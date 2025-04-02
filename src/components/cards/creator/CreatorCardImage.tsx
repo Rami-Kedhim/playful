@@ -1,9 +1,8 @@
 
-import { useState } from "react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Users } from "lucide-react";
 
 interface CreatorCardImageProps {
   imageUrl: string;
@@ -15,6 +14,7 @@ interface CreatorCardImageProps {
   subscriberCount: number;
   price: number;
   toggleFavorite: (e: React.MouseEvent) => void;
+  badge?: string;
 }
 
 const CreatorCardImage = ({
@@ -27,22 +27,26 @@ const CreatorCardImage = ({
   subscriberCount,
   price,
   toggleFavorite,
+  badge
 }: CreatorCardImageProps) => {
-  const formattedSubscribers = subscriberCount >= 1000
-    ? `${(subscriberCount / 1000).toFixed(1)}K`
-    : subscriberCount.toString();
-
   return (
     <div className="relative">
-      <AspectRatio ratio={1/1}>
-        <img 
-          src={imageUrl} 
-          alt={name} 
-          className="object-cover w-full h-full"
-        />
+      <AspectRatio ratio={2/3}>
+        <img src={imageUrl} alt={name} className="object-cover w-full h-full" />
       </AspectRatio>
       
-      {/* Favorite button */}
+      <div className="absolute top-2 left-2 flex flex-col gap-1">
+        {isLive && (
+          <Badge className="bg-red-500 animate-pulse">LIVE</Badge>
+        )}
+        {isAI && (
+          <Badge className="bg-blue-500">AI</Badge>
+        )}
+        {badge && (
+          <Badge className="bg-purple-600">{badge}</Badge>
+        )}
+      </div>
+      
       <Button
         size="icon"
         variant="ghost"
@@ -50,38 +54,21 @@ const CreatorCardImage = ({
           isFavorited ? "text-red-500" : "text-white"
         }`}
         onClick={toggleFavorite}
+        aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
       >
         <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
       </Button>
       
-      {/* Live badge */}
-      {isLive && (
-        <Badge className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 animate-pulse-slow">
-          LIVE
-        </Badge>
-      )}
-      
-      {/* AI-generated badge */}
-      {isAI && (
-        <Badge className="absolute top-2 left-2 bg-lucoin/70 text-white">
-          AI
-        </Badge>
-      )}
-      
-      {/* Premium badge */}
-      {isPremium && (
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-          <div className="flex items-center justify-between">
-            <Badge className="bg-lucoin text-white px-2 py-1">
-              {price} LC/month
-            </Badge>
-            <div className="flex items-center text-white text-sm">
-              <Eye size={14} className="mr-1" />
-              <span>{formattedSubscribers}</span>
-            </div>
-          </div>
+      <div className="absolute bottom-2 w-full px-2 flex justify-between items-center">
+        <div className="flex items-center bg-black/50 rounded-md px-2 py-1 backdrop-blur-sm">
+          <Users size={14} className="text-white mr-1" />
+          <span className="text-white text-xs">{subscriberCount.toLocaleString()}</span>
         </div>
-      )}
+        
+        {isPremium && (
+          <Badge className="bg-primary">{price} LC/mo</Badge>
+        )}
+      </div>
     </div>
   );
 };

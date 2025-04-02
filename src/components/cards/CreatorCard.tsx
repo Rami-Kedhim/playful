@@ -56,6 +56,7 @@ const CreatorCard = ({
           subscriberCount={subscriberCount}
           price={price}
           toggleFavorite={toggleFavorite}
+          badge="Virtual Creator"
         />
         
         <CreatorCardContent

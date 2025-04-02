@@ -1,12 +1,14 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, MessageSquare, Calendar, Heart } from "lucide-react";
+import { Star, MapPin, MessageSquare, Calendar, Heart, Clock } from "lucide-react";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useToast } from "@/hooks/use-toast";
+import StarRating from "@/components/ui/StarRating";
 
 interface EscortCardProps {
   id: string;
@@ -78,11 +80,14 @@ const EscortCard = ({
             <Heart size={18} fill={favorited ? "currentColor" : "none"} />
           </Button>
           
-          {verified && (
-            <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-              Verified
-            </Badge>
-          )}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {verified && (
+              <Badge className="bg-primary text-primary-foreground">
+                Verified
+              </Badge>
+            )}
+            <Badge className="bg-amber-600">In Person</Badge>
+          </div>
           
           <div className="absolute bottom-2 right-2">
             <Badge className="bg-lucoin text-white">
@@ -95,8 +100,8 @@ const EscortCard = ({
           <div className="flex justify-between items-start mb-2">
             <h3 className="font-semibold text-lg">{name}, {age}</h3>
             <div className="flex items-center">
-              <Star size={14} className="text-yellow-400 mr-1" fill="currentColor" />
-              <span className="text-sm">
+              <StarRating rating={rating} size={14} />
+              <span className="text-sm ml-1">
                 {rating} <span className="text-gray-400">({reviews})</span>
               </span>
             </div>
@@ -135,7 +140,7 @@ const EscortCard = ({
             )}
           </div>
           
-          <div className="flex space-x-2 mt-auto">
+          <div className="flex space-x-2 mt-4">
             <Button size="sm" className="flex-1 bg-secondary hover:bg-secondary/80">
               <MessageSquare size={14} className="mr-2" />
               Chat
