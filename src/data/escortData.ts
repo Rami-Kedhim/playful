@@ -10,10 +10,12 @@ export interface Escort {
   tags: string[];
   description?: string;
   gallery?: string[];
-  videos?: string[];  // Add videos array
+  videos?: string[];
   verified: boolean;
-  gender?: string;     // Add gender field
-  sexualOrientation?: string;  // Add sexual orientation field
+  gender?: string;
+  sexualOrientation?: string;
+  isContentCreator?: boolean;
+  creatorUsername?: string;
 }
 
 export const escorts: Escort[] = [
@@ -27,7 +29,7 @@ export const escorts: Escort[] = [
     sexualOrientation: "bisexual",
     imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     gallery: [
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
       "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80",
       "https://images.unsplash.com/photo-1548142813-c348350df52b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=635&q=80"
     ],
@@ -38,7 +40,9 @@ export const escorts: Escort[] = [
     rating: 4.8,
     reviews: 24,
     tags: ["GFE", "Massage", "Overnight"],
-    verified: true
+    verified: true,
+    isContentCreator: true,
+    creatorUsername: "sophia_nyc"
   },
   {
     id: "2",
@@ -80,7 +84,9 @@ export const escorts: Escort[] = [
     rating: 4.9,
     reviews: 32,
     tags: ["Domination", "Roleplay", "BDSM"],
-    verified: true
+    verified: true,
+    isContentCreator: true,
+    creatorUsername: "alice_london"
   },
   {
     id: "4",

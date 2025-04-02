@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { format } from "date-fns";
 import { Escort } from "@/data/escortData";
@@ -12,6 +13,7 @@ import EscortServices from "./EscortServices";
 import BookingForm, { BookingFormData } from "./BookingForm";
 import MessageForm from "./MessageForm";
 import ShareProfileModal from "./ShareProfileModal";
+import CreatorProfileLink from "./CreatorProfileLink";
 import { Heart, Calendar, MessageSquare, Star, Share2, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -156,6 +158,14 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
             </div>
           </CardContent>
         </Card>
+        
+        {/* Display virtual creator card if escort is also a content creator */}
+        {escort.isContentCreator && escort.creatorUsername && (
+          <CreatorProfileLink 
+            escortName={escort.name}
+            creatorUsername={escort.creatorUsername}
+          />
+        )}
         
         <Tabs defaultValue="services" className="w-full">
           <TabsList className="grid grid-cols-3 w-full">

@@ -7,7 +7,6 @@ import EscortProfile from "@/components/escorts/detail/EscortProfile";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
 
 const EscortDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,14 +37,25 @@ const EscortDetail = () => {
   
   return (
     <MainLayout showHeader={false}>
-      <Button 
-        variant="ghost" 
-        className="mb-6" 
-        onClick={() => navigate('/escorts')}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Escorts
-      </Button>
+      <div className="flex justify-between items-center mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/escorts')}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Escorts
+        </Button>
+        
+        {escort.isContentCreator && escort.creatorUsername && (
+          <Button 
+            variant="outline" 
+            className="bg-purple-500/10 text-purple-300 border-purple-500/30 hover:bg-purple-500/20"
+            onClick={() => navigate(`/creators/${escort.creatorUsername}`)}
+          >
+            View Content Creator Profile
+          </Button>
+        )}
+      </div>
       
       <EscortProfile 
         escort={escort} 

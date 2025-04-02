@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, MessageSquare, Calendar, Heart, Clock } from "lucide-react";
+import { Star, MapPin, MessageSquare, Calendar, Heart, Users } from "lucide-react";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/ui/StarRating";
@@ -23,6 +23,8 @@ interface EscortCardProps {
   verified: boolean;
   gender?: string;
   sexualOrientation?: string;
+  isContentCreator?: boolean;
+  creatorUsername?: string;
 }
 
 const EscortCard = ({
@@ -37,7 +39,9 @@ const EscortCard = ({
   price,
   verified,
   gender,
-  sexualOrientation
+  sexualOrientation,
+  isContentCreator,
+  creatorUsername
 }: EscortCardProps) => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { toast } = useToast();
@@ -54,6 +58,14 @@ const EscortCard = ({
         ? `${name} has been removed from your favorites` 
         : `${name} has been added to your favorites`,
     });
+  };
+
+  const handleCreatorClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (creatorUsername) {
+      window.location.href = `/creators/${creatorUsername}`;
+    }
   };
 
   return (
@@ -87,6 +99,15 @@ const EscortCard = ({
               </Badge>
             )}
             <Badge className="bg-amber-600">In Person</Badge>
+            {isContentCreator && (
+              <Badge 
+                className="bg-purple-600 cursor-pointer"
+                onClick={handleCreatorClick}
+              >
+                <Users size={12} className="mr-1" />
+                Creator
+              </Badge>
+            )}
           </div>
           
           <div className="absolute bottom-2 right-2">
