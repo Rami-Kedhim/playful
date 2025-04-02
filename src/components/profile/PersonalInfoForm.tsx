@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AvatarUpload from "./AvatarUpload";
 import { Loader2 } from "lucide-react";
 import { Gender } from "@/utils/profileUtils";
@@ -114,33 +114,13 @@ const PersonalInfoForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid gap-6">
-          <div className="flex flex-col items-center gap-4 sm:flex-row">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={avatarPreview} alt="Avatar" />
-              <AvatarFallback>{profile?.username?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1">
-              <FormItem>
-                <FormLabel htmlFor="avatar">Profile Photo</FormLabel>
-                <FormControl>
-                  <Input 
-                    id="avatar" 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={onAvatarChange}
-                    className="cursor-pointer"
-                  />
-                </FormControl>
-                <p className="text-xs text-gray-400 mt-1">
-                  Recommended: Square JPG or PNG, max 1MB
-                </p>
-                {form.formState.errors.avatar_url && (
-                  <FormMessage>{form.formState.errors.avatar_url.message}</FormMessage>
-                )}
-              </FormItem>
-            </div>
-          </div>
+          <AvatarUpload
+            avatarPreview={avatarPreview}
+            username={profile?.username}
+            email={user?.email}
+            onAvatarChange={onAvatarChange}
+            error={form.formState.errors.avatar_url?.message?.toString()}
+          />
           
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField
