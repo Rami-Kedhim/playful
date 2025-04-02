@@ -16,11 +16,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
+// Define the allowed gender types explicitly
+type Gender = "male" | "female" | "non-binary" | "transgender" | "other" | "prefer-not-to-say";
+
 interface ProfileFormData {
   username: string;
   full_name: string;
   bio: string;
-  gender: string;
+  gender: Gender; // Use the explicit Gender type here
   sexual_orientation: string;
   location: string;
   avatar_url: string;
@@ -40,7 +43,15 @@ const ProfileManagement = () => {
       setValue("username", profile.username || "");
       setValue("full_name", profile.full_name || "");
       setValue("bio", profile.bio || "");
-      setValue("gender", profile.gender || "");
+      
+      // Ensure we're setting a valid gender value that matches our type
+      if (profile.gender) {
+        const validGender = ["male", "female", "non-binary", "transgender", "other", "prefer-not-to-say"].includes(profile.gender) 
+          ? (profile.gender as Gender) 
+          : "other";
+        setValue("gender", validGender);
+      }
+      
       setValue("sexual_orientation", profile.sexual_orientation || "");
       setValue("location", profile.location || "");
       setAvatarPreview(profile.avatar_url || "");
@@ -165,7 +176,7 @@ const ProfileManagement = () => {
                   <div className="flex flex-col items-center gap-4 sm:flex-row">
                     <Avatar className="h-24 w-24">
                       <AvatarImage src={avatarPreview} alt="Avatar" />
-                      <AvatarFallback>{profile?.username?.[0] || user.email?.[0] || "U"}</AvatarFallback>
+                      <AvatarFallback>{profile?.username?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                     
                     <div className="flex-1">
@@ -218,7 +229,7 @@ const ProfileManagement = () => {
                     <div className="space-y-2">
                       <Label htmlFor="gender">Gender</Label>
                       <Select 
-                        onValueChange={(value) => setValue("gender", value)}
+                        onValueChange={(value: Gender) => setValue("gender", value)}
                         defaultValue={profile?.gender || ""}
                       >
                         <SelectTrigger id="gender">
@@ -294,7 +305,7 @@ const ProfileManagement = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium">Email Address</h3>
-                      <p className="text-sm text-gray-400">{user.email}</p>
+                      <p className="text-sm text-gray-400">{user?.email}</p>
                     </div>
                     <Button variant="outline" size="sm">Change Email</Button>
                   </div>
