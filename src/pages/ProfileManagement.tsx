@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,11 +19,7 @@ import PersonalInfoForm from "@/components/profile/PersonalInfoForm";
 import AccountSettings from "@/components/profile/AccountSettings";
 import { uploadAvatar, validateGender } from "@/utils/profileUtils";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
-import { ProfileFormSchema } from "@/components/profile/ProfileFormSchema";
-import { z } from "zod";
-
-// Define the ProfileFormData type based on the zod schema
-type ProfileFormData = z.infer<typeof ProfileFormSchema>;
+import { profileFormSchema, ProfileFormData } from "@/components/profile/ProfileFormSchema";
 
 const ProfileManagement = () => {
   const { user, profile, refreshProfile } = useAuth();

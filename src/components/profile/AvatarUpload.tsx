@@ -1,8 +1,6 @@
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { FormMessage } from "@/components/ui/form";
+import Avatar from "./Avatar";
+import FileUpload from "./FileUpload";
 
 interface AvatarUploadProps {
   avatarPreview: string;
@@ -15,24 +13,22 @@ interface AvatarUploadProps {
 const AvatarUpload = ({ avatarPreview, username, email, onAvatarChange, error }: AvatarUploadProps) => {
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row">
-      <Avatar className="h-24 w-24">
-        <AvatarImage src={avatarPreview} alt="Avatar" />
-        <AvatarFallback>{username?.[0] || email?.[0] || "U"}</AvatarFallback>
-      </Avatar>
+      <Avatar 
+        src={avatarPreview} 
+        username={username} 
+        email={email} 
+        size="lg" 
+      />
       
       <div className="flex-1">
-        <Label htmlFor="avatar" className="block mb-2">Profile Photo</Label>
-        <Input 
-          id="avatar" 
-          type="file" 
-          accept="image/*" 
+        <FileUpload
+          id="avatar"
+          label="Profile Photo"
+          accept="image/*"
           onChange={onAvatarChange}
-          className="cursor-pointer"
+          hint="Recommended: Square JPG or PNG, max 1MB"
+          error={error}
         />
-        <p className="text-xs text-gray-400 mt-1">
-          Recommended: Square JPG or PNG, max 1MB
-        </p>
-        {error && <FormMessage>{error}</FormMessage>}
       </div>
     </div>
   );
