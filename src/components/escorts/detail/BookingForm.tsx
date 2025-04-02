@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -10,9 +10,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -20,27 +17,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Escort } from "@/data/escortData";
-import { CalendarIcon, Clock } from "lucide-react";
-import { 
+import {
   Form,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-interface BookingFormProps {
-  escort: Escort;
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: BookingFormData) => void;
-}
+import { useForm } from "react-hook-form";
+import { Escort } from "@/data/escortData";
 
 export interface BookingFormData {
   date: Date;
@@ -52,34 +44,47 @@ export interface BookingFormData {
   message: string;
 }
 
+interface BookingFormProps {
+  escort: Escort;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: BookingFormData) => void;
+}
+
 const formSchema = z.object({
   date: z.date({
-    required_error: "Please select a date for your appointment.",
+    required_error: "A date is required.",
   }),
   time: z.string({
-    required_error: "Please select a time for your appointment.",
+    required_error: "Please select a time.",
   }),
   duration: z.string({
-    required_error: "Please select the duration of your appointment.",
+    required_error: "Please select a duration.",
   }),
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   email: z.string().email({
-    message: "Please enter a valid email address.",
+    message: "Please enter a valid email.",
   }),
-  phone: z.string().min(10, {
+  phone: z.string().min(5, {
     message: "Please enter a valid phone number.",
   }),
   message: z.string().optional(),
 });
 
 const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) => {
+  const timeSlots = [
+    "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM",
+    "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM",
+    "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM",
+  ];
+
+  const durations = ["1 hour", "2 hours", "3 hours", "Overnight"];
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      time: "",
-      duration: "1hour",
       name: "",
       email: "",
       phone: "",
@@ -88,45 +93,40 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
   });
 
   const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    onSubmit(data);
+    onSubmit(data as BookingFormData);
+    form.reset();
     onClose();
   };
 
-  // Generate available times (simplified for demo)
-  const availableTimes = [
-    "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", 
-    "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM",
-    "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM",
-  ];
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Book an appointment with {escort.name}</DialogTitle>
+          <DialogTitle>Book Appointment with {escort.name}</DialogTitle>
           <DialogDescription>
-            Please fill out the form below to schedule your appointment.
+            Fill out the form below to request an appointment.
+            All bookings require confirmation.
           </DialogDescription>
         </DialogHeader>
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="date"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>Date</FormLabel>
-                    <div className="border rounded-md p-1">
+                    <FormControl>
                       <Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
                         disabled={(date) => date < new Date()}
-                        className="p-2 pointer-events-auto"
+                        className="border rounded-md p-2"
                       />
-                    </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -138,17 +138,14 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Time</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select time" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {availableTimes.map((time) => (
+                        {timeSlots.map((time) => (
                           <SelectItem key={time} value={time}>
                             {time}
                           </SelectItem>
@@ -166,19 +163,18 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Duration</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select duration" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="1hour">1 Hour ({escort.price} LC)</SelectItem>
-                        <SelectItem value="2hours">2 Hours ({escort.price * 1.9} LC)</SelectItem>
-                        <SelectItem value="overnight">Overnight ({escort.price * 5} LC)</SelectItem>
+                        {durations.map((duration) => (
+                          <SelectItem key={duration} value={duration}>
+                            {duration}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -190,10 +186,10 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Your Name</FormLabel>
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your name" {...field} />
+                      <Input placeholder="Your name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -207,7 +203,7 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your email" {...field} type="email" />
+                      <Input placeholder="Your email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -221,7 +217,7 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your phone" {...field} type="tel" />
+                      <Input placeholder="Your phone number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -235,7 +231,10 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
                   <FormItem className="col-span-2">
                     <FormLabel>Message (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Any special requests?" {...field} />
+                      <Textarea 
+                        placeholder="Any special requests or questions" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -243,9 +242,9 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
               />
             </div>
             
-            <DialogFooter className="mt-4">
+            <DialogFooter>
               <Button type="submit" className="w-full">
-                Book Now
+                Request Booking
               </Button>
             </DialogFooter>
           </form>

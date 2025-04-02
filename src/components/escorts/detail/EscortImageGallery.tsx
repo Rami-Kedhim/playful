@@ -40,8 +40,8 @@ const EscortImageGallery = ({
             <X size={20} />
           </Button>
 
-          <Carousel className="w-full h-full" defaultIndex={initialIndex}>
-            <CarouselContent className="h-full">
+          <Carousel className="w-full h-full">
+            <CarouselContent className="h-full" defaultIndex={initialIndex}>
               {images.map((image, index) => (
                 <CarouselItem key={index} className="h-full flex items-center justify-center">
                   <div className="h-full w-full flex items-center justify-center p-4">
