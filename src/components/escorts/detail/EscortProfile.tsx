@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Escort } from "@/data/escortData";
 import { useToast } from "@/hooks/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { format } from "date-fns";
-import BookingForm, { BookingFormData } from "./BookingForm";
+import { BookingForm, BookingFormData } from "./booking";
 import MessageForm from "./MessageForm";
 import { ShareProfileModal } from "./share";
 import MediaSection from "./MediaSection";
