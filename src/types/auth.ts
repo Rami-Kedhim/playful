@@ -16,3 +16,6 @@ export interface AuthContextValue extends AuthState {
   updatePassword: (newPassword: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
+
+// Define the allowed gender values for the database
+export type DatabaseGender = "male" | "female" | "other";

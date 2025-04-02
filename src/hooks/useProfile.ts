@@ -2,6 +2,7 @@
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { DatabaseGender } from "@/types/auth";
 
 export interface ProfileUpdateData {
   username?: string;
@@ -38,12 +39,29 @@ export const useProfile = () => {
     }
   };
 
+  // Validate and map gender to ensure it's compatible with the database
+  const validateGender = (gender: string | null): DatabaseGender => {
+    // If the gender is null or not one of the valid database genders, return "other"
+    if (!gender || !["male", "female", "other"].includes(gender)) {
+      return "other";
+    }
+    
+    return gender as DatabaseGender;
+  };
+
   // Update user profile
   const updateProfile = async (userId: string, updateData: ProfileUpdateData) => {
     try {
+      // Create a new object with validated gender
+      const validatedData = {
+        ...updateData,
+        // If gender exists in updateData, validate it
+        ...(updateData.gender && { gender: validateGender(updateData.gender) })
+      };
+
       const { error } = await supabase
         .from("profiles")
-        .update(updateData)
+        .update(validatedData)
         .eq("id", userId);
 
       if (error) {
