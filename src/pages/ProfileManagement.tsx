@@ -16,10 +16,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Import custom components
 import ProfileHeader from "@/components/profile/ProfileHeader";
-import PersonalInfoForm, { ProfileFormData } from "@/components/profile/PersonalInfoForm";
+import PersonalInfoForm from "@/components/profile/PersonalInfoForm";
 import AccountSettings from "@/components/profile/AccountSettings";
 import { uploadAvatar, validateGender } from "@/utils/profileUtils";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
+import { ProfileFormSchema } from "@/components/profile/ProfileFormSchema";
+import { z } from "zod";
+
+// Define the ProfileFormData type based on the zod schema
+type ProfileFormData = z.infer<typeof ProfileFormSchema>;
 
 const ProfileManagement = () => {
   const { user, profile, refreshProfile } = useAuth();
