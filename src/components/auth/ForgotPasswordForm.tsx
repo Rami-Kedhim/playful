@@ -31,10 +31,22 @@ const ForgotPasswordForm = ({ setForgotPasswordMode, email, setEmail }: ForgotPa
     try {
       setLoading(true);
       await resetPassword(email);
+      
+      // Show success message
+      toast({
+        title: "Reset email sent",
+        description: "If an account exists with this email, you will receive password reset instructions.",
+      });
+      
       // Reset the form after sending the reset email
       setForgotPasswordMode(false);
     } catch (error) {
       console.error("Password reset error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send reset email. Please try again later.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
