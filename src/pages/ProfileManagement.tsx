@@ -32,7 +32,9 @@ const ProfileManagement = () => {
     avatarPreview,
     handleAvatarChange,
     handleAvatarRemove,
-    isDefault
+    isDefault,
+    uploadProgress,
+    setUploadProgress
   } = useAvatarUpload(profile?.avatar_url || "");
 
   const onSubmit = async (data: ProfileFormData) => {
@@ -44,8 +46,16 @@ const ProfileManagement = () => {
       
       // Handle avatar changes
       if (avatarFile) {
-        // Upload new avatar
-        const newAvatarUrl = await uploadAvatar(avatarFile, user);
+        // Set initial progress
+        setUploadProgress(10);
+        
+        // Create a function to track upload progress
+        const trackProgress = (progress: number) => {
+          setUploadProgress(Math.min(Math.floor(10 + progress * 0.8), 90)); // Scale between 10% and 90%
+        };
+        
+        // Upload new avatar with progress tracking
+        const newAvatarUrl = await uploadAvatar(avatarFile, user, trackProgress);
         if (newAvatarUrl) {
           avatarUrl = newAvatarUrl;
         }
@@ -57,10 +67,12 @@ const ProfileManagement = () => {
         try {
           const filename = profile.avatar_url.split('/').pop();
           if (filename) {
+            setUploadProgress(30);
             await supabase
               .storage
               .from('profiles')
               .remove([`avatars/${filename}`]);
+            setUploadProgress(70);
           }
         } catch (error) {
           console.error("Error removing old avatar:", error);
@@ -70,6 +82,8 @@ const ProfileManagement = () => {
 
       // Validate and process gender to ensure it matches our database accepted values
       const validatedGender = validateGender(data.gender);
+
+      setUploadProgress(90); // Almost done
 
       const { error } = await supabase
         .from('profiles')
@@ -89,6 +103,8 @@ const ProfileManagement = () => {
         throw error;
       }
 
+      setUploadProgress(100); // Complete
+      
       await refreshProfile();
       toast({
         title: "Profile updated",
@@ -147,6 +163,7 @@ const ProfileManagement = () => {
                   handleAvatarChange={handleAvatarChange}
                   handleAvatarRemove={handleAvatarRemove}
                   onSubmit={onSubmit}
+                  uploadProgress={uploadProgress}
                 />
               </CardContent>
             </Card>

@@ -9,7 +9,7 @@ import BioField from "./BioField";
 import PersonalDetails from "./PersonalDetails";
 import LocationField from "./LocationField";
 import FormActions from "./FormActions";
-import { profileFormSchema, ProfileFormData } from "./ProfileFormSchema";
+import { profileFormSchema, ProfileFormData, MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES } from "./ProfileFormSchema";
 
 interface PersonalInfoFormProps {
   profile: any;
@@ -19,6 +19,7 @@ interface PersonalInfoFormProps {
   handleAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAvatarRemove?: () => void;
   onSubmit: (data: ProfileFormData) => Promise<void>;
+  uploadProgress?: number;
 }
 
 const PersonalInfoForm = ({ 
@@ -28,7 +29,8 @@ const PersonalInfoForm = ({
   avatarPreview, 
   handleAvatarChange,
   handleAvatarRemove,
-  onSubmit 
+  onSubmit,
+  uploadProgress
 }: PersonalInfoFormProps) => {
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -83,8 +85,6 @@ const PersonalInfoForm = ({
     }
   };
 
-  const { MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES } = require("./ProfileFormSchema");
-
   return (
     <FormProvider {...form}>
       <Form {...form}>
@@ -98,6 +98,7 @@ const PersonalInfoForm = ({
               onAvatarRemove={handleAvatarRemove}
               error={form.formState.errors.avatar_url?.message?.toString()}
               disabled={loading}
+              uploadProgress={uploadProgress}
             />
             
             <BasicInfoFields />

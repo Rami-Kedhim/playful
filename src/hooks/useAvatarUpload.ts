@@ -15,6 +15,8 @@ interface UseAvatarUploadReturn {
   fileError: string | null;
   validateAvatar: (file: File) => boolean;
   isDefault: boolean;
+  uploadProgress: number;
+  setUploadProgress: (progress: number) => void;
 }
 
 export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadReturn {
@@ -22,6 +24,7 @@ export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadR
   const [avatarPreview, setAvatarPreview] = useState(initialAvatarUrl);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isDefault, setIsDefault] = useState(!!initialAvatarUrl);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     // Update the preview when initialAvatarUrl changes
@@ -58,6 +61,7 @@ export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadR
         setAvatarFile(file);
         setAvatarPreview(URL.createObjectURL(file));
         setIsDefault(false);
+        setUploadProgress(0); // Reset progress when new file is selected
       }
     }
   };
@@ -71,6 +75,7 @@ export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadR
     setAvatarPreview(initialAvatarUrl);
     setFileError(null);
     setIsDefault(!!initialAvatarUrl);
+    setUploadProgress(0);
   };
 
   const resetAvatar = () => {
@@ -82,6 +87,7 @@ export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadR
     setAvatarPreview(initialAvatarUrl);
     setFileError(null);
     setIsDefault(!!initialAvatarUrl);
+    setUploadProgress(0);
   };
 
   return {
@@ -92,6 +98,8 @@ export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadR
     resetAvatar,
     fileError,
     validateAvatar,
-    isDefault
+    isDefault,
+    uploadProgress,
+    setUploadProgress
   };
 }
