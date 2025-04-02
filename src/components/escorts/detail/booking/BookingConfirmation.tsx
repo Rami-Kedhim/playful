@@ -39,10 +39,10 @@ const BookingConfirmation = ({ data, escort }: BookingConfirmationProps) => {
           <div className="text-sm text-muted-foreground">Location:</div>
           <div className="text-sm font-medium">{escort.location}</div>
           
-          {escort.hourlyRate && (
+          {escort.price && (
             <>
               <div className="text-sm text-muted-foreground">Hourly Rate:</div>
-              <div className="text-sm font-medium">${escort.hourlyRate}/hr</div>
+              <div className="text-sm font-medium">${escort.price}/hr</div>
             </>
           )}
         </div>
