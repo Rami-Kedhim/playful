@@ -2336,6 +2336,72 @@ export type Database = {
           },
         ]
       }
+      lucoin_packages: {
+        Row: {
+          amount: number
+          bonus_amount: number | null
+          created_at: string | null
+          currency: string
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      lucoin_stats: {
+        Row: {
+          created_at: string | null
+          stat_date: string
+          total_recharged: number | null
+          total_retained: number | null
+          total_spent: number | null
+          total_users_active: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          stat_date: string
+          total_recharged?: number | null
+          total_retained?: number | null
+          total_spent?: number | null
+          total_users_active?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          stat_date?: string
+          total_recharged?: number | null
+          total_retained?: number | null
+          total_spent?: number | null
+          total_users_active?: number | null
+        }
+        Relationships: []
+      }
       lucoin_transactions: {
         Row: {
           amount: number
@@ -3080,6 +3146,51 @@ export type Database = {
           location?: Json | null
           resolved_at?: string | null
           status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payment_orders: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string | null
+          currency: string
+          external_order_id: string | null
+          id: string
+          payment_details: Json | null
+          payment_method: string
+          price_fiat: number
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string
+          external_order_id?: string | null
+          id?: string
+          payment_details?: Json | null
+          payment_method?: string
+          price_fiat: number
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string
+          external_order_id?: string | null
+          id?: string
+          payment_details?: Json | null
+          payment_method?: string
+          price_fiat?: number
+          status?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -5805,14 +5916,25 @@ export type Database = {
         }
         Returns: Json
       }
-      process_lucoin_transaction: {
-        Args: {
-          sender_id: string
-          receiver_id: string
-          amount: number
-        }
-        Returns: boolean
-      }
+      process_lucoin_transaction:
+        | {
+            Args: {
+              p_user_id: string
+              p_amount: number
+              p_transaction_type: string
+              p_description?: string
+              p_metadata?: Json
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              sender_id: string
+              receiver_id: string
+              amount: number
+            }
+            Returns: boolean
+          }
       process_subscription_payment: {
         Args: {
           subscriber_uuid: string
