@@ -17,6 +17,7 @@ interface PersonalInfoFormProps {
   loading: boolean;
   avatarPreview: string;
   handleAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAvatarRemove?: () => void;
   onSubmit: (data: ProfileFormData) => Promise<void>;
 }
 
@@ -25,7 +26,8 @@ const PersonalInfoForm = ({
   user, 
   loading, 
   avatarPreview, 
-  handleAvatarChange, 
+  handleAvatarChange,
+  handleAvatarRemove,
   onSubmit 
 }: PersonalInfoFormProps) => {
   const form = useForm<ProfileFormData>({
@@ -44,8 +46,6 @@ const PersonalInfoForm = ({
   // Custom avatar validation function
   const validateAvatar = (file: File | null): boolean => {
     if (!file) return true;
-    
-    const { MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES } = require("./ProfileFormSchema");
     
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
@@ -83,6 +83,8 @@ const PersonalInfoForm = ({
     }
   };
 
+  const { MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES } = require("./ProfileFormSchema");
+
   return (
     <FormProvider {...form}>
       <Form {...form}>
@@ -93,7 +95,9 @@ const PersonalInfoForm = ({
               username={profile?.username}
               email={user?.email}
               onAvatarChange={onAvatarChange}
+              onAvatarRemove={handleAvatarRemove}
               error={form.formState.errors.avatar_url?.message?.toString()}
+              disabled={loading}
             />
             
             <BasicInfoFields />

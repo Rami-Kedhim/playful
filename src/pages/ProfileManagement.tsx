@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,7 +30,9 @@ const ProfileManagement = () => {
   const {
     avatarFile,
     avatarPreview,
-    handleAvatarChange
+    handleAvatarChange,
+    handleAvatarRemove,
+    isDefault
   } = useAvatarUpload(profile?.avatar_url || "");
 
   const onSubmit = async (data: ProfileFormData) => {
@@ -39,10 +42,29 @@ const ProfileManagement = () => {
     try {
       let avatarUrl = profile?.avatar_url || null;
       
+      // Handle avatar changes
       if (avatarFile) {
+        // Upload new avatar
         const newAvatarUrl = await uploadAvatar(avatarFile, user);
         if (newAvatarUrl) {
           avatarUrl = newAvatarUrl;
+        }
+      } else if (!isDefault && profile?.avatar_url) {
+        // User removed the avatar
+        avatarUrl = null;
+        
+        // If there was a previous avatar, remove it from storage
+        try {
+          const filename = profile.avatar_url.split('/').pop();
+          if (filename) {
+            await supabase
+              .storage
+              .from('profiles')
+              .remove([`avatars/${filename}`]);
+          }
+        } catch (error) {
+          console.error("Error removing old avatar:", error);
+          // Non-critical error, continue with profile update
         }
       }
 
@@ -55,7 +77,7 @@ const ProfileManagement = () => {
           username: data.username,
           full_name: data.full_name,
           bio: data.bio,
-          gender: validatedGender, // Use the validated and mapped gender
+          gender: validatedGender,
           sexual_orientation: data.sexual_orientation,
           location: data.location,
           avatar_url: avatarUrl,
@@ -123,6 +145,7 @@ const ProfileManagement = () => {
                   loading={loading}
                   avatarPreview={avatarPreview}
                   handleAvatarChange={handleAvatarChange}
+                  handleAvatarRemove={handleAvatarRemove}
                   onSubmit={onSubmit}
                 />
               </CardContent>

@@ -10,20 +10,24 @@ interface UseAvatarUploadReturn {
   avatarFile: File | null;
   avatarPreview: string;
   handleAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAvatarRemove: () => void;
   resetAvatar: () => void;
   fileError: string | null;
   validateAvatar: (file: File) => boolean;
+  isDefault: boolean;
 }
 
 export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadReturn {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState(initialAvatarUrl);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [isDefault, setIsDefault] = useState(!!initialAvatarUrl);
 
   useEffect(() => {
     // Update the preview when initialAvatarUrl changes
     if (initialAvatarUrl && !avatarFile) {
       setAvatarPreview(initialAvatarUrl);
+      setIsDefault(true);
     }
   }, [initialAvatarUrl, avatarFile]);
 
@@ -53,22 +57,41 @@ export function useAvatarUpload(initialAvatarUrl: string = ""): UseAvatarUploadR
       if (validateAvatar(file)) {
         setAvatarFile(file);
         setAvatarPreview(URL.createObjectURL(file));
+        setIsDefault(false);
       }
     }
   };
 
-  const resetAvatar = () => {
+  const handleAvatarRemove = () => {
+    if (avatarFile) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+    
     setAvatarFile(null);
     setAvatarPreview(initialAvatarUrl);
     setFileError(null);
+    setIsDefault(!!initialAvatarUrl);
+  };
+
+  const resetAvatar = () => {
+    if (avatarFile) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+    
+    setAvatarFile(null);
+    setAvatarPreview(initialAvatarUrl);
+    setFileError(null);
+    setIsDefault(!!initialAvatarUrl);
   };
 
   return {
     avatarFile,
     avatarPreview,
     handleAvatarChange,
+    handleAvatarRemove,
     resetAvatar,
     fileError,
-    validateAvatar
+    validateAvatar,
+    isDefault
   };
 }
