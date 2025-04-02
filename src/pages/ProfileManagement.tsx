@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import PersonalInfoForm, { ProfileFormData } from "@/components/profile/PersonalInfoForm";
 import AccountSettings from "@/components/profile/AccountSettings";
-import { uploadAvatar } from "@/utils/profileUtils";
+import { uploadAvatar, validateGender } from "@/utils/profileUtils";
 import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 
 const ProfileManagement = () => {
@@ -46,13 +46,16 @@ const ProfileManagement = () => {
         }
       }
 
+      // Validate and process gender to ensure it matches our Gender type
+      const validatedGender = validateGender(data.gender);
+
       const { error } = await supabase
         .from('profiles')
         .update({
           username: data.username,
           full_name: data.full_name,
           bio: data.bio,
-          gender: data.gender,
+          gender: validatedGender,
           sexual_orientation: data.sexual_orientation,
           location: data.location,
           avatar_url: avatarUrl,
