@@ -81,4 +81,14 @@
   .shimmer {
     @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent;
   }
+  
+  .scale-200 {
+    transform: scale(2);
+  }
+
+  /* Touch swipe related utilities */
+  .swipe-container {
+    @apply touch-pan-y;
+  }
 }
+
