@@ -1,26 +1,10 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { ContentCreator } from "@/types/creator";
 
-export type Creator = {
-  id: string;
-  name: string;
-  username: string;
-  imageUrl: string;
-  bio?: string;
-  isPremium: boolean;
-  isLive: boolean;
-  isAI: boolean;
-  subscriberCount: number;
-  contentCount: {
-    photos: number;
-    videos: number;
-  };
-  price: number;
-  rating?: number;
-  createdAt?: string;
-  tags?: string[];
-};
+export type Creator = ContentCreator;
 
 export const useCreators = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +16,7 @@ export const useCreators = () => {
 
     try {
       // In a real implementation, this would fetch from a Supabase database
-      // For now, we'll use the mock data from the Creators.tsx page
+      // For now, we'll use the mock data
       
       // Example of what the real implementation would look like:
       // const query = supabase.from('profiles')

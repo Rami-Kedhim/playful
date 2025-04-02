@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCreators } from "@/hooks/useCreators";
 import { useCreatorFilters } from "@/hooks/useCreatorFilters";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,11 +11,22 @@ import SearchAndSortBar from "@/components/creators/SearchAndSortBar";
 import AppliedFilters from "@/components/creators/AppliedFilters";
 import CreatorResults from "@/components/creators/CreatorResults";
 import contentTypes from "@/components/creators/ContentTypes";
+import { ContentCreator } from "@/types/creator";
 
 const Creators = () => {
   const { fetchCreators } = useCreators();
-  const [creators, setCreators] = useState(() => fetchCreators());
+  const [creators, setCreators] = useState<ContentCreator[]>([]);
   const isMobile = useIsMobile();
+  
+  // Fetch creators on component mount
+  useEffect(() => {
+    const loadCreators = async () => {
+      const fetchedCreators = await fetchCreators();
+      setCreators(fetchedCreators);
+    };
+    
+    loadCreators();
+  }, []);
   
   const {
     searchQuery,
