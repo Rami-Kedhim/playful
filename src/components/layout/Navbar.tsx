@@ -1,15 +1,25 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Menu, X } from "lucide-react";
+import { Heart, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFavorites } from "@/contexts/FavoritesContext";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { favorites } = useFavorites();
+  const { user, profile, signOut } = useAuth();
   
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -25,6 +35,26 @@ const Navbar = () => {
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location.pathname]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+  };
+
+  const getUserInitials = () => {
+    if (profile?.username) {
+      return profile.username.substring(0, 2).toUpperCase();
+    }
+    
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    
+    return "U";
+  };
   
   return (
     <header 
@@ -55,13 +85,44 @@ const Navbar = () => {
               )}
             </Link>
             
-            <Link to="/login">
-              <Button variant="ghost" size="sm">Login</Button>
-            </Link>
-            
-            <Link to="/signup">
-              <Button size="sm">Sign Up</Button>
-            </Link>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url} alt={profile?.username || "User"} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="font-medium">
+                    {profile?.username || user.email}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/wallet">Wallet</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="ghost" size="sm">Login</Button>
+                </Link>
+                <Link to="/auth">
+                  <Button size="sm">Sign Up</Button>
+                </Link>
+              </>
+            )}
           </nav>
           
           {/* Mobile menu button */}
@@ -81,14 +142,41 @@ const Navbar = () => {
             <MobileNavLink to="/escorts" label="Escorts" />
             <MobileNavLink to="/creators" label="Creators" />
             <MobileNavLink to="/favorites" label="Favorites" icon={<Heart size={18} className="mr-2" fill={favorites.length > 0 ? "currentColor" : "none"} />} />
-            <div className="pt-4 grid grid-cols-2 gap-2">
-              <Link to="/login" className="w-full">
-                <Button variant="outline" className="w-full">Login</Button>
-              </Link>
-              <Link to="/signup" className="w-full">
-                <Button className="w-full">Sign Up</Button>
-              </Link>
-            </div>
+            
+            {user ? (
+              <>
+                <div className="pt-2 px-2">
+                  <div className="flex items-center space-x-2 p-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url} alt={profile?.username || "User"} />
+                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
+                    </Avatar>
+                    <div className="text-sm font-medium">{profile?.username || user.email}</div>
+                  </div>
+                </div>
+                <MobileNavLink to="/profile" label="Profile" icon={<User size={18} className="mr-2" />} />
+                <MobileNavLink to="/wallet" label="Wallet" />
+                <div className="pt-2">
+                  <Button 
+                    variant="destructive" 
+                    className="w-full flex items-center justify-center" 
+                    onClick={handleSignOut}
+                  >
+                    <LogOut size={18} className="mr-2" />
+                    Sign out
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="pt-4 grid grid-cols-2 gap-2">
+                <Link to="/auth" className="w-full">
+                  <Button variant="outline" className="w-full">Login</Button>
+                </Link>
+                <Link to="/auth" className="w-full">
+                  <Button className="w-full">Sign Up</Button>
+                </Link>
+              </div>
+            )}
           </nav>
         )}
       </div>
