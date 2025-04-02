@@ -12,6 +12,7 @@ import EscortReviews from "./EscortReviews";
 import EscortServices from "./EscortServices";
 import BookingForm, { BookingFormData } from "./BookingForm";
 import MessageForm from "./MessageForm";
+import ShareProfileModal from "./ShareProfileModal";
 import { Heart, Calendar, MessageSquare, Star, Share2, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -26,6 +27,7 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   
   const handleFavoriteToggle = () => {
     toggleFavorite(escort.id);
@@ -52,6 +54,10 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
       title: "Message Sent",
       description: `Your message has been sent to ${escort.name}.`,
     });
+  };
+
+  const handleShareProfile = () => {
+    setShareOpen(true);
   };
   
   return (
@@ -118,7 +124,11 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
                 Message
               </Button>
               
-              <Button variant="ghost" className="w-full col-span-2">
+              <Button 
+                variant="ghost" 
+                className="w-full col-span-2"
+                onClick={handleShareProfile}
+              >
                 <Share2 size={16} className="mr-2" />
                 Share Profile
               </Button>
@@ -159,6 +169,12 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
         isOpen={messageOpen}
         onClose={() => setMessageOpen(false)}
         onSubmit={handleMessageSubmit}
+      />
+      
+      <ShareProfileModal
+        escort={escort}
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
       />
     </div>
   );
