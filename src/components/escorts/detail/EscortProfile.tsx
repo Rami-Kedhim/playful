@@ -16,6 +16,7 @@ import { Heart, Calendar, MessageSquare, Star, Share2, MapPin } from "lucide-rea
 import { useToast } from "@/hooks/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import EscortVideoGallery from "./EscortVideoGallery";
+import StarRating from "@/components/ui/StarRating";
 
 interface EscortProfileProps {
   escort: Escort;
@@ -112,9 +113,9 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
             </div>
             
             <div className="flex items-center mb-4">
-              <div className="bg-gray-800 rounded-md px-3 py-1 flex items-center">
-                <Star size={16} className="text-yellow-400 mr-1" fill="currentColor" />
-                <span>{escort.rating.toFixed(1)}</span>
+              <div className="bg-gray-800 rounded-md px-3 py-1 flex items-center gap-1">
+                <StarRating rating={escort.rating} size={14} />
+                <span className="ml-1">{escort.rating.toFixed(1)}</span>
                 <span className="text-gray-400 ml-1">({escort.reviews})</span>
               </div>
               

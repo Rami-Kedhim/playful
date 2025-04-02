@@ -19,6 +19,7 @@ interface CreatorCardProps {
   };
   price: number;
   isAI: boolean;
+  rating?: number;
 }
 
 const CreatorCard = ({
@@ -32,6 +33,7 @@ const CreatorCard = ({
   contentCount,
   price,
   isAI,
+  rating = 0,
 }: CreatorCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
 
@@ -61,6 +63,7 @@ const CreatorCard = ({
           username={username}
           contentCount={contentCount}
           isPremium={isPremium}
+          rating={rating}
         />
       </Card>
     </Link>

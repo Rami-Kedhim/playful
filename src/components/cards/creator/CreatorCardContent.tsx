@@ -1,6 +1,7 @@
 
 import { Video, Image as ImageIcon, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StarRating from "@/components/ui/StarRating";
 
 interface CreatorCardContentProps {
   name: string;
@@ -10,6 +11,7 @@ interface CreatorCardContentProps {
     videos: number;
   };
   isPremium: boolean;
+  rating?: number;
 }
 
 const CreatorCardContent = ({
@@ -17,6 +19,7 @@ const CreatorCardContent = ({
   username,
   contentCount,
   isPremium,
+  rating = 0,
 }: CreatorCardContentProps) => {
   return (
     <div className="p-4">
@@ -26,6 +29,13 @@ const CreatorCardContent = ({
           <p className="text-sm text-gray-400">@{username}</p>
         </div>
       </div>
+      
+      {rating > 0 && (
+        <div className="flex items-center gap-1 mt-1 mb-2">
+          <StarRating rating={rating} size={14} />
+          <span className="text-xs text-gray-400">{rating.toFixed(1)}</span>
+        </div>
+      )}
       
       <div className="flex items-center gap-3 text-sm text-gray-400 my-3">
         <div className="flex items-center">

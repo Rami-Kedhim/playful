@@ -4,6 +4,7 @@ import { Escort } from "@/data/escortData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StarRating from "@/components/ui/StarRating";
 
 interface EscortReviewsProps {
   escort: Escort;
@@ -75,16 +76,7 @@ const EscortReviews = ({ escort }: EscortReviewsProps) => {
           <div className="flex items-center">
             <div className="text-4xl font-bold mr-3">{escort.rating.toFixed(1)}</div>
             <div>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((_, index) => (
-                  <Star 
-                    key={index} 
-                    size={16} 
-                    className="text-yellow-400" 
-                    fill="currentColor" 
-                  />
-                ))}
-              </div>
+              <StarRating rating={escort.rating} size={18} />
               <div className="text-sm text-gray-400">{escort.reviews} reviews</div>
             </div>
           </div>
@@ -103,14 +95,7 @@ const EscortReviews = ({ escort }: EscortReviewsProps) => {
               </div>
               
               <div className="flex my-1">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star 
-                    key={index} 
-                    size={14} 
-                    className={index < review.rating ? "text-yellow-400" : "text-gray-600"} 
-                    fill={index < review.rating ? "currentColor" : "none"} 
-                  />
-                ))}
+                <StarRating rating={review.rating} size={14} />
               </div>
               
               <p className="text-sm my-2">{review.text}</p>

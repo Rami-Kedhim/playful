@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -12,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import ProfileCompleteness from "@/components/profile/ProfileCompleteness";
 import useCreators, { Creator } from "@/hooks/useCreators";
 import { CalendarDays, Clock, Heart, Image as ImageIcon, Lock, MessageSquare, Video, Star } from "lucide-react";
+import StarRating from "@/components/ui/StarRating";
 
 const CreatorDetail = () => {
   const { username } = useParams<{ username: string }>();
@@ -137,8 +137,10 @@ const CreatorDetail = () => {
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="flex flex-col items-center p-3 bg-muted rounded-md">
-                      <Star className="mb-1 text-yellow-500" size={20} />
-                      <span className="font-semibold">{creator.rating || 0}/5</span>
+                      <div className="mb-1">
+                        <StarRating rating={creator.rating || 0} size={18} />
+                      </div>
+                      <span className="font-semibold">{creator.rating?.toFixed(1) || "0.0"}/5</span>
                       <span className="text-xs text-gray-500">Rating</span>
                     </div>
                     <div className="flex flex-col items-center p-3 bg-muted rounded-md">
