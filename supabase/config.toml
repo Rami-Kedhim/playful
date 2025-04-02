@@ -1,16 +1,1 @@
-
-# This file controls the configuration for your Supabase project.
-# See: https://supabase.com/docs/guides/functions/config
-
-[functions]
-[functions.create-payment]
-verify_jwt = true
-
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.wallet-api]
-verify_jwt = true
-
-[functions.solana-integration]
-verify_jwt = true
+project_id = "haffqtqpbnaviefewfmn"
