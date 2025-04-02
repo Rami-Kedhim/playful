@@ -9,7 +9,7 @@ export const useAuthentication = (
   setIsLoading: (value: boolean) => void,
   refreshProfile: () => Promise<void>
 ) => {
-  const { fetchProfile } = useProfile();
+  const { fetchProfile, updateProfile } = useProfile();
 
   // Sign up function
   const signUp = async (email: string, password: string, userData?: Record<string, any>) => {
@@ -63,6 +63,15 @@ export const useAuthentication = (
         title: "Welcome back!",
         description: "You have successfully signed in",
       });
+      
+      // Update last_online status in profile
+      const userData = await supabase.auth.getUser();
+      if (userData.data.user) {
+        await supabase
+          .from('profiles')
+          .update({ last_online: new Date().toISOString() })
+          .eq('id', userData.data.user.id);
+      }
     } catch (error: any) {
       console.error("Error signing in:", error.message);
       throw error;

@@ -7,20 +7,27 @@ import { useAuthentication } from "@/hooks/useAuthentication";
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [{ session, user, profile, isLoading }, setIsLoading, refreshProfile] = useAuthState();
+  const [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile] = useAuthState();
   const { signUp, signIn, signOut, resetPassword, updatePassword } = useAuthentication(setIsLoading, refreshProfile);
+
+  // Function to check if user has a specific role
+  const checkRole = (role: string): boolean => {
+    return userRoles.includes(role);
+  };
 
   const value: AuthContextValue = {
     session,
     user,
     profile,
     isLoading,
+    userRoles,
     signUp,
     signIn,
     signOut,
     resetPassword,
     updatePassword,
-    refreshProfile
+    refreshProfile,
+    checkRole
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

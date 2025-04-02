@@ -6,6 +6,7 @@ export interface AuthState {
   user: User | null;
   profile: any | null;
   isLoading: boolean;
+  userRoles: string[];
 }
 
 export interface AuthContextValue extends AuthState {
@@ -15,7 +16,32 @@ export interface AuthContextValue extends AuthState {
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
+  checkRole: (role: string) => boolean;
 }
 
 // Define the allowed gender values for the database
 export type DatabaseGender = "male" | "female" | "other";
+
+// User roles definition
+export type UserRole = "user" | "escort" | "creator" | "admin" | "moderator";
+
+// Define the user profile structure
+export interface UserProfile {
+  id: string;
+  username: string | null;
+  full_name: string | null;
+  bio: string | null;
+  gender: DatabaseGender | null;
+  sexual_orientation: string | null;
+  location: string | null;
+  avatar_url: string | null;
+  lucoin_balance: number;
+  is_verified: boolean;
+  verification_level: string | null;
+  profile_completeness: number;
+  created_at: string;
+  updated_at: string;
+  languages: string[] | null;
+  birth_date: string | null;
+  last_online: string | null;
+}

@@ -8,10 +8,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import AppLayout from "@/components/layout/AppLayout";
 import { toast } from "@/components/ui/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState("login");
@@ -20,6 +22,9 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [userType, setUserType] = useState("user");
+  const [gender, setGender] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   
@@ -54,7 +59,7 @@ const Auth = () => {
     if (!email || !password || !confirmPassword || !username) {
       toast({
         title: "Missing fields",
-        description: "Please fill in all fields",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
       return;
@@ -103,10 +108,20 @@ const Auth = () => {
       }
       
       // Sign up with metadata
-      await signUp(email, password, { username });
+      await signUp(email, password, { 
+        username, 
+        full_name: fullName,
+        gender,
+        user_type: userType
+      });
       
       // No navigation here - user needs to verify email first
       setActiveTab("login");
+      
+      toast({
+        title: "Registration successful",
+        description: "Please check your email to verify your account",
+      });
     } catch (error) {
       console.error("Signup error:", error);
     } finally {
@@ -253,16 +268,71 @@ const Auth = () => {
                     />
                   </div>
                   
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        type="text"
+                        placeholder="Choose a username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        id="fullName"
+                        type="text"
+                        placeholder="Your full name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      placeholder="Choose a username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                    />
+                    <Label htmlFor="user-type">I am registering as a</Label>
+                    <Select 
+                      value={userType} 
+                      onValueChange={setUserType}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select account type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">Client</SelectItem>
+                        <SelectItem value="escort">Escort</SelectItem>
+                        <SelectItem value="creator">Content Creator</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Escort and Creator profiles require additional verification
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Gender</Label>
+                    <RadioGroup 
+                      value={gender} 
+                      onValueChange={setGender}
+                      className="flex space-x-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="male" id="male" />
+                        <Label htmlFor="male">Male</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="female" id="female" />
+                        <Label htmlFor="female">Female</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="other" id="other" />
+                        <Label htmlFor="other">Other</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                   
                   <div className="space-y-2">

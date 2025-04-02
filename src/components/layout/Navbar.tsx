@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Heart, Menu, X, LogOut } from "lucide-react";
+import { Heart, Menu, X, LogOut, User, Shield, Film, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import DesktopNav from "./DesktopNav";
@@ -12,7 +12,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, userRoles } = useAuth();
   
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -36,6 +36,11 @@ const Navbar = () => {
       console.error("Sign out error:", error);
     }
   };
+
+  // Check for role-specific dashboards to show
+  const isEscort = userRoles.includes('escort');
+  const isCreator = userRoles.includes('creator');
+  const isAdmin = userRoles.includes('admin');
   
   return (
     <header 
@@ -52,6 +57,34 @@ const Navbar = () => {
           
           {/* Desktop navigation */}
           <DesktopNav />
+          
+          {/* Desktop role dashboards */}
+          <div className="hidden md:flex items-center space-x-2 mr-2">
+            {isEscort && (
+              <Link to="/escort-dashboard">
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <Briefcase className="h-4 w-4 mr-1" />
+                  <span>Escort Dashboard</span>
+                </Button>
+              </Link>
+            )}
+            {isCreator && (
+              <Link to="/creator-dashboard">
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <Film className="h-4 w-4 mr-1" />
+                  <span>Creator Dashboard</span>
+                </Button>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <Shield className="h-4 w-4 mr-1" />
+                  <span>Admin</span>
+                </Button>
+              </Link>
+            )}
+          </div>
           
           {/* Desktop user menu */}
           <div className="hidden md:flex items-center space-x-4">

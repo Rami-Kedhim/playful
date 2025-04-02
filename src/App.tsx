@@ -18,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ProfileManagement from "./pages/ProfileManagement";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import RoleGuard from "./components/auth/RoleGuard";
 
 const queryClient = new QueryClient();
 
@@ -34,13 +35,33 @@ const App = () => (
             <Route path="/escorts/:id" element={<EscortDetail />} />
             <Route path="/creators" element={<Creators />} />
             <Route path="/creators/:username" element={<CreatorDetail />} />
-            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/favorites" element={
+              <ProtectedRoute>
+                <Favorites />
+              </ProtectedRoute>
+            } />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/profile" element={
               <ProtectedRoute>
                 <ProfileManagement />
               </ProtectedRoute>
+            } />
+            {/* Role-specific routes */}
+            <Route path="/escort-dashboard" element={
+              <RoleGuard allowedRoles={['escort', 'admin']}>
+                <div>Escort Dashboard (to be implemented)</div>
+              </RoleGuard>
+            } />
+            <Route path="/creator-dashboard" element={
+              <RoleGuard allowedRoles={['creator', 'admin']}>
+                <div>Creator Dashboard (to be implemented)</div>
+              </RoleGuard>
+            } />
+            <Route path="/admin" element={
+              <RoleGuard allowedRoles={['admin']}>
+                <div>Admin Dashboard (to be implemented)</div>
+              </RoleGuard>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { Heart, User, LogOut } from "lucide-react";
+import { Heart, User, LogOut, Shield, Film, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,7 +25,7 @@ interface MobileNavProps {
 
 export const MobileNav = ({ handleSignOut }: MobileNavProps) => {
   const { favorites } = useFavorites();
-  const { user, profile } = useAuth();
+  const { user, profile, userRoles } = useAuth();
   
   const getUserInitials = () => {
     if (profile?.username) {
@@ -38,6 +38,11 @@ export const MobileNav = ({ handleSignOut }: MobileNavProps) => {
     
     return "U";
   };
+
+  // Check for role-specific dashboards to show
+  const isEscort = userRoles.includes('escort');
+  const isCreator = userRoles.includes('creator');
+  const isAdmin = userRoles.includes('admin');
   
   return (
     <nav className="md:hidden py-4 space-y-3">
@@ -45,6 +50,17 @@ export const MobileNav = ({ handleSignOut }: MobileNavProps) => {
       <MobileNavLink to="/escorts" label="Escorts" />
       <MobileNavLink to="/creators" label="Creators" />
       <MobileNavLink to="/favorites" label="Favorites" icon={<Heart size={18} className="mr-2" fill={favorites.length > 0 ? "currentColor" : "none"} />} />
+      
+      {/* Role-specific dashboard links */}
+      {isEscort && (
+        <MobileNavLink to="/escort-dashboard" label="Escort Dashboard" icon={<Briefcase size={18} className="mr-2" />} />
+      )}
+      {isCreator && (
+        <MobileNavLink to="/creator-dashboard" label="Creator Dashboard" icon={<Film size={18} className="mr-2" />} />
+      )}
+      {isAdmin && (
+        <MobileNavLink to="/admin" label="Admin Dashboard" icon={<Shield size={18} className="mr-2" />} />
+      )}
       
       {user ? (
         <>
