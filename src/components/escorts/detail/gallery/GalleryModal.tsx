@@ -2,7 +2,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { GalleryNavigationControls } from "./GalleryNavigationControls";
 import { GalleryImage } from "./GalleryImage";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 interface GalleryModalProps {
   images: string[];
@@ -23,6 +23,31 @@ export const GalleryModal = ({
 }: GalleryModalProps) => {
   // Don't render anything if no images
   if (images.length === 0) return null;
+  
+  // Keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!isOpen) return;
+    
+    switch (e.key) {
+      case "ArrowRight":
+        goToNext();
+        break;
+      case "ArrowLeft":
+        goToPrev();
+        break;
+      case "Escape":
+        onClose();
+        break;
+      default:
+        break;
+    }
+  }, [isOpen, goToNext, goToPrev, onClose]);
+  
+  // Set up keyboard listeners
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
   
   // Disable body scroll when modal is open
   useEffect(() => {

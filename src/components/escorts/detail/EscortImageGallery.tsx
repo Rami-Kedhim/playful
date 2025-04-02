@@ -39,30 +39,6 @@ const EscortImageGallery = ({
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   }, [images.length]);
   
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      
-      switch (e.key) {
-        case "ArrowRight":
-          goToNext();
-          break;
-        case "ArrowLeft":
-          goToPrev();
-          break;
-        case "Escape":
-          onClose();
-          break;
-        default:
-          break;
-      }
-    };
-    
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, goToNext, goToPrev, onClose]);
-  
   return (
     <GalleryModal
       images={images}
