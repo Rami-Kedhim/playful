@@ -17,6 +17,12 @@ const AccountSettings = ({ user, profile }: AccountSettingsProps) => {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const { updatePassword } = useAuth();
   
+  const getLastPasswordChange = () => {
+    // This would typically come from the user metadata
+    // For now, we'll just return 'Never' as a placeholder
+    return "Never";
+  };
+  
   return (
     <div className="space-y-6">
       {profile && (
@@ -32,7 +38,7 @@ const AccountSettings = ({ user, profile }: AccountSettingsProps) => {
       
       <AccountItem 
         title="Password" 
-        subtitle="Last changed: Never" 
+        subtitle={`Last changed: ${getLastPasswordChange()}`} 
         actionLabel="Change Password"
         onAction={() => setPasswordDialogOpen(true)}
       />
