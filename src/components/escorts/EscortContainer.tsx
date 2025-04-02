@@ -35,7 +35,12 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     setCurrentPage,
     clearFilters,
     paginatedEscorts,
-    totalPages
+    totalPages,
+    // Add new filter states and functions
+    selectedGenders,
+    toggleGender,
+    selectedOrientations,
+    toggleOrientation
   } = useEscortFilter(escorts);
 
   return (
@@ -67,6 +72,11 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             toggleService={toggleService}
             services={services}
             clearFilters={clearFilters}
+            // Pass new filter props
+            selectedGenders={selectedGenders}
+            toggleGender={toggleGender}
+            selectedOrientations={selectedOrientations}
+            toggleOrientation={toggleOrientation}
           />
         </div>
         
@@ -86,6 +96,11 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
               services={services}
               clearFilters={clearFilters}
               setShowFilters={setShowFilters}
+              // Pass new filter props
+              selectedGenders={selectedGenders}
+              toggleGender={toggleGender}
+              selectedOrientations={selectedOrientations}
+              toggleOrientation={toggleOrientation}
             />
           </div>
         )}
@@ -110,6 +125,11 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             selectedServices={selectedServices}
             toggleService={toggleService}
             clearFilters={clearFilters}
+            // Pass new filter props
+            selectedGenders={selectedGenders}
+            toggleGender={toggleGender}
+            selectedOrientations={selectedOrientations}
+            toggleOrientation={toggleOrientation}
           />
           
           <EscortResults 

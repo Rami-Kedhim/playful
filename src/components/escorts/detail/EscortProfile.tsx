@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { Escort } from "@/data/escortData";
@@ -16,6 +15,7 @@ import ShareProfileModal from "./ShareProfileModal";
 import { Heart, Calendar, MessageSquare, Star, Share2, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
+import EscortVideoGallery from "./EscortVideoGallery";
 
 interface EscortProfileProps {
   escort: Escort;
@@ -62,9 +62,14 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left column - Images */}
+      {/* Left column - Media */}
       <div className="lg:col-span-2">
         <EscortGallery escort={escort} />
+        
+        {/* Add Video Gallery below the image gallery */}
+        {escort.videos && escort.videos.length > 0 && (
+          <EscortVideoGallery videos={escort.videos} />
+        )}
       </div>
       
       {/* Right column - Info */}
@@ -78,6 +83,21 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
                   <MapPin size={16} className="mr-1" />
                   <span>{escort.location}</span>
                 </div>
+                {/* Display gender and orientation */}
+                {(escort.gender || escort.sexualOrientation) && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {escort.gender && (
+                      <Badge variant="outline" className="capitalize">
+                        {escort.gender}
+                      </Badge>
+                    )}
+                    {escort.sexualOrientation && (
+                      <Badge variant="outline" className="capitalize">
+                        {escort.sexualOrientation}
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </div>
               
               <Button

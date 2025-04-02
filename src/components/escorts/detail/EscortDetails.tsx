@@ -26,6 +26,12 @@ const EscortDetails = ({ escort }: EscortDetailsProps) => {
           <div className="text-gray-400">Age</div>
           <div>{escort.age} years</div>
           
+          <div className="text-gray-400">Gender</div>
+          <div className="capitalize">{escort.gender || "Not specified"}</div>
+          
+          <div className="text-gray-400">Sexual Orientation</div>
+          <div className="capitalize">{escort.sexualOrientation || "Not specified"}</div>
+          
           <div className="text-gray-400">Height</div>
           <div>{details.height}</div>
           

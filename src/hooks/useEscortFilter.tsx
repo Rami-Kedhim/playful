@@ -12,6 +12,8 @@ export interface EscortFilterState {
   selectedServices: string[];
   sortBy: string;
   currentPage: number;
+  selectedGenders: string[];
+  selectedOrientations: string[];
 }
 
 interface UseEscortFilterResult extends EscortFilterState {
@@ -26,6 +28,8 @@ interface UseEscortFilterResult extends EscortFilterState {
   filteredEscorts: Escort[];
   paginatedEscorts: Escort[];
   totalPages: number;
+  toggleGender: (gender: string) => void;
+  toggleOrientation: (orientation: string) => void;
 }
 
 export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
@@ -37,6 +41,9 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
+  // New filter states
+  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
+  const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
   
   const toggleService = (service: string) => {
     setSelectedServices(prev => 
@@ -47,12 +54,32 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
     setCurrentPage(1); // Reset to first page when filters change
   };
   
+  const toggleGender = (gender: string) => {
+    setSelectedGenders(prev => 
+      prev.includes(gender)
+        ? prev.filter(g => g !== gender)
+        : [...prev, gender]
+    );
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+  
+  const toggleOrientation = (orientation: string) => {
+    setSelectedOrientations(prev => 
+      prev.includes(orientation)
+        ? prev.filter(o => o !== orientation)
+        : [...prev, orientation]
+    );
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+  
   const clearFilters = () => {
     setSearchQuery("");
     setLocation("");
     setPriceRange([0, 500]);
     setVerifiedOnly(false);
     setSelectedServices([]);
+    setSelectedGenders([]);
+    setSelectedOrientations([]);
     setSortBy("featured");
     setCurrentPage(1);
   };
@@ -68,8 +95,16 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
       const matchesServices = selectedServices.length > 0 
         ? selectedServices.some(service => escort.tags.includes(service))
         : true;
+      const matchesGender = selectedGenders.length > 0
+        ? escort.gender && selectedGenders.includes(escort.gender.toLowerCase())
+        : true;
+      const matchesOrientation = selectedOrientations.length > 0
+        ? escort.sexualOrientation && selectedOrientations.includes(escort.sexualOrientation.toLowerCase())
+        : true;
         
-      return matchesSearch && matchesLocation && matchesPrice && matchesVerified && matchesServices;
+      return matchesSearch && matchesLocation && matchesPrice && 
+             matchesVerified && matchesServices && 
+             matchesGender && matchesOrientation;
     });
 
     // Sort logic
@@ -87,7 +122,7 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
         // Assuming featured is already in the desired order
         return result;
     }
-  }, [escortData, searchQuery, location, priceRange, verifiedOnly, selectedServices, sortBy]);
+  }, [escortData, searchQuery, location, priceRange, verifiedOnly, selectedServices, sortBy, selectedGenders, selectedOrientations]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredEscorts.length / ESCORTS_PER_PAGE);
@@ -112,6 +147,10 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
     setSortBy,
     currentPage,
     setCurrentPage,
+    selectedGenders,
+    toggleGender,
+    selectedOrientations,
+    toggleOrientation,
     clearFilters,
     filteredEscorts,
     paginatedEscorts,

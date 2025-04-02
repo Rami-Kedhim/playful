@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MapPin } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +20,10 @@ interface FilterSidebarProps {
   toggleService: (service: string) => void;
   services: string[];
   clearFilters: () => void;
+  selectedGenders: string[];
+  toggleGender: (gender: string) => void;
+  selectedOrientations: string[];
+  toggleOrientation: (orientation: string) => void;
 }
 
 const FilterSidebar = ({
@@ -36,7 +39,14 @@ const FilterSidebar = ({
   toggleService,
   services,
   clearFilters,
+  selectedGenders,
+  toggleGender,
+  selectedOrientations,
+  toggleOrientation,
 }: FilterSidebarProps) => {
+  const genders = ["male", "female", "non-binary", "transgender"];
+  const orientations = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
+
   return (
     <Card className="h-fit sticky top-20">
       <CardHeader>
@@ -90,6 +100,48 @@ const FilterSidebar = ({
             onCheckedChange={setVerifiedOnly}
           />
           <label className="text-sm font-medium">Verified only</label>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Gender</label>
+          <div className="grid grid-cols-2 gap-2">
+            {genders.map((gender) => (
+              <div key={gender} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`gender-${gender}`}
+                  checked={selectedGenders.includes(gender)}
+                  onCheckedChange={() => toggleGender(gender)}
+                />
+                <label 
+                  htmlFor={`gender-${gender}`}
+                  className="text-sm capitalize cursor-pointer"
+                >
+                  {gender}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Sexual Orientation</label>
+          <div className="grid grid-cols-2 gap-2">
+            {orientations.map((orientation) => (
+              <div key={orientation} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`orientation-${orientation}`}
+                  checked={selectedOrientations.includes(orientation)}
+                  onCheckedChange={() => toggleOrientation(orientation)}
+                />
+                <label 
+                  htmlFor={`orientation-${orientation}`}
+                  className="text-sm capitalize cursor-pointer"
+                >
+                  {orientation}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
         
         <div className="space-y-2">

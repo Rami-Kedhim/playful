@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -15,6 +14,10 @@ interface AppliedFiltersProps {
   selectedServices: string[];
   toggleService: (service: string) => void;
   clearFilters: () => void;
+  selectedGenders: string[];
+  toggleGender: (gender: string) => void;
+  selectedOrientations: string[];
+  toggleOrientation: (orientation: string) => void;
 }
 
 const AppliedFilters = ({
@@ -29,9 +32,15 @@ const AppliedFilters = ({
   selectedServices,
   toggleService,
   clearFilters,
+  selectedGenders,
+  toggleGender,
+  selectedOrientations,
+  toggleOrientation,
 }: AppliedFiltersProps) => {
   // Only render if there are any filters applied
-  if (!(searchQuery || location || verifiedOnly || selectedServices.length > 0 || priceRange[0] > 0 || priceRange[1] < 500)) {
+  if (!(searchQuery || location || verifiedOnly || selectedServices.length > 0 || 
+        priceRange[0] > 0 || priceRange[1] < 500 || 
+        selectedGenders.length > 0 || selectedOrientations.length > 0)) {
     return null;
   }
 
@@ -88,6 +97,28 @@ const AppliedFilters = ({
             size={14} 
             className="cursor-pointer" 
             onClick={() => toggleService(service)}
+          />
+        </Badge>
+      ))}
+      
+      {selectedGenders.map(gender => (
+        <Badge key={`gender-${gender}`} variant="secondary" className="flex items-center gap-1 capitalize">
+          {gender}
+          <X 
+            size={14} 
+            className="cursor-pointer" 
+            onClick={() => toggleGender(gender)}
+          />
+        </Badge>
+      ))}
+      
+      {selectedOrientations.map(orientation => (
+        <Badge key={`orientation-${orientation}`} variant="secondary" className="flex items-center gap-1 capitalize">
+          {orientation}
+          <X 
+            size={14} 
+            className="cursor-pointer" 
+            onClick={() => toggleOrientation(orientation)}
           />
         </Badge>
       ))}

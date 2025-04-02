@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +20,10 @@ interface MobileFilterCardProps {
   services: string[];
   clearFilters: () => void;
   setShowFilters: (value: boolean) => void;
+  selectedGenders: string[];
+  toggleGender: (gender: string) => void;
+  selectedOrientations: string[];
+  toggleOrientation: (orientation: string) => void;
 }
 
 const MobileFilterCard = ({
@@ -37,7 +40,14 @@ const MobileFilterCard = ({
   services,
   clearFilters,
   setShowFilters,
+  selectedGenders,
+  toggleGender,
+  selectedOrientations,
+  toggleOrientation,
 }: MobileFilterCardProps) => {
+  const genders = ["male", "female", "non-binary", "transgender"];
+  const orientations = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
+  
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -91,6 +101,38 @@ const MobileFilterCard = ({
             onCheckedChange={setVerifiedOnly}
           />
           <label className="text-sm font-medium">Verified only</label>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Gender</label>
+          <div className="flex flex-wrap gap-2">
+            {genders.map((gender) => (
+              <Badge
+                key={gender}
+                variant={selectedGenders.includes(gender) ? "default" : "outline"}
+                className="cursor-pointer capitalize"
+                onClick={() => toggleGender(gender)}
+              >
+                {gender}
+              </Badge>
+            ))}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Sexual Orientation</label>
+          <div className="flex flex-wrap gap-2">
+            {orientations.map((orientation) => (
+              <Badge
+                key={orientation}
+                variant={selectedOrientations.includes(orientation) ? "default" : "outline"}
+                className="cursor-pointer capitalize"
+                onClick={() => toggleOrientation(orientation)}
+              >
+                {orientation}
+              </Badge>
+            ))}
+          </div>
         </div>
         
         <div className="space-y-2">

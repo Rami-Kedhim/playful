@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -20,6 +19,8 @@ interface EscortCardProps {
   imageUrl: string;
   price: number;
   verified: boolean;
+  gender?: string;
+  sexualOrientation?: string;
 }
 
 const EscortCard = ({
@@ -33,6 +34,8 @@ const EscortCard = ({
   imageUrl,
   price,
   verified,
+  gender,
+  sexualOrientation
 }: EscortCardProps) => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { toast } = useToast();
@@ -63,7 +66,6 @@ const EscortCard = ({
             />
           </AspectRatio>
           
-          {/* Favorite button */}
           <Button
             size="icon"
             variant="ghost"
@@ -76,14 +78,12 @@ const EscortCard = ({
             <Heart size={18} fill={favorited ? "currentColor" : "none"} />
           </Button>
           
-          {/* Verification badge */}
           {verified && (
             <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
               Verified
             </Badge>
           )}
           
-          {/* Price tag */}
           <div className="absolute bottom-2 right-2">
             <Badge className="bg-lucoin text-white">
               {price} LC/hr
@@ -102,10 +102,25 @@ const EscortCard = ({
             </div>
           </div>
           
-          <div className="flex items-center text-sm text-gray-400 mb-3">
+          <div className="flex items-center text-sm text-gray-400 mb-2">
             <MapPin size={14} className="mr-1" />
             <span>{location}</span>
           </div>
+          
+          {(gender || sexualOrientation) && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {gender && (
+                <Badge variant="secondary" className="text-xs capitalize">
+                  {gender}
+                </Badge>
+              )}
+              {sexualOrientation && (
+                <Badge variant="secondary" className="text-xs capitalize">
+                  {sexualOrientation}
+                </Badge>
+              )}
+            </div>
+          )}
           
           <div className="flex flex-wrap gap-1 mb-4">
             {tags.slice(0, 3).map((tag, index) => (
