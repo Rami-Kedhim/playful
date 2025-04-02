@@ -6,7 +6,7 @@ import { useFavorites } from "@/contexts/FavoritesContext";
 import { format } from "date-fns";
 import BookingForm, { BookingFormData } from "./BookingForm";
 import MessageForm from "./MessageForm";
-import ShareProfileModal from "./ShareProfileModal";
+import { ShareProfileModal } from "./share";
 import MediaSection from "./MediaSection";
 import ProfileInfo from "./ProfileInfo";
 
