@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import EscortCard from "@/components/cards/EscortCard";
@@ -22,7 +21,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Search, MapPin, Filter, SlidersHorizontal } from "lucide-react";
+import { Search, MapPin, Filter, SlidersHorizontal, X } from "lucide-react";
 
 // Mock data
 const escorts = [
