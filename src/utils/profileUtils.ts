@@ -2,7 +2,11 @@
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+// This represents the Gender type as expected by our application code
 export type Gender = "male" | "female" | "non-binary" | "transgender" | "other" | "prefer-not-to-say";
+
+// This represents the gender type as accepted by our database
+type DatabaseGender = "male" | "female" | "other";
 
 export const uploadAvatar = async (avatarFile: File | null, user: User | null): Promise<string | null> => {
   if (!avatarFile || !user) return null;
@@ -28,14 +32,19 @@ export const uploadAvatar = async (avatarFile: File | null, user: User | null): 
   }
 };
 
-export const validateGender = (gender: string | null): Gender => {
-  const validGenders: Gender[] = [
-    "male", "female", "non-binary", "transgender", "other", "prefer-not-to-say"
-  ];
+/**
+ * Validates and maps the gender value to ensure it's compatible with the database
+ * If the value is not one of the accepted database values, maps it to "other"
+ */
+export const validateGender = (gender: string | null): DatabaseGender => {
+  // Define valid database genders
+  const validDatabaseGenders: DatabaseGender[] = ["male", "female", "other"];
   
-  if (!gender || !validGenders.includes(gender as Gender)) {
+  // If the gender is null or not in the valid database genders, return "other"
+  if (!gender || !validDatabaseGenders.includes(gender as DatabaseGender)) {
+    // Map specific values to "other" for the database
     return "other";
   }
   
-  return gender as Gender;
+  return gender as DatabaseGender;
 };

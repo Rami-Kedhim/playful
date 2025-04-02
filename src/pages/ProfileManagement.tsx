@@ -46,7 +46,7 @@ const ProfileManagement = () => {
         }
       }
 
-      // Validate and process gender to ensure it matches our Gender type
+      // Validate and process gender to ensure it matches our database accepted values
       const validatedGender = validateGender(data.gender);
 
       const { error } = await supabase
@@ -55,7 +55,7 @@ const ProfileManagement = () => {
           username: data.username,
           full_name: data.full_name,
           bio: data.bio,
-          gender: validatedGender,
+          gender: validatedGender, // Use the validated and mapped gender
           sexual_orientation: data.sexual_orientation,
           location: data.location,
           avatar_url: avatarUrl,
