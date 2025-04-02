@@ -1,134 +1,129 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Heart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Menu,
-  Search,
-  Sparkles,
-  Wallet,
-  LogIn,
-  X,
-  Globe,
-  MessageSquare,
-  Video,
-  ShoppingBag,
-  Menu as MenuIcon
-} from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isMobile = useIsMobile();
-
-  const navLinks = [
-    { name: "Escorts", path: "/escorts", icon: <Globe size={18} /> },
-    { name: "Creators", path: "/creators", icon: <Sparkles size={18} /> },
-    { name: "Livecams", path: "/livecams", icon: <Video size={18} /> },
-    { name: "Shop", path: "/shop", icon: <ShoppingBag size={18} /> },
-    { name: "Messages", path: "/messages", icon: <MessageSquare size={18} /> },
-  ];
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
+  const [isScrolled, setIsScrolled] = useState(false);
+  const location = useLocation();
+  const { favorites } = useFavorites();
+  
+  // Handle scroll event to change navbar appearance
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+  
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+  
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="container mx-auto px-4 flex items-center justify-between h-16">
-        {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-lucoin bg-clip-text text-transparent">
-            UberEscorts
-          </h1>
-        </Link>
-
-        {/* Desktop Navigation */}
-        {!isMobile && (
-          <nav className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-secondary hover:text-white flex items-center space-x-1"
-              >
-                {link.icon}
-                <span>{link.name}</span>
-              </Link>
-            ))}
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled || isMenuOpen ? "bg-background/80 backdrop-blur-md shadow-md" : "bg-transparent"
+      }`}
+    >
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <span className="text-xl font-bold">LuxLife</span>
+          </Link>
+          
+          {/* Desktop navigation */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <NavLink to="/" label="Home" isActive={location.pathname === "/"} />
+            <NavLink to="/escorts" label="Escorts" isActive={location.pathname.startsWith("/escorts")} />
+            <NavLink to="/creators" label="Creators" isActive={location.pathname.startsWith("/creators")} />
+            <Link to="/favorites" className="relative group">
+              <Button variant="ghost" size="icon" className={location.pathname === "/favorites" ? "bg-primary/10 text-primary" : ""}>
+                <Heart size={20} className="transition-colors group-hover:text-primary" fill={favorites.length > 0 ? "currentColor" : "none"} />
+              </Button>
+              {favorites.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {favorites.length > 9 ? '9+' : favorites.length}
+                </span>
+              )}
+            </Link>
+            
+            <Link to="/login">
+              <Button variant="ghost" size="sm">Login</Button>
+            </Link>
+            
+            <Link to="/signup">
+              <Button size="sm">Sign Up</Button>
+            </Link>
           </nav>
-        )}
-
-        {/* Action buttons */}
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" className="text-gray-300">
-            <Search size={20} />
-          </Button>
           
-          <Button variant="ghost" size="icon" className="text-gray-300">
-            <Wallet size={20} />
-            <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-primary"></span>
-          </Button>
-          
-          <Link to="/login">
-            <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
-              <LogIn size={16} />
-              <span>Login</span>
-            </Button>
-          </Link>
-          
-          <Link to="/register">
-            <Button 
-              size="sm" 
-              className="hidden sm:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              Register
-            </Button>
-          </Link>
-
           {/* Mobile menu button */}
-          {isMobile && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleMenu}
-              className="md:hidden text-gray-300"
-            >
-              {isMenuOpen ? <X size={20} /> : <MenuIcon size={20} />}
-            </Button>
-          )}
+          <button 
+            className="md:hidden p-2 rounded-md"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-      </div>
-
-      {/* Mobile menu */}
-      {isMobile && isMenuOpen && (
-        <div className="md:hidden bg-background border-b border-border">
-          <div className="container mx-auto px-4 py-3 space-y-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-secondary hover:text-white flex items-center space-x-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {link.icon}
-                <span>{link.name}</span>
+        
+        {/* Mobile navigation */}
+        {isMenuOpen && (
+          <nav className="md:hidden py-4 space-y-3">
+            <MobileNavLink to="/" label="Home" />
+            <MobileNavLink to="/escorts" label="Escorts" />
+            <MobileNavLink to="/creators" label="Creators" />
+            <MobileNavLink to="/favorites" label="Favorites" icon={<Heart size={18} className="mr-2" fill={favorites.length > 0 ? "currentColor" : "none"} />} />
+            <div className="pt-4 grid grid-cols-2 gap-2">
+              <Link to="/login" className="w-full">
+                <Button variant="outline" className="w-full">Login</Button>
               </Link>
-            ))}
-            <div className="flex gap-2 mt-4">
-              <Link to="/login" className="flex-1">
-                <Button variant="outline" className="w-full gap-2">
-                  <LogIn size={16} />
-                  <span>Login</span>
-                </Button>
-              </Link>
-              <Link to="/register" className="flex-1">
-                <Button className="w-full">Register</Button>
+              <Link to="/signup" className="w-full">
+                <Button className="w-full">Sign Up</Button>
               </Link>
             </div>
-          </div>
-        </div>
-      )}
+          </nav>
+        )}
+      </div>
     </header>
   );
 };
+
+interface NavLinkProps {
+  to: string;
+  label: string;
+  isActive: boolean;
+}
+
+const NavLink = ({ to, label, isActive }: NavLinkProps) => (
+  <Link 
+    to={to} 
+    className={`transition-colors hover:text-primary ${
+      isActive ? "text-primary font-medium" : ""
+    }`}
+  >
+    {label}
+  </Link>
+);
+
+interface MobileNavLinkProps {
+  to: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+const MobileNavLink = ({ to, label, icon }: MobileNavLinkProps) => (
+  <Link to={to} className="block px-2 py-2 hover:bg-gray-800 rounded flex items-center">
+    {icon}
+    {label}
+  </Link>
+);
 
 export default Navbar;

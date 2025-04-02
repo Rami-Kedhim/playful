@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Star, MapPin, MessageSquare, Calendar, Heart } from "lucide-react";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface EscortCardProps {
   id: string;
@@ -32,12 +34,21 @@ const EscortCard = ({
   price,
   verified,
 }: EscortCardProps) => {
-  const [isFavorited, setIsFavorited] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { toast } = useToast();
+  const favorited = isFavorite(id);
 
-  const toggleFavorite = (e: React.MouseEvent) => {
+  const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorited(!isFavorited);
+    toggleFavorite(id);
+    
+    toast({
+      title: favorited ? "Removed from favorites" : "Added to favorites",
+      description: favorited 
+        ? `${name} has been removed from your favorites` 
+        : `${name} has been added to your favorites`,
+    });
   };
 
   return (
@@ -57,11 +68,12 @@ const EscortCard = ({
             size="icon"
             variant="ghost"
             className={`absolute top-2 right-2 rounded-full bg-black/30 backdrop-blur-sm ${
-              isFavorited ? "text-red-500" : "text-white"
+              favorited ? "text-red-500" : "text-white"
             }`}
-            onClick={toggleFavorite}
+            onClick={handleFavoriteClick}
+            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
           >
-            <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
+            <Heart size={18} fill={favorited ? "currentColor" : "none"} />
           </Button>
           
           {/* Verification badge */}

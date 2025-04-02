@@ -14,6 +14,7 @@ import BookingForm, { BookingFormData } from "./BookingForm";
 import MessageForm from "./MessageForm";
 import { Heart, Calendar, MessageSquare, Star, Share2, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface EscortProfileProps {
   escort: Escort;
@@ -22,15 +23,15 @@ interface EscortProfileProps {
 
 const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const { toast } = useToast();
-  const [isFavorited, setIsFavorited] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   
-  const toggleFavorite = () => {
-    setIsFavorited(!isFavorited);
+  const handleFavoriteToggle = () => {
+    toggleFavorite(escort.id);
     toast({
-      title: isFavorited ? "Removed from favorites" : "Added to favorites",
-      description: isFavorited 
+      title: isFavorite(escort.id) ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite(escort.id) 
         ? `${escort.name} has been removed from your favorites.` 
         : `${escort.name} has been added to your favorites.`,
     });
@@ -76,10 +77,11 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
               <Button
                 variant="outline"
                 size="icon"
-                className={isFavorited ? "text-red-500" : ""}
-                onClick={toggleFavorite}
+                className={isFavorite(escort.id) ? "text-red-500" : ""}
+                onClick={handleFavoriteToggle}
+                aria-label={isFavorite(escort.id) ? "Remove from favorites" : "Add to favorites"}
               >
-                <Heart size={20} fill={isFavorited ? "currentColor" : "none"} />
+                <Heart size={20} fill={isFavorite(escort.id) ? "currentColor" : "none"} />
               </Button>
             </div>
             

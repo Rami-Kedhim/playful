@@ -34,6 +34,10 @@
     --ring: 255 70% 74%;
     
     --radius: 0.75rem;
+
+    /* New custom colors */
+    --lucoin: 45 100% 50%;
+    --favorite: 0 100% 67%;
   }
 }
 
@@ -91,4 +95,3 @@
     @apply touch-pan-y;
   }
 }
-
