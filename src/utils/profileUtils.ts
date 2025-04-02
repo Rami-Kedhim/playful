@@ -1,7 +1,8 @@
 
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { Gender } from "@/components/profile/PersonalInfoForm";
+
+export type Gender = "male" | "female" | "non-binary" | "transgender" | "other" | "prefer-not-to-say";
 
 export const uploadAvatar = async (avatarFile: File | null, user: User | null): Promise<string | null> => {
   if (!avatarFile || !user) return null;

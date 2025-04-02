@@ -8,9 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
 import AvatarUpload from "./AvatarUpload";
 import { Loader2 } from "lucide-react";
-
-// Define the allowed gender types explicitly
-export type Gender = "male" | "female" | "non-binary" | "transgender" | "other" | "prefer-not-to-say";
+import { Gender } from "@/utils/profileUtils";
 
 export interface ProfileFormData {
   username: string;

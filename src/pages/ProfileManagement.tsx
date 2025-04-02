@@ -18,28 +18,19 @@ import { supabase } from "@/integrations/supabase/client";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import PersonalInfoForm, { ProfileFormData } from "@/components/profile/PersonalInfoForm";
 import AccountSettings from "@/components/profile/AccountSettings";
-import { uploadAvatar, validateGender } from "@/utils/profileUtils";
+import { uploadAvatar } from "@/utils/profileUtils";
+import { useAvatarUpload } from "@/hooks/useAvatarUpload";
 
 const ProfileManagement = () => {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
-
-  useEffect(() => {
-    if (profile) {
-      setAvatarPreview(profile.avatar_url || "");
-    }
-  }, [profile]);
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-    }
-  };
+  
+  const {
+    avatarFile,
+    avatarPreview,
+    handleAvatarChange
+  } = useAvatarUpload(profile?.avatar_url || "");
 
   const onSubmit = async (data: ProfileFormData) => {
     if (!user) return;
