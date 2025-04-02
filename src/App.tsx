@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Escorts from "./pages/Escorts";
 import EscortDetail from "./pages/EscortDetail";
 import Creators from "./pages/Creators";
+import CreatorDetail from "./pages/CreatorDetail";
 import Favorites from "./pages/Favorites";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/escorts" element={<Escorts />} />
             <Route path="/escorts/:id" element={<EscortDetail />} />
             <Route path="/creators" element={<Creators />} />
+            <Route path="/creators/:username" element={<CreatorDetail />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
