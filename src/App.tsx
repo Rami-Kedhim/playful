@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -12,6 +13,7 @@ import EscortDetail from "./pages/EscortDetail";
 import Creators from "./pages/Creators";
 import Favorites from "./pages/Favorites";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ProfileManagement from "./pages/ProfileManagement";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -32,6 +34,7 @@ const App = () => (
             <Route path="/creators" element={<Creators />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/profile" element={
               <ProtectedRoute>
                 <ProfileManagement />

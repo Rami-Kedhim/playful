@@ -8,7 +8,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [{ session, user, profile, isLoading }, setIsLoading, refreshProfile] = useAuthState();
-  const { signUp, signIn, signOut } = useAuthentication(setIsLoading, refreshProfile);
+  const { signUp, signIn, signOut, resetPassword, updatePassword } = useAuthentication(setIsLoading, refreshProfile);
 
   const value: AuthContextValue = {
     session,
@@ -18,6 +18,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signIn,
     signOut,
+    resetPassword,
+    updatePassword,
     refreshProfile
   };
 

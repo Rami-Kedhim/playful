@@ -9,8 +9,10 @@ export interface AuthState {
 }
 
 export interface AuthContextValue extends AuthState {
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, userData?: Record<string, any>) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
