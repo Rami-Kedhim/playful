@@ -14,6 +14,9 @@ export interface EscortFilterState {
   currentPage: number;
   selectedGenders: string[];
   selectedOrientations: string[];
+  ageRange: number[];
+  ratingMin: number;
+  availableNow: boolean;
 }
 
 interface UseEscortFilterResult extends EscortFilterState {
@@ -30,10 +33,13 @@ interface UseEscortFilterResult extends EscortFilterState {
   totalPages: number;
   toggleGender: (gender: string) => void;
   toggleOrientation: (orientation: string) => void;
+  setAgeRange: (value: number[]) => void;
+  setRatingMin: (value: number) => void;
+  setAvailableNow: (value: boolean) => void;
 }
 
 export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
-  // Filter state
+  // Base filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const [priceRange, setPriceRange] = useState([0, 500]);
@@ -41,9 +47,13 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("featured");
   const [currentPage, setCurrentPage] = useState(1);
-  // New filter states
+  
+  // Extended filter state
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
+  const [ageRange, setAgeRange] = useState([18, 50]);
+  const [ratingMin, setRatingMin] = useState(0);
+  const [availableNow, setAvailableNow] = useState(false);
   
   const toggleService = (service: string) => {
     setSelectedServices(prev => 
@@ -80,6 +90,9 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
     setSelectedServices([]);
     setSelectedGenders([]);
     setSelectedOrientations([]);
+    setAgeRange([18, 50]);
+    setRatingMin(0);
+    setAvailableNow(false);
     setSortBy("featured");
     setCurrentPage(1);
   };
@@ -101,10 +114,15 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
       const matchesOrientation = selectedOrientations.length > 0
         ? escort.sexualOrientation && selectedOrientations.includes(escort.sexualOrientation.toLowerCase())
         : true;
+      const matchesAge = escort.age >= ageRange[0] && escort.age <= ageRange[1];
+      const matchesRating = escort.rating >= ratingMin;
+      // For demo purposes, simulate "available now" with a random condition
+      const matchesAvailability = availableNow ? Math.random() > 0.5 : true;
         
       return matchesSearch && matchesLocation && matchesPrice && 
              matchesVerified && matchesServices && 
-             matchesGender && matchesOrientation;
+             matchesGender && matchesOrientation &&
+             matchesAge && matchesRating && matchesAvailability;
     });
 
     // Sort logic
@@ -117,12 +135,16 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
         return [...result].sort((a, b) => b.price - a.price);
       case "reviews":
         return [...result].sort((a, b) => b.reviews - a.reviews);
+      case "newest":
+        // For demo purposes, sort by ID (assuming higher IDs are newer)
+        return [...result].sort((a, b) => parseInt(b.id) - parseInt(a.id));
       case "featured":
       default:
         // Assuming featured is already in the desired order
         return result;
     }
-  }, [escortData, searchQuery, location, priceRange, verifiedOnly, selectedServices, sortBy, selectedGenders, selectedOrientations]);
+  }, [escortData, searchQuery, location, priceRange, verifiedOnly, selectedServices, 
+      sortBy, selectedGenders, selectedOrientations, ageRange, ratingMin, availableNow]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredEscorts.length / ESCORTS_PER_PAGE);
@@ -151,6 +173,12 @@ export function useEscortFilter(escortData: Escort[]): UseEscortFilterResult {
     toggleGender,
     selectedOrientations,
     toggleOrientation,
+    ageRange,
+    setAgeRange,
+    ratingMin,
+    setRatingMin,
+    availableNow,
+    setAvailableNow,
     clearFilters,
     filteredEscorts,
     paginatedEscorts,

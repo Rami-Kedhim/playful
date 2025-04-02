@@ -40,7 +40,13 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     selectedGenders,
     toggleGender,
     selectedOrientations,
-    toggleOrientation
+    toggleOrientation,
+    ageRange,
+    setAgeRange,
+    ratingMin,
+    setRatingMin,
+    availableNow,
+    setAvailableNow
   } = useEscortFilter(escorts);
 
   return (
@@ -72,11 +78,16 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             toggleService={toggleService}
             services={services}
             clearFilters={clearFilters}
-            // Pass new filter props
             selectedGenders={selectedGenders}
             toggleGender={toggleGender}
             selectedOrientations={selectedOrientations}
             toggleOrientation={toggleOrientation}
+            ageRange={ageRange}
+            setAgeRange={setAgeRange}
+            ratingMin={ratingMin}
+            setRatingMin={setRatingMin}
+            availableNow={availableNow}
+            setAvailableNow={setAvailableNow}
           />
         </div>
         
@@ -96,7 +107,6 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
               services={services}
               clearFilters={clearFilters}
               setShowFilters={setShowFilters}
-              // Pass new filter props
               selectedGenders={selectedGenders}
               toggleGender={toggleGender}
               selectedOrientations={selectedOrientations}
@@ -125,11 +135,16 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             selectedServices={selectedServices}
             toggleService={toggleService}
             clearFilters={clearFilters}
-            // Pass new filter props
             selectedGenders={selectedGenders}
             toggleGender={toggleGender}
             selectedOrientations={selectedOrientations}
             toggleOrientation={toggleOrientation}
+            ageRange={ageRange}
+            setAgeRange={setAgeRange}
+            ratingMin={ratingMin}
+            setRatingMin={setRatingMin}
+            availableNow={availableNow}
+            setAvailableNow={setAvailableNow}
           />
           
           <EscortResults 
