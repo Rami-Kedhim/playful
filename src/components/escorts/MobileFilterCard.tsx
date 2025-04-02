@@ -1,10 +1,11 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { MapPin } from "lucide-react";
+import SearchFilter from "./filters/SearchFilter";
+import LocationFilter from "./filters/LocationFilter";
+import PriceRangeFilter from "./filters/PriceRangeFilter";
+import VerifiedFilter from "./filters/VerifiedFilter";
 
 interface MobileFilterCardProps {
   searchQuery: string;
@@ -55,53 +56,25 @@ const MobileFilterCard = ({
         <CardDescription>Refine your search</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Search</label>
-          <Input
-            placeholder="Search by name"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-background/50"
-          />
-        </div>
+        <SearchFilter 
+          searchQuery={searchQuery} 
+          setSearchQuery={setSearchQuery} 
+        />
         
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Location</label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            <Input
-              placeholder="City or area"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="pl-10 bg-background/50"
-            />
-          </div>
-        </div>
+        <LocationFilter 
+          location={location} 
+          setLocation={setLocation} 
+        />
         
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Price Range (LC)</label>
-          <div className="pt-2">
-            <Slider
-              value={priceRange}
-              min={0}
-              max={500}
-              step={10}
-              onValueChange={setPriceRange}
-            />
-            <div className="flex justify-between mt-2 text-sm text-gray-400">
-              <span>{priceRange[0]} LC</span>
-              <span>{priceRange[1]} LC</span>
-            </div>
-          </div>
-        </div>
+        <PriceRangeFilter 
+          priceRange={priceRange} 
+          setPriceRange={setPriceRange} 
+        />
         
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={verifiedOnly}
-            onCheckedChange={setVerifiedOnly}
-          />
-          <label className="text-sm font-medium">Verified only</label>
-        </div>
+        <VerifiedFilter 
+          verifiedOnly={verifiedOnly} 
+          setVerifiedOnly={setVerifiedOnly} 
+        />
         
         <div className="space-y-2">
           <label className="text-sm font-medium">Gender</label>
