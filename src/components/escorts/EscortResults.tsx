@@ -1,6 +1,14 @@
 
 import { Button } from "@/components/ui/button";
 import EscortCard from "@/components/cards/EscortCard";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Escort {
   id: string;
@@ -18,9 +26,24 @@ interface Escort {
 interface EscortResultsProps {
   escorts: Escort[];
   clearFilters: () => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
 }
 
-const EscortResults = ({ escorts, clearFilters }: EscortResultsProps) => {
+const EscortResults = ({ 
+  escorts, 
+  clearFilters, 
+  currentPage, 
+  setCurrentPage, 
+  totalPages 
+}: EscortResultsProps) => {
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of results
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <>
       <div className="mb-4">
@@ -45,13 +68,37 @@ const EscortResults = ({ escorts, clearFilters }: EscortResultsProps) => {
       )}
       
       {/* Pagination */}
-      {escorts.length > 0 && (
-        <div className="flex justify-center mt-8">
-          <Button variant="outline" className="mx-1" disabled>Previous</Button>
-          <Button variant="outline" className="mx-1 bg-primary text-primary-foreground hover:bg-primary/90">1</Button>
-          <Button variant="outline" className="mx-1">2</Button>
-          <Button variant="outline" className="mx-1">3</Button>
-          <Button variant="outline" className="mx-1">Next</Button>
+      {escorts.length > 0 && totalPages > 1 && (
+        <div className="mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    onClick={() => handlePageChange(page)}
+                    isActive={page === currentPage}
+                    className="cursor-pointer"
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </>

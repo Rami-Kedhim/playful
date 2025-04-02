@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useMemo } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Filter } from "lucide-react";
@@ -112,6 +113,8 @@ const services = [
   "GFE", "Massage", "Overnight", "Dinner Date", "Travel", "Party", "Fetish", "Domination", "Role Play"
 ];
 
+const ESCORTS_PER_PAGE = 6; // Number of escorts to display per page
+
 const Escorts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
@@ -119,6 +122,8 @@ const Escorts = () => {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState("featured");
+  const [currentPage, setCurrentPage] = useState(1);
   
   const toggleService = (service: string) => {
     setSelectedServices(prev => 
@@ -126,6 +131,7 @@ const Escorts = () => {
         ? prev.filter(s => s !== service)
         : [...prev, service]
     );
+    setCurrentPage(1); // Reset to first page when filters change
   };
   
   const clearFilters = () => {
@@ -134,19 +140,47 @@ const Escorts = () => {
     setPriceRange([0, 500]);
     setVerifiedOnly(false);
     setSelectedServices([]);
+    setCurrentPage(1);
   };
   
-  const filteredEscorts = escorts.filter(escort => {
-    const matchesSearch = escort.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLocation = location ? escort.location.toLowerCase().includes(location.toLowerCase()) : true;
-    const matchesPrice = escort.price >= priceRange[0] && escort.price <= priceRange[1];
-    const matchesVerified = verifiedOnly ? escort.verified : true;
-    const matchesServices = selectedServices.length > 0 
-      ? selectedServices.some(service => escort.tags.includes(service))
-      : true;
-      
-    return matchesSearch && matchesLocation && matchesPrice && matchesVerified && matchesServices;
-  });
+  // Filter and sort escorts
+  const filteredAndSortedEscorts = useMemo(() => {
+    // Filter logic
+    let result = escorts.filter(escort => {
+      const matchesSearch = escort.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesLocation = location ? escort.location.toLowerCase().includes(location.toLowerCase()) : true;
+      const matchesPrice = escort.price >= priceRange[0] && escort.price <= priceRange[1];
+      const matchesVerified = verifiedOnly ? escort.verified : true;
+      const matchesServices = selectedServices.length > 0 
+        ? selectedServices.some(service => escort.tags.includes(service))
+        : true;
+        
+      return matchesSearch && matchesLocation && matchesPrice && matchesVerified && matchesServices;
+    });
+
+    // Sort logic
+    switch (sortBy) {
+      case "rating":
+        return [...result].sort((a, b) => b.rating - a.rating);
+      case "price-low":
+        return [...result].sort((a, b) => a.price - b.price);
+      case "price-high":
+        return [...result].sort((a, b) => b.price - a.price);
+      case "reviews":
+        return [...result].sort((a, b) => b.reviews - a.reviews);
+      case "featured":
+      default:
+        // Assuming featured is already in the desired order or we could add a 'featured' boolean property
+        return result;
+    }
+  }, [escorts, searchQuery, location, priceRange, verifiedOnly, selectedServices, sortBy]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredAndSortedEscorts.length / ESCORTS_PER_PAGE);
+  const paginatedEscorts = useMemo(() => {
+    const startIndex = (currentPage - 1) * ESCORTS_PER_PAGE;
+    return filteredAndSortedEscorts.slice(startIndex, startIndex + ESCORTS_PER_PAGE);
+  }, [filteredAndSortedEscorts, currentPage]);
 
   return (
     <AppLayout>
@@ -205,6 +239,8 @@ const Escorts = () => {
             <SearchBar 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
             />
             
             <AppliedFilters 
@@ -222,8 +258,11 @@ const Escorts = () => {
             />
             
             <EscortResults 
-              escorts={filteredEscorts}
+              escorts={paginatedEscorts}
               clearFilters={clearFilters}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
             />
           </div>
         </div>

@@ -6,9 +6,11 @@ import { Search } from "lucide-react";
 interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
+  sortBy: string;
+  setSortBy: (value: string) => void;
 }
 
-const SearchBar = ({ searchQuery, setSearchQuery }: SearchBarProps) => {
+const SearchBar = ({ searchQuery, setSearchQuery, sortBy, setSortBy }: SearchBarProps) => {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
       <div className="relative flex-grow">
@@ -21,7 +23,7 @@ const SearchBar = ({ searchQuery, setSearchQuery }: SearchBarProps) => {
         />
       </div>
       
-      <Select defaultValue="featured">
+      <Select value={sortBy} onValueChange={setSortBy}>
         <SelectTrigger className="w-full sm:w-[180px]">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
