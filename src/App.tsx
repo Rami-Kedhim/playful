@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { WalletProvider } from "@/contexts/WalletContext";
 
 // Pages
 import Index from "./pages/Index";
