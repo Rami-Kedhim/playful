@@ -7,6 +7,7 @@ import EscortProfile from "@/components/escorts/detail/EscortProfile";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 const EscortDetail = () => {
   const { id } = useParams<{ id: string }>();

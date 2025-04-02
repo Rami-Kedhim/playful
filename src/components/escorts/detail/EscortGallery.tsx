@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import EscortImageGallery from "./EscortImageGallery";
 
 interface EscortGalleryProps {
   escort: Escort;
@@ -20,6 +21,7 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
   ];
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   
   const goToNextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -28,58 +30,72 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
   const goToPrevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
+
+  const openGallery = () => {
+    setGalleryOpen(true);
+  };
   
   return (
-    <Card className="overflow-hidden relative">
-      <AspectRatio ratio={1/1} className="bg-gray-900">
-        <img 
-          src={images[currentImageIndex]} 
-          alt={escort.name} 
-          className="object-cover w-full h-full"
-        />
-      </AspectRatio>
-      
-      {/* Navigation buttons */}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50"
-        onClick={goToPrevImage}
-      >
-        <ChevronLeft size={24} />
-      </Button>
-      
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50"
-        onClick={goToNextImage}
-      >
-        <ChevronRight size={24} />
-      </Button>
-      
-      {/* Fullscreen button */}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="absolute bottom-2 right-2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50"
-      >
-        <Maximize2 size={18} />
-      </Button>
-      
-      {/* Thumbnail indicators */}
-      <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            className={`w-2 h-2 rounded-full ${
-              index === currentImageIndex ? "bg-white" : "bg-white/50"
-            }`}
-            onClick={() => setCurrentImageIndex(index)}
+    <>
+      <Card className="overflow-hidden relative">
+        <AspectRatio ratio={1/1} className="bg-gray-900">
+          <img 
+            src={images[currentImageIndex]} 
+            alt={escort.name} 
+            className="object-cover w-full h-full"
           />
-        ))}
-      </div>
-    </Card>
+        </AspectRatio>
+        
+        {/* Navigation buttons */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50"
+          onClick={goToPrevImage}
+        >
+          <ChevronLeft size={24} />
+        </Button>
+        
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50"
+          onClick={goToNextImage}
+        >
+          <ChevronRight size={24} />
+        </Button>
+        
+        {/* Fullscreen button */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute bottom-2 right-2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50"
+          onClick={openGallery}
+        >
+          <Maximize2 size={18} />
+        </Button>
+        
+        {/* Thumbnail indicators */}
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              className={`w-2 h-2 rounded-full ${
+                index === currentImageIndex ? "bg-white" : "bg-white/50"
+              }`}
+              onClick={() => setCurrentImageIndex(index)}
+            />
+          ))}
+        </div>
+      </Card>
+
+      <EscortImageGallery
+        images={images}
+        isOpen={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        initialIndex={currentImageIndex}
+      />
+    </>
   );
 };
 

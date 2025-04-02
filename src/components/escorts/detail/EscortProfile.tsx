@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { format } from "date-fns";
 import { Escort } from "@/data/escortData";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,10 @@ import EscortGallery from "./EscortGallery";
 import EscortDetails from "./EscortDetails";
 import EscortReviews from "./EscortReviews";
 import EscortServices from "./EscortServices";
+import BookingForm, { BookingFormData } from "./BookingForm";
+import MessageForm from "./MessageForm";
 import { Heart, Calendar, MessageSquare, Star, Share2, MapPin } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface EscortProfileProps {
   escort: Escort;
@@ -17,10 +21,36 @@ interface EscortProfileProps {
 }
 
 const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
+  const { toast } = useToast();
   const [isFavorited, setIsFavorited] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [messageOpen, setMessageOpen] = useState(false);
   
   const toggleFavorite = () => {
     setIsFavorited(!isFavorited);
+    toast({
+      title: isFavorited ? "Removed from favorites" : "Added to favorites",
+      description: isFavorited 
+        ? `${escort.name} has been removed from your favorites.` 
+        : `${escort.name} has been added to your favorites.`,
+    });
+  };
+
+  const handleBookingSubmit = (data: BookingFormData) => {
+    console.log("Booking data:", data);
+    toast({
+      title: "Booking Request Sent",
+      description: `Your booking with ${escort.name} for ${format(data.date, "MMMM d, yyyy")} at ${data.time} has been sent.`,
+    });
+    onBookNow();
+  };
+
+  const handleMessageSubmit = (message: string) => {
+    console.log("Message sent:", message);
+    toast({
+      title: "Message Sent",
+      description: `Your message has been sent to ${escort.name}.`,
+    });
   };
   
   return (
@@ -72,12 +102,16 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
             </div>
             
             <div className="grid grid-cols-2 gap-3 mt-6">
-              <Button onClick={onBookNow} className="w-full">
+              <Button onClick={() => setBookingOpen(true)} className="w-full">
                 <Calendar size={16} className="mr-2" />
                 Book Now
               </Button>
               
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setMessageOpen(true)}
+              >
                 <MessageSquare size={16} className="mr-2" />
                 Message
               </Button>
@@ -110,6 +144,20 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <BookingForm
+        escort={escort}
+        isOpen={bookingOpen}
+        onClose={() => setBookingOpen(false)}
+        onSubmit={handleBookingSubmit}
+      />
+
+      <MessageForm
+        escort={escort}
+        isOpen={messageOpen}
+        onClose={() => setMessageOpen(false)}
+        onSubmit={handleMessageSubmit}
+      />
     </div>
   );
 };
