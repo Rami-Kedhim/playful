@@ -3,7 +3,7 @@ import { useState } from "react";
 import Avatar from "./Avatar";
 import FileUpload from "./FileUpload";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 
 interface AvatarUploadProps {
   avatarPreview: string;
@@ -13,6 +13,7 @@ interface AvatarUploadProps {
   onAvatarRemove?: () => void;
   error?: string;
   disabled?: boolean;
+  uploadProgress?: number;
 }
 
 const AvatarUpload = ({ 
@@ -22,7 +23,8 @@ const AvatarUpload = ({
   onAvatarChange, 
   onAvatarRemove,
   error,
-  disabled = false
+  disabled = false,
+  uploadProgress
 }: AvatarUploadProps) => {
   const [isHovering, setIsHovering] = useState(false);
   
@@ -39,6 +41,7 @@ const AvatarUpload = ({
           email={email} 
           size="lg" 
           className="transition-opacity duration-200 ease-in-out"
+          border={true}
         />
         
         {avatarPreview && onAvatarRemove && isHovering && (
@@ -61,9 +64,14 @@ const AvatarUpload = ({
           label="Profile Photo"
           accept="image/*"
           onChange={onAvatarChange}
+          onRemove={onAvatarRemove}
           hint="Recommended: Square JPG or PNG, max 1MB"
           error={error}
           disabled={disabled}
+          preview={avatarPreview}
+          showPreview={false}
+          progress={uploadProgress}
+          maxSize={1}
         />
         
         {avatarPreview && (

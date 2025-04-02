@@ -9,6 +9,8 @@ interface AvatarProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
   fallbackClassName?: string;
+  status?: "online" | "offline" | "away" | "busy";
+  border?: boolean;
 }
 
 const Avatar = ({ 
@@ -17,7 +19,9 @@ const Avatar = ({
   email, 
   size = "md", 
   className,
-  fallbackClassName 
+  fallbackClassName,
+  status,
+  border = false
 }: AvatarProps) => {
   // Get the first character for the fallback
   const fallbackText = username?.[0] || email?.[0] || "U";
@@ -30,14 +34,40 @@ const Avatar = ({
     lg: "h-24 w-24",
     xl: "h-32 w-32"
   };
+
+  // Define status indicator colors
+  const statusColors = {
+    online: "bg-green-500",
+    offline: "bg-gray-500",
+    away: "bg-amber-500",
+    busy: "bg-red-500"
+  };
   
   return (
-    <UIAvatar className={cn(sizeClasses[size], className)}>
-      <AvatarImage src={src} alt={username || "Avatar"} />
-      <AvatarFallback className={fallbackClassName}>
-        {fallbackText.toUpperCase()}
-      </AvatarFallback>
-    </UIAvatar>
+    <div className="relative inline-block">
+      <UIAvatar className={cn(
+        sizeClasses[size], 
+        border && "ring-2 ring-background",
+        className
+      )}>
+        <AvatarImage src={src} alt={username || "Avatar"} />
+        <AvatarFallback className={cn(
+          "bg-gray-800",
+          fallbackClassName
+        )}>
+          {fallbackText.toUpperCase()}
+        </AvatarFallback>
+      </UIAvatar>
+      
+      {status && (
+        <span className={cn(
+          "absolute bottom-0 right-0 rounded-full border-2 border-background",
+          statusColors[status],
+          size === "xs" ? "h-2 w-2" : "h-3 w-3",
+          size === "lg" || size === "xl" ? "h-4 w-4" : ""
+        )} />
+      )}
+    </div>
   );
 };
 
