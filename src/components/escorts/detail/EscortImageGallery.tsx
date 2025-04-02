@@ -1,13 +1,6 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
@@ -33,13 +26,37 @@ const EscortImageGallery = ({
     }
   }, [initialIndex, isOpen]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
+  }, [images.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  }, [images.length]);
+
+  // Add keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      
+      switch (e.key) {
+        case "ArrowRight":
+          handleNext();
+          break;
+        case "ArrowLeft":
+          handlePrevious();
+          break;
+        case "Escape":
+          onClose();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, handleNext, handlePrevious, onClose]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -67,6 +84,7 @@ const EscortImageGallery = ({
               size="icon"
               className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 rounded-full h-10 w-10"
               onClick={handlePrevious}
+              aria-label="Previous image"
             >
               <ChevronLeft size={24} />
             </Button>
@@ -76,20 +94,24 @@ const EscortImageGallery = ({
               size="icon"
               className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 rounded-full h-10 w-10"
               onClick={handleNext}
+              aria-label="Next image"
             >
               <ChevronRight size={24} />
             </Button>
           </div>
           
           {/* Thumbnails */}
-          <div className="h-[15%] w-full flex justify-center items-center gap-2 px-4 py-2 bg-black/50">
+          <div className="h-[15%] w-full flex justify-center items-center gap-2 px-4 py-2 bg-black/50 overflow-x-auto">
             {images.map((image, index) => (
               <div
                 key={index}
-                className={`h-16 w-16 cursor-pointer border-2 transition-all ${
+                className={`h-16 w-16 cursor-pointer border-2 transition-all flex-shrink-0 ${
                   index === currentIndex ? "border-primary" : "border-transparent"
                 }`}
                 onClick={() => setCurrentIndex(index)}
+                role="button"
+                aria-label={`View image ${index + 1}`}
+                tabIndex={0}
               >
                 <img
                   src={image}

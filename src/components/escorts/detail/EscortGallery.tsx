@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Escort } from "@/data/escortData";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -22,17 +22,33 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
   
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
   
   const goToNextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    scrollToActiveThumbnail();
   };
   
   const goToPrevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    scrollToActiveThumbnail();
   };
 
   const openGallery = () => {
     setGalleryOpen(true);
+  };
+  
+  const scrollToActiveThumbnail = () => {
+    if (thumbnailsRef.current) {
+      const activeThumb = thumbnailsRef.current.querySelector(`.active-thumbnail`);
+      if (activeThumb) {
+        activeThumb.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }
   };
   
   return (
@@ -54,6 +70,7 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
             size="icon" 
             className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 rounded-full"
             onClick={goToPrevImage}
+            aria-label="Previous image"
           >
             <ChevronLeft size={24} />
           </Button>
@@ -63,6 +80,7 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
             size="icon" 
             className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 rounded-full"
             onClick={goToNextImage}
+            aria-label="Next image"
           >
             <ChevronRight size={24} />
           </Button>
@@ -73,20 +91,32 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
             size="icon" 
             className="absolute bottom-2 right-2 bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 rounded-full"
             onClick={openGallery}
+            aria-label="Open fullscreen gallery"
           >
             <Maximize2 size={18} />
           </Button>
+          
+          {/* Image counter */}
+          <div className="absolute top-2 right-2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+            {currentImageIndex + 1} / {images.length}
+          </div>
         </Card>
         
         {/* Thumbnails */}
-        <div className="grid grid-cols-4 gap-2">
+        <div 
+          ref={thumbnailsRef}
+          className="grid grid-cols-4 gap-2 overflow-x-auto flex-nowrap pb-2"
+        >
           {images.map((image, index) => (
             <div 
               key={index}
               className={`aspect-square relative cursor-pointer border-2 transition-all ${
-                index === currentImageIndex ? "border-primary" : "border-transparent"
+                index === currentImageIndex ? "border-primary active-thumbnail" : "border-transparent"
               }`}
               onClick={() => setCurrentImageIndex(index)}
+              role="button"
+              aria-label={`View image ${index + 1}`}
+              tabIndex={0}
             >
               <img 
                 src={image} 
