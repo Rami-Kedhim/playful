@@ -113,10 +113,10 @@ export const getAnalyticsSummary = async (creatorId: string, period: string = 'w
     // Calculate total views, likes, shares, earnings
     return analytics.reduce((summary, item) => {
       return {
-        views: summary.views + item.views,
-        likes: summary.likes + item.likes,
-        shares: summary.shares + item.shares,
-        earnings: summary.earnings + parseFloat(item.earnings.toString()),
+        views: summary.views + (item.views || 0),
+        likes: summary.likes + (item.likes || 0),
+        shares: summary.shares + (item.shares || 0),
+        earnings: summary.earnings + (parseFloat(item.earnings?.toString() || '0')),
       };
     }, { views: 0, likes: 0, shares: 0, earnings: 0 });
   } catch (error) {

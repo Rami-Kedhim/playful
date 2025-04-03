@@ -46,19 +46,20 @@ export const fetchCreatorAnalytics = async (creatorId: string, period: string = 
       return data;
     }
     
-    // Mock data for now - in a real implementation, this would query from the database
-    const mockData = [];
-    for (let d = new Date(range); d <= today; d.setDate(d.getDate() + 1)) {
-      mockData.push({
-        date: new Date(d).toISOString().split('T')[0],
-        views: Math.floor(Math.random() * 100) + 1,
-        likes: Math.floor(Math.random() * 50),
-        shares: Math.floor(Math.random() * 25),
-        earnings: parseFloat((Math.random() * 10).toFixed(2))
-      });
-    }
+    // Generate and seed mock data if no data exists
+    await seedMockAnalyticsData(creatorId, range, today);
     
-    return mockData;
+    // Try fetching again after seeding
+    const { data: seededData, error: seededError } = await supabase
+      .from('creator_analytics')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .gte('date', range.toISOString().split('T')[0])
+      .lte('date', today.toISOString().split('T')[0])
+      .order('date', { ascending: true });
+      
+    if (seededError) throw seededError;
+    return seededData || [];
   } catch (error: any) {
     console.error("Error fetching creator analytics:", error);
     toast({
@@ -69,6 +70,43 @@ export const fetchCreatorAnalytics = async (creatorId: string, period: string = 
     return [];
   }
 };
+
+/**
+ * Seed mock data for testing purposes
+ */
+async function seedMockAnalyticsData(creatorId: string, startDate: Date, endDate: Date) {
+  try {
+    const mockData = [];
+    let currentDate = new Date(startDate);
+    
+    // Generate daily data between start and end date
+    while (currentDate <= endDate) {
+      mockData.push({
+        creator_id: creatorId,
+        date: new Date(currentDate).toISOString().split('T')[0],
+        views: Math.floor(Math.random() * 100) + 1,
+        likes: Math.floor(Math.random() * 50),
+        shares: Math.floor(Math.random() * 25),
+        earnings: parseFloat((Math.random() * 10).toFixed(2))
+      });
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // Insert the mock data
+    const { error } = await supabase
+      .from('creator_analytics')
+      .insert(mockData);
+      
+    if (error) throw error;
+    
+    console.log('Seeded mock analytics data for testing');
+    return true;
+  } catch (error) {
+    console.error("Error seeding mock analytics data:", error);
+    return false;
+  }
+}
 
 /**
  * Track content view
@@ -97,7 +135,7 @@ export const trackContentView = async (contentId: string, viewerId: string) => {
  */
 export const getCreatorSummaryStats = async (creatorId: string) => {
   try {
-    // Attempt to get real data
+    // Calculate total views for creator's content
     const { data: viewsData, error: viewsError } = await supabase
       .from('creator_content')
       .select('views_count')

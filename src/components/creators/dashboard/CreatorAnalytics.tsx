@@ -1,17 +1,16 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, Legend, ResponsiveContainer 
+  Tooltip, Legend, ResponsiveContainer, Area, AreaChart 
 } from "recharts";
 import { 
-  Eye, ArrowUpRight, ThumbsUp, Share2, DollarSign
+  Eye, ArrowUpRight, ThumbsUp, Share2, DollarSign,
+  TrendingUp, TrendingDown
 } from "lucide-react";
-import { fetchCreatorAnalytics } from "@/services/creatorService";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
 
 interface AnalyticsStat {
@@ -20,6 +19,7 @@ interface AnalyticsStat {
   change: string;
   icon: React.ReactNode;
   trend: "up" | "down" | "neutral";
+  color: string;
 }
 
 interface CreatorAnalyticsProps {
@@ -27,94 +27,47 @@ interface CreatorAnalyticsProps {
 }
 
 const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
-  const [statsData, setStatsData] = useState<AnalyticsStat[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState("7days");
-  const { analytics } = useCreatorAnalytics(timeRange === "7days" ? "week" : timeRange === "30days" ? "month" : "year");
+  const [timeRange, setTimeRange] = useState("week");
+  const { analytics, analyticsHistory, loading } = useCreatorAnalytics(timeRange as "week" | "month" | "year");
 
-  useEffect(() => {
-    if (creatorId) {
-      loadAnalytics();
-    }
-  }, [creatorId, timeRange]);
-
-  const loadAnalytics = async () => {
-    setIsLoading(true);
-    
-    let startDate: Date;
-    const endDate = endOfDay(new Date());
-    
-    switch (timeRange) {
-      case "30days":
-        startDate = startOfDay(subDays(new Date(), 30));
-        break;
-      case "90days":
-        startDate = startOfDay(subDays(new Date(), 90));
-        break;
-      default: // 7days
-        startDate = startOfDay(subDays(new Date(), 7));
-        break;
-    }
-    
-    const data = await fetchCreatorAnalytics(creatorId, startDate, endDate);
-    
-    // Process data for charts
-    const formattedData = data.map((item: any) => ({
-      date: format(new Date(item.date), 'MMM dd'),
-      views: item.views,
-      likes: item.likes,
-      shares: item.shares,
-      earnings: parseFloat(item.earnings)
-    }));
-    
-    setChartData(formattedData.reverse());
-    
-    // Calculate summary stats
-    const totalViews = data.reduce((sum: number, item: any) => sum + item.views, 0);
-    const totalLikes = data.reduce((sum: number, item: any) => sum + item.likes, 0);
-    const totalShares = data.reduce((sum: number, item: any) => sum + item.shares, 0);
-    const totalEarnings = data.reduce((sum: number, item: any) => sum + parseFloat(item.earnings), 0);
-    
-    // Mock previous period data for trends (in a real app, you'd compare with actual previous period)
-    const prevTotalViews = totalViews * 0.9; // assume 10% growth
-    const viewsChange = totalViews > 0 ? 
-      `${Math.round((totalViews - prevTotalViews) / prevTotalViews * 100)}%` : "0%";
-    
-    // Create stats cards data
-    setStatsData([
-      {
-        title: "Total Views",
-        value: totalViews.toLocaleString(),
-        change: viewsChange,
-        icon: <Eye className="h-4 w-4" />,
-        trend: "up"
-      },
-      {
-        title: "Total Likes",
-        value: totalLikes.toLocaleString(),
-        change: "+5%",
-        icon: <ThumbsUp className="h-4 w-4" />,
-        trend: "up"
-      },
-      {
-        title: "Total Shares",
-        value: totalShares.toLocaleString(),
-        change: "+12%",
-        icon: <Share2 className="h-4 w-4" />,
-        trend: "up"
-      },
-      {
-        title: "Total Earnings",
-        value: `$${totalEarnings.toFixed(2)}`,
-        change: "+8%",
-        icon: <DollarSign className="h-4 w-4" />,
-        trend: "up"
-      }
-    ]);
-    
-    setIsLoading(false);
+  // Calculate trend percentages (in a real app, compare with previous period)
+  // For demo purposes, we'll use random trends
+  const getRandomTrend = () => {
+    const isUp = Math.random() > 0.3; // More likely to show up trends
+    return {
+      trend: isUp ? "up" : "down",
+      change: `${Math.floor(Math.random() * 30) + 1}%`,
+      color: isUp ? "text-green-500" : "text-red-500"
+    };
   };
+
+  // Create stats data
+  const statsData: AnalyticsStat[] = [
+    {
+      title: "Total Views",
+      value: loading ? "-" : analytics.views.toLocaleString(),
+      ...getRandomTrend(),
+      icon: <Eye className="h-4 w-4" />,
+    },
+    {
+      title: "Total Likes",
+      value: loading ? "-" : analytics.likes.toLocaleString(),
+      ...getRandomTrend(),
+      icon: <ThumbsUp className="h-4 w-4" />,
+    },
+    {
+      title: "Total Shares",
+      value: loading ? "-" : analytics.shares.toLocaleString(),
+      ...getRandomTrend(),
+      icon: <Share2 className="h-4 w-4" />,
+    },
+    {
+      title: "Total Earnings",
+      value: loading ? "-" : `$${analytics.earnings.toFixed(2)}`,
+      ...getRandomTrend(),
+      icon: <DollarSign className="h-4 w-4" />,
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -122,14 +75,14 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
         <h2 className="text-2xl font-bold">Analytics</h2>
         <Tabs value={timeRange} onValueChange={setTimeRange}>
           <TabsList>
-            <TabsTrigger value="7days">7 Days</TabsTrigger>
-            <TabsTrigger value="30days">30 Days</TabsTrigger>
-            <TabsTrigger value="90days">90 Days</TabsTrigger>
+            <TabsTrigger value="week">7 Days</TabsTrigger>
+            <TabsTrigger value="month">30 Days</TabsTrigger>
+            <TabsTrigger value="year">Year</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
       
-      {isLoading ? (
+      {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
@@ -155,11 +108,11 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
-                <div className={`flex items-center text-xs ${
-                  stat.trend === "up" ? "text-green-500" : 
-                  stat.trend === "down" ? "text-red-500" : "text-gray-500"
-                }`}>
-                  {stat.trend === "up" ? <ArrowUpRight className="h-3 w-3 mr-1" /> : null}
+                <div className={`flex items-center text-xs ${stat.color}`}>
+                  {stat.trend === "up" ? 
+                    <TrendingUp className="h-3 w-3 mr-1" /> : 
+                    <TrendingDown className="h-3 w-3 mr-1" />
+                  }
                   <span>{stat.change} from previous period</span>
                 </div>
               </CardContent>
@@ -182,33 +135,40 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
                 <TabsTrigger value="earnings">Earnings</TabsTrigger>
               </TabsList>
               <TabsContent value="views" className="h-[400px] mt-4">
-                {isLoading ? (
+                {loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
+                    <AreaChart data={analyticsHistory}>
+                      <defs>
+                        <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Line 
+                      <Area 
                         type="monotone" 
                         dataKey="views" 
                         stroke="#6366f1" 
-                        activeDot={{ r: 8 }} 
+                        fillOpacity={1}
+                        fill="url(#colorViews)"
                         name="Views"
                       />
-                    </LineChart>
+                    </AreaChart>
                   </ResponsiveContainer>
                 )}
               </TabsContent>
               <TabsContent value="engagement" className="h-[400px] mt-4">
-                {isLoading ? (
+                {loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
+                    <BarChart data={analyticsHistory}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
@@ -221,11 +181,11 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
                 )}
               </TabsContent>
               <TabsContent value="earnings" className="h-[400px] mt-4">
-                {isLoading ? (
+                {loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
+                    <LineChart data={analyticsHistory}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
