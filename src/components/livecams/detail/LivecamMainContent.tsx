@@ -18,6 +18,13 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   const uniqueSeed = `${model.id || model.username}-${Date.now().toString().substring(8, 13)}`;
   const fallbackImage = `https://picsum.photos/seed/${uniqueSeed}/800/450`;
 
+  // Debug log for image URLs
+  console.log(`Rendering detail for ${model.username}:`, { 
+    originalImage: model.imageUrl,
+    fallback: fallbackImage,
+    hasError: imgError
+  });
+
   return (
     <Card className="overflow-hidden">
       <div className="relative">
@@ -37,7 +44,10 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
               src={imgError ? fallbackImage : model.imageUrl} 
               alt={model.displayName} 
               className="object-cover w-full h-full"
-              onError={() => setImgError(true)}
+              onError={() => {
+                console.log(`Detail image error for ${model.username}, using fallback`);
+                setImgError(true);
+              }}
               loading="lazy"
             />
           )}

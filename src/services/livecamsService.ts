@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { LivecamModel, LivecamsFilter, LivecamsResponse } from "@/types/livecams";
 import { toast } from "sonner";
@@ -37,22 +36,29 @@ export const fetchLivecams = async (
       throw new Error("Invalid data format received from API");
     }
     
-    // Ensure all required fields are present
+    // Ensure all required fields are present and URLs are valid
     const validatedModels = data.models.map((model: any) => {
+      // Log original URLs for debugging
+      console.log(`Model ${model.username || 'unknown'} - Image: ${model.imageUrl}, Thumbnail: ${model.thumbnailUrl}`);
+      
       // Ensure the model has all required fields
-      return {
+      const validatedModel: LivecamModel = {
         id: model.id || `id-${Math.random().toString(36).substring(2)}`,
         username: model.username || 'unknown',
         displayName: model.displayName || model.username || 'Unknown',
+        // Keep original URLs but provide fallbacks if they're missing
         imageUrl: model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`,
-        thumbnailUrl: model.thumbnailUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`,
+        thumbnailUrl: model.thumbnailUrl || model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`,
         isLive: model.isLive !== undefined ? model.isLive : false,
         viewerCount: model.viewerCount !== undefined ? model.viewerCount : 0,
         country: model.country || undefined,
         categories: Array.isArray(model.categories) ? model.categories : [],
         age: model.age || undefined,
         language: model.language || undefined,
-      } as LivecamModel;
+        description: model.description || undefined
+      };
+      
+      return validatedModel;
     });
     
     return {

@@ -29,42 +29,20 @@ serve(async (req) => {
     // Get the request body
     const { country, category, limit = 24, page = 1 } = await req.json()
 
-    // For mock/testing purposes - uncomment this to bypass the real API
-    // return new Response(
-    //   JSON.stringify(getMockResponse(country, category, limit, page)),
-    //   { 
-    //     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    //     status: 200 
-    //   }
-    // )
-
     // Get the API key from environment variables
     // @ts-ignore: Deno namespace
     const CAM4_API_KEY = Deno.env.get('CAM4_API_KEY')
     
     if (!CAM4_API_KEY) {
       console.error('CAM4_API_KEY is not set in environment variables')
-      return new Response(
-        JSON.stringify({
-          error: 'API key configuration error',
-          models: [],
-          totalCount: 0,
-          page: page,
-          pageSize: limit,
-          hasMore: false
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 500 
-        }
-      )
+      throw new Error('API key configuration error')
     }
 
     // Construct the API URL with query parameters
     let url = `https://tools.cam4pays.com/api/cams?apiKey=${CAM4_API_KEY}&limit=${limit}`
     
-    if (country) url += `&country=${country}`
-    if (category) url += `&category=${category}`
+    if (country && country !== 'all') url += `&country=${country}`
+    if (category && category !== 'all') url += `&category=${category}`
     
     // Calculate pagination offset
     const offset = (page - 1) * limit
@@ -85,8 +63,6 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text()
       console.error(`API request failed: ${response.status} - ${errorText}`)
-      
-      // Return mock data when API fails
       return new Response(
         JSON.stringify(getMockResponse(country, category, limit, page)),
         { 
@@ -96,10 +72,11 @@ serve(async (req) => {
       )
     }
 
-    const data = await response.json()
+    const rawData = await response.json()
+    console.log('Raw Cam4 API response:', JSON.stringify(rawData).substring(0, 200) + '...')
     
-    // Transform the data to match our expected format if needed
-    const transformedData = transformApiResponse(data, page, limit)
+    // Transform the API response to match our expected format
+    const transformedData = transformApiResponse(rawData, page, limit)
     
     // Log the request for analytics purposes
     const { error: logError } = await supabaseClient
@@ -114,7 +91,7 @@ serve(async (req) => {
       console.error('Error logging request:', logError)
     }
 
-    // Return the data with CORS headers
+    // Return the transformed data with CORS headers
     return new Response(
       JSON.stringify(transformedData),
       { 
@@ -146,21 +123,44 @@ serve(async (req) => {
 
 // Helper function to transform API response to our format
 function transformApiResponse(apiData: any, page: number, limit: number) {
-  // Implement transformation logic based on the actual API response structure
-  // This is a placeholder - modify based on actual Cam4 API response format
-  const models = Array.isArray(apiData.cams) ? apiData.cams.map((cam: any) => ({
-    id: cam.id || `cam-${Math.random().toString(36).substring(2, 9)}`,
-    username: cam.username || cam.name || 'unknown',
-    displayName: cam.displayName || cam.name || cam.username || 'Unknown Model',
-    imageUrl: cam.imageUrl || cam.image || `https://picsum.photos/seed/${cam.id || Math.random()}/800/450`,
-    thumbnailUrl: cam.thumbnailUrl || cam.thumbnail || `https://picsum.photos/seed/${cam.id || Math.random()}/200/200`,
-    isLive: cam.isLive !== undefined ? cam.isLive : true,
-    viewerCount: cam.viewerCount || cam.viewers || Math.floor(Math.random() * 1000),
-    country: cam.country || 'Unknown',
-    categories: cam.categories || cam.tags || ['chat'],
-    age: cam.age || Math.floor(Math.random() * 10) + 20,
-    language: cam.language || 'English'
-  })) : [];
+  console.log('Transforming API response...');
+  
+  // Check if the response has the expected structure
+  if (!apiData || !apiData.cams) {
+    console.error('Unexpected API response format:', apiData);
+    return {
+      models: [],
+      totalCount: 0,
+      page,
+      pageSize: limit,
+      hasMore: false
+    };
+  }
+  
+  const models = Array.isArray(apiData.cams) ? apiData.cams.map((cam: any) => {
+    // Log the cam data to see what we're getting
+    console.log('Processing cam:', cam.username || 'unknown');
+    
+    return {
+      id: cam.id || `cam-${Math.random().toString(36).substring(2, 9)}`,
+      username: cam.username || cam.name || 'unknown',
+      displayName: cam.displayName || cam.name || cam.username || 'Unknown Model',
+      // Use the direct URLs from cam4pays without modification
+      imageUrl: cam.image || cam.profileImageURL || cam.thumbnailUrl || null,
+      thumbnailUrl: cam.thumbnail || cam.thumbnailUrl || cam.image || null,
+      isLive: cam.isLive !== undefined ? cam.isLive : true,
+      viewerCount: cam.viewers || cam.viewerCount || 0,
+      country: cam.country || 'Unknown',
+      categories: cam.categories || cam.tags || ['chat'],
+      age: cam.age || null,
+      language: cam.language || 'English',
+      description: cam.description || ''
+    };
+  }) : [];
+
+  // Count how many models have valid images
+  const validImageCount = models.filter(m => m.imageUrl && m.thumbnailUrl).length;
+  console.log(`Processed ${models.length} models, ${validImageCount} with valid images`);
 
   return {
     models,
@@ -171,7 +171,7 @@ function transformApiResponse(apiData: any, page: number, limit: number) {
   };
 }
 
-// Helper function to generate mock data for development
+// Helper function to generate mock data for development and fallback
 function getMockResponse(country?: string, category?: string, limit: number = 24, page: number = 1) {
   const mockModels = [];
   

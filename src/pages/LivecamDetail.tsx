@@ -36,12 +36,16 @@ const LivecamDetail: React.FC = () => {
         // In a real implementation, we would fetch the specific model
         // For now, we'll fetch all models and find the one we need
         const response = await fetchLivecams({ limit: 100 });
+        
+        console.log(`Looking for model with username: ${username}`);
         const foundModel = response.models.find(m => m.username === username);
         
         if (foundModel) {
+          console.log("Found model:", foundModel);
           setModel(foundModel);
           document.title = `${foundModel.displayName} - Live Cam`;
         } else {
+          console.error(`Model with username ${username} not found`);
           setError("Model not found");
           toast.error(`Could not find model with username: ${username}`);
         }
