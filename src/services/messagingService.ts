@@ -27,7 +27,7 @@ export interface Conversation {
 // Fetch conversations for the current user
 export const fetchConversations = async (userId: string): Promise<Conversation[]> => {
   try {
-    // Since the conversations_view doesn't exist, let's use a more direct approach
+    // Since we're working directly with the messages table without a view
     const { data, error } = await supabase
       .from('messages')
       .select(`
@@ -35,8 +35,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
         content,
         created_at,
         sender_id,
-        receiver_id,
-        read,
+        read_at,
         profiles!profiles_sender_id_fkey(id, username, avatar_url)
       `)
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
@@ -49,6 +48,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
     
     if (data) {
       data.forEach(message => {
+        // For each message, determine the other user (conversation participant)
         const otherUserId = message.sender_id === userId ? message.receiver_id : message.sender_id;
         const profileData = message.profiles;
         
@@ -57,12 +57,12 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
             id: otherUserId,
             last_message: message.content,
             last_message_time: message.created_at,
-            unread_count: (message.sender_id !== userId && !message.read) ? 1 : 0,
+            unread_count: (message.sender_id !== userId && !message.read_at) ? 1 : 0,
             participant: {
               id: otherUserId,
               name: profileData?.username || 'Unknown User',
               avatar_url: profileData?.avatar_url,
-              type: profileData?.creator_id ? 'creator' : 'escort'
+              type: determineUserType(profileData)
             }
           });
         }
@@ -81,14 +81,21 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
   }
 };
 
+// Helper function to determine user type
+const determineUserType = (profileData: any): "creator" | "escort" | "user" => {
+  if (!profileData) return "user";
+  if (profileData.is_content_creator) return "creator";
+  if (profileData.is_escort) return "escort";
+  return "user";
+};
+
 // Fetch messages for a specific conversation
 export const fetchMessages = async (userId: string, otherUserId: string): Promise<Message[]> => {
   try {
     const { data, error } = await supabase
       .from('messages')
       .select('*')
-      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-      .or(`sender_id.eq.${otherUserId},receiver_id.eq.${otherUserId}`)
+      .or(`and(sender_id.eq.${userId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${userId})`)
       .order('created_at');
       
     if (error) throw error;
@@ -100,7 +107,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
       receiver_id: msg.receiver_id,
       content: msg.content,
       created_at: msg.created_at,
-      read: msg.read || false
+      read: msg.read_at !== null
     })) || [];
     
     return messages;
@@ -124,7 +131,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
         sender_id: senderId,
         receiver_id: receiverId,
         content,
-        read: false
+        read_at: null
       })
       .select()
       .single();
@@ -138,7 +145,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
       receiver_id: data.receiver_id,
       content: data.content,
       created_at: data.created_at,
-      read: data.read || false
+      read: false
     };
     
     return message;
@@ -158,10 +165,10 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
   try {
     const { error } = await supabase
       .from('messages')
-      .update({ read: true })
+      .update({ read_at: new Date().toISOString() })
       .eq('receiver_id', userId)
       .eq('sender_id', senderId)
-      .eq('read', false);
+      .is('read_at', null);
       
     if (error) throw error;
   } catch (error: any) {
@@ -186,7 +193,7 @@ export const subscribeToMessages = (userId: string, callback: (message: Message)
         receiver_id: newMessage.receiver_id,
         content: newMessage.content,
         created_at: newMessage.created_at,
-        read: newMessage.read || false
+        read: newMessage.read_at !== null
       });
     })
     .subscribe();
