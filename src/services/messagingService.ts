@@ -27,15 +27,49 @@ export interface Conversation {
 // Fetch conversations for the current user
 export const fetchConversations = async (userId: string): Promise<Conversation[]> => {
   try {
+    // Since the conversations_view doesn't exist, let's use a more direct approach
     const { data, error } = await supabase
-      .from('conversations_view')
-      .select('*')
-      .eq('user_id', userId)
-      .order('last_message_time', { ascending: false });
+      .from('messages')
+      .select(`
+        id,
+        content,
+        created_at,
+        sender_id,
+        receiver_id,
+        read,
+        profiles!profiles_sender_id_fkey(id, username, avatar_url)
+      `)
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .order('created_at', { ascending: false });
       
     if (error) throw error;
     
-    return data || [];
+    // Process the data to create a conversations list
+    const conversationsMap = new Map<string, Conversation>();
+    
+    if (data) {
+      data.forEach(message => {
+        const otherUserId = message.sender_id === userId ? message.receiver_id : message.sender_id;
+        const profileData = message.profiles;
+        
+        if (!conversationsMap.has(otherUserId)) {
+          conversationsMap.set(otherUserId, {
+            id: otherUserId,
+            last_message: message.content,
+            last_message_time: message.created_at,
+            unread_count: (message.sender_id !== userId && !message.read) ? 1 : 0,
+            participant: {
+              id: otherUserId,
+              name: profileData?.username || 'Unknown User',
+              avatar_url: profileData?.avatar_url,
+              type: profileData?.creator_id ? 'creator' : 'escort'
+            }
+          });
+        }
+      });
+    }
+    
+    return Array.from(conversationsMap.values());
   } catch (error: any) {
     console.error("Error fetching conversations:", error.message);
     toast({
@@ -59,7 +93,17 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
       
     if (error) throw error;
     
-    return data || [];
+    // Convert the data to match our Message interface
+    const messages: Message[] = data?.map(msg => ({
+      id: msg.id,
+      sender_id: msg.sender_id,
+      receiver_id: msg.receiver_id,
+      content: msg.content,
+      created_at: msg.created_at,
+      read: msg.read || false
+    })) || [];
+    
+    return messages;
   } catch (error: any) {
     console.error("Error fetching messages:", error.message);
     toast({
@@ -87,7 +131,17 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
       
     if (error) throw error;
     
-    return data;
+    // Convert the response to match our Message interface
+    const message: Message = {
+      id: data.id,
+      sender_id: data.sender_id,
+      receiver_id: data.receiver_id,
+      content: data.content,
+      created_at: data.created_at,
+      read: data.read || false
+    };
+    
+    return message;
   } catch (error: any) {
     console.error("Error sending message:", error.message);
     toast({
@@ -125,7 +179,15 @@ export const subscribeToMessages = (userId: string, callback: (message: Message)
       table: 'messages',
       filter: `receiver_id=eq.${userId}`
     }, (payload) => {
-      callback(payload.new as Message);
+      const newMessage = payload.new as any;
+      callback({
+        id: newMessage.id,
+        sender_id: newMessage.sender_id,
+        receiver_id: newMessage.receiver_id,
+        content: newMessage.content,
+        created_at: newMessage.created_at,
+        read: newMessage.read || false
+      });
     })
     .subscribe();
 };
