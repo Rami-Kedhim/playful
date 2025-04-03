@@ -80,25 +80,3 @@ export const useVirtualContent = () => {
     unlockedContentIds
   };
 };
-
-// Add a helper function to the useLucoins hook to process transactions
-const processLucoinTransaction = async (options: {
-  amount: number;
-  transactionType: string;
-  description: string;
-  metadata?: any;
-}): Promise<boolean> => {
-  // Mock implementation - in real app this would call the Supabase RPC
-  console.log("Processing transaction:", options);
-  
-  // Simulate transaction success (90% success rate)
-  const isSuccessful = Math.random() > 0.1;
-  
-  // Add delay to simulate API call
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return isSuccessful;
-};
-
-// Add this function to the useLucoins export
-useLucoins.processLucoinTransaction = processLucoinTransaction;
