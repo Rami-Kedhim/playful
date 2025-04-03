@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { fetchCreatorAnalytics } from "@/services/creator/creatorAnalyticsService";
 import { CreatorAnalytics } from "@/types/creator";
-import { startOfDay, subDays, subMonths, subYears, endOfDay } from 'date-fns';
 import { toast } from "@/components/ui/use-toast";
 
 type TimeRange = "week" | "month" | "year" | "custom";

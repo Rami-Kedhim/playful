@@ -13,7 +13,10 @@ import {
 
 interface PayoutRequestFormProps {
   earnings: {
+    total: number;
     available: number;
+    pending: number;
+    thisMonth: number;
   };
   onRequestPayout: (
     amount: number, 

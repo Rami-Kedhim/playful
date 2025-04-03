@@ -1,7 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { fetchCreatorPayouts, requestPayout, getCreatorPayouts } from "@/services/creator/creatorPayoutsService";
+import { 
+  fetchCreatorPayouts, 
+  requestPayout, 
+  getCreatorPayouts,
+  getCreatorEarningsSummary
+} from "@/services/creator/creatorPayoutsService";
 import { CreatorPayout, PayoutRequest } from "@/types/creator";
 
 export const usePayouts = (creatorId: string) => {
@@ -9,9 +14,10 @@ export const usePayouts = (creatorId: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [earnings, setEarnings] = useState({
-    total: "0.00",
-    pending: "0.00",
-    completed: "0.00"
+    total: 0,
+    available: 0,
+    pending: 0,
+    thisMonth: 0
   });
 
   const loadPayouts = async () => {
@@ -22,11 +28,12 @@ export const usePayouts = (creatorId: string) => {
       setPayouts(result.data);
       
       // Get earnings summary
-      const payoutStats = await getCreatorPayouts(creatorId);
+      const earningsSummary = await getCreatorEarningsSummary(creatorId);
       setEarnings({
-        total: payoutStats.total,
-        pending: payoutStats.pending,
-        completed: payoutStats.completed
+        total: earningsSummary.total,
+        available: earningsSummary.available,
+        pending: earningsSummary.pending,
+        thisMonth: earningsSummary.thisMonth
       });
     } catch (error) {
       console.error("Error loading payouts:", error);
