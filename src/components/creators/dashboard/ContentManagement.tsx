@@ -7,12 +7,12 @@ import { PlusCircle, Loader2 } from "lucide-react";
 import { useCreatorContent } from "@/hooks/useCreatorContent";
 import ContentTable from "./ContentTable";
 import ContentDialog from "./ContentDialog";
-import { ContentCreateInput } from "@/services/contentService";
+import { ContentCreateInput, ContentUpdateInput } from "@/services/contentService";
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState("published");
   const [openDialog, setOpenDialog] = useState(false);
-  const [editingContent, setEditingContent] = useState<ContentCreateInput | null>(null);
+  const [editingContent, setEditingContent] = useState<ContentUpdateInput | null>(null);
   
   // Load content based on active tab
   const { 
@@ -42,14 +42,14 @@ const ContentManagement = () => {
     setOpenDialog(true);
   };
   
-  const handleEdit = (content: any) => {
+  const handleEdit = (content: ContentUpdateInput) => {
     setEditingContent(content);
     setOpenDialog(true);
   };
   
   const handleSave = async (content: ContentCreateInput) => {
     if (editingContent?.id) {
-      await editContent({ ...content, id: editingContent.id as string });
+      await editContent({ ...content, id: editingContent.id });
     } else {
       await addContent(content);
     }

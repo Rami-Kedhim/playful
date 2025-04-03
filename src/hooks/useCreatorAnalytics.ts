@@ -2,12 +2,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
-import { 
-  getCreatorAnalytics, 
-  getAnalyticsSummary, 
-  getAudienceDemographics,
-  getContentPerformance
-} from "@/services/analyticsService";
 
 // Define detailed analytics object structures
 interface AnalyticsSummary {
@@ -63,30 +57,69 @@ export const useCreatorAnalytics = (period: string = 'week') => {
     const fetchAnalytics = async () => {
       setLoading(true);
       try {
-        // Get analytics summary data
-        const summaryData = await getAnalyticsSummary(user.id, period);
+        // For now, let's use mocked data since we don't have the actual Supabase tables
+
+        // Mock analytics summary
+        const summaryData = {
+          views: Math.floor(Math.random() * 10000) + 1000,
+          likes: Math.floor(Math.random() * 5000) + 500,
+          shares: Math.floor(Math.random() * 2000) + 200,
+          earnings: parseFloat((Math.random() * 1000 + 100).toFixed(2))
+        };
         setAnalytics(summaryData);
         
-        // Get detailed analytics history
-        const historyData = await getCreatorAnalytics(user.id, period);
+        // Mock analytics history
+        const days = period === 'week' ? 7 : period === 'month' ? 30 : 365;
+        const historyData = Array.from({ length: days }).map((_, i) => {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          
+          return {
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            views: Math.floor(Math.random() * 500) + 50,
+            likes: Math.floor(Math.random() * 200) + 20,
+            shares: Math.floor(Math.random() * 50) + 5,
+            earnings: parseFloat((Math.random() * 50 + 5).toFixed(2))
+          };
+        }).reverse();
         
-        // Format data for charts
-        const formattedHistory = historyData.map(item => ({
-          date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          views: item.views || 0,
-          likes: item.likes || 0,
-          shares: item.shares || 0,
-          earnings: parseFloat(item.earnings?.toString() || '0'),
-        }));
+        setAnalyticsHistory(historyData);
         
-        setAnalyticsHistory(formattedHistory);
-        
-        // Get audience demographics
-        const demographicsData = await getAudienceDemographics(user.id);
+        // Mock demographics data
+        const demographicsData = {
+          age: [
+            { group: '18-24', percentage: 35 },
+            { group: '25-34', percentage: 40 },
+            { group: '35-44', percentage: 15 },
+            { group: '45-54', percentage: 7 },
+            { group: '55+', percentage: 3 }
+          ],
+          gender: [
+            { type: 'Male', percentage: 65 },
+            { type: 'Female', percentage: 32 },
+            { type: 'Other', percentage: 3 }
+          ],
+          location: [
+            { country: 'United States', percentage: 45 },
+            { country: 'United Kingdom', percentage: 15 },
+            { country: 'Canada', percentage: 12 },
+            { country: 'Australia', percentage: 8 },
+            { country: 'Germany', percentage: 5 },
+            { country: 'Other', percentage: 15 }
+          ]
+        };
         setDemographics(demographicsData);
         
-        // Get top performing content
-        const contentData = await getContentPerformance(user.id, 5);
+        // Mock top content data
+        const contentData: ContentPerformance[] = Array.from({ length: 5 }).map((_, i) => ({
+          id: `mock-${i}`,
+          title: `Top Content ${i + 1}`,
+          thumbnail_url: `https://picsum.photos/seed/${i + 1}/300/200`,
+          views_count: Math.floor(Math.random() * 1000) + 100,
+          likes_count: Math.floor(Math.random() * 100) + 10,
+          created_at: new Date(Date.now() - i * 86400000).toISOString()
+        }));
+        
         setTopContent(contentData);
       } catch (error) {
         console.error("Error fetching analytics:", error);

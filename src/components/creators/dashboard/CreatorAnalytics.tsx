@@ -11,7 +11,6 @@ import {
   TrendingUp, TrendingDown
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
 import AudienceDemographics from "./AudienceDemographics";
 import TopContent from "./TopContent";
 
@@ -24,26 +23,57 @@ interface AnalyticsStat {
   color: string;
 }
 
-interface CreatorAnalyticsProps {
-  creatorId: string;
+interface DailyAnalytics {
+  date: string;
+  views: number;
+  likes: number;
+  shares: number;
+  earnings: number;
 }
 
-const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
-  const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
-  const { 
-    analytics, 
-    analyticsHistory, 
-    demographics, 
-    topContent, 
-    loading 
-  } = useCreatorAnalytics(timeRange);
+interface AudienceDemographics {
+  age: { group: string; percentage: number }[];
+  gender: { type: string; percentage: number }[];
+  location: { country: string; percentage: number }[];
+}
 
+interface ContentPerformance {
+  id: string;
+  title: string;
+  thumbnail_url: string;
+  views_count: number;
+  likes_count: number;
+  created_at: string;
+}
+
+interface CreatorAnalyticsProps {
+  analyticsHistory: DailyAnalytics[];
+  demographics: AudienceDemographics;
+  period: "day" | "week" | "month" | "year";
+  setPeriod: React.Dispatch<React.SetStateAction<"day" | "week" | "month" | "year">>;
+  loading: boolean;
+  analytics: {
+    views: number;
+    likes: number;
+    shares: number;
+    earnings: number;
+  };
+}
+
+const CreatorAnalytics = ({ 
+  analyticsHistory, 
+  demographics, 
+  period, 
+  setPeriod, 
+  loading,
+  analytics 
+}: CreatorAnalyticsProps) => {
   // Calculate trend percentages (in a real app, compare with previous period)
   // For demo purposes, we'll use random trends
   const getRandomTrend = () => {
     const isUp = Math.random() > 0.3; // More likely to show up trends
     return {
-      trend: isUp ? "up" : "down",
+      trend: isUp ? "up" as const : "down" as const,
       change: `${Math.floor(Math.random() * 30) + 1}%`,
       color: isUp ? "text-green-500" : "text-red-500"
     };
@@ -81,7 +111,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Analytics</h2>
-        <Tabs value={timeRange} onValueChange={(value) => setTimeRange(value as "week" | "month" | "year")}>
+        <Tabs value={period} onValueChange={(value) => setPeriod(value as "day" | "week" | "month" | "year")}>
           <TabsList>
             <TabsTrigger value="week">7 Days</TabsTrigger>
             <TabsTrigger value="month">30 Days</TabsTrigger>
@@ -217,7 +247,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
         <AudienceDemographics demographics={demographics} loading={loading} />
       </div>
       
-      <TopContent content={topContent} loading={loading} />
+      <TopContent content={loading ? [] : []} loading={loading} />
     </div>
   );
 };

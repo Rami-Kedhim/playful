@@ -1,5 +1,5 @@
 
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
 export interface ContentItem {
@@ -22,6 +22,7 @@ export interface ContentItem {
 }
 
 export interface ContentCreateInput {
+  id?: string; // Added id property
   title: string;
   description: string;
   thumbnail_url?: string;
