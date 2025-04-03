@@ -15,13 +15,13 @@ export const getCreatorContent = async (creatorId: string, page = 1, pageSize = 
       description: `This is a mock content item ${i + 1}`,
       content_type: i % 3 === 0 ? 'image' : (i % 3 === 1 ? 'video' : 'text'),
       url: `https://example.com/content/${i + 1}`,
-      thumbnail_url: i % 2 === 0 ? `https://picsum.photos/seed/${i}/300/200` : null,
+      thumbnail_url: i % 2 === 0 ? `https://picsum.photos/seed/${i}/300/200` : undefined,
       views_count: Math.floor(Math.random() * 1000),
       likes_count: Math.floor(Math.random() * 500),
       created_at: new Date(Date.now() - i * 86400000).toISOString(),
       is_premium: i % 3 === 0,
       status: i % 5 === 0 ? 'draft' : 'published',
-      price: i % 3 === 0 ? (Math.random() * 20).toFixed(2) : null
+      price: i % 3 === 0 ? (Math.random() * 20) : null
     }));
 
     return mockData;
