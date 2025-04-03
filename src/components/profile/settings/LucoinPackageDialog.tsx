@@ -1,254 +1,157 @@
-import { useState, useEffect } from "react";
-import { PlusCircle, Loader2, Info, Coins, Wallet, AlertCircle } from "lucide-react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { toast } from "@/components/ui/use-toast";
-import { useLucoins, LucoinPackage } from "@/hooks/useLucoins";
-import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { 
-  getSolanaPrice, 
-  getSolanaBalance,
-  purchaseLucoinsWithSol 
-} from "@/services/solanaService";
-import WalletConnect from "@/components/solana/WalletConnect";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Coins } from 'lucide-react';
+import { useLucoins } from '@/hooks/useLucoins';
+import { toast } from '@/components/ui/use-toast';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LucoinPackageDialogProps {
-  onSuccess?: () => void;
+  onSuccess?: () => Promise<void>;
 }
 
-const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [packages, setPackages] = useState<LucoinPackage[]>([]);
+const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
-  const [solanaPrice, setSolanaPrice] = useState(0);
-  const [solanaBalance, setSolanaBalance] = useState(0);
   const [processing, setProcessing] = useState(false);
-  const { loading, fetchPackages, purchasePackageWithSol } = useLucoins();
-  const { walletAddress, connectWallet } = useSolanaWallet();
+  const { fetchPackages, purchasePackage, packages } = useLucoins();
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
-  useEffect(() => {
+  const handleOpen = async (open: boolean) => {
+    setOpen(open);
     if (open) {
-      loadPackages();
-      loadSolanaPrice();
+      try {
+        await fetchPackages();
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+        toast({
+          title: "Failed to load packages",
+          description: "Could not load Lucoin packages. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [open]);
-
-  useEffect(() => {
-    if (walletAddress) {
-      loadSolanaBalance(walletAddress);
-    } else {
-      setSolanaBalance(0);
-    }
-  }, [walletAddress]);
-
-  const loadPackages = async () => {
-    const data = await fetchPackages();
-    setPackages(data);
-    
-    const featured = data.find(pkg => pkg.is_featured);
-    if (featured) {
-      setSelectedPackage(featured.id);
-    }
-  };
-
-  const loadSolanaPrice = async () => {
-    const price = await getSolanaPrice();
-    setSolanaPrice(price);
-  };
-
-  const loadSolanaBalance = async (address: string) => {
-    const balance = await getSolanaBalance(address);
-    setSolanaBalance(balance);
   };
 
   const handlePurchase = async () => {
     if (!selectedPackage) {
       toast({
         title: "No package selected",
-        description: "Please select a Lucoin package to purchase",
+        description: "Please select a package first",
         variant: "destructive",
       });
       return;
     }
 
-    const pkg = packages.find(p => p.id === selectedPackage);
-    if (!pkg) return;
-
-    if (!walletAddress) {
-      toast({
-        title: "Wallet not connected",
-        description: "Please connect your Solana wallet to purchase Lucoins",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (solanaBalance < (pkg.price_sol || 0)) {
-      toast({
-        title: "Insufficient SOL balance",
-        description: "You don't have enough SOL to purchase this package",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    setProcessing(true);
     try {
-      setProcessing(true);
-      
-      const success = await purchasePackageWithSol(
-        selectedPackage,
-        pkg.price_sol || 0,
-        walletAddress
-      );
-      
-      if (success) {
+      const result = await purchasePackage(selectedPackage);
+      if (result.success) {
+        toast({
+          title: "Purchase successful",
+          description: `You have purchased ${result.amount} Lucoins`,
+        });
         setOpen(false);
-        setSelectedPackage(null);
-        loadSolanaBalance(walletAddress);
-        if (onSuccess) onSuccess();
+        if (onSuccess) await onSuccess();
+      } else {
+        toast({
+          title: "Purchase failed",
+          description: result.error || "An error occurred during purchase",
+          variant: "destructive",
+        });
       }
+    } catch (error: any) {
+      console.error("Error purchasing package:", error);
+      toast({
+        title: "Purchase error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
       setProcessing(false);
     }
   };
 
-  const getUsdPrice = (priceSol?: number) => {
-    if (!priceSol || !solanaPrice) return 'N/A';
-    const usdPrice = priceSol * solanaPrice;
-    return `$${usdPrice.toFixed(2)}`;
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Add Lucoins</Button>
+        <Button variant="outline" size="sm" className="gap-2">
+          <Coins className="h-4 w-4" />
+          Buy Lucoins
+        </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Purchase Lucoins</DialogTitle>
           <DialogDescription>
-            Select a package to add Lucoins to your account
+            Lucoins are used for premium features, content, and interactions
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {!walletAddress && (
-            <div className="flex flex-col items-center bg-muted p-4 rounded-md mb-4">
-              <Wallet className="h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-center text-sm text-muted-foreground mb-3">
-                Connect your Solana wallet to purchase Lucoins
-              </p>
-              <WalletConnect />
+          {packages.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No packages available at the moment</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {packages.map((pkg) => (
+                <Card 
+                  key={pkg.id} 
+                  className={`cursor-pointer transition-all ${
+                    selectedPackage === pkg.id 
+                      ? 'border-primary bg-primary/5' 
+                      : 'hover:border-primary/50'
+                  }`}
+                  onClick={() => setSelectedPackage(pkg.id)}
+                >
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex justify-between items-center">
+                      <span>{pkg.name}</span>
+                      {pkg.is_featured && (
+                        <span className="bg-yellow-500/10 text-yellow-500 text-xs px-2 py-1 rounded-full">
+                          Best Value
+                        </span>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold flex items-center gap-1 mb-1">
+                      <Coins className="h-5 w-5 text-yellow-500" />
+                      {pkg.amount}
+                      {pkg.bonus_amount > 0 && (
+                        <span className="text-sm text-green-500">+{pkg.bonus_amount} bonus</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">${pkg.price.toFixed(2)}</div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
-
-          {walletAddress && (
-            <div className="flex justify-between items-center bg-muted p-3 rounded-md mb-2">
-              <div>
-                <span className="text-sm text-muted-foreground">SOL Balance:</span>
-                <span className="ml-2 font-medium">{solanaBalance.toFixed(4)} SOL</span>
-              </div>
-              <div>
-                <span className="text-sm text-muted-foreground">SOL Price:</span>
-                <span className="ml-2 font-medium">${solanaPrice.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
-
-          {walletAddress && solanaBalance < 0.01 && (
-            <Alert variant="warning" className="mb-2">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Low balance</AlertTitle>
-              <AlertDescription>
-                Your SOL balance is low. You may need to add funds to your wallet before purchasing.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {packages.map((pkg) => (
-              <Card 
-                key={pkg.id}
-                className={`p-4 cursor-pointer transition-all ${
-                  selectedPackage === pkg.id 
-                    ? "ring-2 ring-primary" 
-                    : "hover:shadow-md"
-                } ${pkg.is_featured ? "border-primary" : ""}`}
-                onClick={() => setSelectedPackage(pkg.id)}
-              >
-                <div className="text-center">
-                  <h3 className="font-medium">{pkg.name}</h3>
-                  <div className="text-2xl font-bold my-2">
-                    {pkg.amount} LC
-                  </div>
-                  {pkg.bonus_amount && pkg.bonus_amount > 0 && (
-                    <div className="text-sm text-green-600 mb-2">
-                      +{pkg.bonus_amount} bonus
-                    </div>
-                  )}
-                  <div className="flex flex-col items-center gap-1">
-                    <div className="text-base font-medium">{pkg.price_sol} SOL</div>
-                    <div className="text-xs text-muted-foreground">
-                      {getUsdPrice(pkg.price_sol)}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center text-sm text-muted-foreground cursor-help">
-                  <Info className="h-4 w-4 mr-1" />
-                  What are Lucoins?
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
-                  Lucoins are the virtual currency used on this platform to access premium features, content, and services.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button 
+            variant="outline" 
+            onClick={() => setOpen(false)}
+            disabled={processing}
+          >
             Cancel
           </Button>
           <Button 
             onClick={handlePurchase} 
-            disabled={!selectedPackage || loading || processing || !walletAddress}
+            disabled={!selectedPackage || processing}
           >
-            {loading || processing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {processing ? "Processing..." : "Loading..."}
-              </>
-            ) : (
-              <>
-                <Coins className="mr-2 h-4 w-4" />
-                Purchase
-              </>
-            )}
+            {processing ? 'Processing...' : 'Purchase'}
           </Button>
         </DialogFooter>
       </DialogContent>

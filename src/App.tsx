@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import ProfileManagement from "./pages/ProfileManagement";
 import Wallet from "./pages/Wallet";
 import Messages from "./pages/Messages";
+import AIProfiles from "./pages/AIProfiles"; // New page
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RoleGuard from "./components/auth/RoleGuard";
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/escorts/:id" element={<EscortDetail />} />
               <Route path="/creators" element={<Creators />} />
               <Route path="/creators/:username" element={<CreatorDetail />} />
+              <Route path="/ai-profiles" element={<AIProfiles />} /> {/* New route */}
               <Route path="/favorites" element={
                 <ProtectedRoute>
                   <Favorites />
