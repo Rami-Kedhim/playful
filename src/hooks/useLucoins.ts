@@ -100,20 +100,16 @@ export const useLucoins = () => {
       
       if (transactionError) throw transactionError;
       
-      // Update the user's balance
+      // Update the user's balance using the RPC function
       const totalAmount = packageData.amount + (packageData.bonus_amount || 0);
       
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          lucoin_balance: supabase.rpc('increment_balance', { 
-            user_id: user.id,
-            amount: totalAmount
-          })
-        })
-        .eq('id', user.id);
-      
-      if (profileError) throw profileError;
+      const { data, error: rpcError } = await supabase
+        .rpc('increment_balance', { 
+          user_id: user.id, 
+          amount: totalAmount 
+        });
+        
+      if (rpcError) throw rpcError;
       
       // Refresh the user profile to get the updated balance
       await refreshProfile();
