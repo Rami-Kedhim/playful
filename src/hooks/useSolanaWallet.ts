@@ -171,7 +171,7 @@ export const useSolanaWallet = () => {
 
         if (updateError) throw updateError;
       } else {
-        // Insert new wallet - don't access returned data
+        // Insert new wallet - don't try to access any properties from the insert result
         const { error: insertError } = await supabase
           .from('solana_wallets' as any)
           .insert({
