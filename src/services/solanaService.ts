@@ -2,10 +2,9 @@
 import { toast } from "@/components/ui/use-toast";
 
 // The Solana RPC endpoint from Chainstack
-// Replace these with your new Chainstack credentials
-const SOLANA_RPC_URL = "YOUR_NEW_CHAINSTACK_RPC_URL";
-const SOLANA_RPC_USERNAME = "YOUR_NEW_CHAINSTACK_USERNAME";
-const SOLANA_RPC_PASSWORD = "YOUR_NEW_CHAINSTACK_PASSWORD";
+const SOLANA_RPC_URL = "https://solana-mainnet.core.chainstack.com";
+const SOLANA_RPC_USERNAME = "confident-kilby";
+const SOLANA_RPC_PASSWORD = "talcum-macaw-cure-manned-brink-decay";
 
 // Base64 encode the username and password for Basic Auth
 const credentials = btoa(`${SOLANA_RPC_USERNAME}:${SOLANA_RPC_PASSWORD}`);
