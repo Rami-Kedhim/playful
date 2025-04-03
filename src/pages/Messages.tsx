@@ -11,7 +11,7 @@ import {
   subscribeToMessages,
   Conversation,
   Message
-} from "@/services/messagingService";
+} from "@/services/messaging";
 import { 
   Card, 
   CardContent, 
