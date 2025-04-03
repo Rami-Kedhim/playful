@@ -53,7 +53,7 @@ const MOCK_COMMENTS = [
       name: 'Sophia Rodriguez',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80'
     },
-    content: 'This is absolutely stunning! I can't believe how perfect the lighting is.',
+    content: 'This is absolutely stunning! I can\'t believe how perfect the lighting is.',
     contentId: 'content1',
     contentTitle: 'Beach Photoshoot Collection',
     createdAt: new Date(2023, 10, 3, 18, 45),
@@ -83,7 +83,7 @@ const MOCK_COMMENTS = [
       name: 'Emma Thompson',
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&h=100&q=80'
     },
-    content: 'Just subscribed to your premium content. Can't wait to see what's available!',
+    content: 'Just subscribed to your premium content. Can\'t wait to see what\'s available!',
     contentId: 'content4',
     contentTitle: 'Premium Content Bundle',
     createdAt: new Date(2023, 10, 1, 16, 10),
