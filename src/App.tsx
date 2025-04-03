@@ -13,6 +13,8 @@ import EscortDetail from "./pages/EscortDetail";
 import Creators from "./pages/Creators";
 import CreatorDetail from "./pages/CreatorDetail";
 import CreatorDashboard from "./pages/CreatorDashboard";
+import EscortDashboard from "./components/escorts/dashboard/EscortDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import Favorites from "./pages/Favorites";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -57,7 +59,7 @@ const App = () => (
             {/* Role-specific routes */}
             <Route path="/escort-dashboard" element={
               <RoleGuard allowedRoles={['escort', 'admin']}>
-                <div>Escort Dashboard (to be implemented)</div>
+                <EscortDashboard />
               </RoleGuard>
             } />
             <Route path="/creator-dashboard" element={
@@ -67,7 +69,7 @@ const App = () => (
             } />
             <Route path="/admin" element={
               <RoleGuard allowedRoles={['admin']}>
-                <div>Admin Dashboard (to be implemented)</div>
+                <AdminDashboard />
               </RoleGuard>
             } />
             <Route path="*" element={<NotFound />} />
