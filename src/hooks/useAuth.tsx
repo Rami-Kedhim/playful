@@ -18,6 +18,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  userRoles: string[]; // Added for compatibility with components that expect this
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, username: string) => Promise<boolean>;
   logout: () => void;
@@ -215,6 +216,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Convert single role to array for backward compatibility
+  const userRoles = user?.role ? [user.role] : [];
+
   return (
     <AuthContext.Provider
       value={{
@@ -222,6 +226,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         error,
         isAuthenticated: !!user,
+        userRoles, // Add this for compatibility
         login,
         register,
         logout,
