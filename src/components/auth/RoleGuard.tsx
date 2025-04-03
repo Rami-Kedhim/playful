@@ -1,24 +1,15 @@
 
-import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface RoleGuardProps {
   children: React.ReactNode;
   allowedRoles: string[];
-  fallbackPath?: string;
 }
 
-/**
- * A component that only renders its children if the current user has one of the allowed roles
- */
-const RoleGuard = ({ 
-  children, 
-  allowedRoles, 
-  fallbackPath = "/auth" 
-}: RoleGuardProps) => {
-  const { user, isLoading, userRoles } = useAuth();
-  
+const RoleGuard = ({ children, allowedRoles }: RoleGuardProps) => {
+  const { user, userRoles, isLoading } = useAuth();
+
   // Show loading state if auth is still being determined
   if (isLoading) {
     return (
@@ -28,20 +19,20 @@ const RoleGuard = ({
     );
   }
 
-  // If no user, redirect to login
+  // Redirect to login if not authenticated
   if (!user) {
-    return <Navigate to={fallbackPath} replace />;
+    return <Navigate to="/auth" replace />;
   }
+
+  // Check if user has any of the allowed roles
+  const hasRole = allowedRoles.some(role => userRoles.includes(role));
   
-  // Check if user has at least one of the allowed roles
-  const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
-  
-  // If user doesn't have required role, redirect to fallback path
-  if (!hasAllowedRole) {
-    return <Navigate to={fallbackPath} replace />;
+  // Redirect to home if not authorized
+  if (!hasRole) {
+    return <Navigate to="/" replace />;
   }
-  
-  // User has required role, render children
+
+  // Render children if authorized
   return <>{children}</>;
 };
 
