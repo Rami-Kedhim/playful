@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { AIProfile, AIConversation, AIMessage } from "@/types/ai-profile";
@@ -12,7 +13,7 @@ export const getAIProfiles = async (filters: Record<string, any> = {}): Promise<
     // Create a base query - using the raw SQL approach for tables not in the schema
     let query = supabase
       .from('ai_profiles')
-      .select('*') as any;
+      .select('*');
     
     // Apply any filters
     if (filters.personality) {
@@ -48,7 +49,7 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
   try {
     const { data, error } = await supabase
       .from('ai_profiles')
-      .select('*') as any
+      .select('*')
       .eq('id', profileId)
       .eq('is_ai', true)
       .single();
@@ -77,7 +78,7 @@ export const startAIConversation = async (
     // Check if conversation already exists
     const { data: existingConversation, error: queryError } = await supabase
       .from('ai_conversations')
-      .select('*') as any
+      .select('*')
       .eq('user_id', userId)
       .eq('ai_profile_id', aiProfileId)
       .single();
@@ -87,7 +88,7 @@ export const startAIConversation = async (
     }
     
     if (existingConversation) {
-      return existingConversation as unknown as AIConversation;
+      return existingConversation as AIConversation;
     }
     
     // Create new conversation
@@ -97,7 +98,7 @@ export const startAIConversation = async (
         user_id: userId,
         ai_profile_id: aiProfileId,
         status: 'active'
-      }) as any
+      })
       .select()
       .single();
     
@@ -108,7 +109,7 @@ export const startAIConversation = async (
     return {
       ...newConversation,
       messages: []
-    } as unknown as AIConversation;
+    } as AIConversation;
   } catch (error: any) {
     console.error("Error starting AI conversation:", error);
     
@@ -136,7 +137,7 @@ export const getAIConversationMessages = async (
   try {
     const { data, error } = await supabase
       .from('ai_messages')
-      .select('*') as any
+      .select('*')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
     
@@ -144,7 +145,7 @@ export const getAIConversationMessages = async (
       throw error;
     }
     
-    return data as unknown as AIMessage[];
+    return data as AIMessage[];
   } catch (error: any) {
     console.error("Error fetching AI messages:", error);
     return [];
@@ -164,7 +165,7 @@ export const getAIConversationWithMessages = async (
       .select(`
         *,
         ai_profile:ai_profiles(*)
-      `) as any
+      `)
       .eq('id', conversationId)
       .single();
     
@@ -175,7 +176,7 @@ export const getAIConversationWithMessages = async (
     // Get the messages
     const { data: messages, error: msgError } = await supabase
       .from('ai_messages')
-      .select('*') as any
+      .select('*')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
     
@@ -186,7 +187,7 @@ export const getAIConversationWithMessages = async (
     return {
       ...conversation,
       messages: messages
-    } as unknown as AIConversation;
+    } as AIConversation;
   } catch (error: any) {
     console.error("Error fetching AI conversation:", error);
     return null;
@@ -215,7 +216,7 @@ export const sendMessageToAI = async (
         sender_id: userId,
         content: message,
         is_ai: false
-      }) as any
+      })
       .select()
       .single();
     
@@ -229,7 +230,7 @@ export const sendMessageToAI = async (
       .select(`
         *,
         ai_profile:ai_profiles(*)
-      `) as any
+      `)
       .eq('id', conversationId)
       .single();
     
@@ -240,7 +241,7 @@ export const sendMessageToAI = async (
     // Check if user has enough credits or if they're within free message limit
     const { data: messageCount, error: countError } = await supabase
       .from('ai_messages')
-      .select('id', { count: 'exact' }) as any
+      .select('id', { count: 'exact' })
       .eq('conversation_id', conversationId);
     
     if (countError) {
@@ -262,7 +263,7 @@ export const sendMessageToAI = async (
         throw profileError;
       }
       
-      const aiProfile = conversation?.ai_profile as unknown as AIProfile;
+      const aiProfile = conversation?.ai_profile as AIProfile;
       const messagePrice = aiProfile?.lucoin_chat_price || 5;
       
       if ((profile?.lucoin_balance || 0) < messagePrice) {
@@ -272,13 +273,13 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: (conversation as any)?.ai_profile_id,
+            sender_id: conversation?.ai_profile_id,
             content: "I'd love to continue our conversation. To chat more with me, you'll need to spend Lucoins.",
             is_ai: true,
             requires_payment: true,
             price: messagePrice,
             payment_status: 'pending'
-          }) as any
+          })
           .select()
           .single();
         
@@ -287,8 +288,8 @@ export const sendMessageToAI = async (
         }
         
         return {
-          userMessage: userMessage as unknown as AIMessage,
-          aiResponse: aiMessage as unknown as AIMessage,
+          userMessage: userMessage as AIMessage,
+          aiResponse: aiMessage as AIMessage,
           requiresPayment: true
         };
       }
@@ -300,7 +301,7 @@ export const sendMessageToAI = async (
             user_id: userId,
             conversation_id: conversationId,
             user_message: message,
-            ai_profile_id: (conversation as any)?.ai_profile_id,
+            ai_profile_id: conversation?.ai_profile_id,
             type: 'message'
           }
         });
@@ -312,15 +313,15 @@ export const sendMessageToAI = async (
           // Save the AI response to database
           const { data: savedMessage, error: saveError } = await supabase
             .from('ai_messages')
-            .insert(aiResponse.message) as any
+            .insert(aiResponse.message)
             .select()
             .single();
             
           if (saveError) throw saveError;
           
           return {
-            userMessage: userMessage as unknown as AIMessage,
-            aiResponse: savedMessage as unknown as AIMessage,
+            userMessage: userMessage as AIMessage,
+            aiResponse: savedMessage as AIMessage,
             requiresPayment: true
           };
         }
@@ -349,15 +350,15 @@ export const sendMessageToAI = async (
         // Save the AI response message
         const { data: savedMessage, error: saveError } = await supabase
           .from('ai_messages')
-          .insert(aiResponse.message) as any
+          .insert(aiResponse.message)
           .select()
           .single();
           
         if (saveError) throw saveError;
         
         return {
-          userMessage: userMessage as unknown as AIMessage,
-          aiResponse: savedMessage as unknown as AIMessage,
+          userMessage: userMessage as AIMessage,
+          aiResponse: savedMessage as AIMessage,
           requiresPayment: false
         };
       } catch (error) {
@@ -365,7 +366,7 @@ export const sendMessageToAI = async (
         console.error("Edge function error:", error);
         
         // Simulate delay for realism
-        const aiProfile = conversation?.ai_profile as unknown as AIProfile;
+        const aiProfile = conversation?.ai_profile as AIProfile;
         const minDelay = aiProfile?.delayed_response_min || 2000;
         const maxDelay = aiProfile?.delayed_response_max || 5000;
         const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
@@ -379,10 +380,10 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: (conversation as any)?.ai_profile_id,
+            sender_id: conversation?.ai_profile_id,
             content: aiResponseText,
             is_ai: true
-          }) as any
+          })
           .select()
           .single();
         
@@ -391,8 +392,8 @@ export const sendMessageToAI = async (
         }
         
         return {
-          userMessage: userMessage as unknown as AIMessage,
-          aiResponse: aiMessage as unknown as AIMessage,
+          userMessage: userMessage as AIMessage,
+          aiResponse: aiMessage as AIMessage,
           requiresPayment: false
         };
       }
@@ -404,7 +405,7 @@ export const sendMessageToAI = async (
             user_id: userId,
             conversation_id: conversationId,
             user_message: message,
-            ai_profile_id: (conversation as any)?.ai_profile_id,
+            ai_profile_id: conversation?.ai_profile_id,
             type: 'message'
           }
         });
@@ -414,15 +415,15 @@ export const sendMessageToAI = async (
         // Save the AI response message
         const { data: savedMessage, error: saveError } = await supabase
           .from('ai_messages')
-          .insert(aiResponse.message) as any
+          .insert(aiResponse.message)
           .select()
           .single();
           
         if (saveError) throw saveError;
         
         return {
-          userMessage: userMessage as unknown as AIMessage,
-          aiResponse: savedMessage as unknown as AIMessage,
+          userMessage: userMessage as AIMessage,
+          aiResponse: savedMessage as AIMessage,
           requiresPayment: false
         };
       } catch (error) {
@@ -430,7 +431,7 @@ export const sendMessageToAI = async (
         console.error("Edge function error:", error);
         
         // Simulate delay for realism
-        const aiProfile = conversation?.ai_profile as unknown as AIProfile;
+        const aiProfile = conversation?.ai_profile as AIProfile;
         const minDelay = aiProfile?.delayed_response_min || 2000;
         const maxDelay = aiProfile?.delayed_response_max || 5000;
         const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
@@ -444,10 +445,10 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: (conversation as any)?.ai_profile_id,
+            sender_id: conversation?.ai_profile_id,
             content: aiResponseText,
             is_ai: true
-          }) as any
+          })
           .select()
           .single();
         
@@ -456,8 +457,8 @@ export const sendMessageToAI = async (
         }
         
         return {
-          userMessage: userMessage as unknown as AIMessage,
-          aiResponse: aiMessage as unknown as AIMessage,
+          userMessage: userMessage as AIMessage,
+          aiResponse: aiMessage as AIMessage,
           requiresPayment: false
         };
       }
@@ -502,7 +503,7 @@ export const processAIMessagePayment = async (
           *,
           ai_profile:ai_profiles(*)
         )
-      `) as any
+      `)
       .eq('id', messageId)
       .single();
     
@@ -565,10 +566,10 @@ export const processAIMessagePayment = async (
     }
     
     // Generate and save AI response
-    const aiProfile = (message as any)?.conversation?.ai_profile as unknown as AIProfile;
+    const aiProfile = (message as any)?.conversation?.ai_profile as AIProfile;
     const lastUserMessage = await supabase
       .from('ai_messages')
-      .select('*') as any
+      .select('*')
       .eq('conversation_id', (message as any)?.conversation_id)
       .eq('is_ai', false)
       .order('created_at', { ascending: false })
@@ -598,7 +599,7 @@ export const processAIMessagePayment = async (
         sender_id: (message as any)?.conversation?.ai_profile_id,
         content: aiResponseText,
         is_ai: true
-      }) as any
+      })
       .select()
       .single();
     
@@ -608,7 +609,7 @@ export const processAIMessagePayment = async (
     
     return {
       success: true,
-      aiResponse: aiMessage as unknown as AIMessage
+      aiResponse: aiMessage as AIMessage
     };
   } catch (error: any) {
     console.error("Error processing AI message payment:", error);
