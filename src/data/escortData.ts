@@ -1,3 +1,4 @@
+
 export interface Escort {
   id: string;
   name: string;
@@ -42,6 +43,8 @@ export interface Escort {
   };
   verificationLevel?: "basic" | "enhanced" | "premium";
   verificationDate?: string;
+  isContentCreator?: boolean;
+  creatorUsername?: string;
 }
 
 export const escorts: Escort[] = [
