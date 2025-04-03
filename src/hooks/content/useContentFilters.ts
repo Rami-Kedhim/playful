@@ -15,10 +15,10 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
     
     // Create a complete ContentFilters object with explicitly defined values
     const completeFilters: ContentFilters = {
-      status: initialFilters.status !== undefined ? initialFilters.status : defaultFilters.status,
-      searchQuery: initialFilters.searchQuery !== undefined ? initialFilters.searchQuery : defaultFilters.searchQuery,
+      status: initialFilters.status ?? defaultFilters.status,
+      searchQuery: initialFilters.searchQuery ?? defaultFilters.searchQuery,
       contentType: initialFilters.contentType,
-      sort: initialFilters.sort !== undefined ? initialFilters.sort : defaultFilters.sort
+      sort: initialFilters.sort ?? defaultFilters.sort
     };
     
     try {
@@ -36,10 +36,10 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
     setFilters(prev => {
       // We need to ensure we return a properly typed ContentFilters object
       const updatedFilters: ContentFilters = {
-        status: newFilters.status !== undefined ? newFilters.status : prev.status,
-        searchQuery: newFilters.searchQuery !== undefined ? newFilters.searchQuery : prev.searchQuery,
+        status: newFilters.status ?? prev.status,
+        searchQuery: newFilters.searchQuery ?? prev.searchQuery,
         contentType: newFilters.contentType !== undefined ? newFilters.contentType : prev.contentType,
-        sort: newFilters.sort !== undefined ? newFilters.sort : prev.sort
+        sort: newFilters.sort ?? prev.sort
       };
       
       try {
