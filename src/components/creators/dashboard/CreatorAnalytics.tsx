@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,9 +8,8 @@ import {
 import { 
   Eye, ArrowUpRight, ThumbsUp, Share2, DollarSign
 } from "lucide-react";
-import { fetchCreatorAnalytics } from "@/services/creatorService";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { format } from 'date-fns';
 import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
 
 interface AnalyticsStat {
@@ -31,7 +29,9 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("7days");
-  const { analytics } = useCreatorAnalytics(timeRange === "7days" ? "week" : timeRange === "30days" ? "month" : "year");
+  const { analytics, summary, loading } = useCreatorAnalytics(
+    timeRange === "7days" ? "week" : timeRange === "30days" ? "month" : "year"
+  );
 
   useEffect(() => {
     if (creatorId) {
@@ -42,25 +42,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
   const loadAnalytics = async () => {
     setIsLoading(true);
     
-    let startDate: Date;
-    const endDate = endOfDay(new Date());
-    
-    switch (timeRange) {
-      case "30days":
-        startDate = startOfDay(subDays(new Date(), 30));
-        break;
-      case "90days":
-        startDate = startOfDay(subDays(new Date(), 90));
-        break;
-      default: // 7days
-        startDate = startOfDay(subDays(new Date(), 7));
-        break;
-    }
-    
-    const data = await fetchCreatorAnalytics(creatorId, startDate, endDate);
-    
-    // Process data for charts
-    const formattedData = data.map((item: any) => ({
+    const formattedData = analytics.map((item: any) => ({
       date: format(new Date(item.date), 'MMM dd'),
       views: item.views,
       likes: item.likes,
@@ -70,43 +52,31 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
     
     setChartData(formattedData.reverse());
     
-    // Calculate summary stats
-    const totalViews = data.reduce((sum: number, item: any) => sum + item.views, 0);
-    const totalLikes = data.reduce((sum: number, item: any) => sum + item.likes, 0);
-    const totalShares = data.reduce((sum: number, item: any) => sum + item.shares, 0);
-    const totalEarnings = data.reduce((sum: number, item: any) => sum + parseFloat(item.earnings), 0);
-    
-    // Mock previous period data for trends (in a real app, you'd compare with actual previous period)
-    const prevTotalViews = totalViews * 0.9; // assume 10% growth
-    const viewsChange = totalViews > 0 ? 
-      `${Math.round((totalViews - prevTotalViews) / prevTotalViews * 100)}%` : "0%";
-    
-    // Create stats cards data
     setStatsData([
       {
         title: "Total Views",
-        value: totalViews.toLocaleString(),
-        change: viewsChange,
+        value: summary.views.toLocaleString(),
+        change: "+10%",
         icon: <Eye className="h-4 w-4" />,
         trend: "up"
       },
       {
         title: "Total Likes",
-        value: totalLikes.toLocaleString(),
+        value: summary.likes.toLocaleString(),
         change: "+5%",
         icon: <ThumbsUp className="h-4 w-4" />,
         trend: "up"
       },
       {
         title: "Total Shares",
-        value: totalShares.toLocaleString(),
+        value: summary.shares.toLocaleString(),
         change: "+12%",
         icon: <Share2 className="h-4 w-4" />,
         trend: "up"
       },
       {
         title: "Total Earnings",
-        value: `$${totalEarnings.toFixed(2)}`,
+        value: `$${summary.earnings.toFixed(2)}`,
         change: "+8%",
         icon: <DollarSign className="h-4 w-4" />,
         trend: "up"
@@ -129,7 +99,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
         </Tabs>
       </div>
       
-      {isLoading ? (
+      {isLoading || loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
@@ -182,7 +152,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
                 <TabsTrigger value="earnings">Earnings</TabsTrigger>
               </TabsList>
               <TabsContent value="views" className="h-[400px] mt-4">
-                {isLoading ? (
+                {isLoading || loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -204,7 +174,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
                 )}
               </TabsContent>
               <TabsContent value="engagement" className="h-[400px] mt-4">
-                {isLoading ? (
+                {isLoading || loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -221,7 +191,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
                 )}
               </TabsContent>
               <TabsContent value="earnings" className="h-[400px] mt-4">
-                {isLoading ? (
+                {isLoading || loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">

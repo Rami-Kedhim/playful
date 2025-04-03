@@ -86,9 +86,9 @@ export const getCreatorEarningsSummary = async (creatorId: string): Promise<{
  * Fetch payout statistics for a creator
  */
 export const getCreatorPayouts = async (creatorId: string): Promise<{
-  total: string;
-  pending: string;
-  completed: string;
+  total: number;
+  pending: number;
+  completed: number;
 }> => {
   try {
     // Query creator payouts from Supabase
@@ -122,23 +122,23 @@ export const getCreatorPayouts = async (creatorId: string): Promise<{
     } else {
       // Return mock data if no payouts found
       return {
-        total: "1250.00",
-        pending: "450.00",
-        completed: "800.00"
+        total: 1250,
+        pending: 450,
+        completed: 800
       };
     }
     
     return {
-      total: total.toFixed(2),
-      pending: pending.toFixed(2),
-      completed: completed.toFixed(2)
+      total,
+      pending,
+      completed
     };
   } catch (error) {
     console.error("Error fetching creator payout stats:", error);
     return {
-      total: "0.00",
-      pending: "0.00",
-      completed: "0.00"
+      total: 0,
+      pending: 0,
+      completed: 0
     };
   }
 };
@@ -187,7 +187,7 @@ export const fetchCreatorPayouts = async (
     // Convert Supabase data to CreatorPayout type
     const payouts: CreatorPayout[] = data.map(item => ({
       id: item.id,
-      amount: typeof item.amount === 'number' ? item.amount.toString() : item.amount,
+      amount: typeof item.amount === 'number' ? item.amount.toFixed(2).toString() : item.amount.toString(),
       status: item.status as 'pending' | 'completed' | 'processing',
       created_at: item.created_at,
       payout_method: item.payout_method
@@ -235,7 +235,7 @@ export const requestPayout = async (
     // Convert to CreatorPayout type
     const payout: CreatorPayout = {
       id: data.id,
-      amount: typeof data.amount === 'number' ? data.amount.toString() : data.amount,
+      amount: typeof data.amount === 'number' ? data.amount.toFixed(2) : data.amount,
       status: data.status as 'pending' | 'completed' | 'processing',
       created_at: data.created_at,
       payout_method: data.payout_method
