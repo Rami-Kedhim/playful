@@ -11,7 +11,7 @@ interface LivecamFiltersProps {
 }
 
 const COUNTRIES = [
-  { value: "", label: "All Countries" },
+  { value: "all", label: "All Countries" }, // Changed from empty string to "all"
   { value: "US", label: "United States" },
   { value: "CA", label: "Canada" },
   { value: "UK", label: "United Kingdom" },
@@ -25,7 +25,7 @@ const COUNTRIES = [
 ];
 
 const CATEGORIES = [
-  { value: "", label: "All Categories" },
+  { value: "all", label: "All Categories" }, // Changed from empty string to "all"
   { value: "chat", label: "Chat" },
   { value: "dance", label: "Dance" },
   { value: "games", label: "Games" },
@@ -45,8 +45,8 @@ const LivecamFilters: React.FC<LivecamFiltersProps> = ({ filters, onFilterChange
         <div>
           <Label htmlFor="country">Country</Label>
           <Select
-            value={filters.country || ""}
-            onValueChange={(value) => onFilterChange({ country: value || undefined })}
+            value={filters.country || "all"} // Changed from empty string to "all"
+            onValueChange={(value) => onFilterChange({ country: value === "all" ? undefined : value })}
           >
             <SelectTrigger id="country">
               <SelectValue placeholder="All Countries" />
@@ -64,8 +64,8 @@ const LivecamFilters: React.FC<LivecamFiltersProps> = ({ filters, onFilterChange
         <div>
           <Label htmlFor="category">Category</Label>
           <Select
-            value={filters.category || ""}
-            onValueChange={(value) => onFilterChange({ category: value || undefined })}
+            value={filters.category || "all"} // Changed from empty string to "all"
+            onValueChange={(value) => onFilterChange({ category: value === "all" ? undefined : value })}
           >
             <SelectTrigger id="category">
               <SelectValue placeholder="All Categories" />

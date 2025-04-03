@@ -22,8 +22,13 @@ export const useLivecams = (initialFilters: LivecamsFilter = {}) => {
         
         console.log("Loading livecams with filters:", filters);
         
+        // Create a clean filter object without any "all" values
+        const cleanFilters = { ...filters };
+        if (cleanFilters.country === "all") cleanFilters.country = undefined;
+        if (cleanFilters.category === "all") cleanFilters.category = undefined;
+        
         const response = await fetchLivecams({
-          ...filters,
+          ...cleanFilters,
           page: 1 // Reset to page 1 when filters change
         });
         
@@ -56,8 +61,13 @@ export const useLivecams = (initialFilters: LivecamsFilter = {}) => {
       
       console.log("Loading more livecams, page:", nextPage);
       
+      // Create a clean filter object without any "all" values
+      const cleanFilters = { ...filters };
+      if (cleanFilters.country === "all") cleanFilters.country = undefined;
+      if (cleanFilters.category === "all") cleanFilters.category = undefined;
+      
       const response = await fetchLivecams({
-        ...filters,
+        ...cleanFilters,
         page: nextPage
       });
       
