@@ -7,11 +7,14 @@ import { toast } from "@/components/ui/use-toast";
  */
 export const saveSolanaWallet = async (address: string, userId: string, refreshProfile: () => Promise<void>) => {
   try {
-    // Instead of directly accessing the table, use a stored procedure/function
-    const { data, error } = await supabase.rpc('save_solana_wallet', {
-      p_address: address,
-      p_user_id: userId
-    });
+    // Insert directly into the solana_wallets table
+    const { data, error } = await supabase
+      .from('solana_wallets')
+      .insert({
+        user_id: userId,
+        wallet_address: address,
+        is_primary: false
+      });
 
     if (error) throw error;
 
@@ -34,10 +37,11 @@ export const saveSolanaWallet = async (address: string, userId: string, refreshP
  */
 export const getUserSolanaWallets = async (userId: string) => {
   try {
-    // Use RPC function instead of direct table access
-    const { data, error } = await supabase.rpc('get_user_solana_wallets', {
-      p_user_id: userId
-    });
+    // Get wallets directly from the table
+    const { data, error } = await supabase
+      .from('solana_wallets')
+      .select('*')
+      .eq('user_id', userId);
       
     if (error) throw error;
     return data || [];
@@ -52,11 +56,20 @@ export const getUserSolanaWallets = async (userId: string) => {
  */
 export const setPrimaryWallet = async (walletId: string, userId: string) => {
   try {
-    // Use RPC function instead of direct table access
-    const { error } = await supabase.rpc('set_primary_wallet', {
-      p_wallet_id: walletId,
-      p_user_id: userId
-    });
+    // First, set all wallets to non-primary
+    const { error: updateError } = await supabase
+      .from('solana_wallets')
+      .update({ is_primary: false })
+      .eq('user_id', userId);
+      
+    if (updateError) throw updateError;
+    
+    // Then, set the selected wallet as primary
+    const { error } = await supabase
+      .from('solana_wallets')
+      .update({ is_primary: true })
+      .eq('id', walletId)
+      .eq('user_id', userId);
       
     if (error) throw error;
     

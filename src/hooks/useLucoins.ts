@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -55,10 +56,9 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       
-      // We'll use a simpler approach for fetching package options
-      // by using a generic query instead of specifying the table directly
+      // Use the direct table query instead of RPC function
       const { data: optionsData, error: optionsError } = await supabase
-        .rpc('get_lucoin_packages') // Custom function that returns packages
+        .from('lucoin_package_options')
         .select('*');
       
       if (optionsError) {
@@ -255,12 +255,14 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       
-      // Get package details - using a different approach to avoid type errors
+      // Get package details from direct table query
       let packageData: any = null;
       
-      // Try to get the package using a generic approach
       const { data: packageInfo, error: packageError } = await supabase
-        .rpc('get_lucoin_package_by_id', { package_id: packageId });
+        .from('lucoin_package_options')
+        .select('*')
+        .eq('id', packageId)
+        .single();
       
       if (packageError || !packageInfo) {
         console.error("Error fetching package info:", packageError);
@@ -292,21 +294,23 @@ export const useLucoins = () => {
         return false;
       }
       
-      // Record the transaction with a generic insert
-      await supabase.rpc('create_lucoin_transaction', {
-        p_user_id: user.id,
-        p_amount: packageData.amount + (packageData.bonus_amount || 0),
-        p_transaction_type: 'purchase',
-        p_description: `Purchased ${packageData.name} package with SOL`,
-        p_metadata: { 
-          package_id: packageId,
-          price_paid_sol: solAmount,
-          transaction_id: transactionId,
-          currency: 'SOL' 
-        }
-      });
+      // Record the transaction
+      await supabase
+        .from('lucoin_transactions')
+        .insert({
+          user_id: user.id,
+          amount: packageData.amount + (packageData.bonus_amount || 0),
+          transaction_type: 'purchase',
+          description: `Purchased ${packageData.name} package with SOL`,
+          metadata: { 
+            package_id: packageId,
+            price_paid_sol: solAmount,
+            transaction_id: transactionId,
+            currency: 'SOL' 
+          }
+        });
       
-      // Update the user's balance using a generic function
+      // Update the user's balance - reuse the existing increment_balance function if it's available
       await supabase.rpc('increment_balance', { 
         user_id: user.id, 
         amount: packageData.amount + (packageData.bonus_amount || 0) 
