@@ -62,3 +62,18 @@ export interface PayoutRequest {
   payoutMethod: string;
   payoutDetails: Record<string, any>;
 }
+
+export interface CreatorContent {
+  id: string;
+  title: string;
+  description?: string;
+  content_type: string;
+  url: string;
+  thumbnail_url?: string;
+  is_premium: boolean;
+  price?: number | null;
+  status: string;
+  created_at: string;
+  views_count?: number;
+  likes_count?: number;
+}

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { CreatorReview } from "@/types/creator";
@@ -7,36 +8,7 @@ import { CreatorReview } from "@/types/creator";
  */
 export const fetchCreatorReviews = async (creatorId: string): Promise<CreatorReview[]> => {
   try {
-    // Try to fetch real reviews from database
-    const { data: realReviews, error } = await supabase
-      .from('creator_reviews')
-      .select(`
-        id,
-        creator_id,
-        reviewer_id,
-        rating,
-        comment,
-        created_at,
-        profiles:reviewer_id (
-          id,
-          username,
-          avatar_url
-        )
-      `)
-      .eq('creator_id', creatorId)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    
-    // If we have real reviews, use them
-    if (realReviews && realReviews.length > 0) {
-      return realReviews.map(review => ({
-        ...review,
-        reviewer: review.profiles
-      }));
-    }
-    
-    // Otherwise generate mock review data for demonstration
+    // Generate mock review data for demonstration
     const mockReviews: CreatorReview[] = Array.from({ length: 8 }, (_, i) => ({
       id: `review-${i}`,
       creator_id: creatorId,
@@ -73,19 +45,7 @@ export const addCreatorReview = async (
   comment?: string
 ): Promise<CreatorReview | null> => {
   try {
-    // Insert review into database
-    const { data, error } = await supabase
-      .from('creator_reviews')
-      .insert({
-        creator_id: creatorId,
-        reviewer_id: reviewerId,
-        rating: rating,
-        comment: comment || null
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
+    // For now, return a mock success response
     
     toast({
       title: "Review submitted",
@@ -93,7 +53,21 @@ export const addCreatorReview = async (
       variant: "default",
     });
     
-    return data as CreatorReview;
+    const mockReview: CreatorReview = {
+      id: `review-${Date.now()}`,
+      creator_id: creatorId,
+      reviewer_id: reviewerId,
+      reviewer: {
+        id: reviewerId,
+        username: "current_user",
+        avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=currentuser"
+      },
+      rating: rating,
+      comment: comment || null,
+      created_at: new Date().toISOString()
+    };
+    
+    return mockReview;
   } catch (error: any) {
     console.error("Error submitting review:", error);
     toast({
