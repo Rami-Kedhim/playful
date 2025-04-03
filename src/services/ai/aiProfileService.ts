@@ -1,13 +1,16 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { AIProfile, AIConversation, AIMessage } from "@/types/ai-profile";
 import { v4 as uuidv4 } from 'uuid';
+// Remove incorrect crypto import
 
 /**
  * Fetch AI profiles with optional filtering
  */
 export const getAIProfiles = async (filters: Record<string, any> = {}): Promise<AIProfile[]> => {
   try {
+    // Create a base query - using the raw SQL approach for tables not in the schema
     let query = supabase
       .from('ai_profiles')
       .select('*');
@@ -30,7 +33,7 @@ export const getAIProfiles = async (filters: Record<string, any> = {}): Promise<
       throw error;
     }
     
-    return data as AIProfile[];
+    return data as unknown as AIProfile[];
   } catch (error: any) {
     console.error("Error fetching AI profiles:", error);
     
@@ -55,7 +58,7 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
       throw error;
     }
     
-    return data as AIProfile;
+    return data as unknown as AIProfile;
   } catch (error: any) {
     console.error("Error fetching AI profile:", error);
     
@@ -85,7 +88,7 @@ export const startAIConversation = async (
     }
     
     if (existingConversation) {
-      return existingConversation as AIConversation;
+      return existingConversation as unknown as AIConversation;
     }
     
     // Create new conversation
@@ -106,7 +109,7 @@ export const startAIConversation = async (
     return {
       ...newConversation,
       messages: []
-    } as AIConversation;
+    } as unknown as AIConversation;
   } catch (error: any) {
     console.error("Error starting AI conversation:", error);
     
@@ -142,7 +145,7 @@ export const getAIConversationMessages = async (
       throw error;
     }
     
-    return data as AIMessage[];
+    return data as unknown as AIMessage[];
   } catch (error: any) {
     console.error("Error fetching AI messages:", error);
     return [];
@@ -184,7 +187,7 @@ export const getAIConversationWithMessages = async (
     return {
       ...conversation,
       messages: messages
-    } as AIConversation;
+    } as unknown as AIConversation;
   } catch (error: any) {
     console.error("Error fetching AI conversation:", error);
     return null;
@@ -260,8 +263,8 @@ export const sendMessageToAI = async (
         throw profileError;
       }
       
-      const aiProfile = conversation.ai_profile as AIProfile;
-      const messagePrice = aiProfile.lucoin_chat_price || 5;
+      const aiProfile = conversation?.ai_profile as unknown as AIProfile;
+      const messagePrice = aiProfile?.lucoin_chat_price || 5;
       
       if ((profile?.lucoin_balance || 0) < messagePrice) {
         // User doesn't have enough Lucoins
@@ -270,7 +273,7 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: conversation.ai_profile_id,
+            sender_id: conversation?.ai_profile_id,
             content: "I'd love to continue our conversation. To chat more with me, you'll need to spend Lucoins.",
             is_ai: true,
             requires_payment: true,
@@ -285,20 +288,21 @@ export const sendMessageToAI = async (
         }
         
         return {
-          userMessage: userMessage as AIMessage,
-          aiResponse: aiMessage as AIMessage,
+          userMessage: userMessage as unknown as AIMessage,
+          aiResponse: aiMessage as unknown as AIMessage,
           requiresPayment: true
         };
       }
       
       // If user has enough balance, call our Supabase Edge Function to generate AI response
       try {
-        const { data: aiResponse, error } = await supabase.functions.invoke('generate-ai-message', {
+        const { data: aiResponse, error } = await supabase.functions.invoke('generate-ai-content', {
           body: {
             user_id: userId,
             conversation_id: conversationId,
             user_message: message,
-            ai_profile_id: conversation.ai_profile_id
+            ai_profile_id: conversation?.ai_profile_id,
+            type: 'message'
           }
         });
         
@@ -316,8 +320,8 @@ export const sendMessageToAI = async (
           if (saveError) throw saveError;
           
           return {
-            userMessage: userMessage as AIMessage,
-            aiResponse: savedMessage as AIMessage,
+            userMessage: userMessage as unknown as AIMessage,
+            aiResponse: savedMessage as unknown as AIMessage,
             requiresPayment: true
           };
         }
@@ -339,7 +343,7 @@ export const sendMessageToAI = async (
             user_id: userId,
             amount: -messagePrice,
             transaction_type: 'ai_chat',
-            description: `Chat with ${aiProfile.name}`,
+            description: `Chat with ${aiProfile?.name}`,
             metadata: { conversation_id: conversationId }
           });
 
@@ -353,8 +357,8 @@ export const sendMessageToAI = async (
         if (saveError) throw saveError;
         
         return {
-          userMessage: userMessage as AIMessage,
-          aiResponse: savedMessage as AIMessage,
+          userMessage: userMessage as unknown as AIMessage,
+          aiResponse: savedMessage as unknown as AIMessage,
           requiresPayment: false
         };
       } catch (error) {
@@ -362,9 +366,9 @@ export const sendMessageToAI = async (
         console.error("Edge function error:", error);
         
         // Simulate delay for realism
-        const aiProfile = conversation.ai_profile as AIProfile;
-        const minDelay = aiProfile.delayed_response_min || 2000;
-        const maxDelay = aiProfile.delayed_response_max || 5000;
+        const aiProfile = conversation?.ai_profile as unknown as AIProfile;
+        const minDelay = aiProfile?.delayed_response_min || 2000;
+        const maxDelay = aiProfile?.delayed_response_max || 5000;
         const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
         await new Promise(resolve => setTimeout(resolve, delay));
         
@@ -376,7 +380,7 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: conversation.ai_profile_id,
+            sender_id: conversation?.ai_profile_id,
             content: aiResponseText,
             is_ai: true
           })
@@ -388,20 +392,21 @@ export const sendMessageToAI = async (
         }
         
         return {
-          userMessage: userMessage as AIMessage,
-          aiResponse: aiMessage as AIMessage,
+          userMessage: userMessage as unknown as AIMessage,
+          aiResponse: aiMessage as unknown as AIMessage,
           requiresPayment: false
         };
       }
     } else {
       // For free tier messages, use the same Edge Function but with simpler prompts
       try {
-        const { data: aiResponse, error } = await supabase.functions.invoke('generate-ai-message', {
+        const { data: aiResponse, error } = await supabase.functions.invoke('generate-ai-content', {
           body: {
             user_id: userId,
             conversation_id: conversationId,
             user_message: message,
-            ai_profile_id: conversation.ai_profile_id
+            ai_profile_id: conversation?.ai_profile_id,
+            type: 'message'
           }
         });
         
@@ -417,8 +422,8 @@ export const sendMessageToAI = async (
         if (saveError) throw saveError;
         
         return {
-          userMessage: userMessage as AIMessage,
-          aiResponse: savedMessage as AIMessage,
+          userMessage: userMessage as unknown as AIMessage,
+          aiResponse: savedMessage as unknown as AIMessage,
           requiresPayment: false
         };
       } catch (error) {
@@ -426,9 +431,9 @@ export const sendMessageToAI = async (
         console.error("Edge function error:", error);
         
         // Simulate delay for realism
-        const aiProfile = conversation.ai_profile as AIProfile;
-        const minDelay = aiProfile.delayed_response_min || 2000;
-        const maxDelay = aiProfile.delayed_response_max || 5000;
+        const aiProfile = conversation?.ai_profile as unknown as AIProfile;
+        const minDelay = aiProfile?.delayed_response_min || 2000;
+        const maxDelay = aiProfile?.delayed_response_max || 5000;
         const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
         await new Promise(resolve => setTimeout(resolve, delay));
         
@@ -440,7 +445,7 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: conversation.ai_profile_id,
+            sender_id: conversation?.ai_profile_id,
             content: aiResponseText,
             is_ai: true
           })
@@ -452,8 +457,8 @@ export const sendMessageToAI = async (
         }
         
         return {
-          userMessage: userMessage as AIMessage,
-          aiResponse: aiMessage as AIMessage,
+          userMessage: userMessage as unknown as AIMessage,
+          aiResponse: aiMessage as unknown as AIMessage,
           requiresPayment: false
         };
       }
@@ -469,7 +474,7 @@ export const sendMessageToAI = async (
         content: message,
         created_at: new Date().toISOString(),
         is_ai: false
-      },
+      } as AIMessage,
       aiResponse: null,
       requiresPayment: false,
       error: error.message
@@ -506,7 +511,7 @@ export const processAIMessagePayment = async (
       throw msgError;
     }
     
-    if (!message.requires_payment) {
+    if (!message?.requires_payment) {
       throw new Error("This message doesn't require payment");
     }
     
@@ -521,7 +526,7 @@ export const processAIMessagePayment = async (
       throw profileError;
     }
     
-    if ((profile?.lucoin_balance || 0) < (message.price || 0)) {
+    if ((profile?.lucoin_balance || 0) < (message?.price || 0)) {
       return {
         success: false,
         aiResponse: null,
@@ -532,7 +537,7 @@ export const processAIMessagePayment = async (
     // Deduct Lucoins
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ lucoin_balance: (profile?.lucoin_balance || 0) - (message.price || 0) })
+      .update({ lucoin_balance: (profile?.lucoin_balance || 0) - (message?.price || 0) })
       .eq('id', userId);
     
     if (updateError) {
@@ -544,10 +549,10 @@ export const processAIMessagePayment = async (
       .from('lucoin_transactions')
       .insert({
         user_id: userId,
-        amount: -(message.price || 0),
+        amount: -(message?.price || 0),
         transaction_type: 'ai_chat',
-        description: `Chat with ${message.conversation.ai_profile.name}`,
-        metadata: { conversation_id: message.conversation_id }
+        description: `Chat with ${message?.conversation?.ai_profile?.name}`,
+        metadata: { conversation_id: message?.conversation_id }
       });
     
     // Update message payment status
@@ -561,25 +566,25 @@ export const processAIMessagePayment = async (
     }
     
     // Generate and save AI response
-    const aiProfile = message.conversation.ai_profile;
+    const aiProfile = message?.conversation?.ai_profile as unknown as AIProfile;
     const lastUserMessage = await supabase
       .from('ai_messages')
       .select('*')
-      .eq('conversation_id', message.conversation_id)
+      .eq('conversation_id', message?.conversation_id)
       .eq('is_ai', false)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
     
     const aiResponseText = generateMockAIResponse(
-      lastUserMessage.data.content,
+      lastUserMessage?.data?.content,
       aiProfile,
       true
     );
     
     // Simulate delay for realism
-    const minDelay = aiProfile.delayed_response_min || 2000;
-    const maxDelay = aiProfile.delayed_response_max || 5000;
+    const minDelay = aiProfile?.delayed_response_min || 2000;
+    const maxDelay = aiProfile?.delayed_response_max || 5000;
     const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
     
     // In a real implementation, we would process this in the background
@@ -590,8 +595,8 @@ export const processAIMessagePayment = async (
     const { data: aiMessage, error: aiMsgError } = await supabase
       .from('ai_messages')
       .insert({
-        conversation_id: message.conversation_id,
-        sender_id: message.conversation.ai_profile_id,
+        conversation_id: message?.conversation_id,
+        sender_id: message?.conversation?.ai_profile_id,
         content: aiResponseText,
         is_ai: true
       })
@@ -604,7 +609,7 @@ export const processAIMessagePayment = async (
     
     return {
       success: true,
-      aiResponse: aiMessage as AIMessage
+      aiResponse: aiMessage as unknown as AIMessage
     };
   } catch (error: any) {
     console.error("Error processing AI message payment:", error);
@@ -631,11 +636,12 @@ export const generateAIImage = async (
   error?: string;
 }> => {
   try {
-    const { data: result, error } = await supabase.functions.invoke('generate-ai-image', {
+    const { data: result, error } = await supabase.functions.invoke('generate-ai-content', {
       body: {
         prompt,
         user_id: userId,
         ai_profile_id: aiProfileId,
+        type: 'image',
         size: "1024x1024",
         style: "natural"
       }
@@ -672,7 +678,7 @@ export const generateAIImage = async (
  */
 function generateMockAIResponse(
   userMessage: string,
-  aiProfile: AIProfile,
+  aiProfile: AIProfile | null | undefined,
   isPremium: boolean = false
 ): string {
   // In a real implementation, this would call GPT-4 or another LLM
@@ -720,21 +726,25 @@ function generateMockAIResponse(
   
   let responses;
   
-  switch (aiProfile.personality.type) {
-    case 'flirty':
-      responses = flirtyResponses;
-      break;
-    case 'shy':
-      responses = shyResponses;
-      break;
-    case 'dominant':
-      responses = dominantResponses;
-      break;
-    case 'playful':
-      responses = playfulResponses;
-      break;
-    default:
-      responses = professionalResponses;
+  if (!aiProfile || !aiProfile.personality) {
+    responses = professionalResponses; // Default to professional if no personality data
+  } else {
+    switch (aiProfile.personality.type) {
+      case 'flirty':
+        responses = flirtyResponses;
+        break;
+      case 'shy':
+        responses = shyResponses;
+        break;
+      case 'dominant':
+        responses = dominantResponses;
+        break;
+      case 'playful':
+        responses = playfulResponses;
+        break;
+      default:
+        responses = professionalResponses;
+    }
   }
   
   // Add name references and emojis for more realistic responses
