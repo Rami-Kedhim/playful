@@ -46,7 +46,7 @@ export interface UseContentFiltersReturn {
   filteredContent: (content: ContentItem[]) => ContentItem[];
 }
 
-// Import ContentService types directly
+// Import content service types directly
 import type { ContentCreateInput, ContentUpdateInput } from "@/services/contentService";
 
 export interface UseContentActionsReturn {
