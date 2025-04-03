@@ -74,6 +74,9 @@ export const getCreatorPayouts = async (creatorId: string, page = 1, pageSize = 
   };
 };
 
+// Export getCreatorPayouts as fetchCreatorPayouts as well to fix the import error
+export const fetchCreatorPayouts = getCreatorPayouts;
+
 /**
  * Save a new content item
  */
