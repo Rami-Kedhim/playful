@@ -41,7 +41,7 @@ export interface TransactionHistory {
   transaction_type: string;
   description?: string;
   created_at: string;
-  metadata?: Record<string, any>;
+  metadata?: any;
 }
 
 export const useLucoins = () => {
@@ -56,8 +56,9 @@ export const useLucoins = () => {
       setLoading(true);
       
       // First try to get packages from the lucoin_package_options table
+      // Use .from('table_name' as any) as a workaround for TypeScript issues
       const { data: optionsData, error: optionsError } = await supabase
-        .from('lucoin_package_options')
+        .from('lucoin_package_options' as any)
         .select('*')
         .eq('is_active', true)
         .order('amount', { ascending: true });
@@ -75,7 +76,7 @@ export const useLucoins = () => {
       }
       
       // Map the data to match the LucoinPackage interface
-      const packages = optionsData.map(pkg => ({
+      const packages: LucoinPackage[] = optionsData.map((pkg: any) => ({
         id: pkg.id,
         name: pkg.name,
         amount: pkg.amount,
@@ -114,7 +115,17 @@ export const useLucoins = () => {
       
       if (error) throw error;
       
-      return data || [];
+      // Convert the data to match the BoostPackage interface
+      const packages: BoostPackage[] = (data || []).map((pkg: any) => ({
+        id: pkg.id,
+        name: pkg.name,
+        duration: pkg.duration,
+        price_lucoin: pkg.price || 0, // Map 'price' to 'price_lucoin'
+        description: pkg.description,
+        is_active: pkg.is_active
+      }));
+      
+      return packages;
     } catch (error: any) {
       console.error("Error fetching boost packages:", error);
       toast({
@@ -135,14 +146,25 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('gift_items')
+        .from('gift_items' as any)
         .select('*')
         .eq('is_active', true)
         .order('price_lucoin', { ascending: true });
       
       if (error) throw error;
       
-      return data || [];
+      // Convert the data to match the GiftItem interface
+      const gifts: GiftItem[] = (data || []).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price_lucoin: item.price_lucoin,
+        animation_url: item.animation_url,
+        thumbnail_url: item.thumbnail_url,
+        is_active: item.is_active
+      }));
+      
+      return gifts;
     } catch (error: any) {
       console.error("Error fetching gift items:", error);
       toast({
@@ -210,23 +232,21 @@ export const useLucoins = () => {
       
       if (transactionError) throw transactionError;
       
-      // Update the user's balance using the RPC function
-      const totalAmount = packageData.amount + (packageData.bonus_amount || 0);
-      
-      const { data, error: rpcError } = await supabase
+      // Update the user's balance using the increment_balance function
+      const { data, error: balanceError } = await supabase
         .rpc('increment_balance', { 
           user_id: user.id, 
-          amount: totalAmount 
+          amount: packageData.amount + (packageData.bonus_amount || 0) 
         });
         
-      if (rpcError) throw rpcError;
+      if (balanceError) throw balanceError;
       
       // Refresh the user profile to get the updated balance
       await refreshProfile();
       
       toast({
         title: "Purchase successful",
-        description: `${totalAmount} Lucoins have been added to your account`,
+        description: `${packageData.amount + (packageData.bonus_amount || 0)} Lucoins have been added to your account`,
       });
       
       return true;
@@ -259,12 +279,11 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       
-      // Use the purchase_profile_boost RPC function
-      const { data, error } = await supabase
-        .rpc('purchase_profile_boost', {
-          p_user_id: user.id,
-          p_boost_package_id: boostPackageId
-        });
+      // Use a custom function call since the RPC function name isn't in the TypeScript types yet
+      const { data, error } = await supabase.rpc('purchase_profile_boost' as any, {
+        p_user_id: user.id,
+        p_boost_package_id: boostPackageId
+      });
       
       if (error) throw error;
       
@@ -317,14 +336,13 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       
-      // Use the process_gift_transaction RPC function
-      const { data, error } = await supabase
-        .rpc('process_gift_transaction', {
-          p_sender_id: user.id,
-          p_receiver_id: receiverId,
-          p_gift_id: giftId,
-          p_message: message || null
-        });
+      // Use a custom function call since the RPC function name isn't in the TypeScript types yet
+      const { data, error } = await supabase.rpc('process_gift_transaction' as any, {
+        p_sender_id: user.id,
+        p_receiver_id: receiverId,
+        p_gift_id: giftId,
+        p_message: message || null
+      });
       
       if (error) throw error;
       
@@ -366,14 +384,15 @@ export const useLucoins = () => {
    */
   const isProfileBoosted = async (profileId: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase
-        .rpc('is_profile_boosted', {
-          profile_id: profileId
-        });
+      // Use a custom function call since the RPC function name isn't in the TypeScript types yet
+      const { data, error } = await supabase.rpc('is_profile_boosted' as any, {
+        profile_id: profileId
+      });
       
       if (error) throw error;
       
-      return data || false;
+      // Explicitly cast the result to boolean
+      return !!data;
     } catch (error: any) {
       console.error("Error checking boost status:", error);
       return false;
@@ -396,7 +415,18 @@ export const useLucoins = () => {
       
       if (error) throw error;
       
-      return data || [];
+      // Convert the data to match the TransactionHistory interface
+      const transactions: TransactionHistory[] = (data || []).map((tx: any) => ({
+        id: tx.id,
+        user_id: tx.user_id,
+        amount: tx.amount,
+        transaction_type: tx.transaction_type,
+        description: tx.description,
+        created_at: tx.created_at,
+        metadata: tx.metadata
+      }));
+      
+      return transactions;
     } catch (error: any) {
       console.error("Error fetching transaction history:", error);
       toast({

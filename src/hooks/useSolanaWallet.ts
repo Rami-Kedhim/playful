@@ -142,8 +142,9 @@ export const useSolanaWallet = () => {
 
     try {
       // First, check if this wallet is already saved
+      // Use 'as any' to bypass TypeScript error
       const { data: existingWallet, error: checkError } = await supabase
-        .from('solana_wallets')
+        .from('solana_wallets' as any)
         .select('*')
         .eq('user_id', user.id)
         .eq('wallet_address', address)
@@ -156,15 +157,15 @@ export const useSolanaWallet = () => {
       // If wallet is already saved, just update last_used_at
       if (existingWallet) {
         const { error: updateError } = await supabase
-          .from('solana_wallets')
-          .update({ last_used_at: new Date() })
+          .from('solana_wallets' as any)
+          .update({ last_used_at: new Date().toISOString() })
           .eq('id', existingWallet.id);
 
         if (updateError) throw updateError;
       } else {
         // Insert new wallet
         const { error: insertError } = await supabase
-          .from('solana_wallets')
+          .from('solana_wallets' as any)
           .insert({
             user_id: user.id,
             wallet_address: address,
