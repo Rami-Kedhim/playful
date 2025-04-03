@@ -54,7 +54,7 @@ export const useVirtualContent = () => {
     
     try {
       // Process payment
-      const result = await processLucoinTransaction({
+      const transactionResult = await processLucoinTransaction({
         amount: price,
         transactionType: 'purchase',
         description: `Unlock ${contentType} content`,
@@ -65,7 +65,7 @@ export const useVirtualContent = () => {
         }
       });
       
-      if (result) {
+      if (transactionResult) {
         // Add to unlocked content
         const updatedUnlockedContent = [...unlockedContent, contentId];
         saveUnlockedContent(updatedUnlockedContent);
