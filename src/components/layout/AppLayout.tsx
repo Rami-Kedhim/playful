@@ -1,6 +1,6 @@
 
 import { ReactNode, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/contexts/NotificationsContext";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
