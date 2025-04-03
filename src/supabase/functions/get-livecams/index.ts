@@ -1,7 +1,7 @@
 
-// Follow this setup guide to integrate the Supabase Deno SDK: https://supabase.com/docs/guides/functions/deno
-import { serve } from 'https://deno.land/std@0.131.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+// Follow this setup guide to integrate the Deno SDK: https://supabase.com/docs/guides/functions/deno
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
