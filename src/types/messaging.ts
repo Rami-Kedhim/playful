@@ -1,5 +1,11 @@
 
-import { Profile } from "./user";
+// Import from profile directly to avoid circular references
+export interface Profile {
+  id: string;
+  username?: string;
+  avatar_url?: string;
+  full_name?: string;
+}
 
 export interface Message {
   id: string;
