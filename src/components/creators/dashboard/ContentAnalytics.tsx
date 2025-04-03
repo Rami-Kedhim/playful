@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, Heart, DollarSign, TrendingUp } from "lucide-react";
 
@@ -181,10 +181,15 @@ const ContentAnalytics = () => {
                 />
                 <YAxis />
                 <Tooltip 
-                  formatter={(value, name) => [
-                    metric === 'revenue' ? `$${value}` : value, 
-                    name.charAt(0).toUpperCase() + name.slice(1)
-                  ]}
+                  formatter={(value, name) => {
+                    // Fix: Convert the name parameter to string before using string methods
+                    const nameStr = String(name);
+                    const displayName = nameStr.charAt(0).toUpperCase() + nameStr.slice(1);
+                    return [
+                      metric === 'revenue' ? `$${value}` : value, 
+                      displayName
+                    ];
+                  }}
                 />
                 <Bar 
                   dataKey={metric} 
