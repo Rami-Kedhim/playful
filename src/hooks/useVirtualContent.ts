@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLucoins } from "@/hooks/useLucoins";
+import { logContentAction, logContentError, logContentFlow } from "@/utils/debugUtils";
 
 export type ContentType = "photo" | "video" | "message";
 
@@ -25,9 +26,12 @@ export const useVirtualContent = () => {
     const storedUnlockedContent = localStorage.getItem('unlockedContent');
     if (storedUnlockedContent) {
       try {
-        setUnlockedContent(JSON.parse(storedUnlockedContent));
+        const parsed = JSON.parse(storedUnlockedContent);
+        setUnlockedContent(parsed);
+        logContentAction('Loaded unlocked content', { count: parsed.length });
       } catch (error) {
         console.error("Failed to parse unlocked content from localStorage", error);
+        logContentError('Loading unlocked content', error);
         setError("Failed to load your unlocked content");
       }
     }
@@ -37,8 +41,10 @@ export const useVirtualContent = () => {
     try {
       localStorage.setItem('unlockedContent', JSON.stringify(contentIds));
       setUnlockedContent(contentIds);
+      logContentAction('Saved unlocked content', { count: contentIds.length });
     } catch (error) {
       console.error("Failed to save unlocked content to localStorage", error);
+      logContentError('Saving unlocked content', error);
       setError("Failed to save your unlocked content");
     }
   };
@@ -50,7 +56,10 @@ export const useVirtualContent = () => {
   const unlockContent = async (options: UnlockContentOptions) => {
     const { creatorId, contentId, contentType, price } = options;
     
+    logContentFlow('Starting unlock process', contentId, { creatorId, contentType, price });
+    
     if (isContentUnlocked(contentId)) {
+      logContentFlow('Content already unlocked', contentId);
       toast({
         title: "Already Unlocked",
         description: "You already have access to this content",
@@ -62,6 +71,7 @@ export const useVirtualContent = () => {
     setError(null);
     
     try {
+      logContentFlow('Processing payment', contentId, { price });
       // Process payment with Lucoins
       const transactionResult = await processLucoinTransaction({
         amount: price,
@@ -75,6 +85,7 @@ export const useVirtualContent = () => {
       });
       
       if (transactionResult) {
+        logContentFlow('Payment successful', contentId);
         // Add to unlocked content
         const updatedUnlockedContent = [...unlockedContent, contentId];
         saveUnlockedContent(updatedUnlockedContent);
@@ -85,6 +96,7 @@ export const useVirtualContent = () => {
         });
         return true;
       } else {
+        logContentFlow('Payment failed', contentId);
         toast({
           title: "Transaction Failed",
           description: "Could not complete the transaction",
@@ -93,6 +105,7 @@ export const useVirtualContent = () => {
         return false;
       }
     } catch (error: any) {
+      logContentError('Unlocking content', error);
       console.error("Error unlocking content:", error);
       setError(error.message || "Failed to unlock content");
       toast({
@@ -111,7 +124,8 @@ export const useVirtualContent = () => {
     unlockingContentId,
     isContentUnlocked,
     unlockContent,
-    error
+    error,
+    unlockedContent
   };
 };
 

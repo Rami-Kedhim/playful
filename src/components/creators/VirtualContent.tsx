@@ -6,6 +6,7 @@ import { useVirtualContent, ContentType } from "@/hooks/useVirtualContent";
 import { useAuth } from "@/contexts/AuthContext";
 import AICreatorBadge from "./AICreatorBadge";
 import { Card, CardContent } from "@/components/ui/card";
+import { logContentFlow } from "@/utils/debugUtils";
 
 interface VirtualContentProps {
   creatorId: string;
@@ -32,10 +33,12 @@ const VirtualContent: React.FC<VirtualContentProps> = ({
   const handleUnlock = async () => {
     if (!user) {
       // Redirect to auth page if not logged in
+      logContentFlow('Redirect to auth', contentId, { reason: 'User not logged in' });
       window.location.href = "/auth";
       return;
     }
     
+    logContentFlow('Unlock button clicked', contentId);
     await unlockContent({
       creatorId,
       contentId,
@@ -45,6 +48,13 @@ const VirtualContent: React.FC<VirtualContentProps> = ({
   };
   
   const unlocked = isContentUnlocked(contentId);
+  
+  React.useEffect(() => {
+    logContentFlow('Content component mounted', contentId, { 
+      unlocked, 
+      contentType 
+    });
+  }, [contentId, unlocked, contentType]);
   
   const getContentTypeIcon = () => {
     switch (contentType) {
@@ -64,14 +74,14 @@ const VirtualContent: React.FC<VirtualContentProps> = ({
       <Card className="border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800">
         <CardContent className="p-4 text-center flex flex-col items-center gap-2">
           <AlertCircle className="h-8 w-8 text-red-500" />
-          <p className="text-sm text-red-600 dark:text-red-400">Error loading content</p>
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         </CardContent>
       </Card>
     );
   }
   
   return (
-    <div className="relative rounded-lg overflow-hidden border bg-card text-card-foreground shadow transition-all hover:shadow-md">
+    <div className="relative rounded-lg overflow-hidden border bg-card text-card-foreground shadow transition-all hover:shadow-md" data-content-id={contentId} data-content-type={contentType} data-unlocked={unlocked.toString()}>
       <div className="relative aspect-square bg-muted">
         {thumbnailUrl ? (
           <img 
@@ -114,6 +124,7 @@ const VirtualContent: React.FC<VirtualContentProps> = ({
               className="w-full" 
               onClick={handleUnlock}
               disabled={isUnlocking}
+              data-testid={`unlock-button-${contentId}`}
             >
               {isUnlocking ? (
                 <>

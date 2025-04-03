@@ -2,6 +2,7 @@
 import React from "react";
 import VirtualContent from "./VirtualContent";
 import { ContentType } from "@/hooks/useVirtualContent";
+import { logContentAction } from "@/utils/debugUtils";
 
 interface VirtualContentItem {
   id: string;
@@ -22,9 +23,13 @@ const VirtualContentGrid: React.FC<VirtualContentGridProps> = ({
   items, 
   columns = 2 
 }) => {
+  React.useEffect(() => {
+    logContentAction('Content grid rendered', { itemCount: items.length, columns });
+  }, [items.length, columns]);
+
   if (!items || items.length === 0) {
     return (
-      <div className="text-center p-8 text-muted-foreground">
+      <div className="text-center p-8 text-muted-foreground" data-testid="empty-content-grid">
         No content available
       </div>
     );
@@ -41,7 +46,7 @@ const VirtualContentGrid: React.FC<VirtualContentGridProps> = ({
   };
   
   return (
-    <div className={getGridClasses()}>
+    <div className={getGridClasses()} data-testid="virtual-content-grid">
       {items.map(item => (
         <VirtualContent
           key={item.id}

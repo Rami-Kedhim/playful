@@ -1,6 +1,7 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ContentType } from "./useVirtualContent";
+import { logContentAction, logContentError } from "@/utils/debugUtils";
 
 interface VirtualContentItem {
   id: string;
@@ -28,11 +29,12 @@ export const useVirtualCreatorContent = (creatorId: string, initialLimit = 6): C
   const [hasMore, setHasMore] = useState(false);
   const [limit, setLimit] = useState(initialLimit);
 
-  const fetchVirtualContent = async (creatorId: string, limit: number) => {
+  const fetchVirtualContent = useCallback(async (creatorId: string, limit: number) => {
     setLoading(true);
     setError(null);
     
     try {
+      logContentAction('Fetching virtual content', { creatorId, limit });
       // In a real implementation, this would be a fetch call to your API
       // For now, we'll mock data based on the creatorId
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
@@ -115,27 +117,31 @@ export const useVirtualCreatorContent = (creatorId: string, initialLimit = 6): C
       const limitedContent = mockContent.slice(0, limit);
       setHasMore(limitedContent.length < mockContent.length);
       setContent(limitedContent);
+      logContentAction('Fetched virtual content', { count: limitedContent.length, hasMore: limitedContent.length < mockContent.length });
     } catch (err: any) {
       console.error("Error fetching virtual content:", err);
+      logContentError('Fetching virtual content', err);
       setError(err.message || "Failed to load content");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
   
   useEffect(() => {
     if (creatorId) {
       fetchVirtualContent(creatorId, limit);
     }
-  }, [creatorId, limit]);
+  }, [creatorId, limit, fetchVirtualContent]);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
+    logContentAction('Loading more content', { currentLimit: limit, newLimit: limit + initialLimit });
     setLimit(prevLimit => prevLimit + initialLimit);
-  };
+  }, [limit, initialLimit]);
 
-  const refreshContent = () => {
+  const refreshContent = useCallback(() => {
+    logContentAction('Refreshing content', { creatorId, limit });
     fetchVirtualContent(creatorId, limit);
-  };
+  }, [creatorId, limit, fetchVirtualContent]);
   
   return {
     loading,
