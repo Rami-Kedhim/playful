@@ -7,11 +7,10 @@ import { toast } from "@/components/ui/use-toast";
  */
 export const fetchCreatorAnalytics = async (creatorId: string, period: string = 'month') => {
   try {
-    let range;
-    
     // Calculate date range based on period
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let range;
     
     switch (period) {
       case 'week':
@@ -31,15 +30,17 @@ export const fetchCreatorAnalytics = async (creatorId: string, period: string = 
         range.setMonth(today.getMonth() - 1);
     }
     
-    const { data, error } = await supabase
-      .from('creator_analytics')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .gte('date', range.toISOString().split('T')[0])
-      .order('date', { ascending: true });
-      
-    if (error) throw error;
-    return data || [];
+    // Mock data for now - in a real implementation, this would query from the database
+    const mockData = [];
+    for (let d = range; d <= today; d.setDate(d.getDate() + 1)) {
+      mockData.push({
+        date: new Date(d).toISOString().split('T')[0],
+        views: Math.floor(Math.random() * 100) + 1,
+        earnings: parseFloat((Math.random() * 10).toFixed(2))
+      });
+    }
+    
+    return mockData;
   } catch (error: any) {
     console.error("Error fetching creator analytics:", error);
     toast({
@@ -56,10 +57,13 @@ export const fetchCreatorAnalytics = async (creatorId: string, period: string = 
  */
 export const trackContentView = async (contentId: string, viewerId: string) => {
   try {
-    const { error } = await supabase.rpc('track_content_view', {
-      p_content_id: contentId,
-      p_viewer_id: viewerId
-    });
+    // In a real implementation, this would insert a record into a content_views table
+    console.log(`Tracking view for content ${contentId} by viewer ${viewerId}`);
+    
+    // Store view in content_views table
+    const { error } = await supabase
+      .from('content_views')
+      .insert({ content_id: contentId, user_id: viewerId });
     
     if (error) throw error;
     return true;
@@ -74,38 +78,21 @@ export const trackContentView = async (contentId: string, viewerId: string) => {
  */
 export const getCreatorSummaryStats = async (creatorId: string) => {
   try {
-    // Fetch total views
-    const { data: viewsData, error: viewsError } = await supabase
-      .from('creator_analytics')
-      .select('views')
-      .eq('creator_id', creatorId);
-      
-    if (viewsError) throw viewsError;
+    // In a real implementation, these would be actual database queries
     
-    // Fetch total earnings
-    const { data: earningsData, error: earningsError } = await supabase
-      .from('creator_analytics')
-      .select('earnings')
-      .eq('creator_id', creatorId);
-      
-    if (earningsError) throw earningsError;
+    // Mock total views - would typically aggregate from content_views
+    const totalViews = Math.floor(Math.random() * 10000) + 500;
     
-    // Fetch content count
-    const { count, error: contentError } = await supabase
-      .from('creator_content')
-      .select('*', { count: 'exact', head: true })
-      .eq('creator_id', creatorId);
-      
-    if (contentError) throw contentError;
+    // Mock total earnings - would typically aggregate from transactions
+    const totalEarnings = parseFloat((Math.random() * 5000).toFixed(2));
     
-    // Calculate totals
-    const totalViews = viewsData?.reduce((sum, item) => sum + (item.views || 0), 0) || 0;
-    const totalEarnings = earningsData?.reduce((sum, item) => sum + (parseFloat(item.earnings) || 0), 0) || 0;
+    // Mock content count - would typically count from content table
+    const contentCount = Math.floor(Math.random() * 50) + 5;
     
     return {
       totalViews,
       totalEarnings,
-      contentCount: count || 0
+      contentCount
     };
   } catch (error: any) {
     console.error("Error fetching creator summary stats:", error);

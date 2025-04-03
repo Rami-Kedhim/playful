@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Bell, Check, CheckAll } from "lucide-react";
+import { Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -38,7 +38,7 @@ const NotificationsMenu = () => {
               className="h-8 text-xs" 
               onClick={() => markAllAsRead()}
             >
-              <CheckAll className="h-4 w-4 mr-1" />
+              <Check className="h-4 w-4 mr-1" />
               Mark all as read
             </Button>
           )}
@@ -53,7 +53,7 @@ const NotificationsMenu = () => {
                 title={notification.title}
                 message={notification.message}
                 type={notification.type}
-                isRead={notification.isRead}
+                isRead={notification.read}
                 createdAt={notification.createdAt}
                 onMarkAsRead={markAsRead}
               />

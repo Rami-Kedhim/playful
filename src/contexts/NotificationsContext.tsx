@@ -9,7 +9,7 @@ interface Notification {
   title: string;
   message: string;
   type: string;
-  isRead: boolean;
+  read: boolean;
   createdAt: string;
 }
 
@@ -29,7 +29,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const { toast } = useToast();
 
   // Calculate unread count
-  const unreadCount = notifications.filter(notification => !notification.isRead).length;
+  const unreadCount = notifications.filter(notification => !notification.read).length;
 
   // Fetch notifications when user changes
   useEffect(() => {
@@ -60,7 +60,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
             title: payload.new.title,
             message: payload.new.message,
             type: payload.new.type,
-            isRead: payload.new.is_read,
+            read: payload.new.read || false,
             createdAt: payload.new.created_at,
           };
 
@@ -100,7 +100,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
           title: notification.title,
           message: notification.message,
           type: notification.type,
-          isRead: notification.is_read,
+          read: notification.read || false,
           createdAt: notification.created_at,
         }))
       );
@@ -114,7 +114,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     try {
       const { error } = await supabase
         .from('notifications')
-        .update({ is_read: true })
+        .update({ read: true })
         .eq('id', id);
 
       if (error) throw error;
@@ -122,7 +122,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
       setNotifications(prev =>
         prev.map(notification =>
           notification.id === id
-            ? { ...notification, isRead: true }
+            ? { ...notification, read: true }
             : notification
         )
       );
@@ -138,14 +138,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     try {
       const { error } = await supabase
         .from('notifications')
-        .update({ is_read: true })
+        .update({ read: true })
         .eq('user_id', user.id)
-        .eq('is_read', false);
+        .eq('read', false);
 
       if (error) throw error;
 
       setNotifications(prev =>
-        prev.map(notification => ({ ...notification, isRead: true }))
+        prev.map(notification => ({ ...notification, read: true }))
       );
     } catch (error) {
       console.error('Error marking all notifications as read:', error);

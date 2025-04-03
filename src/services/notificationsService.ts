@@ -38,7 +38,7 @@ export const markNotificationAsRead = async (id: string) => {
   try {
     const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
+      .update({ read: true })
       .eq('id', id);
       
     if (error) throw error;
@@ -57,7 +57,7 @@ export const markAllNotificationsAsRead = async (userId: string) => {
   try {
     const { error } = await supabase
       .from('notifications')
-      .update({ is_read: true })
+      .update({ read: true })
       .eq('user_id', userId);
       
     if (error) throw error;
@@ -99,7 +99,7 @@ export const getUnreadCount = async (userId: string) => {
       .from('notifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
-      .eq('is_read', false);
+      .eq('read', false);
       
     if (error) throw error;
     

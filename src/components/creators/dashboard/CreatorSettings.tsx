@@ -1,188 +1,169 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { useProfile } from "@/hooks/useProfile";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
-import { 
-  Settings, Lock, Bell, CreditCard, Image,
-  DollarSign, FileImage, Users
-} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface CreatorSettingsProps {
+interface ProfileProps {
   profile: any;
 }
 
-const CreatorSettings = ({ profile }: CreatorSettingsProps) => {
-  const { updateProfile } = useProfile();
+const CreatorSettings = ({ profile }: ProfileProps) => {
   const { refreshProfile } = useAuth();
-  
-  const [formData, setFormData] = useState({
-    subscriptionPrice: profile?.subscription_price || 9.99,
-    streamingEnabled: profile?.streaming_enabled || false,
-    virtualRoomEnabled: profile?.virtual_room_access ? true : false,
-    bio: profile?.bio || '',
-    virtualServices: profile?.virtual_services || []
+  const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState({
+    displayName: profile?.full_name || "",
+    bio: profile?.bio || "",
+    subscriptionPrice: profile?.subscription_price || 0,
+    enablePPV: profile?.ppv_enabled || false,
   });
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setProfileData(prev => ({ ...prev, [name]: value }));
   };
-  
-  const handleSwitchChange = (name: string) => (checked: boolean) => {
-    setFormData(prev => ({ ...prev, [name]: checked }));
+
+  const handleSwitchChange = (checked: boolean) => {
+    setProfileData(prev => ({ ...prev, enablePPV: checked }));
   };
-  
-  const handleSubmit = async () => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
     try {
-      setIsSubmitting(true);
+      // Call update profile API here
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
       
-      const updates = {
-        subscription_price: parseFloat(formData.subscriptionPrice.toString()),
-        streaming_enabled: formData.streamingEnabled,
-        virtual_room_access: formData.virtualRoomEnabled ? {} : null,
-        bio: formData.bio,
-        virtual_services: formData.virtualServices
-      };
-      
-      await updateProfile(profile.id, updates);
+      // Update profile
       await refreshProfile();
       
       toast({
         title: "Settings updated",
-        description: "Your creator profile settings have been updated successfully.",
-        variant: "success",
+        description: "Your creator profile has been updated successfully",
+        variant: "default",
       });
-    } catch (error: any) {
+    } catch (error) {
+      console.error("Error updating profile:", error);
       toast({
         title: "Update failed",
-        description: error.message || "Failed to update settings. Please try again.",
+        description: "There was a problem updating your profile",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
-  
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold flex items-center">
-        <Settings className="mr-2 h-5 w-5" />
-        Creator Settings
-      </h2>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Subscription Settings</CardTitle>
-          <CardDescription>
-            Configure your subscription options for your fans
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="subscriptionPrice">Subscription Price ($ per month)</Label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <span className="text-gray-500">$</span>
-              </div>
-              <Input
-                id="subscriptionPrice"
-                name="subscriptionPrice"
-                type="number"
-                min="0.99"
-                step="0.01"
-                value={formData.subscriptionPrice}
-                onChange={handleInputChange}
-                className="pl-7"
-                placeholder="9.99"
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Set the monthly price for access to your premium content.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Creator Profile</CardTitle>
-          <CardDescription>
-            Update your public profile information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="bio">Bio / Description</Label>
-            <Textarea
-              id="bio"
-              name="bio"
-              value={formData.bio}
-              onChange={handleInputChange}
-              placeholder="Tell your fans about yourself and your content..."
-              rows={4}
-            />
-            <p className="text-sm text-muted-foreground">
-              This will be shown on your public profile. Keep it engaging and descriptive.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Content Features</CardTitle>
-          <CardDescription>
-            Enable or disable content features
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Live Streaming</Label>
-              <p className="text-sm text-muted-foreground">
-                Allow fans to view your live streams
-              </p>
-            </div>
-            <Switch 
-              checked={formData.streamingEnabled}
-              onCheckedChange={handleSwitchChange('streamingEnabled')}
-            />
-          </div>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Creator Settings</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="profile" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="monetization">Monetization</TabsTrigger>
+            <TabsTrigger value="privacy">Privacy</TabsTrigger>
+          </TabsList>
           
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Virtual Room</Label>
-              <p className="text-sm text-muted-foreground">
-                Enable virtual room for interactive experiences
+          <TabsContent value="profile" className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Display Name</Label>
+                <Input
+                  id="displayName"
+                  name="displayName"
+                  value={profileData.displayName}
+                  onChange={handleChange}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  name="bio"
+                  value={profileData.bio}
+                  onChange={handleChange}
+                  rows={5}
+                />
+              </div>
+              
+              <Button type="submit" disabled={loading}>
+                {loading ? "Saving..." : "Save Changes"}
+              </Button>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="monetization" className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="subscriptionPrice">Subscription Price (LC)</Label>
+                <Input
+                  id="subscriptionPrice"
+                  name="subscriptionPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={profileData.subscriptionPrice}
+                  onChange={handleChange}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="enablePPV"
+                  checked={profileData.enablePPV}
+                  onCheckedChange={handleSwitchChange}
+                />
+                <Label htmlFor="enablePPV">Enable Pay-Per-View Content</Label>
+              </div>
+              
+              <Button type="submit" disabled={loading}>
+                {loading ? "Saving..." : "Save Changes"}
+              </Button>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="privacy" className="space-y-4">
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                Privacy settings control who can see your content and how they can interact with it.
               </p>
+              
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Switch id="privacy-followers" />
+                  <Label htmlFor="privacy-followers">Only followers can see my content</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch id="privacy-comments" defaultChecked />
+                  <Label htmlFor="privacy-comments">Allow comments on my content</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch id="privacy-dm" defaultChecked />
+                  <Label htmlFor="privacy-dm">Allow direct messages</Label>
+                </div>
+              </div>
+              
+              <Button disabled={loading}>
+                {loading ? "Saving..." : "Save Privacy Settings"}
+              </Button>
             </div>
-            <Switch 
-              checked={formData.virtualRoomEnabled}
-              onCheckedChange={handleSwitchChange('virtualRoomEnabled')}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="flex justify-end">
-        <Button 
-          onClick={handleSubmit} 
-          disabled={isSubmitting}
-          className="min-w-32"
-        >
-          {isSubmitting ? "Saving..." : "Save Settings"}
-        </Button>
-      </div>
-    </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };
 

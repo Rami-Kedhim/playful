@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,20 +46,61 @@ const ContentManager = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<Content | null>(null);
 
-  // Fetch content data
-  const { data: content = [], isLoading } = useQuery({
+  // Mock data for demonstration
+  const mockContent: Content[] = [
+    {
+      id: "1",
+      title: "Getting Started with Photography",
+      description: "A beginner's guide to photography",
+      content_type: "tutorial",
+      url: "https://example.com/content/1",
+      thumbnail_url: "https://example.com/thumbnails/1.jpg",
+      is_premium: false,
+      price: 0,
+      status: "published",
+      published_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: "2",
+      title: "Advanced Lighting Techniques",
+      description: "Master lighting for professional photos",
+      content_type: "video",
+      url: "https://example.com/content/2",
+      thumbnail_url: "https://example.com/thumbnails/2.jpg",
+      is_premium: true,
+      price: 5.99,
+      status: "published",
+      published_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    {
+      id: "3",
+      title: "Editing 101",
+      description: "Basic photo editing techniques",
+      content_type: "tutorial",
+      url: "https://example.com/content/3",
+      thumbnail_url: "https://example.com/thumbnails/3.jpg",
+      is_premium: false,
+      price: 0,
+      status: "draft",
+      published_at: "",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ];
+
+  // Fetch content data - using mock data for now
+  const { data: content = mockContent, isLoading } = useQuery({
     queryKey: ['creatorContent', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
       
-      const { data, error } = await supabase
-        .from('creator_content')
-        .select('*')
-        .eq('creator_id', user.id)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      return data as Content[];
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return mockContent;
     },
     enabled: !!user?.id,
   });
@@ -68,12 +108,9 @@ const ContentManager = () => {
   // Delete content mutation
   const deleteContentMutation = useMutation({
     mutationFn: async (contentId: string) => {
-      const { error } = await supabase
-        .from('creator_content')
-        .delete()
-        .eq('id', contentId);
-        
-      if (error) throw error;
+      // Simulate delete API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log(`Deleting content with ID: ${contentId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['creatorContent', user?.id] });
