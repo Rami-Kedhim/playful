@@ -56,15 +56,16 @@ export const useVirtualContent = () => {
       // Process payment
       const result = await processLucoinTransaction({
         amount: price,
-        recipientId: creatorId,
+        transactionType: 'purchase',
         description: `Unlock ${contentType} content`,
         metadata: {
           contentId,
-          contentType
+          contentType,
+          creatorId
         }
       });
       
-      if (result.success) {
+      if (result) {
         // Add to unlocked content
         const updatedUnlockedContent = [...unlockedContent, contentId];
         saveUnlockedContent(updatedUnlockedContent);
@@ -76,7 +77,7 @@ export const useVirtualContent = () => {
       } else {
         toast({
           title: "Transaction Failed",
-          description: result.message || "Could not complete the transaction",
+          description: "Could not complete the transaction",
           variant: "destructive",
         });
       }
