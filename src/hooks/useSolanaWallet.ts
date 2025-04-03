@@ -163,7 +163,7 @@ export const useSolanaWallet = () => {
         if (updateError) throw updateError;
       } else {
         // Insert new wallet
-        const { data: insertedWallet, error: insertError } = await supabase
+        const { data, error: insertError } = await supabase
           .from('solana_wallets' as any)
           .insert({
             user_id: user.id,
@@ -173,6 +173,8 @@ export const useSolanaWallet = () => {
           .select();
 
         if (insertError) throw insertError;
+        
+        // No need to access data.id here, which was causing the TypeScript error
       }
 
       // Refresh user profile to get updated data
