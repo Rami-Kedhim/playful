@@ -1,59 +1,73 @@
 
-import { MapPin, Sparkles, Video, Wallet } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { 
+  ShieldCheck, 
+  MapPin, 
+  Wallet, 
+  Video, 
+  MessageSquare,
+  Lock
+} from "lucide-react";
 
 const FeaturesSection = () => {
+  const features = [
+    {
+      icon: <ShieldCheck className="h-6 w-6 text-primary" />,
+      title: "Verified Users Only",
+      description: "Every escort and client is verified through our secure ID and selfie verification process."
+    },
+    {
+      icon: <MapPin className="h-6 w-6 text-accent" />,
+      title: "Privacy-First GPS",
+      description: "E2E encrypted route sharing between verified users for maximum safety and discretion."
+    },
+    {
+      icon: <Wallet className="h-6 w-6 text-lucoin" />,
+      title: "Lucoin Economy",
+      description: "Our native token system enables frictionless payments, tipping, and content access."
+    },
+    {
+      icon: <Video className="h-6 w-6 text-primary" />,
+      title: "Creator Platform",
+      description: "Monetize with premium content, livestreams, and secure pay-per-view experiences."
+    },
+    {
+      icon: <MessageSquare className="h-6 w-6 text-accent" />,
+      title: "Lucie AI Assistant",
+      description: "Our elegant, intelligent AI persona to guide and enhance your UberEscorts experience."
+    },
+    {
+      icon: <Lock className="h-6 w-6 text-lucoin" />,
+      title: "Zero Trust Security",
+      description: "Industry-leading encryption, privacy, and content moderation to protect all users."
+    }
+  ];
+
   return (
-    <section className="py-16 container mx-auto px-4 relative">
-      <div className="text-center mb-12">
-        <Badge variant="outline" className="mb-4">PLATFORM FEATURES</Badge>
-        <h2 className="text-3xl font-bold mb-6">Complete Web3 Adult Ecosystem</h2>
+    <section className="py-20 container mx-auto px-4">
+      <div className="text-center mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          The Complete Web3 Adult Ecosystem
+        </h2>
         <p className="text-gray-400 max-w-2xl mx-auto">
-          UberEscorts combines verified profiles, secure payments, content creation, and real-time features in one seamless platform.
+          UberEscorts unifies verification, secure payments, content creation, and privacy in one powerful platform.
         </p>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 glass-card flex flex-col items-center text-center h-full">
-          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-            <MapPin className="text-primary" size={24} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {features.map((feature, index) => (
+          <div 
+            key={index} 
+            className="p-6 glass-card rounded-xl border border-white/10 hover:border-primary/30 transition-all duration-300"
+          >
+            <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
+              {feature.icon}
+            </div>
+            <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+            <p className="text-gray-400">
+              {feature.description}
+            </p>
           </div>
-          <h3 className="text-lg font-semibold mb-2">Verified Escorts</h3>
-          <p className="text-gray-400">
-            Every escort is verified with our advanced KYC system ensuring authenticity and safety.
-          </p>
-        </Card>
-        
-        <Card className="p-6 glass-card flex flex-col items-center text-center h-full">
-          <div className="h-12 w-12 rounded-full bg-lucoin/20 flex items-center justify-center mb-4">
-            <Sparkles className="text-lucoin" size={24} />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Content Creators</h3>
-          <p className="text-gray-400">
-            Subscribe to premium content from your favorite creators with exclusive photos and videos.
-          </p>
-        </Card>
-        
-        <Card className="p-6 glass-card flex flex-col items-center text-center h-full">
-          <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center mb-4">
-            <Video className="text-accent" size={24} />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Live Streaming</h3>
-          <p className="text-gray-400">
-            Experience interactive live streams with real-time tipping and private shows.
-          </p>
-        </Card>
-        
-        <Card className="p-6 glass-card flex flex-col items-center text-center h-full">
-          <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-            <Wallet className="text-primary" size={24} />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Lucoin Payments</h3>
-          <p className="text-gray-400">
-            Our secure blockchain token for anonymous, fast, and frictionless transactions.
-          </p>
-        </Card>
+        ))}
       </div>
     </section>
   );

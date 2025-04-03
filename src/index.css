@@ -38,6 +38,8 @@
     /* New custom colors */
     --lucoin: 45 100% 50%;
     --favorite: 0 100% 67%;
+    --success: 142 70% 45%;
+    --warning: 35 100% 50%;
   }
 }
 
@@ -93,5 +95,34 @@
   /* Touch swipe related utilities */
   .swipe-container {
     @apply touch-pan-y;
+  }
+
+  /* Animation classes */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.05);
+    }
   }
 }

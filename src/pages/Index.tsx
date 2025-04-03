@@ -9,6 +9,7 @@ import LucoinSection from "@/components/home/LucoinSection";
 import MetaverseSection from "@/components/home/MetaverseSection";
 import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
+import LucieAssistant from "@/components/home/LucieAssistant";
 import { featuredEscorts, featuredCreators } from "@/components/home/MockData";
 
 const Index = () => {
@@ -30,6 +31,7 @@ const Index = () => {
       <MetaverseSection />
       <TrustSection />
       <CtaSection />
+      <LucieAssistant />
     </AppLayout>
   );
 };
