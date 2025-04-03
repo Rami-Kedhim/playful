@@ -31,7 +31,7 @@ const VirtualContentGrid: React.FC<VirtualContentGridProps> = ({
   }
   
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-${columns} md:grid-cols-${columns} lg:grid-cols-${columns} gap-4`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-${columns} gap-4`}>
       {items.map(item => (
         <VirtualContent
           key={item.id}

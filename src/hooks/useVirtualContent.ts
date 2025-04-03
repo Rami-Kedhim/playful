@@ -1,11 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { useLucoins } from "@/hooks/useLucoins";
-import { toast } from "@/components/ui/use-toast";
 
 export type ContentType = "photo" | "video" | "message";
 
-interface UnlockOptions {
+interface UnlockContentOptions {
   creatorId: string;
   contentId: string;
   contentType: ContentType;
@@ -13,70 +13,90 @@ interface UnlockOptions {
 }
 
 export const useVirtualContent = () => {
-  const [isUnlocking, setIsUnlocking] = useState(false);
-  const [unlockedContentIds, setUnlockedContentIds] = useState<string[]>([]);
+  const [unlockingContentId, setUnlockingContentId] = useState<string | null>(null);
+  const [unlockedContent, setUnlockedContent] = useState<string[]>([]);
+  const { toast } = useToast();
   const { processLucoinTransaction } = useLucoins();
-
-  const unlockContent = async ({ creatorId, contentId, contentType, price }: UnlockOptions): Promise<boolean> => {
-    setIsUnlocking(true);
+  
+  // In a real application, we'd fetch this from the server
+  useEffect(() => {
+    const storedUnlockedContent = localStorage.getItem('unlockedContent');
+    if (storedUnlockedContent) {
+      try {
+        setUnlockedContent(JSON.parse(storedUnlockedContent));
+      } catch (error) {
+        console.error("Failed to parse unlocked content from localStorage", error);
+      }
+    }
+  }, []);
+  
+  const saveUnlockedContent = (contentIds: string[]) => {
+    localStorage.setItem('unlockedContent', JSON.stringify(contentIds));
+    setUnlockedContent(contentIds);
+  };
+  
+  const isContentUnlocked = (contentId: string): boolean => {
+    return unlockedContent.includes(contentId);
+  };
+  
+  const unlockContent = async (options: UnlockContentOptions) => {
+    const { creatorId, contentId, contentType, price } = options;
+    
+    if (isContentUnlocked(contentId)) {
+      toast({
+        title: "Already Unlocked",
+        description: "You already have access to this content",
+      });
+      return;
+    }
+    
+    setUnlockingContentId(contentId);
     
     try {
-      // Process the transaction using Lucoins
+      // Process payment
       const result = await processLucoinTransaction({
-        amount: -price, // Negative amount for spending
-        transactionType: "content_unlock",
-        description: `Unlocked ${contentType} from virtual creator`,
+        amount: price,
+        recipientId: creatorId,
+        description: `Unlock ${contentType} content`,
         metadata: {
-          creatorId,
           contentId,
           contentType
         }
       });
       
-      if (result) {
+      if (result.success) {
         // Add to unlocked content
-        setUnlockedContentIds(prev => [...prev, contentId]);
+        const updatedUnlockedContent = [...unlockedContent, contentId];
+        saveUnlockedContent(updatedUnlockedContent);
         
-        // Show success toast
         toast({
           title: "Content Unlocked",
-          description: `You have successfully unlocked this ${contentType}`,
+          description: `You now have access to this ${contentType}`,
         });
-        
-        return true;
       } else {
-        // Show error toast
         toast({
-          title: "Unlock Failed",
-          description: "There was an issue processing your payment",
+          title: "Transaction Failed",
+          description: result.message || "Could not complete the transaction",
           variant: "destructive",
         });
-        
-        return false;
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error unlocking content:", error);
-      
       toast({
         title: "Error",
-        description: error.message || "Failed to unlock content",
+        description: "Failed to unlock content. Please try again later.",
         variant: "destructive",
       });
-      
-      return false;
     } finally {
-      setIsUnlocking(false);
+      setUnlockingContentId(null);
     }
   };
-
-  const isContentUnlocked = (contentId: string): boolean => {
-    return unlockedContentIds.includes(contentId);
-  };
-
+  
   return {
-    unlockContent,
+    isUnlocking: !!unlockingContentId,
     isContentUnlocked,
-    isUnlocking,
-    unlockedContentIds
+    unlockContent
   };
 };
+
+export default useVirtualContent;

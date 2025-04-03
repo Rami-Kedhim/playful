@@ -19,8 +19,6 @@ const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
   const [activeTab, setActiveTab] = useState<ContentType>("photo");
   const { content, loading, error } = useVirtualCreatorContent(creatorId);
   
-  const filteredContent = content.filter(item => item.type === activeTab);
-  
   return (
     <Card className="w-full">
       <CardHeader>
