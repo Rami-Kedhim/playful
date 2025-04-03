@@ -4,32 +4,53 @@ import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, Wallet as WalletIcon, History, Gift, Zap } from "lucide-react";
+import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw } from "lucide-react";
 import LucoinBalance from "@/components/profile/settings/LucoinBalance";
 import LucoinTransactionHistory from "@/components/profile/settings/LucoinTransactionHistory";
 import LucoinPackageDialog from "@/components/profile/settings/LucoinPackageDialog";
 import WalletConnect from "@/components/solana/WalletConnect";
+import SolanaTransactionHistory from "@/components/solana/SolanaTransactionHistory";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import { getSolanaBalance, getSolanaPrice } from "@/services/solanaService";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Wallet = () => {
   const { user, profile } = useAuth();
   const { walletAddress } = useSolanaWallet();
-  const [solBalance, setSolBalance] = useState(0);
-  const [solanaPrice, setSolanaPrice] = useState(0);
+  const [solBalance, setSolBalance] = useState<number | null>(null);
+  const [solanaPrice, setSolanaPrice] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     if (walletAddress) {
       loadSolanaData(walletAddress);
+    } else {
+      setSolBalance(null);
     }
   }, [walletAddress]);
   
   const loadSolanaData = async (address: string) => {
-    const balance = await getSolanaBalance(address);
-    setSolBalance(balance);
-    
-    const price = await getSolanaPrice();
-    setSolanaPrice(price);
+    setLoading(true);
+    try {
+      const [balance, price] = await Promise.all([
+        getSolanaBalance(address),
+        getSolanaPrice()
+      ]);
+      
+      setSolBalance(balance);
+      setSolanaPrice(price);
+    } catch (error) {
+      console.error("Error loading Solana data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const refreshSolanaData = () => {
+    if (walletAddress) {
+      loadSolanaData(walletAddress);
+    }
   };
   
   return (
@@ -63,20 +84,41 @@ const Wallet = () => {
           </Card>
           
           <Card>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center text-lg">
                 <WalletIcon className="h-5 w-5 text-primary mr-2" />
                 Solana Balance
               </CardTitle>
+              {walletAddress && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={refreshSolanaData}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               {walletAddress ? (
-                <>
-                  <div className="text-3xl font-bold">{solBalance.toFixed(4)} SOL</div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    ≈ ${(solBalance * solanaPrice).toFixed(2)} USD
-                  </p>
-                </>
+                loading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-24" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-3xl font-bold">{solBalance !== null ? solBalance.toFixed(4) : '0.0000'} SOL</div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {solanaPrice && solBalance !== null ? (
+                        <>≈ ${(solBalance * solanaPrice).toFixed(2)} USD</>
+                      ) : (
+                        '—'
+                      )}
+                    </p>
+                  </>
+                )
               ) : (
                 <div className="text-muted-foreground py-1">
                   Connect wallet to view balance
@@ -108,10 +150,14 @@ const Wallet = () => {
         </div>
         
         <Tabs defaultValue="transactions" className="w-full">
-          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
+          <TabsList className="grid w-full md:w-[600px] grid-cols-3">
             <TabsTrigger value="transactions" className="flex items-center">
               <History className="mr-2 h-4 w-4" />
-              Transactions
+              Lucoin Transactions
+            </TabsTrigger>
+            <TabsTrigger value="solana" className="flex items-center">
+              <WalletIcon className="mr-2 h-4 w-4" />
+              Solana Transactions
             </TabsTrigger>
             <TabsTrigger value="gifts" className="flex items-center">
               <Gift className="mr-2 h-4 w-4" />
@@ -121,6 +167,10 @@ const Wallet = () => {
           
           <TabsContent value="transactions" className="mt-6">
             <LucoinTransactionHistory />
+          </TabsContent>
+          
+          <TabsContent value="solana" className="mt-6">
+            <SolanaTransactionHistory />
           </TabsContent>
           
           <TabsContent value="gifts" className="mt-6">

@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { purchaseLucoinsWithSol } from "@/services/solanaService";
 
 export interface LucoinPackage {
   id: string;
@@ -56,9 +56,8 @@ export const useLucoins = () => {
       setLoading(true);
       
       // First try to get packages from the lucoin_package_options table
-      // Use .from('table_name' as any) as a workaround for TypeScript issues
       const { data: optionsData, error: optionsError } = await supabase
-        .from('lucoin_package_options' as any)
+        .from('lucoin_package_options')
         .select('*')
         .eq('is_active', true)
         .order('amount', { ascending: true });
@@ -173,6 +172,125 @@ export const useLucoins = () => {
         variant: "destructive",
       });
       return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Process a Lucoin purchase with SOL
+   */
+  const purchasePackageWithSol = async (
+    packageId: string, 
+    solAmount: number, 
+    walletAddress: string
+  ): Promise<boolean> => {
+    if (!user) {
+      toast({
+        title: "Not logged in",
+        description: "You must be logged in to purchase Lucoins",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Get package details
+      const { data: packageData, error: packageError } = await supabase
+        .from('lucoin_packages')
+        .select('*')
+        .eq('id', packageId)
+        .single();
+      
+      if (packageError) {
+        // Try alternate table if the first one fails
+        const { data: altPackageData, error: altPackageError } = await supabase
+          .from('lucoin_package_options')
+          .select('*')
+          .eq('id', packageId)
+          .single();
+          
+        if (altPackageError) throw new Error("Package not found");
+        
+        if (!altPackageData) {
+          toast({
+            title: "Package not found",
+            description: "The selected package could not be found",
+            variant: "destructive",
+          });
+          return false;
+        }
+        
+        // Use the alternate package data
+        packageData = altPackageData;
+      }
+      
+      if (!packageData) {
+        toast({
+          title: "Package not found",
+          description: "The selected package could not be found",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      // Process the Solana transaction
+      const { success, transactionId } = await purchaseLucoinsWithSol(
+        packageId,
+        solAmount,
+        walletAddress
+      );
+      
+      if (!success) {
+        return false;
+      }
+      
+      // Record the transaction
+      const { error: transactionError } = await supabase
+        .from('lucoin_transactions')
+        .insert({
+          user_id: user.id,
+          amount: packageData.amount + (packageData.bonus_amount || 0),
+          transaction_type: 'purchase',
+          description: `Purchased ${packageData.name} package with SOL`,
+          metadata: { 
+            package_id: packageId,
+            price_paid_sol: solAmount,
+            transaction_id: transactionId,
+            currency: 'SOL' 
+          }
+        });
+      
+      if (transactionError) throw transactionError;
+      
+      // Update the user's balance using the increment_balance function
+      const { data, error: balanceError } = await supabase
+        .rpc('increment_balance', { 
+          user_id: user.id, 
+          amount: packageData.amount + (packageData.bonus_amount || 0) 
+        });
+        
+      if (balanceError) throw balanceError;
+      
+      // Refresh the user profile to get the updated balance
+      await refreshProfile();
+      
+      toast({
+        title: "Purchase successful",
+        description: `${packageData.amount + (packageData.bonus_amount || 0)} Lucoins have been added to your account`,
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error("Error purchasing lucoins:", error);
+      toast({
+        title: "Purchase failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return false;
     } finally {
       setLoading(false);
     }
@@ -443,7 +561,8 @@ export const useLucoins = () => {
   return { 
     loading, 
     fetchPackages, 
-    purchasePackage, 
+    purchasePackage,
+    purchasePackageWithSol,
     getTransactionHistory,
     fetchBoostPackages,
     purchaseBoost,

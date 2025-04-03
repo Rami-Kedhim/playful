@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { PlusCircle, Loader2, Info, Coins, Wallet } from "lucide-react";
+import { PlusCircle, Loader2, Info, Coins, Wallet, AlertCircle } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -21,8 +21,13 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { useLucoins, LucoinPackage } from "@/hooks/useLucoins";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { getSolanaPrice, getSolanaBalance, purchaseLucoinsWithSol } from "@/services/solanaService";
+import { 
+  getSolanaPrice, 
+  getSolanaBalance,
+  purchaseLucoinsWithSol 
+} from "@/services/solanaService";
 import WalletConnect from "@/components/solana/WalletConnect";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface LucoinPackageDialogProps {
   onSuccess?: () => void;
@@ -34,7 +39,8 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
   const [open, setOpen] = useState(false);
   const [solanaPrice, setSolanaPrice] = useState(0);
   const [solanaBalance, setSolanaBalance] = useState(0);
-  const { loading, fetchPackages, purchasePackage } = useLucoins();
+  const [processing, setProcessing] = useState(false);
+  const { loading, fetchPackages, purchasePackageWithSol } = useLucoins();
   const { walletAddress, connectWallet } = useSolanaWallet();
 
   useEffect(() => {
@@ -106,22 +112,25 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
       return;
     }
 
-    // Process the purchase using Solana
-    const success = await purchaseLucoinsWithSol(
-      selectedPackage,
-      pkg.price_sol || 0,
-      walletAddress
-    );
-    
-    if (success) {
-      // Update the local database record
-      const dbSuccess = await purchasePackage(selectedPackage);
+    try {
+      setProcessing(true);
       
-      if (dbSuccess) {
+      // Process the purchase using Solana and update the database
+      const success = await purchasePackageWithSol(
+        selectedPackage,
+        pkg.price_sol || 0,
+        walletAddress
+      );
+      
+      if (success) {
         setOpen(false);
         setSelectedPackage(null);
+        // Refresh the SOL balance
+        loadSolanaBalance(walletAddress);
         if (onSuccess) onSuccess();
       }
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -167,6 +176,16 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
                 <span className="ml-2 font-medium">${solanaPrice.toFixed(2)}</span>
               </div>
             </div>
+          )}
+
+          {walletAddress && solanaBalance < 0.01 && (
+            <Alert variant="warning" className="mb-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Low balance</AlertTitle>
+              <AlertDescription>
+                Your SOL balance is low. You may need to add funds to your wallet before purchasing.
+              </AlertDescription>
+            </Alert>
           )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -224,12 +243,12 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
           </Button>
           <Button 
             onClick={handlePurchase} 
-            disabled={!selectedPackage || loading || !walletAddress}
+            disabled={!selectedPackage || loading || processing || !walletAddress}
           >
-            {loading ? (
+            {loading || processing ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
+                {processing ? "Processing..." : "Loading..."}
               </>
             ) : (
               <>
