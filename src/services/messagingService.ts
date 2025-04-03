@@ -40,60 +40,51 @@ const safeGetData = <T>(result: any): T[] => {
   return [];
 };
 
-// Use a simple approach to check direct messaging support
-const hasDirectMessaging = async (): Promise<boolean> => {
+// Simplified approach to check messaging schema
+const getMessagingSchema = async (): Promise<'direct' | 'conversation' | 'none'> => {
   try {
-    // Try a simple query first to check if the messages table exists
-    const { data, error } = await supabase
+    // Check direct messaging (messages table with receiver_id column)
+    const { data: directData, error: directError } = await supabase
       .from('messages')
-      .select('id')
+      .select('sender_id')
+      .limit(1);
+      
+    // Try to query a field that would only exist in direct messaging
+    const { data: receiverTest } = await supabase
+      .from('messages')
+      .select('receiver_id')
       .limit(1);
     
-    if (error) {
-      console.error("Error checking messages table:", error);
-      return false;
+    if (!directError && receiverTest !== null) {
+      // If we can select receiver_id without error, it's direct messaging
+      return 'direct';
     }
     
-    // Now check if receiver_id column exists by trying to use it in a query
-    const { data: receiverData, error: receiverError } = await supabase
-      .from('messages')
-      .select('id')
-      .eq('receiver_id', '00000000-0000-0000-0000-000000000000')
-      .limit(1);
-    
-    // If there's no error, the receiver_id column exists
-    return !receiverError;
-  } catch (err) {
-    console.error("Error in hasDirectMessaging check:", err);
-    return false;
-  }
-};
-
-// Check if conversations table exists
-const hasConversationsModel = async (): Promise<boolean> => {
-  try {
-    // Try a simple query to see if the conversations table exists
-    const { error } = await supabase
+    // Check conversation-based (conversations and participants tables)
+    const { data: convData, error: convError } = await supabase
       .from('conversations')
       .select('id')
       .limit(1);
     
-    // If there's no error, the table exists
-    return !error;
+    if (!convError && convData !== null) {
+      return 'conversation';
+    }
+    
+    return 'none';
   } catch (err) {
-    console.error("Error in hasConversationsModel check:", err);
-    return false;
+    console.error("Error detecting messaging schema:", err);
+    return 'none';
   }
 };
 
 // Fetch conversations for the current user
 export const fetchConversations = async (userId: string): Promise<Conversation[]> => {
   try {
-    // Check which messaging model is implemented
-    const directMessagingEnabled = await hasDirectMessaging();
-    const conversationsModelEnabled = await hasConversationsModel();
+    // Determine which messaging schema is being used
+    const messagingSchema = await getMessagingSchema();
+    console.log("Detected messaging schema:", messagingSchema);
     
-    if (directMessagingEnabled) {
+    if (messagingSchema === 'direct') {
       // Direct messaging model
       const { data, error } = await supabase
         .from('messages')
@@ -122,7 +113,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
           const otherUserId = message.sender_id === userId ? message.receiver_id : message.sender_id;
           
           // Check if profiles data exists and has the required properties
-          const profileData = message.profiles as Record<string, any> | null;
+          const profileData = message.profiles;
           
           if (!conversationsMap.has(otherUserId)) {
             // Safely access profile properties with fallbacks
@@ -153,7 +144,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
       });
       
       return Array.from(conversationsMap.values());
-    } else if (conversationsModelEnabled) {
+    } else if (messagingSchema === 'conversation') {
       // Conversation-based model
       try {
         // First get all conversations this user is a part of
@@ -203,7 +194,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
             if (!lastMessage) continue;
             
             // Get profile data safely
-            const profileData = participant.profiles as Record<string, any> | null;
+            const profileData = participant.profiles;
             let profileName = "Unknown User";
             let profileAvatar = null;
             
@@ -261,11 +252,10 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
 // Fetch messages for a specific conversation
 export const fetchMessages = async (userId: string, otherUserId: string): Promise<Message[]> => {
   try {
-    // Check which messaging model is implemented
-    const directMessagingEnabled = await hasDirectMessaging();
-    const conversationsModelEnabled = await hasConversationsModel();
+    // Determine which messaging schema is being used
+    const messagingSchema = await getMessagingSchema();
     
-    if (directMessagingEnabled) {
+    if (messagingSchema === 'direct') {
       // Direct messaging model
       const { data, error } = await supabase
         .from('messages')
@@ -288,7 +278,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
       }));
       
       return messages;
-    } else if (conversationsModelEnabled) {
+    } else if (messagingSchema === 'conversation') {
       // Find conversations that both users are part of
       try {
         // First find conversations the current user is part of
@@ -370,11 +360,10 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
 // Send a new message
 export const sendMessage = async (senderId: string, receiverId: string, content: string): Promise<Message | null> => {
   try {
-    // Check which messaging model is implemented
-    const directMessagingEnabled = await hasDirectMessaging();
-    const conversationsModelEnabled = await hasConversationsModel();
+    // Determine which messaging schema is being used
+    const messagingSchema = await getMessagingSchema();
     
-    if (directMessagingEnabled) {
+    if (messagingSchema === 'direct') {
       // Direct message model
       const { data, error } = await supabase
         .from('messages')
@@ -401,7 +390,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
       };
       
       return message;
-    } else if (conversationsModelEnabled) {
+    } else if (messagingSchema === 'conversation') {
       // First check if a conversation exists between these users
       let conversationId: string | null = null;
       
@@ -503,11 +492,10 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
 // Mark messages as read
 export const markMessagesAsRead = async (userId: string, senderId: string): Promise<void> => {
   try {
-    // Check which messaging model is implemented
-    const directMessagingEnabled = await hasDirectMessaging();
-    const conversationsModelEnabled = await hasConversationsModel();
+    // Determine which messaging schema is being used
+    const messagingSchema = await getMessagingSchema();
     
-    if (directMessagingEnabled) {
+    if (messagingSchema === 'direct') {
       // Direct message model
       const { error } = await supabase
         .from('messages')
@@ -517,7 +505,7 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
         .is('read_at', null);
       
       if (error) throw error;
-    } else if (conversationsModelEnabled) {
+    } else if (messagingSchema === 'conversation') {
       try {
         // Find the common conversation
         const { data: userConversations, error: userError } = await supabase
@@ -566,15 +554,21 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
 
 // Subscribe to new messages for the current user
 export const subscribeToMessages = (userId: string, callback: (message: Message) => void) => {
-  let channelSetup: any = null;
+  const subscriber = {
+    channel: null as any,
+    unsubscribe: () => {
+      if (subscriber.channel) {
+        supabase.removeChannel(subscriber.channel);
+        console.log("Unsubscribed from messages channel");
+      }
+    }
+  };
   
   // Check messaging model
-  hasDirectMessaging().then(directMessagingEnabled => {
-    let channel;
-    
-    if (directMessagingEnabled) {
+  getMessagingSchema().then(messagingSchema => {
+    if (messagingSchema === 'direct') {
       // Direct messaging model
-      channel = supabase
+      subscriber.channel = supabase
         .channel('direct_messages')
         .on('postgres_changes', {
           event: 'INSERT',
@@ -594,59 +588,44 @@ export const subscribeToMessages = (userId: string, callback: (message: Message)
           });
         })
         .subscribe();
-    } else {
-      // Check if using conversation model
-      hasConversationsModel().then(conversationsModelEnabled => {
-        if (conversationsModelEnabled) {
-          // First get all conversations this user is a part of
-          supabase
-            .from('conversation_participants')
-            .select('conversation_id')
-            .eq('user_id', userId)
-            .then(({ data }) => {
-              if (!data || data.length === 0) return;
+    } else if (messagingSchema === 'conversation') {
+      // First get all conversations this user is a part of
+      supabase
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('user_id', userId)
+        .then(({ data }) => {
+          if (!data || data.length === 0) return;
+          
+          const conversationIds = data.map(c => c.conversation_id);
+          
+          // Subscribe to messages in these conversations
+          subscriber.channel = supabase
+            .channel('conversation_messages')
+            .on('postgres_changes', {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'messages',
+              filter: `conversation_id=in.(${conversationIds.join(',')})`
+            }, (payload) => {
+              const newMessage = payload.new as any;
               
-              const conversationIds = data.map(c => c.conversation_id);
-              
-              // Subscribe to messages in these conversations
-              channel = supabase
-                .channel('conversation_messages')
-                .on('postgres_changes', {
-                  event: 'INSERT',
-                  schema: 'public',
-                  table: 'messages',
-                  filter: `conversation_id=in.(${conversationIds.join(',')})`
-                }, (payload) => {
-                  const newMessage = payload.new as any;
-                  
-                  // Only notify about messages not sent by the current user
-                  if (newMessage.sender_id !== userId) {
-                    callback({
-                      id: newMessage.id,
-                      sender_id: newMessage.sender_id,
-                      receiver_id: userId, // Inferred as the current user
-                      content: newMessage.content,
-                      created_at: newMessage.created_at,
-                      read: newMessage.read_at !== null
-                    });
-                  }
-                })
-                .subscribe();
-            });
-        }
-      });
+              // Only notify about messages not sent by the current user
+              if (newMessage.sender_id !== userId) {
+                callback({
+                  id: newMessage.id,
+                  sender_id: newMessage.sender_id,
+                  receiver_id: userId, // Inferred as the current user
+                  content: newMessage.content,
+                  created_at: newMessage.created_at,
+                  read: newMessage.read_at !== null
+                });
+              }
+            })
+            .subscribe();
+        });
     }
-    
-    channelSetup = channel;
   });
   
-  // Return an object with an unsubscribe method
-  return {
-    unsubscribe: () => {
-      if (channelSetup) {
-        supabase.removeChannel(channelSetup);
-      }
-      console.log("Unsubscribed from messages channel");
-    }
-  };
+  return subscriber;
 };
