@@ -59,7 +59,7 @@ const ContentManagement = () => {
         media_type: content.media_type,
         thumbnail_url: content.thumbnail_url,
         visibility: content.visibility,
-        status: content.status, // Status is now required in both types
+        status: content.status, 
         is_premium: content.is_premium,
         price: content.price,
         scheduled_for: content.scheduled_for,
