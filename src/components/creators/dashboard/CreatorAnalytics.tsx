@@ -7,11 +7,13 @@ import {
   Tooltip, Legend, ResponsiveContainer, Area, AreaChart 
 } from "recharts";
 import { 
-  Eye, ArrowUpRight, ThumbsUp, Share2, DollarSign,
+  Eye, ThumbsUp, Share2, DollarSign,
   TrendingUp, TrendingDown
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
+import AudienceDemographics from "./AudienceDemographics";
+import TopContent from "./TopContent";
 
 interface AnalyticsStat {
   title: string;
@@ -27,8 +29,14 @@ interface CreatorAnalyticsProps {
 }
 
 const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
-  const [timeRange, setTimeRange] = useState("week");
-  const { analytics, analyticsHistory, loading } = useCreatorAnalytics(timeRange as "week" | "month" | "year");
+  const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
+  const { 
+    analytics, 
+    analyticsHistory, 
+    demographics, 
+    topContent, 
+    loading 
+  } = useCreatorAnalytics(timeRange);
 
   // Calculate trend percentages (in a real app, compare with previous period)
   // For demo purposes, we'll use random trends
@@ -73,7 +81,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Analytics</h2>
-        <Tabs value={timeRange} onValueChange={setTimeRange}>
+        <Tabs value={timeRange} onValueChange={(value) => setTimeRange(value as "week" | "month" | "year")}>
           <TabsList>
             <TabsTrigger value="week">7 Days</TabsTrigger>
             <TabsTrigger value="month">30 Days</TabsTrigger>
@@ -121,20 +129,20 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
         </div>
       )}
       
-      <div className="mt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Performance Metrics</CardTitle>
             <CardDescription>Track your content performance over time</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="h-[400px]">
             <Tabs defaultValue="views">
               <TabsList>
                 <TabsTrigger value="views">Views</TabsTrigger>
                 <TabsTrigger value="engagement">Engagement</TabsTrigger>
                 <TabsTrigger value="earnings">Earnings</TabsTrigger>
               </TabsList>
-              <TabsContent value="views" className="h-[400px] mt-4">
+              <TabsContent value="views" className="h-[350px] mt-4">
                 {loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
@@ -163,7 +171,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
                   </ResponsiveContainer>
                 )}
               </TabsContent>
-              <TabsContent value="engagement" className="h-[400px] mt-4">
+              <TabsContent value="engagement" className="h-[350px] mt-4">
                 {loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
@@ -180,7 +188,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
                   </ResponsiveContainer>
                 )}
               </TabsContent>
-              <TabsContent value="earnings" className="h-[400px] mt-4">
+              <TabsContent value="earnings" className="h-[350px] mt-4">
                 {loading ? (
                   <Skeleton className="h-full w-full" />
                 ) : (
@@ -205,7 +213,11 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
             </Tabs>
           </CardContent>
         </Card>
+        
+        <AudienceDemographics demographics={demographics} loading={loading} />
       </div>
+      
+      <TopContent content={topContent} loading={loading} />
     </div>
   );
 };

@@ -81,13 +81,23 @@ async function seedMockAnalyticsData(creatorId: string, startDate: Date, endDate
     
     // Generate daily data between start and end date
     while (currentDate <= endDate) {
+      // Create more realistic data patterns
+      const dayOfWeek = currentDate.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+      
+      // More views and engagement on weekends
+      const baseFactor = isWeekend ? 1.5 : 1.0;
+      
+      // Add some randomization but with upward trend over time
+      const trendFactor = 1 + ((endDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24 * 30)) * 0.1;
+      
       mockData.push({
         creator_id: creatorId,
         date: new Date(currentDate).toISOString().split('T')[0],
-        views: Math.floor(Math.random() * 100) + 1,
-        likes: Math.floor(Math.random() * 50),
-        shares: Math.floor(Math.random() * 25),
-        earnings: parseFloat((Math.random() * 10).toFixed(2))
+        views: Math.floor((Math.random() * 50 + 50) * baseFactor / trendFactor),
+        likes: Math.floor((Math.random() * 25 + 10) * baseFactor / trendFactor),
+        shares: Math.floor((Math.random() * 12 + 3) * baseFactor / trendFactor),
+        earnings: parseFloat((Math.random() * 5 + 2) * baseFactor / trendFactor).toFixed(2)
       });
       
       currentDate.setDate(currentDate.getDate() + 1);
@@ -126,6 +136,43 @@ export const trackContentView = async (contentId: string, viewerId: string) => {
     return true;
   } catch (error: any) {
     console.error("Error tracking content view:", error);
+    return false;
+  }
+};
+
+/**
+ * Track content engagement (like, share, comment)
+ */
+export const trackContentEngagement = async (
+  contentId: string, 
+  userId: string, 
+  type: 'like' | 'share' | 'comment'
+) => {
+  try {
+    // Record the engagement in the database
+    const { error } = await supabase
+      .from('content_engagements')
+      .insert({
+        content_id: contentId,
+        user_id: userId,
+        engagement_type: type,
+        created_at: new Date().toISOString()
+      });
+    
+    if (error) throw error;
+    
+    // Update the engagement counts on the content
+    const countField = `${type}s_count`;
+    const { error: updateError } = await supabase
+      .from('creator_content')
+      .update({ [countField]: supabase.rpc('increment_counter', { row_id: contentId, counter_name: countField }) })
+      .eq('id', contentId);
+    
+    if (updateError) throw updateError;
+    
+    return true;
+  } catch (error: any) {
+    console.error(`Error tracking ${type}:`, error);
     return false;
   }
 };
@@ -172,10 +219,22 @@ export const getCreatorSummaryStats = async (creatorId: string) => {
     // Use count or fallback to random
     const contentCount = count || Math.floor(Math.random() * 50) + 5;
     
+    // Get subscriber count
+    const { data: subscriberData, error: subscriberError } = await supabase
+      .from('creator_subscribers')
+      .select('id', { count: 'exact' })
+      .eq('creator_id', creatorId);
+      
+    if (subscriberError) throw subscriberError;
+    
+    // Use subscriber count or fallback to random
+    const subscriberCount = subscriberData ? subscriberData.length : Math.floor(Math.random() * 500) + 50;
+    
     return {
       totalViews,
       totalEarnings,
-      contentCount
+      contentCount,
+      subscriberCount
     };
   } catch (error: any) {
     console.error("Error fetching creator summary stats:", error);
@@ -187,7 +246,53 @@ export const getCreatorSummaryStats = async (creatorId: string) => {
     return {
       totalViews: 0,
       totalEarnings: 0,
-      contentCount: 0
+      contentCount: 0,
+      subscriberCount: 0
+    };
+  }
+};
+
+/**
+ * Get audience demographics
+ */
+export const getAudienceDemographics = async (creatorId: string) => {
+  try {
+    // In a real application, we would query demographic data from our database
+    // For now, return mock data
+    
+    // Add some randomization to make it look more realistic
+    const malePercentage = Math.floor(Math.random() * 20) + 50; // 50-70%
+    const femalePercentage = Math.floor(Math.random() * 20) + 25; // 25-45%
+    const otherPercentage = 100 - malePercentage - femalePercentage;
+    
+    return {
+      age: [
+        { group: '18-24', percentage: Math.floor(Math.random() * 15) + 25 },
+        { group: '25-34', percentage: Math.floor(Math.random() * 15) + 30 },
+        { group: '35-44', percentage: Math.floor(Math.random() * 10) + 15 },
+        { group: '45-54', percentage: Math.floor(Math.random() * 7) + 5 },
+        { group: '55+', percentage: Math.floor(Math.random() * 5) + 1 }
+      ],
+      gender: [
+        { type: 'Male', percentage: malePercentage },
+        { type: 'Female', percentage: femalePercentage },
+        { type: 'Other', percentage: otherPercentage }
+      ],
+      location: [
+        { country: 'United States', percentage: Math.floor(Math.random() * 20) + 35 },
+        { country: 'United Kingdom', percentage: Math.floor(Math.random() * 10) + 10 },
+        { country: 'Canada', percentage: Math.floor(Math.random() * 8) + 8 },
+        { country: 'Australia', percentage: Math.floor(Math.random() * 5) + 5 },
+        { country: 'Germany', percentage: Math.floor(Math.random() * 5) + 3 },
+        { country: 'Other', percentage: Math.floor(Math.random() * 10) + 10 }
+      ]
+    };
+  } catch (error) {
+    console.error("Error fetching audience demographics:", error);
+    return {
+      age: [],
+      gender: [],
+      location: []
     };
   }
 };
