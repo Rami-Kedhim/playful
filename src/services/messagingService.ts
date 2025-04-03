@@ -43,31 +43,50 @@ const safeGetData = <T>(result: any): T[] => {
 // Simplified approach to check messaging schema
 const getMessagingSchema = async (): Promise<'direct' | 'conversation' | 'none'> => {
   try {
-    // Check direct messaging (messages table with receiver_id column)
-    const { data: directData, error: directError } = await supabase
-      .from('messages')
-      .select('sender_id')
-      .limit(1);
-      
-    // Try to query a field that would only exist in direct messaging
-    const { data: receiverTest } = await supabase
-      .from('messages')
-      .select('receiver_id')
-      .limit(1);
+    // Check if messages table exists at all
+    try {
+      const { data: messagesExist, error: messagesError } = await supabase
+        .from('messages')
+        .select('id')
+        .limit(1);
+        
+      if (messagesError) {
+        console.log("Messages table doesn't exist or is inaccessible:", messagesError);
+        return 'none';
+      }
+    } catch (err) {
+      console.log("Error checking messages table:", err);
+      return 'none';
+    }
     
-    if (!directError && receiverTest !== null) {
-      // If we can select receiver_id without error, it's direct messaging
-      return 'direct';
+    // Try to query a field that would only exist in direct messaging
+    try {
+      const { data: receiverTest, error: receiverError } = await supabase
+        .from('messages')
+        .select('receiver_id')
+        .limit(1);
+      
+      if (!receiverError) {
+        // If we can select receiver_id without error, it's direct messaging
+        return 'direct';
+      }
+    } catch (err) {
+      // This error is expected if using conversation model
+      console.log("Receiver_id field doesn't exist, likely using conversation model");
     }
     
     // Check conversation-based (conversations and participants tables)
-    const { data: convData, error: convError } = await supabase
-      .from('conversations')
-      .select('id')
-      .limit(1);
-    
-    if (!convError && convData !== null) {
-      return 'conversation';
+    try {
+      const { data: convData, error: convError } = await supabase
+        .from('conversations')
+        .select('id')
+        .limit(1);
+      
+      if (!convError && convData !== null) {
+        return 'conversation';
+      }
+    } catch (err) {
+      console.log("Error checking conversations table:", err);
     }
     
     return 'none';
@@ -102,7 +121,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
       
       if (error) throw error;
       
-      if (!Array.isArray(data) || data.length === 0) return [];
+      if (!data || !Array.isArray(data) || data.length === 0) return [];
       
       // Process the data to create a conversations list
       const conversationsMap = new Map<string, Conversation>();
@@ -113,7 +132,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
           const otherUserId = message.sender_id === userId ? message.receiver_id : message.sender_id;
           
           // Check if profiles data exists and has the required properties
-          const profileData = message.profiles;
+          const profileData = message.profiles || {};
           
           if (!conversationsMap.has(otherUserId)) {
             // Safely access profile properties with fallbacks
@@ -153,8 +172,9 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
           .select('conversation_id')
           .eq('user_id', userId);
           
-        if (convError) throw convError;
-        if (!userConversations || userConversations.length === 0) return [];
+        if (convError || !userConversations || userConversations.length === 0) {
+          return [];
+        }
         
         const conversationIds = userConversations.map(c => c.conversation_id);
         
@@ -169,8 +189,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
           .in('conversation_id', conversationIds)
           .neq('user_id', userId);
           
-        if (partError) throw partError;
-        if (!participants) return [];
+        if (partError || !participants) return [];
         
         // Get the last message for each conversation
         const { data: lastMessages, error: msgError } = await supabase
@@ -179,7 +198,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
           .in('conversation_id', conversationIds)
           .order('created_at', { ascending: false });
           
-        if (msgError) throw msgError;
+        if (msgError) return [];
         
         // Build the conversations with the data we have
         const conversations: Conversation[] = [];
@@ -194,7 +213,7 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
             if (!lastMessage) continue;
             
             // Get profile data safely
-            const profileData = participant.profiles;
+            const profileData = participant.profiles || {};
             let profileName = "Unknown User";
             let profileAvatar = null;
             
@@ -265,7 +284,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
       
       if (error) throw error;
       
-      if (!Array.isArray(data)) return [];
+      if (!data || !Array.isArray(data)) return [];
       
       // Convert the data to match our Message interface
       const messages: Message[] = data.map(msg => ({
@@ -329,7 +348,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
         const messages: Message[] = data.map(msg => ({
           id: msg.id,
           sender_id: msg.sender_id,
-          // For the conversation model, we need to infer the receiver
+          // For the conversation model, infer the receiver
           receiver_id: msg.sender_id === userId ? otherUserId : userId,
           content: msg.content,
           created_at: msg.created_at,
@@ -449,13 +468,15 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
       }
       
       // Now insert the message
+      const message = {
+        conversation_id: conversationId,
+        sender_id: senderId,
+        content
+      };
+      
       const { data, error } = await supabase
         .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: senderId,
-          content
-        })
+        .insert(message)
         .select()
         .single();
       
@@ -464,7 +485,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
       if (!data) throw new Error("Failed to send message");
       
       // For the conversation model, we need to construct the full Message object
-      const message: Message = {
+      const result: Message = {
         id: data.id,
         sender_id: data.sender_id,
         // The receiver_id is inferred for the conversation model
@@ -474,7 +495,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
         read: false
       };
       
-      return message;
+      return result;
     } else {
       throw new Error("No compatible messaging schema found");
     }
@@ -578,14 +599,16 @@ export const subscribeToMessages = (userId: string, callback: (message: Message)
         }, (payload) => {
           const newMessage = payload.new as any;
           
-          callback({
-            id: newMessage.id,
-            sender_id: newMessage.sender_id,
-            receiver_id: newMessage.receiver_id,
-            content: newMessage.content,
-            created_at: newMessage.created_at,
-            read: newMessage.read_at !== null
-          });
+          if (newMessage) {
+            callback({
+              id: newMessage.id,
+              sender_id: newMessage.sender_id,
+              receiver_id: newMessage.receiver_id,
+              content: newMessage.content,
+              created_at: newMessage.created_at,
+              read: newMessage.read_at !== null
+            });
+          }
         })
         .subscribe();
     } else if (messagingSchema === 'conversation') {
@@ -611,7 +634,7 @@ export const subscribeToMessages = (userId: string, callback: (message: Message)
               const newMessage = payload.new as any;
               
               // Only notify about messages not sent by the current user
-              if (newMessage.sender_id !== userId) {
+              if (newMessage && newMessage.sender_id !== userId) {
                 callback({
                   id: newMessage.id,
                   sender_id: newMessage.sender_id,
