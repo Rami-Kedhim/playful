@@ -1,25 +1,31 @@
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { 
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger 
+} from "@/components/ui/accordion";
+import { VideoIcon, UserIcon } from "lucide-react";
 import SearchFilter from "./filters/SearchFilter";
 import LocationFilter from "./filters/LocationFilter";
 import PriceRangeFilter from "./filters/PriceRangeFilter";
 import VerifiedFilter from "./filters/VerifiedFilter";
 import CheckboxGroup from "./filters/CheckboxGroup";
-import { StarIcon } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface FilterSidebarProps {
   searchQuery: string;
-  setSearchQuery: (value: string) => void;
+  setSearchQuery: (query: string) => void;
   location: string;
-  setLocation: (value: string) => void;
-  priceRange: number[];
-  setPriceRange: (value: number[]) => void;
+  setLocation: (location: string) => void;
+  priceRange: [number, number];
+  setPriceRange: (range: [number, number]) => void;
   verifiedOnly: boolean;
-  setVerifiedOnly: (value: boolean) => void;
+  setVerifiedOnly: (verified: boolean) => void;
   selectedServices: string[];
   toggleService: (service: string) => void;
   services: string[];
@@ -28,12 +34,14 @@ interface FilterSidebarProps {
   toggleGender: (gender: string) => void;
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
-  ageRange?: number[];
-  setAgeRange?: (value: number[]) => void;
+  ageRange?: [number, number];
+  setAgeRange?: (range: [number, number]) => void;
   ratingMin?: number;
-  setRatingMin?: (value: number) => void;
+  setRatingMin?: (rating: number) => void;
   availableNow?: boolean;
-  setAvailableNow?: (value: boolean) => void;
+  setAvailableNow?: (available: boolean) => void;
+  serviceTypeFilter: "in-person" | "virtual" | "both" | "";
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
 }
 
 const FilterSidebar = ({
@@ -53,119 +61,158 @@ const FilterSidebar = ({
   toggleGender,
   selectedOrientations,
   toggleOrientation,
-  ageRange = [18, 50],
+  ageRange = [18, 60],
   setAgeRange = () => {},
   ratingMin = 0,
   setRatingMin = () => {},
   availableNow = false,
   setAvailableNow = () => {},
+  serviceTypeFilter,
+  setServiceTypeFilter
 }: FilterSidebarProps) => {
-  const genders = ["male", "female", "non-binary", "transgender"];
+  const genders = ["male", "female", "transgender", "non-binary"];
   const orientations = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
-
+  
   return (
-    <Card className="h-fit sticky top-20">
-      <CardHeader>
-        <CardTitle>Filters</CardTitle>
-        <CardDescription>Refine your search</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <SearchFilter 
-          searchQuery={searchQuery} 
-          setSearchQuery={setSearchQuery} 
-        />
-        
-        <LocationFilter 
-          location={location} 
-          setLocation={setLocation} 
-        />
-        
-        <PriceRangeFilter 
-          priceRange={priceRange} 
-          setPriceRange={setPriceRange} 
-        />
-        
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium">Age Range</h3>
-          <div className="pt-2">
-            <Slider
-              value={ageRange}
-              min={18}
-              max={60}
-              step={1}
-              onValueChange={setAgeRange}
-            />
-            <div className="flex justify-between mt-1 text-xs text-gray-500">
-              <span>{ageRange[0]} years</span>
-              <span>{ageRange[1]} years</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <h3 className="text-sm font-medium">Rating</h3>
-          <div className="flex items-center gap-2">
-            <Slider
-              value={[ratingMin]}
-              min={0}
-              max={5}
-              step={0.5}
-              onValueChange={(value) => setRatingMin(value[0])}
-            />
-            <div className="flex items-center gap-1 min-w-[40px]">
-              <span className="text-amber-500"><StarIcon size={14} /></span>
-              <span className="text-sm">{ratingMin}</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center space-x-2 pt-1">
-          <Switch 
-            id="availableNow" 
-            checked={availableNow} 
-            onCheckedChange={setAvailableNow}
-          />
-          <Label htmlFor="availableNow">Available now</Label>
-        </div>
-        
-        <VerifiedFilter 
-          verifiedOnly={verifiedOnly} 
-          setVerifiedOnly={setVerifiedOnly} 
-        />
-        
-        <CheckboxGroup
-          title="Gender"
-          items={genders}
-          selectedItems={selectedGenders}
-          toggleItem={toggleGender}
-          idPrefix="gender"
-        />
-        
-        <CheckboxGroup
-          title="Sexual Orientation"
-          items={orientations}
-          selectedItems={selectedOrientations}
-          toggleItem={toggleOrientation}
-          idPrefix="orientation"
-        />
-        
-        <CheckboxGroup
-          title="Services"
-          items={services}
-          selectedItems={selectedServices}
-          toggleItem={toggleService}
-          idPrefix="service"
-        />
-        
+    <div className="bg-card p-6 rounded-xl border border-border shadow">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Filters</h2>
         <Button 
-          variant="outline" 
+          variant="ghost" 
+          size="sm" 
           onClick={clearFilters}
-          className="w-full"
+          className="text-xs"
         >
-          Clear Filters
+          Clear All
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+      
+      <Separator className="my-4" />
+      
+      <Accordion type="multiple" defaultValue={["search", "serviceType", "location", "price", "availability"]}>
+        <AccordionItem value="search">
+          <AccordionTrigger>Search</AccordionTrigger>
+          <AccordionContent>
+            <SearchFilter 
+              searchQuery={searchQuery} 
+              setSearchQuery={setSearchQuery} 
+            />
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="serviceType">
+          <AccordionTrigger>Service Type</AccordionTrigger>
+          <AccordionContent>
+            <RadioGroup 
+              value={serviceTypeFilter} 
+              onValueChange={(value) => setServiceTypeFilter(value as "in-person" | "virtual" | "both" | "")}
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="" id="all-services" />
+                <Label htmlFor="all-services" className="flex items-center gap-2">
+                  All Services
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="in-person" id="in-person" />
+                <Label htmlFor="in-person" className="flex items-center gap-2">
+                  <UserIcon className="h-4 w-4" />
+                  In-Person
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="virtual" id="virtual" />
+                <Label htmlFor="virtual" className="flex items-center gap-2">
+                  <VideoIcon className="h-4 w-4" />
+                  Virtual
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="both" id="both" />
+                <Label htmlFor="both" className="flex items-center gap-2">
+                  Both
+                </Label>
+              </div>
+            </RadioGroup>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="location">
+          <AccordionTrigger>Location</AccordionTrigger>
+          <AccordionContent>
+            <LocationFilter 
+              location={location} 
+              setLocation={setLocation} 
+            />
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="price">
+          <AccordionTrigger>Price Range</AccordionTrigger>
+          <AccordionContent>
+            <PriceRangeFilter 
+              priceRange={priceRange} 
+              setPriceRange={setPriceRange} 
+            />
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="availability">
+          <AccordionTrigger>Availability</AccordionTrigger>
+          <AccordionContent className="space-y-4">
+            <VerifiedFilter 
+              verifiedOnly={verifiedOnly} 
+              setVerifiedOnly={setVerifiedOnly} 
+            />
+            
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="available-now" 
+                checked={availableNow}
+                onCheckedChange={setAvailableNow}
+              />
+              <Label htmlFor="available-now">Available Now</Label>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="gender">
+          <AccordionTrigger>Gender</AccordionTrigger>
+          <AccordionContent>
+            <CheckboxGroup 
+              options={genders}
+              selectedOptions={selectedGenders}
+              toggleOption={toggleGender}
+              formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+            />
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="orientation">
+          <AccordionTrigger>Sexual Orientation</AccordionTrigger>
+          <AccordionContent>
+            <CheckboxGroup 
+              options={orientations}
+              selectedOptions={selectedOrientations}
+              toggleOption={toggleOrientation}
+              formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+            />
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="services">
+          <AccordionTrigger>Services</AccordionTrigger>
+          <AccordionContent>
+            <CheckboxGroup 
+              options={services}
+              selectedOptions={selectedServices}
+              toggleOption={toggleService}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   );
 };
 

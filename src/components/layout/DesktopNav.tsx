@@ -1,47 +1,51 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { Heart, Video } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useFavorites } from "@/contexts/FavoritesContext";
+import { useAuth } from "@/hooks/useAuth";
+import { Search } from "lucide-react";
+import ServiceTypeMenu from "@/components/navigation/ServiceTypeMenu";
 
-interface NavLinkProps {
-  to: string;
-  label: string;
-  isActive: boolean;
-}
+const DesktopNav = () => {
+  const { user } = useAuth();
 
-export const NavLink = ({ to, label, isActive }: NavLinkProps) => (
-  <Link 
-    to={to} 
-    className={`transition-colors hover:text-primary ${
-      isActive ? "text-primary font-medium" : ""
-    }`}
-  >
-    {label}
-  </Link>
-);
-
-export const DesktopNav = () => {
-  const location = useLocation();
-  const { favorites } = useFavorites();
-  
   return (
-    <nav className="hidden md:flex items-center space-x-6">
-      <NavLink to="/" label="Home" isActive={location.pathname === "/"} />
-      <NavLink to="/escorts" label="Escorts" isActive={location.pathname.startsWith("/escorts")} />
-      <NavLink to="/creators" label="Creators" isActive={location.pathname.startsWith("/creators")} />
-      <NavLink to="/livecams" label="Live Cams" isActive={location.pathname.startsWith("/livecams")} />
-      <Link to="/favorites" className="relative group">
-        <Button variant="ghost" size="icon" className={location.pathname === "/favorites" ? "bg-primary/10 text-primary" : ""}>
-          <Heart size={20} className="transition-colors group-hover:text-primary" fill={favorites.length > 0 ? "currentColor" : "none"} />
-        </Button>
-        {favorites.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-            {favorites.length > 9 ? '9+' : favorites.length}
-          </span>
+    <div className="hidden md:flex w-full items-center justify-between">
+      <div className="flex items-center gap-8">
+        <Link to="/" className="text-xl font-bold">
+          Luscious
+        </Link>
+        
+        <div className="flex items-center gap-2">
+          <Link to="/">
+            <Button variant="ghost">Home</Button>
+          </Link>
+          
+          <ServiceTypeMenu />
+          
+          <Link to="/escort-application">
+            <Button variant="ghost">Become an Escort</Button>
+          </Link>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-4">
+        <Link to="/search">
+          <Button variant="ghost" size="icon">
+            <Search className="h-[1.2rem] w-[1.2rem]" />
+          </Button>
+        </Link>
+        
+        {user ? (
+          <Link to="/profile">
+            <Button variant="default">My Account</Button>
+          </Link>
+        ) : (
+          <Link to="/auth">
+            <Button variant="default">Sign In</Button>
+          </Link>
         )}
-      </Link>
-    </nav>
+      </div>
+    </div>
   );
 };
 

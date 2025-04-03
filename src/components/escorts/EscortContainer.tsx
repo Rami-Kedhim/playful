@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FilterSidebar from "@/components/escorts/FilterSidebar";
@@ -17,11 +18,12 @@ interface EscortContainerProps {
 
 const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
   const [showFilters, setShowFilters] = useState(false);
+  const location = useLocation();
   
   const {
     searchQuery,
     setSearchQuery,
-    location,
+    location: locationFilter,
     setLocation,
     priceRange,
     setPriceRange,
@@ -46,8 +48,20 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     ratingMin,
     setRatingMin,
     availableNow,
-    setAvailableNow
+    setAvailableNow,
+    serviceTypeFilter,
+    setServiceTypeFilter
   } = useEscortFilter(escorts);
+
+  // Parse URL query parameters when the component loads
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const typeParam = params.get('type');
+    
+    if (typeParam && ['in-person', 'virtual', 'both'].includes(typeParam)) {
+      setServiceTypeFilter(typeParam as "in-person" | "virtual" | "both");
+    }
+  }, [location.search, setServiceTypeFilter]);
 
   return (
     <>
@@ -68,7 +82,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
           <FilterSidebar 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            location={location}
+            location={locationFilter}
             setLocation={setLocation}
             priceRange={priceRange}
             setPriceRange={setPriceRange}
@@ -88,6 +102,8 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             setRatingMin={setRatingMin}
             availableNow={availableNow}
             setAvailableNow={setAvailableNow}
+            serviceTypeFilter={serviceTypeFilter}
+            setServiceTypeFilter={setServiceTypeFilter}
           />
         </div>
         
@@ -96,7 +112,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             <MobileFilterCard 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              location={location}
+              location={locationFilter}
               setLocation={setLocation}
               priceRange={priceRange}
               setPriceRange={setPriceRange}
@@ -111,6 +127,8 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
               toggleGender={toggleGender}
               selectedOrientations={selectedOrientations}
               toggleOrientation={toggleOrientation}
+              serviceTypeFilter={serviceTypeFilter}
+              setServiceTypeFilter={setServiceTypeFilter}
             />
           </div>
         )}
@@ -126,7 +144,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
           <AppliedFilters 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            location={location}
+            location={locationFilter}
             setLocation={setLocation}
             priceRange={priceRange}
             setPriceRange={setPriceRange}
@@ -145,6 +163,8 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             setRatingMin={setRatingMin}
             availableNow={availableNow}
             setAvailableNow={setAvailableNow}
+            serviceTypeFilter={serviceTypeFilter}
+            setServiceTypeFilter={setServiceTypeFilter}
           />
           
           <EscortResults 
