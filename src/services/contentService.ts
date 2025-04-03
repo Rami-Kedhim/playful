@@ -49,12 +49,12 @@ export interface ContentCreateInput {
 export interface ContentUpdateInput {
   id: string;
   creator_id: string;
-  title: string; // Making this required to match ContentCreateInput
+  title: string;
   description?: string;
-  media_url?: string;
-  media_type?: ContentType;
+  media_url: string; // Making this required to match ContentCreateInput
+  media_type: ContentType;
   thumbnail_url?: string;
-  visibility?: ContentVisibility;
+  visibility: ContentVisibility;
   status?: ContentStatus;
   is_premium?: boolean;
   price?: number;

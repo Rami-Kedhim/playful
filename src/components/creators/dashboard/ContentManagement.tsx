@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,13 +49,13 @@ const ContentManagement = () => {
   
   const handleSave = async (content: ContentCreateInput) => {
     if (editingContent?.id) {
-      // When editing, create a ContentUpdateInput from ContentCreateInput
+      // When editing, convert ContentCreateInput to ContentUpdateInput
       await editContent({
         id: editingContent.id,
         creator_id: content.creator_id,
         title: content.title,
         description: content.description,
-        media_url: content.media_url,
+        media_url: content.media_url, // This is required in both types now
         media_type: content.media_type,
         thumbnail_url: content.thumbnail_url,
         visibility: content.visibility,

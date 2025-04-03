@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import { ContentCreateInput } from "@/services/contentService";
+import { ContentCreateInput, ContentType } from "@/services/contentService";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,6 +41,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
 
+// Ensure media_type is compatible with ContentType
 const formSchema = z.object({
   title: z.string().min(2, {
     message: "Title must be at least 2 characters.",
@@ -52,7 +53,7 @@ const formSchema = z.object({
   media_url: z.string().url({
     message: "Please enter a valid URL for the media.",
   }),
-  media_type: z.enum(["image", "video"]),
+  media_type: z.enum(["image", "video", "text"] as const),
   visibility: z.enum(["public", "subscribers", "premium"]),
   status: z.enum(["draft", "published", "scheduled"]),
   scheduled_for: z.date().optional(),
@@ -256,6 +257,7 @@ const ContentDialog = ({
                       <SelectContent>
                         <SelectItem value="image">Image</SelectItem>
                         <SelectItem value="video">Video</SelectItem>
+                        <SelectItem value="text">Text</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
