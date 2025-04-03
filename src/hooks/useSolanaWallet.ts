@@ -1,86 +1,62 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { WalletHookReturn, WalletState } from "@/types/solana";
+import { getWalletProvider } from "@/utils/walletProviderUtils";
+import { saveSolanaWallet } from "@/services/walletDbService";
 
-// Define types for Solana wallet providers based on their API
-interface SolanaProvider {
-  isConnected: boolean;
-  connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString: () => string } }>;
-  disconnect: () => Promise<void>;
-  on: (event: string, callback: () => void) => void;
-  publicKey: { toString: () => string } | null;
-}
-
-// Chainstack connection type
-interface ChainstackConnection {
-  rpcUrl: string;
-  authenticate: () => Promise<void>;
-  isAuthenticated: boolean;
-}
-
-declare global {
-  interface Window {
-    chainstack?: {
-      solana?: SolanaProvider;
-      connection?: ChainstackConnection;
-    };
-    solana?: SolanaProvider;
-  }
-}
-
-export const useSolanaWallet = () => {
-  const [provider, setProvider] = useState<SolanaProvider | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [connecting, setConnecting] = useState(false);
-  const [disconnecting, setDisconnecting] = useState(false);
+export const useSolanaWallet = (): WalletHookReturn => {
+  const [state, setState] = useState<WalletState>({
+    provider: null,
+    walletAddress: null,
+    connecting: false,
+    disconnecting: false
+  });
+  
   const { user, refreshProfile } = useAuth();
 
   // Check if Solana provider is installed
   useEffect(() => {
-    const getProvider = (): SolanaProvider | null => {
-      if ('chainstack' in window && window.chainstack?.solana) {
-        const provider = window.chainstack.solana;
-        if (provider.isConnected) {
-          return provider;
-        }
-      }
-
-      // Fallback for other Solana wallets
-      if ('solana' in window) {
-        const provider = window.solana;
-        if (provider?.isConnected) {
-          return provider;
-        }
-      }
-      
-      return null;
-    };
-
-    const provider = getProvider();
-    setProvider(provider);
+    const provider = getWalletProvider();
+    
+    setState(prev => ({
+      ...prev,
+      provider
+    }));
 
     // If the wallet is already connected, set the address
     if (provider?.publicKey) {
-      setWalletAddress(provider.publicKey.toString());
+      setState(prev => ({
+        ...prev,
+        walletAddress: provider.publicKey?.toString() || null
+      }));
     }
 
     // Listen for wallet connection events
     if (provider) {
       provider.on('connect', () => {
         if (provider.publicKey) {
-          setWalletAddress(provider.publicKey.toString());
+          setState(prev => ({
+            ...prev,
+            walletAddress: provider.publicKey?.toString() || null
+          }));
         }
       });
 
       provider.on('disconnect', () => {
-        setWalletAddress(null);
+        setState(prev => ({
+          ...prev,
+          walletAddress: null
+        }));
       });
     }
   }, []);
 
   // Connect to Solana wallet via Chainstack
   const connectWallet = async () => {
+    const { provider } = state;
+    
     if (!provider) {
       window.open('https://chainstack.com/build-better-with-solana/', '_blank');
       toast({
@@ -92,14 +68,18 @@ export const useSolanaWallet = () => {
     }
 
     try {
-      setConnecting(true);
+      setState(prev => ({ ...prev, connecting: true }));
       const { publicKey } = await provider.connect();
       const address = publicKey.toString();
-      setWalletAddress(address);
+      
+      setState(prev => ({
+        ...prev,
+        walletAddress: address
+      }));
 
       // If user is logged in, save the wallet address to the database
       if (user) {
-        await saveSolanaWallet(address);
+        await saveSolanaWallet(address, user.id, refreshProfile);
       }
 
       toast({
@@ -114,17 +94,23 @@ export const useSolanaWallet = () => {
         variant: "destructive",
       });
     } finally {
-      setConnecting(false);
+      setState(prev => ({ ...prev, connecting: false }));
     }
   };
 
   // Disconnect from wallet
   const disconnectWallet = async () => {
+    const { provider } = state;
+    
     if (provider) {
       try {
-        setDisconnecting(true);
+        setState(prev => ({ ...prev, disconnecting: true }));
         await provider.disconnect();
-        setWalletAddress(null);
+        
+        setState(prev => ({
+          ...prev,
+          walletAddress: null
+        }));
         
         toast({
           title: "Wallet disconnected",
@@ -138,70 +124,16 @@ export const useSolanaWallet = () => {
           variant: "destructive",
         });
       } finally {
-        setDisconnecting(false);
+        setState(prev => ({ ...prev, disconnecting: false }));
       }
-    }
-  };
-
-  // Save wallet address to user profile
-  const saveSolanaWallet = async (address: string) => {
-    if (!user) return;
-
-    try {
-      // First, check if this wallet is already saved
-      const { data, error: checkError } = await supabase
-        .from('solana_wallets' as any)
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('wallet_address', address)
-        .single();
-
-      // Handle potential error from the single() call
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      // If wallet is already saved, just update last_used_at
-      if (data) {
-        const { error: updateError } = await supabase
-          .from('solana_wallets' as any)
-          .update({ last_used_at: new Date().toISOString() })
-          .eq('id', data.id);
-
-        if (updateError) throw updateError;
-      } else {
-        // Insert new wallet - don't try to access any properties from the insert result
-        const { error: insertError } = await supabase
-          .from('solana_wallets' as any)
-          .insert({
-            user_id: user.id,
-            wallet_address: address,
-            is_primary: true
-          });
-
-        if (insertError) throw insertError;
-      }
-
-      // Refresh user profile to get updated data
-      await refreshProfile();
-    } catch (error: any) {
-      console.error("Error saving wallet address:", error);
-      toast({
-        title: "Failed to save wallet",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
   return {
-    provider,
-    walletAddress,
-    connecting,
-    disconnecting,
+    ...state,
     connectWallet,
     disconnectWallet,
-    hasWallet: !!provider,
-    isConnected: !!walletAddress
+    hasWallet: !!state.provider,
+    isConnected: !!state.walletAddress
   };
 };
