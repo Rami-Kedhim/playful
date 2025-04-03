@@ -30,8 +30,11 @@ const VirtualContentGrid: React.FC<VirtualContentGridProps> = ({
     );
   }
   
+  // Fix the grid columns dynamically
+  const gridClasses = `grid grid-cols-1 sm:grid-cols-${columns} gap-4`;
+  
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-${columns} gap-4`}>
+    <div className={gridClasses}>
       {items.map(item => (
         <VirtualContent
           key={item.id}
