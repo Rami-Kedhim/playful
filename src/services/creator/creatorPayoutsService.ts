@@ -187,7 +187,7 @@ export const fetchCreatorPayouts = async (
     // Convert Supabase data to CreatorPayout type
     const payouts: CreatorPayout[] = data.map(item => ({
       id: item.id,
-      amount: typeof item.amount === 'number' ? item.amount.toFixed(2).toString() : item.amount.toString(),
+      amount: typeof item.amount === 'number' ? item.amount.toFixed(2) : item.amount,
       status: item.status as 'pending' | 'completed' | 'processing',
       created_at: item.created_at,
       payout_method: item.payout_method
