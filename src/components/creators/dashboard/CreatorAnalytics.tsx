@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { format } from 'date-fns';
 import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
 import { AnalyticsHeader, AnalyticsStats, AnalyticsCharts, AnalyticsSummary } from "./analytics";
-import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface CreatorAnalyticsProps {
   creatorId: string;
@@ -11,7 +12,7 @@ interface CreatorAnalyticsProps {
 
 const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
   const [timeRange, setTimeRange] = useState("7days");
-  const { analytics, summary, loading } = useCreatorAnalytics(
+  const { analytics, summary, loading, error } = useCreatorAnalytics(
     timeRange === "7days" ? "week" : timeRange === "30days" ? "month" : "year"
   );
   const [statsData, setStatsData] = useState<any[]>([]);
@@ -67,7 +68,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
     }
   }, [analytics, summary, loading]);
 
-  // Helper function to calculate previous period summary (mock data for now)
+  // Helper function to calculate previous period summary
   const getPreviousPeriodSummary = () => {
     // In real implementation, we would fetch the previous period data
     // For now, just use approximately 90% of current values for demonstration
@@ -86,6 +87,18 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
     const prefix = change >= 0 ? "+" : "";
     return `${prefix}${change.toFixed(1)}%`;
   };
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          Failed to load analytics data: {error}
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-6">

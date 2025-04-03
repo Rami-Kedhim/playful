@@ -42,15 +42,18 @@ export const fetchCreatorAnalytics = async (
       .lte('date', endDateStr)
       .order('date', { ascending: true });
     
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error:", error);
+      throw error;
+    }
     
     // If we have data, return it
     if (data && data.length > 0) {
+      console.log("Found analytics data:", data.length, "records");
       return data as CreatorAnalytics[];
     }
     
     // If no data is found, generate mock data for development
-    // In production, this would just return an empty array
     console.warn("No analytics data found, generating mock data for development");
     return generateMockAnalyticsData(period);
   } catch (error) {
@@ -84,14 +87,15 @@ const generateMockAnalyticsData = (period: 'week' | 'month' | 'year'): CreatorAn
     const date = new Date(now);
     date.setDate(date.getDate() - i);
     
-    // Generate random metrics
-    // More realistic data patterns could be implemented here
+    // Generate random metrics that increase over time for more realistic patterns
+    const factor = 1 + (i / days); // Higher for more recent days
+    
     data.push({
       date: date.toISOString().split('T')[0],
-      views: Math.floor(Math.random() * 200) + 50,
-      likes: Math.floor(Math.random() * 50) + 10,
-      shares: Math.floor(Math.random() * 20) + 5,
-      earnings: parseFloat((Math.random() * 20 + 5).toFixed(2))
+      views: Math.floor(Math.random() * 200 * factor) + 50,
+      likes: Math.floor(Math.random() * 50 * factor) + 10,
+      shares: Math.floor(Math.random() * 20 * factor) + 5,
+      earnings: parseFloat((Math.random() * 20 * factor + 5).toFixed(2))
     });
   }
   
