@@ -198,33 +198,28 @@ export const useLucoins = () => {
       setLoading(true);
       
       // Get package details
-      const { data: packageData, error: packageError } = await supabase
-        .from('lucoin_packages')
+      let packageData;
+      
+      // Try to get the package from the primary table
+      const { data: primaryData, error: primaryError } = await supabase
+        .from('lucoin_package_options')
         .select('*')
         .eq('id', packageId)
         .single();
       
-      if (packageError) {
-        // Try alternate table if the first one fails
-        const { data: altPackageData, error: altPackageError } = await supabase
-          .from('lucoin_package_options')
+      if (primaryError) {
+        // If that fails, try the fallback table
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('lucoin_packages')
           .select('*')
           .eq('id', packageId)
           .single();
           
-        if (altPackageError) throw new Error("Package not found");
+        if (fallbackError) throw new Error("Package not found");
         
-        if (!altPackageData) {
-          toast({
-            title: "Package not found",
-            description: "The selected package could not be found",
-            variant: "destructive",
-          });
-          return false;
-        }
-        
-        // Use the alternate package data
-        packageData = altPackageData;
+        packageData = fallbackData;
+      } else {
+        packageData = primaryData;
       }
       
       if (!packageData) {
