@@ -17,7 +17,7 @@ const RoleGuard = ({
   allowedRoles, 
   fallbackPath = "/auth" 
 }: RoleGuardProps) => {
-  const { user, isLoading, userRoles } = useAuth();
+  const { user, isLoading } = useAuth();
   
   // Show loading state if auth is still being determined
   if (isLoading) {
@@ -33,8 +33,8 @@ const RoleGuard = ({
     return <Navigate to={fallbackPath} replace />;
   }
   
-  // Check if user has at least one of the allowed roles
-  const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+  // Since we don't have userRoles in our current auth context, we'll check the user.role property instead
+  const hasAllowedRole = allowedRoles.includes(user.role);
   
   // If user doesn't have required role, redirect to fallback path
   if (!hasAllowedRole) {
