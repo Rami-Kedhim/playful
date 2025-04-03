@@ -1,22 +1,80 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import { PayoutResult, CreatorPayout } from "@/types/creator";
+import { CreatorPayout, PayoutRequest, PayoutResult } from "@/types/creator";
+
+/**
+ * Fetch payout statistics for a creator
+ */
+export const getCreatorPayouts = async (creatorId: string): Promise<{
+  total: string;
+  pending: string;
+  completed: string;
+}> => {
+  try {
+    // Query creator payouts from Supabase
+    const { data, error } = await supabase
+      .from('creator_payouts')
+      .select('amount, status')
+      .eq('creator_id', creatorId);
+    
+    if (error) {
+      console.error("Error fetching creator payouts:", error);
+      throw error;
+    }
+    
+    let total = 0;
+    let pending = 0;
+    let completed = 0;
+    
+    if (data && data.length > 0) {
+      data.forEach(payout => {
+        const amount = parseFloat(payout.amount as unknown as string);
+        total += amount;
+        
+        if (payout.status === 'pending') {
+          pending += amount;
+        } else if (payout.status === 'completed') {
+          completed += amount;
+        }
+      });
+    } else {
+      // Return mock data if no payouts found
+      return {
+        total: "1250.00",
+        pending: "450.00",
+        completed: "800.00"
+      };
+    }
+    
+    return {
+      total: total.toFixed(2),
+      pending: pending.toFixed(2),
+      completed: completed.toFixed(2)
+    };
+  } catch (error) {
+    console.error("Error fetching creator payout stats:", error);
+    return {
+      total: "0.00",
+      pending: "0.00",
+      completed: "0.00"
+    };
+  }
+};
 
 /**
  * Fetch payout history for a creator
  */
 export const fetchCreatorPayouts = async (
-  creatorId: string, 
-  page = 1, 
+  creatorId: string,
+  page = 1,
   pageSize = 10
 ): Promise<PayoutResult> => {
   try {
-    // Calculate the range for pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     
-    // Fetch payouts from the database
+    // Query payouts with pagination
     const { data, error, count } = await supabase
       .from('creator_payouts')
       .select('*', { count: 'exact' })
@@ -25,111 +83,99 @@ export const fetchCreatorPayouts = async (
       .range(from, to);
     
     if (error) {
-      console.error("Error fetching payouts:", error);
+      console.error("Error fetching creator payouts:", error);
       throw error;
     }
     
-    // If no results, return mock data for the demo
     if (!data || data.length === 0) {
+      // Generate mock data if no payouts found
+      const mockData: CreatorPayout[] = Array(5).fill(null).map((_, i) => ({
+        id: `payout-${i}`,
+        amount: (Math.random() * 500 + 50).toFixed(2),
+        status: ['pending', 'completed', 'processing'][Math.floor(Math.random() * 3)] as 'pending' | 'completed' | 'processing',
+        created_at: new Date(Date.now() - i * 86400000 * 7).toISOString(),
+        payout_method: ['bank_transfer', 'paypal', 'crypto'][Math.floor(Math.random() * 3)]
+      }));
+      
       return {
-        data: Array(3).fill(null).map((_, i) => ({
-          id: `mock-payout-${i}`,
-          amount: (Math.random() * 1000).toFixed(2),
-          status: ['pending', 'completed', 'processing'][Math.floor(Math.random() * 3)] as 'pending' | 'completed' | 'processing',
-          created_at: new Date(Date.now() - i * 86400000).toISOString(),
-          payout_method: ['bank_transfer', 'paypal', 'crypto'][Math.floor(Math.random() * 3)]
-        })),
-        totalCount: 3
+        data: mockData,
+        totalCount: mockData.length
       };
     }
     
+    // Convert Supabase data to CreatorPayout type
+    const payouts: CreatorPayout[] = data.map(item => ({
+      id: item.id,
+      amount: item.amount.toString(),
+      status: item.status as 'pending' | 'completed' | 'processing',
+      created_at: item.created_at,
+      payout_method: item.payout_method
+    }));
+    
     return {
-      data: data as CreatorPayout[],
-      totalCount: count || 0
+      data: payouts,
+      totalCount: count || payouts.length
     };
   } catch (error) {
-    console.error("Error in fetchCreatorPayouts:", error);
-    // Return mock data in case of error (for the demo)
-    return {
-      data: [],
-      totalCount: 0
-    };
+    console.error("Error fetching creator payouts:", error);
+    return { data: [], totalCount: 0 };
   }
 };
 
 /**
- * Request a payout for a creator
+ * Request a new payout
  */
 export const requestPayout = async (
-  creatorId: string, 
-  amount: number, 
-  payoutMethod: string, 
-  payoutDetails: Record<string, any>
-): Promise<CreatorPayout | null> => {
+  request: PayoutRequest
+): Promise<{ success: boolean; data?: CreatorPayout; error?: string }> => {
   try {
-    // Create the payout record in the database
     const { data, error } = await supabase
       .from('creator_payouts')
       .insert([{
-        creator_id: creatorId,
-        amount,
-        payout_method: payoutMethod,
-        notes: payoutDetails.notes || null,
-        status: 'pending'
+        creator_id: request.creatorId,
+        amount: request.amount,
+        payout_method: request.payoutMethod,
+        notes: JSON.stringify(request.payoutDetails),
+        status: 'pending',
+        requested_at: new Date().toISOString()
       }])
       .select()
       .single();
     
     if (error) {
-      console.error("Error requesting payout:", error);
       throw error;
     }
     
     toast({
       title: "Payout requested",
-      description: "Your payout request has been submitted successfully",
-      variant: "default",
+      description: "Your payout request has been submitted and is pending review",
     });
     
-    return data as CreatorPayout;
+    // Convert to CreatorPayout type
+    const payout: CreatorPayout = {
+      id: data.id,
+      amount: data.amount.toString(),
+      status: data.status as 'pending' | 'completed' | 'processing',
+      created_at: data.created_at,
+      payout_method: data.payout_method
+    };
+    
+    return {
+      success: true,
+      data: payout
+    };
   } catch (error: any) {
     console.error("Error requesting payout:", error);
     
     toast({
-      title: "Failed to request payout",
-      description: error.message || "An error occurred while processing your request",
+      title: "Error requesting payout",
+      description: error.message || "Failed to request payout",
       variant: "destructive",
     });
     
-    return null;
-  }
-};
-
-/**
- * Get summary of earnings for a creator
- */
-export const getCreatorEarningsSummary = async (creatorId: string) => {
-  try {
-    // In a real implementation, you would calculate this from actual data
-    // For now, returning mock data
     return {
-      total: 2347.85,
-      available: 1250.42,
-      pending: 567.25,
-      thisMonth: 892.15
-    };
-  } catch (error) {
-    console.error("Error getting earnings summary:", error);
-    
-    // Return default values in case of error
-    return {
-      total: 0,
-      available: 0,
-      pending: 0,
-      thisMonth: 0
+      success: false,
+      error: error.message || "Failed to request payout"
     };
   }
 };
-
-// Export the functions
-export { fetchCreatorPayouts as getCreatorPayouts };

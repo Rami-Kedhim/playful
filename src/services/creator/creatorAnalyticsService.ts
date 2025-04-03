@@ -1,24 +1,44 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorAnalytics } from "@/types/creator";
-import { format, subDays } from 'date-fns';
 
 /**
  * Fetch analytics data for a creator
  */
 export const fetchCreatorAnalytics = async (
   creatorId: string,
-  startDate: Date,
-  endDate: Date
+  period: 'week' | 'month' | 'year' = 'week'
 ): Promise<CreatorAnalytics[]> => {
   try {
-    // Get creator analytics from the database
+    let startDate: Date;
+    const now = new Date();
+    
+    // Determine start date based on period
+    switch (period) {
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        break;
+      default:
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    }
+    
+    // Convert dates to ISO string for database query
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = now.toISOString().split('T')[0];
+    
+    // Query analytics from Supabase
     const { data, error } = await supabase
       .from('creator_analytics')
       .select('*')
       .eq('creator_id', creatorId)
-      .gte('date', format(startDate, 'yyyy-MM-dd'))
-      .lte('date', format(endDate, 'yyyy-MM-dd'))
+      .gte('date', startDateStr)
+      .lte('date', endDateStr)
       .order('date', { ascending: true });
     
     if (error) {
@@ -26,51 +46,42 @@ export const fetchCreatorAnalytics = async (
       throw error;
     }
     
-    // If there's no data, generate mock data for the demo
+    // If no data found, return mock data
     if (!data || data.length === 0) {
-      // Generate daily data between startDate and endDate
-      const daysBetween = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
-      
-      // Create mock analytics data
-      return Array(daysBetween).fill(null).map((_, i) => {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        
-        // Generate random data with some trends
-        const baseViews = 100 + Math.floor(Math.random() * 150);
-        const baseLikes = 20 + Math.floor(Math.random() * 50);
-        const baseShares = 5 + Math.floor(Math.random() * 15);
-        const baseEarnings = 10 + Math.random() * 40;
-        
-        // Weekend boost
-        const dayOfWeek = date.getDay();
-        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-        const weekendMultiplier = isWeekend ? 1.5 : 1;
-        
-        // Recency boost (more recent days have slightly higher numbers)
-        const recencyIndex = i / daysBetween;
-        const recencyBoost = 1 + recencyIndex * 0.5;
-        
-        return {
-          date: date.toISOString(),
-          views: Math.floor(baseViews * weekendMultiplier * recencyBoost),
-          likes: Math.floor(baseLikes * weekendMultiplier * recencyBoost),
-          shares: Math.floor(baseShares * weekendMultiplier * recencyBoost),
-          earnings: parseFloat((baseEarnings * weekendMultiplier * recencyBoost).toFixed(2))
-        };
-      });
+      console.log("No analytics data found for creator, generating mock data");
+      return generateMockAnalytics(startDate, now);
     }
     
-    // Transform database data to match our interface
+    // Convert Supabase data to CreatorAnalytics type
     return data.map(item => ({
       date: item.date,
       views: item.views,
       likes: item.likes,
       shares: item.shares,
-      earnings: parseFloat(item.earnings)
+      earnings: item.earnings,
     }));
   } catch (error) {
     console.error("Error fetching creator analytics:", error);
-    throw error;
+    return generateMockAnalytics(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date());
   }
+};
+
+// Helper to generate mock analytics data
+const generateMockAnalytics = (startDate: Date, endDate: Date): CreatorAnalytics[] => {
+  const data: CreatorAnalytics[] = [];
+  let currentDate = new Date(startDate);
+  
+  while (currentDate <= endDate) {
+    data.push({
+      date: currentDate.toISOString().split('T')[0], // Convert to 'YYYY-MM-DD' format
+      views: Math.floor(Math.random() * 500) + 50,
+      likes: Math.floor(Math.random() * 200) + 10,
+      shares: Math.floor(Math.random() * 50) + 5,
+      earnings: parseFloat((Math.random() * 50 + 5).toFixed(2)),
+    });
+    
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return data;
 };
