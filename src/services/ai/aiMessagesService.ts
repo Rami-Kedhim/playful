@@ -1,198 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
-import { AIProfile, AIConversation, AIMessage } from "@/types/ai-profile";
+import { AIMessage, AIProfile } from "@/types/ai-profile";
 import { v4 as uuidv4 } from 'uuid';
-// Remove incorrect crypto import
-
-/**
- * Fetch AI profiles with optional filtering
- */
-export const getAIProfiles = async (filters: Record<string, any> = {}): Promise<AIProfile[]> => {
-  try {
-    // Create a base query - using the raw SQL approach for tables not in the schema
-    let query = supabase
-      .from('ai_profiles')
-      .select('*');
-    
-    // Apply any filters
-    if (filters.personality) {
-      query = query.eq('personality->type', filters.personality);
-    }
-    
-    if (filters.location) {
-      query = query.ilike('location', `%${filters.location}%`);
-    }
-    
-    // Always filter to only return AI profiles
-    query = query.eq('is_ai', true);
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      throw error;
-    }
-    
-    return data as AIProfile[];
-  } catch (error: any) {
-    console.error("Error fetching AI profiles:", error);
-    
-    // Return mock data for development
-    return mockAIProfiles;
-  }
-};
-
-/**
- * Get a single AI profile by ID
- */
-export const getAIProfileById = async (profileId: string): Promise<AIProfile | null> => {
-  try {
-    const { data, error } = await supabase
-      .from('ai_profiles')
-      .select('*')
-      .eq('id', profileId)
-      .eq('is_ai', true)
-      .single();
-    
-    if (error) {
-      throw error;
-    }
-    
-    return data as AIProfile;
-  } catch (error: any) {
-    console.error("Error fetching AI profile:", error);
-    
-    // For development, return a mock profile
-    return mockAIProfiles.find(p => p.id === profileId) || null;
-  }
-};
-
-/**
- * Start or continue a conversation with an AI profile
- */
-export const startAIConversation = async (
-  userId: string,
-  aiProfileId: string
-): Promise<AIConversation> => {
-  try {
-    // Check if conversation already exists
-    const { data: existingConversation, error: queryError } = await supabase
-      .from('ai_conversations')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('ai_profile_id', aiProfileId)
-      .single();
-    
-    if (queryError && queryError.code !== 'PGRST116') { // PGRST116 means no rows returned
-      throw queryError;
-    }
-    
-    if (existingConversation) {
-      return existingConversation as AIConversation;
-    }
-    
-    // Create new conversation
-    const { data: newConversation, error: insertError } = await supabase
-      .from('ai_conversations')
-      .insert({
-        user_id: userId,
-        ai_profile_id: aiProfileId,
-        status: 'active'
-      })
-      .select()
-      .single();
-    
-    if (insertError) {
-      throw insertError;
-    }
-    
-    return {
-      ...newConversation,
-      messages: []
-    } as AIConversation;
-  } catch (error: any) {
-    console.error("Error starting AI conversation:", error);
-    
-    // For development, return a mock conversation
-    const mockConversationId = uuidv4();
-    return {
-      id: mockConversationId,
-      user_id: userId,
-      ai_profile_id: aiProfileId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      status: 'active',
-      messages: [],
-      ai_profile: mockAIProfiles.find(p => p.id === aiProfileId) || undefined
-    };
-  }
-};
-
-/**
- * Get messages for an AI conversation
- */
-export const getAIConversationMessages = async (
-  conversationId: string
-): Promise<AIMessage[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('ai_messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
-    
-    if (error) {
-      throw error;
-    }
-    
-    return data as AIMessage[];
-  } catch (error: any) {
-    console.error("Error fetching AI messages:", error);
-    return [];
-  }
-};
-
-/**
- * Get a conversation with all its messages
- */
-export const getAIConversationWithMessages = async (
-  conversationId: string
-): Promise<AIConversation | null> => {
-  try {
-    // Get the conversation
-    const { data: conversation, error: convError } = await supabase
-      .from('ai_conversations')
-      .select(`
-        *,
-        ai_profile:ai_profiles(*)
-      `)
-      .eq('id', conversationId)
-      .single();
-    
-    if (convError) {
-      throw convError;
-    }
-    
-    // Get the messages
-    const { data: messages, error: msgError } = await supabase
-      .from('ai_messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
-    
-    if (msgError) {
-      throw msgError;
-    }
-    
-    return {
-      ...conversation,
-      messages: messages
-    } as AIConversation;
-  } catch (error: any) {
-    console.error("Error fetching AI conversation:", error);
-    return null;
-  }
-};
 
 /**
  * Send a message to an AI profile and get a response
@@ -209,7 +18,7 @@ export const sendMessageToAI = async (
 }> => {
   try {
     // First, save the user's message
-    const { data: userMessage, error: msgError } = await supabase
+    const { data: userMessage, error: msgError } = await (supabase
       .from('ai_messages')
       .insert({
         conversation_id: conversationId,
@@ -218,31 +27,31 @@ export const sendMessageToAI = async (
         is_ai: false
       })
       .select()
-      .single();
+      .single() as any);
     
     if (msgError) {
       throw msgError;
     }
     
     // Get conversation with AI profile 
-    const { data: conversation, error: convError } = await supabase
+    const { data: conversation, error: convError } = await (supabase
       .from('ai_conversations')
       .select(`
         *,
         ai_profile:ai_profiles(*)
       `)
       .eq('id', conversationId)
-      .single();
+      .single() as any);
     
     if (convError) {
       throw convError;
     }
 
     // Check if user has enough credits or if they're within free message limit
-    const { data: messageCount, error: countError } = await supabase
+    const { data: messageCount, error: countError } = await (supabase
       .from('ai_messages')
       .select('id', { count: 'exact' })
-      .eq('conversation_id', conversationId);
+      .eq('conversation_id', conversationId) as any);
     
     if (countError) {
       throw countError;
@@ -253,11 +62,11 @@ export const sendMessageToAI = async (
     
     if (!isFreeTier) {
       // Check if user has enough Lucoins
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await (supabase
         .from('profiles')
         .select('lucoin_balance')
         .eq('id', userId)
-        .single();
+        .single() as any);
       
       if (profileError) {
         throw profileError;
@@ -269,7 +78,7 @@ export const sendMessageToAI = async (
       if ((profile?.lucoin_balance || 0) < messagePrice) {
         // User doesn't have enough Lucoins
         // Create a payment required message from AI
-        const { data: aiMessage, error: aiMsgError } = await supabase
+        const { data: aiMessage, error: aiMsgError } = await (supabase
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
@@ -281,7 +90,7 @@ export const sendMessageToAI = async (
             payment_status: 'pending'
           })
           .select()
-          .single();
+          .single() as any);
         
         if (aiMsgError) {
           throw aiMsgError;
@@ -311,11 +120,11 @@ export const sendMessageToAI = async (
         // If message requires payment, return without deducting balance
         if (aiResponse.requiresPayment) {
           // Save the AI response to database
-          const { data: savedMessage, error: saveError } = await supabase
+          const { data: savedMessage, error: saveError } = await (supabase
             .from('ai_messages')
             .insert(aiResponse.message)
             .select()
-            .single();
+            .single() as any);
             
           if (saveError) throw saveError;
           
@@ -327,17 +136,17 @@ export const sendMessageToAI = async (
         }
 
         // If not requiring payment, deduct Lucoins
-        const { error: updateError } = await supabase
+        const { error: updateError } = await (supabase
           .from('profiles')
           .update({ lucoin_balance: (profile?.lucoin_balance || 0) - messagePrice })
-          .eq('id', userId);
+          .eq('id', userId) as any);
         
         if (updateError) {
           throw updateError;
         }
         
         // Record the transaction
-        await supabase
+        await (supabase
           .from('lucoin_transactions')
           .insert({
             user_id: userId,
@@ -345,14 +154,14 @@ export const sendMessageToAI = async (
             transaction_type: 'ai_chat',
             description: `Chat with ${aiProfile?.name}`,
             metadata: { conversation_id: conversationId }
-          });
+          }) as any);
 
         // Save the AI response message
-        const { data: savedMessage, error: saveError } = await supabase
+        const { data: savedMessage, error: saveError } = await (supabase
           .from('ai_messages')
           .insert(aiResponse.message)
           .select()
-          .single();
+          .single() as any);
           
         if (saveError) throw saveError;
         
@@ -376,7 +185,7 @@ export const sendMessageToAI = async (
         const aiResponseText = generateMockAIResponse(message, aiProfile, true);
         
         // Save the AI response
-        const { data: aiMessage, error: aiMsgError } = await supabase
+        const { data: aiMessage, error: aiMsgError } = await (supabase
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
@@ -385,7 +194,7 @@ export const sendMessageToAI = async (
             is_ai: true
           })
           .select()
-          .single();
+          .single() as any);
         
         if (aiMsgError) {
           throw aiMsgError;
@@ -413,11 +222,11 @@ export const sendMessageToAI = async (
         if (error) throw new Error(error.message);
         
         // Save the AI response message
-        const { data: savedMessage, error: saveError } = await supabase
+        const { data: savedMessage, error: saveError } = await (supabase
           .from('ai_messages')
           .insert(aiResponse.message)
           .select()
-          .single();
+          .single() as any);
           
         if (saveError) throw saveError;
         
@@ -441,7 +250,7 @@ export const sendMessageToAI = async (
         const aiResponseText = generateMockAIResponse(message, aiProfile);
         
         // Save the AI response
-        const { data: aiMessage, error: aiMsgError } = await supabase
+        const { data: aiMessage, error: aiMsgError } = await (supabase
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
@@ -450,7 +259,7 @@ export const sendMessageToAI = async (
             is_ai: true
           })
           .select()
-          .single();
+          .single() as any);
         
         if (aiMsgError) {
           throw aiMsgError;
@@ -495,7 +304,7 @@ export const processAIMessagePayment = async (
 }> => {
   try {
     // Get the message
-    const { data: message, error: msgError } = await supabase
+    const { data: message, error: msgError } = await (supabase
       .from('ai_messages')
       .select(`
         *,
@@ -505,7 +314,7 @@ export const processAIMessagePayment = async (
         )
       `)
       .eq('id', messageId)
-      .single();
+      .single() as any);
     
     if (msgError) {
       throw msgError;
@@ -516,11 +325,11 @@ export const processAIMessagePayment = async (
     }
     
     // Check if user has enough Lucoins
-    const { data: profile, error: profileError } = await supabase
+    const { data: profile, error: profileError } = await (supabase
       .from('profiles')
       .select('lucoin_balance')
       .eq('id', userId)
-      .single();
+      .single() as any);
     
     if (profileError) {
       throw profileError;
@@ -535,17 +344,17 @@ export const processAIMessagePayment = async (
     }
     
     // Deduct Lucoins
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase
       .from('profiles')
       .update({ lucoin_balance: (profile?.lucoin_balance || 0) - ((message as any)?.price || 0) })
-      .eq('id', userId);
+      .eq('id', userId) as any);
     
     if (updateError) {
       throw updateError;
     }
     
     // Record the transaction
-    await supabase
+    await (supabase
       .from('lucoin_transactions')
       .insert({
         user_id: userId,
@@ -553,13 +362,13 @@ export const processAIMessagePayment = async (
         transaction_type: 'ai_chat',
         description: `Chat with ${(message as any)?.conversation?.ai_profile?.name}`,
         metadata: { conversation_id: (message as any)?.conversation_id }
-      });
+      }) as any);
     
     // Update message payment status
-    const { error: statusError } = await supabase
+    const { error: statusError } = await (supabase
       .from('ai_messages')
       .update({ payment_status: 'completed' })
-      .eq('id', messageId);
+      .eq('id', messageId) as any);
     
     if (statusError) {
       throw statusError;
@@ -567,14 +376,14 @@ export const processAIMessagePayment = async (
     
     // Generate and save AI response
     const aiProfile = (message as any)?.conversation?.ai_profile as AIProfile;
-    const lastUserMessage = await supabase
+    const lastUserMessage = await (supabase
       .from('ai_messages')
       .select('*')
       .eq('conversation_id', (message as any)?.conversation_id)
       .eq('is_ai', false)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .single() as any);
     
     const aiResponseText = generateMockAIResponse(
       (lastUserMessage?.data as any)?.content,
@@ -592,7 +401,7 @@ export const processAIMessagePayment = async (
     await new Promise(resolve => setTimeout(resolve, delay));
     
     // Save the AI response
-    const { data: aiMessage, error: aiMsgError } = await supabase
+    const { data: aiMessage, error: aiMsgError } = await (supabase
       .from('ai_messages')
       .insert({
         conversation_id: (message as any)?.conversation_id,
@@ -601,7 +410,7 @@ export const processAIMessagePayment = async (
         is_ai: true
       })
       .select()
-      .single();
+      .single() as any);
     
     if (aiMsgError) {
       throw aiMsgError;
@@ -623,60 +432,9 @@ export const processAIMessagePayment = async (
 };
 
 /**
- * Generate an AI image using DALL-E
- */
-export const generateAIImage = async (
-  userId: string,
-  prompt: string,
-  aiProfileId?: string
-): Promise<{
-  imageUrl?: string;
-  requiresPayment: boolean;
-  price?: number;
-  error?: string;
-}> => {
-  try {
-    const { data: result, error } = await supabase.functions.invoke('generate-ai-content', {
-      body: {
-        prompt,
-        user_id: userId,
-        ai_profile_id: aiProfileId,
-        type: 'image',
-        size: "1024x1024",
-        style: "natural"
-      }
-    });
-    
-    if (error) {
-      throw new Error(error.message);
-    }
-    
-    if (result.error) {
-      return {
-        requiresPayment: result.requiresPayment || false,
-        price: result.price,
-        error: result.error
-      };
-    }
-    
-    return {
-      imageUrl: result.image_url,
-      requiresPayment: false, // Already paid in the function
-      price: result.price
-    };
-  } catch (error: any) {
-    console.error("Error generating AI image:", error);
-    return {
-      requiresPayment: false,
-      error: error.message
-    };
-  }
-};
-
-/**
  * Helper function to generate a mock AI response based on the AI profile personality
  */
-function generateMockAIResponse(
+export function generateMockAIResponse(
   userMessage: string,
   aiProfile: AIProfile | null | undefined,
   isPremium: boolean = false
@@ -764,87 +522,3 @@ function generateMockAIResponse(
   
   return randomResponse;
 }
-
-/**
- * Mock AI Profiles for development
- */
-const mockAIProfiles: AIProfile[] = [
-  {
-    id: "ai-profile-1",
-    name: "Sophia",
-    age: 25,
-    location: "Los Angeles, CA",
-    bio: "Luxury companion with a taste for adventure. I love intellectual conversations and spontaneous encounters. Let me be your fantasy come true.",
-    avatar_url: "https://source.unsplash.com/random/400x600/?model,woman",
-    gallery_images: [
-      "https://source.unsplash.com/random/800x1000/?model,woman",
-      "https://source.unsplash.com/random/800x1000/?glamour,woman",
-      "https://source.unsplash.com/random/800x1000/?portrait,woman"
-    ],
-    personality: {
-      type: "flirty",
-      traits: ["outgoing", "adventurous", "spontaneous"],
-      responseStyle: "flirtatious and direct"
-    },
-    interests: ["travel", "fine dining", "art", "philosophy"],
-    is_ai: true,
-    systemPrompt: "You are Sophia, a confident luxury companion. Be flirtatious but sophisticated.",
-    delayed_response_min: 2000,
-    delayed_response_max: 5000,
-    created_at: "2023-01-01T00:00:00.000Z",
-    lucoin_chat_price: 5,
-    lucoin_image_price: 10
-  },
-  {
-    id: "ai-profile-2",
-    name: "Mia",
-    age: 22,
-    location: "Miami, FL",
-    bio: "Sweet and shy college student. I might seem reserved at first, but I'll open up once I get comfortable. Let's get to know each other slowly.",
-    avatar_url: "https://source.unsplash.com/random/400x600/?college,woman",
-    gallery_images: [
-      "https://source.unsplash.com/random/800x1000/?college,woman",
-      "https://source.unsplash.com/random/800x1000/?casual,woman",
-      "https://source.unsplash.com/random/800x1000/?cute,woman"
-    ],
-    personality: {
-      type: "shy",
-      traits: ["introverted", "thoughtful", "curious"],
-      responseStyle: "shy yet increasingly open"
-    },
-    interests: ["books", "coffee shops", "indie music", "photography"],
-    is_ai: true,
-    systemPrompt: "You are Mia, a shy college student. Start reserved but gradually open up.",
-    delayed_response_min: 3000,
-    delayed_response_max: 8000,
-    created_at: "2023-02-01T00:00:00.000Z",
-    lucoin_chat_price: 5,
-    lucoin_image_price: 10
-  },
-  {
-    id: "ai-profile-3",
-    name: "Mistress Raven",
-    age: 29,
-    location: "New York, NY",
-    bio: "Experienced dominatrix seeking obedient subjects. I'll take control and push your boundaries. Are you brave enough to submit?",
-    avatar_url: "https://source.unsplash.com/random/400x600/?goth,woman",
-    gallery_images: [
-      "https://source.unsplash.com/random/800x1000/?goth,woman",
-      "https://source.unsplash.com/random/800x1000/?dark,woman",
-      "https://source.unsplash.com/random/800x1000/?leather,woman"
-    ],
-    personality: {
-      type: "dominant",
-      traits: ["assertive", "commanding", "strict"],
-      responseStyle: "dominant and demanding"
-    },
-    interests: ["power dynamics", "psychology", "leather crafting", "gothic art"],
-    is_ai: true,
-    systemPrompt: "You are Mistress Raven, a stern dominatrix. Be commanding and intimidating.",
-    delayed_response_min: 1500,
-    delayed_response_max: 4000,
-    created_at: "2023-03-01T00:00:00.000Z",
-    lucoin_chat_price: 10,
-    lucoin_image_price: 20
-  }
-];

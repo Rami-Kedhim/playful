@@ -9,7 +9,7 @@ import {
   sendMessageToAI,
   processAIMessagePayment,
   generateAIImage
-} from '@/services/ai/aiProfileService';
+} from '@/services/ai';
 import { toast } from '@/components/ui/use-toast';
 
 interface UseAIMessagingProps {

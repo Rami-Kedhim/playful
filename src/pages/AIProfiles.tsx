@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { AIProfile } from '@/types/ai-profile';
-import { getAIProfiles } from '@/services/ai/aiProfileService';
+import { getAIProfiles } from '@/services/ai';
 import AppLayout from '@/components/layout/AppLayout';
 import AIProfileCard from '@/components/ai/AIProfileCard';
 import AIChat from '@/components/ai/AIChat';
