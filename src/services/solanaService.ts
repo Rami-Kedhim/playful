@@ -2,6 +2,7 @@
 import { toast } from "@/components/ui/use-toast";
 
 // The Solana RPC endpoint from Chainstack
+// TODO: Replace with your new Chainstack credentials
 const SOLANA_RPC_URL = "https://solana-mainnet.core.chainstack.com/de56bca4b4c75b9bc8b0edd691a34bef";
 const SOLANA_RPC_USERNAME = "modest-wilson";
 const SOLANA_RPC_PASSWORD = "silk-irate-open-sway-trout-twisty";
