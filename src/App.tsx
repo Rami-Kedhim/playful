@@ -17,6 +17,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ProfileManagement from "./pages/ProfileManagement";
+import Wallet from "./pages/Wallet";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RoleGuard from "./components/auth/RoleGuard";
 
@@ -45,6 +46,11 @@ const App = () => (
             <Route path="/profile" element={
               <ProtectedRoute>
                 <ProfileManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/wallet" element={
+              <ProtectedRoute>
+                <Wallet />
               </ProtectedRoute>
             } />
             {/* Role-specific routes */}

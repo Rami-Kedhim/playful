@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -63,7 +63,10 @@ export const UserMenu = ({ handleSignOut }: UserMenuProps) => {
           <Link to="/profile">Profile</Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/wallet">Wallet</Link>
+          <Link to="/wallet">
+            <Wallet className="mr-2 h-4 w-4" />
+            <span>Wallet</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
