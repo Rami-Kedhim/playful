@@ -45,7 +45,7 @@ export const useCreatorContent = (initialFilters: Partial<ContentFilters> = {}):
     error,
     filters,
     updateFilters,
-    filteredContent, // Add this missing property
+    filteredContent, // This property was previously missing and was added
     addContent,
     editContent,
     removeContent,
