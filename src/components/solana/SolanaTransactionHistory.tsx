@@ -90,6 +90,19 @@ const SolanaTransactionHistory = () => {
     window.open(`https://explorer.solana.com/tx/${signature}`, '_blank');
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'confirmed':
+        return <Badge variant="success">Confirmed</Badge>;
+      case 'pending':
+        return <Badge variant="warning">Pending</Badge>;
+      case 'failed':
+        return <Badge variant="destructive">Failed</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+
   if (!walletAddress) {
     return (
       <Card>
@@ -227,11 +240,7 @@ const SolanaTransactionHistory = () => {
                       {tx.signature.substring(0, 10)}...{tx.signature.substring(tx.signature.length - 5)}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge 
-                        variant={tx.err ? "destructive" : "success"}
-                      >
-                        {tx.err ? "Failed" : "Success"}
-                      </Badge>
+                      {getStatusBadge(tx.status)}
                       <span className="text-xs text-muted-foreground">
                         {formatTimestamp(tx.blockTime)}
                       </span>
