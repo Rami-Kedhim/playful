@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { AppLayout } from '@/components/layout/AppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -140,11 +140,7 @@ const Messages = () => {
               </div>
               <Separator />
               <ScrollArea className="h-[calc(70vh-60px)]">
-                <ConversationList 
-                  conversations={conversations} 
-                  currentConversationId={conversationId} 
-                  loading={loading} 
-                />
+                <ConversationList />
               </ScrollArea>
             </div>
             

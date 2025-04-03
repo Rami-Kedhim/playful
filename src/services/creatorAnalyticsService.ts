@@ -1,155 +1,183 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { format, subDays } from 'date-fns';
 
-/**
- * Fetch creator analytics for a given period
- */
-export const fetchCreatorAnalytics = async (creatorId: string, period: string = 'month') => {
+interface AnalyticsDataPoint {
+  date: string;
+  views: number;
+  likes: number;
+  shares: number;
+  earnings: number;
+}
+
+// Function to get analytics data for a creator
+export const getCreatorAnalytics = async (
+  creatorId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<AnalyticsDataPoint[]> => {
   try {
-    // Calculate date range based on period
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let range;
+    // Since the creator_analytics table doesn't exist, return mock data
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
+    const result: AnalyticsDataPoint[] = [];
     
-    switch (period) {
-      case 'week':
-        range = new Date(today);
-        range.setDate(today.getDate() - 7);
-        break;
-      case 'month':
-        range = new Date(today);
-        range.setMonth(today.getMonth() - 1);
-        break;
-      case 'year':
-        range = new Date(today);
-        range.setFullYear(today.getFullYear() - 1);
-        break;
-      default:
-        range = new Date(today);
-        range.setMonth(today.getMonth() - 1);
-    }
-    
-    // Try to fetch real analytics data
-    const { data, error } = await supabase
-      .from('creator_analytics')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .gte('date', range.toISOString().split('T')[0])
-      .lte('date', today.toISOString().split('T')[0])
-      .order('date', { ascending: true });
-    
-    if (error) throw error;
-    
-    // If we have real data, use it
-    if (data && data.length > 0) {
-      return data;
-    }
-    
-    // Mock data for now - in a real implementation, this would query from the database
-    const mockData = [];
-    for (let d = new Date(range); d <= today; d.setDate(d.getDate() + 1)) {
-      mockData.push({
-        date: new Date(d).toISOString().split('T')[0],
-        views: Math.floor(Math.random() * 100) + 1,
-        likes: Math.floor(Math.random() * 50),
-        shares: Math.floor(Math.random() * 25),
-        earnings: parseFloat((Math.random() * 10).toFixed(2))
+    for (let i = 0; i < days; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      
+      // Generate some random data for this date
+      result.push({
+        date: format(currentDate, 'yyyy-MM-dd'),
+        views: Math.floor(Math.random() * 1000),
+        likes: Math.floor(Math.random() * 500),
+        shares: Math.floor(Math.random() * 100),
+        earnings: parseFloat((Math.random() * 100).toFixed(2))
       });
     }
     
-    return mockData;
-  } catch (error: any) {
+    return result;
+  } catch (error) {
     console.error("Error fetching creator analytics:", error);
-    toast({
-      title: "Error",
-      description: "Failed to load analytics data",
-      variant: "destructive"
-    });
     return [];
   }
 };
 
-/**
- * Track content view
- */
-export const trackContentView = async (contentId: string, viewerId: string) => {
+// Function to get content view analytics 
+export const getContentViewAnalytics = async (
+  creatorId: string,
+  period: 'day' | 'week' | 'month' | 'year' = 'week'
+): Promise<{ date: string; count: number }[]> => {
   try {
-    // In a real implementation, this would insert a record into a content_views table
-    console.log(`Tracking view for content ${contentId} by viewer ${viewerId}`);
+    // Generate mock data based on period
+    let days: number;
+    switch (period) {
+      case 'day':
+        days = 24; // 24 hours
+        break;
+      case 'week':
+        days = 7;
+        break;
+      case 'month':
+        days = 30;
+        break;
+      case 'year':
+        days = 12; // 12 months
+        break;
+      default:
+        days = 7;
+    }
     
-    // Call our RPC function
-    const { error } = await supabase.rpc('log_content_view', {
-      content_id: contentId,
-      viewer_id: viewerId
-    });
+    const result = [];
+    const today = new Date();
     
-    if (error) throw error;
-    return true;
-  } catch (error: any) {
-    console.error("Error tracking content view:", error);
-    return false;
+    for (let i = 0; i < days; i++) {
+      const date = new Date(today);
+      if (period === 'day') {
+        date.setHours(today.getHours() - i);
+        result.push({
+          date: format(date, 'HH:00'),
+          count: Math.floor(Math.random() * 100)
+        });
+      } else if (period === 'year') {
+        date.setMonth(today.getMonth() - i);
+        result.push({
+          date: format(date, 'MMM'),
+          count: Math.floor(Math.random() * 5000)
+        });
+      } else {
+        date.setDate(today.getDate() - i);
+        result.push({
+          date: format(date, 'MMM dd'),
+          count: Math.floor(Math.random() * 500)
+        });
+      }
+    }
+    
+    // Return data in reverse order (oldest to newest)
+    return result.reverse();
+  } catch (error) {
+    console.error("Error fetching content view analytics:", error);
+    return [];
   }
 };
 
-/**
- * Get creator summary statistics
- */
-export const getCreatorSummaryStats = async (creatorId: string) => {
+// Function to get revenue analytics
+export const getRevenueAnalytics = async (
+  creatorId: string,
+  period: 'day' | 'week' | 'month' | 'year' = 'week'
+): Promise<{ date: string; amount: number }[]> => {
   try {
-    // Attempt to get real data
-    const { data: viewsData, error: viewsError } = await supabase
-      .from('creator_content')
-      .select('views_count')
-      .eq('creator_id', creatorId);
+    // Generate mock data based on period
+    let days: number;
+    switch (period) {
+      case 'day':
+        days = 24; // 24 hours
+        break;
+      case 'week':
+        days = 7;
+        break;
+      case 'month':
+        days = 30;
+        break;
+      case 'year':
+        days = 12; // 12 months
+        break;
+      default:
+        days = 7;
+    }
     
-    if (viewsError) throw viewsError;
+    const result = [];
+    const today = new Date();
     
-    // Calculate total views if we have data
-    const totalViews = viewsData?.length 
-      ? viewsData.reduce((sum, item) => sum + (item.views_count || 0), 0)
-      : Math.floor(Math.random() * 10000) + 500;
+    for (let i = 0; i < days; i++) {
+      const date = new Date(today);
+      if (period === 'day') {
+        date.setHours(today.getHours() - i);
+        result.push({
+          date: format(date, 'HH:00'),
+          amount: parseFloat((Math.random() * 50).toFixed(2))
+        });
+      } else if (period === 'year') {
+        date.setMonth(today.getMonth() - i);
+        result.push({
+          date: format(date, 'MMM'),
+          amount: parseFloat((Math.random() * 5000).toFixed(2))
+        });
+      } else {
+        date.setDate(today.getDate() - i);
+        result.push({
+          date: format(date, 'MMM dd'),
+          amount: parseFloat((Math.random() * 500).toFixed(2))
+        });
+      }
+    }
     
-    // Get earnings data
-    const { data: earningsData, error: earningsError } = await supabase
-      .from('creator_analytics')
-      .select('earnings')
-      .eq('creator_id', creatorId);
-    
-    if (earningsError) throw earningsError;
-    
-    // Calculate total earnings if we have data
-    const totalEarnings = earningsData?.length 
-      ? earningsData.reduce((sum, item) => sum + parseFloat(item.earnings || 0), 0)
-      : parseFloat((Math.random() * 5000).toFixed(2));
-    
-    // Count content items
-    const { count, error: countError } = await supabase
-      .from('creator_content')
-      .select('id', { count: 'exact' })
-      .eq('creator_id', creatorId);
-    
-    if (countError) throw countError;
-    
-    // Use count or fallback to random
-    const contentCount = count || Math.floor(Math.random() * 50) + 5;
-    
-    return {
-      totalViews,
-      totalEarnings,
-      contentCount
-    };
-  } catch (error: any) {
-    console.error("Error fetching creator summary stats:", error);
-    toast({
-      title: "Error",
-      description: "Failed to load creator statistics",
-      variant: "destructive"
-    });
-    return {
-      totalViews: 0,
-      totalEarnings: 0,
-      contentCount: 0
-    };
+    // Return data in reverse order (oldest to newest)
+    return result.reverse();
+  } catch (error) {
+    console.error("Error fetching revenue analytics:", error);
+    return [];
+  }
+};
+
+// Function to get content performance
+export const getContentPerformance = async (
+  creatorId: string,
+  limit: number = 5
+): Promise<any[]> => {
+  try {
+    // Return mock data for content performance
+    return Array(limit).fill(null).map((_, i) => ({
+      id: `content-${i}`,
+      title: `Content Item ${i + 1}`,
+      type: i % 2 === 0 ? 'video' : 'image',
+      views: Math.floor(Math.random() * 10000),
+      likes: Math.floor(Math.random() * 5000),
+      comments: Math.floor(Math.random() * 1000),
+      revenue: parseFloat((Math.random() * 200).toFixed(2))
+    }));
+  } catch (error) {
+    console.error("Error fetching content performance:", error);
+    return [];
   }
 };

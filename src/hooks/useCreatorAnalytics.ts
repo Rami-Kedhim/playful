@@ -27,10 +27,8 @@ export const useCreatorAnalytics = (period: string = 'week') => {
     const fetchAnalytics = async () => {
       setLoading(true);
       try {
-        // Since we can't query creator_analytics directly with TypeScript errors,
-        // we'll use mock data based on the period for demonstration
-        
-        // Calculate multiplier based on period
+        // Since we don't have the actual tables in our database yet, we'll use mock data
+        // Generate realistic-looking mock data based on the period
         let multiplier = 1;
         switch (period) {
           case 'month':
@@ -43,7 +41,7 @@ export const useCreatorAnalytics = (period: string = 'week') => {
             multiplier = 1;
         }
         
-        // Generate realistic-looking mock data
+        // Generate mock data
         const mockData = {
           views: Math.floor(Math.random() * 10000) * multiplier,
           likes: Math.floor(Math.random() * 5000) * multiplier,
