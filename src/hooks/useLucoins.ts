@@ -47,6 +47,8 @@ export interface TransactionHistory {
 export const useLucoins = () => {
   const [loading, setLoading] = useState(false);
   const [packages, setPackages] = useState<LucoinPackage[]>([]);
+  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
+  const [giftItems, setGiftItems] = useState<GiftItem[]>([]);
   const { user, refreshProfile } = useAuth();
 
   /**
@@ -345,6 +347,219 @@ export const useLucoins = () => {
   };
 
   /**
+   * Fetch available boost packages
+   */
+  const fetchBoostPackages = async (): Promise<BoostPackage[]> => {
+    try {
+      setLoading(true);
+      
+      // Use direct table query with type assertion
+      const { data: boostData, error: boostError } = await supabase
+        .from('boost_packages' as any)
+        .select('*')
+        .eq('is_active', true);
+      
+      if (boostError) {
+        console.error("Error fetching boost packages:", boostError);
+        
+        // Fallback to hardcoded packages if we can't fetch from DB
+        const fallbackBoosts = [
+          {
+            id: "boost1",
+            name: "Daily Boost",
+            duration: "24:00:00",
+            price_lucoin: 50,
+            description: "Boost your profile for 24 hours",
+            is_active: true
+          },
+          {
+            id: "boost2",
+            name: "Weekly Boost",
+            duration: "168:00:00",
+            price_lucoin: 200,
+            description: "Boost your profile for 7 days",
+            is_active: true
+          },
+          {
+            id: "boost3",
+            name: "Monthly Boost",
+            duration: "720:00:00",
+            price_lucoin: 500,
+            description: "Boost your profile for 30 days",
+            is_active: true
+          }
+        ];
+        
+        setBoostPackages(fallbackBoosts);
+        return fallbackBoosts;
+      }
+      
+      // Map the data to our expected format
+      const boostList: BoostPackage[] = (boostData || []).map((pkg: any) => ({
+        id: pkg.id,
+        name: pkg.name,
+        duration: pkg.duration,
+        price_lucoin: pkg.price,
+        description: pkg.description,
+        is_active: pkg.is_active
+      }));
+      
+      setBoostPackages(boostList);
+      return boostList;
+    } catch (error: any) {
+      console.error("Error fetching boost packages:", error);
+      toast({
+        title: "Error loading boost packages",
+        description: error.message,
+        variant: "destructive",
+      });
+      
+      // Return fallback packages on error
+      const fallbackBoosts = [
+        {
+          id: "boost1",
+          name: "Daily Boost",
+          duration: "24:00:00",
+          price_lucoin: 50,
+          description: "Boost your profile for 24 hours",
+          is_active: true
+        },
+        {
+          id: "boost2",
+          name: "Weekly Boost",
+          duration: "168:00:00",
+          price_lucoin: 200,
+          description: "Boost your profile for 7 days",
+          is_active: true
+        },
+        {
+          id: "boost3",
+          name: "Monthly Boost",
+          duration: "720:00:00",
+          price_lucoin: 500,
+          description: "Boost your profile for 30 days",
+          is_active: true
+        }
+      ];
+      
+      setBoostPackages(fallbackBoosts);
+      return fallbackBoosts;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Fetch available gift items
+   */
+  const fetchGiftItems = async (): Promise<GiftItem[]> => {
+    try {
+      setLoading(true);
+      
+      // Use direct table query with type assertion
+      const { data: giftData, error: giftError } = await supabase
+        .from('gift_items' as any)
+        .select('*')
+        .eq('is_active', true);
+      
+      if (giftError) {
+        console.error("Error fetching gift items:", giftError);
+        
+        // Fallback to hardcoded gifts if we can't fetch from DB
+        const fallbackGifts = [
+          {
+            id: "gift1",
+            name: "Rose",
+            description: "A beautiful rose for a beautiful person",
+            price_lucoin: 20,
+            animation_url: "/gifts/rose.gif",
+            thumbnail_url: "/gifts/rose_thumb.png",
+            is_active: true
+          },
+          {
+            id: "gift2",
+            name: "Heart",
+            description: "Show your appreciation with a heart",
+            price_lucoin: 50,
+            animation_url: "/gifts/heart.gif",
+            thumbnail_url: "/gifts/heart_thumb.png",
+            is_active: true
+          },
+          {
+            id: "gift3",
+            name: "Diamond",
+            description: "For someone truly special",
+            price_lucoin: 100,
+            animation_url: "/gifts/diamond.gif",
+            thumbnail_url: "/gifts/diamond_thumb.png",
+            is_active: true
+          }
+        ];
+        
+        setGiftItems(fallbackGifts);
+        return fallbackGifts;
+      }
+      
+      // Map the data to our expected format
+      const giftsList: GiftItem[] = (giftData || []).map((gift: any) => ({
+        id: gift.id,
+        name: gift.name,
+        description: gift.description,
+        price_lucoin: gift.price_lucoin,
+        animation_url: gift.animation_url,
+        thumbnail_url: gift.thumbnail_url,
+        is_active: gift.is_active
+      }));
+      
+      setGiftItems(giftsList);
+      return giftsList;
+    } catch (error: any) {
+      console.error("Error fetching gift items:", error);
+      toast({
+        title: "Error loading gift items",
+        description: error.message,
+        variant: "destructive",
+      });
+      
+      // Return fallback gifts on error
+      const fallbackGifts = [
+        {
+          id: "gift1",
+          name: "Rose",
+          description: "A beautiful rose for a beautiful person",
+          price_lucoin: 20,
+          animation_url: "/gifts/rose.gif",
+          thumbnail_url: "/gifts/rose_thumb.png",
+          is_active: true
+        },
+        {
+          id: "gift2",
+          name: "Heart",
+          description: "Show your appreciation with a heart",
+          price_lucoin: 50,
+          animation_url: "/gifts/heart.gif",
+          thumbnail_url: "/gifts/heart_thumb.png",
+          is_active: true
+        },
+        {
+          id: "gift3",
+          name: "Diamond",
+          description: "For someone truly special",
+          price_lucoin: 100,
+          animation_url: "/gifts/diamond.gif",
+          thumbnail_url: "/gifts/diamond_thumb.png",
+          is_active: true
+        }
+      ];
+      
+      setGiftItems(fallbackGifts);
+      return fallbackGifts;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
    * Purchase a boost package with Lucoins
    */
   const purchaseBoost = async (boostPackageId: string): Promise<boolean> => {
@@ -524,14 +739,16 @@ export const useLucoins = () => {
   return { 
     loading,
     packages,
+    boostPackages,
+    giftItems,
     fetchPackages, 
+    fetchBoostPackages,
+    fetchGiftItems,
     purchasePackage,
     purchasePackageWithSol,
     getTransactionHistory,
-    fetchBoostPackages,
     purchaseBoost,
     isProfileBoosted,
-    fetchGiftItems,
     sendGift
   };
 };
