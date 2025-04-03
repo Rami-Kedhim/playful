@@ -1,10 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { CreatorReview } from "@/types/creator";
 
 /**
  * Fetch reviews for a creator
  */
-export const fetchCreatorReviews = async (creatorId: string) => {
+export const fetchCreatorReviews = async (creatorId: string): Promise<CreatorReview[]> => {
   try {
     // Try to fetch real reviews from database
     const { data: realReviews, error } = await supabase
@@ -36,7 +37,7 @@ export const fetchCreatorReviews = async (creatorId: string) => {
     }
     
     // Otherwise generate mock review data for demonstration
-    const mockReviews = Array.from({ length: 8 }, (_, i) => ({
+    const mockReviews: CreatorReview[] = Array.from({ length: 8 }, (_, i) => ({
       id: `review-${i}`,
       creator_id: creatorId,
       reviewer_id: `user-${i}`,
@@ -65,7 +66,12 @@ export const fetchCreatorReviews = async (creatorId: string) => {
 /**
  * Add a review for a creator
  */
-export const addCreatorReview = async (creatorId: string, reviewerId: string, rating: number, comment?: string) => {
+export const addCreatorReview = async (
+  creatorId: string, 
+  reviewerId: string, 
+  rating: number, 
+  comment?: string
+): Promise<CreatorReview | null> => {
   try {
     // Insert review into database
     const { data, error } = await supabase
@@ -87,7 +93,7 @@ export const addCreatorReview = async (creatorId: string, reviewerId: string, ra
       variant: "default",
     });
     
-    return data;
+    return data as CreatorReview;
   } catch (error: any) {
     console.error("Error submitting review:", error);
     toast({
