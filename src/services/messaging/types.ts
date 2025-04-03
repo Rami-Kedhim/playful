@@ -25,10 +25,10 @@ export interface Conversation {
 
 export type MessagingSchema = 'direct' | 'conversation' | 'none';
 
-// For the useContentFilters issue
+// Updated ContentFilters to match the hooks/content/types.ts format
 export interface ContentFilters {
   status: "published" | "draft" | "scheduled" | undefined;
-  searchQuery?: string;
+  searchQuery: string;  // Changed from optional to required to match the format in types.ts
   contentType?: string;
   sort?: "newest" | "oldest" | "title_asc" | "title_desc" | "most_viewed" | "least_viewed";
 }

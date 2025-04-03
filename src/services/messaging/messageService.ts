@@ -1,8 +1,12 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { getMessagingSchema } from "./schemaDetection";
 import { Message } from "./types";
 
+/**
+ * Fetch messages between two users
+ */
 export const fetchMessages = async (userId: string, otherUserId: string): Promise<Message[]> => {
   try {
     // Determine which messaging schema is being used
@@ -28,12 +32,20 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
   }
 };
 
+/**
+ * Fetch messages using the direct messaging schema
+ */
 async function fetchDirectMessages(userId: string, otherUserId: string): Promise<Message[]> {
   try {
+    // Create a safer query condition
+    const condition = `(sender_id.eq.${userId}.and.receiver_id.eq.${otherUserId})
+                       .or.
+                       (sender_id.eq.${otherUserId}.and.receiver_id.eq.${userId})`;
+    
     const { data, error } = await supabase
       .from('messages')
       .select('*')
-      .or(`and(sender_id.eq.${userId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${userId})`)
+      .or(condition)
       .order('created_at');
     
     if (error) throw error;
@@ -44,7 +56,7 @@ async function fetchDirectMessages(userId: string, otherUserId: string): Promise
     const messages: Message[] = data.map(msg => ({
       id: msg.id,
       sender_id: msg.sender_id,
-      receiver_id: msg.receiver_id,
+      receiver_id: msg.sender_id === userId ? otherUserId : userId, // Ensure receiver_id is set
       content: msg.content,
       created_at: msg.created_at,
       read: msg.read_at !== null
@@ -57,6 +69,9 @@ async function fetchDirectMessages(userId: string, otherUserId: string): Promise
   }
 }
 
+/**
+ * Fetch messages using the conversation schema
+ */
 async function fetchConversationMessages(userId: string, otherUserId: string): Promise<Message[]> {
   try {
     // Find conversations that both users are part of
@@ -99,12 +114,11 @@ async function fetchConversationMessages(userId: string, otherUserId: string): P
       .eq('conversation_id', conversationId)
       .order('created_at');
       
-    if (msgError || !Array.isArray(data)) {
+    if (msgError || !Array.isArray(data) || data.length === 0) {
       return [];
     }
     
-    // Convert the data to match our Message interface - for conversation model,
-    // we need to infer the receiver_id as it's not stored in the messages table
+    // Convert the data to match our Message interface
     const messages: Message[] = data.map(msg => ({
       id: msg.id,
       sender_id: msg.sender_id,
@@ -122,6 +136,9 @@ async function fetchConversationMessages(userId: string, otherUserId: string): P
   }
 }
 
+/**
+ * Send a message from one user to another
+ */
 export const sendMessage = async (senderId: string, receiverId: string, content: string): Promise<Message | null> => {
   try {
     // Determine which messaging schema is being used
@@ -145,14 +162,18 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
   }
 };
 
+/**
+ * Send a message using the direct messaging schema
+ */
 async function sendDirectMessage(senderId: string, receiverId: string, content: string): Promise<Message | null> {
   try {
+    // In direct message schema, we directly insert a message with sender and receiver
     const { data, error } = await supabase
       .from('messages')
       .insert({
         sender_id: senderId,
         receiver_id: receiverId,
-        content
+        content: content
       })
       .select()
       .single();
@@ -165,7 +186,7 @@ async function sendDirectMessage(senderId: string, receiverId: string, content: 
     const message: Message = {
       id: data.id,
       sender_id: data.sender_id,
-      receiver_id: data.receiver_id,
+      receiver_id: data.receiver_id || receiverId, // Use provided receiverId as fallback
       content: data.content,
       created_at: data.created_at,
       read: false
@@ -178,6 +199,9 @@ async function sendDirectMessage(senderId: string, receiverId: string, content: 
   }
 }
 
+/**
+ * Send a message using the conversation schema
+ */
 async function sendConversationMessage(senderId: string, receiverId: string, content: string): Promise<Message | null> {
   try {
     // First check if a conversation exists between these users
@@ -232,11 +256,11 @@ async function sendConversationMessage(senderId: string, receiverId: string, con
       if (participantsError) throw participantsError;
     }
     
-    // Now insert the message
+    // Now insert the message - only include fields that exist in the schema
     const messageData = {
       conversation_id: conversationId,
       sender_id: senderId,
-      content
+      content: content
     };
     
     const { data, error } = await supabase

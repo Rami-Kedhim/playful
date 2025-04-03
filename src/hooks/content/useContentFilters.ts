@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { ContentFilters } from '@/services/messaging/types';
 
 const defaultFilters: ContentFilters = {
@@ -9,8 +9,11 @@ const defaultFilters: ContentFilters = {
   sort: 'newest'
 };
 
-export const useContentFilters = () => {
-  const [filters, setFilters] = useState<ContentFilters>(defaultFilters);
+export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}) => {
+  const [filters, setFilters] = useState<ContentFilters>({
+    ...defaultFilters,
+    ...initialFilters
+  });
 
   const updateFilter = useCallback((
     key: keyof ContentFilters,
@@ -33,10 +36,42 @@ export const useContentFilters = () => {
     }));
   }, []);
 
+  // Add updateFilters method for compatibility
+  const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
+    setFilters(prev => ({
+      ...prev,
+      ...newFilters,
+    }));
+  }, []);
+
+  // Add filteredContent method
+  const filteredContent = useCallback((content: any[]) => {
+    return content.filter(item => {
+      // Filter by search query
+      if (filters.searchQuery && !item.title?.toLowerCase().includes(filters.searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      // Filter by content type
+      if (filters.contentType && item.contentType !== filters.contentType) {
+        return false;
+      }
+      
+      // Filter by status
+      if (filters.status && item.status !== filters.status) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [filters]);
+
   return {
     filters,
     updateFilter,
     resetFilters,
-    setMultipleFilters
+    setMultipleFilters,
+    updateFilters,
+    filteredContent
   };
 };

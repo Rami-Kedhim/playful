@@ -4,12 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ContentItem, getCreatorContent } from "@/services/contentService";
 import { useContentFilters } from "./useContentFilters";
 import { useContentActions } from "./useContentActions";
-import { ContentFilters, UseCreatorContentReturn, ContentError } from "./types";
+import { ContentFilters as InternalContentFilters, UseCreatorContentReturn, ContentError } from "./types";
+import { ContentFilters as ExternalContentFilters } from "@/services/messaging/types";
 
 // Cache timeouts in milliseconds
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-export const useCreatorContent = (initialFilters: Partial<ContentFilters> = {}): UseCreatorContentReturn => {
+export const useCreatorContent = (initialFilters: Partial<ExternalContentFilters> = {}): UseCreatorContentReturn => {
   const { user } = useAuth();
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,11 +20,11 @@ export const useCreatorContent = (initialFilters: Partial<ContentFilters> = {}):
   const cacheTimestamp = useRef<number>(0);
   const isMounted = useRef(true);
   
-  // Get filter functionality
-  const { filters, updateFilters, filteredContent } = useContentFilters(initialFilters);
+  // Get filter functionality - convert to internal format
+  const { filters, updateFilters, filteredContent } = useContentFilters(initialFilters as any);
   
   // Get content actions
-  const { addContent, editContent, removeContent, publishDraft } = useContentActions(filters, setContent);
+  const { addContent, editContent, removeContent, publishDraft } = useContentActions(filters as any, setContent);
   
   // Create a function to check if we should bypass cache
   const shouldFetchData = useCallback((forceRefresh = false) => {
@@ -100,11 +101,12 @@ export const useCreatorContent = (initialFilters: Partial<ContentFilters> = {}):
     };
   }, []);
   
+  // Cast filters to match the expected return type
   return {
     content: filteredContent(content),
     loading,
     error,
-    filters,
+    filters: filters as any,
     updateFilters,
     filteredContent,
     addContent,

@@ -2,21 +2,21 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { getMessagingSchema } from "./schemaDetection";
-import { determineUserType, safeGet } from "./utils";
 import { Conversation } from "./types";
 
+/**
+ * Fetch the list of conversations for a user
+ */
 export const fetchConversations = async (userId: string): Promise<Conversation[]> => {
   try {
     // Determine which messaging schema is being used
     const messagingSchema = await getMessagingSchema();
-    console.log("Detected messaging schema:", messagingSchema);
     
     if (messagingSchema === 'direct') {
       return await fetchDirectConversations(userId);
     } else if (messagingSchema === 'conversation') {
-      return await fetchConversationBasedConversations(userId);
+      return await fetchConversationSchema(userId);
     } else {
-      // No compatible messaging schema found
       console.error("No compatible messaging schema found");
       return [];
     }
@@ -31,152 +31,227 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
   }
 };
 
+/**
+ * Fetch conversations from direct messages schema
+ */
 async function fetchDirectConversations(userId: string): Promise<Conversation[]> {
   try {
-    const { data, error } = await supabase
+    // First get all the unique user IDs that the current user has exchanged messages with
+    const { data: messagePartners, error: partnerError } = await supabase
       .from('messages')
-      .select(`
-        id,
-        content,
-        created_at,
-        sender_id,
-        read_at,
-        receiver_id,
-        profiles!sender_id(id, username, avatar_url, is_content_creator, is_escort)
-      `)
+      .select('sender_id, receiver_id')
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (partnerError) throw partnerError;
     
-    if (!data || !Array.isArray(data) || data.length === 0) return [];
+    if (!messagePartners || messagePartners.length === 0) {
+      return [];
+    }
     
-    // Process the data to create a conversations list
-    const conversationsMap = new Map<string, Conversation>();
-    
-    data.forEach(message => {
-      try {
-        // Check if the message object has the required properties
-        if (!message || typeof message !== 'object') return;
-        
-        // For each message, determine the other user (conversation participant)
-        const otherUserId = message.sender_id === userId ? message.receiver_id : message.sender_id;
-        if (!otherUserId) return;
-        
-        // Check if profiles data exists and has the required properties
-        const profileData = message.profiles || {};
-        
-        if (!conversationsMap.has(otherUserId)) {
-          // Safely access profile properties with fallbacks
-          const profileName = safeGet(profileData, 'username', "Unknown User");
-          const profileAvatar = safeGet(profileData, 'avatar_url', null);
-          
-          conversationsMap.set(otherUserId, {
-            id: otherUserId,
-            last_message: message.content || "",
-            last_message_time: message.created_at || new Date().toISOString(),
-            unread_count: (message.sender_id !== userId && !message.read_at) ? 1 : 0,
-            participant: {
-              id: otherUserId,
-              name: profileName,
-              avatar_url: profileAvatar,
-              type: determineUserType(profileData)
-            }
-          });
-        }
-      } catch (err) {
-        console.error("Error processing message:", err);
+    // Extract unique user IDs that are not the current user
+    const uniquePartnerIds = new Set<string>();
+    messagePartners.forEach(msg => {
+      if (msg && msg.sender_id !== userId) {
+        uniquePartnerIds.add(msg.sender_id);
+      }
+      if (msg && msg.receiver_id !== userId) {
+        uniquePartnerIds.add(msg.receiver_id);
       }
     });
     
-    return Array.from(conversationsMap.values());
+    // Now fetch the last message for each conversation
+    const conversations: Conversation[] = [];
+    
+    for (const partnerId of uniquePartnerIds) {
+      // Get the last message between these users
+      const { data: lastMessage, error: msgError } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${userId},receiver_id.eq.${partnerId}),and(sender_id.eq.${partnerId},receiver_id.eq.${userId})`)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (msgError) {
+        console.error(`Error fetching last message with ${partnerId}:`, msgError);
+        continue;
+      }
+      
+      if (!lastMessage) continue;
+      
+      // Get unread count
+      const { count: unreadCount, error: countError } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('sender_id', partnerId)
+        .eq('receiver_id', userId)
+        .is('read_at', null);
+      
+      if (countError) {
+        console.error(`Error counting unread messages from ${partnerId}:`, countError);
+        continue;
+      }
+      
+      // Get user details
+      const { data: partnerProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url, is_escort, is_content_creator')
+        .eq('id', partnerId)
+        .single();
+      
+      if (profileError) {
+        console.error(`Error fetching profile for ${partnerId}:`, profileError);
+        continue;
+      }
+      
+      if (!partnerProfile) continue;
+      
+      // Determine partner type
+      let partnerType: "creator" | "escort" | "user" = "user";
+      if (partnerProfile.is_content_creator) {
+        partnerType = "creator";
+      } else if (partnerProfile.is_escort) {
+        partnerType = "escort";
+      }
+      
+      // Add to conversations array
+      conversations.push({
+        id: partnerId, // In direct message model, we use the partner ID as the conversation ID
+        last_message: lastMessage.content,
+        last_message_time: lastMessage.created_at,
+        unread_count: unreadCount || 0,
+        participant: {
+          id: partnerId,
+          name: partnerProfile.username || 'Anonymous User',
+          avatar_url: partnerProfile.avatar_url,
+          type: partnerType
+        }
+      });
+    }
+    
+    // Sort by last message time, newest first
+    return conversations.sort((a, b) => 
+      new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+    );
   } catch (err) {
-    console.error("Error in direct conversations:", err);
+    console.error("Error in fetchDirectConversations:", err);
     return [];
   }
 }
 
-async function fetchConversationBasedConversations(userId: string): Promise<Conversation[]> {
+/**
+ * Fetch conversations from the conversation schema
+ */
+async function fetchConversationSchema(userId: string): Promise<Conversation[]> {
   try {
-    // First get all conversations this user is a part of
+    // Get all conversations the user is part of
     const { data: userConversations, error: convError } = await supabase
       .from('conversation_participants')
       .select('conversation_id')
       .eq('user_id', userId);
       
-    if (convError || !userConversations || userConversations.length === 0) {
+    if (convError) throw convError;
+    if (!userConversations || userConversations.length === 0) {
       return [];
     }
     
     const conversationIds = userConversations.map(c => c.conversation_id);
     
-    // Then get all conversation participants for those conversations except the current user
-    const { data: participants, error: partError } = await supabase
-      .from('conversation_participants')
-      .select(`
-        conversation_id,
-        user_id,
-        profiles(id, username, avatar_url, is_content_creator, is_escort)
-      `)
-      .in('conversation_id', conversationIds)
-      .neq('user_id', userId);
-      
-    if (partError || !participants) return [];
-    
-    // Get the last message for each conversation
-    const { data: lastMessages, error: msgError } = await supabase
-      .from('messages')
-      .select('*')
-      .in('conversation_id', conversationIds)
-      .order('created_at', { ascending: false });
-      
-    if (msgError) return [];
-    
-    // Build the conversations with the data we have
+    // For each conversation, get the last message and other participant
     const conversations: Conversation[] = [];
     
-    for (const participant of participants) {
-      try {
-        const conversationId = participant.conversation_id;
-        // Find the last message for this conversation
-        const lastMessage = Array.isArray(lastMessages) ? 
-          lastMessages.find(m => m.conversation_id === conversationId) : null;
+    for (const conversationId of conversationIds) {
+      // Get other participants in this conversation
+      const { data: participants, error: partError } = await supabase
+        .from('conversation_participants')
+        .select('user_id')
+        .eq('conversation_id', conversationId)
+        .neq('user_id', userId);
         
-        if (!lastMessage) continue;
-        
-        // Get profile data safely
-        const profileData = participant.profiles || {};
-        const profileName = safeGet(profileData, 'username', "Unknown User");
-        const profileAvatar = safeGet(profileData, 'avatar_url', null);
-        
-        // Count unread messages
-        const unreadCount = Array.isArray(lastMessages) ? 
-          lastMessages.filter(m => 
-            m.conversation_id === conversationId && 
-            m.sender_id !== userId && 
-            !m.read_at
-          ).length : 0;
-        
-        conversations.push({
-          id: conversationId,
-          last_message: lastMessage.content || "",
-          last_message_time: lastMessage.created_at || new Date().toISOString(),
-          unread_count: unreadCount,
-          participant: {
-            id: participant.user_id,
-            name: profileName,
-            avatar_url: profileAvatar,
-            type: determineUserType(profileData)
-          }
-        });
-      } catch (err) {
-        console.error("Error building conversation:", err);
+      if (partError) {
+        console.error(`Error fetching participants for conversation ${conversationId}:`, partError);
+        continue;
       }
+      
+      if (!participants || participants.length === 0) continue;
+      
+      // For simplicity, we'll just use the first other participant (most conversations will be 1:1)
+      const partnerId = participants[0].user_id;
+      
+      // Get last message
+      const { data: messages, error: msgError } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+        
+      if (msgError) {
+        console.error(`Error fetching messages for conversation ${conversationId}:`, msgError);
+        continue;
+      }
+      
+      if (!messages || messages.length === 0) continue;
+      
+      const lastMessage = messages[0];
+      
+      // Get unread count
+      const { count: unreadCount, error: countError } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', userId)
+        .is('read_at', null);
+        
+      if (countError) {
+        console.error(`Error counting unread messages for conversation ${conversationId}:`, countError);
+        continue;
+      }
+      
+      // Get partner profile
+      const { data: partnerProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url, is_escort, is_content_creator')
+        .eq('id', partnerId)
+        .single();
+        
+      if (profileError) {
+        console.error(`Error fetching profile for ${partnerId}:`, profileError);
+        continue;
+      }
+      
+      if (!partnerProfile) continue;
+      
+      // Determine partner type
+      let partnerType: "creator" | "escort" | "user" = "user";
+      if (partnerProfile.is_content_creator) {
+        partnerType = "creator";
+      } else if (partnerProfile.is_escort) {
+        partnerType = "escort";
+      }
+      
+      // Add to conversations array
+      conversations.push({
+        id: conversationId,
+        last_message: lastMessage.content,
+        last_message_time: lastMessage.created_at,
+        unread_count: unreadCount || 0,
+        participant: {
+          id: partnerId,
+          name: partnerProfile.username || 'Anonymous User',
+          avatar_url: partnerProfile.avatar_url,
+          type: partnerType
+        }
+      });
     }
     
-    return conversations;
-  } catch (error) {
-    console.error("Error in conversation-based model:", error);
+    // Sort by last message time, newest first
+    return conversations.sort((a, b) => 
+      new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+    );
+  } catch (err) {
+    console.error("Error in fetchConversationSchema:", err);
     return [];
   }
 }
