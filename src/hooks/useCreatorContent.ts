@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { fetchCreatorContent, saveContent, updateContent } from "@/services/creator/creatorContentService";
+import { useState, useEffect, useCallback } from "react";
+import { fetchCreatorContent, saveContent, updateContent, deleteContent, getContentDetail } from "@/services/creator";
 import { CreatorContent } from "@/types/creator";
 import { toast } from "@/components/ui/use-toast";
 
@@ -12,13 +12,15 @@ export const useCreatorContent = (creatorId: string) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [filters, setFilters] = useState<Record<string, any>>({});
+  const [selectedContent, setSelectedContent] = useState<CreatorContent | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
-  const loadContent = async (page = currentPage, filters = {}) => {
+  const loadContent = useCallback(async (page = currentPage, currentFilters = filters) => {
     setLoading(true);
     setError(null);
     
     try {
-      const result = await fetchCreatorContent(creatorId, page, itemsPerPage, filters);
+      const result = await fetchCreatorContent(creatorId, page, itemsPerPage, currentFilters);
       setContent(result.data);
       setTotalItems(result.totalCount);
       setCurrentPage(page);
@@ -34,7 +36,7 @@ export const useCreatorContent = (creatorId: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [creatorId, currentPage, filters, itemsPerPage]);
 
   const handleSaveContent = async (contentData: Partial<CreatorContent>) => {
     try {
@@ -54,7 +56,7 @@ export const useCreatorContent = (creatorId: string) => {
   const handleUpdateContent = async (contentId: string, contentData: Partial<CreatorContent>) => {
     try {
       const result = await updateContent(contentId, contentData);
-      if (result.success) {
+      if (result.success && result.data) {
         // Update the content in the local state
         setContent(prevContent => 
           prevContent.map(item => 
@@ -70,11 +72,45 @@ export const useCreatorContent = (creatorId: string) => {
     }
   };
 
+  const handleDeleteContent = async (contentId: string) => {
+    try {
+      const result = await deleteContent(contentId);
+      if (result.success) {
+        // Remove the content from the local state
+        setContent(prevContent => 
+          prevContent.filter(item => item.id !== contentId)
+        );
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Error deleting content:", err);
+      return false;
+    }
+  };
+
+  const fetchContentDetail = async (contentId: string) => {
+    setLoadingDetail(true);
+    try {
+      const result = await getContentDetail(contentId);
+      if (result.success && result.data) {
+        setSelectedContent(result.data);
+        return result.data;
+      }
+      return null;
+    } catch (err) {
+      console.error("Error fetching content detail:", err);
+      return null;
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
   useEffect(() => {
     if (creatorId) {
       loadContent(1, filters);
     }
-  }, [creatorId]); // Don't add filters to dependency array to avoid infinite loops
+  }, [creatorId, loadContent]); // Don't add filters to dependency array to avoid infinite loops
 
   return {
     content,
@@ -83,6 +119,8 @@ export const useCreatorContent = (creatorId: string) => {
     totalItems,
     currentPage,
     itemsPerPage,
+    selectedContent,
+    loadingDetail,
     setCurrentPage: (page: number) => loadContent(page, filters),
     setFilters: (newFilters: Record<string, any>) => {
       setFilters(newFilters);
@@ -90,6 +128,8 @@ export const useCreatorContent = (creatorId: string) => {
     },
     saveContent: handleSaveContent,
     updateContent: handleUpdateContent,
+    deleteContent: handleDeleteContent,
+    getContentDetail: fetchContentDetail,
     refreshContent: () => loadContent(currentPage, filters)
   };
 };

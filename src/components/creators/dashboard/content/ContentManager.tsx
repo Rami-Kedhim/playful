@@ -1,13 +1,14 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, RefreshCw, AlertCircle } from "lucide-react";
+import { PlusCircle, RefreshCw, AlertCircle, Upload } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import ContentFilters from "./ContentFilters";
 import ContentList from "./ContentList";
 import ContentForm from "./ContentForm";
 import ContentPagination from "./ContentPagination";
+import ContentUploader from "./ContentUploader";
 import { CreatorContent } from "@/types/creator";
 import useCreatorContent from "@/hooks/useCreatorContent";
 import {
@@ -42,6 +43,8 @@ const ContentManager: React.FC<ContentManagerProps> = ({ creatorId }) => {
   } = useCreatorContent(creatorId);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isUploaderOpen, setIsUploaderOpen] = useState(false);
+  const [uploadType, setUploadType] = useState<'image' | 'video'>('image');
   const [selectedContent, setSelectedContent] = useState<CreatorContent | undefined>(undefined);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [contentToDelete, setContentToDelete] = useState<string | null>(null);
@@ -58,6 +61,40 @@ const ContentManager: React.FC<ContentManagerProps> = ({ creatorId }) => {
 
   const handleViewContent = (item: CreatorContent) => {
     window.open(item.url, '_blank');
+  };
+
+  const handleUploadContent = (type: 'image' | 'video') => {
+    setUploadType(type);
+    setIsUploaderOpen(true);
+  };
+
+  const handleUploadSuccess = async (url: string, fileId: string) => {
+    try {
+      // Save the uploaded content
+      await saveContent({
+        title: `New ${uploadType} ${new Date().toLocaleString()}`,
+        content_type: uploadType,
+        url: url,
+        thumbnail_url: uploadType === 'image' ? url : undefined,
+        is_premium: false,
+        status: 'draft'
+      });
+      
+      toast({
+        title: "Content uploaded",
+        description: `Your ${uploadType} has been uploaded successfully`
+      });
+      
+      refreshContent();
+      setIsUploaderOpen(false);
+    } catch (error) {
+      console.error("Error saving uploaded content:", error);
+      toast({
+        title: "Error",
+        description: "There was an error saving your content",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleFormSave = async (data: Partial<CreatorContent>) => {
@@ -78,6 +115,7 @@ const ContentManager: React.FC<ContentManagerProps> = ({ creatorId }) => {
         });
       }
       setIsFormOpen(false);
+      refreshContent();
     } catch (error) {
       console.error("Error saving content:", error);
       toast({
@@ -120,10 +158,26 @@ const ContentManager: React.FC<ContentManagerProps> = ({ creatorId }) => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h2 className="text-2xl font-bold">Your Content</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={refreshContent}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleUploadContent('image')}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload Image
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleUploadContent('video')}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload Video
           </Button>
           <Button onClick={handleAddContent}>
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -173,6 +227,14 @@ const ContentManager: React.FC<ContentManagerProps> = ({ creatorId }) => {
         onClose={() => setIsFormOpen(false)}
         onSave={handleFormSave}
         initialData={selectedContent}
+      />
+
+      <ContentUploader
+        creatorId={creatorId}
+        isOpen={isUploaderOpen}
+        onCancel={() => setIsUploaderOpen(false)}
+        onSuccess={handleUploadSuccess}
+        contentType={uploadType}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

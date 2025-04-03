@@ -5,7 +5,9 @@ import {
   fetchCreatorContent, 
   uploadCreatorContent, 
   saveContent, 
-  updateContent 
+  updateContent,
+  deleteContent,
+  getContentDetail
 } from './creatorContentService';
 import { getCreatorPayouts, fetchCreatorPayouts, requestPayout } from './creatorPayoutsService';
 import { fetchCreatorReviews, addCreatorReview } from './creatorReviewsService';
@@ -19,6 +21,8 @@ export {
   uploadCreatorContent,
   saveContent,
   updateContent,
+  deleteContent,
+  getContentDetail,
   
   // Payouts
   getCreatorPayouts,

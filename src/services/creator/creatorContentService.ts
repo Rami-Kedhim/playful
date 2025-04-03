@@ -1,5 +1,7 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorContent } from "@/types/creator";
+import { uploadFile } from "@/services/storageService";
 
 export const fetchCreatorContent = async (
   creatorId: string,
@@ -71,16 +73,19 @@ export const uploadCreatorContent = async (
   try {
     // Generate a unique filename
     const filename = `${creatorId}_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-    const filePath = `${creatorId}/${filename}`;
     
-    // In a real app, this would upload to Supabase storage
-    // For now, we'll mock a successful upload
+    // Use the storage service to upload the file
+    const result = await uploadFile(file, 'creator-content', `${creatorId}`);
     
-    // Return mock response
+    if (!result.success) {
+      throw new Error(result.error || "Failed to upload file");
+    }
+    
+    // Return successful response with the file URL
     return {
       success: true,
       data: {
-        url: `https://example.com/content/${filePath}`,
+        url: result.url || '',
         id: `file_${Date.now()}`
       }
     };
@@ -148,6 +153,54 @@ export const updateContent = async (
     };
   } catch (err) {
     console.error("Error updating content:", err);
+    return { success: false };
+  }
+};
+
+export const deleteContent = async (
+  contentId: string
+): Promise<{ success: boolean }> => {
+  try {
+    // In a real application, this would be a Supabase delete
+    // For now, we'll mock a successful deletion
+    
+    return {
+      success: true
+    };
+  } catch (err) {
+    console.error("Error deleting content:", err);
+    return { success: false };
+  }
+};
+
+export const getContentDetail = async (
+  contentId: string
+): Promise<{ success: boolean; data?: CreatorContent }> => {
+  try {
+    // In a real application, this would be a Supabase query
+    // For now, we'll mock a response
+    
+    const mockContent: CreatorContent = {
+      id: contentId,
+      title: `Content Detail ${contentId}`,
+      description: `Detailed description for content ${contentId}`,
+      content_type: Math.random() > 0.5 ? 'video' : 'image',
+      url: `https://example.com/content/${contentId}`,
+      thumbnail_url: `https://picsum.photos/seed/content${contentId}/400/300`,
+      is_premium: Math.random() > 0.7,
+      price: Math.random() > 0.7 ? Math.floor(Math.random() * 50) + 5 : null,
+      status: Math.random() > 0.2 ? 'published' : 'draft',
+      created_at: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString(),
+      views_count: Math.floor(Math.random() * 1000),
+      likes_count: Math.floor(Math.random() * 100),
+    };
+    
+    return {
+      success: true,
+      data: mockContent
+    };
+  } catch (err) {
+    console.error("Error fetching content detail:", err);
     return { success: false };
   }
 };
