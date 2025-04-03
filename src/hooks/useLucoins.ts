@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -47,6 +46,7 @@ export interface TransactionHistory {
 
 export const useLucoins = () => {
   const [loading, setLoading] = useState(false);
+  const [packages, setPackages] = useState<LucoinPackage[]>([]);
   const { user, refreshProfile } = useAuth();
 
   /**
@@ -65,7 +65,7 @@ export const useLucoins = () => {
         console.error("Error fetching lucoin packages:", optionsError);
         
         // Fallback to hardcoded packages if we can't fetch from DB
-        return [
+        const fallbackPackages = [
           {
             id: "pack1",
             name: "Basic Pack",
@@ -97,10 +97,13 @@ export const useLucoins = () => {
             currency: 'SOL'
           }
         ];
+        
+        setPackages(fallbackPackages);
+        return fallbackPackages;
       }
       
       // Map the data to our expected format
-      const packages: LucoinPackage[] = (optionsData || []).map((pkg: any) => ({
+      const packageList: LucoinPackage[] = (optionsData || []).map((pkg: any) => ({
         id: pkg.id,
         name: pkg.name,
         amount: pkg.amount,
@@ -111,7 +114,8 @@ export const useLucoins = () => {
         currency: 'SOL'
       }));
       
-      return packages;
+      setPackages(packageList);
+      return packageList;
     } catch (error: any) {
       console.error("Error fetching lucoin packages:", error);
       toast({
@@ -121,7 +125,7 @@ export const useLucoins = () => {
       });
       
       // Return fallback packages on error
-      return [
+      const fallbackPackages = [
         {
           id: "pack1",
           name: "Basic Pack",
@@ -153,83 +157,85 @@ export const useLucoins = () => {
           currency: 'SOL'
         }
       ];
+      
+      setPackages(fallbackPackages);
+      return fallbackPackages;
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * Fetch available boost packages from the database
+   * Process a Lucoin purchase
    */
-  const fetchBoostPackages = async (): Promise<BoostPackage[]> => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('boost_packages')
-        .select('*')
-        .eq('is_active', true)
-        .order('price_lucoin', { ascending: true });
-      
-      if (error) throw error;
-      
-      // Convert the data to match the BoostPackage interface
-      const packages: BoostPackage[] = (data || []).map((pkg: any) => ({
-        id: pkg.id,
-        name: pkg.name,
-        duration: pkg.duration,
-        price_lucoin: pkg.price || 0, // Map 'price' to 'price_lucoin'
-        description: pkg.description,
-        is_active: pkg.is_active
-      }));
-      
-      return packages;
-    } catch (error: any) {
-      console.error("Error fetching boost packages:", error);
+  const purchasePackage = async (packageId: string): Promise<boolean> => {
+    if (!user) {
       toast({
-        title: "Error loading boost packages",
-        description: error.message,
+        title: "Not logged in",
+        description: "You must be logged in to purchase Lucoins",
         variant: "destructive",
       });
-      return [];
-    } finally {
-      setLoading(false);
+      return false;
     }
-  };
 
-  /**
-   * Fetch available gift items from the database
-   */
-  const fetchGiftItems = async (): Promise<GiftItem[]> => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('gift_items' as any)
-        .select('*')
-        .eq('is_active', true)
-        .order('price_lucoin', { ascending: true });
       
-      if (error) throw error;
+      // Find the package in our local state
+      const selectedPackage = packages.find(p => p.id === packageId);
       
-      // Convert the data to match the GiftItem interface
-      const gifts: GiftItem[] = (data || []).map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price_lucoin: item.price_lucoin,
-        animation_url: item.animation_url,
-        thumbnail_url: item.thumbnail_url,
-        is_active: item.is_active
-      }));
+      if (!selectedPackage) {
+        toast({
+          title: "Package not found",
+          description: "The selected package could not be found",
+          variant: "destructive",
+        });
+        return false;
+      }
       
-      return gifts;
-    } catch (error: any) {
-      console.error("Error fetching gift items:", error);
+      // Record the transaction - using any to bypass type issues
+      const { error: transactionError } = await supabase
+        .from('lucoin_transactions' as any)
+        .insert({
+          user_id: user.id,
+          amount: selectedPackage.amount + (selectedPackage.bonus_amount || 0),
+          transaction_type: 'purchase',
+          description: `Purchased ${selectedPackage.name} package`,
+          metadata: { 
+            package_id: packageId,
+            price_paid: selectedPackage.price,
+            currency: selectedPackage.currency || 'USD' 
+          }
+        });
+      
+      if (transactionError) throw transactionError;
+      
+      // Update the user's balance - using any to bypass type issues
+      const { data, error: balanceError } = await supabase
+        .rpc('increment_balance' as any, { 
+          user_id: user.id, 
+          amount: selectedPackage.amount + (selectedPackage.bonus_amount || 0) 
+        }) as any;
+        
+      if (balanceError) throw balanceError;
+      
+      // Refresh the user profile to get the updated balance
+      await refreshProfile();
+      
       toast({
-        title: "Error loading gifts",
+        title: "Purchase successful",
+        description: `${selectedPackage.amount + (selectedPackage.bonus_amount || 0)} Lucoins have been added to your account`,
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error("Error purchasing lucoins:", error);
+      toast({
+        title: "Purchase failed",
         description: error.message,
         variant: "destructive",
       });
-      return [];
+      return false;
     } finally {
       setLoading(false);
     }
@@ -315,91 +321,6 @@ export const useLucoins = () => {
         user_id: user.id, 
         amount: packageData.amount + (packageData.bonus_amount || 0) 
       });
-      
-      // Refresh the user profile to get the updated balance
-      await refreshProfile();
-      
-      toast({
-        title: "Purchase successful",
-        description: `${packageData.amount + (packageData.bonus_amount || 0)} Lucoins have been added to your account`,
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error("Error purchasing lucoins:", error);
-      toast({
-        title: "Purchase failed",
-        description: error.message,
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Process a Lucoin purchase
-   */
-  const purchasePackage = async (packageId: string): Promise<boolean> => {
-    if (!user) {
-      toast({
-        title: "Not logged in",
-        description: "You must be logged in to purchase Lucoins",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    try {
-      setLoading(true);
-      
-      // In a real implementation, this would integrate with a payment provider
-      // and then create a transaction record and update the user's balance
-      
-      // For this example, we'll directly create a simulated transaction
-      const { data: packageData, error: packageError } = await supabase
-        .from('lucoin_packages')
-        .select('*')
-        .eq('id', packageId)
-        .single();
-      
-      if (packageError) throw packageError;
-      
-      if (!packageData) {
-        toast({
-          title: "Package not found",
-          description: "The selected package could not be found",
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      // Record the transaction
-      const { error: transactionError } = await supabase
-        .from('lucoin_transactions')
-        .insert({
-          user_id: user.id,
-          amount: packageData.amount + (packageData.bonus_amount || 0),
-          transaction_type: 'purchase',
-          description: `Purchased ${packageData.name} package`,
-          metadata: { 
-            package_id: packageId,
-            price_paid: packageData.price,
-            currency: packageData.currency || 'USD' 
-          }
-        });
-      
-      if (transactionError) throw transactionError;
-      
-      // Update the user's balance using the increment_balance function
-      const { data, error: balanceError } = await supabase
-        .rpc('increment_balance', { 
-          user_id: user.id, 
-          amount: packageData.amount + (packageData.bonus_amount || 0) 
-        });
-        
-      if (balanceError) throw balanceError;
       
       // Refresh the user profile to get the updated balance
       await refreshProfile();
@@ -601,7 +522,8 @@ export const useLucoins = () => {
   };
 
   return { 
-    loading, 
+    loading,
+    packages,
     fetchPackages, 
     purchasePackage,
     purchasePackageWithSol,

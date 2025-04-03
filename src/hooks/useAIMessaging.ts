@@ -7,9 +7,9 @@ import {
   startAIConversation,
   getAIConversationWithMessages,
   sendMessageToAI,
-  processAIMessagePayment,
-  generateAIImage
+  generateAIImage,
 } from '@/services/ai';
+import { unlockPaidMessage } from '@/services/ai/aiMessagesService';
 import { toast } from '@/components/ui/use-toast';
 
 interface UseAIMessagingProps {
@@ -181,25 +181,41 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     setError(null);
 
     try {
-      const result = await sendMessageToAI(conversation.id, user.id, content);
+      // First add the user's message to the UI immediately
+      const tempUserMessage: AIMessage = {
+        id: 'temp-' + Date.now(),
+        conversation_id: conversation.id,
+        sender_id: user.id,
+        content: content,
+        created_at: new Date().toISOString(),
+        is_ai: false,
+        has_read: true
+      };
       
-      if (result.error) {
-        throw new Error(result.error);
+      setMessages(prev => [...prev, tempUserMessage]);
+      
+      // Send the message to get AI response
+      const aiMessage = await sendMessageToAI(
+        user.id,
+        conversation.id,
+        content,
+        profileId || ''
+      );
+      
+      if (!aiMessage) {
+        throw new Error('Failed to get AI response');
       }
-
-      // Add user message to the list
-      setMessages(prev => [...prev, result.userMessage]);
-
-      // If payment is required
-      if (result.requiresPayment && result.aiResponse) {
+      
+      // Check if payment is required for the AI message
+      if (aiMessage.requires_payment && aiMessage.payment_status === 'pending') {
         setPaymentRequired(true);
-        setPaymentMessage(result.aiResponse);
-        setMessages(prev => [...prev, result.aiResponse as AIMessage]);
+        setPaymentMessage(aiMessage);
+        setMessages(prev => [...prev, aiMessage]);
       } 
       // If AI responded normally, simulate typing first then show the message
-      else if (result.aiResponse) {
-        simulateTyping(result.aiResponse, () => {
-          setMessages(prev => [...prev, result.aiResponse as AIMessage]);
+      else {
+        simulateTyping(aiMessage, () => {
+          setMessages(prev => [...prev, aiMessage]);
         });
       }
     } catch (err: any) {
@@ -212,7 +228,7 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     } finally {
       setSendingMessage(false);
     }
-  }, [user, conversation, paymentRequired, simulateTyping]);
+  }, [user, conversation, paymentRequired, simulateTyping, profileId]);
 
   // Generate an AI image
   const generateImage = useCallback(async (prompt: string) => {
@@ -265,21 +281,17 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     setError(null);
 
     try {
-      const result = await processAIMessagePayment(paymentMessage.id, user.id);
+      const success = await unlockPaidMessage(user.id, paymentMessage.id);
       
-      if (!result.success) {
-        throw new Error(result.error || 'Payment processing failed');
+      if (!success) {
+        throw new Error('Payment processing failed');
       }
 
       setPaymentRequired(false);
       setPaymentMessage(null);
 
-      if (result.aiResponse) {
-        // Simulate typing before showing the AI response
-        simulateTyping(result.aiResponse, () => {
-          setMessages(prev => [...prev, result.aiResponse as AIMessage]);
-        });
-      }
+      // Refresh the conversation
+      await initializeConversation();
 
       toast({
         title: 'Payment Successful',
@@ -295,7 +307,7 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     } finally {
       setLoading(false);
     }
-  }, [user, paymentMessage, simulateTyping]);
+  }, [user, paymentMessage, initializeConversation]);
 
   return {
     loading,

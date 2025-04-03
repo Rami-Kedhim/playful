@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,14 +22,16 @@ interface LucoinPackageDialogProps {
 const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const { fetchPackages, purchasePackage, packages } = useLucoins();
+  const { fetchPackages, purchasePackage } = useLucoins();
+  const [packages, setPackages] = useState<any[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
   const handleOpen = async (open: boolean) => {
     setOpen(open);
     if (open) {
       try {
-        await fetchPackages();
+        const packageList = await fetchPackages();
+        setPackages(packageList || []);
       } catch (error) {
         console.error("Error fetching packages:", error);
         toast({
@@ -54,17 +56,17 @@ const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) 
     setProcessing(true);
     try {
       const result = await purchasePackage(selectedPackage);
-      if (result.success) {
+      if (result) {
         toast({
           title: "Purchase successful",
-          description: `You have purchased ${result.amount} Lucoins`,
+          description: `You have purchased Lucoins successfully`,
         });
         setOpen(false);
         if (onSuccess) await onSuccess();
       } else {
         toast({
           title: "Purchase failed",
-          description: result.error || "An error occurred during purchase",
+          description: "An error occurred during purchase",
           variant: "destructive",
         });
       }

@@ -12,13 +12,13 @@ export const startAIConversation = async (
   aiProfileId: string
 ): Promise<AIConversation> => {
   try {
-    // Check if conversation already exists
-    const { data: existingConversation, error: queryError } = await (supabase
-      .from('ai_conversations')
+    // Check if conversation already exists - using any to bypass type issues
+    const { data: existingConversation, error: queryError } = await supabase
+      .from('ai_conversations' as any)
       .select('*')
       .eq('user_id', userId)
       .eq('ai_profile_id', aiProfileId)
-      .single() as any);
+      .single() as any;
     
     if (queryError && queryError.code !== 'PGRST116') { // PGRST116 means no rows returned
       throw queryError;
@@ -28,16 +28,16 @@ export const startAIConversation = async (
       return existingConversation as AIConversation;
     }
     
-    // Create new conversation
-    const { data: newConversation, error: insertError } = await (supabase
-      .from('ai_conversations')
+    // Create new conversation - using any to bypass type issues
+    const { data: newConversation, error: insertError } = await supabase
+      .from('ai_conversations' as any)
       .insert({
         user_id: userId,
         ai_profile_id: aiProfileId,
         status: 'active'
       })
       .select()
-      .single() as any);
+      .single() as any;
     
     if (insertError) {
       throw insertError;
@@ -72,11 +72,11 @@ export const getAIConversationMessages = async (
   conversationId: string
 ): Promise<AIMessage[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('ai_messages')
+    const { data, error } = await supabase
+      .from('ai_messages' as any)
       .select('*')
       .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true }) as any);
+      .order('created_at', { ascending: true }) as any;
     
     if (error) {
       throw error;
@@ -96,26 +96,26 @@ export const getAIConversationWithMessages = async (
   conversationId: string
 ): Promise<AIConversation | null> => {
   try {
-    // Get the conversation
-    const { data: conversation, error: convError } = await (supabase
-      .from('ai_conversations')
+    // Get the conversation - using any to bypass type issues
+    const { data: conversation, error: convError } = await supabase
+      .from('ai_conversations' as any)
       .select(`
         *,
         ai_profile:ai_profiles(*)
       `)
       .eq('id', conversationId)
-      .single() as any);
+      .single() as any;
     
     if (convError) {
       throw convError;
     }
     
-    // Get the messages
-    const { data: messages, error: msgError } = await (supabase
-      .from('ai_messages')
+    // Get the messages - using any to bypass type issues
+    const { data: messages, error: msgError } = await supabase
+      .from('ai_messages' as any)
       .select('*')
       .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true }) as any);
+      .order('created_at', { ascending: true }) as any;
     
     if (msgError) {
       throw msgError;

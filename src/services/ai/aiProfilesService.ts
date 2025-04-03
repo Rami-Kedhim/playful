@@ -1,73 +1,54 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
 import { AIProfile } from "@/types/ai-profile";
-import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Fetch AI profiles with optional filtering
+ * Get all AI profiles
  */
-export const getAIProfiles = async (filters: Record<string, any> = {}): Promise<AIProfile[]> => {
+export const getAIProfiles = async (): Promise<AIProfile[]> => {
   try {
-    // Create a base query - using the raw SQL approach for tables not in the schema
-    let query = supabase
-      .from('ai_profiles')
+    // Using any to bypass type issues
+    const { data, error } = await supabase
+      .from('ai_profiles' as any)
       .select('*') as any;
     
-    // Apply any filters
-    if (filters.personality) {
-      query = query.eq('personality->type', filters.personality);
-    }
-    
-    if (filters.location) {
-      query = query.ilike('location', `%${filters.location}%`);
-    }
-    
-    // Always filter to only return AI profiles
-    query = query.eq('is_ai', true);
-    
-    const { data, error } = await query;
-    
     if (error) {
-      throw error;
+      console.error("Error fetching AI profiles:", error);
+      return mockAIProfiles;
     }
     
     return data as AIProfile[];
-  } catch (error: any) {
-    console.error("Error fetching AI profiles:", error);
-    
-    // Return mock data for development
+  } catch (error) {
+    console.error("Error in getAIProfiles:", error);
     return mockAIProfiles;
   }
 };
 
 /**
- * Get a single AI profile by ID
+ * Get a specific AI profile by ID
  */
 export const getAIProfileById = async (profileId: string): Promise<AIProfile | null> => {
   try {
-    const { data, error } = await (supabase
-      .from('ai_profiles')
+    // Using any to bypass type issues
+    const { data, error } = await supabase
+      .from('ai_profiles' as any)
       .select('*')
       .eq('id', profileId)
-      .eq('is_ai', true)
-      .single() as any);
+      .single() as any;
     
     if (error) {
-      throw error;
+      console.error("Error fetching AI profile by ID:", error);
+      return mockAIProfiles.find(p => p.id === profileId) || null;
     }
     
     return data as AIProfile;
-  } catch (error: any) {
-    console.error("Error fetching AI profile:", error);
-    
-    // For development, return a mock profile
+  } catch (error) {
+    console.error("Error in getAIProfileById:", error);
     return mockAIProfiles.find(p => p.id === profileId) || null;
   }
 };
 
 /**
- * Mock AI Profiles for development
+ * Mock AI Profiles for development or fallback
  */
 export const mockAIProfiles: AIProfile[] = [
   {
