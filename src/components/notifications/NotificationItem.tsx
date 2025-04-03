@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { Check, Bell } from "lucide-react";
+import { Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { markNotificationAsRead } from "@/services/notificationsService";
+import NotificationIcon from "./NotificationIcon";
 
 interface NotificationItemProps {
   id: string;
@@ -37,22 +38,6 @@ const NotificationItem = ({
     setLoading(false);
   };
 
-  // Determine icon based on notification type
-  const getIcon = () => {
-    switch (type) {
-      case "message":
-        return <Bell className="h-4 w-4 text-blue-500" />;
-      case "booking":
-        return <Bell className="h-4 w-4 text-green-500" />;
-      case "payment":
-        return <Bell className="h-4 w-4 text-amber-500" />;
-      case "system":
-        return <Bell className="h-4 w-4 text-purple-500" />;
-      default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
   return (
     <div 
       className={cn(
@@ -60,7 +45,9 @@ const NotificationItem = ({
         !isRead && "bg-muted/30"
       )}
     >
-      <div className="mt-1">{getIcon()}</div>
+      <div className="mt-1">
+        <NotificationIcon type={type} />
+      </div>
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <p className={cn("text-sm font-medium", !isRead && "font-semibold")}>{title}</p>

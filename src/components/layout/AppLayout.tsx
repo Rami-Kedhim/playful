@@ -1,6 +1,7 @@
 
 import { ReactNode, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { isNewUser, createWelcomeNotification } from "@/services/accountService";
@@ -11,6 +12,7 @@ interface AppLayoutProps {
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const { user } = useAuth();
+  const { fetchNotifications } = useNotifications();
   
   // Create welcome notification for new users
   useEffect(() => {
@@ -19,13 +21,15 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         const newUser = await isNewUser(user.id);
         
         if (newUser) {
-          createWelcomeNotification(user.id);
+          await createWelcomeNotification(user.id);
+          // Refresh notifications to show the welcome message
+          fetchNotifications();
         }
       };
       
       checkAndCreateWelcomeNotification();
     }
-  }, [user?.id]);
+  }, [user?.id, fetchNotifications]);
   
   return (
     <div className="flex flex-col min-h-screen">

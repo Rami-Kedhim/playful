@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { NotificationsProvider } from "@/contexts/NotificationsContext";
 
 // Pages
 import Index from "./pages/Index";
@@ -29,53 +30,55 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <FavoritesProvider>
-        <BrowserRouter>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/escorts" element={<Escorts />} />
-            <Route path="/escorts/:id" element={<EscortDetail />} />
-            <Route path="/creators" element={<Creators />} />
-            <Route path="/creators/:username" element={<CreatorDetail />} />
-            <Route path="/favorites" element={
-              <ProtectedRoute>
-                <Favorites />
-              </ProtectedRoute>
-            } />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <ProfileManagement />
-              </ProtectedRoute>
-            } />
-            <Route path="/wallet" element={
-              <ProtectedRoute>
-                <Wallet />
-              </ProtectedRoute>
-            } />
-            {/* Role-specific routes */}
-            <Route path="/escort-dashboard" element={
-              <RoleGuard allowedRoles={['escort', 'admin']}>
-                <EscortDashboard />
-              </RoleGuard>
-            } />
-            <Route path="/creator-dashboard" element={
-              <RoleGuard allowedRoles={['creator', 'admin']}>
-                <CreatorDashboard />
-              </RoleGuard>
-            } />
-            <Route path="/admin" element={
-              <RoleGuard allowedRoles={['admin']}>
-                <AdminDashboard />
-              </RoleGuard>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </FavoritesProvider>
+      <NotificationsProvider>
+        <FavoritesProvider>
+          <BrowserRouter>
+            <Toaster />
+            <Sonner />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/escorts" element={<Escorts />} />
+              <Route path="/escorts/:id" element={<EscortDetail />} />
+              <Route path="/creators" element={<Creators />} />
+              <Route path="/creators/:username" element={<CreatorDetail />} />
+              <Route path="/favorites" element={
+                <ProtectedRoute>
+                  <Favorites />
+                </ProtectedRoute>
+              } />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfileManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/wallet" element={
+                <ProtectedRoute>
+                  <Wallet />
+                </ProtectedRoute>
+              } />
+              {/* Role-specific routes */}
+              <Route path="/escort-dashboard" element={
+                <RoleGuard allowedRoles={['escort', 'admin']}>
+                  <EscortDashboard />
+                </RoleGuard>
+              } />
+              <Route path="/creator-dashboard" element={
+                <RoleGuard allowedRoles={['creator', 'admin']}>
+                  <CreatorDashboard />
+                </RoleGuard>
+              } />
+              <Route path="/admin" element={
+                <RoleGuard allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </RoleGuard>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </FavoritesProvider>
+      </NotificationsProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
