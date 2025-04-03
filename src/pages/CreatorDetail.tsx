@@ -173,19 +173,15 @@ const CreatorDetail = () => {
             
             <TabsContent value="photos" className="mt-4">
               <VirtualContentGallery 
-                contentType="photos"
-                contentCount={creator.contentCount.photos}
-                isPremium={creator.isPremium}
                 creatorId={creator.id}
+                username={creator.name}
               />
             </TabsContent>
             
             <TabsContent value="videos" className="mt-4">
               <VirtualContentGallery 
-                contentType="videos"
-                contentCount={creator.contentCount.videos}
-                isPremium={creator.isPremium}
                 creatorId={creator.id}
+                username={creator.name}
               />
             </TabsContent>
             

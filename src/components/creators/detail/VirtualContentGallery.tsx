@@ -7,7 +7,7 @@ import VirtualContentGrid from "@/components/creators/VirtualContentGrid";
 import useVirtualCreatorContent from "@/hooks/useVirtualCreatorContent";
 import { ContentType } from "@/hooks/useVirtualContent";
 
-interface VirtualContentGalleryProps {
+export interface VirtualContentGalleryProps {
   creatorId: string;
   username: string;
 }
