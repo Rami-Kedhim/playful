@@ -21,7 +21,7 @@ const transformedEscorts = [
     verified: true,
     featured: true,
     rating: 4.9,
-    serviceType: "both",
+    serviceType: "both" as const,
     isLive: false
   },
   {
@@ -31,7 +31,7 @@ const transformedEscorts = [
     location: "Los Angeles, CA",
     verified: true,
     rating: 4.7,
-    serviceType: "in-person",
+    serviceType: "in-person" as const,
     isLive: false
   },
   {
@@ -41,7 +41,7 @@ const transformedEscorts = [
     location: "Chicago, IL",
     verified: true,
     rating: 4.8,
-    serviceType: "virtual",
+    serviceType: "virtual" as const,
     isLive: true
   },
   {
@@ -52,7 +52,7 @@ const transformedEscorts = [
     verified: true,
     featured: true,
     rating: 4.9,
-    serviceType: "both",
+    serviceType: "both" as const,
     isLive: false
   }
 ];
@@ -67,7 +67,7 @@ const transformedCreators = [
     verified: true,
     isPremium: true,
     rating: 4.9,
-    serviceType: "virtual",
+    serviceType: "virtual" as const,
     isLive: true
   },
   {
@@ -77,7 +77,7 @@ const transformedCreators = [
     location: "Atlanta, GA",
     verified: true,
     rating: 4.7,
-    serviceType: "virtual",
+    serviceType: "virtual" as const,
     isLive: false
   },
   {
@@ -88,7 +88,7 @@ const transformedCreators = [
     verified: true,
     isPremium: true,
     rating: 4.8,
-    serviceType: "virtual",
+    serviceType: "virtual" as const,
     isLive: true
   },
   {
@@ -98,7 +98,7 @@ const transformedCreators = [
     location: "Denver, CO",
     verified: true,
     rating: 4.6,
-    serviceType: "virtual",
+    serviceType: "virtual" as const,
     isLive: false
   }
 ];
