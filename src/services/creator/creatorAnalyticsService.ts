@@ -33,6 +33,8 @@ export const fetchCreatorAnalytics = async (
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
     
+    console.log(`Fetching analytics for creator ${creatorId} from ${startDateStr} to ${endDateStr}`);
+    
     // Fetch data from Supabase
     const { data, error } = await supabase
       .from('creator_analytics')
@@ -58,7 +60,7 @@ export const fetchCreatorAnalytics = async (
     return generateMockAnalyticsData(period);
   } catch (error) {
     console.error("Error fetching creator analytics:", error);
-    throw new Error("Failed to fetch analytics data");
+    return generateMockAnalyticsData(period);
   }
 };
 

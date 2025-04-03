@@ -4,17 +4,27 @@ import { format } from 'date-fns';
 import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
 import { AnalyticsHeader, AnalyticsStats, AnalyticsCharts, AnalyticsSummary } from "./analytics";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, ThumbsUp, Share2, DollarSign } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CreatorAnalyticsProps {
   creatorId: string;
 }
 
 const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
-  const [timeRange, setTimeRange] = useState("7days");
+  const [timeRange, setTimeRange] = useState<string>("7days");
+  
+  // Convert timeRange to period format expected by the hook
+  const periodMap: Record<string, 'week' | 'month' | 'year'> = {
+    "7days": "week",
+    "30days": "month",
+    "90days": "year"
+  };
+  
   const { analytics, summary, loading, error } = useCreatorAnalytics(
-    timeRange === "7days" ? "week" : timeRange === "30days" ? "month" : "year"
+    periodMap[timeRange] || "week"
   );
+  
   const [statsData, setStatsData] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
 
@@ -40,28 +50,28 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
           title: "Total Views",
           value: summary.views.toLocaleString(),
           change: getPercentChange(summary.views, previousPeriodData.views),
-          icon: "eye",
+          icon: <Eye className="h-4 w-4" />,
           trend: summary.views >= previousPeriodData.views ? "up" : "down"
         },
         {
           title: "Total Likes",
           value: summary.likes.toLocaleString(),
           change: getPercentChange(summary.likes, previousPeriodData.likes),
-          icon: "thumbsUp",
+          icon: <ThumbsUp className="h-4 w-4" />,
           trend: summary.likes >= previousPeriodData.likes ? "up" : "down"
         },
         {
           title: "Total Shares",
           value: summary.shares.toLocaleString(),
           change: getPercentChange(summary.shares, previousPeriodData.shares),
-          icon: "share",
+          icon: <Share2 className="h-4 w-4" />,
           trend: summary.shares >= previousPeriodData.shares ? "up" : "down"
         },
         {
           title: "Total Earnings",
           value: `${summary.earnings.toFixed(2)} LC`,
           change: getPercentChange(summary.earnings, previousPeriodData.earnings),
-          icon: "dollarSign",
+          icon: <DollarSign className="h-4 w-4" />,
           trend: summary.earnings >= previousPeriodData.earnings ? "up" : "down"
         }
       ]);

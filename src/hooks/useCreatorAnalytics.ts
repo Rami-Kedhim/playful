@@ -31,24 +31,31 @@ export const useCreatorAnalytics = (period: 'week' | 'month' | 'year' = 'week') 
         
         // Ensure we have a user
         if (!user) {
+          setLoading(false);
           throw new Error("User not authenticated");
         }
         
         // Fetch analytics data using service
         const analyticsData = await fetchCreatorAnalytics(user.id, period);
-        setAnalytics(analyticsData);
         
-        // Calculate summary
-        const summaryData = analyticsData.reduce((acc, item) => {
-          return {
-            views: acc.views + item.views,
-            likes: acc.likes + item.likes,
-            shares: acc.shares + item.shares,
-            earnings: acc.earnings + item.earnings
-          };
-        }, { views: 0, likes: 0, shares: 0, earnings: 0 });
-        
-        setSummary(summaryData);
+        if (analyticsData && analyticsData.length > 0) {
+          setAnalytics(analyticsData);
+          
+          // Calculate summary
+          const summaryData = analyticsData.reduce((acc, item) => {
+            return {
+              views: acc.views + item.views,
+              likes: acc.likes + item.likes,
+              shares: acc.shares + item.shares,
+              earnings: acc.earnings + item.earnings
+            };
+          }, { views: 0, likes: 0, shares: 0, earnings: 0 });
+          
+          setSummary(summaryData);
+        } else {
+          setAnalytics([]);
+          setSummary({ views: 0, likes: 0, shares: 0, earnings: 0 });
+        }
       } catch (err: any) {
         console.error("Error loading analytics:", err);
         setError(err.message || "Failed to load analytics data");
