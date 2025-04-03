@@ -1,7 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { fetchCreatorReviews } from "@/services/creatorService";
+import { fetchCreatorReviews } from "@/services/creator/creatorReviewsService";
 import { CreatorReview } from "@/types/creator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface CreatorReviewsProps {
   creatorId: string;
@@ -32,30 +34,61 @@ const CreatorReviews = ({ creatorId }: CreatorReviewsProps) => {
   }, [creatorId]);
 
   if (loading) {
-    return <div>Loading reviews...</div>;
+    return (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">Reviews</h2>
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+            <Skeleton className="h-16 w-full" />
+          </Card>
+        ))}
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error loading reviews: {error}</div>;
+    return (
+      <div className="p-4 border border-red-300 bg-red-50 rounded-lg text-red-700">
+        Error loading reviews: {error}
+      </div>
+    );
   }
 
   if (reviews.length === 0) {
-    return <div>No reviews yet.</div>;
+    return (
+      <div className="p-4 border rounded-lg text-center">
+        <h2 className="text-xl font-semibold mb-2">Reviews</h2>
+        <p className="text-gray-500">No reviews yet. Be the first to leave a review!</p>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Reviews</h2>
       {reviews.map((review) => (
-        <div key={review.id} className="p-4 border rounded-lg">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{review.reviewer.username}</span>
-            <span className="text-yellow-500">★ {review.rating}</span>
-          </div>
-          {review.comment && (
-            <p className="mt-2 text-gray-700">{review.comment}</p>
-          )}
-        </div>
+        <Card key={review.id} className="p-4">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">{review.reviewer.username}</span>
+              <div className="flex items-center text-yellow-500">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i}>
+                    {i < review.rating ? "★" : "☆"}
+                  </span>
+                ))}
+                <span className="ml-1 text-sm text-gray-600">({review.rating})</span>
+              </div>
+            </div>
+            {review.comment && (
+              <p className="mt-2 text-gray-700">{review.comment}</p>
+            )}
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

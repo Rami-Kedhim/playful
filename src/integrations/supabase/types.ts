@@ -1870,6 +1870,198 @@ export type Database = {
         }
         Relationships: []
       }
+      creator_analytics: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          date: string
+          earnings: number | null
+          id: string
+          likes: number | null
+          shares: number | null
+          views: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          date: string
+          earnings?: number | null
+          id?: string
+          likes?: number | null
+          shares?: number | null
+          views?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          date?: string
+          earnings?: number | null
+          id?: string
+          likes?: number | null
+          shares?: number | null
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_analytics_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_content: {
+        Row: {
+          content_type: string
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          is_premium: boolean | null
+          likes_count: number | null
+          price: number | null
+          published_at: string | null
+          status: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          url: string
+          views_count: number | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean | null
+          likes_count?: number | null
+          price?: number | null
+          published_at?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          url: string
+          views_count?: number | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean | null
+          likes_count?: number | null
+          price?: number | null
+          published_at?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_content_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_payouts: {
+        Row: {
+          amount: number
+          created_at: string | null
+          creator_id: string
+          id: string
+          notes: string | null
+          payout_method: string
+          processed_at: string | null
+          requested_at: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          notes?: string | null
+          payout_method: string
+          processed_at?: string | null
+          requested_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          notes?: string | null
+          payout_method?: string
+          processed_at?: string | null
+          requested_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_payouts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          creator_id: string
+          id: string
+          rating: number
+          reviewer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          rating: number
+          reviewer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          rating?: number
+          reviewer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_reviews_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_packages: {
         Row: {
           created_at: string | null

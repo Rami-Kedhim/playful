@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { fetchCreatorPayouts, requestPayout } from "@/services/creatorService";
+import { fetchCreatorPayouts, requestPayout, getCreatorEarningsSummary } from "@/services/creator/creatorPayoutsService";
 import { CreatorPayout } from "@/types/creator";
 
 export const usePayouts = (creatorId: string) => {
@@ -18,18 +18,13 @@ export const usePayouts = (creatorId: string) => {
   const loadPayouts = async () => {
     setIsLoading(true);
     try {
+      // Fetch payouts from the database
       const result = await fetchCreatorPayouts(creatorId);
       setPayouts(result.data);
       
-      // In a real app, you would fetch this from an API
-      const mockEarnings = {
-        total: 2347.85,
-        available: 1250.42,
-        pending: 567.25,
-        thisMonth: 892.15
-      };
-      
-      setEarnings(mockEarnings);
+      // Get earnings summary
+      const earningsSummary = await getCreatorEarningsSummary(creatorId);
+      setEarnings(earningsSummary);
     } catch (error) {
       console.error("Error loading payouts:", error);
       toast({
@@ -48,13 +43,17 @@ export const usePayouts = (creatorId: string) => {
     details: Record<string, any>
   ) => {
     try {
-      await requestPayout(creatorId, amount, payoutMethod, details);
-      setDialogOpen(false);
-      toast({
-        title: "Payout requested",
-        description: "Your payout request has been submitted",
-      });
-      loadPayouts(); // Refresh data
+      const result = await requestPayout(creatorId, amount, payoutMethod, details);
+      if (result) {
+        setDialogOpen(false);
+        toast({
+          title: "Payout requested",
+          description: "Your payout request has been submitted",
+        });
+        
+        // Refresh the data
+        loadPayouts();
+      }
     } catch (error) {
       console.error("Error requesting payout:", error);
       toast({

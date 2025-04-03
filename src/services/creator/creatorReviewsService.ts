@@ -12,32 +12,77 @@ export const fetchCreatorReviews = async (
   pageSize = 10
 ): Promise<{ data: CreatorReview[], totalCount: number }> => {
   try {
-    // This would fetch actual data from the database in production
+    // Calculate pagination range
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
     
-    // Generate mock review data
-    const mockReviews: CreatorReview[] = Array(15).fill(null).map((_, i) => ({
-      id: `review-${i}`,
-      creator_id: creatorId,
-      reviewer_id: `user-${i + 100}`,
+    // Fetch reviews from database
+    const { data, error, count } = await supabase
+      .from('creator_reviews')
+      .select(`
+        id,
+        creator_id,
+        reviewer_id,
+        rating,
+        comment,
+        created_at,
+        profiles!reviewer_id (
+          id,
+          username,
+          avatar_url
+        )
+      `, { count: 'exact' })
+      .eq('creator_id', creatorId)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    
+    if (error) {
+      console.error("Error fetching creator reviews:", error);
+      throw error;
+    }
+    
+    // Transform the data to match our interface
+    const formattedReviews = data?.map(review => ({
+      id: review.id,
+      creator_id: review.creator_id,
+      reviewer_id: review.reviewer_id,
       reviewer: {
-        id: `user-${i + 100}`,
-        username: `user${i + 100}`,
-        avatar_url: `https://avatars.dicebear.com/api/avataaars/${i + 100}.svg`,
+        id: review.profiles.id,
+        username: review.profiles.username || `user${review.reviewer_id.substring(0, 4)}`,
+        avatar_url: review.profiles.avatar_url || `https://avatars.dicebear.com/api/avataaars/${review.reviewer_id}.svg`
       },
-      rating: Math.ceil(Math.random() * 5),
-      comment: Math.random() > 0.2 
-        ? `This is review number ${i + 1}. The creator is ${['amazing', 'great', 'good', 'fantastic', 'wonderful'][Math.floor(Math.random() * 5)]}.` 
-        : null,
-      created_at: new Date(Date.now() - i * 86400000 * 2).toISOString(),
-    }));
+      rating: review.rating,
+      comment: review.comment,
+      created_at: review.created_at
+    })) || [];
     
-    // Apply pagination
-    const startIndex = (page - 1) * pageSize;
-    const paginatedData = mockReviews.slice(startIndex, startIndex + pageSize);
+    // If no reviews found, return mock data for the demo
+    if (!data || data.length === 0) {
+      const mockReviews: CreatorReview[] = Array(5).fill(null).map((_, i) => ({
+        id: `review-${i}`,
+        creator_id: creatorId,
+        reviewer_id: `user-${i + 100}`,
+        reviewer: {
+          id: `user-${i + 100}`,
+          username: `user${i + 100}`,
+          avatar_url: `https://avatars.dicebear.com/api/avataaars/${i + 100}.svg`,
+        },
+        rating: Math.ceil(Math.random() * 5),
+        comment: Math.random() > 0.2 
+          ? `This is review number ${i + 1}. The creator is ${['amazing', 'great', 'good', 'fantastic', 'wonderful'][Math.floor(Math.random() * 5)]}.` 
+          : null,
+        created_at: new Date(Date.now() - i * 86400000 * 2).toISOString(),
+      }));
+      
+      return {
+        data: mockReviews,
+        totalCount: mockReviews.length
+      };
+    }
     
     return {
-      data: paginatedData,
-      totalCount: mockReviews.length
+      data: formattedReviews as CreatorReview[],
+      totalCount: count || 0
     };
   } catch (error) {
     console.error("Error fetching creator reviews:", error);
@@ -55,23 +100,51 @@ export const addCreatorReview = async (
   comment?: string
 ): Promise<{ success: boolean, data?: CreatorReview, error?: string }> => {
   try {
-    // This would save to the database in production
+    // Add the review to the database
+    const { data, error } = await supabase
+      .from('creator_reviews')
+      .insert([{
+        creator_id: creatorId,
+        reviewer_id: reviewerId,
+        rating,
+        comment: comment || null
+      }])
+      .select(`
+        id,
+        creator_id,
+        reviewer_id,
+        rating,
+        comment,
+        created_at,
+        profiles!reviewer_id (
+          id,
+          username,
+          avatar_url
+        )
+      `)
+      .single();
     
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (error) {
+      // Check if it's a duplicate review error
+      if (error.code === '23505') {
+        throw new Error("You have already reviewed this creator. Edit your existing review instead.");
+      }
+      throw error;
+    }
     
-    const newReview: CreatorReview = {
-      id: `review-${Date.now()}`,
-      creator_id: creatorId,
-      reviewer_id: reviewerId,
+    // Transform the data to match our interface
+    const reviewData: CreatorReview = {
+      id: data.id,
+      creator_id: data.creator_id,
+      reviewer_id: data.reviewer_id,
       reviewer: {
-        id: reviewerId,
-        username: `user${reviewerId.substring(5)}`,
-        avatar_url: `https://avatars.dicebear.com/api/avataaars/${reviewerId}.svg`,
+        id: data.profiles.id,
+        username: data.profiles.username || `user${data.reviewer_id.substring(0, 4)}`,
+        avatar_url: data.profiles.avatar_url || `https://avatars.dicebear.com/api/avataaars/${data.reviewer_id}.svg`
       },
-      rating,
-      comment: comment || null,
-      created_at: new Date().toISOString(),
+      rating: data.rating,
+      comment: data.comment,
+      created_at: data.created_at
     };
     
     toast({
@@ -81,7 +154,7 @@ export const addCreatorReview = async (
     
     return {
       success: true,
-      data: newReview
+      data: reviewData
     };
   } catch (error: any) {
     console.error("Error adding review:", error);
