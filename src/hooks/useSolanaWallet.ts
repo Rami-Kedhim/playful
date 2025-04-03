@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -150,7 +149,7 @@ export const useSolanaWallet = () => {
 
     try {
       // First, check if this wallet is already saved
-      const { data: existingWallet, error: checkError } = await supabase
+      const { data, error: checkError } = await supabase
         .from('solana_wallets' as any)
         .select('*')
         .eq('user_id', user.id)
@@ -163,11 +162,11 @@ export const useSolanaWallet = () => {
       }
 
       // If wallet is already saved, just update last_used_at
-      if (existingWallet) {
+      if (data) {
         const { error: updateError } = await supabase
           .from('solana_wallets' as any)
           .update({ last_used_at: new Date().toISOString() })
-          .eq('id', existingWallet.id);
+          .eq('id', data.id);
 
         if (updateError) throw updateError;
       } else {
