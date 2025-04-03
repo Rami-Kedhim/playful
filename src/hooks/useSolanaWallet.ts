@@ -157,6 +157,7 @@ export const useSolanaWallet = () => {
         .eq('wallet_address', address)
         .single();
 
+      // Handle potential error from the single() call
       if (checkError && checkError.code !== 'PGRST116') {
         throw checkError;
       }
@@ -170,7 +171,7 @@ export const useSolanaWallet = () => {
 
         if (updateError) throw updateError;
       } else {
-        // Insert new wallet - don't try to access returned data
+        // Insert new wallet - don't access returned data
         const { error: insertError } = await supabase
           .from('solana_wallets' as any)
           .insert({
