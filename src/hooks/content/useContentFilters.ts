@@ -13,18 +13,22 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
       sort: "newest"
     };
     
-    // Create a complete ContentFilters object with defaults applied for any missing properties
-    const mergedFilters: ContentFilters = { 
-      ...defaultFilters, 
+    // Create a complete ContentFilters object - ensuring all required properties are present
+    const mergedFilters = {
+      ...defaultFilters,
       ...initialFilters,
-      // Ensure required properties have values if not provided in initialFilters
-      status: initialFilters.status || defaultFilters.status,
-      searchQuery: initialFilters.searchQuery !== undefined ? initialFilters.searchQuery : defaultFilters.searchQuery,
-      sort: initialFilters.sort || defaultFilters.sort
+    };
+    
+    // Force TypeScript to recognize this is a complete ContentFilters object
+    const completeFilters: ContentFilters = {
+      status: mergedFilters.status || defaultFilters.status,
+      searchQuery: mergedFilters.searchQuery !== undefined ? mergedFilters.searchQuery : defaultFilters.searchQuery,
+      contentType: mergedFilters.contentType,
+      sort: mergedFilters.sort || defaultFilters.sort
     };
     
     try {
-      return contentFiltersSchema.parse(mergedFilters);
+      return contentFiltersSchema.parse(completeFilters);
     } catch (error) {
       console.warn("Invalid filter format, using defaults:", error);
       return defaultFilters;
@@ -36,19 +40,16 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
   // Update filters with validation
   const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
     setFilters(prev => {
-      // Create a complete ContentFilters object by merging with previous state
-      // Explicitly ensuring required properties are preserved
-      const updated: ContentFilters = { 
-        ...prev, 
-        ...newFilters,
-        // Ensure required properties are always present
+      // Always ensure a complete ContentFilters object is created
+      const completeFilters: ContentFilters = {
         status: newFilters.status !== undefined ? newFilters.status : prev.status,
         searchQuery: newFilters.searchQuery !== undefined ? newFilters.searchQuery : prev.searchQuery,
+        contentType: newFilters.contentType !== undefined ? newFilters.contentType : prev.contentType,
         sort: newFilters.sort !== undefined ? newFilters.sort : prev.sort
       };
       
       try {
-        return contentFiltersSchema.parse(updated);
+        return contentFiltersSchema.parse(completeFilters);
       } catch (error) {
         console.warn("Invalid filter update:", error);
         return prev;
