@@ -148,7 +148,8 @@ const LucieAssistant = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>
+        {`
         .typing-dot {
           width: 6px;
           height: 6px;
@@ -176,7 +177,8 @@ const LucieAssistant = () => {
             opacity: 1;
           }
         }
-      `}</style>
+        `}
+      </style>
     </>
   );
 };

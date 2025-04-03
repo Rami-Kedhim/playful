@@ -101,7 +101,7 @@ const HeroSection = ({ searchLocation, setSearchLocation }: HeroSectionProps) =>
                 <Button size="sm" variant="outline" onClick={() => setShowLucie(true)}>
                   Chat with Lucie
                 </Button>
-                <Button size="sm" variant="lucoin">
+                <Button size="sm" variant="secondary">
                   Learn about Lucoin
                 </Button>
               </div>

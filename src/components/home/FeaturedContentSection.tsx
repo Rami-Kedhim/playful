@@ -133,7 +133,7 @@ const FeaturedContentSection = ({ featuredEscorts, featuredCreators }: FeaturedC
                       )}
                     </div>
                     <div className="absolute bottom-3 right-3">
-                      <Button size="sm" variant="lucoin" className="gap-1">
+                      <Button size="sm" variant="secondary" className="gap-1">
                         <Coins className="h-3 w-3" />
                         Subscribe
                       </Button>
