@@ -6,28 +6,40 @@ import {
   TableCell, 
   TableHead, 
   TableHeader, 
-  TableRow 
+  TableRow
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { 
+  CircleEllipsis, 
+  Eye, 
+  Edit, 
+  Trash2, 
+  MessageCircle, 
+  Star, 
+  BarChart, 
+  Share2, 
+  ArrowUpRight, 
+  Lock 
+} from "lucide-react";
 import { ContentItem } from "@/services/contentService";
-import { Edit, MoreVertical, Trash2, Eye, Calendar, ArrowUpFromLine } from "lucide-react";
+import { format } from "date-fns";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface ContentTableProps {
   content: ContentItem[];
@@ -41,145 +53,211 @@ interface ContentTableProps {
 const ContentTable = ({ 
   content, 
   onEdit, 
-  onDelete, 
+  onDelete,
   onPublish,
-  emptyMessage = "No content found",
+  emptyMessage = "No content available",
   showPublishButton = false
 }: ContentTableProps) => {
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
+  const [previewContent, setPreviewContent] = useState<ContentItem | null>(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   
-  const handleDeleteClick = (id: string) => {
-    setSelectedContentId(id);
+  const openDeleteDialog = (id: string) => {
+    setDeleteId(id);
     setDeleteDialogOpen(true);
   };
   
-  const confirmDelete = async () => {
-    if (selectedContentId) {
-      await onDelete(selectedContentId);
+  const confirmDelete = () => {
+    if (deleteId) {
+      onDelete(deleteId);
       setDeleteDialogOpen(false);
-      setSelectedContentId(null);
+      setDeleteId(null);
     }
   };
   
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const openPreviewDialog = (content: ContentItem) => {
+    setPreviewContent(content);
+    setPreviewDialogOpen(true);
   };
   
-  const getVisibilityBadge = (visibility: string) => {
-    switch (visibility) {
-      case 'public':
-        return <Badge variant="outline">Public</Badge>;
-      case 'subscribers':
-        return <Badge>Subscribers</Badge>;
-      case 'premium':
-        return <Badge variant="secondary">Premium</Badge>;
+  const getMediaTypeIcon = (mediaType: string) => {
+    switch (mediaType) {
+      case "image":
+        return "🖼️";
+      case "video":
+        return "🎬";
+      case "text":
+        return "📝";
       default:
-        return <Badge variant="outline">{visibility}</Badge>;
+        return "📄";
     }
   };
   
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "—";
+    return format(new Date(dateString), "MMM d, yyyy");
+  };
+
   if (content.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-40 text-center text-muted-foreground">
-        <p>{emptyMessage}</p>
+      <div className="text-center py-12 border rounded-md bg-card/50">
+        <p className="text-muted-foreground">{emptyMessage}</p>
       </div>
     );
   }
-  
+
   return (
     <>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Content</TableHead>
+              <TableHead>Title</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>Visibility</TableHead>
-              <TableHead>Stats</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Date</TableHead>
+              <TableHead className="hidden md:table-cell">Stats</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {content.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>
-                  <div className="flex items-center space-x-3">
-                    <div className="h-12 w-12 rounded-md overflow-hidden bg-muted">
-                      <img 
-                        src={item.thumbnail_url} 
-                        alt={item.title} 
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          // Fallback for broken images
-                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100?text=Content';
-                        }}
-                      />
+                  <div className="flex items-center gap-3">
+                    <div className="bg-muted w-10 h-10 rounded flex items-center justify-center overflow-hidden">
+                      {item.thumbnail_url ? (
+                        <img 
+                          src={item.thumbnail_url} 
+                          alt={item.title} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-lg">
+                          {getMediaTypeIcon(item.media_type)}
+                        </span>
+                      )}
                     </div>
                     <div>
-                      <div className="font-medium truncate max-w-[200px]">{item.title}</div>
-                      <div className="text-sm text-muted-foreground truncate max-w-[200px]">
-                        {item.description}
+                      <div className="font-medium truncate max-w-[200px]" title={item.title}>
+                        {item.title}
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        {item.is_premium && (
+                          <Badge variant="default" className="bg-amber-500 hover:bg-amber-600">
+                            ${item.price.toFixed(2)}
+                          </Badge>
+                        )}
+                        {item.visibility === "subscribers" && (
+                          <Badge variant="outline" className="text-xs">
+                            <Lock className="h-3 w-3 mr-1" />
+                            Subscribers
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">
-                    {item.media_type === 'video' ? 'Video' : 'Image'}
+                    {item.media_type.charAt(0).toUpperCase() + item.media_type.slice(1)}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {getVisibilityBadge(item.visibility)}
+                  <Badge
+                    variant={
+                      item.status === "published" ? "success" :
+                      item.status === "scheduled" ? "warning" : "secondary"
+                    }
+                  >
+                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                  </Badge>
                 </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2 text-sm">
-                    <span className="flex items-center">
-                      <Eye className="h-3 w-3 mr-1" /> {item.views_count}
-                    </span>
-                    <span>•</span>
-                    <span>{item.likes_count} likes</span>
+                <TableCell className="hidden md:table-cell">
+                  {item.status === "published" && formatDate(item.published_at)}
+                  {item.status === "scheduled" && formatDate(item.scheduled_for)}
+                  {item.status === "draft" && formatDate(item.created_at)}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  <div className="flex items-center gap-3 text-muted-foreground">
+                    <div className="flex items-center">
+                      <Eye className="h-3 w-3 mr-1" />
+                      {item.views_count || 0}
+                    </div>
+                    <div className="flex items-center">
+                      <Star className="h-3 w-3 mr-1" />
+                      {item.likes_count || 0}
+                    </div>
+                    <div className="flex items-center">
+                      <MessageCircle className="h-3 w-3 mr-1" />
+                      {item.comments_count || 0}
+                    </div>
                   </div>
                 </TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{formatDate(item.created_at)}</span>
-                    {item.status === 'scheduled' && item.scheduled_for && (
-                      <span className="text-xs text-muted-foreground flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" /> {formatDate(item.scheduled_for)}
-                      </span>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(item)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      {showPublishButton && onPublish && (
-                        <DropdownMenuItem onClick={() => onPublish(item.id)}>
-                          <ArrowUpFromLine className="h-4 w-4 mr-2" />
-                          Publish
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => handleDeleteClick(item.id)}
+                <TableCell className="text-right">
+                  <div className="flex justify-end items-center gap-2">
+                    {showPublishButton && item.status === "draft" && onPublish && (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => onPublish(item.id)}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <ArrowUpRight className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => openPreviewDialog(item)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <CircleEllipsis className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onEdit(item)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        
+                        {showPublishButton && item.status === "draft" && onPublish && (
+                          <DropdownMenuItem onClick={() => onPublish(item.id)}>
+                            <ArrowUpRight className="h-4 w-4 mr-2" />
+                            Publish
+                          </DropdownMenuItem>
+                        )}
+                        
+                        <DropdownMenuItem>
+                          <BarChart className="h-4 w-4 mr-2" />
+                          Analytics
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem>
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Share
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator />
+                        
+                        <DropdownMenuItem
+                          onClick={() => openDeleteDialog(item.id)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -187,23 +265,126 @@ const ContentTable = ({
         </Table>
       </div>
       
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your content
-              and remove it from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this content? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
               Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Content Preview Dialog */}
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>{previewContent?.title}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-3">
+            {previewContent?.media_type === "image" && previewContent?.media_url && (
+              <div className="rounded-md overflow-hidden">
+                <img 
+                  src={previewContent.media_url} 
+                  alt={previewContent.title} 
+                  className="w-full object-cover max-h-[400px]"
+                />
+              </div>
+            )}
+            
+            {previewContent?.media_type === "video" && previewContent?.media_url && (
+              <div className="rounded-md overflow-hidden">
+                <video 
+                  src={previewContent.media_url} 
+                  controls
+                  className="w-full max-h-[400px]"
+                />
+              </div>
+            )}
+            
+            {previewContent?.description && (
+              <div>
+                <h3 className="text-sm font-medium mb-2">Description</h3>
+                <p className="text-muted-foreground whitespace-pre-line">{previewContent.description}</p>
+              </div>
+            )}
+            
+            {previewContent?.tags && previewContent.tags.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium mb-2">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {previewContent.tags.map(tag => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div>
+                <h3 className="text-sm font-medium mb-1">Status</h3>
+                <Badge
+                  variant={
+                    previewContent?.status === "published" ? "success" :
+                    previewContent?.status === "scheduled" ? "warning" : "secondary"
+                  }
+                >
+                  {previewContent?.status.charAt(0).toUpperCase() + previewContent?.status.slice(1)}
+                </Badge>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium mb-1">Type</h3>
+                <Badge variant="outline">
+                  {previewContent?.media_type.charAt(0).toUpperCase() + previewContent?.media_type.slice(1)}
+                </Badge>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium mb-1">Visibility</h3>
+                <Badge variant="outline">
+                  {previewContent?.visibility.charAt(0).toUpperCase() + previewContent?.visibility.slice(1)}
+                </Badge>
+              </div>
+              
+              {previewContent?.is_premium && (
+                <div>
+                  <h3 className="text-sm font-medium mb-1">Price</h3>
+                  <Badge variant="default" className="bg-amber-500 hover:bg-amber-600">
+                    ${previewContent.price.toFixed(2)}
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewDialogOpen(false)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              setPreviewDialogOpen(false);
+              if (previewContent) onEdit(previewContent);
+            }}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

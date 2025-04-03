@@ -8,11 +8,13 @@ import { useCreatorContent } from "@/hooks/useCreatorContent";
 import ContentTable from "./ContentTable";
 import ContentDialog from "./ContentDialog";
 import { ContentCreateInput, ContentUpdateInput } from "@/services/contentService";
+import { useToast } from "@/components/ui/use-toast";
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState("published");
   const [openDialog, setOpenDialog] = useState(false);
   const [editingContent, setEditingContent] = useState<ContentUpdateInput | null>(null);
+  const { toast } = useToast();
   
   // Load content based on active tab
   const { 
@@ -48,27 +50,79 @@ const ContentManagement = () => {
   };
   
   const handleSave = async (content: ContentCreateInput) => {
-    if (editingContent?.id) {
-      // When editing, convert ContentCreateInput to ContentUpdateInput
-      await editContent({
-        id: editingContent.id,
-        creator_id: content.creator_id,
-        title: content.title,
-        description: content.description,
-        media_url: content.media_url,
-        media_type: content.media_type,
-        thumbnail_url: content.thumbnail_url,
-        visibility: content.visibility,
-        status: content.status, 
-        is_premium: content.is_premium,
-        price: content.price,
-        scheduled_for: content.scheduled_for,
-        tags: content.tags
+    try {
+      if (editingContent?.id) {
+        // When editing, convert ContentCreateInput to ContentUpdateInput
+        await editContent({
+          id: editingContent.id,
+          creator_id: content.creator_id,
+          title: content.title,
+          description: content.description,
+          media_url: content.media_url,
+          media_type: content.media_type,
+          thumbnail_url: content.thumbnail_url,
+          visibility: content.visibility,
+          status: content.status, 
+          is_premium: content.is_premium,
+          price: content.price,
+          scheduled_for: content.scheduled_for,
+          tags: content.tags
+        });
+        
+        toast({
+          title: "Content updated",
+          description: "Your content has been successfully updated.",
+        });
+      } else {
+        await addContent(content);
+        toast({
+          title: "Content created",
+          description: "Your content has been successfully created.",
+        });
+      }
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Error saving content:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem saving your content. Please try again.",
+        variant: "destructive",
       });
-    } else {
-      await addContent(content);
     }
-    setOpenDialog(false);
+  };
+  
+  const handleDelete = async (id: string) => {
+    try {
+      await removeContent(id);
+      toast({
+        title: "Content deleted",
+        description: "Your content has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error("Error deleting content:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem deleting your content. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handlePublish = async (id: string) => {
+    try {
+      await publishDraft(id);
+      toast({
+        title: "Content published",
+        description: "Your draft has been successfully published.",
+      });
+    } catch (error) {
+      console.error("Error publishing content:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem publishing your content. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   const getContentForTab = () => {
@@ -129,11 +183,15 @@ const ContentManagement = () => {
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
+            ) : error ? (
+              <div className="text-center text-destructive p-4">
+                Error loading content. Please try again.
+              </div>
             ) : (
               <ContentTable 
                 content={content} 
                 onEdit={handleEdit} 
-                onDelete={removeContent}
+                onDelete={handleDelete}
                 emptyMessage="You haven't published any content yet."
               />
             )}
@@ -144,12 +202,16 @@ const ContentManagement = () => {
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
+            ) : draftError ? (
+              <div className="text-center text-destructive p-4">
+                Error loading drafts. Please try again.
+              </div>
             ) : (
               <ContentTable 
                 content={draftContent} 
                 onEdit={handleEdit} 
-                onDelete={removeContent}
-                onPublish={publishDraft}
+                onDelete={handleDelete}
+                onPublish={handlePublish}
                 emptyMessage="You don't have any draft content."
                 showPublishButton
               />
@@ -161,11 +223,15 @@ const ContentManagement = () => {
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
+            ) : scheduledError ? (
+              <div className="text-center text-destructive p-4">
+                Error loading scheduled content. Please try again.
+              </div>
             ) : (
               <ContentTable 
                 content={scheduledContent} 
                 onEdit={handleEdit} 
-                onDelete={removeContent}
+                onDelete={handleDelete}
                 emptyMessage="You don't have any scheduled content."
               />
             )}

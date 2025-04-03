@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 // Basic content type definitions
@@ -24,6 +25,7 @@ export interface ContentItem {
   scheduled_for?: string;
   views_count: number;
   likes_count: number;
+  comments_count?: number;
   tags?: string[];
 }
 
