@@ -2336,6 +2336,42 @@ export type Database = {
           },
         ]
       }
+      lucoin_package_options: {
+        Row: {
+          amount: number
+          bonus_amount: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          price_sol: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          price_sol?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          price_sol?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       lucoin_packages: {
         Row: {
           amount: number
@@ -4231,6 +4267,33 @@ export type Database = {
           mfa_enabled?: boolean | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      solana_wallets: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          last_used_at: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          last_used_at?: string | null
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          last_used_at?: string | null
+          user_id?: string
+          wallet_address?: string
         }
         Relationships: []
       }

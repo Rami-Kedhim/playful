@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -55,7 +56,10 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       
-      // First try to get packages from the lucoin_package_options table
+      // Check if lucoin_package_options table exists and has data
+      let packages: LucoinPackage[] = [];
+      
+      // Try to get packages from the lucoin_package_options table
       const { data: optionsData, error: optionsError } = await supabase
         .from('lucoin_package_options')
         .select('*')
@@ -63,28 +67,34 @@ export const useLucoins = () => {
         .order('amount', { ascending: true });
       
       if (optionsError) {
-        // Fallback to the old lucoin_packages table if the new one doesn't exist yet
-        const { data, error } = await supabase
+        console.error("Error fetching from lucoin_package_options:", optionsError);
+        
+        // Fallback to the old lucoin_packages table
+        const { data: fallbackData, error: fallbackError } = await supabase
           .from('lucoin_packages')
           .select('*')
           .eq('is_active', true)
           .order('amount', { ascending: true });
         
-        if (error) throw error;
-        return data || [];
+        if (fallbackError) {
+          console.error("Error fetching from fallback lucoin_packages:", fallbackError);
+          return [];
+        }
+        
+        packages = fallbackData || [];
+      } else {
+        // Map the data from lucoin_package_options
+        packages = (optionsData || []).map((pkg: any) => ({
+          id: pkg.id,
+          name: pkg.name,
+          amount: pkg.amount,
+          price: 0, // We'll calculate this based on SOL price in the UI
+          price_sol: pkg.price_sol,
+          bonus_amount: pkg.bonus_amount,
+          is_featured: pkg.is_featured,
+          currency: 'SOL'
+        }));
       }
-      
-      // Map the data to match the LucoinPackage interface
-      const packages: LucoinPackage[] = optionsData.map((pkg: any) => ({
-        id: pkg.id,
-        name: pkg.name,
-        amount: pkg.amount,
-        price: 0, // We'll calculate this based on SOL price in the UI
-        price_sol: pkg.price_sol,
-        bonus_amount: pkg.bonus_amount,
-        is_featured: pkg.is_featured,
-        currency: 'SOL'
-      }));
       
       return packages;
     } catch (error: any) {
@@ -198,28 +208,32 @@ export const useLucoins = () => {
       setLoading(true);
       
       // Get package details
-      let packageData;
+      let packageData: any = null;
       
-      // Try to get the package from the primary table
-      const { data: primaryData, error: primaryError } = await supabase
+      // Try to get the package from the lucoin_package_options table
+      const { data: packageInfo, error: packageError } = await supabase
         .from('lucoin_package_options')
         .select('*')
         .eq('id', packageId)
         .single();
       
-      if (primaryError) {
-        // If that fails, try the fallback table
+      if (packageError) {
+        console.error("Error fetching from lucoin_package_options:", packageError);
+        
+        // Fallback to the old lucoin_packages table
         const { data: fallbackData, error: fallbackError } = await supabase
           .from('lucoin_packages')
           .select('*')
           .eq('id', packageId)
           .single();
           
-        if (fallbackError) throw new Error("Package not found");
+        if (fallbackError) {
+          throw new Error("Package not found");
+        }
         
         packageData = fallbackData;
       } else {
-        packageData = primaryData;
+        packageData = packageInfo;
       }
       
       if (!packageData) {

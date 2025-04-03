@@ -228,7 +228,7 @@ const SolanaTransactionHistory = () => {
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge 
-                        variant={tx.err ? "destructive" : "outline"}
+                        variant={tx.err ? "destructive" : "success"}
                       >
                         {tx.err ? "Failed" : "Success"}
                       </Badge>

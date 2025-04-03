@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { PlusCircle, Loader2, Info, Coins, Wallet, AlertCircle } from "lucide-react";
 import { 
@@ -62,7 +61,6 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
     const data = await fetchPackages();
     setPackages(data);
     
-    // Auto-select a featured package if available
     const featured = data.find(pkg => pkg.is_featured);
     if (featured) {
       setSelectedPackage(featured.id);
@@ -89,7 +87,6 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
       return;
     }
 
-    // Get the selected package
     const pkg = packages.find(p => p.id === selectedPackage);
     if (!pkg) return;
 
@@ -102,7 +99,6 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
       return;
     }
 
-    // Check if user has enough SOL
     if (solanaBalance < (pkg.price_sol || 0)) {
       toast({
         title: "Insufficient SOL balance",
@@ -115,7 +111,6 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
     try {
       setProcessing(true);
       
-      // Process the purchase using Solana and update the database
       const success = await purchasePackageWithSol(
         selectedPackage,
         pkg.price_sol || 0,
@@ -125,7 +120,6 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
       if (success) {
         setOpen(false);
         setSelectedPackage(null);
-        // Refresh the SOL balance
         loadSolanaBalance(walletAddress);
         if (onSuccess) onSuccess();
       }
@@ -134,7 +128,6 @@ const LucoinPackageDialog = ({ onSuccess }: LucoinPackageDialogProps) => {
     }
   };
 
-  // Calculate the USD price for display
   const getUsdPrice = (priceSol?: number) => {
     if (!priceSol || !solanaPrice) return 'N/A';
     const usdPrice = priceSol * solanaPrice;
