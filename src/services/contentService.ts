@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 // Basic content type definitions
@@ -51,11 +50,11 @@ export interface ContentUpdateInput {
   creator_id: string;
   title: string;
   description?: string;
-  media_url: string; // Making this required to match ContentCreateInput
+  media_url: string;
   media_type: ContentType;
   thumbnail_url?: string;
   visibility: ContentVisibility;
-  status?: ContentStatus;
+  status: ContentStatus;
   is_premium?: boolean;
   price?: number;
   scheduled_for?: string;

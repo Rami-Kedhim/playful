@@ -55,11 +55,11 @@ const ContentManagement = () => {
         creator_id: content.creator_id,
         title: content.title,
         description: content.description,
-        media_url: content.media_url, // This is required in both types now
+        media_url: content.media_url,
         media_type: content.media_type,
         thumbnail_url: content.thumbnail_url,
         visibility: content.visibility,
-        status: content.status,
+        status: content.status, // Status is now required in both types
         is_premium: content.is_premium,
         price: content.price,
         scheduled_for: content.scheduled_for,
