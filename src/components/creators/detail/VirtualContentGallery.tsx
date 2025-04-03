@@ -28,7 +28,10 @@ const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
         </CardDescription>
       </CardHeader>
       
-      <Tabs defaultValue="photo" onValueChange={(value) => setActiveTab(value as ContentType)}>
+      <Tabs 
+        defaultValue="photo" 
+        onValueChange={(value) => setActiveTab(value as ContentType)}
+      >
         <div className="px-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="photo" className="flex items-center gap-2">

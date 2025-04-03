@@ -53,8 +53,8 @@ export const useVirtualContent = () => {
     setUnlockingContentId(contentId);
     
     try {
-      // Process payment - fixing the TypeScript errors here
-      const transactionSuccess = await processLucoinTransaction({
+      // Process payment with Lucoins
+      const transactionResult = await processLucoinTransaction({
         amount: price,
         transactionType: 'purchase',
         description: `Unlock ${contentType} content`,
@@ -65,7 +65,7 @@ export const useVirtualContent = () => {
         }
       });
       
-      if (transactionSuccess) {
+      if (transactionResult) {
         // Add to unlocked content
         const updatedUnlockedContent = [...unlockedContent, contentId];
         saveUnlockedContent(updatedUnlockedContent);
