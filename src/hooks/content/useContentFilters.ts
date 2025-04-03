@@ -13,10 +13,15 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
       sort: "newest"
     };
     
-    const mergedFilters = { 
+    // Create a complete ContentFilters object with defaults applied for any missing properties
+    const mergedFilters: ContentFilters = { 
       ...defaultFilters, 
-      ...initialFilters 
-    } as ContentFilters; // Cast after merging to ensure all required properties exist
+      ...initialFilters,
+      // Ensure required properties have values if not provided in initialFilters
+      status: initialFilters.status || defaultFilters.status,
+      searchQuery: initialFilters.searchQuery !== undefined ? initialFilters.searchQuery : defaultFilters.searchQuery,
+      sort: initialFilters.sort || defaultFilters.sort
+    };
     
     try {
       return contentFiltersSchema.parse(mergedFilters);
@@ -31,10 +36,15 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
   // Update filters with validation
   const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
     setFilters(prev => {
-      // Create a complete ContentFilters object by merging previous state with updates
+      // Create a complete ContentFilters object by merging with previous state
+      // Explicitly ensuring required properties are preserved
       const updated: ContentFilters = { 
         ...prev, 
-        ...newFilters 
+        ...newFilters,
+        // Ensure required properties are always present
+        status: newFilters.status !== undefined ? newFilters.status : prev.status,
+        searchQuery: newFilters.searchQuery !== undefined ? newFilters.searchQuery : prev.searchQuery,
+        sort: newFilters.sort !== undefined ? newFilters.sort : prev.sort
       };
       
       try {
