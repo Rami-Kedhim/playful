@@ -16,7 +16,7 @@ export interface ContentCreator {
   price: number;
   createdAt?: string;
   tags?: string[];
-  rating?: number; // Added rating property
+  rating?: number;
 }
 
 export interface CreatorAnalytics {

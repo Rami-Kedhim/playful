@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CreatorProfile {
   isVerified: boolean;
@@ -11,7 +11,7 @@ interface CreatorProfile {
 }
 
 export const useCreatorAuth = () => {
-  const { user, profile, checkRole, userRoles } = useAuth();
+  const { user, isLoading, userRoles } = useAuth();
   const [isCreator, setIsCreator] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,24 +27,24 @@ export const useCreatorAuth = () => {
       }
 
       // Check if user has creator role
-      const hasCreatorRole = checkRole("creator");
+      const hasCreatorRole = userRoles?.includes('creator') || user.role === 'creator';
       setIsCreator(hasCreatorRole);
 
-      if (hasCreatorRole && profile) {
+      if (hasCreatorRole) {
         // In a real app, you would fetch more detailed creator profile data
-        // For now, we'll create a mock creator profile based on the user profile
+        // For now, we'll create a mock creator profile
         const mockCreatorProfile: CreatorProfile = {
-          isVerified: profile.is_verified || false,
-          level: profile.creator_level || "standard",
-          bio: profile.bio || "",
+          isVerified: true,
+          level: "standard",
+          bio: "Creator bio goes here",
           payoutDetails: {
             hasSetupPayout: Math.random() > 0.5,
             preferredMethod: "bank_transfer"
           },
           social: {
-            twitter: profile.social_links?.twitter || "",
-            instagram: profile.social_links?.instagram || "",
-            tiktok: profile.social_links?.tiktok || ""
+            twitter: "",
+            instagram: "",
+            tiktok: ""
           }
         };
         
@@ -57,7 +57,7 @@ export const useCreatorAuth = () => {
     };
 
     checkCreatorStatus();
-  }, [user, profile, checkRole, userRoles]);
+  }, [user, userRoles]);
 
   return {
     isCreator,
@@ -69,3 +69,5 @@ export const useCreatorAuth = () => {
     creatorId: user?.id
   };
 };
+
+export default useCreatorAuth;

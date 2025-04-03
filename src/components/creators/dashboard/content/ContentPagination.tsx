@@ -14,58 +14,57 @@ const ContentPagination: React.FC<ContentPaginationProps> = ({
   currentPage,
   totalItems,
   itemsPerPage,
-  onPageChange
+  onPageChange,
 }) => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  
+
   if (totalPages <= 1) {
     return null;
   }
 
   const getPageNumbers = () => {
     const pages = [];
-    const maxPagesToShow = 5;
-    
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    
-    if (endPage - startPage + 1 < maxPagesToShow) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    const maxPageButtons = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+    if (endPage - startPage + 1 < maxPageButtons) {
+      startPage = Math.max(1, endPage - maxPageButtons + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    
+
     return pages;
   };
 
   return (
-    <div className="flex items-center justify-center space-x-2 mt-6">
+    <div className="flex justify-center items-center mt-4 space-x-2">
       <Button
         variant="outline"
-        size="icon"
-        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      
-      {getPageNumbers().map(page => (
+
+      {getPageNumbers().map((page) => (
         <Button
           key={page}
-          variant={page === currentPage ? "default" : "outline"}
+          variant={currentPage === page ? "default" : "outline"}
           size="sm"
           onClick={() => onPageChange(page)}
         >
           {page}
         </Button>
       ))}
-      
+
       <Button
         variant="outline"
-        size="icon"
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
         <ChevronRight className="h-4 w-4" />

@@ -1,111 +1,150 @@
 
 import { useState } from "react";
-import { 
-  DialogContent, DialogHeader, DialogTitle, DialogDescription, 
-  DialogFooter 
+import {
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface PayoutRequestFormProps {
   earnings: {
     total: number;
-    available: number;
     pending: number;
-    thisMonth: number;
+    available: number;
   };
-  onRequestPayout: (
-    amount: number, 
-    payoutMethod: string, 
-    payoutDetails: Record<string, any>
-  ) => Promise<void>;
+  onRequestPayout: (data: {
+    amount: number;
+    payoutMethod: string;
+    payoutDetails: Record<string, any>;
+  }) => Promise<boolean>;
   onCancel: () => void;
 }
 
-const PayoutRequestForm = ({ 
-  earnings, 
-  onRequestPayout, 
-  onCancel 
+const PayoutRequestForm = ({
+  earnings,
+  onRequestPayout,
+  onCancel,
 }: PayoutRequestFormProps) => {
-  const [payoutAmount, setPayoutAmount] = useState("");
-  const [payoutMethod, setPayoutMethod] = useState("bank_transfer");
-  const [payoutDetails, setPayoutDetails] = useState({
+  const [amount, setAmount] = useState<number>(earnings.available);
+  const [payoutMethod, setPayoutMethod] = useState<string>("bank_transfer");
+  const [details, setDetails] = useState<Record<string, string>>({
     accountName: "",
     accountNumber: "",
-    routingNumber: "",
-    paypalEmail: "",
-    walletAddress: ""
+    bankName: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    if (!payoutAmount || parseFloat(payoutAmount) <= 0) return;
-    
-    // Extract only the relevant details based on the payout method
-    const relevantDetails = {} as Record<string, any>;
-    
-    if (payoutMethod === 'bank_transfer') {
-      relevantDetails.accountName = payoutDetails.accountName;
-      relevantDetails.accountNumber = payoutDetails.accountNumber;
-      relevantDetails.routingNumber = payoutDetails.routingNumber;
-    } else if (payoutMethod === 'paypal') {
-      relevantDetails.paypalEmail = payoutDetails.paypalEmail;
-    } else if (payoutMethod === 'crypto') {
-      relevantDetails.walletAddress = payoutDetails.walletAddress;
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    if (isNaN(value)) {
+      setAmount(0);
+    } else {
+      setAmount(Math.min(value, earnings.available));
     }
-    
-    onRequestPayout(parseFloat(payoutAmount), payoutMethod, relevantDetails);
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setPayoutDetails({
-      ...payoutDetails,
-      [field]: value
-    });
+  const handleDetailsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setDetails((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const isFormValid = () => {
+    if (amount <= 0 || amount > earnings.available) {
+      return false;
+    }
+
+    if (payoutMethod === "bank_transfer") {
+      return (
+        details.accountName.trim() !== "" &&
+        details.accountNumber.trim() !== "" &&
+        details.bankName.trim() !== ""
+      );
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isFormValid()) {
+      setError("Please fill all required fields with valid values");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      const success = await onRequestPayout({
+        amount,
+        payoutMethod,
+        payoutDetails: details,
+      });
+      
+      if (!success) {
+        setError("Failed to process payout request. Please try again.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
-        <DialogTitle>Request a Payout</DialogTitle>
+        <DialogTitle>Request Payout</DialogTitle>
         <DialogDescription>
-          Enter the amount you want to withdraw and your payment details.
+          Request a payout of your available earnings. Payouts typically process
+          within 3-5 business days.
         </DialogDescription>
       </DialogHeader>
-      <div className="grid gap-4 py-4">
-        <div>
-          <Label htmlFor="payoutAmount">Amount</Label>
-          <div className="relative mt-1">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-gray-500">$</span>
-            </div>
-            <Input
-              id="payoutAmount"
-              type="number"
-              value={payoutAmount}
-              onChange={(e) => setPayoutAmount(e.target.value)}
-              className="pl-7"
-              placeholder="0.00"
-              min="10"
-              max={earnings.available}
-              step="0.01"
-            />
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            Available balance: ${earnings.available.toFixed(2)}
-          </p>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="amount">Amount (Available: {earnings.available.toFixed(2)} LC)</Label>
+          <Input
+            id="amount"
+            type="number"
+            min="10"
+            max={earnings.available}
+            step="0.01"
+            value={amount}
+            onChange={handleAmountChange}
+          />
         </div>
-        
-        <div>
+
+        <div className="space-y-2">
           <Label htmlFor="payoutMethod">Payout Method</Label>
           <Select
             value={payoutMethod}
             onValueChange={setPayoutMethod}
           >
-            <SelectTrigger id="payoutMethod" className="mt-1">
+            <SelectTrigger id="payoutMethod">
               <SelectValue placeholder="Select payout method" />
             </SelectTrigger>
             <SelectContent>
@@ -115,88 +154,76 @@ const PayoutRequestForm = ({
             </SelectContent>
           </Select>
         </div>
-        
-        {payoutMethod === 'bank_transfer' && (
-          <>
-            <div>
-              <Label htmlFor="accountName">Account Name</Label>
+
+        {payoutMethod === "bank_transfer" && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="accountName">Account Holder Name</Label>
               <Input
                 id="accountName"
-                value={payoutDetails.accountName}
-                onChange={(e) => handleInputChange('accountName', e.target.value)}
-                className="mt-1"
-                placeholder="Enter account name"
+                name="accountName"
+                value={details.accountName}
+                onChange={handleDetailsChange}
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="accountNumber">Account Number</Label>
               <Input
                 id="accountNumber"
-                value={payoutDetails.accountNumber}
-                onChange={(e) => handleInputChange('accountNumber', e.target.value)}
-                className="mt-1"
-                placeholder="Enter account number"
+                name="accountNumber"
+                value={details.accountNumber}
+                onChange={handleDetailsChange}
               />
             </div>
-            <div>
-              <Label htmlFor="routingNumber">Routing Number</Label>
+            <div className="space-y-2">
+              <Label htmlFor="bankName">Bank Name</Label>
               <Input
-                id="routingNumber"
-                value={payoutDetails.routingNumber}
-                onChange={(e) => handleInputChange('routingNumber', e.target.value)}
-                className="mt-1"
-                placeholder="Enter routing number"
+                id="bankName"
+                name="bankName"
+                value={details.bankName}
+                onChange={handleDetailsChange}
               />
             </div>
-          </>
+          </div>
         )}
-        
-        {payoutMethod === 'paypal' && (
-          <div>
+
+        {payoutMethod === "paypal" && (
+          <div className="space-y-2">
             <Label htmlFor="paypalEmail">PayPal Email</Label>
             <Input
               id="paypalEmail"
+              name="paypalEmail"
               type="email"
-              value={payoutDetails.paypalEmail}
-              onChange={(e) => handleInputChange('paypalEmail', e.target.value)}
-              placeholder="Enter PayPal email"
-              className="mt-1"
+              value={details.paypalEmail || ""}
+              onChange={handleDetailsChange}
             />
           </div>
         )}
-        
-        {payoutMethod === 'crypto' && (
-          <div>
+
+        {payoutMethod === "crypto" && (
+          <div className="space-y-2">
             <Label htmlFor="walletAddress">Wallet Address</Label>
             <Input
               id="walletAddress"
-              value={payoutDetails.walletAddress}
-              onChange={(e) => handleInputChange('walletAddress', e.target.value)}
-              placeholder="Enter wallet address"
-              className="mt-1"
+              name="walletAddress"
+              value={details.walletAddress || ""}
+              onChange={handleDetailsChange}
             />
           </div>
         )}
-      </div>
-      <DialogFooter>
-        <Button 
-          variant="outline" 
-          onClick={onCancel}
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          onClick={handleSubmit}
-          disabled={
-            !payoutAmount || 
-            parseFloat(payoutAmount) <= 0 || 
-            parseFloat(payoutAmount) > earnings.available
-          }
-        >
-          Request Payout
-        </Button>
-      </DialogFooter>
+
+        <DialogFooter className="pt-4">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !isFormValid()}
+          >
+            {isSubmitting ? "Processing..." : "Request Payout"}
+          </Button>
+        </DialogFooter>
+      </form>
     </DialogContent>
   );
 };
