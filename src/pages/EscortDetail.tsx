@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { escorts } from "@/data/escortData";
 import { getEscortById } from "@/utils/escortUtils";
@@ -7,7 +6,6 @@ import EscortProfile from "@/components/escorts/detail/EscortProfile";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Shield, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Helmet } from "react-helmet-async";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EscortDetail = () => {
@@ -43,7 +41,6 @@ const EscortDetail = () => {
   return (
     <MainLayout showHeader={false}>
       <div>
-        {/* Set page title and description using regular DOM methods as fallback */}
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         

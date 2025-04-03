@@ -1,5 +1,5 @@
 
-import { Escort } from "@/data/escortData";
+import { Escort } from "../types/escort";
 
 /**
  * Find an escort by their ID

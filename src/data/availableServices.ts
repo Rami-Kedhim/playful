@@ -1,0 +1,27 @@
+
+export const availableServices = [
+  "GFE",
+  "Massage",
+  "Overnight",
+  "Dinner Date",
+  "Travel Companion",
+  "Domination",
+  "Roleplay",
+  "BDSM",
+  "French Kissing",
+  "Lingerie Shows",
+  "Exotic Dancing",
+  "Anal",
+  "Deepthroat",
+  "Kissing",
+  "Cosplay",
+  "Striptease",
+  "Couples",
+  "Fetish",
+  "Duo with Girl",
+  "Light Domination",
+  "Mutual French",
+  "Prostate Massage",
+  "Spanking",
+  "Tantric Massage"
+];
