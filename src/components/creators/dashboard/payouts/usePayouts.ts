@@ -1,18 +1,17 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { fetchCreatorPayouts, requestPayout, getCreatorEarningsSummary } from "@/services/creator/creatorPayoutsService";
-import { CreatorPayout } from "@/types/creator";
+import { fetchCreatorPayouts, requestPayout, getCreatorPayouts } from "@/services/creator/creatorPayoutsService";
+import { CreatorPayout, PayoutRequest } from "@/types/creator";
 
 export const usePayouts = (creatorId: string) => {
   const [payouts, setPayouts] = useState<CreatorPayout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [earnings, setEarnings] = useState({
-    total: 0,
-    available: 0,
-    pending: 0,
-    thisMonth: 0
+    total: "0.00",
+    pending: "0.00",
+    completed: "0.00"
   });
 
   const loadPayouts = async () => {
@@ -23,8 +22,12 @@ export const usePayouts = (creatorId: string) => {
       setPayouts(result.data);
       
       // Get earnings summary
-      const earningsSummary = await getCreatorEarningsSummary(creatorId);
-      setEarnings(earningsSummary);
+      const payoutStats = await getCreatorPayouts(creatorId);
+      setEarnings({
+        total: payoutStats.total,
+        pending: payoutStats.pending,
+        completed: payoutStats.completed
+      });
     } catch (error) {
       console.error("Error loading payouts:", error);
       toast({
@@ -43,8 +46,16 @@ export const usePayouts = (creatorId: string) => {
     details: Record<string, any>
   ) => {
     try {
-      const result = await requestPayout(creatorId, amount, payoutMethod, details);
-      if (result) {
+      const request: PayoutRequest = {
+        creatorId: creatorId,
+        amount,
+        payoutMethod,
+        payoutDetails: details
+      };
+      
+      const result = await requestPayout(request);
+      
+      if (result.success) {
         setDialogOpen(false);
         toast({
           title: "Payout requested",
