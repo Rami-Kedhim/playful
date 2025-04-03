@@ -13,12 +13,12 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
       sort: "newest"
     };
     
-    // Create a complete ContentFilters object with explicitly defined values to satisfy TypeScript
+    // Create a complete ContentFilters object with explicitly defined values
     const completeFilters: ContentFilters = {
-      status: initialFilters.status ?? defaultFilters.status,
-      searchQuery: initialFilters.searchQuery ?? defaultFilters.searchQuery,
+      status: initialFilters.status !== undefined ? initialFilters.status : defaultFilters.status,
+      searchQuery: initialFilters.searchQuery !== undefined ? initialFilters.searchQuery : defaultFilters.searchQuery,
       contentType: initialFilters.contentType,
-      sort: initialFilters.sort ?? defaultFilters.sort
+      sort: initialFilters.sort !== undefined ? initialFilters.sort : defaultFilters.sort
     };
     
     try {
@@ -34,16 +34,16 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
   // Update filters with validation
   const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
     setFilters(prev => {
-      // Create a fully specified ContentFilters object to satisfy TypeScript's requirements
-      const completeFilters: ContentFilters = {
-        status: newFilters.status ?? prev.status,
-        searchQuery: newFilters.searchQuery ?? prev.searchQuery,
+      // Ensure all required properties are set with non-optional values
+      const updatedFilters: ContentFilters = {
+        status: newFilters.status !== undefined ? newFilters.status : prev.status,
+        searchQuery: newFilters.searchQuery !== undefined ? newFilters.searchQuery : prev.searchQuery,
         contentType: newFilters.contentType !== undefined ? newFilters.contentType : prev.contentType,
-        sort: newFilters.sort ?? prev.sort
+        sort: newFilters.sort !== undefined ? newFilters.sort : prev.sort
       };
       
       try {
-        return contentFiltersSchema.parse(completeFilters);
+        return contentFiltersSchema.parse(updatedFilters);
       } catch (error) {
         console.warn("Invalid filter update:", error);
         return prev;
