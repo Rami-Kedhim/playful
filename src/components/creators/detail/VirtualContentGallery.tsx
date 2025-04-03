@@ -1,11 +1,12 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Image, Film, MessageSquare } from "lucide-react";
+import { Image, Film, MessageSquare, Loader2 } from "lucide-react";
 import VirtualContentGrid from "@/components/creators/VirtualContentGrid";
 import useVirtualCreatorContent from "@/hooks/useVirtualCreatorContent";
 import { ContentType } from "@/hooks/useVirtualContent";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export interface VirtualContentGalleryProps {
   creatorId: string;
@@ -18,6 +19,15 @@ const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<ContentType>("photo");
   const { content, loading, error } = useVirtualCreatorContent(creatorId);
+  const [isEmpty, setIsEmpty] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Check if there's content for the active tab
+    if (!loading && !error) {
+      const hasContent = content.some(item => item.type === activeTab);
+      setIsEmpty(!hasContent);
+    }
+  }, [activeTab, content, loading, error]);
   
   return (
     <Card className="w-full">
@@ -52,32 +62,56 @@ const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
         <CardContent className="pt-6">
           {loading ? (
             <div className="text-center p-8">
-              <div className="animate-pulse h-4 w-1/2 bg-muted rounded mx-auto mb-2"></div>
-              <div className="animate-pulse h-32 w-full bg-muted rounded"></div>
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+              <p className="text-muted-foreground">Loading content...</p>
             </div>
           ) : error ? (
-            <div className="text-center p-8 text-destructive">
-              Error loading content: {error}
-            </div>
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
           ) : (
             <>
               <TabsContent value="photo">
-                <VirtualContentGrid 
-                  items={content.filter(item => item.type === "photo")} 
-                  columns={2}
-                />
+                {isEmpty ? (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <Image className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No photos available yet</p>
+                  </div>
+                ) : (
+                  <VirtualContentGrid 
+                    items={content.filter(item => item.type === "photo")} 
+                    columns={2}
+                  />
+                )}
               </TabsContent>
               <TabsContent value="video">
-                <VirtualContentGrid 
-                  items={content.filter(item => item.type === "video")} 
-                  columns={2}
-                />
+                {isEmpty ? (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <Film className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No videos available yet</p>
+                  </div>
+                ) : (
+                  <VirtualContentGrid 
+                    items={content.filter(item => item.type === "video")} 
+                    columns={2}
+                  />
+                )}
               </TabsContent>
               <TabsContent value="message">
-                <VirtualContentGrid 
-                  items={content.filter(item => item.type === "message")} 
-                  columns={2}
-                />
+                {isEmpty ? (
+                  <div className="text-center p-8 text-muted-foreground">
+                    <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No messages available yet</p>
+                  </div>
+                ) : (
+                  <VirtualContentGrid 
+                    items={content.filter(item => item.type === "message")} 
+                    columns={2}
+                  />
+                )}
               </TabsContent>
             </>
           )}

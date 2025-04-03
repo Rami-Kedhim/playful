@@ -15,24 +15,32 @@ interface UnlockContentOptions {
 export const useVirtualContent = () => {
   const [unlockingContentId, setUnlockingContentId] = useState<string | null>(null);
   const [unlockedContent, setUnlockedContent] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { processLucoinTransaction } = useLucoins();
   
   // In a real application, we'd fetch this from the server
   useEffect(() => {
+    setError(null);
     const storedUnlockedContent = localStorage.getItem('unlockedContent');
     if (storedUnlockedContent) {
       try {
         setUnlockedContent(JSON.parse(storedUnlockedContent));
       } catch (error) {
         console.error("Failed to parse unlocked content from localStorage", error);
+        setError("Failed to load your unlocked content");
       }
     }
   }, []);
   
   const saveUnlockedContent = (contentIds: string[]) => {
-    localStorage.setItem('unlockedContent', JSON.stringify(contentIds));
-    setUnlockedContent(contentIds);
+    try {
+      localStorage.setItem('unlockedContent', JSON.stringify(contentIds));
+      setUnlockedContent(contentIds);
+    } catch (error) {
+      console.error("Failed to save unlocked content to localStorage", error);
+      setError("Failed to save your unlocked content");
+    }
   };
   
   const isContentUnlocked = (contentId: string): boolean => {
@@ -47,10 +55,11 @@ export const useVirtualContent = () => {
         title: "Already Unlocked",
         description: "You already have access to this content",
       });
-      return;
+      return true;
     }
     
     setUnlockingContentId(contentId);
+    setError(null);
     
     try {
       // Process payment with Lucoins
@@ -74,20 +83,24 @@ export const useVirtualContent = () => {
           title: "Content Unlocked",
           description: `You now have access to this ${contentType}`,
         });
+        return true;
       } else {
         toast({
           title: "Transaction Failed",
           description: "Could not complete the transaction",
           variant: "destructive",
         });
+        return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error unlocking content:", error);
+      setError(error.message || "Failed to unlock content");
       toast({
         title: "Error",
         description: "Failed to unlock content. Please try again later.",
         variant: "destructive",
       });
+      return false;
     } finally {
       setUnlockingContentId(null);
     }
@@ -95,8 +108,10 @@ export const useVirtualContent = () => {
   
   return {
     isUnlocking: !!unlockingContentId,
+    unlockingContentId,
     isContentUnlocked,
-    unlockContent
+    unlockContent,
+    error
   };
 };
 
