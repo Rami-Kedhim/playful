@@ -1,18 +1,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Heart, Share2, DollarSign } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 
-export interface AnalyticsStat {
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-  trend: "up" | "down" | "neutral";
-  change: string;
-  color: string;
-}
-
-export interface AnalyticsSummaryProps {
+interface AnalyticsSummaryProps {
   views: number;
   likes: number;
   shares: number;

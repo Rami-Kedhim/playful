@@ -24,7 +24,6 @@ import ProfileManagement from "./pages/ProfileManagement";
 import Wallet from "./pages/Wallet";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RoleGuard from "./components/auth/RoleGuard";
-import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -57,11 +56,6 @@ const App = () => (
               <Route path="/wallet" element={
                 <ProtectedRoute>
                   <Wallet />
-                </ProtectedRoute>
-              } />
-              <Route path="/messages" element={
-                <ProtectedRoute>
-                  <Messages />
                 </ProtectedRoute>
               } />
               {/* Role-specific routes */}
