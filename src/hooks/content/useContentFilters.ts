@@ -13,18 +13,12 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
       sort: "newest"
     };
     
-    // Create a complete ContentFilters object - ensuring all required properties are present
-    const mergedFilters = {
-      ...defaultFilters,
-      ...initialFilters,
-    };
-    
-    // Force TypeScript to recognize this is a complete ContentFilters object
+    // Create a complete ContentFilters object with explicitly defined values to satisfy TypeScript
     const completeFilters: ContentFilters = {
-      status: mergedFilters.status || defaultFilters.status,
-      searchQuery: mergedFilters.searchQuery !== undefined ? mergedFilters.searchQuery : defaultFilters.searchQuery,
-      contentType: mergedFilters.contentType,
-      sort: mergedFilters.sort || defaultFilters.sort
+      status: initialFilters.status ?? defaultFilters.status,
+      searchQuery: initialFilters.searchQuery ?? defaultFilters.searchQuery,
+      contentType: initialFilters.contentType,
+      sort: initialFilters.sort ?? defaultFilters.sort
     };
     
     try {
@@ -40,12 +34,12 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
   // Update filters with validation
   const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
     setFilters(prev => {
-      // Always ensure a complete ContentFilters object is created
+      // Create a fully specified ContentFilters object to satisfy TypeScript's requirements
       const completeFilters: ContentFilters = {
-        status: newFilters.status !== undefined ? newFilters.status : prev.status,
-        searchQuery: newFilters.searchQuery !== undefined ? newFilters.searchQuery : prev.searchQuery,
+        status: newFilters.status ?? prev.status,
+        searchQuery: newFilters.searchQuery ?? prev.searchQuery,
         contentType: newFilters.contentType !== undefined ? newFilters.contentType : prev.contentType,
-        sort: newFilters.sort !== undefined ? newFilters.sort : prev.sort
+        sort: newFilters.sort ?? prev.sort
       };
       
       try {
