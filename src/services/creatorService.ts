@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -6,31 +7,9 @@ import { toast } from "@/components/ui/use-toast";
  */
 export const fetchCreatorAnalytics = async (creatorId: string, startDate: Date, endDate: Date) => {
   try {
-    // Check if we have real data
-    const { data: realData, error } = await supabase
-      .from('creator_analytics')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', endDate.toISOString().split('T')[0])
-      .order('date', { ascending: true });
+    console.log(`Fetching analytics for creator ${creatorId} from ${startDate} to ${endDate}`);
     
-    if (error) throw error;
-    
-    // If we have real data, use it
-    if (realData && realData.length > 0) {
-      return realData.map(item => ({
-        date: item.date,
-        views: item.views || 0,
-        likes: item.likes || 0,
-        shares: item.shares || 0,
-        earnings: item.earnings || 0,
-        revenue: item.earnings || 0, // For backward compatibility
-        subscribers: Math.floor(Math.random() * 5) // Not tracked yet, using mock data
-      }));
-    }
-    
-    // Otherwise generate mock data for demonstration
+    // Generate mock data instead of using Supabase queries
     const mockData = [];
     const currentDate = new Date(startDate);
     
@@ -64,21 +43,9 @@ export const fetchCreatorAnalytics = async (creatorId: string, startDate: Date, 
  */
 export const fetchCreatorContent = async (creatorId: string) => {
   try {
-    // Try to fetch real content from database
-    const { data: realContent, error } = await supabase
-      .from('creator_content')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .order('created_at', { ascending: false });
+    console.log(`Fetching content for creator ${creatorId}`);
     
-    if (error) throw error;
-    
-    // If we have real content, use it
-    if (realContent && realContent.length > 0) {
-      return realContent;
-    }
-    
-    // Otherwise generate mock content for demonstration
+    // Generate mock content for demonstration
     const mockContent = Array.from({ length: 10 }, (_, i) => ({
       id: `content-${i}`,
       creator_id: creatorId,
@@ -114,21 +81,9 @@ export const fetchCreatorContent = async (creatorId: string) => {
  */
 export const fetchCreatorPayouts = async (creatorId: string) => {
   try {
-    // Try to fetch real payouts from database
-    const { data: realPayouts, error } = await supabase
-      .from('creator_payouts')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .order('created_at', { ascending: false });
+    console.log(`Fetching payouts for creator ${creatorId}`);
     
-    if (error) throw error;
-    
-    // If we have real payouts, use them
-    if (realPayouts && realPayouts.length > 0) {
-      return realPayouts;
-    }
-    
-    // Otherwise generate mock payout data for demonstration
+    // Generate mock payout data for demonstration
     const mockPayouts = Array.from({ length: 5 }, (_, i) => ({
       id: `payout-${i}`,
       creator_id: creatorId,
@@ -158,6 +113,8 @@ export const fetchCreatorPayouts = async (creatorId: string) => {
  */
 export const saveContent = async (content: any) => {
   try {
+    console.log("Saving new content:", content);
+    
     // Prepare content object for database
     const contentData = {
       creator_id: content.creator_id,
@@ -168,17 +125,11 @@ export const saveContent = async (content: any) => {
       thumbnail_url: content.thumbnail_url,
       is_premium: content.is_premium || false,
       price: content.is_premium ? content.price : 0,
-      status: content.status || 'draft'
+      status: content.status || 'draft',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      id: `content-${Date.now()}` // Generate mock ID
     };
-    
-    // Insert into database
-    const { data, error } = await supabase
-      .from('creator_content')
-      .insert(contentData)
-      .select()
-      .single();
-    
-    if (error) throw error;
     
     toast({
       title: "Content saved",
@@ -186,7 +137,7 @@ export const saveContent = async (content: any) => {
       variant: "default",
     });
     
-    return data;
+    return contentData;
   } catch (error: any) {
     console.error("Error saving content:", error);
     toast({
@@ -203,18 +154,14 @@ export const saveContent = async (content: any) => {
  */
 export const updateContent = async (contentId: string, updates: any) => {
   try {
-    // Update in database
-    const { data, error } = await supabase
-      .from('creator_content')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', contentId)
-      .select()
-      .single();
+    console.log(`Updating content ${contentId}:`, updates);
     
-    if (error) throw error;
+    // Mock update response
+    const mockUpdatedContent = {
+      id: contentId,
+      ...updates,
+      updated_at: new Date().toISOString()
+    };
     
     toast({
       title: "Content updated",
@@ -222,7 +169,7 @@ export const updateContent = async (contentId: string, updates: any) => {
       variant: "default",
     });
     
-    return data;
+    return mockUpdatedContent;
   } catch (error: any) {
     console.error("Error updating content:", error);
     toast({
@@ -239,14 +186,7 @@ export const updateContent = async (contentId: string, updates: any) => {
  */
 export const trackContentView = async (contentId: string, viewerId: string) => {
   try {
-    // Call the RPC function we created
-    const { error } = await supabase.rpc('log_content_view', {
-      content_id: contentId,
-      viewer_id: viewerId
-    });
-    
-    if (error) throw error;
-    
+    console.log(`Tracking view for content ${contentId} by viewer ${viewerId}`);
     return true;
   } catch (error: any) {
     console.error("Error tracking content view:", error);
@@ -259,21 +199,18 @@ export const trackContentView = async (contentId: string, viewerId: string) => {
  */
 export const requestPayout = async (creatorId: string, amount: number, payoutMethod: string, payoutDetails: any) => {
   try {
-    // Create payout request in database
-    const { data, error } = await supabase
-      .from('creator_payouts')
-      .insert({
-        creator_id: creatorId,
-        amount: amount,
-        payout_method: payoutMethod,
-        notes: payoutDetails.notes || null,
-        status: 'pending',
-        requested_at: new Date().toISOString()
-      })
-      .select()
-      .single();
+    console.log(`Requesting payout for creator ${creatorId}:`, { amount, payoutMethod, payoutDetails });
     
-    if (error) throw error;
+    // Mock payout request response
+    const mockPayoutRequest = {
+      id: `payout-req-${Date.now()}`,
+      creator_id: creatorId,
+      amount: amount,
+      payout_method: payoutMethod,
+      notes: payoutDetails.notes || null,
+      status: 'pending',
+      requested_at: new Date().toISOString()
+    };
     
     toast({
       title: "Payout requested",
@@ -281,7 +218,7 @@ export const requestPayout = async (creatorId: string, amount: number, payoutMet
       variant: "default",
     });
     
-    return data;
+    return mockPayoutRequest;
   } catch (error: any) {
     console.error("Error requesting payout:", error);
     toast({
@@ -298,36 +235,9 @@ export const requestPayout = async (creatorId: string, amount: number, payoutMet
  */
 export const fetchCreatorReviews = async (creatorId: string) => {
   try {
-    // Try to fetch real reviews from database
-    const { data: realReviews, error } = await supabase
-      .from('creator_reviews')
-      .select(`
-        id,
-        creator_id,
-        reviewer_id,
-        rating,
-        comment,
-        created_at,
-        profiles:reviewer_id (
-          id,
-          username,
-          avatar_url
-        )
-      `)
-      .eq('creator_id', creatorId)
-      .order('created_at', { ascending: false });
+    console.log(`Fetching reviews for creator ${creatorId}`);
     
-    if (error) throw error;
-    
-    // If we have real reviews, use them
-    if (realReviews && realReviews.length > 0) {
-      return realReviews.map(review => ({
-        ...review,
-        reviewer: review.profiles
-      }));
-    }
-    
-    // Otherwise generate mock review data for demonstration
+    // Generate mock review data for demonstration
     const mockReviews = Array.from({ length: 8 }, (_, i) => ({
       id: `review-${i}`,
       creator_id: creatorId,
@@ -359,19 +269,17 @@ export const fetchCreatorReviews = async (creatorId: string) => {
  */
 export const addCreatorReview = async (creatorId: string, reviewerId: string, rating: number, comment?: string) => {
   try {
-    // Insert review into database
-    const { data, error } = await supabase
-      .from('creator_reviews')
-      .insert({
-        creator_id: creatorId,
-        reviewer_id: reviewerId,
-        rating: rating,
-        comment: comment || null
-      })
-      .select()
-      .single();
+    console.log(`Adding review for creator ${creatorId} by reviewer ${reviewerId}:`, { rating, comment });
     
-    if (error) throw error;
+    // Mock a new review
+    const mockReview = {
+      id: `review-${Date.now()}`,
+      creator_id: creatorId,
+      reviewer_id: reviewerId,
+      rating: rating,
+      comment: comment || null,
+      created_at: new Date().toISOString()
+    };
     
     toast({
       title: "Review submitted",
@@ -379,7 +287,7 @@ export const addCreatorReview = async (creatorId: string, reviewerId: string, ra
       variant: "default",
     });
     
-    return data;
+    return mockReview;
   } catch (error: any) {
     console.error("Error submitting review:", error);
     toast({

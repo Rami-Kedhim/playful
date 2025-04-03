@@ -6,7 +6,6 @@ import { Users, TrendingUp, DollarSign, Play } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import AnalyticsSummary from "./AnalyticsSummary";
 import AudienceDemographics from "./AudienceDemographics";
-import { AnalyticsStat } from "./AnalyticsSummary";
 
 export interface CreatorAnalyticsProps {
   analyticsData: {
@@ -41,41 +40,6 @@ const CreatorAnalytics = ({
   loading 
 }: CreatorAnalyticsProps) => {
   
-  const analyticsStats: AnalyticsStat[] = [
-    {
-      title: "Total Views",
-      value: analyticsData.views.toLocaleString(),
-      icon: <Play className="h-4 w-4" />,
-      trend: "up" as const, // Explicitly type as const
-      change: "12%",
-      color: "text-green-500"
-    },
-    {
-      title: "Engagement",
-      value: analyticsData.likes.toLocaleString(),
-      icon: <TrendingUp className="h-4 w-4" />,
-      trend: "up" as const, // Explicitly type as const
-      change: "8%",
-      color: "text-green-500"
-    },
-    {
-      title: "Shares",
-      value: analyticsData.shares.toLocaleString(),
-      icon: <Users className="h-4 w-4" />,
-      trend: "up" as const, // Explicitly type as const
-      change: "5%",
-      color: "text-green-500"
-    },
-    {
-      title: "Earnings",
-      value: `$${analyticsData.earnings.toLocaleString()}`,
-      icon: <DollarSign className="h-4 w-4" />,
-      trend: "up" as const, // Explicitly type as const
-      change: "15%",
-      color: "text-green-500"
-    }
-  ];
-  
   return (
     <Card>
       <CardHeader>
@@ -93,7 +57,13 @@ const CreatorAnalytics = ({
       </CardHeader>
       <CardContent>
         <div className="grid gap-6">
-          <AnalyticsSummary stats={analyticsStats} loading={loading} />
+          <AnalyticsSummary 
+            views={analyticsData.views}
+            likes={analyticsData.likes}
+            shares={analyticsData.shares}
+            earnings={analyticsData.earnings}
+            loading={loading}
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">

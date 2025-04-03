@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,9 +50,19 @@ const ContentManagement = () => {
     if (editingContent?.id) {
       // When editing, create a ContentUpdateInput from ContentCreateInput
       await editContent({
-        ...content,
         id: editingContent.id,
-        creator_id: content.creator_id
+        creator_id: content.creator_id,
+        title: content.title,
+        description: content.description,
+        media_url: content.media_url,
+        media_type: content.media_type,
+        thumbnail_url: content.thumbnail_url,
+        visibility: content.visibility,
+        status: content.status,
+        is_premium: content.is_premium,
+        price: content.price,
+        scheduled_for: content.scheduled_for,
+        tags: content.tags
       });
     } else {
       await addContent(content);

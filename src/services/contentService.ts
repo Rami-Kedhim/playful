@@ -1,263 +1,297 @@
 
-import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+// Basic content type definitions
+export type ContentType = "video" | "image" | "text";
+export type ContentStatus = "draft" | "published" | "scheduled";
+export type ContentVisibility = "public" | "subscribers" | "premium";
+
+// Define the structure for a content item
 export interface ContentItem {
   id: string;
-  title: string;
-  description: string;
-  thumbnail_url: string;
-  media_url: string;
-  media_type: "image" | "video";
-  visibility: "public" | "subscribers" | "premium";
-  status: "draft" | "published" | "scheduled";
-  scheduled_for?: string;
-  created_at: string;
-  updated_at: string;
-  tags: string[];
   creator_id: string;
+  title: string;
+  description?: string;
+  media_url: string;
+  media_type: ContentType;
+  thumbnail_url?: string;
+  visibility: ContentVisibility;
+  status: ContentStatus;
+  is_premium: boolean;
+  price: number;
+  created_at: string;
+  updated_at?: string;
+  published_at?: string;
+  scheduled_for?: string;
   views_count: number;
   likes_count: number;
-  comments_count: number;
+  tags?: string[];
 }
 
+// Input for creating new content
 export interface ContentCreateInput {
   id?: string;
-  title: string;
-  description: string;
-  thumbnail_url?: string;
-  media_url: string;
-  media_type: "image" | "video";
-  visibility: "public" | "subscribers" | "premium";
-  status: "draft" | "published" | "scheduled";
-  scheduled_for?: string;
-  tags: string[];
   creator_id: string;
-}
-
-export interface ContentUpdateInput {
-  id: string;
-  title?: string;
+  title: string;
   description?: string;
+  media_url: string;
+  media_type: ContentType;
   thumbnail_url?: string;
-  media_url?: string;
-  media_type?: "image" | "video";
-  visibility?: "public" | "subscribers" | "premium";
-  status?: "draft" | "published" | "scheduled";
+  visibility: ContentVisibility;
+  status: ContentStatus;
+  is_premium?: boolean;
+  price?: number;
   scheduled_for?: string;
   tags?: string[];
-  creator_id: string; // Making this required to match ContentCreateInput
 }
 
-// Get content for a specific creator
-export const getCreatorContent = async (creatorId: string, limit = 10, status?: string): Promise<ContentItem[]> => {
+// Input for updating existing content
+export interface ContentUpdateInput {
+  id: string;
+  creator_id: string;
+  title: string; // Making this required to match ContentCreateInput
+  description?: string;
+  media_url?: string;
+  media_type?: ContentType;
+  thumbnail_url?: string;
+  visibility?: ContentVisibility;
+  status?: ContentStatus;
+  is_premium?: boolean;
+  price?: number;
+  scheduled_for?: string;
+  tags?: string[];
+}
+
+// Mock data for creator content
+const mockContent: ContentItem[] = [
+  {
+    id: "1",
+    creator_id: "user-1",
+    title: "Beach Photoshoot",
+    description: "Summer vibes photoshoot at Malibu Beach",
+    media_url: "https://example.com/beach.jpg",
+    media_type: "image",
+    thumbnail_url: "https://example.com/beach-thumb.jpg",
+    visibility: "public",
+    status: "published",
+    is_premium: false,
+    price: 0,
+    created_at: "2023-05-10T12:00:00Z",
+    updated_at: "2023-05-10T14:30:00Z",
+    published_at: "2023-05-10T15:00:00Z",
+    views_count: 1240,
+    likes_count: 87
+  },
+  {
+    id: "2",
+    creator_id: "user-1",
+    title: "Exclusive Workout Video",
+    description: "Full body workout routine",
+    media_url: "https://example.com/workout.mp4",
+    media_type: "video",
+    thumbnail_url: "https://example.com/workout-thumb.jpg",
+    visibility: "premium",
+    status: "published",
+    is_premium: true,
+    price: 9.99,
+    created_at: "2023-05-15T10:00:00Z",
+    updated_at: "2023-05-15T12:00:00Z",
+    published_at: "2023-05-15T14:00:00Z",
+    views_count: 320,
+    likes_count: 45
+  },
+  {
+    id: "3",
+    creator_id: "user-1",
+    title: "Upcoming Live Session",
+    description: "Q&A with fans",
+    media_url: "https://example.com/live.jpg",
+    media_type: "image",
+    thumbnail_url: "https://example.com/live-thumb.jpg",
+    visibility: "subscribers",
+    status: "scheduled",
+    is_premium: false,
+    price: 0,
+    created_at: "2023-05-20T09:00:00Z",
+    updated_at: "2023-05-20T10:00:00Z",
+    scheduled_for: "2023-06-01T18:00:00Z",
+    views_count: 0,
+    likes_count: 0
+  },
+  {
+    id: "4",
+    creator_id: "user-1",
+    title: "Draft Post",
+    description: "Work in progress",
+    media_url: "https://example.com/draft.jpg",
+    media_type: "image",
+    thumbnail_url: "https://example.com/draft-thumb.jpg",
+    visibility: "public",
+    status: "draft",
+    is_premium: false,
+    price: 0,
+    created_at: "2023-05-22T11:00:00Z",
+    updated_at: "2023-05-22T11:30:00Z",
+    views_count: 0,
+    likes_count: 0
+  }
+];
+
+// Get content for a creator
+export const getCreatorContent = async (
+  creatorId: string,
+  limit: number = 10,
+  status?: string
+): Promise<ContentItem[]> => {
   try {
-    // For now, we'll use mock data since the 'content' table doesn't exist yet
-    const mockContent: ContentItem[] = Array.from({ length: Math.floor(Math.random() * 10) + 1 }, (_, i) => ({
-      id: `content-${i}`,
-      title: `Content ${i}`,
-      description: `Description for content ${i}`,
-      thumbnail_url: `https://picsum.photos/seed/${i}/300/200`,
-      media_url: `https://example.com/media/${i}`,
-      media_type: i % 2 === 0 ? "image" : "video",
-      visibility: ["public", "subscribers", "premium"][i % 3] as "public" | "subscribers" | "premium",
-      status: ["draft", "published", "scheduled"][i % 3] as "draft" | "published" | "scheduled",
-      scheduled_for: i % 3 === 2 ? new Date(Date.now() + 86400000 * i).toISOString() : undefined,
-      created_at: new Date(Date.now() - 86400000 * i).toISOString(),
-      updated_at: new Date(Date.now() - 43200000 * i).toISOString(),
-      tags: [`tag${i}`, `category${i % 3}`],
-      creator_id: creatorId,
-      views_count: Math.floor(Math.random() * 1000),
-      likes_count: Math.floor(Math.random() * 100),
-      comments_count: Math.floor(Math.random() * 50)
-    }));
+    console.log(`Fetching content for creator: ${creatorId}, status filter: ${status || 'all'}`);
     
+    // Use mock data instead of actual Supabase calls for now
+    let filteredContent = [...mockContent];
+    
+    // Apply status filter if provided
     if (status) {
-      return mockContent.filter(item => item.status === status);
+      filteredContent = filteredContent.filter(item => item.status === status);
     }
     
-    return mockContent;
+    // Filter by creator
+    filteredContent = filteredContent.filter(item => item.creator_id === creatorId);
+    
+    // Apply limit
+    filteredContent = filteredContent.slice(0, limit);
+    
+    return filteredContent;
   } catch (error) {
     console.error("Error fetching creator content:", error);
     return [];
   }
 };
 
-// Get a single content item by ID
-export const getContentById = async (contentId: string): Promise<ContentItem | null> => {
+// Create new content
+export const createContent = async (
+  content: ContentCreateInput
+): Promise<ContentItem | null> => {
   try {
-    // Use mock data
-    const mockContent: ContentItem = {
-      id: contentId,
-      title: `Content ${contentId}`,
-      description: `Description for content ${contentId}`,
-      thumbnail_url: `https://picsum.photos/seed/${contentId}/300/200`,
-      media_url: `https://example.com/media/${contentId}`,
-      media_type: Math.random() > 0.5 ? "image" : "video",
-      visibility: ["public", "subscribers", "premium"][Math.floor(Math.random() * 3)] as "public" | "subscribers" | "premium",
-      status: ["draft", "published", "scheduled"][Math.floor(Math.random() * 3)] as "draft" | "published" | "scheduled",
-      scheduled_for: Math.random() > 0.7 ? new Date(Date.now() + 86400000).toISOString() : undefined,
-      created_at: new Date(Date.now() - 86400000).toISOString(),
-      updated_at: new Date(Date.now() - 43200000).toISOString(),
-      tags: [`tag1`, `category2`],
-      creator_id: `creator-${Math.floor(Math.random() * 10)}`,
-      views_count: Math.floor(Math.random() * 1000),
-      likes_count: Math.floor(Math.random() * 100),
-      comments_count: Math.floor(Math.random() * 50)
-    };
+    console.log("Creating new content:", content);
     
-    return mockContent;
-  } catch (error) {
-    console.error("Error fetching content:", error);
-    return null;
-  }
-};
-
-// Create a new content item
-export const createContent = async (content: ContentCreateInput): Promise<ContentItem | null> => {
-  try {
-    // Create a mock content item
+    // Generate mock data instead of actual DB insert
     const newContent: ContentItem = {
-      id: content.id || `content-${Date.now()}`,
+      id: `content-${Date.now()}`,
+      creator_id: content.creator_id,
       title: content.title,
-      description: content.description,
-      thumbnail_url: content.thumbnail_url || "https://picsum.photos/seed/default/300/200",
+      description: content.description || "",
       media_url: content.media_url,
       media_type: content.media_type,
+      thumbnail_url: content.thumbnail_url,
       visibility: content.visibility,
       status: content.status,
-      scheduled_for: content.scheduled_for,
+      is_premium: content.is_premium || false,
+      price: content.price || 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      tags: content.tags || [],
-      creator_id: content.creator_id,
+      published_at: content.status === 'published' ? new Date().toISOString() : undefined,
+      scheduled_for: content.scheduled_for,
       views_count: 0,
       likes_count: 0,
-      comments_count: 0
+      tags: content.tags
     };
     
-    toast({
-      title: "Content created",
-      description: "Your content has been saved successfully.",
-    });
+    mockContent.unshift(newContent);
     
     return newContent;
   } catch (error) {
     console.error("Error creating content:", error);
-    
-    toast({
-      title: "Error creating content",
-      description: "There was a problem saving your content.",
-      variant: "destructive",
-    });
-    
     return null;
   }
 };
 
-// Update an existing content item
-export const updateContent = async (content: ContentUpdateInput): Promise<ContentItem | null> => {
+// Update existing content
+export const updateContent = async (
+  content: ContentUpdateInput
+): Promise<ContentItem | null> => {
   try {
-    // Create a mock updated content item
+    console.log("Updating content:", content);
+    
+    // Find the content to update in our mock data
+    const index = mockContent.findIndex(item => item.id === content.id);
+    
+    if (index === -1) {
+      console.error(`Content with ID ${content.id} not found`);
+      return null;
+    }
+    
+    // Update the content
     const updatedContent: ContentItem = {
-      id: content.id,
-      title: content.title || "Default Title",
-      description: content.description || "Default Description",
-      thumbnail_url: content.thumbnail_url || "https://picsum.photos/seed/default/300/200",
-      media_url: content.media_url || "https://example.com/media/default",
-      media_type: content.media_type || "image",
-      visibility: content.visibility || "public",
-      status: content.status || "draft",
-      scheduled_for: content.scheduled_for,
-      created_at: new Date(Date.now() - 86400000).toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: content.tags || [],
-      creator_id: content.creator_id,
-      views_count: Math.floor(Math.random() * 1000),
-      likes_count: Math.floor(Math.random() * 100),
-      comments_count: Math.floor(Math.random() * 50)
+      ...mockContent[index],
+      ...content,
+      updated_at: new Date().toISOString()
     };
     
-    toast({
-      title: "Content updated",
-      description: "Your content has been updated successfully.",
-    });
+    // If status changed to published, update published_at
+    if (content.status === 'published' && mockContent[index].status !== 'published') {
+      updatedContent.published_at = new Date().toISOString();
+    }
+    
+    // Replace the old content with the updated one
+    mockContent[index] = updatedContent;
     
     return updatedContent;
   } catch (error) {
     console.error("Error updating content:", error);
-    
-    toast({
-      title: "Error updating content",
-      description: "There was a problem updating your content.",
-      variant: "destructive",
-    });
-    
     return null;
   }
 };
 
-// Delete a content item
+// Delete content
 export const deleteContent = async (contentId: string): Promise<boolean> => {
   try {
-    // No actual deletion needed for mock data
+    console.log("Deleting content:", contentId);
     
-    toast({
-      title: "Content deleted",
-      description: "Your content has been deleted successfully.",
-    });
+    // Find the content to delete
+    const index = mockContent.findIndex(item => item.id === contentId);
+    
+    if (index === -1) {
+      console.error(`Content with ID ${contentId} not found`);
+      return false;
+    }
+    
+    // Remove the content
+    mockContent.splice(index, 1);
     
     return true;
   } catch (error) {
     console.error("Error deleting content:", error);
-    
-    toast({
-      title: "Error deleting content",
-      description: "There was a problem deleting your content.",
-      variant: "destructive",
-    });
-    
     return false;
   }
 };
 
-// Publish a draft content
+// Publish a draft
 export const publishContent = async (contentId: string): Promise<ContentItem | null> => {
   try {
-    // Mock publish by creating a published content item
+    console.log("Publishing content:", contentId);
+    
+    // Find the content to publish
+    const index = mockContent.findIndex(item => item.id === contentId);
+    
+    if (index === -1) {
+      console.error(`Content with ID ${contentId} not found`);
+      return null;
+    }
+    
+    // Update the content status to published
     const publishedContent: ContentItem = {
-      id: contentId,
-      title: `Content ${contentId}`,
-      description: `Description for content ${contentId}`,
-      thumbnail_url: `https://picsum.photos/seed/${contentId}/300/200`,
-      media_url: `https://example.com/media/${contentId}`,
-      media_type: Math.random() > 0.5 ? "image" : "video",
-      visibility: ["public", "subscribers", "premium"][Math.floor(Math.random() * 3)] as "public" | "subscribers" | "premium",
+      ...mockContent[index],
       status: "published",
-      created_at: new Date(Date.now() - 86400000).toISOString(),
-      updated_at: new Date().toISOString(),
-      tags: [`tag1`, `category2`],
-      creator_id: `creator-${Math.floor(Math.random() * 10)}`,
-      views_count: Math.floor(Math.random() * 1000),
-      likes_count: Math.floor(Math.random() * 100),
-      comments_count: Math.floor(Math.random() * 50)
+      published_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     
-    toast({
-      title: "Content published",
-      description: "Your content is now visible to your audience.",
-    });
+    // Replace the old content with the published one
+    mockContent[index] = publishedContent;
     
     return publishedContent;
   } catch (error) {
     console.error("Error publishing content:", error);
-    
-    toast({
-      title: "Error publishing content",
-      description: "There was a problem publishing your content.",
-      variant: "destructive",
-    });
-    
     return null;
   }
 };
