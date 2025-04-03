@@ -9,7 +9,7 @@ import SearchBar from "@/components/escorts/SearchBar";
 import AppliedFilters from "@/components/escorts/AppliedFilters";
 import EscortResults from "@/components/escorts/EscortResults";
 import { useEscortFilter } from "@/hooks/useEscortFilter";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 
 interface EscortContainerProps {
   escorts: Escort[];
@@ -26,7 +26,6 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     location: locationFilter,
     setLocation,
     priceRange,
-    setPriceRange,
     handlePriceRangeChange,
     verifiedOnly,
     setVerifiedOnly,
@@ -45,7 +44,6 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     selectedOrientations,
     toggleOrientation,
     ageRange,
-    setAgeRange,
     handleAgeRangeChange,
     ratingMin,
     setRatingMin,
@@ -155,7 +153,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             location={locationFilter}
             setLocation={setLocation}
             priceRange={priceRange}
-            setPriceRange={setPriceRange}
+            setPriceRange={handlePriceRangeChange}
             verifiedOnly={verifiedOnly}
             setVerifiedOnly={setVerifiedOnly}
             selectedServices={selectedServices}
@@ -166,7 +164,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             selectedOrientations={selectedOrientations}
             toggleOrientation={toggleOrientation}
             ageRange={ageRange}
-            setAgeRange={setAgeRange}
+            setAgeRange={handleAgeRangeChange}
             ratingMin={ratingMin}
             setRatingMin={setRatingMin}
             availableNow={availableNow}

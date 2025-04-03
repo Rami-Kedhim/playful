@@ -3,33 +3,39 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 interface CheckboxGroupProps {
   title?: string;
-  options?: string[];
   items?: string[];
-  selectedOptions?: string[];
   selectedItems?: string[];
-  toggleOption?: (item: string) => void;
   toggleItem?: (item: string) => void;
   idPrefix?: string;
+  formatItem?: (item: string) => string;
+  // For backward compatibility
+  options?: string[];
+  selectedOptions?: string[];
+  toggleOption?: (item: string) => void;
   formatOption?: (option: string) => string;
 }
 
 const CheckboxGroup = ({ 
   title, 
-  options = [], 
   items = [], 
-  selectedOptions = [], 
   selectedItems = [], 
-  toggleOption = () => {}, 
   toggleItem = () => {}, 
   idPrefix = "checkbox", 
+  formatItem = (item) => item,
+  // For backward compatibility
+  options = [],
+  selectedOptions = [],
+  toggleOption = () => {},
   formatOption = (option) => option
 }: CheckboxGroupProps) => {
-  // Use either options or items array
-  const dataItems = options.length > 0 ? options : items;
-  // Use either selectedOptions or selectedItems array
-  const selectedDataItems = selectedOptions.length > 0 ? selectedOptions : selectedItems;
-  // Use either toggleOption or toggleItem function
-  const toggleFunction = toggleOption || toggleItem;
+  // Use either items or options array
+  const dataItems = items.length > 0 ? items : options.length > 0 ? options : [];
+  // Use either selectedItems or selectedOptions array
+  const selectedDataItems = selectedItems.length > 0 ? selectedItems : selectedOptions;
+  // Use either toggleItem or toggleOption function
+  const toggleFunction = toggleItem !== (() => {}) ? toggleItem : toggleOption;
+  // Use either formatItem or formatOption function
+  const formatFunction = formatItem !== ((item: string) => item) ? formatItem : formatOption;
   
   return (
     <div className="space-y-2">
@@ -46,7 +52,7 @@ const CheckboxGroup = ({
               htmlFor={`${idPrefix}-${item}`}
               className="text-sm capitalize cursor-pointer"
             >
-              {formatOption(item)}
+              {formatFunction(item)}
             </label>
           </div>
         ))}
