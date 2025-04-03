@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { AIProfile, AIConversation, AIMessage } from "@/types/ai-profile";
@@ -13,7 +12,7 @@ export const getAIProfiles = async (filters: Record<string, any> = {}): Promise<
     // Create a base query - using the raw SQL approach for tables not in the schema
     let query = supabase
       .from('ai_profiles')
-      .select('*');
+      .select('*') as any;
     
     // Apply any filters
     if (filters.personality) {
@@ -33,7 +32,7 @@ export const getAIProfiles = async (filters: Record<string, any> = {}): Promise<
       throw error;
     }
     
-    return data as unknown as AIProfile[];
+    return data as AIProfile[];
   } catch (error: any) {
     console.error("Error fetching AI profiles:", error);
     
@@ -49,7 +48,7 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
   try {
     const { data, error } = await supabase
       .from('ai_profiles')
-      .select('*')
+      .select('*') as any
       .eq('id', profileId)
       .eq('is_ai', true)
       .single();
@@ -58,7 +57,7 @@ export const getAIProfileById = async (profileId: string): Promise<AIProfile | n
       throw error;
     }
     
-    return data as unknown as AIProfile;
+    return data as AIProfile;
   } catch (error: any) {
     console.error("Error fetching AI profile:", error);
     
@@ -78,7 +77,7 @@ export const startAIConversation = async (
     // Check if conversation already exists
     const { data: existingConversation, error: queryError } = await supabase
       .from('ai_conversations')
-      .select('*')
+      .select('*') as any
       .eq('user_id', userId)
       .eq('ai_profile_id', aiProfileId)
       .single();
@@ -98,7 +97,7 @@ export const startAIConversation = async (
         user_id: userId,
         ai_profile_id: aiProfileId,
         status: 'active'
-      })
+      }) as any
       .select()
       .single();
     
@@ -137,7 +136,7 @@ export const getAIConversationMessages = async (
   try {
     const { data, error } = await supabase
       .from('ai_messages')
-      .select('*')
+      .select('*') as any
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
     
@@ -165,7 +164,7 @@ export const getAIConversationWithMessages = async (
       .select(`
         *,
         ai_profile:ai_profiles(*)
-      `)
+      `) as any
       .eq('id', conversationId)
       .single();
     
@@ -176,7 +175,7 @@ export const getAIConversationWithMessages = async (
     // Get the messages
     const { data: messages, error: msgError } = await supabase
       .from('ai_messages')
-      .select('*')
+      .select('*') as any
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: true });
     
@@ -216,7 +215,7 @@ export const sendMessageToAI = async (
         sender_id: userId,
         content: message,
         is_ai: false
-      })
+      }) as any
       .select()
       .single();
     
@@ -230,7 +229,7 @@ export const sendMessageToAI = async (
       .select(`
         *,
         ai_profile:ai_profiles(*)
-      `)
+      `) as any
       .eq('id', conversationId)
       .single();
     
@@ -241,7 +240,7 @@ export const sendMessageToAI = async (
     // Check if user has enough credits or if they're within free message limit
     const { data: messageCount, error: countError } = await supabase
       .from('ai_messages')
-      .select('id', { count: 'exact' })
+      .select('id', { count: 'exact' }) as any
       .eq('conversation_id', conversationId);
     
     if (countError) {
@@ -273,13 +272,13 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: conversation?.ai_profile_id,
+            sender_id: (conversation as any)?.ai_profile_id,
             content: "I'd love to continue our conversation. To chat more with me, you'll need to spend Lucoins.",
             is_ai: true,
             requires_payment: true,
             price: messagePrice,
             payment_status: 'pending'
-          })
+          }) as any
           .select()
           .single();
         
@@ -301,7 +300,7 @@ export const sendMessageToAI = async (
             user_id: userId,
             conversation_id: conversationId,
             user_message: message,
-            ai_profile_id: conversation?.ai_profile_id,
+            ai_profile_id: (conversation as any)?.ai_profile_id,
             type: 'message'
           }
         });
@@ -313,7 +312,7 @@ export const sendMessageToAI = async (
           // Save the AI response to database
           const { data: savedMessage, error: saveError } = await supabase
             .from('ai_messages')
-            .insert(aiResponse.message)
+            .insert(aiResponse.message) as any
             .select()
             .single();
             
@@ -350,7 +349,7 @@ export const sendMessageToAI = async (
         // Save the AI response message
         const { data: savedMessage, error: saveError } = await supabase
           .from('ai_messages')
-          .insert(aiResponse.message)
+          .insert(aiResponse.message) as any
           .select()
           .single();
           
@@ -380,10 +379,10 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: conversation?.ai_profile_id,
+            sender_id: (conversation as any)?.ai_profile_id,
             content: aiResponseText,
             is_ai: true
-          })
+          }) as any
           .select()
           .single();
         
@@ -405,7 +404,7 @@ export const sendMessageToAI = async (
             user_id: userId,
             conversation_id: conversationId,
             user_message: message,
-            ai_profile_id: conversation?.ai_profile_id,
+            ai_profile_id: (conversation as any)?.ai_profile_id,
             type: 'message'
           }
         });
@@ -415,7 +414,7 @@ export const sendMessageToAI = async (
         // Save the AI response message
         const { data: savedMessage, error: saveError } = await supabase
           .from('ai_messages')
-          .insert(aiResponse.message)
+          .insert(aiResponse.message) as any
           .select()
           .single();
           
@@ -445,10 +444,10 @@ export const sendMessageToAI = async (
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
-            sender_id: conversation?.ai_profile_id,
+            sender_id: (conversation as any)?.ai_profile_id,
             content: aiResponseText,
             is_ai: true
-          })
+          }) as any
           .select()
           .single();
         
@@ -503,7 +502,7 @@ export const processAIMessagePayment = async (
           *,
           ai_profile:ai_profiles(*)
         )
-      `)
+      `) as any
       .eq('id', messageId)
       .single();
     
@@ -511,7 +510,7 @@ export const processAIMessagePayment = async (
       throw msgError;
     }
     
-    if (!message?.requires_payment) {
+    if (!(message as any)?.requires_payment) {
       throw new Error("This message doesn't require payment");
     }
     
@@ -526,7 +525,7 @@ export const processAIMessagePayment = async (
       throw profileError;
     }
     
-    if ((profile?.lucoin_balance || 0) < (message?.price || 0)) {
+    if ((profile?.lucoin_balance || 0) < ((message as any)?.price || 0)) {
       return {
         success: false,
         aiResponse: null,
@@ -537,7 +536,7 @@ export const processAIMessagePayment = async (
     // Deduct Lucoins
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ lucoin_balance: (profile?.lucoin_balance || 0) - (message?.price || 0) })
+      .update({ lucoin_balance: (profile?.lucoin_balance || 0) - ((message as any)?.price || 0) })
       .eq('id', userId);
     
     if (updateError) {
@@ -549,10 +548,10 @@ export const processAIMessagePayment = async (
       .from('lucoin_transactions')
       .insert({
         user_id: userId,
-        amount: -(message?.price || 0),
+        amount: -((message as any)?.price || 0),
         transaction_type: 'ai_chat',
-        description: `Chat with ${message?.conversation?.ai_profile?.name}`,
-        metadata: { conversation_id: message?.conversation_id }
+        description: `Chat with ${(message as any)?.conversation?.ai_profile?.name}`,
+        metadata: { conversation_id: (message as any)?.conversation_id }
       });
     
     // Update message payment status
@@ -566,18 +565,18 @@ export const processAIMessagePayment = async (
     }
     
     // Generate and save AI response
-    const aiProfile = message?.conversation?.ai_profile as unknown as AIProfile;
+    const aiProfile = (message as any)?.conversation?.ai_profile as unknown as AIProfile;
     const lastUserMessage = await supabase
       .from('ai_messages')
-      .select('*')
-      .eq('conversation_id', message?.conversation_id)
+      .select('*') as any
+      .eq('conversation_id', (message as any)?.conversation_id)
       .eq('is_ai', false)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
     
     const aiResponseText = generateMockAIResponse(
-      lastUserMessage?.data?.content,
+      (lastUserMessage?.data as any)?.content,
       aiProfile,
       true
     );
@@ -595,11 +594,11 @@ export const processAIMessagePayment = async (
     const { data: aiMessage, error: aiMsgError } = await supabase
       .from('ai_messages')
       .insert({
-        conversation_id: message?.conversation_id,
-        sender_id: message?.conversation?.ai_profile_id,
+        conversation_id: (message as any)?.conversation_id,
+        sender_id: (message as any)?.conversation?.ai_profile_id,
         content: aiResponseText,
         is_ai: true
-      })
+      }) as any
       .select()
       .single();
     
