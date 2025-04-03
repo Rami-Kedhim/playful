@@ -106,10 +106,9 @@ export const useLucoins = () => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ 
-          lucoin_balance: supabase.rpc('increment', { 
-            x: totalAmount,
-            row_id: user.id,
-            column_name: 'lucoin_balance'
+          lucoin_balance: supabase.rpc('increment_balance', { 
+            user_id: user.id,
+            amount: totalAmount
           })
         })
         .eq('id', user.id);
