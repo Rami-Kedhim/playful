@@ -1,69 +1,84 @@
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "@/components/ui/use-toast";
+import { fetchCreatorAnalytics } from "@/services/creator/creatorAnalyticsService";
+import { CreatorAnalytics } from "@/types/creator";
+import { startOfDay, subDays, subMonths, subYears, endOfDay } from 'date-fns';
 
-// Define a detailed analytics object structure
-interface AnalyticsSummary {
-  views: number;
-  likes: number;
-  shares: number;
-  earnings: number;
-}
+type TimeRange = "week" | "month" | "year" | "custom";
 
-export const useCreatorAnalytics = (period: string = 'week') => {
-  const [analytics, setAnalytics] = useState<AnalyticsSummary>({
+export const useCreatorAnalytics = (timeRange: TimeRange = "week", customDates?: { start: Date; end: Date }) => {
+  const [analytics, setAnalytics] = useState<CreatorAnalytics[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState({
     views: 0,
     likes: 0,
     shares: 0,
-    earnings: 0,
+    earnings: 0
   });
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
 
   useEffect(() => {
-    if (!user?.id) return;
-
-    const fetchAnalytics = async () => {
+    const loadAnalytics = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
-        // Since we don't have the actual tables in our database yet, we'll use mock data
-        // Generate realistic-looking mock data based on the period
-        let multiplier = 1;
-        switch (period) {
-          case 'month':
-            multiplier = 4;
+        let startDate: Date;
+        const endDate = endOfDay(new Date());
+        
+        // Set start date based on selected time range
+        switch (timeRange) {
+          case "week":
+            startDate = startOfDay(subDays(new Date(), 7));
             break;
-          case 'year':
-            multiplier = 12;
+          case "month":
+            startDate = startOfDay(subMonths(new Date(), 1));
             break;
-          default: // week
-            multiplier = 1;
+          case "year":
+            startDate = startOfDay(subYears(new Date(), 1));
+            break;
+          case "custom":
+            if (!customDates?.start || !customDates?.end) {
+              throw new Error("Custom date range requires start and end dates");
+            }
+            startDate = startOfDay(customDates.start);
+            break;
+          default:
+            startDate = startOfDay(subDays(new Date(), 7));
         }
         
-        // Generate mock data
-        const mockData = {
-          views: Math.floor(Math.random() * 10000) * multiplier,
-          likes: Math.floor(Math.random() * 5000) * multiplier,
-          shares: Math.floor(Math.random() * 1000) * multiplier,
-          earnings: parseFloat((Math.random() * 1000 * multiplier).toFixed(2)),
-        };
+        const data = await fetchCreatorAnalytics('mock-creator-id', startDate, endDate);
+        setAnalytics(data);
         
-        setAnalytics(mockData);
-      } catch (error) {
-        console.error("Error fetching analytics:", error);
-        toast({
-          title: "Error fetching analytics",
-          description: "Could not load your analytics data at this time.",
-          variant: "destructive"
+        // Calculate summary metrics
+        const totalViews = data.reduce((sum, item) => sum + item.views, 0);
+        const totalLikes = data.reduce((sum, item) => sum + item.likes, 0);
+        const totalShares = data.reduce((sum, item) => sum + item.shares, 0);
+        const totalEarnings = data.reduce((sum, item) => sum + item.earnings, 0);
+        
+        setSummary({
+          views: totalViews,
+          likes: totalLikes,
+          shares: totalShares,
+          earnings: totalEarnings
         });
+        
+      } catch (err: any) {
+        setError(err.message || "Failed to load analytics");
+        console.error("Error loading creator analytics:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchAnalytics();
-  }, [user?.id, period]);
-
-  return { analytics, loading };
+    
+    loadAnalytics();
+  }, [timeRange, customDates]);
+  
+  return {
+    analytics,
+    loading,
+    error,
+    summary,
+    timeRange
+  };
 };

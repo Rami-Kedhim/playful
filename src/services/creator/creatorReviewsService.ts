@@ -6,32 +6,42 @@ import { CreatorReview } from "@/types/creator";
 /**
  * Fetch reviews for a creator
  */
-export const fetchCreatorReviews = async (creatorId: string): Promise<CreatorReview[]> => {
+export const fetchCreatorReviews = async (
+  creatorId: string,
+  page = 1,
+  pageSize = 10
+): Promise<{ data: CreatorReview[], totalCount: number }> => {
   try {
-    // Generate mock review data for demonstration
-    const mockReviews: CreatorReview[] = Array.from({ length: 8 }, (_, i) => ({
+    // This would fetch actual data from the database in production
+    
+    // Generate mock review data
+    const mockReviews: CreatorReview[] = Array(15).fill(null).map((_, i) => ({
       id: `review-${i}`,
       creator_id: creatorId,
-      reviewer_id: `user-${i}`,
+      reviewer_id: `user-${i + 100}`,
       reviewer: {
-        id: `user-${i}`,
-        username: `user${i}`,
-        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`
+        id: `user-${i + 100}`,
+        username: `user${i + 100}`,
+        avatar_url: `https://avatars.dicebear.com/api/avataaars/${i + 100}.svg`,
       },
-      rating: Math.floor(Math.random() * 3) + 3, // 3-5 stars
-      comment: i % 2 === 0 ? `This is a great creator! Review ${i}` : null,
-      created_at: new Date(Date.now() - i * 86400000 * 3).toISOString()
+      rating: Math.ceil(Math.random() * 5),
+      comment: Math.random() > 0.2 
+        ? `This is review number ${i + 1}. The creator is ${['amazing', 'great', 'good', 'fantastic', 'wonderful'][Math.floor(Math.random() * 5)]}.` 
+        : null,
+      created_at: new Date(Date.now() - i * 86400000 * 2).toISOString(),
     }));
     
-    return mockReviews;
-  } catch (error: any) {
+    // Apply pagination
+    const startIndex = (page - 1) * pageSize;
+    const paginatedData = mockReviews.slice(startIndex, startIndex + pageSize);
+    
+    return {
+      data: paginatedData,
+      totalCount: mockReviews.length
+    };
+  } catch (error) {
     console.error("Error fetching creator reviews:", error);
-    toast({
-      title: "Failed to fetch reviews",
-      description: error.message,
-      variant: "destructive",
-    });
-    return [];
+    return { data: [], totalCount: 0 };
   }
 };
 
@@ -39,42 +49,52 @@ export const fetchCreatorReviews = async (creatorId: string): Promise<CreatorRev
  * Add a review for a creator
  */
 export const addCreatorReview = async (
-  creatorId: string, 
-  reviewerId: string, 
-  rating: number, 
+  creatorId: string,
+  reviewerId: string,
+  rating: number,
   comment?: string
-): Promise<CreatorReview | null> => {
+): Promise<{ success: boolean, data?: CreatorReview, error?: string }> => {
   try {
-    // For now, return a mock success response
+    // This would save to the database in production
     
-    toast({
-      title: "Review submitted",
-      description: "Your review has been submitted successfully",
-      variant: "default",
-    });
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    const mockReview: CreatorReview = {
+    const newReview: CreatorReview = {
       id: `review-${Date.now()}`,
       creator_id: creatorId,
       reviewer_id: reviewerId,
       reviewer: {
         id: reviewerId,
-        username: "current_user",
-        avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=currentuser"
+        username: `user${reviewerId.substring(5)}`,
+        avatar_url: `https://avatars.dicebear.com/api/avataaars/${reviewerId}.svg`,
       },
-      rating: rating,
+      rating,
       comment: comment || null,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
     
-    return mockReview;
-  } catch (error: any) {
-    console.error("Error submitting review:", error);
     toast({
-      title: "Failed to submit review",
-      description: error.message,
+      title: "Review submitted",
+      description: "Your review has been submitted successfully",
+    });
+    
+    return {
+      success: true,
+      data: newReview
+    };
+  } catch (error: any) {
+    console.error("Error adding review:", error);
+    
+    toast({
+      title: "Error submitting review",
+      description: error.message || "Failed to submit review",
       variant: "destructive",
     });
-    return null;
+    
+    return {
+      success: false,
+      error: error.message || "Failed to submit review"
+    };
   }
 };
