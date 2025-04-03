@@ -33,8 +33,7 @@ const LivecamDetail: React.FC = () => {
         setLoading(true);
         setError(null);
         
-        // In a real implementation, we would fetch the specific model
-        // For now, we'll fetch all models and find the one we need
+        // Fetch all models and find the one we need
         const response = await fetchLivecams({ limit: 100 });
         
         console.log(`Looking for model with username: ${username}`);

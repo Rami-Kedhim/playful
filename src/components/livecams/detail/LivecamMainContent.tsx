@@ -15,11 +15,11 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   const [imgError, setImgError] = useState(false);
   
   // Generate a unique fallback image for this specific model
-  const uniqueSeed = `${model.id || model.username}-${Date.now().toString().substring(8, 13)}`;
+  const uniqueSeed = `${model.id || model.username}-detail-${model.username}`;
   const fallbackImage = `https://picsum.photos/seed/${uniqueSeed}/800/450`;
 
   // Debug log for image URLs
-  console.log(`Rendering detail for ${model.username}:`, { 
+  console.log(`LivecamMainContent for ${model.username}:`, { 
     originalImage: model.imageUrl,
     fallback: fallbackImage,
     hasError: imgError

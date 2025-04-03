@@ -138,16 +138,21 @@ function transformApiResponse(apiData: any, page: number, limit: number) {
   }
   
   const models = Array.isArray(apiData.cams) ? apiData.cams.map((cam: any) => {
-    // Log the cam data to see what we're getting
-    console.log('Processing cam:', cam.username || 'unknown');
+    // Log the entire cam object to see all available fields
+    console.log(`Processing cam ${cam.username || 'unknown'}:`, JSON.stringify(cam).substring(0, 200));
+    
+    // Preserve ALL original image URLs exactly as they come from the API
+    const imageUrl = cam.image || cam.profileImageURL || cam.thumbnailUrl || null;
+    const thumbnailUrl = cam.thumbnail || cam.thumbnailUrl || cam.image || null;
+    
+    console.log(`Image URLs for ${cam.username || 'unknown'}: image=${imageUrl}, thumbnail=${thumbnailUrl}`);
     
     return {
       id: cam.id || `cam-${Math.random().toString(36).substring(2, 9)}`,
       username: cam.username || cam.name || 'unknown',
       displayName: cam.displayName || cam.name || cam.username || 'Unknown Model',
-      // Use the direct URLs from cam4pays without modification
-      imageUrl: cam.image || cam.profileImageURL || cam.thumbnailUrl || null,
-      thumbnailUrl: cam.thumbnail || cam.thumbnailUrl || cam.image || null,
+      imageUrl: imageUrl,
+      thumbnailUrl: thumbnailUrl,
       isLive: cam.isLive !== undefined ? cam.isLive : true,
       viewerCount: cam.viewers || cam.viewerCount || 0,
       country: cam.country || 'Unknown',

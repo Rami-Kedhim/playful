@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { LivecamModel, LivecamsFilter, LivecamsResponse } from "@/types/livecams";
 import { toast } from "sonner";
@@ -36,19 +37,25 @@ export const fetchLivecams = async (
       throw new Error("Invalid data format received from API");
     }
     
-    // Ensure all required fields are present and URLs are valid
+    // Process the models but preserve the original image URLs
     const validatedModels = data.models.map((model: any) => {
       // Log original URLs for debugging
-      console.log(`Model ${model.username || 'unknown'} - Image: ${model.imageUrl}, Thumbnail: ${model.thumbnailUrl}`);
+      console.log(`Model ${model.username || 'unknown'} - Original URLs:`, {
+        imageUrl: model.imageUrl,
+        thumbnailUrl: model.thumbnailUrl
+      });
+      
+      // Only provide fallbacks if the URLs are completely missing
+      const imageUrl = model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`;
+      const thumbnailUrl = model.thumbnailUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`;
       
       // Ensure the model has all required fields
       const validatedModel: LivecamModel = {
         id: model.id || `id-${Math.random().toString(36).substring(2)}`,
         username: model.username || 'unknown',
         displayName: model.displayName || model.username || 'Unknown',
-        // Keep original URLs but provide fallbacks if they're missing
-        imageUrl: model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`,
-        thumbnailUrl: model.thumbnailUrl || model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`,
+        imageUrl,
+        thumbnailUrl,
         isLive: model.isLive !== undefined ? model.isLive : false,
         viewerCount: model.viewerCount !== undefined ? model.viewerCount : 0,
         country: model.country || undefined,

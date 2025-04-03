@@ -15,12 +15,15 @@ const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
   const [imgError, setImgError] = useState(false);
   
   // Create a unique and stable fallback image for each model
-  const uniqueSeed = `${model.id || model.username}-${Date.now().toString().substring(8, 13)}`;
+  const uniqueSeed = `${model.id || model.username}-${model.username}`;
   const fallbackImage = `https://picsum.photos/seed/${uniqueSeed}/500/500`;
 
   // Debug logging for image URLs
-  console.log(`Rendering card for ${model.username}:`, { 
-    original: model.thumbnailUrl || model.imageUrl,
+  console.log(`LivecamCard ${model.username}:`, { 
+    original: {
+      thumbnail: model.thumbnailUrl,
+      image: model.imageUrl
+    },
     fallback: fallbackImage,
     hasError: imgError
   });
@@ -31,7 +34,7 @@ const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
         <div className="relative">
           <AspectRatio ratio={16/9}>
             <img 
-              src={imgError ? fallbackImage : (model.thumbnailUrl || model.imageUrl)} 
+              src={imgError ? fallbackImage : model.thumbnailUrl || model.imageUrl} 
               alt={model.displayName} 
               className="object-cover w-full h-full"
               onError={() => {
