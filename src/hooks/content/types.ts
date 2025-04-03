@@ -22,7 +22,7 @@ export interface ContentError extends Error {
 export interface ContentFilters {
   status: ContentStatus;
   searchQuery: string;
-  contentType?: string;
+  contentType?: string | undefined;
   sort: SortOption;
 }
 
