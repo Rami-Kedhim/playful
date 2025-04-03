@@ -15,13 +15,14 @@ import {
   ArrowUpRight, TrendingUp, Info, CreditCard as CreditCardIcon
 } from "lucide-react";
 import { format } from "date-fns";
+import { CreatorPayout } from "@/types/creator";
 
 interface CreatorPayoutsProps {
   creatorId: string;
 }
 
 const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
-  const [payouts, setPayouts] = useState<any[]>([]);
+  const [payouts, setPayouts] = useState<CreatorPayout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [earnings, setEarnings] = useState({
@@ -46,8 +47,8 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
 
   const loadPayouts = async () => {
     setIsLoading(true);
-    const data = await fetchCreatorPayouts(creatorId);
-    setPayouts(data);
+    const result = await fetchCreatorPayouts(creatorId);
+    setPayouts(result.data); // Now we're correctly accessing the data array
     
     // Calculate earnings summary
     // In a real app, you would fetch this from an API
