@@ -1,5 +1,5 @@
 
-import { ContentItem, ContentCreateInput, ContentUpdateInput } from "@/services/contentService";
+import { ContentItem } from "@/services/contentService";
 import { z } from "zod";
 
 export type ContentStatus = "published" | "draft" | "scheduled";
@@ -45,6 +45,9 @@ export interface UseContentFiltersReturn {
   updateFilters: (newFilters: PartialContentFilters) => void;
   filteredContent: (content: ContentItem[]) => ContentItem[];
 }
+
+// Import these types directly from the service
+import { ContentCreateInput, ContentUpdateInput } from "@/services/contentService";
 
 export interface UseContentActionsReturn {
   addContent: (newContent: ContentCreateInput) => Promise<ContentItem | undefined>;
