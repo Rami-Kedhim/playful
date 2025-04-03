@@ -4,7 +4,7 @@ import { ContentItem } from "@/services/contentService";
 import { 
   ContentFilters, 
   UseContentFiltersReturn, 
-  SortOption, 
+  SortOption,
   contentFiltersSchema, 
   PartialContentFilters 
 } from "./types";
