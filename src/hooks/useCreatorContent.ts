@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   ContentItem, 
@@ -13,12 +13,26 @@ import {
 } from "@/services/contentService";
 
 type ContentStatus = "published" | "draft" | "scheduled";
+type SortOption = "newest" | "oldest" | "title_asc" | "title_desc" | "most_viewed" | "least_viewed";
 
-export const useCreatorContent = (status: ContentStatus = "published") => {
+interface ContentFilters {
+  status: ContentStatus;
+  searchQuery: string;
+  contentType?: string;
+  sort: SortOption;
+}
+
+export const useCreatorContent = (initialFilters: Partial<ContentFilters> = {}) => {
   const { user } = useAuth();
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [filters, setFilters] = useState<ContentFilters>({
+    status: initialFilters.status || "published",
+    searchQuery: initialFilters.searchQuery || "",
+    contentType: initialFilters.contentType,
+    sort: initialFilters.sort || "newest"
+  });
   
   // Fetch content on mount and when dependencies change
   useEffect(() => {
@@ -28,7 +42,7 @@ export const useCreatorContent = (status: ContentStatus = "published") => {
       setLoading(true);
       setError(null);
       try {
-        const result = await getCreatorContent(user.id, 100, status);
+        const result = await getCreatorContent(user.id, 100, filters.status);
         setContent(result);
       } catch (err) {
         console.error("Error fetching creator content:", err);
@@ -39,7 +53,7 @@ export const useCreatorContent = (status: ContentStatus = "published") => {
     };
     
     fetchContent();
-  }, [user?.id, status]);
+  }, [user?.id, filters.status]);
   
   // Add new content
   const addContent = async (newContent: ContentCreateInput) => {
@@ -53,7 +67,7 @@ export const useCreatorContent = (status: ContentStatus = "published") => {
       
       if (createdContent) {
         // Only update state if the created content matches the current status filter
-        if (createdContent.status === status) {
+        if (createdContent.status === filters.status) {
           setContent(prev => [createdContent, ...prev]);
         }
         return createdContent;
@@ -73,7 +87,7 @@ export const useCreatorContent = (status: ContentStatus = "published") => {
       
       if (result) {
         // If status changed, we might need to remove it from the current view
-        if (result.status !== status) {
+        if (result.status !== filters.status) {
           setContent(prev => prev.filter(item => item.id !== result.id));
         } else {
           // Update the item in the current view
@@ -107,11 +121,11 @@ export const useCreatorContent = (status: ContentStatus = "published") => {
       
       if (published) {
         // If we're viewing drafts, remove the published item
-        if (status === "draft") {
+        if (filters.status === "draft") {
           setContent(prev => prev.filter(item => item.id !== id));
         } 
         // If we're viewing published, add the published item
-        else if (status === "published") {
+        else if (filters.status === "published") {
           setContent(prev => [published, ...prev]);
         }
         return published;
@@ -122,10 +136,62 @@ export const useCreatorContent = (status: ContentStatus = "published") => {
     }
   };
   
+  // Update filters
+  const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  }, []);
+  
+  // Get filtered content
+  const filteredContent = useCallback(() => {
+    let result = [...content];
+    
+    // Filter by search query
+    if (filters.searchQuery) {
+      const query = filters.searchQuery.toLowerCase();
+      result = result.filter(item => 
+        item.title.toLowerCase().includes(query) || 
+        (item.description && item.description.toLowerCase().includes(query))
+      );
+    }
+    
+    // Filter by content type
+    if (filters.contentType) {
+      result = result.filter(item => item.media_type === filters.contentType);
+    }
+    
+    // Sort content
+    switch (filters.sort) {
+      case "newest":
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case "oldest":
+        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case "title_asc":
+        result.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "title_desc":
+        result.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case "most_viewed":
+        result.sort((a, b) => (b.views_count || 0) - (a.views_count || 0));
+        break;
+      case "least_viewed":
+        result.sort((a, b) => (a.views_count || 0) - (b.views_count || 0));
+        break;
+      default:
+        break;
+    }
+    
+    return result;
+  }, [content, filters]);
+  
   return {
-    content,
+    content: filteredContent(),
     loading,
     error,
+    filters,
+    updateFilters,
     addContent,
     editContent,
     removeContent,

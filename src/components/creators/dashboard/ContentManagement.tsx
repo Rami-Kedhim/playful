@@ -3,7 +3,9 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlusCircle, Loader2, Search, Filter } from "lucide-react";
 import { useCreatorContent } from "@/hooks/useCreatorContent";
 import ContentTable from "./ContentTable";
 import ContentDialog from "./ContentDialog";
@@ -14,30 +16,54 @@ const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState("published");
   const [openDialog, setOpenDialog] = useState(false);
   const [editingContent, setEditingContent] = useState<ContentUpdateInput | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [contentType, setContentType] = useState<string | undefined>(undefined);
+  const [sortOption, setSortOption] = useState("newest");
   const { toast } = useToast();
   
   // Load content based on active tab
   const { 
-    content: publishedContent, 
-    loading: publishedLoading,
-    error: publishedError,
+    content,
+    loading,
+    error,
+    filters,
+    updateFilters,
     addContent,
     editContent,
     removeContent,
     publishDraft
-  } = useCreatorContent("published");
+  } = useCreatorContent({
+    status: activeTab as "published" | "draft" | "scheduled",
+    searchQuery,
+    contentType,
+    sort: sortOption as any
+  });
   
-  const { 
-    content: draftContent, 
-    loading: draftLoading,
-    error: draftError
-  } = useCreatorContent("draft");
+  // Update filters when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    updateFilters({ status: value as "published" | "draft" | "scheduled" });
+  };
   
-  const { 
-    content: scheduledContent, 
-    loading: scheduledLoading,
-    error: scheduledError
-  } = useCreatorContent("scheduled");
+  // Update search filter
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    updateFilters({ searchQuery: value });
+  };
+  
+  // Update content type filter
+  const handleContentTypeChange = (value: string) => {
+    const type = value === "all" ? undefined : value;
+    setContentType(type);
+    updateFilters({ contentType: type });
+  };
+  
+  // Update sort option
+  const handleSortChange = (value: string) => {
+    setSortOption(value);
+    updateFilters({ sort: value as any });
+  };
   
   const handleCreateNew = () => {
     setEditingContent(null);
@@ -125,37 +151,6 @@ const ContentManagement = () => {
     }
   };
   
-  const getContentForTab = () => {
-    switch (activeTab) {
-      case "published":
-        return { 
-          content: publishedContent, 
-          loading: publishedLoading, 
-          error: publishedError 
-        };
-      case "drafts":
-        return { 
-          content: draftContent, 
-          loading: draftLoading, 
-          error: draftError 
-        };
-      case "scheduled":
-        return { 
-          content: scheduledContent, 
-          loading: scheduledLoading, 
-          error: scheduledError 
-        };
-      default:
-        return { 
-          content: publishedContent, 
-          loading: publishedLoading, 
-          error: publishedError 
-        };
-    }
-  };
-  
-  const { content, loading, error } = getContentForTab();
-  
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -171,12 +166,53 @@ const ContentManagement = () => {
         </Button>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="published" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="published" value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="mb-4">
             <TabsTrigger value="published">Published</TabsTrigger>
-            <TabsTrigger value="drafts">Drafts</TabsTrigger>
+            <TabsTrigger value="draft">Drafts</TabsTrigger>
             <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
           </TabsList>
+          
+          <div className="mb-4 flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-grow">
+              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search content..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select value={contentType || "all"} onValueChange={handleContentTypeChange}>
+                <SelectTrigger className="w-[160px]">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="image">Images</SelectItem>
+                  <SelectItem value="video">Videos</SelectItem>
+                  <SelectItem value="text">Articles</SelectItem>
+                  <SelectItem value="audio">Audio</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={sortOption} onValueChange={handleSortChange}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="title_asc">Title (A-Z)</SelectItem>
+                  <SelectItem value="title_desc">Title (Z-A)</SelectItem>
+                  <SelectItem value="most_viewed">Most Viewed</SelectItem>
+                  <SelectItem value="least_viewed">Least Viewed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           
           <TabsContent value="published" className="space-y-4">
             {loading ? (
@@ -197,18 +233,18 @@ const ContentManagement = () => {
             )}
           </TabsContent>
           
-          <TabsContent value="drafts" className="space-y-4">
-            {draftLoading ? (
+          <TabsContent value="draft" className="space-y-4">
+            {loading ? (
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
-            ) : draftError ? (
+            ) : error ? (
               <div className="text-center text-destructive p-4">
                 Error loading drafts. Please try again.
               </div>
             ) : (
               <ContentTable 
-                content={draftContent} 
+                content={content} 
                 onEdit={handleEdit} 
                 onDelete={handleDelete}
                 onPublish={handlePublish}
@@ -219,17 +255,17 @@ const ContentManagement = () => {
           </TabsContent>
           
           <TabsContent value="scheduled" className="space-y-4">
-            {scheduledLoading ? (
+            {loading ? (
               <div className="flex items-center justify-center h-40">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
-            ) : scheduledError ? (
+            ) : error ? (
               <div className="text-center text-destructive p-4">
                 Error loading scheduled content. Please try again.
               </div>
             ) : (
               <ContentTable 
-                content={scheduledContent} 
+                content={content} 
                 onEdit={handleEdit} 
                 onDelete={handleDelete}
                 emptyMessage="You don't have any scheduled content."
