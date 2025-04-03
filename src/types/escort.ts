@@ -41,8 +41,33 @@ export interface Escort {
     email?: string;
     website?: string;
   };
+  
+  // Verification information
   verificationLevel?: "basic" | "enhanced" | "premium";
   verificationDate?: string;
-  isContentCreator?: boolean;
-  creatorUsername?: string;
+  
+  // Content creator capabilities
+  hasVirtualContent: boolean;
+  virtualUsername?: string;
+  
+  // Service type flags
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  providesLiveStreams?: boolean;
+  isAIGenerated?: boolean;
+  
+  // Content information
+  contentStats?: {
+    photos: number;
+    videos: number;
+    streams: number;
+  };
+  
+  // Subscription information
+  subscriptionPrice?: number;
+  subscriptionLevels?: {
+    name: string;
+    price: number;
+    benefits: string[];
+  }[];
 }

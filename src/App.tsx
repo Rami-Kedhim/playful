@@ -10,6 +10,9 @@ import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import Index from "./pages/Index";
 import Escorts from "./pages/Escorts";
 import EscortDetail from "./pages/EscortDetail";
+import EscortContent from "./pages/EscortContent";
+import EscortLiveStreams from "./pages/EscortLiveStreams";
+import EscortLiveStreamDetail from "./pages/EscortLiveStreamDetail";
 import Favorites from "./pages/Favorites";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -33,8 +36,17 @@ const App = () => (
           <Sonner />
           <Routes>
             <Route path="/" element={<Index />} />
+            
+            {/* Unified Escort Routes */}
             <Route path="/escorts" element={<Escorts />} />
-            <Route path="/escorts/:id" element={<EscortDetail />} />
+            <Route path="/escort/:id" element={<EscortDetail />} />
+            <Route path="/escort/:id/content" element={<EscortContent />} />
+            <Route path="/escort/:id/live" element={<EscortLiveStreamDetail />} />
+            
+            {/* Live Streams as a feature of escorts */}
+            <Route path="/live-streams" element={<EscortLiveStreams />} />
+            
+            {/* Protected Routes */}
             <Route path="/favorites" element={
               <ProtectedRoute>
                 <Favorites />
@@ -62,6 +74,7 @@ const App = () => (
                 <Wallet />
               </ProtectedRoute>
             } />
+            
             {/* Role-specific routes */}
             <Route path="/escort-dashboard" element={
               <RoleGuard allowedRoles={['escort', 'admin']}>
