@@ -1,5 +1,5 @@
 
-import { Globe, Cube } from "lucide-react";
+import { Globe, Box } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,7 +23,7 @@ const MetaverseSection = () => {
         <div className="absolute inset-0 bg-[url('/images/metaverse-preview.jpg')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700"></div>
         
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 p-6">
-          <Cube className="h-16 w-16 text-primary mb-6 animate-float" />
+          <Box className="h-16 w-16 text-primary mb-6 animate-float" />
           
           <div className="max-w-xl text-center mb-8">
             <h3 className="text-2xl font-bold mb-3">Virtual Escort Experiences</h3>
