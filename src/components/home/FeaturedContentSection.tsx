@@ -52,7 +52,7 @@ const FeaturedContentSection = ({ featuredEscorts, featuredCreators }: FeaturedC
         </Tabs>
       </div>
       
-      <div>
+      <Tabs value={activeTab} className="hidden">
         <TabsContent value="escorts" className="mt-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredEscorts.map((escort) => (
@@ -171,6 +171,121 @@ const FeaturedContentSection = ({ featuredEscorts, featuredCreators }: FeaturedC
             </Button>
           </div>
         </TabsContent>
+      </Tabs>
+      
+      {/* Content display based on active tab */}
+      <div>
+        {activeTab === "escorts" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredEscorts.map((escort) => (
+              <Link to={`/escort/${escort.id}`} key={escort.id}>
+                <div className="group glass-card rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300">
+                  <div className="relative h-64 overflow-hidden">
+                    <img 
+                      src={escort.avatar} 
+                      alt={escort.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      {escort.verified && (
+                        <Badge variant="outline" className="bg-primary/20 border-primary/50 flex items-center gap-1">
+                          <Shield className="h-3 w-3" />
+                          Verified
+                        </Badge>
+                      )}
+                      {escort.featured && (
+                        <Badge variant="outline" className="bg-lucoin/20 border-lucoin/50 flex items-center gap-1">
+                          <Star className="h-3 w-3" />
+                          Featured
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-lg">{escort.name}</h3>
+                        <p className="text-gray-400 text-sm">{escort.location}</p>
+                      </div>
+                      {escort.rating && (
+                        <div className="flex items-center bg-white/5 px-2 py-1 rounded">
+                          <Star className="h-3 w-3 text-yellow-500 mr-1" fill="currentColor" />
+                          <span className="text-xs">{escort.rating}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          
+        )}
+        
+        {activeTab === "creators" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredCreators.map((creator) => (
+              <Link to={`/creator/${creator.id}`} key={creator.id}>
+                <div className="group glass-card rounded-xl overflow-hidden hover:border-accent/50 transition-all duration-300">
+                  <div className="relative h-64 overflow-hidden">
+                    <img 
+                      src={creator.avatar} 
+                      alt={creator.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      {creator.verified && (
+                        <Badge variant="outline" className="bg-primary/20 border-primary/50 flex items-center gap-1">
+                          <Shield className="h-3 w-3" />
+                          Verified
+                        </Badge>
+                      )}
+                      {creator.isPremium && (
+                        <Badge variant="outline" className="bg-lucoin/20 border-lucoin/50 flex items-center gap-1">
+                          <Lock className="h-3 w-3" />
+                          Premium
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="absolute bottom-3 right-3">
+                      <Button size="sm" variant="secondary" className="gap-1">
+                        <Coins className="h-3 w-3" />
+                        Subscribe
+                      </Button>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="h-16 w-16 rounded-full bg-accent/20 backdrop-blur-md flex items-center justify-center">
+                        <Play className="h-8 w-8 text-white" fill="currentColor" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-lg">{creator.name}</h3>
+                        <p className="text-gray-400 text-sm">{creator.location}</p>
+                      </div>
+                      {creator.rating && (
+                        <div className="flex items-center bg-white/5 px-2 py-1 rounded">
+                          <Star className="h-3 w-3 text-yellow-500 mr-1" fill="currentColor" />
+                          <span className="text-xs">{creator.rating}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+        
+        <div className="mt-8 text-center">
+          <Button asChild>
+            <Link to={activeTab === "escorts" ? "/escorts" : "/creators"}>
+              View All {activeTab === "escorts" ? "Escorts" : "Creators"} <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>
   );
