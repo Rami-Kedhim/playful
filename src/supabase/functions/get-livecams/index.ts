@@ -1,6 +1,6 @@
-
-// Follow this setup guide to integrate the Deno SDK: https://supabase.com/docs/guides/functions/deno
+// @ts-ignore: Deno specific imports
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
+// @ts-ignore: Deno specific imports
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.21.0'
 
 const corsHeaders = {
@@ -18,6 +18,7 @@ serve(async (req) => {
 
   try {
     // Create a Supabase client with the Auth context of the function
+    // @ts-ignore: Deno namespace
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -28,6 +29,7 @@ serve(async (req) => {
     const { country, category, limit = 24, page = 1 } = await req.json()
 
     // Get the API key from environment variables
+    // @ts-ignore: Deno namespace
     const CAM4_API_KEY = Deno.env.get('CAM4_API_KEY')
     
     if (!CAM4_API_KEY) {
