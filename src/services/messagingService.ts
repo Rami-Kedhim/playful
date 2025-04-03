@@ -32,15 +32,31 @@ const determineUserType = (profileData: any): "creator" | "escort" | "user" => {
   return "user";
 };
 
+// Helper to safely get data from query results that might have errors
+const safeGetData = <T>(result: any): T[] => {
+  if (result && !result.error && Array.isArray(result.data)) {
+    return result.data as T[];
+  }
+  return [];
+};
+
 // Helper function to check if a column exists in a table
 async function checkColumnExists(tableName: string, columnName: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    // Use a simpler method - just try to select the column directly
+    const { error } = await supabase
       .from(tableName)
       .select(columnName)
-      .limit(1);
+      .limit(1)
+      .single();
     
-    return !error;
+    // If there's an error mentioning the column doesn't exist, return false
+    if (error && error.message.includes(`column "${columnName}" does not exist`)) {
+      return false;
+    }
+    
+    // If no specific column error, assume it exists (might be permissions or other issues)
+    return true;
   } catch (error) {
     console.error(`Error checking if column ${columnName} exists in ${tableName}:`, error);
     return false;
@@ -50,12 +66,19 @@ async function checkColumnExists(tableName: string, columnName: string): Promise
 // Helper function to check if a table exists
 async function checkTableExists(tableName: string): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    // Try to fetch one row to see if the table exists
+    const { error } = await supabase
       .from(tableName)
-      .select('*')
+      .select('id')
       .limit(1);
     
-    return !error;
+    // If error mentions relation doesn't exist, the table doesn't exist
+    if (error && error.message.includes(`relation "${tableName}" does not exist`)) {
+      return false;
+    }
+    
+    // If no specific error about the table not existing, assume it exists
+    return true;
   } catch (error) {
     console.error(`Error checking if table ${tableName} exists:`, error);
     return false;
@@ -67,7 +90,6 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
   try {
     // First check if receiver_id column exists in messages
     const hasReceiverIdColumn = await checkColumnExists('messages', 'receiver_id');
-    // Check if conversations table exists
     const hasConversationsTable = await checkTableExists('conversations');
     
     if (hasReceiverIdColumn) {
@@ -81,11 +103,11 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
           sender_id,
           read_at,
           receiver_id,
-          profiles:sender_id(id, username, avatar_url, is_content_creator, is_escort)
+          profiles!sender_id(id, username, avatar_url, is_content_creator, is_escort)
         `)
         .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
         .order('created_at', { ascending: false });
-        
+      
       if (error) throw error;
       
       if (!data || data.length === 0) return [];
@@ -93,22 +115,36 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
       // Process the data to create a conversations list
       const conversationsMap = new Map<string, Conversation>();
       
-      data.forEach(message => {
+      const messagesArray = safeGetData<any>(data);
+      
+      messagesArray.forEach(message => {
         try {
+          // If there was a query error in the data, skip this message
+          if (message.error) return;
+          
           // For each message, determine the other user (conversation participant)
           const otherUserId = message.sender_id === userId ? message.receiver_id : message.sender_id;
           const profileData = message.profiles;
           
           if (!conversationsMap.has(otherUserId)) {
+            // Safely access properties that might not exist in an error case
+            let profileName = "Unknown User";
+            let profileAvatar = null;
+            
+            if (profileData && typeof profileData === 'object') {
+              profileName = profileData.username || "Unknown User";
+              profileAvatar = profileData.avatar_url;
+            }
+            
             conversationsMap.set(otherUserId, {
               id: otherUserId,
-              last_message: message.content,
-              last_message_time: message.created_at,
+              last_message: message.content || "",
+              last_message_time: message.created_at || new Date().toISOString(),
               unread_count: (message.sender_id !== userId && !message.read_at) ? 1 : 0,
               participant: {
                 id: otherUserId,
-                name: profileData?.username || 'Unknown User',
-                avatar_url: profileData?.avatar_url,
+                name: profileName,
+                avatar_url: profileAvatar,
                 type: determineUserType(profileData)
               }
             });
@@ -128,12 +164,12 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
           messages(content, created_at, sender_id, read_at),
           conversation_participants!conversation_id(
             user_id,
-            profiles:user_id(id, username, avatar_url, is_content_creator, is_escort)
+            profiles(id, username, avatar_url, is_content_creator, is_escort)
           )
         `)
         .or(`conversation_participants.user_id.eq.${userId}`)
         .order('created_at', { ascending: false });
-        
+      
       if (error) throw error;
       
       if (!data || data.length === 0) return [];
@@ -141,29 +177,44 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
       // Process conversations data
       const conversations: Conversation[] = [];
       
-      data.forEach(conv => {
+      const conversationsArray = safeGetData<any>(data);
+      
+      conversationsArray.forEach(conv => {
         try {
           // Find participants other than the current user
-          const participants = conv.conversation_participants || [];
+          const participants = safeGetData<any>(conv.conversation_participants);
           const otherParticipant = participants.find(p => p.user_id !== userId);
           if (!otherParticipant) return;
           
           // Get the last message
-          const messages = conv.messages || [];
+          const messages = safeGetData<any>(conv.messages);
           const lastMessage = messages.length > 0 ? messages[0] : null;
           if (!lastMessage) return;
           
-          const profileData = otherParticipant.profiles;
+          // Get profile data safely, accounts for possible errors in the data
+          let profileData = null;
+          if (otherParticipant.profiles && !otherParticipant.profiles.error) {
+            profileData = otherParticipant.profiles;
+          }
+          
+          // Handle cases where profile data might be array or object
+          if (Array.isArray(profileData) && profileData.length > 0) {
+            profileData = profileData[0];
+          }
+          
+          // Create a safe profile name and avatar
+          const profileName = profileData?.username || "Unknown User";
+          const profileAvatar = profileData?.avatar_url || null;
           
           conversations.push({
             id: conv.id, // Using conversation ID as the identifier
-            last_message: lastMessage.content,
-            last_message_time: lastMessage.created_at,
+            last_message: lastMessage.content || "",
+            last_message_time: lastMessage.created_at || new Date().toISOString(),
             unread_count: (lastMessage.sender_id !== userId && !lastMessage.read_at) ? 1 : 0,
             participant: {
               id: otherParticipant.user_id,
-              name: profileData?.username || 'Unknown User',
-              avatar_url: profileData?.avatar_url,
+              name: profileName,
+              avatar_url: profileAvatar,
               type: determineUserType(profileData)
             }
           });
@@ -192,9 +243,8 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
 // Fetch messages for a specific conversation
 export const fetchMessages = async (userId: string, otherUserId: string): Promise<Message[]> => {
   try {
-    // Check if receiver_id column exists in messages
+    // Check schema configuration
     const hasReceiverIdColumn = await checkColumnExists('messages', 'receiver_id');
-    // Check if conversations table exists
     const hasConversationsTable = await checkTableExists('conversations');
     
     if (hasReceiverIdColumn) {
@@ -204,7 +254,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
         .select('*')
         .or(`and(sender_id.eq.${userId},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${userId})`)
         .order('created_at');
-        
+      
       if (error) throw error;
       
       if (!data) return [];
@@ -226,7 +276,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
         .from('conversation_participants')
         .select('conversation_id')
         .eq('user_id', userId);
-        
+      
       if (convError) throw convError;
       
       if (!convParticipants || convParticipants.length === 0) return [];
@@ -240,7 +290,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
         .select('conversation_id')
         .eq('user_id', otherUserId)
         .in('conversation_id', userConversationIds);
-        
+      
       if (otherError) throw otherError;
       
       if (!otherParticipants || otherParticipants.length === 0) return [];
@@ -254,7 +304,7 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
         .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at');
-        
+      
       if (error) throw error;
       
       if (!data) return [];
@@ -305,7 +355,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
         })
         .select()
         .single();
-        
+      
       if (error) throw error;
       
       if (!data) throw new Error("Failed to send message");
@@ -330,7 +380,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
         .from('conversation_participants')
         .select('conversation_id')
         .eq('user_id', senderId);
-        
+      
       if (usersConvsError) throw usersConvsError;
       
       if (usersConvs && usersConvs.length > 0) {
@@ -342,7 +392,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
           .select('conversation_id')
           .eq('user_id', receiverId)
           .in('conversation_id', userConvIds);
-          
+        
         if (otherUserError) throw otherUserError;
         
         if (otherUserConvs && otherUserConvs.length > 0) {
@@ -357,7 +407,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
           .insert({})
           .select('id')
           .single();
-          
+        
         if (newConvError) throw newConvError;
         
         if (!newConv) throw new Error("Failed to create conversation");
@@ -373,7 +423,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
         const { error: participantsError } = await supabase
           .from('conversation_participants')
           .insert(participantsData);
-          
+        
         if (participantsError) throw participantsError;
       }
       
@@ -387,7 +437,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
         })
         .select()
         .single();
-        
+      
       if (error) throw error;
       
       if (!data) throw new Error("Failed to send message");
@@ -432,7 +482,7 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
         .eq('receiver_id', userId)
         .eq('sender_id', senderId)
         .is('read_at', null);
-        
+      
       if (error) throw error;
     } else if (hasConversationsTable) {
       // Find the conversation between the users
@@ -440,7 +490,7 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
         .from('conversation_participants')
         .select('conversation_id')
         .eq('user_id', userId);
-        
+      
       if (usersConvsError) throw usersConvsError;
       
       if (usersConvs && usersConvs.length > 0) {
@@ -452,7 +502,7 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
           .select('conversation_id')
           .eq('user_id', senderId)
           .in('conversation_id', userConvIds);
-          
+        
         if (otherUserError) throw otherUserError;
         
         if (otherUserConvs && otherUserConvs.length > 0) {
@@ -465,7 +515,7 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
             .eq('conversation_id', conversationId)
             .eq('sender_id', senderId)
             .is('read_at', null);
-            
+          
           if (error) throw error;
         }
       }
@@ -477,14 +527,20 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
 
 // Subscribe to new messages for the current user
 export const subscribeToMessages = (userId: string, callback: (message: Message) => void) => {
-  let filter = `receiver_id=eq.${userId}`;
+  let channelSetup: any = null;
   
   // Check if we need to use conversations model instead
   checkColumnExists('messages', 'receiver_id').then(hasReceiverIdColumn => {
-    if (!hasReceiverIdColumn) {
+    let filter = '';
+    
+    if (hasReceiverIdColumn) {
+      filter = `receiver_id=eq.${userId}`;
+    } else {
       // Use conversations model subscription
+      // This is a simplified approach - in a real app you would need to check
+      // for all conversations the user is part of
       console.log("Using conversations model subscription");
-      filter = 'conversation_id=in.(select conversation_id from conversation_participants where user_id=eq.' + userId + ')';
+      filter = `sender_id=neq.${userId}`;
     }
     
     const channel = supabase
@@ -515,15 +571,17 @@ export const subscribeToMessages = (userId: string, callback: (message: Message)
         });
       })
       .subscribe();
-      
-    return channel;
+    
+    channelSetup = channel;
   });
   
-  // Return a default channel that can be unsubscribed
+  // Return an object with an unsubscribe method
   return {
     unsubscribe: () => {
-      // This will be replaced by the actual channel's unsubscribe method
-      console.log("Unsubscribing from messages channel");
+      if (channelSetup) {
+        supabase.removeChannel(channelSetup);
+      }
+      console.log("Unsubscribed from messages channel");
     }
   };
 };

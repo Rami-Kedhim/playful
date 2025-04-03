@@ -26,6 +26,9 @@ export interface ContentFilters {
   sort: SortOption;
 }
 
+// Make a partial version of ContentFilters for easier updates
+export type PartialContentFilters = Partial<ContentFilters>;
+
 // Zod schema for content filters validation
 export const contentFiltersSchema = z.object({
   status: z.enum(["published", "draft", "scheduled"]),
@@ -39,7 +42,7 @@ export const contentFiltersSchema = z.object({
 
 export interface UseContentFiltersReturn {
   filters: ContentFilters;
-  updateFilters: (newFilters: Partial<ContentFilters>) => void;
+  updateFilters: (newFilters: PartialContentFilters) => void;
   filteredContent: (content: ContentItem[]) => ContentItem[];
 }
 
@@ -54,5 +57,5 @@ export interface UseCreatorContentReturn extends UseContentFiltersReturn, UseCon
   content: ContentItem[];
   loading: boolean;
   error: ContentError | null;
-  refresh: () => Promise<void>; // New method to refresh content
+  refresh: () => Promise<void>; // Method to refresh content
 }

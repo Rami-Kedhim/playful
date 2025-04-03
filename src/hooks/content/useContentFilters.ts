@@ -1,9 +1,15 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { ContentItem } from "@/services/contentService";
-import { ContentFilters, UseContentFiltersReturn, SortOption, contentFiltersSchema } from "./types";
+import { 
+  ContentFilters, 
+  UseContentFiltersReturn, 
+  SortOption, 
+  contentFiltersSchema, 
+  PartialContentFilters 
+} from "./types";
 
-export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}): UseContentFiltersReturn => {
+export const useContentFilters = (initialFilters: PartialContentFilters = {}): UseContentFiltersReturn => {
   // Validate and set default filters
   const validatedInitialFilters = useMemo(() => {
     const defaultFilters: ContentFilters = {
@@ -32,7 +38,7 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
   const [filters, setFilters] = useState<ContentFilters>(validatedInitialFilters);
   
   // Update filters with validation
-  const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
+  const updateFilters = useCallback((newFilters: PartialContentFilters) => {
     setFilters(prev => {
       // Create a complete ContentFilters object that includes all required properties
       const updatedFilters: ContentFilters = {
