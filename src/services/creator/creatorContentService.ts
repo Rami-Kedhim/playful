@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorContent } from "@/types/creator";
 
@@ -61,6 +60,33 @@ export const fetchCreatorContent = async (
   } catch (err) {
     console.error("Error fetching creator content:", err);
     throw new Error("Failed to fetch creator content");
+  }
+};
+
+export const uploadCreatorContent = async (
+  creatorId: string,
+  file: File,
+  metadata: Record<string, any> = {}
+): Promise<{ success: boolean; data?: { url: string; id: string } }> => {
+  try {
+    // Generate a unique filename
+    const filename = `${creatorId}_${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+    const filePath = `${creatorId}/${filename}`;
+    
+    // In a real app, this would upload to Supabase storage
+    // For now, we'll mock a successful upload
+    
+    // Return mock response
+    return {
+      success: true,
+      data: {
+        url: `https://example.com/content/${filePath}`,
+        id: `file_${Date.now()}`
+      }
+    };
+  } catch (err) {
+    console.error("Error uploading content:", err);
+    return { success: false };
   }
 };
 
