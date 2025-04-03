@@ -1,5 +1,5 @@
 
-import { ContentItem } from "@/services/contentService";
+import { ContentItem, ContentCreateInput, ContentUpdateInput } from "@/services/contentService";
 import { z } from "zod";
 
 export type ContentStatus = "published" | "draft" | "scheduled";
