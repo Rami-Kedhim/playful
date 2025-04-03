@@ -10,11 +10,6 @@ import { NotificationsProvider } from "@/contexts/NotificationsContext";
 import Index from "./pages/Index";
 import Escorts from "./pages/Escorts";
 import EscortDetail from "./pages/EscortDetail";
-import Creators from "./pages/Creators";
-import CreatorDetail from "./pages/CreatorDetail";
-import CreatorDashboard from "./pages/CreatorDashboard";
-import EscortDashboard from "./components/escorts/dashboard/EscortDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import Favorites from "./pages/Favorites";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -22,12 +17,10 @@ import NotFound from "./pages/NotFound";
 import ProfileManagement from "./pages/ProfileManagement";
 import Wallet from "./pages/Wallet";
 import Messages from "./pages/Messages";
-import AIProfiles from "./pages/AIProfiles"; 
-import Livecams from "./pages/Livecams";
-import LivecamDetail from "./pages/LivecamDetail";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RoleGuard from "./components/auth/RoleGuard";
-import Subscriptions from "./pages/Subscriptions";
+import EscortDashboard from "./components/escorts/dashboard/EscortDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import { SubscriptionProvider } from "./hooks/useSubscription";
 
 const queryClient = new QueryClient();
@@ -42,11 +35,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/escorts" element={<Escorts />} />
             <Route path="/escorts/:id" element={<EscortDetail />} />
-            <Route path="/creators" element={<Creators />} />
-            <Route path="/creators/:username" element={<CreatorDetail />} />
-            <Route path="/ai-profiles" element={<AIProfiles />} />
-            <Route path="/livecams" element={<Livecams />} />
-            <Route path="/livecams/:username" element={<LivecamDetail />} />
             <Route path="/favorites" element={
               <ProtectedRoute>
                 <Favorites />
@@ -80,21 +68,12 @@ const App = () => (
                 <EscortDashboard />
               </RoleGuard>
             } />
-            <Route path="/creator-dashboard" element={
-              <RoleGuard allowedRoles={['creator', 'admin']}>
-                <CreatorDashboard />
-              </RoleGuard>
-            } />
             <Route path="/admin" element={
               <RoleGuard allowedRoles={['admin']}>
                 <AdminDashboard />
               </RoleGuard>
             } />
             <Route path="*" element={<NotFound />} />
-            <Route 
-              path="/subscriptions" 
-              element={<Subscriptions />} 
-            />
           </Routes>
         </NotificationsProvider>
       </SubscriptionProvider>

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, MessageSquare, Calendar, Heart, Users } from "lucide-react";
+import { Star, MapPin, MessageSquare, Calendar, Heart, Shield, Clock, UserCheck } from "lucide-react";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/ui/StarRating";
@@ -23,8 +23,9 @@ interface EscortCardProps {
   verified: boolean;
   gender?: string;
   sexualOrientation?: string;
-  isContentCreator?: boolean;
-  creatorUsername?: string;
+  availableNow?: boolean;
+  lastActive?: string;
+  responseRate?: number;
 }
 
 const EscortCard = ({
@@ -40,12 +41,14 @@ const EscortCard = ({
   verified,
   gender,
   sexualOrientation,
-  isContentCreator,
-  creatorUsername
+  availableNow = false,
+  lastActive,
+  responseRate = 95
 }: EscortCardProps) => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { toast } = useToast();
   const favorited = isFavorite(id);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -60,23 +63,18 @@ const EscortCard = ({
     });
   };
 
-  const handleCreatorClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (creatorUsername) {
-      window.location.href = `/creators/${creatorUsername}`;
-    }
-  };
-
   return (
     <Link to={`/escorts/${id}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full bg-card border-border">
         <div className="relative">
           <AspectRatio ratio={2/3}>
+            <div className={`absolute inset-0 bg-gray-600 animate-pulse ${imageLoaded ? 'hidden' : 'block'}`} />
             <img 
               src={imageUrl} 
               alt={name} 
-              className="object-cover w-full h-full"
+              className={`object-cover w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              onLoad={() => setImageLoaded(true)}
+              loading="lazy"
             />
           </AspectRatio>
           
@@ -94,18 +92,20 @@ const EscortCard = ({
           
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {verified && (
-              <Badge className="bg-primary text-primary-foreground">
+              <Badge className="bg-primary text-primary-foreground flex items-center gap-1">
+                <Shield size={10} className="mr-1" />
                 Verified
               </Badge>
             )}
-            <Badge className="bg-amber-600">In Person</Badge>
-            {isContentCreator && (
-              <Badge 
-                className="bg-purple-600 cursor-pointer"
-                onClick={handleCreatorClick}
-              >
-                <Users size={12} className="mr-1" />
-                Creator
+            {availableNow && (
+              <Badge className="bg-green-600 text-white flex items-center gap-1">
+                <Clock size={10} className="mr-1" />
+                Available Now
+              </Badge>
+            )}
+            {gender && (
+              <Badge variant="outline" className="bg-background/60 backdrop-blur-sm capitalize">
+                {gender}
               </Badge>
             )}
           </div>
@@ -133,22 +133,15 @@ const EscortCard = ({
             <span>{location}</span>
           </div>
           
-          {(gender || sexualOrientation) && (
+          {sexualOrientation && (
             <div className="flex flex-wrap gap-1 mb-2">
-              {gender && (
-                <Badge variant="secondary" className="text-xs capitalize">
-                  {gender}
-                </Badge>
-              )}
-              {sexualOrientation && (
-                <Badge variant="secondary" className="text-xs capitalize">
-                  {sexualOrientation}
-                </Badge>
-              )}
+              <Badge variant="secondary" className="text-xs capitalize">
+                {sexualOrientation}
+              </Badge>
             </div>
           )}
           
-          <div className="flex flex-wrap gap-1 mb-4">
+          <div className="flex flex-wrap gap-1 mb-3">
             {tags.slice(0, 3).map((tag, index) => (
               <Badge key={index} variant="secondary" className="text-xs">
                 {tag}
@@ -161,7 +154,12 @@ const EscortCard = ({
             )}
           </div>
           
-          <div className="flex space-x-2 mt-4">
+          <div className="flex items-center text-xs text-gray-400 mb-3">
+            <UserCheck size={12} className="mr-1" />
+            <span>{responseRate}% Response Rate</span>
+          </div>
+          
+          <div className="flex space-x-2 mt-2">
             <Button size="sm" className="flex-1 bg-secondary hover:bg-secondary/80">
               <MessageSquare size={14} className="mr-2" />
               Chat

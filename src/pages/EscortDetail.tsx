@@ -5,8 +5,10 @@ import { getEscortById } from "@/utils/escortUtils";
 import MainLayout from "@/components/layout/MainLayout";
 import EscortProfile from "@/components/escorts/detail/EscortProfile";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Shield, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Helmet } from "react-helmet-async";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EscortDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +20,9 @@ const EscortDetail = () => {
   if (!escort) {
     return (
       <MainLayout containerClass="text-center">
+        <Helmet>
+          <title>Escort Not Found</title>
+        </Helmet>
         <h1 className="text-2xl font-bold mb-4">Escort Not Found</h1>
         <p className="mb-6">The escort you're looking for doesn't exist or has been removed.</p>
         <Button onClick={() => navigate('/escorts')}>
@@ -37,6 +42,11 @@ const EscortDetail = () => {
   
   return (
     <MainLayout showHeader={false}>
+      <Helmet>
+        <title>{`${escort.name}, ${escort.age} | Escort in ${escort.location}`}</title>
+        <meta name="description" content={`Book ${escort.name}, a ${escort.age} year old escort in ${escort.location}. View photos, services, and rates.`} />
+      </Helmet>
+      
       <div className="flex justify-between items-center mb-6">
         <Button 
           variant="ghost" 
@@ -45,17 +55,25 @@ const EscortDetail = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Escorts
         </Button>
-        
-        {escort.isContentCreator && escort.creatorUsername && (
-          <Button 
-            variant="outline" 
-            className="bg-purple-500/10 text-purple-300 border-purple-500/30 hover:bg-purple-500/20"
-            onClick={() => navigate(`/creators/${escort.creatorUsername}`)}
-          >
-            View Content Creator Profile
-          </Button>
-        )}
       </div>
+      
+      {escort.verified ? (
+        <Alert className="mb-6 bg-primary/10 border-primary/20">
+          <Shield className="h-4 w-4 text-primary" />
+          <AlertTitle>Verified Escort</AlertTitle>
+          <AlertDescription>
+            This escort has been verified by our team. Their identity and photos are real.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Alert className="mb-6 bg-amber-500/10 border-amber-500/20">
+          <AlertTriangle className="h-4 w-4 text-amber-500" />
+          <AlertTitle>Verification Pending</AlertTitle>
+          <AlertDescription>
+            This escort has not been verified yet. Please exercise caution.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <EscortProfile 
         escort={escort} 

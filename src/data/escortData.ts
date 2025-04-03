@@ -5,17 +5,43 @@ export interface Escort {
   location: string;
   price: number;
   imageUrl: string;
+  gallery?: string[];
+  videos?: string[];
   rating: number;
   reviews: number;
   tags: string[];
   description?: string;
-  gallery?: string[];
-  videos?: string[];
   verified: boolean;
   gender?: string;
   sexualOrientation?: string;
-  isContentCreator?: boolean;
-  creatorUsername?: string;
+  availableNow?: boolean;
+  lastActive?: string;
+  responseRate?: number;
+  languages?: string[];
+  height?: string;
+  weight?: string;
+  measurements?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  availability?: {
+    days: string[];
+    hours: string;
+  };
+  services?: string[];
+  rates?: {
+    hourly: number;
+    twoHours?: number;
+    overnight?: number;
+    weekend?: number;
+  };
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  verificationLevel?: "basic" | "enhanced" | "premium";
+  verificationDate?: string;
 }
 
 export const escorts: Escort[] = [
@@ -41,8 +67,29 @@ export const escorts: Escort[] = [
     reviews: 24,
     tags: ["GFE", "Massage", "Overnight"],
     verified: true,
-    isContentCreator: true,
-    creatorUsername: "sophia_nyc"
+    availableNow: true,
+    lastActive: "5 minutes ago",
+    responseRate: 98,
+    languages: ["English", "French"],
+    height: "168 cm",
+    weight: "54 kg",
+    measurements: "34-24-36",
+    hairColor: "Blonde",
+    eyeColor: "Blue",
+    ethnicity: "Caucasian",
+    availability: {
+      days: ["Monday", "Tuesday", "Wednesday", "Friday", "Saturday"],
+      hours: "10:00 AM - 10:00 PM"
+    },
+    services: ["GFE", "Massage", "Overnight", "Travel Companion", "Dinner Date"],
+    rates: {
+      hourly: 300,
+      twoHours: 550,
+      overnight: 1500,
+      weekend: 3000
+    },
+    verificationLevel: "premium",
+    verificationDate: "2023-05-15"
   },
   {
     id: "2",
@@ -63,7 +110,29 @@ export const escorts: Escort[] = [
     rating: 4.7,
     reviews: 18,
     tags: ["Massage", "Dinner Date", "Travel Companion"],
-    verified: true
+    verified: true,
+    availableNow: false,
+    lastActive: "2 hours ago",
+    responseRate: 95,
+    languages: ["English", "Spanish"],
+    height: "165 cm",
+    weight: "52 kg",
+    measurements: "32-24-36",
+    hairColor: "Brown",
+    eyeColor: "Green",
+    ethnicity: "Caucasian",
+    availability: {
+      days: ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      hours: "12:00 PM - 12:00 AM"
+    },
+    services: ["Massage", "Dinner Date", "Travel Companion", "Overnight"],
+    rates: {
+      hourly: 250,
+      twoHours: 450,
+      overnight: 1200
+    },
+    verificationLevel: "enhanced",
+    verificationDate: "2023-06-20"
   },
   {
     id: "3",
@@ -85,8 +154,29 @@ export const escorts: Escort[] = [
     reviews: 32,
     tags: ["Domination", "Roleplay", "BDSM"],
     verified: true,
-    isContentCreator: true,
-    creatorUsername: "alice_london"
+    availableNow: true,
+    lastActive: "just now",
+    responseRate: 99,
+    languages: ["English", "Italian"],
+    height: "175 cm",
+    weight: "60 kg",
+    measurements: "36-26-38",
+    hairColor: "Black",
+    eyeColor: "Brown",
+    ethnicity: "Mixed",
+    availability: {
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      hours: "24/7"
+    },
+    services: ["Domination", "Roleplay", "BDSM", "Fetish", "Couple Friendly"],
+    rates: {
+      hourly: 400,
+      twoHours: 750,
+      overnight: 2000,
+      weekend: 4000
+    },
+    verificationLevel: "premium",
+    verificationDate: "2023-04-10"
   },
   {
     id: "4",
@@ -107,7 +197,29 @@ export const escorts: Escort[] = [
     rating: 4.6,
     reviews: 15,
     tags: ["French Kissing", "Lingerie", "Exotic Dancing"],
-    verified: true
+    verified: false,
+    availableNow: false,
+    lastActive: "1 day ago",
+    responseRate: 85,
+    languages: ["French", "English"],
+    height: "170 cm",
+    weight: "56 kg",
+    measurements: "34-26-36",
+    hairColor: "Blonde",
+    eyeColor: "Brown",
+    ethnicity: "Caucasian",
+    availability: {
+      days: ["Tuesday", "Wednesday", "Thursday", "Friday"],
+      hours: "7:00 PM - 3:00 AM"
+    },
+    services: ["French Kissing", "Lingerie Shows", "Exotic Dancing", "Dinner Date"],
+    rates: {
+      hourly: 350,
+      twoHours: 650,
+      overnight: 1800
+    },
+    verificationLevel: "basic",
+    verificationDate: "2023-07-05"
   },
   {
     id: "5",
@@ -128,7 +240,29 @@ export const escorts: Escort[] = [
     rating: 4.5,
     reviews: 12,
     tags: ["Anal Sex", "Deepthroat", "Kissing"],
-    verified: true
+    verified: true,
+    availableNow: true,
+    lastActive: "3 hours ago",
+    responseRate: 92,
+    languages: ["German", "English"],
+    height: "160 cm",
+    weight: "50 kg",
+    measurements: "32-23-34",
+    hairColor: "Red",
+    eyeColor: "Blue",
+    ethnicity: "European",
+    availability: {
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      hours: "6:00 PM - 2:00 AM"
+    },
+    services: ["Anal Sex", "Deepthroat", "Kissing", "Bondage"],
+    rates: {
+      hourly: 280,
+      twoHours: 500,
+      overnight: 1400
+    },
+    verificationLevel: "enhanced",
+    verificationDate: "2023-03-15"
   },
   {
     id: "6",
@@ -149,7 +283,29 @@ export const escorts: Escort[] = [
     rating: 4.7,
     reviews: 21,
     tags: ["Cosplay", "Striptease", "Roleplay"],
-    verified: true
+    verified: true,
+    availableNow: false,
+    lastActive: "4 hours ago",
+    responseRate: 88,
+    languages: ["English", "Australian"],
+    height: "172 cm",
+    weight: "58 kg",
+    measurements: "34-25-36",
+    hairColor: "Brunette",
+    eyeColor: "Hazel",
+    ethnicity: "Caucasian",
+    availability: {
+      days: ["Monday", "Wednesday", "Friday", "Saturday"],
+      hours: "8:00 PM - 4:00 AM"
+    },
+    services: ["Cosplay", "Striptease", "Roleplay", "Massage"],
+    rates: {
+      hourly: 320,
+      twoHours: 600,
+      overnight: 1600
+    },
+    verificationLevel: "enhanced",
+    verificationDate: "2023-02-20"
   },
   {
     id: "7",
@@ -170,7 +326,29 @@ export const escorts: Escort[] = [
     rating: 4.8,
     reviews: 26,
     tags: ["Couples", "BDSM", "Massage"],
-    verified: true
+    verified: true,
+    availableNow: true,
+    lastActive: "2 days ago",
+    responseRate: 95,
+    languages: ["Spanish", "English"],
+    height: "166 cm",
+    weight: "53 kg",
+    measurements: "33-24-35",
+    hairColor: "Black",
+    eyeColor: "Brown",
+    ethnicity: "Hispanic",
+    availability: {
+      days: ["Tuesday", "Thursday", "Saturday", "Sunday"],
+      hours: "9:00 PM - 5:00 AM"
+    },
+    services: ["Couples", "BDSM", "Massage", "Lingerie Shows"],
+    rates: {
+      hourly: 290,
+      twoHours: 520,
+      overnight: 1500
+    },
+    verificationLevel: "enhanced",
+    verificationDate: "2023-01-10"
   },
   {
     id: "8",
@@ -191,7 +369,29 @@ export const escorts: Escort[] = [
     rating: 4.9,
     reviews: 30,
     tags: ["GFE", "Anal Sex", "Deepthroat"],
-    verified: true
+    verified: true,
+    availableNow: true,
+    lastActive: "just now",
+    responseRate: 100,
+    languages: ["Italian", "English"],
+    height: "164 cm",
+    weight: "51 kg",
+    measurements: "32-23-33",
+    hairColor: "Blonde",
+    eyeColor: "Blue",
+    ethnicity: "European",
+    availability: {
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      hours: "11:00 AM - 11:00 PM"
+    },
+    services: ["GFE", "Anal Sex", "Deepthroat", "French Kissing"],
+    rates: {
+      hourly: 310,
+      twoHours: 580,
+      overnight: 1700
+    },
+    verificationLevel: "premium",
+    verificationDate: "2023-05-01"
   },
 ];
 
@@ -205,14 +405,21 @@ export const availableServices = [
   "Roleplay",
   "BDSM",
   "French Kissing",
-  "Lingerie",
+  "Lingerie Shows",
   "Exotic Dancing",
-  "Anal Sex",
+  "Anal",
   "Deepthroat",
   "Kissing",
   "Cosplay",
   "Striptease",
-  "Couples"
+  "Couples",
+  "Fetish",
+  "Duo with Girl",
+  "Light Domination",
+  "Mutual French",
+  "Prostate Massage",
+  "Spanking",
+  "Tantric Massage"
 ];
 
 export const getEscortById = (escorts: Escort[], id: string) => {
