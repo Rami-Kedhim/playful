@@ -12,6 +12,7 @@ import Escorts from "./pages/Escorts";
 import EscortDetail from "./pages/EscortDetail";
 import Creators from "./pages/Creators";
 import CreatorDetail from "./pages/CreatorDetail";
+import CreatorDashboard from "./pages/CreatorDashboard";
 import Favorites from "./pages/Favorites";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -61,7 +62,7 @@ const App = () => (
             } />
             <Route path="/creator-dashboard" element={
               <RoleGuard allowedRoles={['creator', 'admin']}>
-                <div>Creator Dashboard (to be implemented)</div>
+                <CreatorDashboard />
               </RoleGuard>
             } />
             <Route path="/admin" element={

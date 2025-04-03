@@ -7,12 +7,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import DesktopNav from "./DesktopNav";
 import MobileNav from "./MobileNav";
 import UserMenu from "./UserMenu";
+import NotificationsMenu from "@/components/notifications/NotificationsMenu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  const { signOut, userRoles } = useAuth();
+  const { signOut, userRoles, user } = useAuth();
   
   // Handle scroll event to change navbar appearance
   useEffect(() => {
@@ -87,7 +88,8 @@ const Navbar = () => {
           </div>
           
           {/* Desktop user menu */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-1">
+            {user && <NotificationsMenu />}
             <UserMenu handleSignOut={handleSignOut} />
           </div>
           
