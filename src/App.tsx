@@ -32,10 +32,9 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <NotificationsProvider>
-      <FavoritesProvider>
-        <SubscriptionProvider>
-          <Toaster />
+    <FavoritesProvider>
+      <SubscriptionProvider>
+        <NotificationsProvider>
           <Sonner />
           <Routes>
             <Route path="/" element={<Index />} />
@@ -93,9 +92,9 @@ const App = () => (
               element={<Subscriptions />} 
             />
           </Routes>
-        </SubscriptionProvider>
-      </FavoritesProvider>
-    </NotificationsProvider>
+        </NotificationsProvider>
+      </SubscriptionProvider>
+    </FavoritesProvider>
   </QueryClientProvider>
 );
 
