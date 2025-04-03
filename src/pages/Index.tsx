@@ -20,7 +20,9 @@ const transformedEscorts = [
     location: "New York, NY",
     verified: true,
     featured: true,
-    rating: 4.9
+    rating: 4.9,
+    serviceType: "both",
+    isLive: false
   },
   {
     id: "escort-2",
@@ -28,7 +30,9 @@ const transformedEscorts = [
     avatar: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
     location: "Los Angeles, CA",
     verified: true,
-    rating: 4.7
+    rating: 4.7,
+    serviceType: "in-person",
+    isLive: false
   },
   {
     id: "escort-3",
@@ -36,7 +40,9 @@ const transformedEscorts = [
     avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
     location: "Chicago, IL",
     verified: true,
-    rating: 4.8
+    rating: 4.8,
+    serviceType: "virtual",
+    isLive: true
   },
   {
     id: "escort-4",
@@ -45,7 +51,9 @@ const transformedEscorts = [
     location: "Miami, FL",
     verified: true,
     featured: true,
-    rating: 4.9
+    rating: 4.9,
+    serviceType: "both",
+    isLive: false
   }
 ];
 
@@ -58,7 +66,9 @@ const transformedCreators = [
     location: "Las Vegas, NV",
     verified: true,
     isPremium: true,
-    rating: 4.9
+    rating: 4.9,
+    serviceType: "virtual",
+    isLive: true
   },
   {
     id: "creator-2",
@@ -66,7 +76,9 @@ const transformedCreators = [
     avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
     location: "Atlanta, GA",
     verified: true,
-    rating: 4.7
+    rating: 4.7,
+    serviceType: "virtual",
+    isLive: false
   },
   {
     id: "creator-3",
@@ -75,7 +87,9 @@ const transformedCreators = [
     location: "Seattle, WA",
     verified: true,
     isPremium: true,
-    rating: 4.8
+    rating: 4.8,
+    serviceType: "virtual",
+    isLive: true
   },
   {
     id: "creator-4",
@@ -83,7 +97,9 @@ const transformedCreators = [
     avatar: "https://images.unsplash.com/photo-1503185912284-5271ff81b9a8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
     location: "Denver, CO",
     verified: true,
-    rating: 4.6
+    rating: 4.6,
+    serviceType: "virtual",
+    isLive: false
   }
 ];
 

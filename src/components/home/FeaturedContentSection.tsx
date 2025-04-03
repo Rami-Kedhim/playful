@@ -22,9 +22,10 @@ interface ProfileProps {
 
 interface FeaturedContentSectionProps {
   featuredEscorts: ProfileProps[];
+  featuredCreators?: ProfileProps[];
 }
 
-const FeaturedContentSection = ({ featuredEscorts }: FeaturedContentSectionProps) => {
+const FeaturedContentSection = ({ featuredEscorts, featuredCreators = [] }: FeaturedContentSectionProps) => {
   const [activeTab, setActiveTab] = useState("all");
   
   // Filter escorts based on active tab
@@ -93,19 +94,19 @@ const FeaturedContentSection = ({ featuredEscorts }: FeaturedContentSectionProps
                 </div>
                 
                 <div className="absolute bottom-3 right-3 flex gap-2">
-                  {escort.serviceType === "in-person" || escort.serviceType === "both" ? (
+                  {(escort.serviceType === "in-person" || escort.serviceType === "both") && (
                     <Badge variant="outline" className="bg-blue-500/20 border-blue-500/50 flex items-center gap-1">
                       <UserIcon className="h-3 w-3" />
                       In-Person
                     </Badge>
-                  ) : null}
+                  )}
                   
-                  {escort.serviceType === "virtual" || escort.serviceType === "both" ? (
+                  {(escort.serviceType === "virtual" || escort.serviceType === "both") && (
                     <Badge variant="outline" className="bg-purple-500/20 border-purple-500/50 flex items-center gap-1">
                       <VideoIcon className="h-3 w-3" />
                       Virtual
                     </Badge>
-                  ) : null}
+                  )}
                 </div>
               </div>
               <div className="p-4">

@@ -46,7 +46,19 @@ export const escorts: Escort[] = [
       weekend: 3000
     },
     verificationLevel: "premium",
-    verificationDate: "2023-05-15"
+    verificationDate: "2023-05-15",
+    hasVirtualContent: true,
+    virtualUsername: "sophia_nyc",
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    providesLiveStreams: true,
+    isAIGenerated: false,
+    contentStats: {
+      photos: 120,
+      videos: 15,
+      streams: 2
+    },
+    subscriptionPrice: 19.99
   },
   {
     id: "2",
@@ -89,7 +101,19 @@ export const escorts: Escort[] = [
       overnight: 1200
     },
     verificationLevel: "enhanced",
-    verificationDate: "2023-06-20"
+    verificationDate: "2023-06-20",
+    hasVirtualContent: true,
+    virtualUsername: "emma_la",
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    providesLiveStreams: false,
+    isAIGenerated: false,
+    contentStats: {
+      photos: 75,
+      videos: 8,
+      streams: 0
+    },
+    subscriptionPrice: 14.99
   },
   {
     id: "3",
@@ -133,7 +157,19 @@ export const escorts: Escort[] = [
       weekend: 4000
     },
     verificationLevel: "premium",
-    verificationDate: "2023-04-10"
+    verificationDate: "2023-04-10",
+    hasVirtualContent: true,
+    virtualUsername: "alice_london",
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    providesLiveStreams: true,
+    isAIGenerated: false,
+    contentStats: {
+      photos: 200,
+      videos: 25,
+      streams: 3
+    },
+    subscriptionPrice: 29.99
   },
   {
     id: "4",
@@ -176,6 +212,11 @@ export const escorts: Escort[] = [
       overnight: 1800
     },
     verificationLevel: "basic",
-    verificationDate: "2023-07-05"
+    verificationDate: "2023-07-05",
+    hasVirtualContent: false,
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    providesLiveStreams: false,
+    isAIGenerated: false
   }
 ];
