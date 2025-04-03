@@ -1,22 +1,20 @@
 
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { runCompatibilityCheck } from './utils/browserCompatibilityCheck.ts'
+import { BrowserRouter } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from './hooks/useAuth.tsx'
-import { Toaster } from './components/ui/toaster.tsx'
 
-// Run browser compatibility check when app loads
-if (process.env.NODE_ENV !== 'production') {
-  runCompatibilityCheck();
-}
-
-createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
-    <AuthProvider>
-      <App />
-      <Toaster />
-    </AuthProvider>
-  </BrowserRouter>
-);
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <HelmetProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </BrowserRouter>
+    </HelmetProvider>
+  </React.StrictMode>,
+)
