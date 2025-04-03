@@ -1,68 +1,67 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import AuthForm from "@/components/auth/AuthForm";
+import { useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/layout/AppLayout";
-import LoginForm from "@/components/auth/LoginForm";
-import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
-import RegisterForm from "@/components/auth/RegisterForm";
+import { logContentAction } from "@/utils/debugUtils";
 
 const Auth = () => {
-  const [activeTab, setActiveTab] = useState("login");
-  const [email, setEmail] = useState("");
-  const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
+  const { login, register, resetPassword, isAuthenticated, isLoading, error } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [authError, setAuthError] = useState<string | null>(error);
+  
+  // Get the return URL from location state or default to homepage
+  const from = location.state?.from?.pathname || "/";
+  
+  // If user is already authenticated, redirect to the return URL
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      logContentAction('User already authenticated, redirecting', { from });
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate, from]);
+  
+  // Update local error state when context error changes
+  useEffect(() => {
+    setAuthError(error);
+  }, [error]);
+  
+  const handleLogin = async (email: string, password: string) => {
+    logContentAction('Login attempt', { email });
+    const success = await login(email, password);
+    if (success) {
+      navigate(from, { replace: true });
+    }
+  };
+  
+  const handleRegister = async (email: string, password: string, username: string) => {
+    logContentAction('Registration attempt', { email, username });
+    const success = await register(email, password, username);
+    if (success) {
+      navigate(from, { replace: true });
+    }
+  };
+  
+  const handleForgotPassword = async (email: string) => {
+    logContentAction('Password reset attempt', { email });
+    await resetPassword(email);
+  };
   
   return (
     <AppLayout>
-      <div className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-16rem)]">
-        <Card className="w-full max-w-md mx-auto">
-          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <CardHeader>
-              <div className="flex justify-center mb-4">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="register">Register</TabsTrigger>
-                </TabsList>
-              </div>
-              <CardTitle className="text-center text-2xl">Welcome to LuxLife</CardTitle>
-              <CardDescription className="text-center">
-                Access premium escorts and content creators
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <TabsContent value="login">
-                {!forgotPasswordMode ? (
-                  <LoginForm 
-                    setForgotPasswordMode={setForgotPasswordMode}
-                    email={email}
-                    setEmail={setEmail}
-                  />
-                ) : (
-                  <ForgotPasswordForm 
-                    setForgotPasswordMode={setForgotPasswordMode}
-                    email={email}
-                    setEmail={setEmail}
-                  />
-                )}
-              </TabsContent>
-              
-              <TabsContent value="register">
-                <RegisterForm 
-                  email={email}
-                  setEmail={setEmail}
-                  setActiveTab={setActiveTab}
-                />
-              </TabsContent>
-            </CardContent>
-            
-            <CardFooter className="flex flex-col space-y-4">
-              <div className="text-xs text-center text-muted-foreground">
-                By continuing, you agree to our Terms of Service and Privacy Policy.
-              </div>
-            </CardFooter>
-          </Tabs>
-        </Card>
+      <div className="container mx-auto py-16 px-4">
+        <div className="max-w-md mx-auto">
+          <h1 className="text-3xl font-bold text-center mb-8">Account Access</h1>
+          <AuthForm
+            onLogin={handleLogin}
+            onRegister={handleRegister}
+            onForgotPassword={handleForgotPassword}
+            isLoading={isLoading}
+            error={authError}
+          />
+        </div>
       </div>
     </AppLayout>
   );

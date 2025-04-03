@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -26,6 +25,7 @@ import Messages from "./pages/Messages";
 import AIProfiles from "./pages/AIProfiles"; // New page
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RoleGuard from "./components/auth/RoleGuard";
+import { SubscriptionProvider } from "./hooks/useSubscription";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +88,10 @@ const App = () => (
                 </RoleGuard>
               } />
               <Route path="*" element={<NotFound />} />
+              <Route 
+                path="/subscriptions" 
+                element={<Subscriptions />} 
+              />
             </Routes>
           </BrowserRouter>
         </FavoritesProvider>
