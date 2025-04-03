@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { LivecamModel, LivecamsFilter } from "@/types/livecams";
 import { fetchLivecams } from "@/services/livecamsService";
+import { toast } from "sonner";
 
 export const useLivecams = (initialFilters: LivecamsFilter = {}) => {
   const [models, setModels] = useState<LivecamModel[]>([]);
@@ -19,19 +20,24 @@ export const useLivecams = (initialFilters: LivecamsFilter = {}) => {
         setLoading(true);
         setError(null);
         
+        console.log("Loading livecams with filters:", filters);
+        
         const response = await fetchLivecams({
           ...filters,
           page: 1 // Reset to page 1 when filters change
         });
         
-        setModels(response.models);
-        setHasMore(response.hasMore);
-        setTotalCount(response.totalCount);
+        console.log("Livecams response:", response);
+        
+        setModels(response.models || []);
+        setHasMore(response.hasMore || false);
+        setTotalCount(response.totalCount || 0);
         setPage(1);
       } catch (err: any) {
         console.error("Error loading livecams:", err);
         setError(err.message || "Failed to load livecams");
         setModels([]);
+        toast.error(`Failed to load livecams: ${err.message || "Unknown error"}`);
       } finally {
         setLoading(false);
       }
@@ -48,17 +54,25 @@ export const useLivecams = (initialFilters: LivecamsFilter = {}) => {
       setLoading(true);
       const nextPage = page + 1;
       
+      console.log("Loading more livecams, page:", nextPage);
+      
       const response = await fetchLivecams({
         ...filters,
         page: nextPage
       });
       
-      setModels(prevModels => [...prevModels, ...response.models]);
-      setHasMore(response.hasMore);
-      setPage(nextPage);
+      if (response && response.models) {
+        setModels(prevModels => [...prevModels, ...response.models]);
+        setHasMore(response.hasMore || false);
+        setPage(nextPage);
+      } else {
+        console.warn("No models received when loading more");
+        setHasMore(false);
+      }
     } catch (err: any) {
       console.error("Error loading more livecams:", err);
       setError(err.message || "Failed to load more livecams");
+      toast.error(`Failed to load more: ${err.message || "Unknown error"}`);
     } finally {
       setLoading(false);
     }
@@ -66,6 +80,7 @@ export const useLivecams = (initialFilters: LivecamsFilter = {}) => {
 
   // Function to update filters
   const updateFilters = (newFilters: Partial<LivecamsFilter>) => {
+    console.log("Updating filters:", newFilters);
     setFilters(prevFilters => ({
       ...prevFilters,
       ...newFilters

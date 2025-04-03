@@ -46,7 +46,7 @@ const Navbar = () => {
     { label: "Home", path: "/" },
     { label: "Escorts", path: "/escorts", icon: CalendarClock },
     { label: "Creators", path: "/creators", icon: Star },
-    { label: "Live Cams", path: "/live", icon: Video },
+    { label: "Live Cams", path: "/livecams", icon: Video },
     { label: "Messages", path: "/messages", icon: MessageCircle },
   ];
   

@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { LivecamModel, LivecamsFilter, LivecamsResponse } from "@/types/livecams";
+import { toast } from "sonner";
 
 // This service will handle API communication for livecams
 export const fetchLivecams = async (
@@ -8,27 +9,32 @@ export const fetchLivecams = async (
 ): Promise<LivecamsResponse> => {
   try {
     // Make an API call to our backend which will communicate with Cam4
-    // We'll implement this with a Supabase Edge Function later
     const { country, category, limit = 24, page = 1 } = filters;
-    
-    // For development, we'll use a mock response
-    // Later, we'll replace this with a real API call to our Supabase Edge Function
     
     console.log("Fetching livecams with filters:", filters);
     
-    // Simulate an API call with the Supabase REST client
+    // Call the Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('get-livecams', {
       body: { country, category, limit, page }
     });
     
     if (error) {
       console.error("Error fetching livecams:", error);
-      throw new Error("Failed to fetch livecams");
+      toast.error("Failed to fetch livecams: " + error.message);
+      throw new Error(`Failed to fetch livecams: ${error.message}`);
     }
     
+    if (!data) {
+      console.error("No data received from livecams API");
+      toast.error("No data received from livecams API");
+      throw new Error("No data received from livecams API");
+    }
+
+    console.log("Livecams data received:", data);
     return data as LivecamsResponse;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Livecams service error:", error);
+    toast.error(`Error: ${error.message || "Failed to load livecams"}`);
     
     // For development/demo, return mock data when API fails
     return getMockLivecams(filters);
