@@ -10,7 +10,7 @@ import {
 } from "./types";
 
 export const useContentFilters = (initialFilters: PartialContentFilters = {}): UseContentFiltersReturn => {
-  // Validate and set default filters
+  // Create default filters and apply any provided initial filters
   const validatedInitialFilters = useMemo(() => {
     const defaultFilters: ContentFilters = {
       status: "published",
@@ -40,7 +40,7 @@ export const useContentFilters = (initialFilters: PartialContentFilters = {}): U
   // Update filters with validation
   const updateFilters = useCallback((newFilters: PartialContentFilters) => {
     setFilters(prev => {
-      // Create a complete ContentFilters object that includes all required properties
+      // Create a complete ContentFilters object from previous and new filters
       const updatedFilters: ContentFilters = {
         status: newFilters.status ?? prev.status,
         searchQuery: newFilters.searchQuery ?? prev.searchQuery,
