@@ -1,8 +1,23 @@
 
 import { ContentItem, ContentCreateInput, ContentUpdateInput } from "@/services/contentService";
+import { z } from "zod";
 
 export type ContentStatus = "published" | "draft" | "scheduled";
 export type SortOption = "newest" | "oldest" | "title_asc" | "title_desc" | "most_viewed" | "least_viewed";
+
+// Content error types for better error handling
+export type ContentErrorType = 
+  | "fetch_error" 
+  | "create_error" 
+  | "update_error" 
+  | "delete_error" 
+  | "permission_error"
+  | "validation_error";
+
+export interface ContentError extends Error {
+  type: ContentErrorType;
+  details?: unknown;
+}
 
 export interface ContentFilters {
   status: ContentStatus;
@@ -10,6 +25,17 @@ export interface ContentFilters {
   contentType?: string;
   sort: SortOption;
 }
+
+// Zod schema for content filters validation
+export const contentFiltersSchema = z.object({
+  status: z.enum(["published", "draft", "scheduled"]),
+  searchQuery: z.string(),
+  contentType: z.string().optional(),
+  sort: z.enum([
+    "newest", "oldest", "title_asc", "title_desc", 
+    "most_viewed", "least_viewed"
+  ])
+});
 
 export interface UseContentFiltersReturn {
   filters: ContentFilters;
@@ -27,5 +53,6 @@ export interface UseContentActionsReturn {
 export interface UseCreatorContentReturn extends UseContentFiltersReturn, UseContentActionsReturn {
   content: ContentItem[];
   loading: boolean;
-  error: Error | null;
+  error: ContentError | null;
+  refresh: () => Promise<void>; // New method to refresh content
 }

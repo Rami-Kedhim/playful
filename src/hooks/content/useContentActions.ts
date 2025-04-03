@@ -10,7 +10,7 @@ import {
   deleteContent,
   publishContent
 } from "@/services/contentService";
-import { ContentFilters, UseContentActionsReturn } from "./types";
+import { ContentFilters, UseContentActionsReturn, ContentError } from "./types";
 
 export const useContentActions = (
   filters: ContentFilters, 
@@ -18,14 +18,34 @@ export const useContentActions = (
 ): UseContentActionsReturn => {
   const { user } = useAuth();
   
-  // Add new content
+  // Create a security error helper
+  const createSecurityError = useCallback((message: string, type: ContentError['type']): ContentError => {
+    const error = new Error(message) as ContentError;
+    error.type = type;
+    return error;
+  }, []);
+  
+  // Validate user permissions
+  const validateUserPermissions = useCallback(() => {
+    if (!user?.id) {
+      throw createSecurityError("User not authenticated", "permission_error");
+    }
+    return user.id;
+  }, [user, createSecurityError]);
+  
+  // Add new content with enhanced security and validation
   const addContent = useCallback(async (newContent: ContentCreateInput) => {
-    if (!user?.id) throw new Error("User not authenticated");
+    const userId = validateUserPermissions();
     
     try {
+      // Validate required fields
+      if (!newContent.title || !newContent.media_url || !newContent.media_type) {
+        throw createSecurityError("Missing required content fields", "validation_error");
+      }
+      
       const createdContent = await createContent({
         ...newContent,
-        creator_id: user.id
+        creator_id: userId
       });
       
       if (createdContent) {
@@ -37,15 +57,28 @@ export const useContentActions = (
       }
     } catch (err) {
       console.error("Error adding content:", err);
-      throw err;
+      
+      // Create typed error
+      const contentError = createSecurityError(
+        err instanceof Error ? err.message : "Failed to create content", 
+        "create_error"
+      );
+      contentError.details = err;
+      
+      throw contentError;
     }
-  }, [user?.id, filters.status, setContent]);
+  }, [user?.id, filters.status, setContent, validateUserPermissions, createSecurityError]);
   
-  // Edit existing content
+  // Edit existing content with security enhancements
   const editContent = useCallback(async (updatedContent: ContentUpdateInput) => {
-    if (!user?.id) throw new Error("User not authenticated");
+    validateUserPermissions();
     
     try {
+      // Validate content ownership (could be enhanced with a backend check)
+      if (updatedContent.creator_id !== user?.id) {
+        throw createSecurityError("You can only edit your own content", "permission_error");
+      }
+      
       const result = await updateContent(updatedContent);
       
       if (result) {
@@ -62,23 +95,42 @@ export const useContentActions = (
       }
     } catch (err) {
       console.error("Error updating content:", err);
-      throw err;
+      
+      const contentError = createSecurityError(
+        err instanceof Error ? err.message : "Failed to update content", 
+        "update_error"
+      );
+      contentError.details = err;
+      
+      throw contentError;
     }
-  }, [user?.id, filters.status, setContent]);
+  }, [user?.id, filters.status, setContent, validateUserPermissions, createSecurityError]);
   
-  // Delete content
+  // Delete content with enhanced security
   const removeContent = useCallback(async (id: string) => {
+    validateUserPermissions();
+    
     try {
+      // Request deletion - server should verify ownership
       await deleteContent(id);
       setContent(prev => prev.filter(item => item.id !== id));
     } catch (err) {
       console.error("Error deleting content:", err);
-      throw err;
+      
+      const contentError = createSecurityError(
+        err instanceof Error ? err.message : "Failed to delete content", 
+        "delete_error"
+      );
+      contentError.details = err;
+      
+      throw contentError;
     }
-  }, [setContent]);
+  }, [setContent, validateUserPermissions, createSecurityError]);
   
-  // Publish a draft
+  // Publish a draft with enhanced security
   const publishDraft = useCallback(async (id: string) => {
+    validateUserPermissions();
+    
     try {
       const published = await publishContent(id);
       
@@ -95,9 +147,16 @@ export const useContentActions = (
       }
     } catch (err) {
       console.error("Error publishing content:", err);
-      throw err;
+      
+      const contentError = createSecurityError(
+        err instanceof Error ? err.message : "Failed to publish content", 
+        "update_error"
+      );
+      contentError.details = err;
+      
+      throw contentError;
     }
-  }, [filters.status, setContent]);
+  }, [filters.status, setContent, validateUserPermissions, createSecurityError]);
   
   return {
     addContent,

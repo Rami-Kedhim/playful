@@ -6,5 +6,7 @@ export type {
   ContentStatus, 
   SortOption, 
   ContentFilters, 
-  UseCreatorContentReturn 
+  UseCreatorContentReturn,
+  ContentError,
+  ContentErrorType
 } from './content/types';
