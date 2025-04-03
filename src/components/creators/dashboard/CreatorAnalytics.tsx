@@ -1,40 +1,20 @@
 
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Legend } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowUpIcon, ArrowDownIcon, TrendingUp, UsersIcon, DollarSign, Eye, Heart } from 'lucide-react';
+import { Dispatch, SetStateAction } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Users, TrendingUp, DollarSign, Play } from "lucide-react";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import AnalyticsSummary from "./AnalyticsSummary";
+import AudienceDemographics from "./AudienceDemographics";
+import { AnalyticsStat } from "./AnalyticsSummary";
 
-interface AnalyticsStat {
-  title: string;
-  value: string;
-  trend: "up" | "down" | "neutral";
-  change: string;
-  color: string;
-  icon: React.ReactNode;
-}
-
-interface AnalyticsSummaryProps {
-  stats: AnalyticsStat[];
-}
-
-interface ChartProps {
-  data: any[];
-  loading: boolean;
-}
-
-interface DemographicsProps {
-  demographics: {
-    age: { group: string; percentage: number }[];
-    gender: { type: string; percentage: number }[];
-    location: { country: string; percentage: number }[];
+export interface CreatorAnalyticsProps {
+  analyticsData: {
+    views: number;
+    likes: number;
+    shares: number;
+    earnings: number;
   };
-  loading: boolean;
-}
-
-interface CreatorAnalyticsProps {
-  period: string;
-  setPeriod: React.Dispatch<React.SetStateAction<any>>;
   analyticsHistory: {
     date: string;
     views: number;
@@ -42,244 +22,67 @@ interface CreatorAnalyticsProps {
     shares: number;
     earnings: number;
   }[];
-  loading: boolean;
   demographics: {
     age: { group: string; percentage: number }[];
     gender: { type: string; percentage: number }[];
     location: { country: string; percentage: number }[];
   };
-  analytics: {
-    views: number;
-    likes: number;
-    shares: number;
-    earnings: number;
-  };
+  period: 'week' | 'month' | 'year';
+  setPeriod: Dispatch<SetStateAction<'week' | 'month' | 'year'>>;
+  loading: boolean;
 }
 
-const AnalyticsSummary = ({ stats }: AnalyticsSummaryProps) => {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat, i) => (
-        <Card key={i}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {stat.title}
-            </CardTitle>
-            <div className={`text-${stat.color} bg-${stat.color}/10 p-2 rounded-full`}>
-              {stat.icon}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className={`text-xs flex items-center text-${stat.color}`}>
-              {stat.trend === "up" ? <ArrowUpIcon className="mr-1 h-4 w-4" /> : 
-               stat.trend === "down" ? <ArrowDownIcon className="mr-1 h-4 w-4" /> : 
-               <ArrowUpIcon className="mr-1 h-4 w-4 opacity-0" />}
-              {stat.change}
-            </p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-};
-
-const EngagementChart = ({ data, loading }: ChartProps) => {
-  if (loading) {
-    return <Skeleton className="h-[300px] w-full" />;
-  }
-  
-  return (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="views" stroke="#8884d8" activeDot={{ r: 8 }} />
-        <Line type="monotone" dataKey="likes" stroke="#82ca9d" />
-        <Line type="monotone" dataKey="shares" stroke="#ffc658" />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-};
-
-const EarningsChart = ({ data, loading }: ChartProps) => {
-  if (loading) {
-    return <Skeleton className="h-[300px] w-full" />;
-  }
-  
-  return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="earnings" fill="#8884d8" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-};
-
-const Demographics = ({ demographics, loading }: DemographicsProps) => {
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#FF6384'];
-  
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Skeleton className="h-[200px]" />
-        <Skeleton className="h-[200px]" />
-        <Skeleton className="h-[200px]" />
-      </div>
-    );
-  }
-  
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Age Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={demographics.age}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="percentage"
-                nameKey="group"
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {demographics.age.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Gender Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={demographics.gender}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="percentage"
-                nameKey="type"
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {demographics.gender.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Geographical Distribution</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={demographics.location}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="percentage"
-                nameKey="country"
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {demographics.location.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
 const CreatorAnalytics = ({ 
-  period, 
-  setPeriod, 
+  analyticsData, 
   analyticsHistory, 
-  loading,
-  demographics,
-  analytics
+  demographics, 
+  period, 
+  setPeriod,
+  loading 
 }: CreatorAnalyticsProps) => {
-  // Prepare stats for summary cards
-  const stats: AnalyticsStat[] = [
+  
+  const analyticsStats: AnalyticsStat[] = [
     {
       title: "Total Views",
-      value: analytics.views.toLocaleString(),
-      trend: "up" as const,
-      change: "12% from last period",
-      color: "green-500",
-      icon: <Eye className="h-4 w-4" />
+      value: analyticsData.views.toLocaleString(),
+      icon: <Play className="h-4 w-4" />,
+      trend: "up" as const, // Explicitly type as const
+      change: "12%",
+      color: "text-green-500"
     },
     {
-      title: "Total Likes",
-      value: analytics.likes.toLocaleString(),
-      trend: "up" as const,
-      change: "9% from last period",
-      color: "green-500",
-      icon: <Heart className="h-4 w-4" />
+      title: "Engagement",
+      value: analyticsData.likes.toLocaleString(),
+      icon: <TrendingUp className="h-4 w-4" />,
+      trend: "up" as const, // Explicitly type as const
+      change: "8%",
+      color: "text-green-500"
     },
     {
-      title: "Subscribers",
-      value: (Math.floor(Math.random() * 1000) + 100).toLocaleString(),
-      trend: "up" as const,
-      change: "5% from last period",
-      color: "green-500",
-      icon: <UsersIcon className="h-4 w-4" />
+      title: "Shares",
+      value: analyticsData.shares.toLocaleString(),
+      icon: <Users className="h-4 w-4" />,
+      trend: "up" as const, // Explicitly type as const
+      change: "5%",
+      color: "text-green-500"
     },
     {
       title: "Earnings",
-      value: `$${analytics.earnings.toLocaleString()}`,
-      trend: "up" as const,
-      change: "7% from last period",
-      color: "green-500",
-      icon: <DollarSign className="h-4 w-4" />
+      value: `$${analyticsData.earnings.toLocaleString()}`,
+      icon: <DollarSign className="h-4 w-4" />,
+      trend: "up" as const, // Explicitly type as const
+      change: "15%",
+      color: "text-green-500"
     }
   ];
-
+  
   return (
-    <Card className="col-span-4">
+    <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Analytics Dashboard</CardTitle>
-            <CardDescription>
-              Track your content performance and audience engagement
-            </CardDescription>
-          </div>
-          <Tabs defaultValue={period} onValueChange={setPeriod}>
+        <CardTitle>Analytics Overview</CardTitle>
+        <CardDescription>Track your performance and audience engagement</CardDescription>
+        <div className="flex justify-end mt-2">
+          <Tabs value={period} onValueChange={(v) => setPeriod(v as 'week' | 'month' | 'year')}>
             <TabsList>
               <TabsTrigger value="week">Week</TabsTrigger>
               <TabsTrigger value="month">Month</TabsTrigger>
@@ -288,39 +91,63 @@ const CreatorAnalytics = ({
           </Tabs>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <AnalyticsSummary stats={stats} />
-        
-        <Tabs defaultValue="engagement" className="mt-6">
-          <TabsList>
-            <TabsTrigger value="engagement">Engagement</TabsTrigger>
-            <TabsTrigger value="earnings">Earnings</TabsTrigger>
-            <TabsTrigger value="demographics">Demographics</TabsTrigger>
-          </TabsList>
-          <TabsContent value="engagement" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Engagement Over Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <EngagementChart data={analyticsHistory} loading={loading} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="earnings" className="mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Earnings Over Time</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <EarningsChart data={analyticsHistory} loading={loading} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="demographics" className="mt-4">
-            <Demographics demographics={demographics} loading={loading} />
-          </TabsContent>
-        </Tabs>
+      <CardContent>
+        <div className="grid gap-6">
+          <AnalyticsSummary stats={analyticsStats} loading={loading} />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Performance Trends</CardTitle>
+                  <CardDescription>Your content performance over time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="h-[300px] flex items-center justify-center">
+                      <p>Loading chart data...</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart data={analyticsHistory}>
+                        <defs>
+                          <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorLikes" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="date" />
+                        <YAxis />
+                        <Tooltip />
+                        <Area 
+                          type="monotone" 
+                          dataKey="views" 
+                          stroke="#8884d8" 
+                          fillOpacity={1} 
+                          fill="url(#colorViews)" 
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="likes" 
+                          stroke="#82ca9d" 
+                          fillOpacity={1} 
+                          fill="url(#colorLikes)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            <div>
+              <AudienceDemographics demographics={demographics} loading={loading} />
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

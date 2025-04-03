@@ -1,253 +1,193 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-/**
- * Track content view with additional engagement metrics
- */
-export const trackContentView = async (contentId: string, metadata = {}) => {
-  try {
-    // Log the view for analytics
-    console.log(`Tracking view for content ID: ${contentId}`);
-    
-    // Get current user
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id;
-    
-    if (!userId) {
-      // Track anonymous view
-      const { error } = await supabase.rpc('log_content_view', { 
-        content_id: contentId,
-        viewer_id: '00000000-0000-0000-0000-000000000000' // Anonymous ID
-      });
-      
-      if (error) throw error;
-    } else {
-      // Track authenticated view
-      const { error } = await supabase.rpc('log_content_view', { 
-        content_id: contentId,
-        viewer_id: userId
-      });
-      
-      if (error) throw error;
-    }
-    
-    // Track additional metadata about the view
-    if (Object.keys(metadata).length > 0) {
-      // Log engagement metadata for more detailed analytics
-      const { error: metadataError } = await supabase
-        .from('content_view_metadata')
-        .insert({
-          content_id: contentId,
-          viewer_id: userId || '00000000-0000-0000-0000-000000000000',
-          metadata
-        });
-      
-      if (metadataError) console.error("Error logging view metadata:", metadataError);
-    }
-    
-    return true;
-  } catch (error) {
-    console.error("Error tracking content view:", error);
-    return false;
-  }
-};
+export interface AnalyticsData {
+  date: string;
+  views: number;
+  likes: number;
+  shares: number;
+  earnings: number;
+}
 
-/**
- * Track user engagement with content (likes, shares, etc.)
- */
-export const trackEngagement = async (contentId: string, engagementType: 'like' | 'share' | 'comment', userId?: string) => {
-  try {
-    // Get current user if not provided
-    if (!userId) {
-      const { data: userData } = await supabase.auth.getUser();
-      userId = userData.user?.id;
-      
-      if (!userId) {
-        console.error("Cannot track engagement for unauthenticated user");
-        return false;
-      }
-    }
-    
-    // Log the engagement
-    const { error } = await supabase
-      .from('content_engagements')
-      .insert({
-        content_id: contentId,
-        user_id: userId,
-        engagement_type: engagementType
-      });
-    
-    if (error) throw error;
-    
-    // Update analytics aggregate tables based on engagement type
-    const updateColumn = `${engagementType}s_count`;
-    
-    const { error: updateError } = await supabase
-      .from('creator_content')
-      .update({ [updateColumn]: supabase.rpc('increment_counter', { row_id: contentId, counter_name: updateColumn }) })
-      .eq('id', contentId);
-    
-    if (updateError) throw updateError;
-    
-    return true;
-  } catch (error) {
-    console.error(`Error tracking ${engagementType}:`, error);
-    return false;
-  }
-};
+export interface ContentViewData {
+  content_id: string;
+  views: number;
+  unique_views: number;
+  average_view_time: number;
+  demographics: {
+    age_groups: { range: string; percentage: number }[];
+    locations: { country: string; percentage: number }[];
+    gender: { type: string; percentage: number }[];
+  };
+}
 
-/**
- * Get analytics data for a creator
- */
-export const getCreatorAnalytics = async (creatorId: string, period: string = 'week') => {
-  try {
-    // Calculate date range based on period
-    const today = new Date();
-    let startDate = new Date();
-    
-    switch (period) {
-      case 'week':
-        startDate.setDate(today.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(today.getMonth() - 1);
-        break;
-      case 'year':
-        startDate.setFullYear(today.getFullYear() - 1);
-        break;
-      default:
-        startDate.setDate(today.getDate() - 7);
-    }
-    
-    // Query actual data from the database
-    const { data, error } = await supabase
-      .from('creator_analytics')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .gte('date', startDate.toISOString().split('T')[0])
-      .lte('date', today.toISOString().split('T')[0])
-      .order('date', { ascending: false });
-    
-    if (error) throw error;
-    
-    if (data && data.length > 0) {
-      return data;
-    }
-    
-    // If no data is found, return mock data
-    const mockData = [];
-    const todayDate = new Date();
-    
-    // Generate some sample data for the last 7-30 days depending on the period
-    let days = period === 'week' ? 7 : 30;
-    
-    for (let i = 0; i < days; i++) {
-      const date = new Date();
-      date.setDate(todayDate.getDate() - i);
-      
-      mockData.push({
-        date: date.toISOString().split('T')[0],
-        views: Math.floor(Math.random() * 100),
-        likes: Math.floor(Math.random() * 50),
-        shares: Math.floor(Math.random() * 20),
-        earnings: parseFloat((Math.random() * 100).toFixed(2))
-      });
-    }
-    
-    return mockData;
-  } catch (error) {
-    console.error("Error fetching creator analytics:", error);
-    return [];
-  }
-};
+export interface CreatorStats {
+  followers: number;
+  subscribers: number;
+  premium_subscribers: number;
+  total_content: number;
+  total_earnings: number;
+  growth_rate: number;
+}
 
-/**
- * Get summary of analytics data for a creator
- */
-export const getAnalyticsSummary = async (creatorId: string, period: string = 'week') => {
-  try {
-    const analytics = await getCreatorAnalytics(creatorId, period);
-    
-    // Calculate total views, likes, shares, earnings
-    return analytics.reduce((summary, item) => {
-      return {
-        views: summary.views + (item.views || 0),
-        likes: summary.likes + (item.likes || 0),
-        shares: summary.shares + (item.shares || 0),
-        earnings: summary.earnings + (parseFloat(item.earnings?.toString() || '0')),
-      };
-    }, { views: 0, likes: 0, shares: 0, earnings: 0 });
-  } catch (error) {
-    console.error("Error getting analytics summary:", error);
-    return { views: 0, likes: 0, shares: 0, earnings: 0 };
-  }
-};
-
-/**
- * Get audience demographics data for a creator
- */
-export const getAudienceDemographics = async (creatorId: string) => {
-  try {
-    // In a real implementation, this would query actual demographic data
-    // For now, return mock data
-    return {
-      age: [
-        { group: '18-24', percentage: 35 },
-        { group: '25-34', percentage: 40 },
-        { group: '35-44', percentage: 15 },
-        { group: '45-54', percentage: 7 },
-        { group: '55+', percentage: 3 }
+// Mock function for getting content view analytics
+export const getContentViewAnalytics = async (
+  contentId: string,
+  period: string = "week"
+): Promise<ContentViewData> => {
+  // Return mock data
+  return {
+    content_id: contentId,
+    views: Math.floor(Math.random() * 10000),
+    unique_views: Math.floor(Math.random() * 5000),
+    average_view_time: Math.floor(Math.random() * 300),
+    demographics: {
+      age_groups: [
+        { range: "18-24", percentage: 25 },
+        { range: "25-34", percentage: 35 },
+        { range: "35-44", percentage: 20 },
+        { range: "45-54", percentage: 12 },
+        { range: "55+", percentage: 8 }
+      ],
+      locations: [
+        { country: "United States", percentage: 40 },
+        { country: "United Kingdom", percentage: 15 },
+        { country: "Canada", percentage: 10 },
+        { country: "Australia", percentage: 8 },
+        { country: "Other", percentage: 27 }
       ],
       gender: [
-        { type: 'Male', percentage: 65 },
-        { type: 'Female', percentage: 32 },
-        { type: 'Other', percentage: 3 }
-      ],
-      location: [
-        { country: 'United States', percentage: 45 },
-        { country: 'United Kingdom', percentage: 15 },
-        { country: 'Canada', percentage: 12 },
-        { country: 'Australia', percentage: 8 },
-        { country: 'Germany', percentage: 5 },
-        { country: 'Other', percentage: 15 }
+        { type: "Male", percentage: 60 },
+        { type: "Female", percentage: 35 },
+        { type: "Other", percentage: 5 }
       ]
-    };
+    }
+  };
+};
+
+// Mock function for tracking content engagement (likes, comments, shares)
+export const trackContentEngagement = async (
+  contentId: string,
+  userId: string,
+  engagementType: "like" | "comment" | "share"
+): Promise<boolean> => {
+  // Mock successful tracking
+  console.log(`Tracked ${engagementType} for content ${contentId} by user ${userId}`);
+  return true;
+};
+
+// Mock function for logging content view
+export const logContentView = async (
+  contentId: string,
+  userId: string,
+  viewDuration: number
+): Promise<boolean> => {
+  try {
+    // Just log to console for now
+    console.log(`Logged view for content ${contentId} by user ${userId} for ${viewDuration} seconds`);
+    return true;
   } catch (error) {
-    console.error("Error getting audience demographics:", error);
-    return { age: [], gender: [], location: [] };
+    console.error("Error logging content view:", error);
+    return false;
   }
 };
 
-/**
- * Get content performance analytics
- */
-export const getContentPerformance = async (creatorId: string, limit: number = 5) => {
-  try {
-    // Query top performing content
-    const { data, error } = await supabase
-      .from('creator_content')
-      .select('id, title, thumbnail_url, views_count, likes_count, created_at')
-      .eq('creator_id', creatorId)
-      .order('views_count', { ascending: false })
-      .limit(limit);
+// Mock function for getting creator analytics
+export const getCreatorAnalytics = async (
+  creatorId: string,
+  period: string = "week"
+): Promise<AnalyticsData[]> => {
+  const days = period === "week" ? 7 : period === "month" ? 30 : 365;
+  
+  // Generate mock data for the period
+  const data: AnalyticsData[] = [];
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  
+  for (let i = 0; i < days; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(currentDate.getDate() + i);
     
-    if (error) throw error;
-    
-    if (data && data.length > 0) {
-      return data;
-    }
-    
-    // If no data, return mock data
-    return Array.from({ length: limit }).map((_, i) => ({
-      id: `mock-${i}`,
-      title: `Top Content ${i + 1}`,
-      thumbnail_url: `https://picsum.photos/seed/${i + 1}/300/200`,
-      views_count: Math.floor(Math.random() * 1000) + 100,
-      likes_count: Math.floor(Math.random() * 100) + 10,
-      created_at: new Date(Date.now() - i * 86400000).toISOString()
-    }));
-  } catch (error) {
-    console.error("Error getting content performance:", error);
-    return [];
+    data.push({
+      date: currentDate.toISOString().split("T")[0],
+      views: Math.floor(Math.random() * 1000),
+      likes: Math.floor(Math.random() * 500),
+      shares: Math.floor(Math.random() * 100),
+      earnings: parseFloat((Math.random() * 100).toFixed(2))
+    });
   }
+  
+  return data;
+};
+
+// Mock function for getting top performing content
+export const getTopContent = async (
+  creatorId: string,
+  limit: number = 5
+): Promise<{
+  id: string;
+  title: string;
+  views: number;
+  likes: number;
+  earnings: number;
+  thumbnail: string;
+}[]> => {
+  // Generate mock top content data
+  const data = [];
+  for (let i = 0; i < limit; i++) {
+    data.push({
+      id: `content-${i}`,
+      title: `Top Performing Content ${i + 1}`,
+      views: Math.floor(Math.random() * 5000),
+      likes: Math.floor(Math.random() * 1000),
+      earnings: parseFloat((Math.random() * 1000).toFixed(2)),
+      thumbnail: `https://picsum.photos/seed/${i}/300/200`
+    });
+  }
+  
+  return data.sort((a, b) => b.views - a.views);
+};
+
+// Mock function for getting earnings data
+export const getEarningsData = async (
+  creatorId: string,
+  period: string = "week"
+): Promise<{
+  total: number;
+  breakdown: { source: string; amount: number }[];
+  history: { date: string; amount: number }[];
+}> => {
+  const days = period === "week" ? 7 : period === "month" ? 30 : 365;
+  
+  // Generate mock earnings history
+  const history = [];
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+  
+  let total = 0;
+  for (let i = 0; i < days; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(currentDate.getDate() + i);
+    const amount = parseFloat((Math.random() * 100).toFixed(2));
+    total += amount;
+    
+    history.push({
+      date: currentDate.toISOString().split("T")[0],
+      amount
+    });
+  }
+  
+  // Generate mock breakdown
+  const breakdown = [
+    { source: "Subscriptions", amount: parseFloat((total * 0.6).toFixed(2)) },
+    { source: "Tips", amount: parseFloat((total * 0.2).toFixed(2)) },
+    { source: "Pay-per-view", amount: parseFloat((total * 0.15).toFixed(2)) },
+    { source: "Other", amount: parseFloat((total * 0.05).toFixed(2)) }
+  ];
+  
+  return {
+    total: parseFloat(total.toFixed(2)),
+    breakdown,
+    history
+  };
 };

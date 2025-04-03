@@ -49,8 +49,7 @@ const ContentManagement = () => {
   
   const handleSave = async (content: ContentCreateInput) => {
     if (editingContent?.id) {
-      // When editing, we need to spread the creator_id from existing content
-      // since ContentUpdateInput doesn't require it
+      // When editing, create a ContentUpdateInput from ContentCreateInput
       await editContent({
         ...content,
         id: editingContent.id,

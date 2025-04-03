@@ -32,7 +32,7 @@ const CreatorDashboard = () => {
           
           <TabsContent value="overview" className="space-y-6">
             <CreatorAnalytics 
-              analytics={analytics}
+              analyticsData={analytics}
               analyticsHistory={analyticsHistory}
               demographics={demographics}
               period={period}

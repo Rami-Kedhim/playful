@@ -1,6 +1,6 @@
 
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface ContentItem {
   id: string;
@@ -35,8 +35,18 @@ export interface ContentCreateInput {
   creator_id: string;
 }
 
-export interface ContentUpdateInput extends Partial<ContentCreateInput> {
+export interface ContentUpdateInput {
   id: string;
+  title?: string;
+  description?: string;
+  thumbnail_url?: string;
+  media_url?: string;
+  media_type?: "image" | "video";
+  visibility?: "public" | "subscribers" | "premium";
+  status?: "draft" | "published" | "scheduled";
+  scheduled_for?: string;
+  tags?: string[];
+  creator_id: string; // Making this required to match ContentCreateInput
 }
 
 // Get content for a specific creator
@@ -162,7 +172,7 @@ export const updateContent = async (content: ContentUpdateInput): Promise<Conten
       created_at: new Date(Date.now() - 86400000).toISOString(),
       updated_at: new Date().toISOString(),
       tags: content.tags || [],
-      creator_id: content.creator_id || "unknown-creator",
+      creator_id: content.creator_id,
       views_count: Math.floor(Math.random() * 1000),
       likes_count: Math.floor(Math.random() * 100),
       comments_count: Math.floor(Math.random() * 50)
