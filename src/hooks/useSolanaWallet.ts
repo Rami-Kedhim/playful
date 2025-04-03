@@ -4,45 +4,53 @@ import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Define types for Phantom wallet providers based on their API
-interface PhantomProvider {
-  isPhantom?: boolean;
+// Define types for Solana wallet providers based on their API
+interface SolanaProvider {
+  isConnected: boolean;
   connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toString: () => string } }>;
   disconnect: () => Promise<void>;
   on: (event: string, callback: () => void) => void;
   publicKey: { toString: () => string } | null;
 }
 
+// Chainstack connection type
+interface ChainstackConnection {
+  rpcUrl: string;
+  authenticate: () => Promise<void>;
+  isAuthenticated: boolean;
+}
+
 declare global {
   interface Window {
-    phantom?: {
-      solana?: PhantomProvider;
+    chainstack?: {
+      solana?: SolanaProvider;
+      connection?: ChainstackConnection;
     };
-    solana?: PhantomProvider;
+    solana?: SolanaProvider;
   }
 }
 
 export const useSolanaWallet = () => {
-  const [provider, setProvider] = useState<PhantomProvider | null>(null);
+  const [provider, setProvider] = useState<SolanaProvider | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const { user, refreshProfile } = useAuth();
 
-  // Check if Phantom is installed
+  // Check if Solana provider is installed
   useEffect(() => {
-    const getProvider = (): PhantomProvider | null => {
-      if ('phantom' in window) {
-        const provider = window.phantom?.solana;
-        if (provider?.isPhantom) {
+    const getProvider = (): SolanaProvider | null => {
+      if ('chainstack' in window && window.chainstack?.solana) {
+        const provider = window.chainstack.solana;
+        if (provider.isConnected) {
           return provider;
         }
       }
 
-      // Fallback for mobile dapp browsers
+      // Fallback for other Solana wallets
       if ('solana' in window) {
         const provider = window.solana;
-        if (provider?.isPhantom) {
+        if (provider?.isConnected) {
           return provider;
         }
       }
@@ -72,13 +80,13 @@ export const useSolanaWallet = () => {
     }
   }, []);
 
-  // Connect to Phantom wallet
+  // Connect to Solana wallet via Chainstack
   const connectWallet = async () => {
     if (!provider) {
-      window.open('https://phantom.app/', '_blank');
+      window.open('https://chainstack.com/build-better-with-solana/', '_blank');
       toast({
-        title: "Phantom wallet not found",
-        description: "Please install Phantom wallet extension to continue.",
+        title: "Solana wallet not found",
+        description: "Please install a compatible Solana wallet to continue.",
         variant: "destructive",
       });
       return;

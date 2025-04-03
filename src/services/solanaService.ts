@@ -71,7 +71,7 @@ export const purchaseLucoinsWithSol = async (
   try {
     // This is a simplified mock implementation
     // In a real app, you would:
-    // 1. Create and sign a transaction
+    // 1. Create and sign a transaction using Chainstack
     // 2. Send the transaction to the blockchain
     // 3. Wait for confirmation
     // 4. Update the user's Lucoin balance

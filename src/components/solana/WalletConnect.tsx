@@ -23,12 +23,12 @@ const WalletConnect = ({ className, size = "default" }: WalletConnectProps) => {
     return (
       <Button
         variant="outline"
-        onClick={() => window.open('https://phantom.app/', '_blank')}
+        onClick={() => window.open('https://chainstack.com/build-better-with-solana/', '_blank')}
         className={className}
         size={size}
       >
         <Wallet className="mr-2 h-4 w-4" />
-        Install Phantom
+        Connect with Chainstack
       </Button>
     );
   }
