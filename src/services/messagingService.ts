@@ -43,20 +43,26 @@ const safeGetData = <T>(result: any): T[] => {
 // Helper function to check if a column exists in a table
 async function checkColumnExists(tableName: string, columnName: string): Promise<boolean> {
   try {
-    // Use a simpler method - just try to select the column directly
-    const { error } = await supabase
-      .from(tableName)
-      .select(columnName)
-      .limit(1)
-      .single();
+    // Check if the table exists first
+    const { data: tables, error: tableError } = await supabase
+      .from('pg_tables')
+      .select('tablename')
+      .eq('tablename', tableName)
+      .limit(1);
     
-    // If there's an error mentioning the column doesn't exist, return false
-    if (error && error.message.includes(`column "${columnName}" does not exist`)) {
+    if (tableError || !tables || tables.length === 0) {
       return false;
     }
     
-    // If no specific column error, assume it exists (might be permissions or other issues)
-    return true;
+    // Use a generic select with limit 1 to see if the column exists
+    // If column doesn't exist, it will return an error
+    const { error } = await supabase
+      .from(tableName)
+      .select(columnName)
+      .limit(1);
+    
+    // If there's an error mentioning the column doesn't exist, return false
+    return !error || !error.message.includes(`column "${columnName}" does not exist`);
   } catch (error) {
     console.error(`Error checking if column ${columnName} exists in ${tableName}:`, error);
     return false;
@@ -66,22 +72,25 @@ async function checkColumnExists(tableName: string, columnName: string): Promise
 // Helper function to check if a table exists
 async function checkTableExists(tableName: string): Promise<boolean> {
   try {
-    // Try to fetch one row to see if the table exists
+    // Check if the table exists by trying to select from it
     const { error } = await supabase
-      .from(tableName)
-      .select('id')
-      .limit(1);
+      .rpc('check_table_exists', { table_name: tableName });
     
-    // If error mentions relation doesn't exist, the table doesn't exist
-    if (error && error.message.includes(`relation "${tableName}" does not exist`)) {
+    // If there's no error, the table exists
+    return !error;
+  } catch (error) {
+    // Fallback approach if the RPC function doesn't exist
+    try {
+      const { error } = await supabase
+        .from(tableName)
+        .select('count(*)')
+        .limit(1);
+        
+      return !error || !error.message.includes(`relation "${tableName}" does not exist`);
+    } catch (err) {
+      console.error(`Error checking if table ${tableName} exists:`, error);
       return false;
     }
-    
-    // If no specific error about the table not existing, assume it exists
-    return true;
-  } catch (error) {
-    console.error(`Error checking if table ${tableName} exists:`, error);
-    return false;
   }
 }
 
@@ -157,73 +166,92 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
       return Array.from(conversationsMap.values());
     } else if (hasConversationsTable) {
       // Conversation-based model
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          id,
-          messages(content, created_at, sender_id, read_at),
-          conversation_participants!conversation_id(
+      // Using a simpler query approach that's more compatible
+      try {
+        // First get all conversations this user is a part of
+        const { data: userConversations, error: convError } = await supabase
+          .from('conversation_participants')
+          .select('conversation_id')
+          .eq('user_id', userId);
+          
+        if (convError) throw convError;
+        if (!userConversations || userConversations.length === 0) return [];
+        
+        const conversationIds = userConversations.map(c => c.conversation_id);
+        
+        // Then get all conversation participants for those conversations except the current user
+        const { data: participants, error: partError } = await supabase
+          .from('conversation_participants')
+          .select(`
+            conversation_id,
             user_id,
-            profiles(id, username, avatar_url, is_content_creator, is_escort)
-          )
-        `)
-        .or(`conversation_participants.user_id.eq.${userId}`)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      if (!data || data.length === 0) return [];
-      
-      // Process conversations data
-      const conversations: Conversation[] = [];
-      
-      const conversationsArray = safeGetData<any>(data);
-      
-      conversationsArray.forEach(conv => {
-        try {
-          // Find participants other than the current user
-          const participants = safeGetData<any>(conv.conversation_participants);
-          const otherParticipant = participants.find(p => p.user_id !== userId);
-          if (!otherParticipant) return;
+            profiles!user_id(id, username, avatar_url, is_content_creator, is_escort)
+          `)
+          .in('conversation_id', conversationIds)
+          .neq('user_id', userId);
           
-          // Get the last message
-          const messages = safeGetData<any>(conv.messages);
-          const lastMessage = messages.length > 0 ? messages[0] : null;
-          if (!lastMessage) return;
+        if (partError) throw partError;
+        if (!participants) return [];
+        
+        // Get the last message for each conversation
+        const { data: lastMessages, error: msgError } = await supabase
+          .from('messages')
+          .select('*')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
           
-          // Get profile data safely, accounts for possible errors in the data
-          let profileData = null;
-          if (otherParticipant.profiles && !otherParticipant.profiles.error) {
-            profileData = otherParticipant.profiles;
-          }
-          
-          // Handle cases where profile data might be array or object
-          if (Array.isArray(profileData) && profileData.length > 0) {
-            profileData = profileData[0];
-          }
-          
-          // Create a safe profile name and avatar
-          const profileName = profileData?.username || "Unknown User";
-          const profileAvatar = profileData?.avatar_url || null;
-          
-          conversations.push({
-            id: conv.id, // Using conversation ID as the identifier
-            last_message: lastMessage.content || "",
-            last_message_time: lastMessage.created_at || new Date().toISOString(),
-            unread_count: (lastMessage.sender_id !== userId && !lastMessage.read_at) ? 1 : 0,
-            participant: {
-              id: otherParticipant.user_id,
-              name: profileName,
-              avatar_url: profileAvatar,
-              type: determineUserType(profileData)
+        if (msgError) throw msgError;
+        
+        // Build the conversations with the data we have
+        const conversations: Conversation[] = [];
+        
+        for (const participant of participants) {
+          try {
+            const conversationId = participant.conversation_id;
+            const lastMessage = lastMessages?.find(m => m.conversation_id === conversationId);
+            
+            if (!lastMessage) continue;
+            
+            // Get profile data safely
+            const profileData = participant.profiles;
+            let profileName = "Unknown User";
+            let profileAvatar = null;
+            
+            if (profileData) {
+              profileName = profileData.username || "Unknown User";
+              profileAvatar = profileData.avatar_url;
             }
-          });
-        } catch (err) {
-          console.error("Error processing conversation:", err);
+            
+            // Count unread messages
+            const unreadCount = lastMessages
+              ?.filter(m => 
+                m.conversation_id === conversationId && 
+                m.sender_id !== userId && 
+                !m.read_at
+              ).length || 0;
+            
+            conversations.push({
+              id: conversationId,
+              last_message: lastMessage.content || "",
+              last_message_time: lastMessage.created_at || new Date().toISOString(),
+              unread_count: unreadCount,
+              participant: {
+                id: participant.user_id,
+                name: profileName,
+                avatar_url: profileAvatar,
+                type: determineUserType(profileData)
+              }
+            });
+          } catch (err) {
+            console.error("Error building conversation:", err);
+          }
         }
-      });
-      
-      return conversations;
+        
+        return conversations;
+      } catch (error) {
+        console.error("Error in conversation-based model:", error);
+        return [];
+      }
     } else {
       // No compatible messaging schema found
       console.error("No compatible messaging schema found");
@@ -272,54 +300,63 @@ export const fetchMessages = async (userId: string, otherUserId: string): Promis
       return messages;
     } else if (hasConversationsTable) {
       // First find the conversation
-      const { data: convParticipants, error: convError } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', userId);
-      
-      if (convError) throw convError;
-      
-      if (!convParticipants || convParticipants.length === 0) return [];
-      
-      // Get all conversations where this user is a participant
-      const userConversationIds = convParticipants.map(p => p.conversation_id);
-      
-      // Find conversations where the other user is also a participant
-      const { data: otherParticipants, error: otherError } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', otherUserId)
-        .in('conversation_id', userConversationIds);
-      
-      if (otherError) throw otherError;
-      
-      if (!otherParticipants || otherParticipants.length === 0) return [];
-      
-      // We found a common conversation
-      const conversationId = otherParticipants[0].conversation_id;
-      
-      // Get the messages
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', conversationId)
-        .order('created_at');
-      
-      if (error) throw error;
-      
-      if (!data) return [];
-      
-      // Convert the data to match our Message interface
-      const messages: Message[] = data.map(msg => ({
-        id: msg.id,
-        sender_id: msg.sender_id,
-        receiver_id: msg.sender_id === userId ? otherUserId : userId, // Inferred
-        content: msg.content,
-        created_at: msg.created_at,
-        read: msg.read_at !== null
-      }));
-      
-      return messages;
+      try {
+        // Find conversations where both users are participants
+        const { data: conversations, error } = await supabase.rpc(
+          'find_common_conversation',
+          { user1_id: userId, user2_id: otherUserId }
+        );
+        
+        if (error || !conversations || conversations.length === 0) {
+          // Fallback manual approach if RPC fails or doesn't exist
+          // Get all conversations for user1
+          const { data: user1Convs } = await supabase
+            .from('conversation_participants')
+            .select('conversation_id')
+            .eq('user_id', userId);
+            
+          if (!user1Convs || user1Convs.length === 0) return [];
+          
+          // Find which ones also have user2
+          const { data: commonConvs } = await supabase
+            .from('conversation_participants')
+            .select('conversation_id')
+            .eq('user_id', otherUserId)
+            .in('conversation_id', user1Convs.map(c => c.conversation_id));
+            
+          if (!commonConvs || commonConvs.length === 0) return [];
+          
+          var conversationId = commonConvs[0].conversation_id;
+        } else {
+          var conversationId = conversations[0].conversation_id;
+        }
+        
+        // Get the messages
+        const { data, error: msgError } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .order('created_at');
+        
+        if (msgError) throw msgError;
+        
+        if (!data) return [];
+        
+        // Convert the data to match our Message interface
+        const messages: Message[] = data.map(msg => ({
+          id: msg.id,
+          sender_id: msg.sender_id,
+          receiver_id: msg.sender_id === userId ? otherUserId : userId, // Inferred
+          content: msg.content,
+          created_at: msg.created_at,
+          read: msg.read_at !== null
+        }));
+        
+        return messages;
+      } catch (err) {
+        console.error("Error fetching conversation messages:", err);
+        return [];
+      }
     } else {
       // No compatible messaging schema found
       console.error("No compatible messaging schema found");
@@ -350,8 +387,7 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
         .insert({
           sender_id: senderId,
           receiver_id: receiverId,
-          content,
-          read_at: null
+          content
         })
         .select()
         .single();
@@ -375,28 +411,37 @@ export const sendMessage = async (senderId: string, receiverId: string, content:
       // First check if a conversation exists between these users
       let conversationId: string | null = null;
       
-      // Look for existing conversation
-      const { data: usersConvs, error: usersConvsError } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', senderId);
-      
-      if (usersConvsError) throw usersConvsError;
-      
-      if (usersConvs && usersConvs.length > 0) {
-        const userConvIds = usersConvs.map(c => c.conversation_id);
+      // Try to find an existing conversation using RPC function if available
+      try {
+        const { data, error } = await supabase.rpc(
+          'find_common_conversation',
+          { user1_id: senderId, user2_id: receiverId }
+        );
         
-        // Check if other user is part of any of these conversations
-        const { data: otherUserConvs, error: otherUserError } = await supabase
+        if (!error && data && data.length > 0) {
+          conversationId = data[0].conversation_id;
+        }
+      } catch (e) {
+        // RPC function doesn't exist, use manual approach
+        // Look for existing conversation
+        const { data: usersConvs, error: usersConvsError } = await supabase
           .from('conversation_participants')
           .select('conversation_id')
-          .eq('user_id', receiverId)
-          .in('conversation_id', userConvIds);
+          .eq('user_id', senderId);
         
-        if (otherUserError) throw otherUserError;
-        
-        if (otherUserConvs && otherUserConvs.length > 0) {
-          conversationId = otherUserConvs[0].conversation_id;
+        if (!usersConvsError && usersConvs && usersConvs.length > 0) {
+          const userConvIds = usersConvs.map(c => c.conversation_id);
+          
+          // Check if other user is part of any of these conversations
+          const { data: otherUserConvs, error: otherUserError } = await supabase
+            .from('conversation_participants')
+            .select('conversation_id')
+            .eq('user_id', receiverId)
+            .in('conversation_id', userConvIds);
+          
+          if (!otherUserError && otherUserConvs && otherUserConvs.length > 0) {
+            conversationId = otherUserConvs[0].conversation_id;
+          }
         }
       }
       
@@ -486,27 +531,50 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
       if (error) throw error;
     } else if (hasConversationsTable) {
       // Find the conversation between the users
-      const { data: usersConvs, error: usersConvsError } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', userId);
-      
-      if (usersConvsError) throw usersConvsError;
-      
-      if (usersConvs && usersConvs.length > 0) {
-        const userConvIds = usersConvs.map(c => c.conversation_id);
+      try {
+        const { data: conversations, error } = await supabase.rpc(
+          'find_common_conversation',
+          { user1_id: userId, user2_id: senderId }
+        );
         
-        // Check which conversations also have the sender
-        const { data: otherUserConvs, error: otherUserError } = await supabase
-          .from('conversation_participants')
-          .select('conversation_id')
-          .eq('user_id', senderId)
-          .in('conversation_id', userConvIds);
-        
-        if (otherUserError) throw otherUserError;
-        
-        if (otherUserConvs && otherUserConvs.length > 0) {
-          const conversationId = otherUserConvs[0].conversation_id;
+        if (error || !conversations || conversations.length === 0) {
+          // Manual approach fallback
+          // Find the conversation between the users
+          const { data: usersConvs, error: usersConvsError } = await supabase
+            .from('conversation_participants')
+            .select('conversation_id')
+            .eq('user_id', userId);
+          
+          if (usersConvsError) throw usersConvsError;
+          
+          if (usersConvs && usersConvs.length > 0) {
+            const userConvIds = usersConvs.map(c => c.conversation_id);
+            
+            // Check which conversations also have the sender
+            const { data: otherUserConvs, error: otherUserError } = await supabase
+              .from('conversation_participants')
+              .select('conversation_id')
+              .eq('user_id', senderId)
+              .in('conversation_id', userConvIds);
+            
+            if (otherUserError) throw otherUserError;
+            
+            if (otherUserConvs && otherUserConvs.length > 0) {
+              const conversationId = otherUserConvs[0].conversation_id;
+              
+              // Update messages as read
+              const { error } = await supabase
+                .from('messages')
+                .update({ read_at: new Date().toISOString() })
+                .eq('conversation_id', conversationId)
+                .eq('sender_id', senderId)
+                .is('read_at', null);
+              
+              if (error) throw error;
+            }
+          }
+        } else {
+          const conversationId = conversations[0].conversation_id;
           
           // Update messages as read
           const { error } = await supabase
@@ -518,6 +586,8 @@ export const markMessagesAsRead = async (userId: string, senderId: string): Prom
           
           if (error) throw error;
         }
+      } catch (err) {
+        console.error("Error marking messages as read:", err);
       }
     }
   } catch (error: any) {
@@ -531,46 +601,73 @@ export const subscribeToMessages = (userId: string, callback: (message: Message)
   
   // Check if we need to use conversations model instead
   checkColumnExists('messages', 'receiver_id').then(hasReceiverIdColumn => {
-    let filter = '';
+    let channel;
     
     if (hasReceiverIdColumn) {
-      filter = `receiver_id=eq.${userId}`;
+      // Direct messaging model
+      channel = supabase
+        .channel('direct_messages')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${userId}`
+        }, (payload) => {
+          const newMessage = payload.new as any;
+          
+          callback({
+            id: newMessage.id,
+            sender_id: newMessage.sender_id,
+            receiver_id: newMessage.receiver_id,
+            content: newMessage.content,
+            created_at: newMessage.created_at,
+            read: newMessage.read_at !== null
+          });
+        })
+        .subscribe();
     } else {
-      // Use conversations model subscription
-      // This is a simplified approach - in a real app you would need to check
-      // for all conversations the user is part of
-      console.log("Using conversations model subscription");
-      filter = `sender_id=neq.${userId}`;
-    }
-    
-    const channel = supabase
-      .channel('public:messages')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter
-      }, (payload) => {
-        const newMessage = payload.new as any;
-        
-        // Determine the receiver_id for the message object
-        let receiverId = newMessage.receiver_id || userId;
-        if (!newMessage.receiver_id && newMessage.conversation_id) {
-          // For conversation model, all new messages where the user isn't the sender
-          // are considered to be received by the user
-          receiverId = newMessage.sender_id === userId ? 'unknown' : userId;
+      // Conversations model - need to listen for all new messages
+      // and filter client-side
+      checkTableExists('conversations').then(hasConversationsTable => {
+        if (hasConversationsTable) {
+          // First get all conversations this user is a part of
+          supabase
+            .from('conversation_participants')
+            .select('conversation_id')
+            .eq('user_id', userId)
+            .then(({ data }) => {
+              if (!data || data.length === 0) return;
+              
+              const conversationIds = data.map(c => c.conversation_id);
+              
+              // Subscribe to messages in these conversations
+              channel = supabase
+                .channel('conversation_messages')
+                .on('postgres_changes', {
+                  event: 'INSERT',
+                  schema: 'public',
+                  table: 'messages',
+                  filter: `conversation_id=in.(${conversationIds.join(',')})`
+                }, (payload) => {
+                  const newMessage = payload.new as any;
+                  
+                  // Only notify about messages not sent by the current user
+                  if (newMessage.sender_id !== userId) {
+                    callback({
+                      id: newMessage.id,
+                      sender_id: newMessage.sender_id,
+                      receiver_id: userId, // Inferred as the current user
+                      content: newMessage.content,
+                      created_at: newMessage.created_at,
+                      read: newMessage.read_at !== null
+                    });
+                  }
+                })
+                .subscribe();
+            });
         }
-        
-        callback({
-          id: newMessage.id,
-          sender_id: newMessage.sender_id,
-          receiver_id: receiverId,
-          content: newMessage.content,
-          created_at: newMessage.created_at,
-          read: newMessage.read_at !== null
-        });
-      })
-      .subscribe();
+      });
+    }
     
     channelSetup = channel;
   });
