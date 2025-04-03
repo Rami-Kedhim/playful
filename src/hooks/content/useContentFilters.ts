@@ -38,7 +38,7 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
       const updatedFilters: ContentFilters = {
         status: newFilters.status ?? prev.status,
         searchQuery: newFilters.searchQuery ?? prev.searchQuery,
-        contentType: newFilters.contentType !== undefined ? newFilters.contentType : prev.contentType,
+        contentType: newFilters.contentType,
         sort: newFilters.sort ?? prev.sort
       };
       
