@@ -133,3 +133,6 @@ export const trackContentView = async (contentId: string, viewerId: string) => {
 
 // Export getCreatorContent as fetchCreatorContent as well to fix the import error
 export const fetchCreatorContent = getCreatorContent;
+
+// Add uploadCreatorContent function for backward compatibility
+export const uploadCreatorContent = saveContent;
