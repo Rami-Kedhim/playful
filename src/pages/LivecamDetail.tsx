@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { LivecamModel } from "@/types/livecams";
 import { fetchLivecams } from "@/services/livecamsService";
 import { 
@@ -8,15 +8,27 @@ import {
   LivecamMainContent, 
   LivecamSidebar 
 } from "@/components/livecams/detail";
+import { toast } from "sonner";
 
 const LivecamDetail: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const [model, setModel] = useState<LivecamModel | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  
+  const handleGoBack = useCallback(() => {
+    navigate("/livecams");
+  }, [navigate]);
   
   useEffect(() => {
     const loadModel = async () => {
+      if (!username) {
+        setError("Invalid username parameter");
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
@@ -28,23 +40,27 @@ const LivecamDetail: React.FC = () => {
         
         if (foundModel) {
           setModel(foundModel);
+          document.title = `${foundModel.displayName} - Live Cam`;
         } else {
           setError("Model not found");
+          toast.error(`Could not find model with username: ${username}`);
         }
       } catch (err: any) {
         console.error("Error loading model:", err);
         setError(err.message || "Failed to load model");
+        toast.error(`Error loading model: ${err.message || "Unknown error"}`);
       } finally {
         setLoading(false);
       }
     };
     
-    if (username) {
-      loadModel();
-    }
+    loadModel();
+    
+    // Clean up function
+    return () => {
+      document.title = 'Live Cams';
+    };
   }, [username]);
-
-  const handleGoBack = () => window.history.back();
 
   return (
     <LivecamDetailLayout

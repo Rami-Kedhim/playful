@@ -3,6 +3,8 @@ import React, { ReactNode } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { LivecamModel } from "@/types/livecams";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface LivecamDetailLayoutProps {
   model: LivecamModel | null;
@@ -33,14 +35,18 @@ const LivecamDetailLayout: React.FC<LivecamDetailLayoutProps> = ({
     return (
       <MainLayout>
         <div className="text-center py-16">
-          <h2 className="text-2xl font-semibold text-red-500 mb-2">
-            {error || "Model not found"}
-          </h2>
-          <p className="text-muted-foreground">
-            The model you're looking for couldn't be found.
+          <Alert variant="destructive" className="mb-6 max-w-md mx-auto">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error || "Model not found"}
+            </AlertDescription>
+          </Alert>
+          <p className="text-muted-foreground mb-6">
+            The model you're looking for couldn't be found or there was an error loading the data.
           </p>
-          <Button className="mt-4" onClick={onGoBack}>
-            Go Back
+          <Button onClick={onGoBack}>
+            Go Back to All Models
           </Button>
         </div>
       </MainLayout>
@@ -49,6 +55,13 @@ const LivecamDetailLayout: React.FC<LivecamDetailLayoutProps> = ({
 
   return (
     <MainLayout>
+      <Button 
+        variant="ghost" 
+        onClick={onGoBack} 
+        className="mb-6"
+      >
+        ← Back to All Models
+      </Button>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {children}
       </div>

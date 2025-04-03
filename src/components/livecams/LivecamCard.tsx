@@ -14,8 +14,8 @@ interface LivecamCardProps {
 const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
   const [imgError, setImgError] = useState(false);
   
-  // Fallback image URL in case the primary image fails to load
-  const fallbackImage = "https://picsum.photos/seed/fallback/500/500";
+  // Create a unique fallback image for each model
+  const fallbackImage = `https://picsum.photos/seed/${model.id || model.username}/500/500`;
   
   return (
     <Link to={`/livecams/${model.username}`}>
@@ -27,6 +27,7 @@ const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
               alt={model.displayName} 
               className="object-cover w-full h-full"
               onError={() => setImgError(true)}
+              loading="lazy"
             />
           </AspectRatio>
           
@@ -48,7 +49,7 @@ const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
             <div className="absolute bottom-2 right-2">
               <Badge variant="secondary" className="bg-background/60 backdrop-blur-sm">
                 <Users size={12} className="mr-1" />
-                {model.viewerCount} viewers
+                {model.viewerCount.toLocaleString()} viewers
               </Badge>
             </div>
           )}

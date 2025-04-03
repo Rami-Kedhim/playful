@@ -14,8 +14,8 @@ interface LivecamMainContentProps {
 const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   const [imgError, setImgError] = useState(false);
   
-  // Fallback image URL in case the primary image fails to load
-  const fallbackImage = "https://picsum.photos/seed/fallback/800/450";
+  // Improved fallback image strategy - create unique fallback per model
+  const fallbackImage = `https://picsum.photos/seed/${model.id || 'fallback'}/800/450`;
 
   return (
     <Card className="overflow-hidden">

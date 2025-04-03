@@ -24,7 +24,7 @@ const LivecamSidebar: React.FC<LivecamSidebarProps> = ({ model }) => {
           
           <div>
             <h3 className="text-sm font-medium text-gray-400">Status</h3>
-            <p className={model.isLive ? "text-green-500" : "text-gray-500"}>
+            <p className={model.isLive ? "text-green-500 font-medium" : "text-gray-500"}>
               {model.isLive ? "Live Now" : "Offline"}
             </p>
           </div>
@@ -32,7 +32,7 @@ const LivecamSidebar: React.FC<LivecamSidebarProps> = ({ model }) => {
           {model.viewerCount !== undefined && model.isLive && (
             <div>
               <h3 className="text-sm font-medium text-gray-400">Viewers</h3>
-              <p>{model.viewerCount}</p>
+              <p>{model.viewerCount.toLocaleString()}</p>
             </div>
           )}
         </div>
@@ -40,7 +40,7 @@ const LivecamSidebar: React.FC<LivecamSidebarProps> = ({ model }) => {
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
           <h3 className="text-sm font-medium text-gray-400 mb-2">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {model.categories ? (
+            {model.categories && model.categories.length > 0 ? (
               model.categories.map((category, index) => (
                 <Badge key={index} variant="outline">
                   {category}
