@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Heart, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
@@ -30,6 +30,7 @@ export const DesktopNav = () => {
       <NavLink to="/" label="Home" isActive={location.pathname === "/"} />
       <NavLink to="/escorts" label="Escorts" isActive={location.pathname.startsWith("/escorts")} />
       <NavLink to="/creators" label="Creators" isActive={location.pathname.startsWith("/creators")} />
+      <NavLink to="/livecams" label="Live Cams" isActive={location.pathname.startsWith("/livecams")} />
       <Link to="/favorites" className="relative group">
         <Button variant="ghost" size="icon" className={location.pathname === "/favorites" ? "bg-primary/10 text-primary" : ""}>
           <Heart size={20} className="transition-colors group-hover:text-primary" fill={favorites.length > 0 ? "currentColor" : "none"} />

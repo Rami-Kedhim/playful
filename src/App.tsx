@@ -23,6 +23,8 @@ import ProfileManagement from "./pages/ProfileManagement";
 import Wallet from "./pages/Wallet";
 import Messages from "./pages/Messages";
 import AIProfiles from "./pages/AIProfiles"; 
+import Livecams from "./pages/Livecams";
+import LivecamDetail from "./pages/LivecamDetail";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RoleGuard from "./components/auth/RoleGuard";
 import Subscriptions from "./pages/Subscriptions";
@@ -43,6 +45,8 @@ const App = () => (
             <Route path="/creators" element={<Creators />} />
             <Route path="/creators/:username" element={<CreatorDetail />} />
             <Route path="/ai-profiles" element={<AIProfiles />} />
+            <Route path="/livecams" element={<Livecams />} />
+            <Route path="/livecams/:username" element={<LivecamDetail />} />
             <Route path="/favorites" element={
               <ProtectedRoute>
                 <Favorites />

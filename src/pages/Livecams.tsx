@@ -1,0 +1,68 @@
+
+import React from "react";
+import MainLayout from "@/components/layout/MainLayout";
+import LivecamGrid from "@/components/livecams/LivecamGrid";
+import LivecamFilters from "@/components/livecams/LivecamFilters";
+import useLivecams from "@/hooks/useLivecams";
+import { useToast } from "@/hooks/use-toast";
+
+const Livecams: React.FC = () => {
+  const { toast } = useToast();
+  const { 
+    models, 
+    loading, 
+    error, 
+    filters, 
+    hasMore, 
+    totalCount,
+    loadMore, 
+    updateFilters 
+  } = useLivecams();
+
+  // Show error toast if something went wrong
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
+
+  return (
+    <MainLayout title="Live Cams">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Live Cams</h1>
+        <p className="text-muted-foreground">
+          Watch live webcam shows from models around the world
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1">
+          <LivecamFilters filters={filters} onFilterChange={updateFilters} />
+        </div>
+        
+        <div className="lg:col-span-3">
+          {!loading && models.length > 0 && (
+            <div className="mb-4 flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                Showing {models.length} of {totalCount} models
+              </p>
+            </div>
+          )}
+          
+          <LivecamGrid 
+            models={models} 
+            loading={loading} 
+            hasMore={hasMore} 
+            onLoadMore={loadMore} 
+          />
+        </div>
+      </div>
+    </MainLayout>
+  );
+};
+
+export default Livecams;
