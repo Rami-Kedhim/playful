@@ -53,8 +53,9 @@ const getMockLivecams = (filters: LivecamsFilter): LivecamsResponse => {
       id,
       username: `model${page}${i}`,
       displayName: `Model ${page}${i}`,
-      imageUrl: `https://images.unsplash.com/photo-${1550000000 + i}?auto=format&fit=crop&w=500&h=500`,
-      thumbnailUrl: `https://images.unsplash.com/photo-${1550000000 + i}?auto=format&fit=crop&w=200&h=200`,
+      // Use more reliable placeholder images
+      imageUrl: `https://picsum.photos/seed/${id}/500/500`,
+      thumbnailUrl: `https://picsum.photos/seed/${id}/200/200`,
       isLive: Math.random() > 0.3,
       viewerCount: Math.floor(Math.random() * 1000),
       country: filters.country || ['US', 'CA', 'UK', 'FR', 'DE'][Math.floor(Math.random() * 5)],

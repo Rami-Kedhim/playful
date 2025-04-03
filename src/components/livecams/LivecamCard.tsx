@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { LivecamModel } from "@/types/livecams";
 import { Card } from "@/components/ui/card";
@@ -12,15 +12,21 @@ interface LivecamCardProps {
 }
 
 const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
+  const [imgError, setImgError] = useState(false);
+  
+  // Fallback image URL in case the primary image fails to load
+  const fallbackImage = "https://picsum.photos/seed/fallback/500/500";
+  
   return (
     <Link to={`/livecams/${model.username}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full">
         <div className="relative">
           <AspectRatio ratio={16/9}>
             <img 
-              src={model.thumbnailUrl || model.imageUrl} 
+              src={imgError ? fallbackImage : (model.thumbnailUrl || model.imageUrl)} 
               alt={model.displayName} 
               className="object-cover w-full h-full"
+              onError={() => setImgError(true)}
             />
           </AspectRatio>
           

@@ -15,6 +15,10 @@ const LivecamDetail: React.FC = () => {
   const [model, setModel] = useState<LivecamModel | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
+  
+  // Fallback image URL in case the primary image fails to load
+  const fallbackImage = "https://picsum.photos/seed/fallback/800/450";
 
   useEffect(() => {
     const loadModel = async () => {
@@ -92,9 +96,10 @@ const LivecamDetail: React.FC = () => {
                   </div>
                 ) : (
                   <img 
-                    src={model.imageUrl} 
+                    src={imgError ? fallbackImage : model.imageUrl} 
                     alt={model.displayName} 
                     className="object-cover w-full h-full"
+                    onError={() => setImgError(true)}
                   />
                 )}
               </AspectRatio>
