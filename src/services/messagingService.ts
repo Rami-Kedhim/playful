@@ -27,7 +27,7 @@ export interface Conversation {
 // Fetch conversations for the current user
 export const fetchConversations = async (userId: string): Promise<Conversation[]> => {
   try {
-    // Since we're working directly with the messages table without a view
+    // Query messages directly to form conversations
     const { data, error } = await supabase
       .from('messages')
       .select(`
@@ -36,7 +36,8 @@ export const fetchConversations = async (userId: string): Promise<Conversation[]
         created_at,
         sender_id,
         read_at,
-        profiles!profiles_sender_id_fkey(id, username, avatar_url)
+        receiver_id,
+        profiles:sender_id(id, username, avatar_url, is_content_creator, is_escort)
       `)
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
       .order('created_at', { ascending: false });
