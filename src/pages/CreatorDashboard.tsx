@@ -8,7 +8,7 @@ import ContentManagement from "@/components/creators/dashboard/ContentManagement
 import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
 
 const CreatorDashboard = () => {
-  const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('week');
+  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('week');
   const { 
     analytics, 
     analyticsHistory, 
