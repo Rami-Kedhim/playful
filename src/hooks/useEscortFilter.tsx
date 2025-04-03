@@ -47,6 +47,16 @@ export const useEscortFilter = (escorts: Escort[]) => {
     }
   };
   
+  // Handle price range change with proper typing
+  const handlePriceRangeChange = (values: number[]) => {
+    setPriceRange([values[0], values[1]] as [number, number]);
+  };
+  
+  // Handle age range change with proper typing
+  const handleAgeRangeChange = (values: number[]) => {
+    setAgeRange([values[0], values[1]] as [number, number]);
+  };
+  
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
@@ -190,6 +200,7 @@ export const useEscortFilter = (escorts: Escort[]) => {
     setLocation,
     priceRange,
     setPriceRange,
+    handlePriceRangeChange,
     verifiedOnly,
     setVerifiedOnly,
     selectedServices,
@@ -210,6 +221,7 @@ export const useEscortFilter = (escorts: Escort[]) => {
     toggleOrientation,
     ageRange,
     setAgeRange,
+    handleAgeRangeChange,
     ratingMin,
     setRatingMin,
     availableNow,

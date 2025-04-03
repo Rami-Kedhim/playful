@@ -12,6 +12,8 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { StarIcon } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { VideoIcon, UserIcon } from "lucide-react";
 
 interface MobileFilterCardProps {
   searchQuery: string;
@@ -37,6 +39,8 @@ interface MobileFilterCardProps {
   setRatingMin?: (value: number) => void;
   availableNow?: boolean;
   setAvailableNow?: (value: boolean) => void;
+  serviceTypeFilter: "in-person" | "virtual" | "both" | "";
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
 }
 
 const MobileFilterCard = ({
@@ -63,6 +67,8 @@ const MobileFilterCard = ({
   setRatingMin = () => {},
   availableNow = false,
   setAvailableNow = () => {},
+  serviceTypeFilter,
+  setServiceTypeFilter
 }: MobileFilterCardProps) => {
   const genders = ["male", "female", "non-binary", "transgender"];
   const orientations = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
@@ -96,6 +102,42 @@ const MobileFilterCard = ({
               priceRange={priceRange} 
               setPriceRange={setPriceRange} 
             />
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Service Type</h3>
+              <RadioGroup 
+                value={serviceTypeFilter} 
+                onValueChange={(value) => setServiceTypeFilter(value as "in-person" | "virtual" | "both" | "")}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="" id="all-services-mobile" />
+                  <Label htmlFor="all-services-mobile" className="flex items-center gap-2">
+                    All Services
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="in-person" id="in-person-mobile" />
+                  <Label htmlFor="in-person-mobile" className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4" />
+                    In-Person
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="virtual" id="virtual-mobile" />
+                  <Label htmlFor="virtual-mobile" className="flex items-center gap-2">
+                    <VideoIcon className="h-4 w-4" />
+                    Virtual
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="both" id="both-mobile" />
+                  <Label htmlFor="both-mobile" className="flex items-center gap-2">
+                    Both
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
             
             <div className="space-y-2">
               <h3 className="text-sm font-medium">Age Range</h3>
@@ -147,25 +189,27 @@ const MobileFilterCard = ({
             
             <CheckboxGroup
               title="Gender"
-              items={genders}
-              selectedItems={selectedGenders}
-              toggleItem={toggleGender}
+              options={genders}
+              selectedOptions={selectedGenders}
+              toggleOption={toggleGender}
+              formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
               idPrefix="gender-mobile"
             />
             
             <CheckboxGroup
               title="Sexual Orientation"
-              items={orientations}
-              selectedItems={selectedOrientations}
-              toggleItem={toggleOrientation}
+              options={orientations}
+              selectedOptions={selectedOrientations}
+              toggleOption={toggleOrientation}
+              formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
               idPrefix="orientation-mobile"
             />
             
             <CheckboxGroup
               title="Services"
-              items={services}
-              selectedItems={selectedServices}
-              toggleItem={toggleService}
+              options={services}
+              selectedOptions={selectedServices}
+              toggleOption={toggleService}
               idPrefix="service-mobile"
             />
           </div>

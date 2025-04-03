@@ -23,7 +23,7 @@ interface FilterSidebarProps {
   location: string;
   setLocation: (location: string) => void;
   priceRange: [number, number];
-  setPriceRange: (range: [number, number]) => void;
+  setPriceRange: (range: number[]) => void;
   verifiedOnly: boolean;
   setVerifiedOnly: (verified: boolean) => void;
   selectedServices: string[];
@@ -35,7 +35,7 @@ interface FilterSidebarProps {
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
   ageRange?: [number, number];
-  setAgeRange?: (range: [number, number]) => void;
+  setAgeRange?: (range: number[]) => void;
   ratingMin?: number;
   setRatingMin?: (rating: number) => void;
   availableNow?: boolean;
@@ -181,10 +181,12 @@ const FilterSidebar = ({
           <AccordionTrigger>Gender</AccordionTrigger>
           <AccordionContent>
             <CheckboxGroup 
+              title="Gender"
               options={genders}
               selectedOptions={selectedGenders}
               toggleOption={toggleGender}
               formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+              idPrefix="gender"
             />
           </AccordionContent>
         </AccordionItem>
@@ -193,10 +195,12 @@ const FilterSidebar = ({
           <AccordionTrigger>Sexual Orientation</AccordionTrigger>
           <AccordionContent>
             <CheckboxGroup 
+              title="Sexual Orientation"
               options={orientations}
               selectedOptions={selectedOrientations}
               toggleOption={toggleOrientation}
               formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+              idPrefix="orientation"
             />
           </AccordionContent>
         </AccordionItem>
@@ -205,9 +209,11 @@ const FilterSidebar = ({
           <AccordionTrigger>Services</AccordionTrigger>
           <AccordionContent>
             <CheckboxGroup 
+              title="Services"
               options={services}
               selectedOptions={selectedServices}
               toggleOption={toggleService}
+              idPrefix="service"
             />
           </AccordionContent>
         </AccordionItem>

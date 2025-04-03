@@ -27,6 +27,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     setLocation,
     priceRange,
     setPriceRange,
+    handlePriceRangeChange,
     verifiedOnly,
     setVerifiedOnly,
     selectedServices,
@@ -45,6 +46,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     toggleOrientation,
     ageRange,
     setAgeRange,
+    handleAgeRangeChange,
     ratingMin,
     setRatingMin,
     availableNow,
@@ -85,7 +87,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             location={locationFilter}
             setLocation={setLocation}
             priceRange={priceRange}
-            setPriceRange={setPriceRange}
+            setPriceRange={handlePriceRangeChange}
             verifiedOnly={verifiedOnly}
             setVerifiedOnly={setVerifiedOnly}
             selectedServices={selectedServices}
@@ -97,7 +99,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             selectedOrientations={selectedOrientations}
             toggleOrientation={toggleOrientation}
             ageRange={ageRange}
-            setAgeRange={setAgeRange}
+            setAgeRange={handleAgeRangeChange}
             ratingMin={ratingMin}
             setRatingMin={setRatingMin}
             availableNow={availableNow}
@@ -115,7 +117,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
               location={locationFilter}
               setLocation={setLocation}
               priceRange={priceRange}
-              setPriceRange={setPriceRange}
+              setPriceRange={handlePriceRangeChange}
               verifiedOnly={verifiedOnly}
               setVerifiedOnly={setVerifiedOnly}
               selectedServices={selectedServices}
@@ -129,6 +131,12 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
               toggleOrientation={toggleOrientation}
               serviceTypeFilter={serviceTypeFilter}
               setServiceTypeFilter={setServiceTypeFilter}
+              ageRange={ageRange}
+              setAgeRange={handleAgeRangeChange}
+              ratingMin={ratingMin}
+              setRatingMin={setRatingMin}
+              availableNow={availableNow}
+              setAvailableNow={setAvailableNow}
             />
           </div>
         )}
