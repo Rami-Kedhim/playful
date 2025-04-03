@@ -5942,8 +5942,8 @@ export type Database = {
           }
       log_content_view: {
         Args: {
-          p_content_id: string
-          p_user_id: string
+          content_id: string
+          viewer_id: string
         }
         Returns: undefined
       }

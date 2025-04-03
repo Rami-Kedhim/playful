@@ -9,15 +9,28 @@ export const trackContentView = async (contentId: string) => {
     // Log the view for analytics
     console.log(`Tracking view for content ID: ${contentId}`);
     
-    // Track the view via content_views table
-    const { error } = await supabase
-      .from('content_views')
-      .insert({ 
-        content_id: contentId,
-        user_id: (await supabase.auth.getUser()).data.user?.id 
-      });
+    // Get current user
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user?.id;
     
-    if (error) throw error;
+    if (!userId) {
+      // Track anonymous view
+      const { error } = await supabase.rpc('log_content_view', { 
+        content_id: contentId,
+        viewer_id: '00000000-0000-0000-0000-000000000000' // Anonymous ID
+      });
+      
+      if (error) throw error;
+    } else {
+      // Track authenticated view
+      const { error } = await supabase.rpc('log_content_view', { 
+        content_id: contentId,
+        viewer_id: userId
+      });
+      
+      if (error) throw error;
+    }
+    
     return true;
   } catch (error) {
     console.error("Error tracking content view:", error);
@@ -30,8 +43,40 @@ export const trackContentView = async (contentId: string) => {
  */
 export const getCreatorAnalytics = async (creatorId: string, period: string = 'week') => {
   try {
-    // For now, return mock data
-    // In a real implementation this would query the analytics tables
+    // Calculate date range based on period
+    const today = new Date();
+    let startDate = new Date();
+    
+    switch (period) {
+      case 'week':
+        startDate.setDate(today.getDate() - 7);
+        break;
+      case 'month':
+        startDate.setMonth(today.getMonth() - 1);
+        break;
+      case 'year':
+        startDate.setFullYear(today.getFullYear() - 1);
+        break;
+      default:
+        startDate.setDate(today.getDate() - 7);
+    }
+    
+    // Query actual data from the database
+    const { data, error } = await supabase
+      .from('creator_analytics')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .gte('date', startDate.toISOString().split('T')[0])
+      .lte('date', today.toISOString().split('T')[0])
+      .order('date', { ascending: false });
+    
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      return data;
+    }
+    
+    // If no data is found, return mock data
     const mockData = [];
     const todayDate = new Date();
     

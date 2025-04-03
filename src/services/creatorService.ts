@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -7,14 +6,42 @@ import { toast } from "@/components/ui/use-toast";
  */
 export const fetchCreatorAnalytics = async (creatorId: string, startDate: Date, endDate: Date) => {
   try {
-    // Mock data generation
+    // Check if we have real data
+    const { data: realData, error } = await supabase
+      .from('creator_analytics')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .gte('date', startDate.toISOString().split('T')[0])
+      .lte('date', endDate.toISOString().split('T')[0])
+      .order('date', { ascending: true });
+    
+    if (error) throw error;
+    
+    // If we have real data, use it
+    if (realData && realData.length > 0) {
+      return realData.map(item => ({
+        date: item.date,
+        views: item.views || 0,
+        likes: item.likes || 0,
+        shares: item.shares || 0,
+        earnings: item.earnings || 0,
+        revenue: item.earnings || 0, // For backward compatibility
+        subscribers: Math.floor(Math.random() * 5) // Not tracked yet, using mock data
+      }));
+    }
+    
+    // Otherwise generate mock data for demonstration
     const mockData = [];
     const currentDate = new Date(startDate);
+    
     while (currentDate <= endDate) {
       mockData.push({
         date: currentDate.toISOString().split('T')[0],
         views: Math.floor(Math.random() * 100),
+        likes: Math.floor(Math.random() * 50),
+        shares: Math.floor(Math.random() * 20),
         revenue: parseFloat((Math.random() * 50).toFixed(2)),
+        earnings: parseFloat((Math.random() * 50).toFixed(2)),
         subscribers: Math.floor(Math.random() * 10)
       });
       currentDate.setDate(currentDate.getDate() + 1);
@@ -37,7 +64,21 @@ export const fetchCreatorAnalytics = async (creatorId: string, startDate: Date, 
  */
 export const fetchCreatorContent = async (creatorId: string) => {
   try {
-    // Generate mock content data
+    // Try to fetch real content from database
+    const { data: realContent, error } = await supabase
+      .from('creator_content')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    // If we have real content, use it
+    if (realContent && realContent.length > 0) {
+      return realContent;
+    }
+    
+    // Otherwise generate mock content for demonstration
     const mockContent = Array.from({ length: 10 }, (_, i) => ({
       id: `content-${i}`,
       creator_id: creatorId,
@@ -48,7 +89,6 @@ export const fetchCreatorContent = async (creatorId: string) => {
       thumbnail_url: `https://example.com/thumbnails/${i}.jpg`,
       is_premium: i % 3 === 0,
       price: i % 3 === 0 ? parseFloat((Math.random() * 20 + 5).toFixed(2)) : 0,
-      is_published: i < 8,
       status: i < 8 ? 'published' : 'draft',
       views_count: Math.floor(Math.random() * 1000),
       likes_count: Math.floor(Math.random() * 500),
@@ -74,16 +114,31 @@ export const fetchCreatorContent = async (creatorId: string) => {
  */
 export const fetchCreatorPayouts = async (creatorId: string) => {
   try {
-    // Generate mock payout data
+    // Try to fetch real payouts from database
+    const { data: realPayouts, error } = await supabase
+      .from('creator_payouts')
+      .select('*')
+      .eq('creator_id', creatorId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    // If we have real payouts, use them
+    if (realPayouts && realPayouts.length > 0) {
+      return realPayouts;
+    }
+    
+    // Otherwise generate mock payout data for demonstration
     const mockPayouts = Array.from({ length: 5 }, (_, i) => ({
       id: `payout-${i}`,
       creator_id: creatorId,
       amount: parseFloat((Math.random() * 500 + 100).toFixed(2)),
       status: ['pending', 'completed', 'completed', 'completed', 'failed'][i],
       payout_method: ['stripe', 'paypal', 'bank_transfer', 'crypto', 'stripe'][i],
-      payout_details: {},
-      created_at: new Date(Date.now() - i * 30 * 86400000).toISOString(),
-      processed_at: i !== 0 ? new Date(Date.now() - i * 30 * 86400000 + 86400000).toISOString() : null
+      transaction_id: `tx-${Math.random().toString(36).substring(2, 10)}`,
+      requested_at: new Date(Date.now() - i * 30 * 86400000).toISOString(),
+      processed_at: i !== 0 ? new Date(Date.now() - i * 30 * 86400000 + 86400000).toISOString() : null,
+      notes: i === 4 ? "Failed due to invalid account details" : null
     }));
     
     return mockPayouts;
@@ -103,16 +158,27 @@ export const fetchCreatorPayouts = async (creatorId: string) => {
  */
 export const saveContent = async (content: any) => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Add ID and timestamp fields
-    const newContent = {
-      ...content,
-      id: `content-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+    // Prepare content object for database
+    const contentData = {
+      creator_id: content.creator_id,
+      title: content.title,
+      description: content.description,
+      content_type: content.content_type,
+      url: content.url,
+      thumbnail_url: content.thumbnail_url,
+      is_premium: content.is_premium || false,
+      price: content.is_premium ? content.price : 0,
+      status: content.status || 'draft'
     };
+    
+    // Insert into database
+    const { data, error } = await supabase
+      .from('creator_content')
+      .insert(contentData)
+      .select()
+      .single();
+    
+    if (error) throw error;
     
     toast({
       title: "Content saved",
@@ -120,7 +186,7 @@ export const saveContent = async (content: any) => {
       variant: "default",
     });
     
-    return newContent;
+    return data;
   } catch (error: any) {
     console.error("Error saving content:", error);
     toast({
@@ -137,14 +203,18 @@ export const saveContent = async (content: any) => {
  */
 export const updateContent = async (contentId: string, updates: any) => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Update in database
+    const { data, error } = await supabase
+      .from('creator_content')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', contentId)
+      .select()
+      .single();
     
-    const updatedContent = {
-      ...updates,
-      id: contentId,
-      updated_at: new Date().toISOString()
-    };
+    if (error) throw error;
     
     toast({
       title: "Content updated",
@@ -152,7 +222,7 @@ export const updateContent = async (contentId: string, updates: any) => {
       variant: "default",
     });
     
-    return updatedContent;
+    return data;
   } catch (error: any) {
     console.error("Error updating content:", error);
     toast({
@@ -169,10 +239,14 @@ export const updateContent = async (contentId: string, updates: any) => {
  */
 export const trackContentView = async (contentId: string, viewerId: string) => {
   try {
-    // Simulate tracking a view
-    console.log(`Tracking view: Content ID ${contentId}, Viewer ID ${viewerId}`);
+    // Call the RPC function we created
+    const { error } = await supabase.rpc('log_content_view', {
+      content_id: contentId,
+      viewer_id: viewerId
+    });
     
-    // In a real implementation, this would update a view counter and possibly store viewing statistics
+    if (error) throw error;
+    
     return true;
   } catch (error: any) {
     console.error("Error tracking content view:", error);
@@ -185,18 +259,21 @@ export const trackContentView = async (contentId: string, viewerId: string) => {
  */
 export const requestPayout = async (creatorId: string, amount: number, payoutMethod: string, payoutDetails: any) => {
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Create payout request in database
+    const { data, error } = await supabase
+      .from('creator_payouts')
+      .insert({
+        creator_id: creatorId,
+        amount: amount,
+        payout_method: payoutMethod,
+        notes: payoutDetails.notes || null,
+        status: 'pending',
+        requested_at: new Date().toISOString()
+      })
+      .select()
+      .single();
     
-    const payoutRequest = {
-      id: `payout-${Date.now()}`,
-      creator_id: creatorId,
-      amount,
-      payout_method: payoutMethod,
-      payout_details: payoutDetails,
-      status: 'pending',
-      created_at: new Date().toISOString()
-    };
+    if (error) throw error;
     
     toast({
       title: "Payout requested",
@@ -204,7 +281,7 @@ export const requestPayout = async (creatorId: string, amount: number, payoutMet
       variant: "default",
     });
     
-    return payoutRequest;
+    return data;
   } catch (error: any) {
     console.error("Error requesting payout:", error);
     toast({
@@ -217,46 +294,40 @@ export const requestPayout = async (creatorId: string, amount: number, payoutMet
 };
 
 /**
- * Add a review for a creator
- */
-export const addCreatorReview = async (creatorId: string, reviewerId: string, rating: number, comment?: string) => {
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const review = {
-      id: `review-${Date.now()}`,
-      creator_id: creatorId,
-      reviewer_id: reviewerId,
-      rating,
-      comment,
-      created_at: new Date().toISOString()
-    };
-    
-    toast({
-      title: "Review submitted",
-      description: "Your review has been submitted successfully",
-      variant: "default",
-    });
-    
-    return review;
-  } catch (error: any) {
-    console.error("Error submitting review:", error);
-    toast({
-      title: "Failed to submit review",
-      description: error.message,
-      variant: "destructive",
-    });
-    return null;
-  }
-};
-
-/**
  * Fetch reviews for a creator
  */
 export const fetchCreatorReviews = async (creatorId: string) => {
   try {
-    // Generate mock review data
+    // Try to fetch real reviews from database
+    const { data: realReviews, error } = await supabase
+      .from('creator_reviews')
+      .select(`
+        id,
+        creator_id,
+        reviewer_id,
+        rating,
+        comment,
+        created_at,
+        profiles:reviewer_id (
+          id,
+          username,
+          avatar_url
+        )
+      `)
+      .eq('creator_id', creatorId)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    // If we have real reviews, use them
+    if (realReviews && realReviews.length > 0) {
+      return realReviews.map(review => ({
+        ...review,
+        reviewer: review.profiles
+      }));
+    }
+    
+    // Otherwise generate mock review data for demonstration
     const mockReviews = Array.from({ length: 8 }, (_, i) => ({
       id: `review-${i}`,
       creator_id: creatorId,
@@ -280,5 +351,42 @@ export const fetchCreatorReviews = async (creatorId: string) => {
       variant: "destructive",
     });
     return [];
+  }
+};
+
+/**
+ * Add a review for a creator
+ */
+export const addCreatorReview = async (creatorId: string, reviewerId: string, rating: number, comment?: string) => {
+  try {
+    // Insert review into database
+    const { data, error } = await supabase
+      .from('creator_reviews')
+      .insert({
+        creator_id: creatorId,
+        reviewer_id: reviewerId,
+        rating: rating,
+        comment: comment || null
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    toast({
+      title: "Review submitted",
+      description: "Your review has been submitted successfully",
+      variant: "default",
+    });
+    
+    return data;
+  } catch (error: any) {
+    console.error("Error submitting review:", error);
+    toast({
+      title: "Failed to submit review",
+      description: error.message,
+      variant: "destructive",
+    });
+    return null;
   }
 };

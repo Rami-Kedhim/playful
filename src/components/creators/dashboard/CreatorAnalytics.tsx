@@ -7,12 +7,12 @@ import {
   Tooltip, Legend, ResponsiveContainer 
 } from "recharts";
 import { 
-  Eye, TrendingUp, Users, DollarSign, Calendar, 
-  BarChart2, ArrowUpRight, ThumbsUp, Share2 
+  Eye, ArrowUpRight, ThumbsUp, Share2, DollarSign
 } from "lucide-react";
 import { fetchCreatorAnalytics } from "@/services/creatorService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
+import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
 
 interface AnalyticsStat {
   title: string;
@@ -31,6 +31,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("7days");
+  const { analytics } = useCreatorAnalytics(timeRange === "7days" ? "week" : timeRange === "30days" ? "month" : "year");
 
   useEffect(() => {
     if (creatorId) {
