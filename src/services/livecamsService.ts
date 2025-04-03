@@ -26,12 +26,42 @@ export const fetchLivecams = async (
     
     if (!data) {
       console.error("No data received from livecams API");
-      toast.error("No data received from livecams API");
       throw new Error("No data received from livecams API");
     }
 
     console.log("Livecams data received:", data);
-    return data as LivecamsResponse;
+    
+    // Validate the response structure
+    if (!Array.isArray(data.models)) {
+      console.error("Invalid data format received:", data);
+      throw new Error("Invalid data format received from API");
+    }
+    
+    // Ensure all required fields are present
+    const validatedModels = data.models.map((model: any) => {
+      // Ensure the model has all required fields
+      return {
+        id: model.id || `id-${Math.random().toString(36).substring(2)}`,
+        username: model.username || 'unknown',
+        displayName: model.displayName || model.username || 'Unknown',
+        imageUrl: model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`,
+        thumbnailUrl: model.thumbnailUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`,
+        isLive: model.isLive !== undefined ? model.isLive : false,
+        viewerCount: model.viewerCount !== undefined ? model.viewerCount : 0,
+        country: model.country || undefined,
+        categories: Array.isArray(model.categories) ? model.categories : [],
+        age: model.age || undefined,
+        language: model.language || undefined,
+      } as LivecamModel;
+    });
+    
+    return {
+      models: validatedModels,
+      totalCount: data.totalCount || validatedModels.length,
+      page: data.page || page,
+      pageSize: data.pageSize || limit,
+      hasMore: data.hasMore !== undefined ? data.hasMore : false
+    };
   } catch (error: any) {
     console.error("Livecams service error:", error);
     toast.error(`Error: ${error.message || "Failed to load livecams"}`);
@@ -49,13 +79,14 @@ const getMockLivecams = (filters: LivecamsFilter): LivecamsResponse => {
   // Generate mock data based on the provided filters
   for (let i = 0; i < limit; i++) {
     const id = `model-${page}-${i}`;
+    const seed = id + "-" + Date.now().toString().substring(8, 13);
     mockModels.push({
       id,
       username: `model${page}${i}`,
       displayName: `Model ${page}${i}`,
-      // Use more reliable placeholder images
-      imageUrl: `https://picsum.photos/seed/${id}/500/500`,
-      thumbnailUrl: `https://picsum.photos/seed/${id}/200/200`,
+      // Use more reliable placeholder images with unique seeds
+      imageUrl: `https://picsum.photos/seed/${seed}/800/450`,
+      thumbnailUrl: `https://picsum.photos/seed/${seed}/200/200`,
       isLive: Math.random() > 0.3,
       viewerCount: Math.floor(Math.random() * 1000),
       country: filters.country || ['US', 'CA', 'UK', 'FR', 'DE'][Math.floor(Math.random() * 5)],

@@ -14,8 +14,9 @@ interface LivecamMainContentProps {
 const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   const [imgError, setImgError] = useState(false);
   
-  // Improved fallback image strategy - create unique fallback per model
-  const fallbackImage = `https://picsum.photos/seed/${model.id || 'fallback'}/800/450`;
+  // Generate a unique fallback image for this specific model
+  const uniqueSeed = `${model.id || model.username}-${Date.now().toString().substring(8, 13)}`;
+  const fallbackImage = `https://picsum.photos/seed/${uniqueSeed}/800/450`;
 
   return (
     <Card className="overflow-hidden">
@@ -37,6 +38,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
               alt={model.displayName} 
               className="object-cover w-full h-full"
               onError={() => setImgError(true)}
+              loading="lazy"
             />
           )}
         </AspectRatio>
@@ -45,7 +47,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
           <div className="absolute top-3 left-3">
             <Badge className="bg-red-500 text-white">
               <Users size={14} className="mr-1" />
-              {model.viewerCount || 0} watching
+              {model.viewerCount ? model.viewerCount.toLocaleString() : "0"} watching
             </Badge>
           </div>
         )}

@@ -14,8 +14,10 @@ interface LivecamCardProps {
 const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
   const [imgError, setImgError] = useState(false);
   
-  // Create a unique fallback image for each model
-  const fallbackImage = `https://picsum.photos/seed/${model.id || model.username}/500/500`;
+  // Create a unique and stable fallback image for each model
+  // Using both id and username with a timestamp to ensure uniqueness
+  const uniqueSeed = `${model.id || model.username}-${Date.now().toString().substring(8, 13)}`;
+  const fallbackImage = `https://picsum.photos/seed/${uniqueSeed}/500/500`;
   
   return (
     <Link to={`/livecams/${model.username}`}>
