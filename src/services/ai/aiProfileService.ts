@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { AIProfile, AIConversation, AIMessage } from "@/types/ai-profile";
@@ -222,7 +221,7 @@ export const sendMessageToAI = async (
       throw msgError;
     }
     
-    // Get conversation with AI profile to access the system prompt
+    // Get conversation with AI profile 
     const { data: conversation, error: convError } = await supabase
       .from('ai_conversations')
       .select(`
@@ -235,8 +234,8 @@ export const sendMessageToAI = async (
     if (convError) {
       throw convError;
     }
-    
-    // Check if user has enough credits or if the first few messages are free
+
+    // Check if user has enough credits or if they're within free message limit
     const { data: messageCount, error: countError } = await supabase
       .from('ai_messages')
       .select('id', { count: 'exact' })
@@ -266,13 +265,13 @@ export const sendMessageToAI = async (
       
       if ((profile?.lucoin_balance || 0) < messagePrice) {
         // User doesn't have enough Lucoins
-        // Save a payment required message from AI
+        // Create a payment required message from AI
         const { data: aiMessage, error: aiMsgError } = await supabase
           .from('ai_messages')
           .insert({
             conversation_id: conversationId,
             sender_id: conversation.ai_profile_id,
-            content: "I'd love to continue our conversation. To chat more with me, you'll need to spend 5 Lucoins.",
+            content: "I'd love to continue our conversation. To chat more with me, you'll need to spend Lucoins.",
             is_ai: true,
             requires_payment: true,
             price: messagePrice,
@@ -292,72 +291,173 @@ export const sendMessageToAI = async (
         };
       }
       
-      // Deduct Lucoins
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ lucoin_balance: (profile?.lucoin_balance || 0) - messagePrice })
-        .eq('id', userId);
-      
-      if (updateError) {
-        throw updateError;
-      }
-      
-      // Record the transaction
-      await supabase
-        .from('lucoin_transactions')
-        .insert({
-          user_id: userId,
-          amount: -messagePrice,
-          transaction_type: 'ai_chat',
-          description: `Chat with ${aiProfile.name}`,
-          metadata: { conversation_id: conversationId }
+      // If user has enough balance, call our Supabase Edge Function to generate AI response
+      try {
+        const { data: aiResponse, error } = await supabase.functions.invoke('generate-ai-message', {
+          body: {
+            user_id: userId,
+            conversation_id: conversationId,
+            user_message: message,
+            ai_profile_id: conversation.ai_profile_id
+          }
         });
-    }
-    
-    // Now, we would use the Edge Function to generate the AI response
-    // For now, we'll simulate an AI response
-    
-    const aiProfile = conversation.ai_profile as AIProfile;
-    let aiResponseText = '';
-    
-    // In a real implementation, this would be an API call to an Edge Function
-    if (isFreeTier) {
-      aiResponseText = generateMockAIResponse(message, aiProfile);
+        
+        if (error) throw new Error(error.message);
+
+        // If message requires payment, return without deducting balance
+        if (aiResponse.requiresPayment) {
+          // Save the AI response to database
+          const { data: savedMessage, error: saveError } = await supabase
+            .from('ai_messages')
+            .insert(aiResponse.message)
+            .select()
+            .single();
+            
+          if (saveError) throw saveError;
+          
+          return {
+            userMessage: userMessage as AIMessage,
+            aiResponse: savedMessage as AIMessage,
+            requiresPayment: true
+          };
+        }
+
+        // If not requiring payment, deduct Lucoins
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ lucoin_balance: (profile?.lucoin_balance || 0) - messagePrice })
+          .eq('id', userId);
+        
+        if (updateError) {
+          throw updateError;
+        }
+        
+        // Record the transaction
+        await supabase
+          .from('lucoin_transactions')
+          .insert({
+            user_id: userId,
+            amount: -messagePrice,
+            transaction_type: 'ai_chat',
+            description: `Chat with ${aiProfile.name}`,
+            metadata: { conversation_id: conversationId }
+          });
+
+        // Save the AI response message
+        const { data: savedMessage, error: saveError } = await supabase
+          .from('ai_messages')
+          .insert(aiResponse.message)
+          .select()
+          .single();
+          
+        if (saveError) throw saveError;
+        
+        return {
+          userMessage: userMessage as AIMessage,
+          aiResponse: savedMessage as AIMessage,
+          requiresPayment: false
+        };
+      } catch (error) {
+        // If there's an error with the edge function, fall back to mock responses
+        console.error("Edge function error:", error);
+        
+        // Simulate delay for realism
+        const aiProfile = conversation.ai_profile as AIProfile;
+        const minDelay = aiProfile.delayed_response_min || 2000;
+        const maxDelay = aiProfile.delayed_response_max || 5000;
+        const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        
+        // Generate a mock response as fallback
+        const aiResponseText = generateMockAIResponse(message, aiProfile, true);
+        
+        // Save the AI response
+        const { data: aiMessage, error: aiMsgError } = await supabase
+          .from('ai_messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: conversation.ai_profile_id,
+            content: aiResponseText,
+            is_ai: true
+          })
+          .select()
+          .single();
+        
+        if (aiMsgError) {
+          throw aiMsgError;
+        }
+        
+        return {
+          userMessage: userMessage as AIMessage,
+          aiResponse: aiMessage as AIMessage,
+          requiresPayment: false
+        };
+      }
     } else {
-      // More sophisticated response for paying users
-      aiResponseText = generateMockAIResponse(message, aiProfile, true);
+      // For free tier messages, use the same Edge Function but with simpler prompts
+      try {
+        const { data: aiResponse, error } = await supabase.functions.invoke('generate-ai-message', {
+          body: {
+            user_id: userId,
+            conversation_id: conversationId,
+            user_message: message,
+            ai_profile_id: conversation.ai_profile_id
+          }
+        });
+        
+        if (error) throw new Error(error.message);
+        
+        // Save the AI response message
+        const { data: savedMessage, error: saveError } = await supabase
+          .from('ai_messages')
+          .insert(aiResponse.message)
+          .select()
+          .single();
+          
+        if (saveError) throw saveError;
+        
+        return {
+          userMessage: userMessage as AIMessage,
+          aiResponse: savedMessage as AIMessage,
+          requiresPayment: false
+        };
+      } catch (error) {
+        // Fallback to mock responses
+        console.error("Edge function error:", error);
+        
+        // Simulate delay for realism
+        const aiProfile = conversation.ai_profile as AIProfile;
+        const minDelay = aiProfile.delayed_response_min || 2000;
+        const maxDelay = aiProfile.delayed_response_max || 5000;
+        const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        
+        // Generate a mock response as fallback
+        const aiResponseText = generateMockAIResponse(message, aiProfile);
+        
+        // Save the AI response
+        const { data: aiMessage, error: aiMsgError } = await supabase
+          .from('ai_messages')
+          .insert({
+            conversation_id: conversationId,
+            sender_id: conversation.ai_profile_id,
+            content: aiResponseText,
+            is_ai: true
+          })
+          .select()
+          .single();
+        
+        if (aiMsgError) {
+          throw aiMsgError;
+        }
+        
+        return {
+          userMessage: userMessage as AIMessage,
+          aiResponse: aiMessage as AIMessage,
+          requiresPayment: false
+        };
+      }
     }
-    
-    // Simulate delay for realism
-    const minDelay = aiProfile.delayed_response_min || 2000;
-    const maxDelay = aiProfile.delayed_response_max || 5000;
-    const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
-    
-    // In a real implementation, we would process this in the background
-    // For the mock, we'll just wait
-    await new Promise(resolve => setTimeout(resolve, delay));
-    
-    // Save the AI response
-    const { data: aiMessage, error: aiMsgError } = await supabase
-      .from('ai_messages')
-      .insert({
-        conversation_id: conversationId,
-        sender_id: conversation.ai_profile_id,
-        content: aiResponseText,
-        is_ai: true
-      })
-      .select()
-      .single();
-    
-    if (aiMsgError) {
-      throw aiMsgError;
-    }
-    
-    return {
-      userMessage: userMessage as AIMessage,
-      aiResponse: aiMessage as AIMessage,
-      requiresPayment: false
-    };
   } catch (error: any) {
     console.error("Error sending message to AI:", error);
     
@@ -512,6 +612,56 @@ export const processAIMessagePayment = async (
     return {
       success: false,
       aiResponse: null,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Generate an AI image using DALL-E
+ */
+export const generateAIImage = async (
+  userId: string,
+  prompt: string,
+  aiProfileId?: string
+): Promise<{
+  imageUrl?: string;
+  requiresPayment: boolean;
+  price?: number;
+  error?: string;
+}> => {
+  try {
+    const { data: result, error } = await supabase.functions.invoke('generate-ai-image', {
+      body: {
+        prompt,
+        user_id: userId,
+        ai_profile_id: aiProfileId,
+        size: "1024x1024",
+        style: "natural"
+      }
+    });
+    
+    if (error) {
+      throw new Error(error.message);
+    }
+    
+    if (result.error) {
+      return {
+        requiresPayment: result.requiresPayment || false,
+        price: result.price,
+        error: result.error
+      };
+    }
+    
+    return {
+      imageUrl: result.image_url,
+      requiresPayment: false, // Already paid in the function
+      price: result.price
+    };
+  } catch (error: any) {
+    console.error("Error generating AI image:", error);
+    return {
+      requiresPayment: false,
       error: error.message
     };
   }

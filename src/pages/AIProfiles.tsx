@@ -7,14 +7,32 @@ import { getAIProfiles } from '@/services/ai/aiProfileService';
 import AppLayout from '@/components/layout/AppLayout';
 import AIProfileCard from '@/components/ai/AIProfileCard';
 import AIChat from '@/components/ai/AIChat';
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, MessageSquare, Plus, Sparkles, Filter } from 'lucide-react';
+import { 
+  Search, 
+  MessageSquare, 
+  Filter, 
+  Heart, 
+  Clock, 
+  User,
+  WifiOff,
+  Sparkles,
+  SlidersHorizontal
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AIProfiles = () => {
   const { user, profile } = useAuth();
@@ -25,10 +43,13 @@ const AIProfiles = () => {
   const [selectedProfile, setSelectedProfile] = useState<AIProfile | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
   const [personalityFilter, setPersonalityFilter] = useState<string | null>(null);
+  const [availability, setAvailability] = useState<string | null>(null);
+  const [interestFilter, setInterestFilter] = useState<string | null>(null);
+  const [showPremiumOnly, setShowPremiumOnly] = useState(false);
   
   useEffect(() => {
     loadProfiles();
-  }, [personalityFilter]);
+  }, [personalityFilter, availability, showPremiumOnly]);
   
   const loadProfiles = async () => {
     setLoading(true);
@@ -38,6 +59,18 @@ const AIProfiles = () => {
       
       if (personalityFilter) {
         filters.personality = personalityFilter;
+      }
+      
+      if (availability) {
+        filters.availability = availability;
+      }
+      
+      if (interestFilter) {
+        filters.interest = interestFilter;
+      }
+      
+      if (showPremiumOnly) {
+        filters.quality = 'premium';
       }
       
       const data = await getAIProfiles(filters);
@@ -65,6 +98,9 @@ const AIProfiles = () => {
       profile.interests.some(interest => interest.toLowerCase().includes(query))
     );
   });
+
+  // Get all unique interests across all profiles
+  const allInterests = [...new Set(profiles.flatMap(p => p.interests))].sort();
   
   return (
     <AppLayout>
@@ -95,7 +131,7 @@ const AIProfiles = () => {
             />
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
             <Tabs 
               defaultValue="all" 
               value={personalityFilter || 'all'}
@@ -107,8 +143,69 @@ const AIProfiles = () => {
                 <TabsTrigger value="shy">Shy</TabsTrigger>
                 <TabsTrigger value="dominant">Dominant</TabsTrigger>
                 <TabsTrigger value="playful">Playful</TabsTrigger>
+                <TabsTrigger value="professional">Professional</TabsTrigger>
               </TabsList>
             </Tabs>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <SlidersHorizontal className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Availability</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={availability === null}
+                  onCheckedChange={() => setAvailability(null)}
+                >
+                  All Statuses
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={availability === 'online'}
+                  onCheckedChange={(checked) => setAvailability(checked ? 'online' : null)}
+                >
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
+                    Online Now
+                  </div>
+                </DropdownMenuCheckboxItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Quality</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={showPremiumOnly}
+                  onCheckedChange={setShowPremiumOnly}
+                >
+                  <div className="flex items-center">
+                    <Sparkles className="h-4 w-4 mr-2 text-amber-400" />
+                    Premium Only
+                  </div>
+                </DropdownMenuCheckboxItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Interests</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={interestFilter === null}
+                  onCheckedChange={() => setInterestFilter(null)}
+                >
+                  All Interests
+                </DropdownMenuCheckboxItem>
+                {allInterests.slice(0, 5).map((interest) => (
+                  <DropdownMenuCheckboxItem
+                    key={interest}
+                    checked={interestFilter === interest}
+                    onCheckedChange={(checked) => setInterestFilter(checked ? interest : null)}
+                  >
+                    {interest}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         

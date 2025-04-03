@@ -3,15 +3,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAIMessaging } from '@/hooks/useAIMessaging';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import { Send, Coins } from 'lucide-react';
+import { Send, Coins, Image, X, MessageSquare, Info } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { UserProfile } from '@/types/auth';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface AIChatProps {
   profileId: string;
@@ -34,12 +36,18 @@ const AIChat: React.FC<AIChatProps> = ({
     error,
     paymentRequired,
     paymentMessage,
+    simulatingTyping,
+    generatingImage,
     initializeConversation,
     sendMessage,
-    processPayment
+    processPayment,
+    generateImage
   } = useAIMessaging({ profileId, conversationId });
   
   const [inputValue, setInputValue] = useState('');
+  const [showImagePrompt, setShowImagePrompt] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
@@ -60,7 +68,7 @@ const AIChat: React.FC<AIChatProps> = ({
   useEffect(() => {
     // Scroll to bottom when messages change
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, simulatingTyping]);
   
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +83,51 @@ const AIChat: React.FC<AIChatProps> = ({
     if (paymentRequired) {
       processPayment();
     }
+  };
+
+  const handleGenerateImage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!imagePrompt.trim()) return;
+    
+    const imageUrl = await generateImage(imagePrompt);
+    if (imageUrl) {
+      setGeneratedImage(imageUrl);
+      // Add a system message about the image generation
+      sendMessage(`I generated an image for you based on: "${imagePrompt}"`);
+      setImagePrompt('');
+      setShowImagePrompt(false);
+    }
+  };
+
+  const getPersonalityBadge = () => {
+    if (!profile?.personality?.type) return null;
+    
+    const type = profile.personality.type;
+    let color;
+    
+    switch(type) {
+      case 'flirty':
+        color = 'bg-pink-500 hover:bg-pink-700';
+        break;
+      case 'shy':
+        color = 'bg-purple-500 hover:bg-purple-700';
+        break;
+      case 'dominant':
+        color = 'bg-red-500 hover:bg-red-700';
+        break;
+      case 'playful':
+        color = 'bg-blue-500 hover:bg-blue-700';
+        break;
+      default:
+        color = 'bg-slate-500 hover:bg-slate-700';
+    }
+    
+    return (
+      <Badge className={`${color} capitalize`}>
+        {type}
+      </Badge>
+    );
   };
   
   return (
@@ -96,14 +149,30 @@ const AIChat: React.FC<AIChatProps> = ({
                 <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-medium">{profile?.name}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{profile?.name}</h3>
+                  {getPersonalityBadge()}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline" className="cursor-help">
+                          <Info className="h-3 w-3 mr-1" />
+                          AI
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">This is an AI-generated profile. The conversations are powered by artificial intelligence.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <p className="text-xs text-muted-foreground">{profile?.location}</p>
               </div>
             </div>
             
             {onClose && (
               <Button variant="ghost" size="sm" onClick={onClose}>
-                Close
+                <X className="h-4 w-4" />
               </Button>
             )}
           </div>
@@ -116,8 +185,8 @@ const AIChat: React.FC<AIChatProps> = ({
             {[1, 2, 3].map((i) => (
               <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : ''}`}>
                 <div className={`max-w-[80%] ${i % 2 === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted'} rounded-lg p-3`}>
-                  <Skeleton className={`h-4 w-[${Math.random() * 150 + 50}px]`} />
-                  <Skeleton className={`h-4 w-[${Math.random() * 100 + 30}px] mt-2`} />
+                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-[80px] mt-2" />
                 </div>
               </div>
             ))}
@@ -137,7 +206,19 @@ const AIChat: React.FC<AIChatProps> = ({
                   )}
                   
                   <div className={`max-w-[80%] ${isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'} rounded-lg p-3`}>
-                    <p className="text-sm">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    
+                    {/* Display generated image if this message mentions it */}
+                    {message.content.includes("generated an image") && generatedImage && (
+                      <div className="mt-2">
+                        <img 
+                          src={generatedImage} 
+                          alt="AI Generated" 
+                          className="w-full rounded-md" 
+                        />
+                      </div>
+                    )}
+                    
                     <p className={`text-xs mt-1 ${isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                       {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
                     </p>
@@ -180,28 +261,108 @@ const AIChat: React.FC<AIChatProps> = ({
               </div>
             )}
             
+            {simulatingTyping && (
+              <div className="flex">
+                <Avatar className="h-8 w-8 mr-2 mt-1">
+                  <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                  <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="bg-muted rounded-lg p-3 max-w-[80%]">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '400ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </div>
         )}
       </ScrollArea>
       
-      <CardFooter className="p-4 border-t">
+      <CardFooter className="p-4 border-t flex-col gap-2">
+        {!paymentRequired && (
+          <div className="flex w-full justify-between items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowImagePrompt(true)}
+              disabled={loading || sendingMessage || paymentRequired}
+              className="text-xs"
+            >
+              <Image className="h-4 w-4 mr-1" />
+              Request Image
+            </Button>
+            
+            <p className="text-xs text-muted-foreground">
+              {profile?.lucoin_chat_price ? `${profile.lucoin_chat_price} LC per message` : ''}
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleSendMessage} className="flex w-full gap-2">
           <Input
             placeholder={paymentRequired ? "Purchase response to continue..." : "Type a message..."}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            disabled={loading || sendingMessage || paymentRequired}
+            disabled={loading || sendingMessage || paymentRequired || simulatingTyping}
             className="flex-1"
           />
           <Button 
             type="submit"
-            disabled={loading || sendingMessage || paymentRequired || !inputValue.trim()}
+            disabled={loading || sendingMessage || paymentRequired || simulatingTyping || !inputValue.trim()}
           >
             <Send className="h-4 w-4" />
           </Button>
         </form>
       </CardFooter>
+
+      {/* Image Generation Dialog */}
+      <Dialog open={showImagePrompt} onOpenChange={setShowImagePrompt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request an AI-generated image</DialogTitle>
+            <DialogDescription>
+              Describe what you'd like {profile?.name} to generate for you. This will cost {profile?.lucoin_image_price || 10} Lucoins.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleGenerateImage} className="space-y-4">
+            <Input
+              placeholder="E.g., A sunset on a beautiful beach..."
+              value={imagePrompt}
+              onChange={(e) => setImagePrompt(e.target.value)}
+              disabled={generatingImage}
+            />
+            
+            <div className="flex justify-end gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowImagePrompt(false)}
+                disabled={generatingImage}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={generatingImage || !imagePrompt.trim()}
+              >
+                {generatingImage ? (
+                  <>Generating...</>
+                ) : (
+                  <>
+                    <Image className="mr-2 h-4 w-4" />
+                    Generate ({profile?.lucoin_image_price || 10} LC)
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

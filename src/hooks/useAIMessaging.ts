@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { AIConversation, AIMessage, AIProfile } from '@/types/ai-profile';
 import {
@@ -7,7 +7,8 @@ import {
   startAIConversation,
   getAIConversationWithMessages,
   sendMessageToAI,
-  processAIMessagePayment
+  processAIMessagePayment,
+  generateAIImage
 } from '@/services/ai/aiProfileService';
 import { toast } from '@/components/ui/use-toast';
 
@@ -26,6 +27,34 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
   const [error, setError] = useState<string | null>(null);
   const [paymentRequired, setPaymentRequired] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<AIMessage | null>(null);
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [simulatingTyping, setSimulatingTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Calculate response time based on message length and AI personality
+  const calculateResponseTime = useCallback((messageLength: number, aiProfile: AIProfile | null) => {
+    if (!aiProfile) return 3000; // Default 3 seconds
+    
+    const baseTime = aiProfile.delayed_response_min || 2000;
+    const variableTime = (aiProfile.delayed_response_max || 5000) - baseTime;
+    
+    // Longer messages take more time to "type"
+    const lengthFactor = Math.min(1, messageLength / 300); // Cap at messages of 300 chars for max delay
+    
+    // Different personalities respond at different speeds
+    let personalityFactor = 0.5; // Default
+    if (aiProfile.personality) {
+      switch (aiProfile.personality.type) {
+        case 'flirty': personalityFactor = 0.7; break;
+        case 'shy': personalityFactor = 0.9; break;
+        case 'dominant': personalityFactor = 0.4; break;
+        case 'playful': personalityFactor = 0.6; break;
+        case 'professional': personalityFactor = 0.5; break;
+      }
+    }
+    
+    return baseTime + (variableTime * lengthFactor * personalityFactor);
+  }, []);
 
   // Initialize conversation
   const initializeConversation = useCallback(async () => {
@@ -98,6 +127,40 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     }
   }, [user, profileId, conversationId, conversation]);
 
+  // Simulate typing before showing the AI message
+  const simulateTyping = useCallback((message: AIMessage, callback: () => void) => {
+    if (!profile) {
+      callback();
+      return;
+    }
+    
+    setSimulatingTyping(true);
+    
+    // Calculate response time based on message length and personality
+    const typingTime = calculateResponseTime(message.content.length, profile);
+    
+    // Clear any existing typing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Set a new timeout
+    typingTimeoutRef.current = setTimeout(() => {
+      setSimulatingTyping(false);
+      callback();
+    }, typingTime);
+    
+  }, [profile, calculateResponseTime]);
+
+  // Clean up typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Send a message
   const sendMessage = useCallback(async (content: string) => {
     if (!user || !conversation) {
@@ -133,9 +196,11 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
         setPaymentMessage(result.aiResponse);
         setMessages(prev => [...prev, result.aiResponse as AIMessage]);
       } 
-      // If AI responded normally
+      // If AI responded normally, simulate typing first then show the message
       else if (result.aiResponse) {
-        setMessages(prev => [...prev, result.aiResponse as AIMessage]);
+        simulateTyping(result.aiResponse, () => {
+          setMessages(prev => [...prev, result.aiResponse as AIMessage]);
+        });
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send message');
@@ -147,7 +212,48 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     } finally {
       setSendingMessage(false);
     }
-  }, [user, conversation, paymentRequired]);
+  }, [user, conversation, paymentRequired, simulateTyping]);
+
+  // Generate an AI image
+  const generateImage = useCallback(async (prompt: string) => {
+    if (!user || !profile) {
+      setError('Cannot generate image: no active profile');
+      return null;
+    }
+    
+    setGeneratingImage(true);
+    setError(null);
+    
+    try {
+      const result = await generateAIImage(user.id, prompt, profile.id);
+      
+      if (result.error) {
+        if (result.requiresPayment) {
+          toast({
+            title: 'Payment Required',
+            description: `You need ${result.price || 10} Lucoins to generate this image`,
+            variant: 'destructive',
+          });
+        } else {
+          throw new Error(result.error);
+        }
+        return null;
+      }
+      
+      // If successful, return the image URL
+      return result.imageUrl;
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate image');
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to generate image',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setGeneratingImage(false);
+    }
+  }, [user, profile]);
 
   // Process payment for a message
   const processPayment = useCallback(async () => {
@@ -169,7 +275,10 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
       setPaymentMessage(null);
 
       if (result.aiResponse) {
-        setMessages(prev => [...prev, result.aiResponse as AIMessage]);
+        // Simulate typing before showing the AI response
+        simulateTyping(result.aiResponse, () => {
+          setMessages(prev => [...prev, result.aiResponse as AIMessage]);
+        });
       }
 
       toast({
@@ -186,7 +295,7 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     } finally {
       setLoading(false);
     }
-  }, [user, paymentMessage]);
+  }, [user, paymentMessage, simulateTyping]);
 
   return {
     loading,
@@ -197,8 +306,11 @@ export const useAIMessaging = ({ profileId, conversationId }: UseAIMessagingProp
     error,
     paymentRequired,
     paymentMessage,
+    simulatingTyping,
+    generatingImage,
     initializeConversation,
     sendMessage,
-    processPayment
+    processPayment,
+    generateImage
   };
 };
