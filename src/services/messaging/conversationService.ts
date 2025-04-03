@@ -56,8 +56,12 @@ async function fetchDirectConversations(userId: string): Promise<Conversation[]>
     
     data.forEach(message => {
       try {
+        // Check if the message object has the required properties
+        if (!message || typeof message !== 'object') return;
+        
         // For each message, determine the other user (conversation participant)
         const otherUserId = message.sender_id === userId ? message.receiver_id : message.sender_id;
+        if (!otherUserId) return;
         
         // Check if profiles data exists and has the required properties
         const profileData = message.profiles || {};

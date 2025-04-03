@@ -24,3 +24,11 @@ export interface Conversation {
 }
 
 export type MessagingSchema = 'direct' | 'conversation' | 'none';
+
+// For the useContentFilters issue
+export interface ContentFilters {
+  status: "published" | "draft" | "scheduled" | undefined;
+  searchQuery?: string;
+  contentType?: string;
+  sort?: "newest" | "oldest" | "title_asc" | "title_desc" | "most_viewed" | "least_viewed";
+}

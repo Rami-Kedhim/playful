@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { getMessagingSchema } from "./schemaDetection";
@@ -185,7 +184,6 @@ async function sendConversationMessage(senderId: string, receiverId: string, con
     let conversationId: string | null = null;
     
     // Find conversations that both users are part of
-    // First find conversations the current user is part of
     const { data: userConversations, error: userError } = await supabase
       .from('conversation_participants')
       .select('conversation_id')
@@ -235,13 +233,15 @@ async function sendConversationMessage(senderId: string, receiverId: string, con
     }
     
     // Now insert the message
+    const messageData = {
+      conversation_id: conversationId,
+      sender_id: senderId,
+      content
+    };
+    
     const { data, error } = await supabase
       .from('messages')
-      .insert({
-        conversation_id: conversationId,
-        sender_id: senderId,
-        content
-      })
+      .insert(messageData)
       .select()
       .single();
     
@@ -250,6 +250,7 @@ async function sendConversationMessage(senderId: string, receiverId: string, con
     if (!data) throw new Error("Failed to send message");
     
     // For the conversation model, we need to construct the full Message object
+    // with an inferred receiver_id since it's not stored in the database
     const result: Message = {
       id: data.id,
       sender_id: data.sender_id,
