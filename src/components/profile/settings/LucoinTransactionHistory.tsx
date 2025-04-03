@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { 
@@ -70,7 +69,7 @@ const LucoinTransactionHistory = () => {
   const getTransactionBadge = (type: string, amount: number) => {
     // Determine if credit or debit
     const isCredit = type.includes('receive') || amount > 0;
-    const color = isCredit ? "green" : "red";
+    const color = isCredit ? "success" : "destructive";
     
     // Format readable transaction type
     let readableType = type.replace(/_/g, ' ');
@@ -78,8 +77,8 @@ const LucoinTransactionHistory = () => {
     
     return (
       <Badge 
-        variant="outline" 
-        className={`capitalize ${isCredit ? 'text-green-600 border-green-200' : 'text-red-600 border-red-200'}`}
+        variant={isCredit ? "success" : "destructive"}
+        className="capitalize"
       >
         {readableType}
       </Badge>

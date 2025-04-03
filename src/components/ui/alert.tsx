@@ -1,6 +1,7 @@
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -12,8 +13,10 @@ const alertVariants = cva(
         default: "bg-background text-foreground",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
-        warning: 
-          "border-yellow-500/50 text-yellow-600 dark:text-yellow-500 dark:border-yellow-500/50 [&>svg]:text-yellow-600 dark:bg-yellow-950/50 dark:border-yellow-800 [&>svg]:dark:text-yellow-500",
+        warning:
+          "border-yellow-500/30 text-yellow-600 dark:text-yellow-500 [&>svg]:text-yellow-600 dark:border-yellow-500/30 bg-yellow-50 dark:bg-yellow-950/50",
+        success:
+          "border-green-500/30 text-green-600 dark:text-green-500 [&>svg]:text-green-600 dark:border-green-500/30 bg-green-50 dark:bg-green-950/50",
       },
     },
     defaultVariants: {
@@ -24,14 +27,30 @@ const alertVariants = cva(
 
 const Alert = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
->(({ className, variant, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants> & {
+    onClose?: () => void;
+  }
+>(({ className, variant, onClose, children, ...props }, ref) => (
   <div
     ref={ref}
     role="alert"
-    className={cn(alertVariants({ variant }), className)}
+    className={cn(alertVariants({ variant }), 
+      className,
+      onClose && "pr-10"
+    )}
     {...props}
-  />
+  >
+    {children}
+    {onClose && (
+      <button 
+        onClick={onClose}
+        className="absolute top-4 right-4 p-1 rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        aria-label="Close alert"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    )}
+  </div>
 ))
 Alert.displayName = "Alert"
 

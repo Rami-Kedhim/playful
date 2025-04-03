@@ -56,9 +56,9 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       
-      // Use the direct table query instead of RPC function
+      // Use direct table query with type assertion
       const { data: optionsData, error: optionsError } = await supabase
-        .from('lucoin_package_options')
+        .from('lucoin_package_options' as any)
         .select('*');
       
       if (optionsError) {
@@ -255,11 +255,11 @@ export const useLucoins = () => {
     try {
       setLoading(true);
       
-      // Get package details from direct table query
+      // Get package details from direct table query with type assertion
       let packageData: any = null;
       
       const { data: packageInfo, error: packageError } = await supabase
-        .from('lucoin_package_options')
+        .from('lucoin_package_options' as any)
         .select('*')
         .eq('id', packageId)
         .single();
@@ -294,9 +294,9 @@ export const useLucoins = () => {
         return false;
       }
       
-      // Record the transaction
+      // Record the transaction using direct table insert with type assertion
       await supabase
-        .from('lucoin_transactions')
+        .from('lucoin_transactions' as any)
         .insert({
           user_id: user.id,
           amount: packageData.amount + (packageData.bonus_amount || 0),
@@ -310,7 +310,7 @@ export const useLucoins = () => {
           }
         });
       
-      // Update the user's balance - reuse the existing increment_balance function if it's available
+      // Update the user's balance using the increment_balance function
       await supabase.rpc('increment_balance', { 
         user_id: user.id, 
         amount: packageData.amount + (packageData.bonus_amount || 0) 
