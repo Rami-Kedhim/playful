@@ -736,6 +736,80 @@ export const useLucoins = () => {
     }
   };
 
+  /**
+   * Process a Lucoin transaction
+   */
+  const processLucoinTransaction = async (options: {
+    amount: number;
+    transactionType: string;
+    description: string;
+    metadata?: any;
+  }): Promise<boolean> => {
+    if (!user) {
+      toast({
+        title: "Not logged in",
+        description: "You must be logged in to make transactions",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    try {
+      setLoading(true);
+      
+      // Call the process_lucoin_transaction RPC function
+      const { data, error } = await supabase.rpc('process_lucoin_transaction', {
+        p_user_id: user.id,
+        p_amount: options.amount,
+        p_transaction_type: options.transactionType,
+        p_description: options.description,
+        p_metadata: options.metadata || {}
+      });
+      
+      if (error) throw error;
+      
+      // Refresh the user profile to get the updated balance
+      await refreshProfile();
+      
+      if (options.amount < 0) {
+        // This is a spending transaction
+        toast({
+          title: "Transaction successful",
+          description: `${Math.abs(options.amount)} Lucoins have been spent`,
+        });
+      } else {
+        // This is a receiving transaction
+        toast({
+          title: "Transaction successful",
+          description: `${options.amount} Lucoins have been added to your account`,
+        });
+      }
+      
+      return true;
+    } catch (error: any) {
+      console.error("Error processing lucoin transaction:", error);
+      
+      // Check for specific error messages
+      if (error.message.includes("Insufficient")) {
+        toast({
+          title: "Insufficient Lucoins",
+          description: "You don't have enough Lucoins for this transaction.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Transaction failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return { 
     loading,
     packages,
@@ -749,6 +823,7 @@ export const useLucoins = () => {
     getTransactionHistory,
     purchaseBoost,
     isProfileBoosted,
-    sendGift
+    sendGift,
+    processLucoinTransaction
   };
 };

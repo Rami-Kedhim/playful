@@ -1,8 +1,7 @@
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Heart, Users } from "lucide-react";
+import AICreatorBadge from "@/components/creators/AICreatorBadge";
 
 interface CreatorCardImageProps {
   imageUrl: string;
@@ -30,44 +29,58 @@ const CreatorCardImage = ({
   badge
 }: CreatorCardImageProps) => {
   return (
-    <div className="relative">
-      <AspectRatio ratio={2/3}>
-        <img src={imageUrl} alt={name} className="object-cover w-full h-full" />
-      </AspectRatio>
+    <div className="relative h-64 overflow-hidden rounded-t-lg">
+      <img 
+        src={imageUrl} 
+        alt={name} 
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+      />
       
-      <div className="absolute top-2 left-2 flex flex-col gap-1">
+      {/* Badges */}
+      <div className="absolute top-2 left-2 flex flex-col gap-2">
+        {isPremium && (
+          <Badge className="bg-gradient-to-r from-amber-500 to-amber-300 text-black border-0">
+            Premium
+          </Badge>
+        )}
+        
         {isLive && (
-          <Badge className="bg-red-500 animate-pulse">LIVE</Badge>
+          <Badge className="bg-red-500 animate-pulse border-0">
+            LIVE
+          </Badge>
         )}
-        {isAI && (
-          <Badge className="bg-blue-500">AI</Badge>
-        )}
+        
         {badge && (
-          <Badge className="bg-purple-600">{badge}</Badge>
+          <Badge variant="outline" className="bg-black/30 text-white border-white/20">
+            {badge}
+          </Badge>
         )}
       </div>
       
-      <Button
-        size="icon"
-        variant="ghost"
-        className={`absolute top-2 right-2 rounded-full bg-black/30 backdrop-blur-sm ${
-          isFavorited ? "text-red-500" : "text-white"
-        }`}
-        onClick={toggleFavorite}
-        aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-      >
-        <Heart size={18} fill={isFavorited ? "currentColor" : "none"} />
-      </Button>
+      {/* AI Badge */}
+      {isAI && <AICreatorBadge />}
       
-      <div className="absolute bottom-2 w-full px-2 flex justify-between items-center">
-        <div className="flex items-center bg-black/50 rounded-md px-2 py-1 backdrop-blur-sm">
-          <Users size={14} className="text-white mr-1" />
-          <span className="text-white text-xs">{subscriberCount.toLocaleString()}</span>
+      {/* Favorite Button */}
+      <button
+        onClick={toggleFavorite}
+        className="absolute top-2 right-2 h-8 w-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
+      >
+        <Heart
+          size={16}
+          className={isFavorited ? "fill-red-500 text-red-500" : "text-white"}
+        />
+      </button>
+      
+      {/* Bottom overlay with stats */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
+        <div className="flex justify-between items-center">
+          <div className="text-sm">
+            <span className="font-medium">{subscriberCount.toLocaleString()}</span> subscribers
+          </div>
+          <div className="text-sm font-bold">
+            ${price}/mo
+          </div>
         </div>
-        
-        {isPremium && (
-          <Badge className="bg-primary">{price} LC/mo</Badge>
-        )}
       </div>
     </div>
   );

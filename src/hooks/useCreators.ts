@@ -3,6 +3,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { ContentCreator } from "@/types/creator";
+import { fetchScrapedCreators, getScrapedCreatorByUsername } from "@/services/scrapedCreatorService";
 
 export type Creator = ContentCreator;
 
@@ -16,25 +17,41 @@ export const useCreators = () => {
 
     try {
       // In a real implementation, this would fetch from a Supabase database
-      // For now, we'll use the mock data
+      // For now, combine mock data with scraped profiles
       
-      // Example of what the real implementation would look like:
-      // const query = supabase.from('profiles')
-      //   .select('*')
-      //   .eq('is_content_creator', true);
+      // Get the scraped creators
+      const scrapedCreators = await fetchScrapedCreators();
       
-      // if (filters?.isPremium !== undefined) {
-      //   query.eq('is_premium', filters.isPremium);
-      // }
+      // Combine with our existing mock creators
+      const allCreators = [...mockCreators, ...scrapedCreators];
       
-      // const { data, error } = await query;
+      // Apply filters if provided
+      if (filters) {
+        return allCreators.filter(creator => {
+          let passesFilter = true;
+          
+          if (filters.isPremium !== undefined) {
+            passesFilter = passesFilter && creator.isPremium === filters.isPremium;
+          }
+          
+          if (filters.isAI !== undefined) {
+            passesFilter = passesFilter && creator.isAI === filters.isAI;
+          }
+          
+          if (filters.searchQuery) {
+            const query = filters.searchQuery.toLowerCase();
+            const matchesName = creator.name.toLowerCase().includes(query);
+            const matchesUsername = creator.username.toLowerCase().includes(query);
+            const matchesTags = creator.tags?.some(tag => tag.toLowerCase().includes(query)) || false;
+            
+            passesFilter = passesFilter && (matchesName || matchesUsername || matchesTags);
+          }
+          
+          return passesFilter;
+        });
+      }
       
-      // if (error) throw error;
-      
-      // return data.map(mapProfileToCreator);
-      
-      // Mock implementation for now
-      return mockCreators;
+      return allCreators;
     } catch (err: any) {
       const errorMessage = err.message || "Failed to fetch creators";
       setError(errorMessage);
@@ -54,7 +71,14 @@ export const useCreators = () => {
     setError(null);
 
     try {
-      // Mock implementation for now
+      // Check if this is a scraped creator (IDs start with "scraped-")
+      if (id.startsWith("scraped-")) {
+        const username = id.replace("scraped-", "");
+        const scrapedCreator = await getScrapedCreatorByUsername(username);
+        return scrapedCreator;
+      }
+      
+      // If not scraped, use the regular mock data
       const creator = mockCreators.find(c => c.id === id);
       return creator || null;
     } catch (err: any) {
@@ -76,9 +100,13 @@ export const useCreators = () => {
     setError(null);
 
     try {
-      // Mock implementation for now
-      const creator = mockCreators.find(c => c.username === username);
-      return creator || null;
+      // Check in regular mock creators
+      const regularCreator = mockCreators.find(c => c.username === username);
+      if (regularCreator) return regularCreator;
+      
+      // If not found, check in scraped creators
+      const scrapedCreator = await getScrapedCreatorByUsername(username);
+      return scrapedCreator;
     } catch (err: any) {
       const errorMessage = err.message || "Failed to fetch creator";
       setError(errorMessage);
