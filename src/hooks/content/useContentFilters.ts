@@ -34,7 +34,7 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
   // Update filters with validation
   const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
     setFilters(prev => {
-      // Ensure all required properties are set with non-optional values
+      // We need to ensure we return a properly typed ContentFilters object
       const updatedFilters: ContentFilters = {
         status: newFilters.status !== undefined ? newFilters.status : prev.status,
         searchQuery: newFilters.searchQuery !== undefined ? newFilters.searchQuery : prev.searchQuery,
