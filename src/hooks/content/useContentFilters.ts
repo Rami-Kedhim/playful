@@ -6,14 +6,17 @@ import { ContentFilters, UseContentFiltersReturn, SortOption, contentFiltersSche
 export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}): UseContentFiltersReturn => {
   // Validate and set default filters
   const validatedInitialFilters = useMemo(() => {
-    const defaultFilters = {
-      status: "published" as const,
+    const defaultFilters: ContentFilters = {
+      status: "published",
       searchQuery: "",
       contentType: undefined,
-      sort: "newest" as const
+      sort: "newest"
     };
     
-    const mergedFilters = { ...defaultFilters, ...initialFilters };
+    const mergedFilters = { 
+      ...defaultFilters, 
+      ...initialFilters 
+    } as ContentFilters; // Cast after merging to ensure all required properties exist
     
     try {
       return contentFiltersSchema.parse(mergedFilters);
@@ -28,7 +31,12 @@ export const useContentFilters = (initialFilters: Partial<ContentFilters> = {}):
   // Update filters with validation
   const updateFilters = useCallback((newFilters: Partial<ContentFilters>) => {
     setFilters(prev => {
-      const updated = { ...prev, ...newFilters };
+      // Create a complete ContentFilters object by merging previous state with updates
+      const updated: ContentFilters = { 
+        ...prev, 
+        ...newFilters 
+      };
+      
       try {
         return contentFiltersSchema.parse(updated);
       } catch (error) {
