@@ -17,115 +17,115 @@ export const serviceCategories: ServiceCategory[] = [
   {
     id: "companionship",
     name: "Companionship",
-    description: "Social companionship services for various occasions",
+    description: "Social companionship services for various occasions, perfect for events, dining, and travel experiences.",
     services: [
       {
         id: "dinner-date",
         name: "Dinner Date",
-        description: "Sophisticated companionship for dining experiences"
+        description: "Sophisticated companionship for dining experiences at restaurants and social venues."
       },
       {
         id: "social-events",
         name: "Social Events",
-        description: "Accompaniment to social gatherings and events"
+        description: "Professional accompaniment to parties, galas, corporate events and social gatherings."
       },
       {
         id: "travel-companion",
         name: "Travel Companion",
-        description: "Companionship during travel and vacations"
+        description: "Experienced companionship during business or leisure travel, both domestic and international."
       },
       {
         id: "weekend-getaway",
         name: "Weekend Getaway",
-        description: "Extended companionship for weekend travel"
+        description: "Extended companionship for weekend travel and relaxing retreats."
       },
       {
         id: "gfe",
         name: "Girlfriend Experience",
-        description: "Authentic connection and companionship experience"
+        description: "Authentic connection with conversation, attention and genuine companionship."
       }
     ]
   },
   {
     id: "wellness",
     name: "Wellness & Relaxation",
-    description: "Relaxation and wellness-focused services",
+    description: "Professional relaxation and wellness services focused on physical and mental rejuvenation.",
     services: [
       {
         id: "massage",
         name: "Massage",
-        description: "Professional massage services"
+        description: "Professional massage services including Swedish, deep tissue and aromatherapy options."
       },
       {
         id: "tantric",
         name: "Tantric Experience",
-        description: "Tantric wellness and meditation sessions"
+        description: "Traditional tantric wellness sessions focusing on energy, meditation and mindfulness."
       }
     ]
   },
   {
     id: "entertainment",
     name: "Entertainment",
-    description: "Performance and entertainment services",
+    description: "Creative performance and entertainment services for a memorable and engaging experience.",
     services: [
       {
         id: "roleplay",
         name: "Roleplay",
-        description: "Creative roleplaying experiences"
+        description: "Creative and imaginative roleplaying experiences customized to your preferences."
       },
       {
         id: "cosplay",
         name: "Cosplay",
-        description: "Character and costume-based entertainment"
+        description: "Character and costume-based entertainment inspired by popular culture."
       },
       {
         id: "dancing",
         name: "Private Dancing",
-        description: "Professional dance performances"
+        description: "Professional dance performances in various styles from classical to contemporary."
       }
     ]
   },
   {
     id: "specialty",
     name: "Specialty Services",
-    description: "Unique and specialized services",
+    description: "Unique and specialized experiences tailored to specific interests and preferences.",
     services: [
       {
         id: "fetish-friendly",
         name: "Fetish Friendly",
-        description: "Open to discussing various interests and preferences"
+        description: "Open-minded professional experienced with various preferences and interests."
       },
       {
         id: "bdsm",
         name: "BDSM",
-        description: "Bondage, discipline, and related experiences"
+        description: "Consensual bondage, discipline and dominance experiences with safety as priority."
       },
       {
         id: "couples",
         name: "Couples Sessions",
-        description: "Services for couples seeking shared experiences"
+        description: "Professional companionship services for couples seeking shared experiences."
       }
     ]
   },
   {
     id: "virtual",
     name: "Virtual Services",
-    description: "Remote and online services",
+    description: "Digital and remote experiences, perfect for distance connections or privacy preferences.",
     services: [
       {
         id: "video-calls",
         name: "Video Calls",
-        description: "Private video communication sessions"
+        description: "Private video communication sessions with high-quality interaction."
       },
       {
         id: "virtual-date",
         name: "Virtual Date",
-        description: "Online companionship experiences"
+        description: "Online companionship experiences including activities like watching movies together."
       },
       {
         id: "custom-content",
         name: "Custom Content",
-        description: "Personalized digital content creation"
+        description: "Personalized digital content creation tailored to your specific requests."
       }
     ]
   }
@@ -175,4 +175,22 @@ export const mapLegacyServiceToId = (legacyName: string): string => {
   };
 
   return mapping[legacyName] || legacyName.toLowerCase().replace(/\s+/g, '-');
+};
+
+// Get a list of all service IDs
+export const getAllServiceIds = (): string[] => {
+  return getAllServices().map(service => service.id);
+};
+
+// Get services by category ID
+export const getServicesByCategoryId = (categoryId: string): Service[] => {
+  const category = getCategoryById(categoryId);
+  return category ? category.services : [];
+};
+
+// Function to get random popular services
+export const getPopularServices = (count: number = 5): Service[] => {
+  const allServices = getAllServices();
+  const shuffled = [...allServices].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 };

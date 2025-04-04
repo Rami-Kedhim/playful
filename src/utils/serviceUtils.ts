@@ -1,5 +1,5 @@
 
-import { mapLegacyServiceToId, serviceCategories } from "@/data/serviceCategories";
+import { mapLegacyServiceToId, serviceCategories, getCategoryById, getServiceById } from "@/data/serviceCategories";
 
 /**
  * Groups services by their categories
@@ -66,4 +66,61 @@ export const getServiceCategoryNames = (services: string[]): string[] => {
   return serviceCategories
     .filter(category => servicesByCategory[category.id]?.length > 0)
     .map(category => category.name);
+};
+
+/**
+ * Gets service details by its ID
+ * @param serviceId The ID of the service
+ * @returns An object with service details and category information
+ */
+export const getServiceDetails = (serviceId: string) => {
+  for (const category of serviceCategories) {
+    const service = category.services.find(s => s.id === serviceId);
+    if (service) {
+      return {
+        service,
+        category
+      };
+    }
+  }
+  
+  return null;
+};
+
+/**
+ * Groups services by their primary attributes (relaxation, entertainment, etc.)
+ * Useful for creating tag clouds or feature highlights
+ */
+export const groupServicesByAttribute = (services: string[]) => {
+  const attributes: Record<string, number> = {
+    "relaxation": 0,
+    "entertainment": 0,
+    "companionship": 0,
+    "social": 0,
+    "specialty": 0
+  };
+  
+  // Map services to general attributes
+  services.forEach(service => {
+    const serviceId = mapLegacyServiceToId(service);
+    const details = getServiceDetails(serviceId);
+    
+    if (details) {
+      if (details.category.id === "wellness") {
+        attributes["relaxation"]++;
+      } else if (details.category.id === "entertainment") {
+        attributes["entertainment"]++;
+      } else if (details.category.id === "companionship") {
+        attributes["companionship"]++;
+      } else if (details.category.id === "virtual") {
+        attributes["social"]++;
+      } else {
+        attributes["specialty"]++;
+      }
+    } else {
+      attributes["specialty"]++;
+    }
+  });
+  
+  return attributes;
 };
