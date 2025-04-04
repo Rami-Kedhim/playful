@@ -19,6 +19,12 @@ export {
   getDocumentUploadStatus 
 } from './documentUpload';
 
+export {
+  calculateVerificationProgress,
+  getVerificationStatusMessage,
+  isVerificationInProgress
+} from './assessmentProgress';
+
 export type { 
   VerificationEligibilityResponse,
   VerificationSubmissionResponse 
