@@ -25,6 +25,10 @@ const fetchEscortById = async (id: string): Promise<Escort | null> => {
           "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1064&auto=format&fit=crop",
           "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1287&auto=format&fit=crop"
         ],
+        videos: [
+          "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f62a0900e1133dd188183763ecf181ccf3&profile_id=139&oauth2_token_id=57447761",
+          "https://player.vimeo.com/external/394678700.sd.mp4?s=353646e34d7bde02ad638c7308a198786e0dff8f&profile_id=164&oauth2_token_id=57447761"
+        ],
         rating: 4.8,
         reviews: 24,
         tags: ["GFE", "Massage", "Dinner Date"],
@@ -60,11 +64,16 @@ const fetchEscortById = async (id: string): Promise<Escort | null> => {
         verificationLevel: "enhanced",
         hasVirtualContent: true,
         providesInPersonServices: true,
+        providesVirtualContent: true, // Added the missing property
         contentStats: {
           photos: 45,
           videos: 12,
           streams: 3
-        }
+        },
+        providesLiveStreams: true, // Added since it might be used
+        isAIGenerated: false, // Added since it might be used
+        virtualUsername: "sophia_london", // Added since hasVirtualContent is true
+        boostScore: 85 // Added optional property
       });
     }, 1000);
   });
