@@ -37,77 +37,41 @@ const useBoostScore = (options: UseBoostScoreOptions = {}) => {
       setError(null);
       
       // In a real implementation, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Mock data for demonstration
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Calculate a slightly different score
-      const currentScore = boostScore || 50;
-      const adjustment = Math.floor(Math.random() * 20) - 10; // -10 to +10
-      const newScore = Math.max(0, Math.min(100, currentScore + adjustment));
-      setBoostScore(newScore);
+      // Calculate a random score between 20 and 95
+      const randomScore = Math.floor(Math.random() * 75) + 20;
+      setBoostScore(randomScore);
       
       toast({
-        title: 'Boost Score Updated',
-        description: adjustment > 0 
-          ? `Your score increased by ${adjustment} points!` 
-          : adjustment < 0 
-            ? `Your score decreased by ${Math.abs(adjustment)} points.`
-            : 'Your score remained the same.',
+        title: "Boost score updated",
+        description: "Your profile boost score has been refreshed."
       });
+      
+      return randomScore;
     } catch (err: any) {
       console.error('Error updating boost score:', err);
       setError(err.message || 'Failed to update boost score');
       
       toast({
-        title: 'Error',
-        description: 'Failed to update boost score. Please try again.',
-        variant: 'destructive',
+        title: "Error updating boost score",
+        description: err.message || "There was a problem refreshing your boost score",
+        variant: "destructive"
       });
+      
+      return null;
     } finally {
       setLoading(false);
     }
-  }, [boostScore]);
-
-  const purchaseBoostCredits = useCallback(async (amount: number) => {
-    try {
-      setLoading(true);
-      
-      // In a real implementation, this would be a payment API call
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      
-      toast({
-        title: 'Boost Credits Purchased',
-        description: `You've purchased ${amount} boost credits!`,
-      });
-      
-      // Simulate score increase due to purchased credits
-      if (boostScore !== null) {
-        const increase = Math.floor(amount / 10);
-        setBoostScore(Math.min(100, boostScore + increase));
-      }
-      
-      return true;
-    } catch (err: any) {
-      console.error('Error purchasing boost credits:', err);
-      
-      toast({
-        title: 'Error',
-        description: 'Failed to purchase boost credits. Please try again.',
-        variant: 'destructive',
-      });
-      
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [boostScore]);
+  }, []);
 
   return {
     boostScore,
     loading,
     error,
     fetchBoostScore,
-    updateBoostScore,
-    purchaseBoostCredits
+    updateBoostScore
   };
 };
 

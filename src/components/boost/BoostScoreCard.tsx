@@ -1,12 +1,9 @@
 
-import { useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Zap, ZapOff, Info, Lock } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAuth } from '@/hooks/auth/useAuth';
-import BoostProfileDialog from './BoostProfileDialog';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Loader2, RefreshCw, Zap } from "lucide-react";
+import { BoostProfileDialog } from "@/components/boost";
 
 interface BoostScoreCardProps {
   profileId: string;
@@ -17,120 +14,77 @@ interface BoostScoreCardProps {
   onRefresh: () => Promise<void>;
 }
 
-const BoostScoreCard = ({ 
-  profileId, 
-  isOwnProfile, 
-  boostScore, 
-  loading, 
-  error, 
-  onRefresh 
+const BoostScoreCard = ({
+  profileId,
+  isOwnProfile,
+  boostScore,
+  loading,
+  error,
+  onRefresh
 }: BoostScoreCardProps) => {
-  const { user } = useAuth();
-
-  const getScoreCategory = (score: number | null) => {
-    if (score === null) return 'Unknown';
-    if (score >= 80) return 'Excellent';
-    if (score >= 60) return 'Good';
-    if (score >= 40) return 'Average';
-    if (score >= 20) return 'Fair';
-    return 'Poor';
-  };
-
   const getScoreColor = (score: number | null) => {
     if (score === null) return 'bg-gray-500';
-    if (score >= 80) return 'bg-emerald-500';
-    if (score >= 60) return 'bg-green-500';
-    if (score >= 40) return 'bg-yellow-500';
-    if (score >= 20) return 'bg-orange-500';
+    if (score >= 90) return 'bg-emerald-500';
+    if (score >= 70) return 'bg-green-500';
+    if (score >= 50) return 'bg-yellow-500';
+    if (score >= 30) return 'bg-orange-500';
     return 'bg-red-500';
   };
 
+  const getScoreLabel = (score: number | null) => {
+    if (score === null) return 'Not available';
+    if (score >= 90) return 'Excellent';
+    if (score >= 70) return 'Great';
+    if (score >= 50) return 'Good';
+    if (score >= 30) return 'Fair';
+    return 'Poor';
+  };
+
   return (
-    <Card className="overflow-hidden border-gray-700 bg-background">
+    <Card>
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-md">Boost Score</CardTitle>
-            <CardDescription>Profile visibility ranking</CardDescription>
-          </div>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="w-[200px] text-sm">
-                  Boost Score determines your visibility in search results. Higher scores appear first.
-                  The Oxum algorithm calculates your score based on profile quality and activity.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
+        <CardTitle className="text-lg flex items-center justify-between">
+          <span>Profile Boost Score</span>
+          {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+        </CardTitle>
+        <CardDescription>
+          How visible your profile is in search results
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {loading ? (
-            <div className="flex justify-center py-4">
-              <div className="h-6 w-24 bg-gray-700 animate-pulse rounded"></div>
+        {error ? (
+          <div className="text-sm text-red-500 mb-2">{error}</div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-1">
+              <div className="text-sm font-medium">{getScoreLabel(boostScore)}</div>
+              <div className="text-2xl font-bold">{boostScore !== null ? boostScore : '-'}</div>
             </div>
-          ) : error ? (
-            <div className="text-center text-red-500 text-sm">{error}</div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{getScoreCategory(boostScore)}</span>
-                <span className="text-2xl font-bold">{boostScore}/100</span>
-              </div>
-              <Progress value={boostScore || 0} className={getScoreColor(boostScore)} />
-              
-              {isOwnProfile && boostScore !== null && (
-                <div className="pt-2 text-xs text-muted-foreground">
-                  <p>Factors that influence your Oxum score:</p>
-                  <ul className="list-disc pl-5 mt-1 space-y-1">
-                    <li>Verification status</li>
-                    <li>Profile completeness</li>
-                    <li>Recent activity</li>
-                    <li>Content quality</li>
-                    <li>Interactions</li>
-                    <li>Boost credits</li>
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </CardContent>
-      {isOwnProfile && (
-        <CardFooter className="flex gap-2 pt-2 border-t border-gray-800">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={onRefresh} 
-            disabled={loading}
-            className="w-1/2"
-          >
-            <ZapOff className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          {user ? (
-            <BoostProfileDialog 
-              profileId={profileId} 
-              onSuccess={onRefresh}
+            <Progress
+              value={boostScore || 0}
+              className={`h-2 ${getScoreColor(boostScore)}`}
             />
-          ) : (
-            <Button 
-              variant="default" 
-              size="sm" 
-              disabled={true}
-              className="w-1/2"
-            >
-              <Lock className="h-4 w-4 mr-2" />
-              Login
-            </Button>
-          )}
-        </CardFooter>
-      )}
+            <p className="text-xs text-muted-foreground mt-2">
+              A higher score means more visibility in search results and browsing.
+            </p>
+          </>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-between pt-0">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRefresh}
+          disabled={loading}
+        >
+          <RefreshCw className="h-3 w-3 mr-2" />
+          Refresh
+        </Button>
+        
+        {isOwnProfile && (
+          <BoostProfileDialog />
+        )}
+      </CardFooter>
     </Card>
   );
 };

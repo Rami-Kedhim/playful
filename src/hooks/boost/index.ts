@@ -6,4 +6,3 @@ export * from './useBoostStatus';
 export * from './useBoostPurchase';
 export * from './useBoostPackages';
 export { formatBoostDuration } from '@/utils/boostCalculator';
-
