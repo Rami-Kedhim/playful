@@ -1,7 +1,7 @@
 
 import { useParams, useNavigate } from "react-router-dom";
 import { escorts } from "@/data/escortData";
-import { getEscortById } from "@/utils/escortUtils";
+import { getEscortById } from "@/data/escortData";
 import MainLayout from "@/components/layout/MainLayout";
 import EscortProfile from "@/components/escorts/detail/EscortProfile";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ const EscortDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const escort = id ? getEscortById(escorts, id) : undefined;
+  const escort = id ? getEscortById(id) : undefined;
   
   if (!escort) {
     return (

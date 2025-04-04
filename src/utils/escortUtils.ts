@@ -9,6 +9,12 @@ export const findEscortById = (escorts: Escort[], id: string): Escort | undefine
 };
 
 /**
+ * For backward compatibility, keep getEscortById but mark as deprecated
+ * @deprecated Use findEscortById instead
+ */
+export const getEscortById = findEscortById;
+
+/**
  * Format price to a readable string with currency symbol
  */
 export const formatPrice = (price: number, currency: string = "$"): string => {

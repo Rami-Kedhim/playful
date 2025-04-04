@@ -1,8 +1,7 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { escorts } from "@/data/escortData";
-import { getEscortById } from "@/utils/escortUtils";
+import { getEscortById } from "@/data/escortData";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,7 +41,6 @@ const EscortLiveStreamDetail = () => {
     { id: "2", sender: escort?.name || "Escort", message: "Hi everyone! Thanks for joining me today!", isEscort: true },
   ]);
   
-  // Simulate connection to stream
   const connectToStream = () => {
     setIsConnecting(true);
     setTimeout(() => {
@@ -64,7 +62,6 @@ const EscortLiveStreamDetail = () => {
     ]);
     setMessage("");
     
-    // Simulate escort response
     setTimeout(() => {
       setChatMessages(prev => [
         ...prev,

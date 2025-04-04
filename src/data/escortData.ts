@@ -157,6 +157,9 @@ export const availableServices = [
   "Tantric Massage"
 ];
 
+/**
+ * Get escort by ID
+ */
 export const getEscortById = (id: string): Escort | undefined => {
   return escorts.find(escort => escort.id === id);
 };
