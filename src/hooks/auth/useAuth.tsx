@@ -1,64 +1,41 @@
 
 import { createContext, useContext } from "react";
-import { AuthContextType } from "@/types/authTypes";
+import { AuthContextValue } from "@/types/auth";
 import { useAuthState } from "./useAuthState";
-import { useAuthOperations } from "./useAuthOperations";
+import { useAuthentication } from "./useAuthentication";
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const {
-    user,
-    setUser,
-    isLoading,
-    setIsLoading,
-    error,
-    setError,
-    userRoles,
-    setUserRoles,
-    isAuthenticated,
-    clearError
-  } = useAuthState();
+  const [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile] = useAuthState();
+  const { signUp, signIn, signOut, resetPassword, updatePassword, updateProfile } = useAuthentication(setIsLoading, refreshProfile);
 
-  const {
-    login,
-    register,
+  // Function to check if user has a specific role
+  const checkRole = (role: string): boolean => {
+    return userRoles.includes(role);
+  };
+
+  const value: AuthContextValue = {
+    session,
+    user,
+    profile,
+    isLoading,
+    userRoles,
+    signUp,
+    signIn,
+    signOut,
     resetPassword,
-    updateUserProfile,
-    logout
-  } = useAuthOperations({
-    user,
-    setUser,
-    isLoading,
-    setIsLoading,
-    error,
-    setError,
-    userRoles,
-    setUserRoles
-  });
+    updatePassword,
+    refreshProfile,
+    checkRole
+  };
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
-      logout, 
-      isLoading, 
-      error, 
-      isAuthenticated,
-      userRoles,
-      register,
-      resetPassword,
-      updateUserProfile,
-      clearError
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
