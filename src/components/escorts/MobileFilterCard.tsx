@@ -1,17 +1,7 @@
 
-import { X } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-import SearchFilter from "./filters/SearchFilter";
-import LocationFilter from "./filters/LocationFilter";
-import PriceRangeFilter from "./filters/PriceRangeFilter";
-import CheckboxGroup from "./filters/CheckboxGroup";
-import ServiceTypeFilter from "./filters/ServiceTypeFilter";
-import AgeRangeFilter from "./filters/AgeRangeFilter";
-import RatingFilter from "./filters/RatingFilter";
-import AvailabilityFilter from "./filters/AvailabilityFilter";
+import { Card, CardContent } from "@/components/ui/card";
+import MobileFilterHeader from "./filters/MobileFilterHeader";
+import MobileFilterContent from "./filters/MobileFilterContent";
 
 interface MobileFilterCardProps {
   searchQuery: string;
@@ -68,106 +58,37 @@ const MobileFilterCard = ({
   serviceTypeFilter,
   setServiceTypeFilter
 }: MobileFilterCardProps) => {
-  const genders = ["male", "female", "non-binary", "transgender"];
-  const orientations = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
-
   return (
     <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-xl">Filters</CardTitle>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setShowFilters(false)}
-        >
-          <X size={18} />
-        </Button>
-      </CardHeader>
+      <MobileFilterHeader setShowFilters={setShowFilters} />
       <CardContent>
-        <ScrollArea className="h-[60vh] pr-4">
-          <div className="space-y-4">
-            <SearchFilter 
-              searchQuery={searchQuery} 
-              setSearchQuery={setSearchQuery} 
-            />
-            
-            <LocationFilter 
-              location={location} 
-              setLocation={setLocation} 
-            />
-            
-            <PriceRangeFilter 
-              priceRange={priceRange} 
-              setPriceRange={setPriceRange} 
-            />
-            
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Service Type</h3>
-              <ServiceTypeFilter
-                serviceTypeFilter={serviceTypeFilter}
-                setServiceTypeFilter={setServiceTypeFilter}
-              />
-            </div>
-            
-            <AgeRangeFilter
-              ageRange={ageRange as [number, number]}
-              setAgeRange={setAgeRange}
-            />
-            
-            <RatingFilter
-              ratingMin={ratingMin}
-              setRatingMin={setRatingMin}
-            />
-            
-            <AvailabilityFilter
-              verifiedOnly={verifiedOnly}
-              setVerifiedOnly={setVerifiedOnly}
-              availableNow={availableNow}
-              setAvailableNow={setAvailableNow}
-            />
-            
-            <CheckboxGroup
-              title="Gender"
-              items={genders}
-              selectedItems={selectedGenders}
-              toggleItem={toggleGender}
-              formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
-              idPrefix="gender-mobile"
-            />
-            
-            <CheckboxGroup
-              title="Sexual Orientation"
-              items={orientations}
-              selectedItems={selectedOrientations}
-              toggleItem={toggleOrientation}
-              formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
-              idPrefix="orientation-mobile"
-            />
-            
-            <CheckboxGroup
-              title="Services"
-              items={services}
-              selectedItems={selectedServices}
-              toggleItem={toggleService}
-              idPrefix="service-mobile"
-            />
-          </div>
-        </ScrollArea>
-        <div className="flex gap-2 mt-4">
-          <Button 
-            variant="outline" 
-            className="flex-1"
-            onClick={clearFilters}
-          >
-            Clear
-          </Button>
-          <Button 
-            className="flex-1"
-            onClick={() => setShowFilters(false)}
-          >
-            Apply Filters
-          </Button>
-        </div>
+        <MobileFilterContent 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          location={location}
+          setLocation={setLocation}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          verifiedOnly={verifiedOnly}
+          setVerifiedOnly={setVerifiedOnly}
+          selectedServices={selectedServices}
+          toggleService={toggleService}
+          services={services}
+          clearFilters={clearFilters}
+          setShowFilters={setShowFilters}
+          selectedGenders={selectedGenders}
+          toggleGender={toggleGender}
+          selectedOrientations={selectedOrientations}
+          toggleOrientation={toggleOrientation}
+          ageRange={ageRange as [number, number]}
+          setAgeRange={setAgeRange}
+          ratingMin={ratingMin}
+          setRatingMin={setRatingMin}
+          availableNow={availableNow}
+          setAvailableNow={setAvailableNow}
+          serviceTypeFilter={serviceTypeFilter}
+          setServiceTypeFilter={setServiceTypeFilter}
+        />
       </CardContent>
     </Card>
   );
