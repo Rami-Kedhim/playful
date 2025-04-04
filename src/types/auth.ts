@@ -17,6 +17,15 @@ export interface AuthContextValue extends AuthState {
   updatePassword: (newPassword: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
   checkRole: (role: string) => boolean;
+  
+  // Add these properties that components are expecting
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, username: string) => Promise<void>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<void>;
+  error: string | null;
+  clearError: () => void;
 }
 
 // Define the allowed gender values for the database
@@ -44,4 +53,14 @@ export interface UserProfile {
   languages: string[] | null;
   birth_date: string | null;
   last_online: string | null;
+}
+
+export interface AuthUser {
+  id: string;
+  username: string;
+  email: string;
+  profileImageUrl?: string;
+  lucoinsBalance: number;
+  role?: string;
+  isVerified?: boolean;
 }
