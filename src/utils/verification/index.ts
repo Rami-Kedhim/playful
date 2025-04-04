@@ -1,7 +1,25 @@
 
-// Export all verification utilities from a single entry point
-export * from './types';
-export * from './documentUpload';
-export * from './requestSubmission';
-export * from './statusCheck';
-export * from './levelCalculation';
+// Re-export functions from the verification utility modules
+export { 
+  isPending, 
+  isApproved, 
+  isRejected, 
+  isExpired,
+  createVerificationRequest,
+  updateVerificationStatus 
+} from './statusCheck';
+
+export { 
+  canSubmitVerification,
+  submitVerificationRequest 
+} from './requestSubmission';
+
+export { 
+  uploadVerificationDocuments,
+  getDocumentUploadStatus 
+} from './documentUpload';
+
+export type { 
+  VerificationEligibilityResponse,
+  VerificationSubmissionResponse 
+} from './types';
