@@ -148,7 +148,9 @@ const mockCreators: Creator[] = [
     price: 9.99,
     isAI: false,
     rating: 4.8,
-    tags: ["glamour", "lifestyle", "travel"]
+    tags: ["glamour", "lifestyle", "travel"],
+    region: "US",
+    language: "en"
   },
   {
     id: "2",
@@ -166,7 +168,9 @@ const mockCreators: Creator[] = [
     price: 12.99,
     isAI: true,
     rating: 4.7,
-    tags: ["cosplay", "fantasy", "gaming"]
+    tags: ["cosplay", "fantasy", "gaming"],
+    region: "EU",
+    language: "en"
   }
 ];
 

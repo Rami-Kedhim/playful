@@ -1,4 +1,3 @@
-
 export interface ContentCreator {
   id: string;
   name: string;
@@ -17,6 +16,8 @@ export interface ContentCreator {
   createdAt?: string;
   tags?: string[];
   rating?: number;
+  region?: string;
+  language?: string;
 }
 
 export interface CreatorAnalytics {
@@ -37,7 +38,7 @@ export interface ContentMediaItem {
   type: 'image' | 'video';
   isPremium: boolean;
   createdAt: string;
-  duration?: number; // For videos, in seconds
+  duration?: number;
   views: number;
   likes: number;
 }
