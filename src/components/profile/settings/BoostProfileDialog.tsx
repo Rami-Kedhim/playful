@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { Zap, Loader2, Calendar, Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Zap, Loader2, Info } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -20,150 +20,55 @@ import {
 } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLucoins, BoostPackage } from "@/hooks/useLucoins";
+import useBoostManager from "@/hooks/useBoostManager";
 
 interface BoostProfileDialogProps {
   onSuccess?: () => void;
 }
 
 const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
   const [open, setOpen] = useState(false);
-  const [activeBoost, setActiveBoost] = useState<any>(null);
-  const [timeRemaining, setTimeRemaining] = useState<string>("");
-  const [progress, setProgress] = useState(0);
   const { profile } = useAuth();
-  const { loading, fetchBoostPackages, purchaseBoost, isProfileBoosted } = useLucoins();
+  
+  const profileId = profile?.id;
+
+  const { 
+    boostStatus, 
+    eligibility,
+    boostPackages, 
+    selectedPackage, 
+    setSelectedPackage,
+    fetchBoostPackages, 
+    purchaseBoost,
+    loading,
+    formatBoostDuration,
+  } = useBoostManager(profileId);
 
   useEffect(() => {
     if (open) {
-      loadPackages();
-      checkActiveBoost();
+      fetchBoostPackages();
     }
   }, [open]);
 
-  const loadPackages = async () => {
-    const data = await fetchBoostPackages();
-    setBoostPackages(data);
-    
-    // Auto-select a featured package if available
-    if (data.length > 0 && !selectedPackage) {
-      setSelectedPackage(data[0].id);
-    }
-  };
-
-  const checkActiveBoost = async () => {
-    if (!profile) return;
-    
-    // This would be a simplified version
-    // In a real implementation, you would fetch the active boost details from the database
-    const isBoosted = await isProfileBoosted(profile.id);
-    
-    if (isBoosted) {
-      // Mock active boost data for demonstration
-      const mockBoost = {
-        end_time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days from now
-        start_time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-        boost_package: {
-          name: "Weekly Boost",
-          duration: "168:00:00" // 7 days
-        }
-      };
-      
-      setActiveBoost(mockBoost);
-      updateRemainingTime(mockBoost);
-      
-      // Set up an interval to update the remaining time
-      const interval = setInterval(() => {
-        updateRemainingTime(mockBoost);
-      }, 60000); // Update every minute
-      
-      return () => clearInterval(interval);
-    } else {
-      setActiveBoost(null);
-      setTimeRemaining("");
-      setProgress(0);
-    }
-  };
-
-  const updateRemainingTime = (boost: any) => {
-    const endTime = new Date(boost.end_time).getTime();
-    const now = Date.now();
-    const diffMs = endTime - now;
-    
-    if (diffMs <= 0) {
-      setTimeRemaining("Expired");
-      setProgress(100);
-      return;
-    }
-    
-    const startTime = new Date(boost.start_time).getTime();
-    const totalDuration = endTime - startTime;
-    const elapsed = now - startTime;
-    const progressValue = Math.min(100, Math.floor((elapsed / totalDuration) * 100));
-    
-    setProgress(progressValue);
-    
-    // Format remaining time
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    
-    let timeString = "";
-    if (days > 0) timeString += `${days}d `;
-    if (hours > 0 || days > 0) timeString += `${hours}h `;
-    timeString += `${minutes}m`;
-    
-    setTimeRemaining(timeString);
-  };
-
   const handlePurchase = async () => {
-    if (!selectedPackage) {
-      toast({
-        title: "No package selected",
-        description: "Please select a boost package",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (activeBoost) {
-      toast({
-        title: "Already boosted",
-        description: "You already have an active boost. Wait for it to expire or replace it.",
-        variant: "destructive",
-      });
-      // In a real app, you might offer to extend or replace the existing boost
-    }
-
+    if (!selectedPackage) return;
+    
     const success = await purchaseBoost(selectedPackage);
     
     if (success) {
       setOpen(false);
       if (onSuccess) onSuccess();
-      
-      // Force refresh of the active boost status
-      checkActiveBoost();
     }
   };
 
-  // Helper function to format the duration in a readable format
-  const formatDuration = (durationStr: string) => {
-    // Parse the PostgreSQL interval format "168:00:00" (hours:minutes:seconds)
-    const parts = durationStr.split(':');
-    const hours = parseInt(parts[0]);
-    
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    
-    if (days > 0) {
-      return `${days} day${days !== 1 ? 's' : ''}${remainingHours > 0 ? ` ${remainingHours} hours` : ''}`;
-    }
-    
-    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  const getProgressColor = (progress: number | undefined) => {
+    if (progress === undefined) return 'bg-gray-500';
+    if (progress >= 80) return 'bg-red-500';
+    if (progress >= 60) return 'bg-orange-500';
+    if (progress >= 40) return 'bg-yellow-500';
+    if (progress >= 20) return 'bg-green-500';
+    return 'bg-emerald-500';
   };
 
   return (
@@ -183,16 +88,19 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {activeBoost && (
+          {boostStatus.isActive && (
             <div className="bg-muted p-4 rounded-md space-y-2 mb-2">
               <div className="flex justify-between">
                 <Badge variant="secondary">
                   <Zap className="h-3 w-3 mr-1" />
-                  {activeBoost.boost_package.name}
+                  {boostStatus.boostPackage?.name}
                 </Badge>
-                <Badge variant="outline">{timeRemaining} remaining</Badge>
+                <Badge variant="outline">{boostStatus.remainingTime} remaining</Badge>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress 
+                value={boostStatus.progress} 
+                className={`h-2 ${getProgressColor(boostStatus.progress)}`} 
+              />
               <p className="text-xs text-muted-foreground">
                 Your profile is currently boosted and will appear with a VIP ribbon.
               </p>
@@ -213,7 +121,7 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
                 <div className="text-center">
                   <h3 className="font-medium">{pkg.name}</h3>
                   <div className="text-sm text-muted-foreground my-2">
-                    {formatDuration(pkg.duration)}
+                    {formatBoostDuration(pkg.duration)}
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
                     <Coins className="h-4 w-4 text-yellow-500" />
@@ -243,6 +151,7 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
               <TooltipContent>
                 <p className="max-w-xs">
                   Boosted profiles appear with a VIP ribbon and get higher priority in search results and browsing.
+                  The Oxum algorithm ensures fair and transparent boosting.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -255,7 +164,7 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
           </Button>
           <Button 
             onClick={handlePurchase} 
-            disabled={!selectedPackage || loading}
+            disabled={!selectedPackage || loading || !eligibility.eligible}
           >
             {loading ? (
               <>

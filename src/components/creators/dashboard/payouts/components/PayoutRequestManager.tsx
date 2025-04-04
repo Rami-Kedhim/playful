@@ -24,7 +24,7 @@ const PayoutRequestManager = ({
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<any | null>(null);
   
-  // Updated to return a Promise<boolean> (even though we don't use the return value here)
+  // Updated to return a Promise<boolean> as required by the interface
   const handleRequestSubmit = async (data: {
     amount: number;
     payoutMethod: string;
@@ -33,7 +33,7 @@ const PayoutRequestManager = ({
     setRequestAmount(data.amount);
     setPendingRequest(data);
     setConfirmationOpen(true);
-    return true; // Simply return true as this function doesn't actually process the request yet
+    return true; // Return true to indicate the request was accepted for confirmation
   };
   
   const handleConfirmRequest = async () => {

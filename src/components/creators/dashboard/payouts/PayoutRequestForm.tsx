@@ -45,7 +45,7 @@ const PayoutRequestForm = ({
   earnings,
   onRequestPayout,
   onCancel,
-  isSubmitting = false, // Set a default value
+  isSubmitting: formIsSubmitting = false, // Renamed to avoid conflict
 }: PayoutRequestFormProps) => {
   const [amount, setAmount] = useState<number>(earnings.available);
   const [payoutMethod, setPayoutMethod] = useState<string>("bank_transfer");
@@ -206,9 +206,9 @@ const PayoutRequestForm = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting || !isFormValid(amount, earnings.available, payoutMethod, details)}
+              disabled={isSubmitting || formIsSubmitting || !isFormValid(amount, earnings.available, payoutMethod, details)}
             >
-              {isSubmitting ? "Processing..." : "Request Payout"}
+              {isSubmitting || formIsSubmitting ? "Processing..." : "Request Payout"}
             </Button>
           </DialogFooter>
         </form>
