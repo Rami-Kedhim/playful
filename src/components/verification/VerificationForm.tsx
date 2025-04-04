@@ -10,7 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Loader2, Upload, Shield, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { submitVerificationRequest, canSubmitVerification } from '@/utils/verificationSystem';
+import { 
+  submitVerificationRequest, 
+  canSubmitVerification 
+} from '@/utils/verification';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
