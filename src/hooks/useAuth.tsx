@@ -1,5 +1,7 @@
 
 import { useState, useEffect, createContext, useContext } from "react";
+import { User } from "@supabase/supabase-js";
+import { toast } from "@/components/ui/use-toast";
 
 // Mock data for demo purposes
 interface User {
@@ -23,6 +25,7 @@ interface AuthContextType {
   register: (email: string, password: string, username: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateUserProfile: (userData: Partial<User>) => Promise<void>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -49,6 +52,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
   }, []);
+  
+  // Clear any authentication errors
+  const clearError = () => {
+    setError(null);
+  };
 
   const login = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
@@ -58,6 +66,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // Mock login - in a real app, you'd call an API
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Validate input
+      if (!email || !password) {
+        throw new Error("Email and password are required");
+      }
       
       // Mock successful login
       const mockUser: User = {
@@ -73,8 +86,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(mockUser);
       setUserRoles([mockUser.role || 'user']);
       localStorage.setItem("user", JSON.stringify(mockUser));
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
     } catch (err) {
-      setError("Invalid email or password");
+      const errorMessage = err instanceof Error ? err.message : "Invalid email or password";
+      setError(errorMessage);
+      toast({
+        title: "Login failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -86,6 +110,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
     
     try {
+      // Validate input
+      if (!email || !password || !username) {
+        throw new Error("All fields are required");
+      }
+      
+      if (password.length < 6) {
+        throw new Error("Password must be at least 6 characters");
+      }
+      
       // Mock registration - in a real app, you'd call an API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
@@ -102,8 +135,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(mockUser);
       setUserRoles(['user']);
       localStorage.setItem("user", JSON.stringify(mockUser));
+      
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created",
+      });
     } catch (err) {
-      setError("Registration failed");
+      const errorMessage = err instanceof Error ? err.message : "Registration failed";
+      setError(errorMessage);
+      toast({
+        title: "Registration failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -115,13 +159,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
     
     try {
+      // Validate input
+      if (!email) {
+        throw new Error("Email is required");
+      }
+      
       // Mock password reset - in a real app, you'd call an API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // In a real app, this would send a password reset email
       console.log(`Password reset requested for ${email}`);
+      
+      toast({
+        title: "Password reset email sent",
+        description: "Check your email for instructions",
+      });
     } catch (err) {
-      setError("Password reset failed");
+      const errorMessage = err instanceof Error ? err.message : "Password reset failed";
+      setError(errorMessage);
+      toast({
+        title: "Password reset failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -146,9 +206,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (userData.role && userData.role !== user.role) {
           setUserRoles([userData.role]);
         }
+        
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been updated successfully",
+        });
+      } else {
+        throw new Error("No user logged in");
       }
     } catch (err) {
-      setError("Profile update failed");
+      const errorMessage = err instanceof Error ? err.message : "Profile update failed";
+      setError(errorMessage);
+      toast({
+        title: "Profile update failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -159,6 +232,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setUserRoles([]);
     localStorage.removeItem("user");
+    
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+    });
   };
 
   const isAuthenticated = !!user;
@@ -174,7 +252,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       userRoles,
       register,
       resetPassword,
-      updateUserProfile
+      updateUserProfile,
+      clearError
     }}>
       {children}
     </AuthContext.Provider>

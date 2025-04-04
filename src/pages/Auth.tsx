@@ -5,12 +5,12 @@ import AuthForm from "@/components/auth/AuthForm";
 import { useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/components/layout/AppLayout";
 import { logContentAction } from "@/utils/debugUtils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Auth = () => {
-  const { login, register, resetPassword, isAuthenticated, isLoading, error } = useAuth();
+  const { login, register, resetPassword, isAuthenticated, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [authError, setAuthError] = useState<string | null>(error);
   
   // Get the return URL from location state or default to homepage
   const from = location.state?.from?.pathname || "/";
@@ -23,10 +23,12 @@ const Auth = () => {
     }
   }, [isAuthenticated, isLoading, navigate, from]);
   
-  // Update local error state when context error changes
+  // Clear any authentication errors when component unmounts or route changes
   useEffect(() => {
-    setAuthError(error);
-  }, [error]);
+    return () => {
+      clearError();
+    };
+  }, [clearError]);
   
   const handleLogin = async (email: string, password: string) => {
     logContentAction('Login attempt', { email });
@@ -50,12 +52,17 @@ const Auth = () => {
       <div className="container mx-auto py-16 px-4">
         <div className="max-w-md mx-auto">
           <h1 className="text-3xl font-bold text-center mb-8">Account Access</h1>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <AuthForm
             onLogin={handleLogin}
             onRegister={handleRegister}
             onForgotPassword={handleForgotPassword}
             isLoading={isLoading}
-            error={authError}
+            error={error}
           />
         </div>
       </div>

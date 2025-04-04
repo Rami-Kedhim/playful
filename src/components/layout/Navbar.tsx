@@ -10,12 +10,21 @@ import UserDropdown from "@/components/navigation/UserDropdown";
 import MobileMenu from "@/components/navigation/MobileMenu";
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const handleLogout = () => {
     logout();
     setIsMobileMenuOpen(false);
+  };
+  
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   };
   
   return (
@@ -39,7 +48,7 @@ const Navbar = () => {
               </Link>
             </Button>
             
-            {user ? (
+            {isAuthenticated ? (
               <>
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/favorites">
@@ -48,7 +57,7 @@ const Navbar = () => {
                 </Button>
                 
                 <UserDropdown 
-                  user={user} 
+                  user={user!}
                   handleLogout={handleLogout} 
                 />
               </>

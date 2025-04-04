@@ -6,14 +6,14 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: "user" | "creator" | "admin";
+  requiredRole?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children,
   requiredRole 
 }) => {
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { user, isLoading, isAuthenticated, userRoles } = useAuth();
   const location = useLocation();
   
   // Show loading spinner while checking authentication
@@ -31,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
   
   // If role is required and user doesn't have that role, redirect to home
-  if (requiredRole && user?.role !== requiredRole) {
+  if (requiredRole && user && !userRoles.includes(requiredRole)) {
     return <Navigate to="/" replace />;
   }
   
