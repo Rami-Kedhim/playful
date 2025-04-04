@@ -26,74 +26,32 @@ serve(async (req) => {
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     )
 
-    // Get the request body
+    // Get the request params for filtering
     const { country, category, limit = 24, page = 1 } = await req.json()
-
-    // Get the API key from environment variables
-    // @ts-ignore: Deno namespace
-    const CAM4_API_KEY = Deno.env.get('CAM4_API_KEY')
     
-    if (!CAM4_API_KEY) {
-      console.error('CAM4_API_KEY is not set in environment variables')
-      throw new Error('API key configuration error')
-    }
-
-    // Construct the API URL with query parameters
-    let url = `https://tools.cam4pays.com/api/cams?apiKey=${CAM4_API_KEY}&limit=${limit}`
-    
-    if (country && country !== 'all') url += `&country=${country}`
-    if (category && category !== 'all') url += `&category=${category}`
-    
-    // Calculate pagination offset
-    const offset = (page - 1) * limit
-    if (offset > 0) {
-      url += `&offset=${offset}`
-    }
-
-    console.log(`Fetching cams from: ${url.replace(CAM4_API_KEY, '[REDACTED]')}`)
-
-    // Make request to the Cam4 API
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+    // Log request for analytics purposes
+    try {
+      const { error: logError } = await supabaseClient
+        .from('livecams_logs')
+        .insert({
+          ip: req.headers.get('x-forwarded-for') || 'unknown',
+          event: 'api_fetch',
+          filters: { country, category, limit }
+        })
+      
+      if (logError) {
+        console.error('Error logging request:', logError)
       }
-    })
-    
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`API request failed: ${response.status} - ${errorText}`)
-      return new Response(
-        JSON.stringify(getMockResponse(country, category, limit, page)),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
-        }
-      )
+    } catch (err) {
+      console.error('Error logging to database:', err)
     }
+    
+    // Generate mock response data instead of calling cam4pays API
+    const mockData = getMockResponse(country, category, limit, page)
 
-    const rawData = await response.json()
-    console.log('Raw Cam4 API response:', JSON.stringify(rawData).substring(0, 200) + '...')
-    
-    // Transform the API response to match our expected format
-    const transformedData = transformApiResponse(rawData, page, limit)
-    
-    // Log the request for analytics purposes
-    const { error: logError } = await supabaseClient
-      .from('livecams_logs')
-      .insert({
-        ip: req.headers.get('x-forwarded-for') || 'unknown',
-        event: 'api_fetch',
-        filters: { country, category, limit }
-      })
-    
-    if (logError) {
-      console.error('Error logging request:', logError)
-    }
-
-    // Return the transformed data with CORS headers
+    // Return the mock data with CORS headers
     return new Response(
-      JSON.stringify(transformedData),
+      JSON.stringify(mockData),
       { 
         headers: { 
           ...corsHeaders, 
@@ -121,61 +79,6 @@ serve(async (req) => {
   }
 })
 
-// Helper function to transform API response to our format
-function transformApiResponse(apiData: any, page: number, limit: number) {
-  console.log('Transforming API response...');
-  
-  // Check if the response has the expected structure
-  if (!apiData || !apiData.cams) {
-    console.error('Unexpected API response format:', apiData);
-    return {
-      models: [],
-      totalCount: 0,
-      page,
-      pageSize: limit,
-      hasMore: false
-    };
-  }
-  
-  const models = Array.isArray(apiData.cams) ? apiData.cams.map((cam: any) => {
-    // Log the entire cam object to see all available fields
-    console.log(`Processing cam ${cam.username || 'unknown'}:`, JSON.stringify(cam).substring(0, 200));
-    
-    // Preserve ALL original image URLs exactly as they come from the API
-    const imageUrl = cam.image || cam.profileImageURL || cam.thumbnailUrl || null;
-    const thumbnailUrl = cam.thumbnail || cam.thumbnailUrl || cam.image || null;
-    
-    console.log(`Image URLs for ${cam.username || 'unknown'}: image=${imageUrl}, thumbnail=${thumbnailUrl}`);
-    
-    return {
-      id: cam.id || `cam-${Math.random().toString(36).substring(2, 9)}`,
-      username: cam.username || cam.name || 'unknown',
-      displayName: cam.displayName || cam.name || cam.username || 'Unknown Model',
-      imageUrl: imageUrl,
-      thumbnailUrl: thumbnailUrl,
-      isLive: cam.isLive !== undefined ? cam.isLive : true,
-      viewerCount: cam.viewers || cam.viewerCount || 0,
-      country: cam.country || 'Unknown',
-      categories: cam.categories || cam.tags || ['chat'],
-      age: cam.age || null,
-      language: cam.language || 'English',
-      description: cam.description || ''
-    };
-  }) : [];
-
-  // Count how many models have valid images
-  const validImageCount = models.filter(m => m.imageUrl && m.thumbnailUrl).length;
-  console.log(`Processed ${models.length} models, ${validImageCount} with valid images`);
-
-  return {
-    models,
-    totalCount: apiData.total || models.length * 10,
-    page,
-    pageSize: limit,
-    hasMore: models.length >= limit
-  };
-}
-
 // Helper function to generate mock data for development and fallback
 function getMockResponse(country?: string, category?: string, limit: number = 24, page: number = 1) {
   const mockModels = [];
@@ -183,19 +86,20 @@ function getMockResponse(country?: string, category?: string, limit: number = 24
   // Generate mock data based on the provided filters
   for (let i = 0; i < limit; i++) {
     const id = `model-${page}-${i}`;
+    const seed = id + "-" + Date.now().toString().substring(8, 13);
     mockModels.push({
       id,
       username: `model${page}${i}`,
       displayName: `Model ${page}${i}`,
-      // Use more reliable placeholder images
-      imageUrl: `https://picsum.photos/seed/${id}/800/450`,
-      thumbnailUrl: `https://picsum.photos/seed/${id}/200/200`,
+      imageUrl: `https://picsum.photos/seed/${seed}/800/450`,
+      thumbnailUrl: `https://picsum.photos/seed/${seed}/200/200`,
       isLive: Math.random() > 0.3,
       viewerCount: Math.floor(Math.random() * 1000),
       country: country || ['US', 'CA', 'UK', 'FR', 'DE'][Math.floor(Math.random() * 5)],
-      categories: category ? [category] : ['chat', 'dance', 'games', 'music'][Math.floor(Math.random() * 4)].split(','),
+      categories: category ? [category] : ['chat', 'dance', 'games', 'music'].slice(0, Math.floor(Math.random() * 3) + 1),
       age: 20 + Math.floor(Math.random() * 15),
-      language: ['English', 'Spanish', 'French', 'German'][Math.floor(Math.random() * 4)]
+      language: ['English', 'Spanish', 'French', 'German'][Math.floor(Math.random() * 4)],
+      description: "Welcome to my stream! I love interacting with my viewers."
     });
   }
   

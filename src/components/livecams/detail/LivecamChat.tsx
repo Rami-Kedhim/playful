@@ -1,207 +1,212 @@
 
 import React, { useState, useEffect, useRef } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send } from "lucide-react";
-import { useAuth } from "@/hooks/auth/useAuth";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SendHorizontal, SmilePlus } from "lucide-react";
 
-// Define the chat message type
 interface ChatMessage {
   id: string;
-  userId: string;
   username: string;
-  avatarUrl?: string;
   message: string;
   timestamp: Date;
   isOwner?: boolean;
+  isModerator?: boolean;
+  avatarUrl?: string;
 }
 
 interface LivecamChatProps {
   streamId: string;
+  streamOwnerName: string;
   isLive: boolean;
   viewerCount: number;
-  streamOwnerName: string;
 }
 
 const LivecamChat: React.FC<LivecamChatProps> = ({
   streamId,
-  isLive,
-  viewerCount,
   streamOwnerName,
+  isLive,
+  viewerCount
 }) => {
-  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // In a real app, get this from auth context
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { user } = useAuth();
-
-  // Mock data - In a real app, these would come from a real-time service
-  useEffect(() => {
-    if (isLive) {
-      // Simulate initial messages
-      const initialMessages: ChatMessage[] = [
-        {
-          id: "1",
-          userId: "system",
-          username: "System",
-          message: `Welcome to ${streamOwnerName}'s livestream!`,
-          timestamp: new Date(Date.now() - 1000 * 60 * 5),
-          isOwner: false,
-        },
-        {
-          id: "2",
-          userId: "user1",
-          username: "ViewerOne",
-          avatarUrl: "https://picsum.photos/seed/user1/200",
-          message: "Hey everyone! Excited for the stream today!",
-          timestamp: new Date(Date.now() - 1000 * 60 * 3),
-          isOwner: false,
-        },
-        {
-          id: "3",
-          userId: "streamer",
-          username: streamOwnerName,
-          avatarUrl: "https://picsum.photos/seed/streamer/200",
-          message: "Thanks for joining! We're going to have a great time.",
-          timestamp: new Date(Date.now() - 1000 * 60 * 2),
-          isOwner: true,
-        },
-      ];
-      
-      setMessages(initialMessages);
-      
-      // Simulate incoming messages every so often
-      const interval = setInterval(() => {
-        const randomViewers = ["Viewer123", "FunWatcher", "StreamFan", "LuckyUser"];
-        const randomViewer = randomViewers[Math.floor(Math.random() * randomViewers.length)];
-        const randomMessages = [
-          "This is amazing!",
-          "How long have you been streaming?",
-          "Hello from Paris!",
-          "What's your favorite thing about streaming?",
-          "I'm a new subscriber!",
-        ];
-        const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-        
-        // 30% chance of adding a new simulated message
-        if (Math.random() > 0.7) {
-          const newMessage: ChatMessage = {
-            id: Date.now().toString(),
-            userId: `user${Math.floor(Math.random() * 1000)}`,
-            username: randomViewer,
-            avatarUrl: `https://picsum.photos/seed/${randomViewer}/200`,
-            message: randomMessage,
-            timestamp: new Date(),
-            isOwner: false,
-          };
-          
-          setMessages(prev => [...prev, newMessage]);
-        }
-      }, 10000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [isLive, streamOwnerName]);
   
-  // Scroll to bottom when new messages arrive
+  // Simulate user login state - in a real app, get this from authentication context
+  useEffect(() => {
+    // Simulate checking login status
+    const checkLoginStatus = async () => {
+      // Mocked authentication check
+      const mockLoggedIn = Math.random() > 0.3; // 70% chance of being logged in
+      setIsLoggedIn(mockLoggedIn);
+    };
+    
+    checkLoginStatus();
+  }, []);
+  
+  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
-  const handleSendMessage = () => {
-    if (!message.trim() || !user) return;
+  // Simulate receiving chat messages
+  useEffect(() => {
+    if (!isLive) return;
     
-    // Create a new message
+    // Initial messages
+    const initialMessages: ChatMessage[] = [
+      {
+        id: `system-welcome`,
+        username: "System",
+        message: `Welcome to ${streamOwnerName}'s live stream!`,
+        timestamp: new Date(),
+        isModerator: true
+      }
+    ];
+    
+    setMessages(initialMessages);
+    
+    // Simulate getting periodic messages
+    const interval = setInterval(() => {
+      if (Math.random() > 0.6) { // 40% chance of new message
+        const mockUsernames = ["Alex", "Robin", "Jordan", "Taylor", "Casey"];
+        const mockMessages = [
+          "Hello everyone!",
+          "How are you today?",
+          "Great stream!",
+          "Love your content!",
+          "Where are you from?",
+          "How long are you streaming today?",
+          "You look amazing!",
+          "What's your favorite music?",
+          "Do you stream every day?"
+        ];
+        
+        const newMessage: ChatMessage = {
+          id: `msg-${Date.now()}-${Math.random()}`,
+          username: mockUsernames[Math.floor(Math.random() * mockUsernames.length)],
+          message: mockMessages[Math.floor(Math.random() * mockMessages.length)],
+          timestamp: new Date(),
+          avatarUrl: `https://picsum.photos/seed/${Math.random()}/50/50`
+        };
+        
+        setMessages(prev => [...prev, newMessage]);
+      }
+      
+      // Occasionally add a message from the stream owner
+      if (Math.random() > 0.9) { // 10% chance
+        const ownerMessage: ChatMessage = {
+          id: `owner-${Date.now()}`,
+          username: streamOwnerName,
+          message: "Thanks for watching my stream everyone! Don't forget to subscribe!",
+          timestamp: new Date(),
+          isOwner: true,
+          avatarUrl: `https://picsum.photos/seed/${streamOwnerName}/50/50`
+        };
+        
+        setMessages(prev => [...prev, ownerMessage]);
+      }
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [isLive, streamOwnerName]);
+  
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputMessage.trim() || !isLoggedIn) return;
+    
     const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      userId: user.id,
-      username: user.username || "Anonymous",
-      avatarUrl: user.profileImageUrl,
-      message: message.trim(),
+      id: `user-${Date.now()}`,
+      username: "You", // In a real app, get from auth context
+      message: inputMessage.trim(),
       timestamp: new Date(),
+      avatarUrl: "https://picsum.photos/seed/currentuser/50/50" // In a real app, get from user profile
     };
     
-    // Add to messages
-    setMessages([...messages, newMessage]);
-    
-    // Clear input
-    setMessage("");
-  };
-  
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSendMessage();
-    }
+    setMessages(prev => [...prev, newMessage]);
+    setInputMessage("");
   };
   
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-semibold">Live Chat</CardTitle>
-          <Badge variant="secondary">{viewerCount} viewers</Badge>
-        </div>
-      </CardHeader>
+    <div className="flex flex-col h-full rounded-md border bg-background shadow">
+      <div className="p-3 border-b">
+        <h3 className="font-semibold flex items-center justify-between">
+          <span>Live Chat</span>
+          <span className="text-sm text-muted-foreground">
+            {viewerCount} {viewerCount === 1 ? 'viewer' : 'viewers'}
+          </span>
+        </h3>
+      </div>
       
-      <CardContent className="flex-grow overflow-y-auto max-h-[400px] pb-0">
-        <div className="space-y-4">
-          {messages.length > 0 ? (
-            messages.map((msg) => (
+      <ScrollArea className="flex-grow p-3">
+        {messages.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+            No messages yet
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map((msg) => (
               <div key={msg.id} className="flex items-start gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={msg.avatarUrl} />
-                  <AvatarFallback>{msg.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={msg.avatarUrl} alt={msg.username} />
+                  <AvatarFallback>{msg.username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div className="space-y-1">
+                <div>
                   <div className="flex items-center gap-2">
-                    <span className={`font-medium text-sm ${msg.isOwner ? "text-primary" : ""}`}>
+                    <span className={`font-medium text-sm ${msg.isOwner ? "text-primary" : msg.isModerator ? "text-blue-500" : ""}`}>
                       {msg.username}
+                      {msg.isOwner && <span className="ml-1 text-xs bg-primary/20 text-primary px-1 rounded">Host</span>}
+                      {msg.isModerator && <span className="ml-1 text-xs bg-blue-500/20 text-blue-500 px-1 rounded">Mod</span>}
                     </span>
-                    {msg.isOwner && (
-                      <Badge variant="outline" className="text-xs py-0 h-5">
-                        Streamer
-                      </Badge>
-                    )}
                     <span className="text-xs text-muted-foreground">
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {msg.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
-                  <p className="text-sm">{msg.message}</p>
+                  <p className="text-sm mt-0.5">{msg.message}</p>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              {isLive ? "Chat is quiet. Be the first to say hello!" : "Chat is disabled when stream is offline."}
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </CardContent>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+      </ScrollArea>
       
-      <CardFooter className="pt-4 mt-auto">
-        {isLive ? (
-          <div className="flex w-full gap-2">
+      <form onSubmit={handleSendMessage} className="p-3 border-t">
+        {isLoggedIn ? (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost" 
+              size="icon"
+              type="button"
+              className="shrink-0"
+              title="Add emoji"
+            >
+              <SmilePlus className="h-5 w-5" />
+            </Button>
             <Input
               placeholder="Type a message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={!user}
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              className="flex-grow"
             />
-            <Button onClick={handleSendMessage} disabled={!message.trim() || !user}>
-              <Send className="h-4 w-4" />
+            <Button size="icon" className="shrink-0" disabled={!inputMessage.trim()}>
+              <SendHorizontal className="h-5 w-5" />
             </Button>
           </div>
         ) : (
-          <div className="w-full text-center text-muted-foreground text-sm">
-            Chat is disabled while the stream is offline
+          <div className="text-center p-2">
+            <p className="text-sm text-muted-foreground mb-2">
+              You need to sign in to chat
+            </p>
+            <Button variant="outline" size="sm">
+              Sign In
+            </Button>
           </div>
         )}
-      </CardFooter>
-    </Card>
+      </form>
+    </div>
   );
 };
 

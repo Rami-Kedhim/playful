@@ -1,72 +1,175 @@
 
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
 import { LivecamModel } from "@/types/livecams";
+import { LivecamStats } from "./";
+import { LivecamActions } from "./";
+import { Expand, Pause, Play, SpeakerX, Speaker, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export interface LivecamMainContentProps {
+interface LivecamMainContentProps {
   model: LivecamModel;
 }
 
 const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
+  const [isPlaying, setIsPlaying] = useState<boolean>(model.isLive);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [loadProgress, setLoadProgress] = useState<number>(0);
+  
+  // Simulate video loading
+  useEffect(() => {
+    if (!model.isLive) return;
+    
+    const interval = setInterval(() => {
+      setLoadProgress(prev => {
+        const newValue = prev + (20 * Math.random());
+        return newValue >= 100 ? 100 : newValue;
+      });
+    }, 500);
+    
+    return () => clearInterval(interval);
+  }, [model.isLive]);
+  
+  const togglePlay = () => {
+    if (!model.isLive) return;
+    setIsPlaying(!isPlaying);
+  };
+  
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+  
+  const toggleFullscreen = () => {
+    const videoContainer = document.getElementById('video-container');
+    
+    if (!document.fullscreenElement && videoContainer) {
+      videoContainer.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      });
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
+  
   return (
-    <div className="space-y-6">
-      {/* Livecam stream container */}
-      <Card className="bg-black relative">
-        <div className="aspect-video relative">
-          {model.isLive ? (
-            <>
-              <img 
-                src={model.thumbnailUrl || "/placeholders/stream-placeholder.jpg"} 
-                alt={`${model.displayName}'s livestream`}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-4 left-4 flex items-center gap-2">
-                <Badge variant="destructive" className="animate-pulse">LIVE</Badge>
-                <Badge variant="secondary">{model.viewerCount || 0} viewers</Badge>
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-full flex-col text-center">
-              <p className="text-xl text-white mb-2">{model.displayName} is currently offline</p>
-              <p className="text-sm text-gray-400">Check back later or subscribe for notifications</p>
+    <div className="flex flex-col gap-4">
+      {/* Video player */}
+      <div 
+        id="video-container"
+        className="aspect-video relative rounded-md overflow-hidden border bg-zinc-950"
+      >
+        {model.isLive ? (
+          <>
+            {/* Mock video player - in a real app, use a proper video player component */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {loadProgress < 100 ? (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-white text-sm">Loading stream...</div>
+                  <div className="w-48 h-1 bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary transition-all duration-300 ease-out"
+                      style={{width: `${loadProgress}%`}}
+                    ></div>
+                  </div>
+                </div>
+              ) : (
+                <img 
+                  src={model.imageUrl} 
+                  alt={model.displayName} 
+                  className="w-full h-full object-cover"
+                  onClick={togglePlay}
+                />
+              )}
             </div>
-          )}
-        </div>
-      </Card>
-
-      {/* Model info and description */}
-      <Card>
-        <CardContent className="p-6">
-          <h1 className="text-2xl font-bold mb-2">{model.displayName}</h1>
-          
-          <div className="flex items-center gap-2 text-muted-foreground mb-4">
-            <span>{model.age} years</span>
-            <span>•</span>
-            <span>{model.country}</span>
-          </div>
-          
-          <p className="text-gray-400">{model.description || "No description available."}</p>
-          
-          <Tabs defaultValue="about" className="mt-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="about">About</TabsTrigger>
-              <TabsTrigger value="schedule">Schedule</TabsTrigger>
-              <TabsTrigger value="photos">Photos</TabsTrigger>
-            </TabsList>
-            <TabsContent value="about" className="mt-4 space-y-4">
-              <p>{model.description || "No bio information available."}</p>
-            </TabsContent>
-            <TabsContent value="schedule" className="mt-4 space-y-4">
-              <p>Upcoming shows schedule will appear here.</p>
-            </TabsContent>
-            <TabsContent value="photos" className="mt-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {/* Replace with actual gallery rendering if property becomes available */}
-                <p>Gallery feature coming soon.</p>
+            
+            {/* Overlay for live status */}
+            <div className="absolute top-4 left-4 z-10">
+              <Badge variant="destructive" className="bg-red-600 text-white">
+                LIVE
+              </Badge>
+            </div>
+            
+            {/* Video controls */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="text-white h-8 w-8"
+                  onClick={togglePlay}
+                >
+                  {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                </Button>
+                
+                <Button 
+                  size="icon" 
+                  variant="ghost"
+                  className="text-white h-8 w-8"
+                  onClick={toggleMute}
+                >
+                  {isMuted ? <SpeakerX className="h-5 w-5" /> : <Speaker className="h-5 w-5" />}
+                </Button>
               </div>
-            </TabsContent>
-          </Tabs>
+              
+              <div className="flex items-center gap-2">
+                <Button 
+                  size="icon" 
+                  variant="ghost"
+                  className="text-white h-8 w-8"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+                
+                <Button 
+                  size="icon" 
+                  variant="ghost"
+                  className="text-white h-8 w-8"
+                  onClick={toggleFullscreen}
+                >
+                  <Expand className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 text-white">
+            <div className="text-center p-4">
+              <div className="text-xl font-bold mb-2">{model.displayName} is offline</div>
+              <p className="text-gray-400">Check back later or browse other live streams</p>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Stream info */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-xl">{model.displayName}</CardTitle>
+              <CardDescription className="text-sm">
+                {model.country && <span className="mr-2">{model.country}</span>}
+                {model.categories && model.categories.map(category => (
+                  <Badge key={category} variant="outline" className="mr-1">{category}</Badge>
+                ))}
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {model.description && (
+            <p className="text-sm text-muted-foreground">{model.description}</p>
+          )}
+          
+          {model.isLive && <LivecamStats model={model} />}
+          
+          <LivecamActions model={model} />
         </CardContent>
       </Card>
     </div>

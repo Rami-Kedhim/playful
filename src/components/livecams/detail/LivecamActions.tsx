@@ -1,173 +1,137 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  Heart, 
-  MessageSquare, 
-  Share2, 
-  Bookmark, 
-  Flag, 
-  Bell,
-  BellOff
-} from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Heart, Share2, Flag, Gift, Wallet, Star, MessageCircle } from "lucide-react";
+import { LivecamModel } from "@/types/livecams";
 import { toast } from "@/components/ui/use-toast";
 
 interface LivecamActionsProps {
-  isLive: boolean;
-  onChat?: () => void;
-  onFollow?: () => void;
+  model: LivecamModel;
+  onStartChat?: () => void;
 }
 
-const LivecamActions: React.FC<LivecamActionsProps> = ({
-  isLive,
-  onChat = () => {},
-  onFollow = () => {},
-}) => {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [isNotified, setIsNotified] = useState(false);
+const LivecamActions: React.FC<LivecamActionsProps> = ({ model, onStartChat }) => {
+  const [liked, setLiked] = useState(false);
+  const [favorited, setFavorited] = useState(false);
   
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
-    onFollow();
-    
+  const handleLike = () => {
+    setLiked(!liked);
     toast({
-      title: isFollowing ? "Unfollowed" : "Following",
-      description: isFollowing ? "You will no longer follow this model" : "You are now following this model",
+      title: liked ? "Like removed" : "Thanks for your like!",
+      description: liked ? `You've removed your like from ${model.displayName}'s stream` : `You've liked ${model.displayName}'s stream`,
     });
   };
   
   const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    
+    setFavorited(!favorited);
     toast({
-      title: isFavorite ? "Removed from favorites" : "Added to favorites",
-      description: isFavorite ? "Removed from your favorites" : "Added to your favorites",
+      title: favorited ? "Removed from favorites" : "Added to favorites!",
+      description: favorited 
+        ? `${model.displayName} has been removed from your favorites` 
+        : `${model.displayName} has been added to your favorites`,
     });
   };
   
-  const handleNotification = () => {
-    setIsNotified(!isNotified);
-    
-    toast({
-      title: isNotified ? "Notifications off" : "Notifications on",
-      description: isNotified 
-        ? "You will no longer receive notifications" 
-        : "You'll be notified when this model goes live",
+  const handleShare = () => {
+    // Mock share functionality - in a real app, integrate share API
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      toast({
+        title: "Link copied!",
+        description: "Share link has been copied to your clipboard",
+      });
     });
   };
   
   const handleReport = () => {
     toast({
-      title: "Report submitted",
-      description: "Thank you for your feedback. Our team will review this stream.",
+      title: "Report",
+      description: "Report functionality will be available soon",
     });
   };
-
+  
+  const handleSendGift = () => {
+    toast({
+      title: "Send gift",
+      description: "Gift sending functionality will be available soon",
+    });
+  };
+  
+  const handleTip = () => {
+    toast({
+      title: "Tip",
+      description: "Tipping functionality will be available soon",
+    });
+  };
+  
   return (
-    <div className="flex gap-2 flex-wrap">
-      <Button className="flex-1" onClick={onChat}>
-        <MessageSquare size={18} className="mr-2" />
-        Start Chat
+    <div className="flex flex-wrap gap-2">
+      <Button 
+        variant={liked ? "default" : "outline"} 
+        size="sm"
+        onClick={handleLike}
+        className={liked ? "bg-red-500 hover:bg-red-600" : ""}
+      >
+        <Heart className={`h-4 w-4 mr-1 ${liked ? "fill-current" : ""}`} />
+        {liked ? "Liked" : "Like"}
       </Button>
       
       <Button 
-        variant={isFollowing ? "secondary" : "outline"} 
-        className="flex-1" 
-        onClick={handleFollow}
+        variant={favorited ? "default" : "outline"} 
+        size="sm"
+        onClick={handleFavorite}
+        className={favorited ? "bg-yellow-500 hover:bg-yellow-600" : ""}
       >
-        <Heart 
-          size={18} 
-          className={`mr-2 ${isFollowing ? "fill-current" : ""}`} 
-        />
-        {isFollowing ? "Following" : "Follow"}
+        <Star className={`h-4 w-4 mr-1 ${favorited ? "fill-current" : ""}`} />
+        {favorited ? "Favorited" : "Favorite"}
       </Button>
       
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={handleFavorite}
-            >
-              <Bookmark 
-                size={18} 
-                className={isFavorite ? "fill-current" : ""} 
-              />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{isFavorite ? "Remove from favorites" : "Save to favorites"}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={handleShare}
+      >
+        <Share2 className="h-4 w-4 mr-1" />
+        Share
+      </Button>
       
-      {!isLive && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={handleNotification}
-              >
-                {isNotified ? <BellOff size={18} /> : <Bell size={18} />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isNotified ? "Turn off notifications" : "Get notified when live"}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleTip}
+        className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+      >
+        <Wallet className="h-4 w-4 mr-1" />
+        Tip
+      </Button>
       
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
-            <Share2 size={18} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => {
-            navigator.clipboard.writeText(window.location.href);
-            toast({ title: "Link copied to clipboard" });
-          }}>
-            Copy link
-          </DropdownMenuItem>
-          <DropdownMenuItem>Share to social</DropdownMenuItem>
-          <DropdownMenuItem>Embed</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={handleReport}
-            >
-              <Flag size={18} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Report this stream</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={handleSendGift}
+        className="bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
+      >
+        <Gift className="h-4 w-4 mr-1" />
+        Gift
+      </Button>
+      
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={onStartChat}
+      >
+        <MessageCircle className="h-4 w-4 mr-1" />
+        Chat
+      </Button>
+      
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={handleReport}
+        className="text-destructive hover:text-destructive"
+      >
+        <Flag className="h-4 w-4 mr-1" />
+        Report
+      </Button>
     </div>
   );
 };

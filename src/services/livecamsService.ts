@@ -8,14 +8,9 @@ export const fetchLivecams = async (
   filters: LivecamsFilter = {}
 ): Promise<LivecamsResponse> => {
   try {
-    // Make an API call to our backend which will communicate with Cam4
-    const { country, category, limit = 24, page = 1 } = filters;
-    
-    console.log("Fetching livecams with filters:", filters);
-    
-    // Call the Supabase Edge Function
+    // Call the Supabase Edge Function that now returns only mock data
     const { data, error } = await supabase.functions.invoke('get-livecams', {
-      body: { country, category, limit, page }
+      body: { ...filters }
     });
     
     if (error) {
@@ -37,32 +32,23 @@ export const fetchLivecams = async (
       throw new Error("Invalid data format received from API");
     }
     
-    // Process the models but preserve the original image URLs
+    // Process and validate the models
     const validatedModels = data.models.map((model: any) => {
-      // Log original URLs for debugging
-      console.log(`Model ${model.username || 'unknown'} - Original URLs:`, {
-        imageUrl: model.imageUrl,
-        thumbnailUrl: model.thumbnailUrl
-      });
-      
-      // Only provide fallbacks if the URLs are completely missing
-      const imageUrl = model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`;
-      const thumbnailUrl = model.thumbnailUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`;
-      
       // Ensure the model has all required fields
       const validatedModel: LivecamModel = {
         id: model.id || `id-${Math.random().toString(36).substring(2)}`,
         username: model.username || 'unknown',
         displayName: model.displayName || model.username || 'Unknown',
-        imageUrl,
-        thumbnailUrl,
+        imageUrl: model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`,
+        thumbnailUrl: model.thumbnailUrl || `https://picsum.photos/seed/${model.id || model.username}/200/200`,
         isLive: model.isLive !== undefined ? model.isLive : false,
         viewerCount: model.viewerCount !== undefined ? model.viewerCount : 0,
         country: model.country || undefined,
         categories: Array.isArray(model.categories) ? model.categories : [],
         age: model.age || undefined,
         language: model.language || undefined,
-        description: model.description || undefined
+        description: model.description || undefined,
+        streamUrl: model.streamUrl || undefined
       };
       
       return validatedModel;
@@ -71,15 +57,15 @@ export const fetchLivecams = async (
     return {
       models: validatedModels,
       totalCount: data.totalCount || validatedModels.length,
-      page: data.page || page,
-      pageSize: data.pageSize || limit,
+      page: data.page || filters.page || 1,
+      pageSize: data.pageSize || filters.limit || 24,
       hasMore: data.hasMore !== undefined ? data.hasMore : false
     };
   } catch (error: any) {
     console.error("Livecams service error:", error);
     toast.error(`Error: ${error.message || "Failed to load livecams"}`);
     
-    // For development/demo, return mock data when API fails
+    // Return mock data when API fails
     return getMockLivecams(filters);
   }
 };
@@ -97,15 +83,15 @@ const getMockLivecams = (filters: LivecamsFilter): LivecamsResponse => {
       id,
       username: `model${page}${i}`,
       displayName: `Model ${page}${i}`,
-      // Use more reliable placeholder images with unique seeds
       imageUrl: `https://picsum.photos/seed/${seed}/800/450`,
       thumbnailUrl: `https://picsum.photos/seed/${seed}/200/200`,
       isLive: Math.random() > 0.3,
       viewerCount: Math.floor(Math.random() * 1000),
       country: filters.country || ['US', 'CA', 'UK', 'FR', 'DE'][Math.floor(Math.random() * 5)],
-      categories: ['chat', 'dance', 'games', 'music'][Math.floor(Math.random() * 4)].split(','),
+      categories: filters.category ? [filters.category] : ['chat', 'dance', 'games', 'music'].slice(0, Math.floor(Math.random() * 3) + 1),
       age: 20 + Math.floor(Math.random() * 15),
-      language: ['English', 'Spanish', 'French', 'German'][Math.floor(Math.random() * 4)]
+      language: ['English', 'Spanish', 'French', 'German'][Math.floor(Math.random() * 4)],
+      description: "Welcome to my stream! I love interacting with my viewers."
     });
   }
   
