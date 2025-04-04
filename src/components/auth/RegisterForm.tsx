@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import FormField from "./FormField";
 import PasswordInput from "./PasswordInput";
+import PasswordStrength from "./PasswordStrength";
 
 interface RegisterFormProps {
   email: string;
@@ -62,6 +63,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Create a password"
         />
+        <PasswordStrength password={password} />
       </FormField>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
