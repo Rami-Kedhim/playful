@@ -11,11 +11,12 @@ import ProfileSettings from "@/pages/dashboard/ProfileSettings";
 import NotFound from "@/pages/NotFound";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 import Home from "@/pages/Home";
+import { Outlet } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: <MainLayout><Outlet /></MainLayout>,
     children: [
       { index: true, element: <Home /> },
       { path: "escorts", element: <Escorts /> },
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <PrivateRoute><MainLayout /></PrivateRoute>,
+    element: <PrivateRoute><MainLayout><Outlet /></MainLayout></PrivateRoute>,
     children: [
       { index: true, element: <Dashboard /> },
       { path: "profile", element: <ProfileSettings /> },

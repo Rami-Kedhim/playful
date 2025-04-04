@@ -2,15 +2,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { Toaster } from "@/components/ui/toaster";
 import Router from "./router";
-import { ThemeProvider } from "@/components/theme/theme-provider";
+import { AppProviders } from "@/components/providers/AppProviders";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="lucent-ui-theme">
+    <AppProviders>
       <Router />
-      <Toaster />
-    </ThemeProvider>
+    </AppProviders>
   </React.StrictMode>
 );
