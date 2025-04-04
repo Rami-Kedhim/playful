@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Users, Globe } from "lucide-react";
 import LivecamBoostControls from './LivecamBoostControls';
 import LivecamBoostBadge from './LivecamBoostBadge';
-import { LivecamModel } from '@/types/livecams';
+import { LivecamModel, Livecam } from '@/types/livecams';
 
 interface LivecamCardProps {
   model: LivecamModel;
@@ -23,7 +23,8 @@ const LivecamCard = ({
   onBoost = () => false,
   onCancelBoost = () => false
 }: LivecamCardProps) => {
-  const livecam = {
+  // Convert to boost interface format for the boost controls
+  const livecam: Livecam = {
     id: model.id,
     username: model.username,
     name: model.displayName,

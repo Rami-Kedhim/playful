@@ -3,7 +3,7 @@
  * Hook to access livecams with boost capabilities
  */
 import { useState, useEffect, useCallback } from 'react';
-import { Livecam } from '@/types/livecams';
+import { LivecamModel } from '@/types/livecams';
 import { useLivecams } from './useLivecams';
 import livecamBoost from '@/services/visibility/LivecamBoostAdapter';
 import { useToast } from '@/components/ui/use-toast';
@@ -24,32 +24,16 @@ export function useBoostableLivecams(initialFilters = {}) {
   const { toast } = useToast();
   const [boostedIds, setBoostedIds] = useState<string[]>([]);
   
-  // Convert models to Livecam type for boost system
-  const livecams = models.map(model => ({
-    id: model.id,
-    username: model.username,
-    name: model.displayName,
-    imageUrl: model.imageUrl,
-    thumbnailUrl: model.thumbnailUrl,
-    isStreaming: model.isLive,
-    viewerCount: model.viewerCount || 0,
-    region: model.country || 'unknown',
-    language: model.language || 'en',
-    tags: model.categories || [],
-    category: model.categories?.[0] || 'general',
-    rating: 5 // Default high rating
-  }));
-  
   // Update boosted IDs on load
   useEffect(() => {
     // In a real app, we'd fetch this from an API
     // For now, just use a mock check
-    setBoostedIds(livecams.filter(lc => lc.id.endsWith('1')).map(lc => lc.id));
-  }, [livecams]);
+    setBoostedIds(models.filter(lc => lc.id.endsWith('1')).map(lc => lc.id));
+  }, [models]);
   
   // Boost a livecam
   const boostLivecam = useCallback((livecamId: string, intensity?: number, durationHours?: number) => {
-    const livecam = livecams.find(lc => lc.id === livecamId);
+    const livecam = models.find(lc => lc.id === livecamId);
     if (!livecam) {
       toast({
         title: "Boost Error",
@@ -59,17 +43,33 @@ export function useBoostableLivecams(initialFilters = {}) {
       return false;
     }
     
-    livecamBoost.boostLivecam(livecam, intensity, durationHours);
+    // Convert LivecamModel to what the boost adapter needs
+    const boostableLivecam = {
+      id: livecam.id,
+      username: livecam.username,
+      name: livecam.displayName,
+      imageUrl: livecam.imageUrl,
+      thumbnailUrl: livecam.thumbnailUrl || livecam.imageUrl,
+      isStreaming: livecam.isLive,
+      viewerCount: livecam.viewerCount || 0,
+      region: livecam.country || 'unknown',
+      language: livecam.language || 'en',
+      tags: livecam.categories || [],
+      category: livecam.categories?.[0] || 'general',
+      rating: 5 // Default high rating
+    };
+    
+    livecamBoost.boostLivecam(boostableLivecam, intensity, durationHours);
     
     setBoostedIds(prev => [...prev, livecamId]);
     
     toast({
       title: "Boost Applied",
-      description: `${livecam.name || livecam.username} has been boosted!`,
+      description: `${livecam.displayName || livecam.username} has been boosted!`,
     });
     
     return true;
-  }, [livecams, toast]);
+  }, [models, toast]);
   
   // Cancel a boost
   const cancelBoost = useCallback((livecamId: string) => {
@@ -91,7 +91,7 @@ export function useBoostableLivecams(initialFilters = {}) {
   }, [boostedIds]);
   
   return {
-    livecams,
+    livecams: models, // Return the original models directly
     loading,
     error,
     filters,
