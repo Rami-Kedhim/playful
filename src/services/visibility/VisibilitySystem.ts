@@ -117,6 +117,13 @@ export class VisibilitySystem {
       console.log(`Updated item ${id} score to ${newScore}, effective: ${effectiveScore}`);
     }
   }
+
+  /**
+   * Get a specific item by its ID
+   */
+  public getItem(id: string): VisibilityItem | undefined {
+    return this.items.get(id);
+  }
 }
 
 // Create singleton instance
