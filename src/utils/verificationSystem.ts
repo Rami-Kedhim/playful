@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { VerificationRequest, VerificationStatus } from "@/types/escort";
 import { toast } from "@/components/ui/use-toast";
@@ -73,7 +74,7 @@ export const submitVerificationRequest = async (
     // 4. Update user profile verification status
     await supabase
       .from('profiles')
-      .update({ verification_status: 'pending' })
+      .update({ verification_status: 'pending' as VerificationStatus })
       .eq('id', userId);
     
     return {
