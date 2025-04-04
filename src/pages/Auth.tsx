@@ -30,18 +30,14 @@ const Auth = () => {
   
   const handleLogin = async (email: string, password: string) => {
     logContentAction('Login attempt', { email });
-    const success = await login(email, password);
-    if (success) {
-      navigate(from, { replace: true });
-    }
+    await login(email, password);
+    // After login completes, let the useEffect handle redirect if authenticated
   };
   
   const handleRegister = async (email: string, password: string, username: string) => {
     logContentAction('Registration attempt', { email, username });
-    const success = await register(email, password, username);
-    if (success) {
-      navigate(from, { replace: true });
-    }
+    await register(email, password, username);
+    // After registration completes, let the useEffect handle redirect if authenticated
   };
   
   const handleForgotPassword = async (email: string) => {

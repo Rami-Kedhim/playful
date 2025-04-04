@@ -20,8 +20,8 @@ interface AuthContextType {
   error: string | null;
   isAuthenticated: boolean;
   userRoles: string[];
-  register: (email: string, password: string, username: string) => Promise<boolean>;
-  resetPassword: (email: string) => Promise<boolean>;
+  register: (email: string, password: string, username: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   updateUserProfile: (userData: Partial<User>) => Promise<void>;
 }
 
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const register = async (email: string, password: string, username: string) => {
+  const register = async (email: string, password: string, username: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
@@ -102,17 +102,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(mockUser);
       setUserRoles(['user']);
       localStorage.setItem("user", JSON.stringify(mockUser));
-      return true;
     } catch (err) {
       setError("Registration failed");
       console.error(err);
-      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (email: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
@@ -122,17 +120,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // In a real app, this would send a password reset email
       console.log(`Password reset requested for ${email}`);
-      return true;
     } catch (err) {
       setError("Password reset failed");
       console.error(err);
-      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updateUserProfile = async (userData: Partial<User>) => {
+  const updateUserProfile = async (userData: Partial<User>): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
