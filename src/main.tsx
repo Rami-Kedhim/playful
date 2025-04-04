@@ -1,20 +1,16 @@
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { BrowserRouter } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
-import { AuthProvider } from './hooks/auth/useAuth'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import { Toaster } from "@/components/ui/toaster";
+import Router from "./router";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <HelmetProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </BrowserRouter>
-    </HelmetProvider>
-  </React.StrictMode>,
-)
+    <ThemeProvider defaultTheme="dark" storageKey="lucent-ui-theme">
+      <Router />
+      <Toaster />
+    </ThemeProvider>
+  </React.StrictMode>
+);

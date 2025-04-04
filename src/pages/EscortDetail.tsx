@@ -1,83 +1,155 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { escorts } from "@/data/escortData";
-import { getEscortById } from "@/utils/escortUtils";
-import MainLayout from "@/components/layout/MainLayout";
-import EscortProfile from "@/components/escorts/detail/EscortProfile";
+
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Escort } from "@/types/escort";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, AlertTriangle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import EscortProfile from "@/components/escorts/detail/EscortProfile";
+import { BookingForm } from "@/components/escorts/detail/booking";
+
+// Dummy data fetch function - replace with real API call later
+const fetchEscortById = async (id: string): Promise<Escort | null> => {
+  // For MVP, we'll return dummy data
+  // Later, implement with Supabase fetch
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id,
+        name: "Sophia Rose",
+        age: 28,
+        location: "London, UK",
+        price: 200,
+        imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1288&auto=format&fit=crop",
+        gallery: [
+          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1287&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1064&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1287&auto=format&fit=crop"
+        ],
+        rating: 4.8,
+        reviews: 24,
+        tags: ["GFE", "Massage", "Dinner Date"],
+        description: "I'm Sophia, a sophisticated companion available for dinner dates, weekend getaways, and intimate encounters. I pride myself on creating an authentic connection and unforgettable experiences.",
+        verified: true,
+        gender: "female",
+        sexualOrientation: "bisexual",
+        availableNow: true,
+        lastActive: "2023-05-15T14:30:00Z",
+        responseRate: 95,
+        languages: ["English", "French", "Spanish"],
+        height: "170cm",
+        weight: "58kg",
+        measurements: "34C-26-36",
+        hairColor: "blonde",
+        eyeColor: "blue",
+        ethnicity: "Caucasian",
+        availability: {
+          days: ["Monday", "Tuesday", "Thursday", "Friday", "Saturday"],
+          hours: "19:00 - 04:00"
+        },
+        services: ["massage", "companionship", "dinner date", "overnight", "gfe"],
+        rates: {
+          hourly: 200,
+          twoHours: 350,
+          overnight: 1200,
+          weekend: 2500
+        },
+        contactInfo: {
+          phone: "+44123456789",
+          email: "sophia@example.com"
+        },
+        verificationLevel: "enhanced",
+        hasVirtualContent: true,
+        providesInPersonServices: true,
+        contentStats: {
+          photos: 45,
+          videos: 12,
+          streams: 3
+        }
+      });
+    }, 1000);
+  });
+};
 
 const EscortDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const [escort, setEscort] = useState<Escort | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [bookingFormOpen, setBookingFormOpen] = useState(false);
   
-  const escort = id ? getEscortById(escorts, id) : undefined;
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      fetchEscortById(id)
+        .then(data => {
+          setEscort(data);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error("Error fetching escort:", error);
+          setLoading(false);
+        });
+    }
+  }, [id]);
   
-  if (!escort) {
+  const handleBookNow = () => {
+    setBookingFormOpen(true);
+  };
+
+  if (loading) {
     return (
-      <MainLayout containerClass="text-center">
-        <h1 className="text-2xl font-bold mb-4">Escort Not Found</h1>
-        <p className="mb-6">The escort you're looking for doesn't exist or has been removed.</p>
-        <Button onClick={() => navigate('/escorts')}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Escorts
-        </Button>
-      </MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Skeleton className="h-96 w-full rounded-xl mb-4" />
+            <div className="grid grid-cols-3 gap-2 mb-6">
+              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-24 w-full rounded-lg" />
+            </div>
+          </div>
+          <div>
+            <Skeleton className="h-40 w-full rounded-xl mb-4" />
+            <Skeleton className="h-20 w-full rounded-lg mb-4" />
+            <Skeleton className="h-60 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
     );
   }
   
-  const handleBookNow = () => {
-    toast({
-      title: "Booking Request Sent",
-      description: `Your booking request for ${escort.name} has been sent.`,
-    });
-  };
-  
-  const pageTitle = `${escort.name}, ${escort.age} | Escort in ${escort.location}`;
-  const pageDescription = `Book ${escort.name}, a ${escort.age} year old escort in ${escort.location}. View photos, services, and rates.`;
+  if (!escort) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Profile Not Found</h1>
+        <p className="text-muted-foreground mb-6">
+          The escort profile you're looking for doesn't exist or has been removed.
+        </p>
+        <Button asChild>
+          <a href="/escorts">Back to Escorts</a>
+        </Button>
+      </div>
+    );
+  }
   
   return (
-    <MainLayout showHeader={false}>
-      <div>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        
-        <div className="flex justify-between items-center mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/escorts')}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Escorts
-          </Button>
-        </div>
-        
-        {escort.verified ? (
-          <Alert className="mb-6 bg-primary/10 border-primary/20">
-            <Shield className="h-4 w-4 text-primary" />
-            <AlertTitle>Verified Escort</AlertTitle>
-            <AlertDescription>
-              This escort has been verified by our team. Their identity and photos are real.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <Alert className="mb-6 bg-amber-500/10 border-amber-500/20">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <AlertTitle>Verification Pending</AlertTitle>
-            <AlertDescription>
-              This escort has not been verified yet. Please exercise caution.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <EscortProfile 
-          escort={escort} 
-          onBookNow={handleBookNow} 
+    <div className="container mx-auto px-4 py-8">
+      <EscortProfile 
+        escort={escort} 
+        onBookNow={handleBookNow} 
+      />
+      
+      {bookingFormOpen && (
+        <BookingForm
+          escort={escort}
+          isOpen={bookingFormOpen}
+          onClose={() => setBookingFormOpen(false)}
+          onSubmit={(data) => {
+            console.log("Booking submitted:", data);
+            setBookingFormOpen(false);
+          }}
         />
-      </div>
-    </MainLayout>
+      )}
+    </div>
   );
 };
 
