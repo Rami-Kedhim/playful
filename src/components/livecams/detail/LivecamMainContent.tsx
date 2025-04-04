@@ -18,7 +18,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
             <>
               <img 
                 src={model.thumbnailUrl || "/placeholders/stream-placeholder.jpg"} 
-                alt={`${model.name}'s livestream`}
+                alt={`${model.displayName}'s livestream`}
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-4 left-4 flex items-center gap-2">
@@ -28,7 +28,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
             </>
           ) : (
             <div className="flex items-center justify-center h-full flex-col text-center">
-              <p className="text-xl text-white mb-2">{model.name} is currently offline</p>
+              <p className="text-xl text-white mb-2">{model.displayName} is currently offline</p>
               <p className="text-sm text-gray-400">Check back later or subscribe for notifications</p>
             </div>
           )}
@@ -38,7 +38,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
       {/* Model info and description */}
       <Card>
         <CardContent className="p-6">
-          <h1 className="text-2xl font-bold mb-2">{model.name}</h1>
+          <h1 className="text-2xl font-bold mb-2">{model.displayName}</h1>
           
           <div className="flex items-center gap-2 text-muted-foreground mb-4">
             <span>{model.age} years</span>
@@ -46,7 +46,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
             <span>{model.country}</span>
           </div>
           
-          <p className="text-gray-400">{model.description}</p>
+          <p className="text-gray-400">{model.description || "No description available."}</p>
           
           <Tabs defaultValue="about" className="mt-6">
             <TabsList className="grid w-full grid-cols-3">
@@ -55,25 +55,15 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
               <TabsTrigger value="photos">Photos</TabsTrigger>
             </TabsList>
             <TabsContent value="about" className="mt-4 space-y-4">
-              <p>{model.bio || "No bio information available."}</p>
+              <p>{model.description || "No bio information available."}</p>
             </TabsContent>
             <TabsContent value="schedule" className="mt-4 space-y-4">
               <p>Upcoming shows schedule will appear here.</p>
             </TabsContent>
             <TabsContent value="photos" className="mt-4">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {model.gallery && model.gallery.length > 0 ? (
-                  model.gallery.map((photo, index) => (
-                    <img 
-                      key={index} 
-                      src={photo} 
-                      alt={`${model.name} photo ${index+1}`} 
-                      className="w-full aspect-square object-cover rounded-md" 
-                    />
-                  ))
-                ) : (
-                  <p>No photos available.</p>
-                )}
+                {/* Replace with actual gallery rendering if property becomes available */}
+                <p>Gallery feature coming soon.</p>
               </div>
             </TabsContent>
           </Tabs>

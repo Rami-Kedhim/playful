@@ -142,27 +142,36 @@ const LivecamDetail: React.FC = () => {
   }, [livecam]);
   
   return (
-    <LivecamDetailLayout
-      model={livecam}
-      loading={loading}
-      error={error}
-      onGoBack={handleGoBack}
-    >
-      <div className="md:col-span-2">
-        {livecam && <LivecamMainContent model={livecam} />}
-      </div>
-      <div>
-        {livecam && (
-          <LivecamSidebar 
-            model={livecam}
-            isBoosted={isBoosted}
-            boostStatus={boostStatus}
-            onBoost={handleBoost}
-            onCancelBoost={handleCancelBoost}
-          />
-        )}
-      </div>
-    </LivecamDetailLayout>
+    <MainLayout>
+      {loading && <div className="flex justify-center p-8">Loading...</div>}
+      
+      {error && (
+        <div className="flex flex-col items-center p-8">
+          <div className="text-destructive mb-4">Error: {error}</div>
+          <button 
+            className="px-4 py-2 bg-primary text-white rounded-md"
+            onClick={handleGoBack}
+          >
+            Go Back
+          </button>
+        </div>
+      )}
+      
+      {livecam && (
+        <LivecamDetailLayout
+          mainContent={<LivecamMainContent model={livecam} />}
+          sidebar={
+            <LivecamSidebar
+              model={livecam}
+              isBoosted={isBoosted}
+              boostStatus={boostStatus}
+              onBoost={handleBoost}
+              onCancelBoost={handleCancelBoost}
+            />
+          }
+        />
+      )}
+    </MainLayout>
   );
 };
 
