@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
@@ -84,7 +84,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
                 mode="single"
                 selected={date}
                 onSelect={setDate}
-                className="border rounded-md"
+                className="border rounded-md pointer-events-auto"
                 disabled={(date) => {
                   // Disable past dates
                   return date < new Date();
@@ -138,6 +138,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
             <Textarea 
               placeholder="Any special requests or notes for your appointment..."
               className="resize-none"
+              aria-label="Additional requests"
             />
           </div>
           
@@ -181,7 +182,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
           </Card>
         </div>
         
-        <div className="flex justify-end gap-2 mt-2">
+        <DialogFooter className="flex justify-end gap-2 mt-2">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button 
             onClick={handleSubmit}
@@ -189,7 +190,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
           >
             Confirm Booking
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
