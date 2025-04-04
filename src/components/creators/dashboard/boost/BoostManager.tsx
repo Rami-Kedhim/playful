@@ -1,15 +1,18 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
-import { useBoostManager } from "@/hooks/boost";
+import { 
+  useBoostManager, 
+  formatBoostDuration 
+} from "@/hooks/boost";
 import BoostStatusCard from "./BoostStatusCard";
 import BoostAnalyticsCard from "./BoostAnalyticsCard";
 import BoostHistoryTable from "./BoostHistoryTable";
 import BoostPackageSelection from "./BoostPackageSelection";
 import BoostPurchaseConfirmation from "./BoostPurchaseConfirmation";
 import BoostEligibilityAlert from "./BoostEligibilityAlert";
-import { formatBoostDuration } from "@/utils/boostCalculator";
 import { AlertCircle } from "lucide-react";
 
 interface BoostManagerProps {

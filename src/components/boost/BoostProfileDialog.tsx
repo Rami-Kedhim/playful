@@ -16,7 +16,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { 
   useBoostManager,
-  formatBoostDuration
+  formatBoostDuration 
 } from "@/hooks/boost";
 import BoostActivePackage from "./dialog/BoostActivePackage";
 import BoostPackageList from "./dialog/BoostPackageList";
