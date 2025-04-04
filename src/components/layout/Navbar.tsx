@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,13 +18,10 @@ import {
   CreditCard, 
   Bell, 
   Settings, 
-  Heart, 
-  Globe,
+  Heart,
   CalendarClock,
-  Video,
   MessageCircle,
   Search,
-  Star
 } from "lucide-react";
 
 const Navbar = () => {
@@ -45,8 +41,6 @@ const Navbar = () => {
   const mainLinks = [
     { label: "Home", path: "/" },
     { label: "Escorts", path: "/escorts", icon: CalendarClock },
-    { label: "Creators", path: "/creators", icon: Star },
-    { label: "Live Cams", path: "/livecams", icon: Video },
     { label: "Messages", path: "/messages", icon: MessageCircle },
   ];
   
@@ -113,12 +107,6 @@ const Navbar = () => {
                       <Link to="/profile" className="cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/subscriptions" className="cursor-pointer">
-                        <Star className="mr-2 h-4 w-4" />
-                        <span>Subscriptions</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

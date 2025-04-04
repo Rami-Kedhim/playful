@@ -6,7 +6,6 @@ import FeaturesSection from "@/components/home/FeaturesSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import FeaturedContentSection from "@/components/home/FeaturedContentSection";
 import LucoinSection from "@/components/home/LucoinSection";
-import MetaverseSection from "@/components/home/MetaverseSection";
 import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
 import LucieAssistant from "@/components/home/LucieAssistant";
@@ -119,7 +118,6 @@ const Index = () => {
         featuredCreators={transformedCreators}
       />
       <LucoinSection />
-      <MetaverseSection />
       <TrustSection />
       <CtaSection />
       <LucieAssistant />

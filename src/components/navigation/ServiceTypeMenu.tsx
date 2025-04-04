@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, UserIcon, VideoIcon, Calendar, Monitor } from "lucide-react";
+import { ChevronDown, UserIcon, Calendar } from "lucide-react";
 
 const ServiceTypeMenu = () => {
   return (
@@ -30,14 +30,8 @@ const ServiceTypeMenu = () => {
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/escorts?type=virtual" className="flex items-center gap-2 cursor-pointer">
-            <VideoIcon size={16} />
-            <span>Virtual Content</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/live-streams" className="flex items-center gap-2 cursor-pointer">
-            <Monitor size={16} />
-            <span>Live Streams</span>
+            <UserIcon size={16} />
+            <span>Virtual Services</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
