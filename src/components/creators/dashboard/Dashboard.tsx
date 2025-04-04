@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare, Upload, DollarSign, Settings, AlertCircle, ChevronRight } from "lucide-react";
+import { MessageSquare, Upload, DollarSign, Settings, AlertCircle, ChevronRight, Zap } from "lucide-react";
 import CreatorAnalytics from "./CreatorAnalytics";
 import CreatorContent from "./CreatorContent";
 import CreatorPayouts from "./CreatorPayouts";
 import CreatorSettings from "./CreatorSettings";
+import CreatorBoostTab from "./CreatorBoostTab";
 
 const CreatorDashboard = () => {
   const { isCreator, creatorProfile, loading, canCreate, creatorId } = useCreatorAuth();
@@ -139,10 +140,14 @@ const CreatorDashboard = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-4 w-full md:w-auto">
+        <TabsList className="grid grid-cols-5 w-full md:w-auto">
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="payouts">Earnings & Payouts</TabsTrigger>
+          <TabsTrigger value="boost">
+            <Zap className="h-4 w-4 mr-2" />
+            Boost
+          </TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         
@@ -156,6 +161,10 @@ const CreatorDashboard = () => {
         
         <TabsContent value="payouts" className="space-y-4">
           <CreatorPayouts creatorId={creatorId || ''} />
+        </TabsContent>
+        
+        <TabsContent value="boost" className="space-y-4">
+          <CreatorBoostTab creatorId={creatorId || ''} profile={creatorProfile} />
         </TabsContent>
         
         <TabsContent value="settings" className="space-y-4">
