@@ -23,13 +23,13 @@ export interface EscortFilterActions {
   setPriceRange: (value: [number, number]) => void;
   handlePriceRangeChange: (values: number[]) => void;
   setVerifiedOnly: (value: boolean) => void;
-  setSelectedServices: (services: string[]) => void; // Add direct setter
+  setSelectedServices: (services: string[]) => void; 
   toggleService: (service: string) => void;
   setSortBy: (value: string) => void;
   setCurrentPage: (value: number) => void;
-  setSelectedGenders: (genders: string[]) => void; // Add direct setter
+  setSelectedGenders: (genders: string[]) => void;
   toggleGender: (gender: string) => void;
-  setSelectedOrientations: (orientations: string[]) => void; // Add direct setter
+  setSelectedOrientations: (orientations: string[]) => void;
   toggleOrientation: (orientation: string) => void;
   setAgeRange: (value: [number, number]) => void;
   handleAgeRangeChange: (values: number[]) => void;
@@ -41,7 +41,7 @@ export interface EscortFilterActions {
 
 export interface EscortFilterResults {
   filteredEscorts: Escort[];
-  sortedEscorts: Escort[];
+  sortedEscorts: Escort[]; // Ensure this is included
   paginatedEscorts: Escort[];
   totalPages: number;
 }

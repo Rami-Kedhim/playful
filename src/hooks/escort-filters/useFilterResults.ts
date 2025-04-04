@@ -15,6 +15,7 @@ interface FilterState {
   ratingMin: number;
   availableNow: boolean;
   serviceTypeFilter: string;
+  currentPage: number; // Added this to match usage
 }
 
 export const useFilterResults = (
@@ -24,6 +25,7 @@ export const useFilterResults = (
   setCurrentPage: (page: number) => void
 ) => {
   const [filteredEscorts, setFilteredEscorts] = useState<Escort[]>([]);
+  const [sortedEscorts, setSortedEscorts] = useState<Escort[]>([]); // Added for completeness
   const [paginatedEscorts, setPaginatedEscorts] = useState<Escort[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 12;
@@ -131,25 +133,28 @@ export const useFilterResults = (
     }
     
     // Apply sorting
+    let sorted = [...filtered];
+    
     switch (filters.sortBy) {
       case 'price-asc':
-        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+        sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
         break;
       case 'price-desc':
-        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
       case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating);
+        sorted.sort((a, b) => b.rating - a.rating);
         break;
       case 'name':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
         break;
       default:
         // Default sorting (newest/featured)
-        filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+        sorted.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     }
     
     setFilteredEscorts(filtered);
+    setSortedEscorts(sorted); // Set the sorted escorts
     setTotalPages(Math.ceil(filtered.length / pageSize));
     
     // Reset to first page when filters change
@@ -165,6 +170,7 @@ export const useFilterResults = (
   
   return {
     filteredEscorts,
+    sortedEscorts, // Now including sortedEscorts
     paginatedEscorts,
     totalPages
   };

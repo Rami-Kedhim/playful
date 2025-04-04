@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
@@ -11,7 +12,7 @@ import useVirtualCreatorContent from "@/hooks/useVirtualCreatorContent";
 
 const EscortContent = () => {
   const { id } = useParams<{ id: string }>();
-  const escort = id ? getEscortById(escorts, id) : undefined;
+  const escort = id ? getEscortById(id) : undefined;
   const { toast } = useToast();
   
   const { content, loading, error, hasMore, loadMore } = 

@@ -41,6 +41,13 @@ export interface EscortAvailability {
   hours?: string;
 }
 
+export interface Social {
+  twitter?: string;
+  instagram?: string;
+  onlyfans?: string;
+  website?: string;
+}
+
 export interface Escort {
   id: string;
   name: string;
@@ -65,7 +72,7 @@ export interface Escort {
   availability?: Record<string, string[]> | EscortAvailability;
   serviceTypes?: ServiceType[];
   featured?: boolean;
-  tags?: string[];
+  tags: string[]; // Now required
   isLive?: boolean;
   
   // Additional fields to match usage in codebase
@@ -93,6 +100,12 @@ export interface Escort {
   lastActive?: string;
   responseRate?: number;
   virtualAvailability?: EscortAvailability;
+  social?: Social; // Added this
+  profileCompletion?: number; // Added this
+  boosted?: boolean;
+  verificationBadges?: string[];
+  serviceType?: string; // Added for backward compatibility
+  lastSeen?: string;
 }
 
 // Additional types used with escorts

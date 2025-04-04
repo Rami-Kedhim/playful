@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 const EscortLiveStreamDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const escort = id ? getEscortById(escorts, id) : undefined;
+  const escort = id ? getEscortById(id) : undefined;
   const { toast } = useToast();
   
   const [isConnecting, setIsConnecting] = useState(false);

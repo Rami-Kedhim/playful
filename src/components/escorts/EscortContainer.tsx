@@ -36,6 +36,8 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     currentPage,
     setCurrentPage,
     clearFilters,
+    filteredEscorts,
+    sortedEscorts, // Added this property to make TypeScript happy
     paginatedEscorts,
     totalPages,
     // Add new filter states and functions
