@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +10,7 @@ import PersonalDetails from "./PersonalDetails";
 import LocationField from "./LocationField";
 import FormActions from "./FormActions";
 import { profileFormSchema, ProfileFormData, MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES } from "./ProfileFormSchema";
+import { AuthUser } from "@/types/auth"; // Import the AuthUser type
 
 interface PersonalInfoFormProps {
   profile: any;

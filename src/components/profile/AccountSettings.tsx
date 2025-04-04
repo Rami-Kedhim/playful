@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AccountItem from "./settings/AccountItem";
@@ -8,6 +9,7 @@ import ProfileCompleteness from "./ProfileCompleteness";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Shield, Zap } from "lucide-react";
 import WalletConnect from "@/components/solana/WalletConnect";
+import { AuthUser } from "@/types/auth"; // Import the AuthUser type
 
 interface AccountSettingsProps {
   user: AuthUser;
