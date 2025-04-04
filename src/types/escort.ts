@@ -72,6 +72,10 @@ export interface Escort {
   boosted?: boolean;
   verificationBadges?: string[];
   serviceType?: 'in-person' | 'virtual' | 'both';
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  verificationLevel?: string;
 }
 
 export type ServiceType = 
@@ -82,6 +86,7 @@ export type ServiceType =
 export interface EscortAvailability {
   days: string[];
   hours: string;
+  id?: string;
 }
 
 export type VerificationStatus = 'pending' | 'approved' | 'rejected';
@@ -94,4 +99,6 @@ export interface VerificationRequest {
   submittedAt: Date;
   reviewedAt?: Date;
   notes?: string;
+  documentType?: string;
+  userId?: string;
 }

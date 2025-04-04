@@ -23,8 +23,16 @@ export const useVideoManagement = (
     
     const videos = escort.videos || [];
     
+    // Create a new video object
+    const newVideo = {
+      id: `video-${Date.now()}`,
+      url: videoUrl,
+      thumbnail: '',
+      title: `Video ${videos.length + 1}`
+    };
+    
     // Check if video already exists
-    if (videos.includes(videoUrl)) {
+    if (videos.some(v => v.url === videoUrl)) {
       toast({
         title: "Video exists",
         description: "This video is already in your collection",
@@ -34,7 +42,7 @@ export const useVideoManagement = (
     
     try {
       const updatedEscort = await updateEscortProfile(id, {
-        videos: [...videos, videoUrl]
+        videos: [...videos, newVideo]
       });
       
       if (updatedEscort) {
@@ -71,7 +79,7 @@ export const useVideoManagement = (
     
     const videos = escort.videos || [];
     
-    if (!videos.includes(videoUrl)) {
+    if (!videos.some(v => v.url === videoUrl)) {
       toast({
         title: "Video not found",
         description: "This video is not in your collection",
@@ -81,7 +89,7 @@ export const useVideoManagement = (
     
     try {
       const updatedEscort = await updateEscortProfile(id, {
-        videos: videos.filter(v => v !== videoUrl)
+        videos: videos.filter(v => v.url !== videoUrl)
       });
       
       if (updatedEscort) {

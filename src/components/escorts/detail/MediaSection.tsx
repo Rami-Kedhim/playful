@@ -1,5 +1,5 @@
 
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import EscortGallery from "./EscortGallery";
 import EscortVideoGallery from "./EscortVideoGallery";
 

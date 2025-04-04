@@ -101,7 +101,18 @@ export const useEscortProfile = (escortId?: string) => {
    */
   const updatePhysicalAttributes = async (
     id: string, 
-    attributes: Pick<Escort, 'height' | 'weight' | 'measurements' | 'hairColor' | 'eyeColor' | 'ethnicity'>
+    attributes: {
+      height?: number;
+      weight?: number;
+      measurements?: {
+        bust?: number;
+        waist?: number;
+        hips?: number;
+      };
+      hairColor?: string;
+      eyeColor?: string;
+      ethnicity?: string;
+    }
   ) => {
     if (!id) {
       toast({

@@ -4,12 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Play, X } from "lucide-react";
 
+interface Video {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title?: string;
+}
+
 interface EscortVideoGalleryProps {
-  videos: string[];
+  videos: Video[];
 }
 
 const EscortVideoGallery = ({ videos }: EscortVideoGalleryProps) => {
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   
   if (!videos || videos.length === 0) {
     return null;
@@ -19,9 +26,9 @@ const EscortVideoGallery = ({ videos }: EscortVideoGalleryProps) => {
     <div className="mt-4">
       <h3 className="text-lg font-semibold mb-3">Videos</h3>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-        {videos.map((video, index) => (
+        {videos.map((video) => (
           <div 
-            key={index} 
+            key={video.id} 
             className="relative aspect-video bg-gray-900 rounded-md overflow-hidden cursor-pointer group"
             onClick={() => setSelectedVideo(video)}
           >
@@ -29,10 +36,15 @@ const EscortVideoGallery = ({ videos }: EscortVideoGalleryProps) => {
               <Play size={36} className="text-white opacity-80 group-hover:opacity-100 transition-opacity" />
             </div>
             <video 
-              src={video} 
+              src={video.url} 
               className="w-full h-full object-cover opacity-80"
               preload="metadata"
             />
+            {video.title && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-2 text-white text-sm">
+                {video.title}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -46,13 +58,18 @@ const EscortVideoGallery = ({ videos }: EscortVideoGalleryProps) => {
           <div className="w-full aspect-video">
             {selectedVideo && (
               <video 
-                src={selectedVideo} 
+                src={selectedVideo.url} 
                 className="w-full h-full object-contain"
                 controls
                 autoPlay
               />
             )}
           </div>
+          {selectedVideo?.title && (
+            <div className="p-4 bg-black text-white">
+              <h3 className="text-xl font-medium">{selectedVideo.title}</h3>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
