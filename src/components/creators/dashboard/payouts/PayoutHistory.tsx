@@ -1,15 +1,10 @@
 
-import { useState } from "react";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreatorPayout } from "@/types/creator";
 import PayoutHistoryList from "./PayoutHistoryList";
+import PayoutHistoryLoading from "./components/PayoutHistoryLoading";
+import EmptyPayoutsList from "./components/EmptyPayoutsList";
+import PayoutsInProgress from "./components/PayoutsInProgress";
 
 interface PayoutHistoryProps {
   payouts: CreatorPayout[];
@@ -17,33 +12,38 @@ interface PayoutHistoryProps {
 }
 
 const PayoutHistory = ({ payouts, isLoading }: PayoutHistoryProps) => {
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  
-  const filteredPayouts = statusFilter === "all" 
-    ? payouts 
-    : payouts.filter(payout => payout.status === statusFilter);
-    
+  // Filter completed payouts
+  const completedPayouts = payouts.filter(
+    payout => payout.status === 'completed'
+  );
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle>Payout History</CardTitle>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="processing">Processing</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
+        <CardDescription>
+          View your past and pending payout requests
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <PayoutHistoryList 
-          payouts={filteredPayouts} 
-          isLoading={isLoading} 
-        />
+        {isLoading ? (
+          <PayoutHistoryLoading />
+        ) : payouts.length === 0 ? (
+          <EmptyPayoutsList />
+        ) : (
+          <div className="space-y-6">
+            <PayoutsInProgress payouts={payouts} />
+            
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Completed Payouts</h3>
+              {completedPayouts.length > 0 ? (
+                <PayoutHistoryList payouts={completedPayouts} />
+              ) : (
+                <p className="text-sm text-muted-foreground">No completed payouts yet.</p>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
