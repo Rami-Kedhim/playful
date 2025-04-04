@@ -5,14 +5,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import BoostAnalyticsCard from "./BoostAnalyticsCard";
 import BoostHistoryTable from "./BoostHistoryTable";
+import HermesOxumQueueVisualization from "./HermesOxumQueueVisualization";
 import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 
 interface BoostAnalyticsProps {
   isActive: boolean;
   getAnalytics: () => Promise<AnalyticsData | null>;
+  creatorId: string; // Added creatorId prop
 }
 
-const BoostAnalytics = ({ isActive, getAnalytics }: BoostAnalyticsProps) => {
+const BoostAnalytics = ({ isActive, getAnalytics, creatorId }: BoostAnalyticsProps) => {
   const [boostHistory, setBoostHistory] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +82,11 @@ const BoostAnalytics = ({ isActive, getAnalytics }: BoostAnalyticsProps) => {
           isActive={isActive} 
           getAnalytics={getAnalytics}
         />
+        
+        {/* Add the Hermes-Oxum Queue Visualization when boost is active */}
+        {isActive && creatorId && (
+          <HermesOxumQueueVisualization profileId={creatorId} />
+        )}
       </div>
       
       <BoostHistoryTable 

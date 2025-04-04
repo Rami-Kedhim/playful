@@ -127,7 +127,8 @@ const BoostManagerContainer = ({
       
       <BoostAnalytics 
         isActive={boostStatus.isActive} 
-        getAnalytics={getAnalyticsWrapper} 
+        getAnalytics={getAnalyticsWrapper}
+        creatorId={creatorId} // Pass creatorId to BoostAnalytics
       />
     </div>
   );
