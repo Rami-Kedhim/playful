@@ -1,38 +1,28 @@
 
-import { BoostStatus } from "@/types/boost";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Zap, Clock, Award } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Clock, AlertCircle, CheckCircle2, Zap } from "lucide-react";
+import { BoostStatus } from "@/types/boost";
 import { formatBoostDuration } from "@/utils/boostCalculator";
 
 interface BoostStatusCardProps {
   boostStatus: BoostStatus;
-  onBoostProfile: () => void;
-  isLoading?: boolean;
+  onCancel: () => void;
+  loading: boolean;
 }
 
-const BoostStatusCard = ({ 
-  boostStatus, 
-  onBoostProfile,
-  isLoading = false 
-}: BoostStatusCardProps) => {
-  if (isLoading) {
+const BoostStatusCard = ({ boostStatus, onCancel, loading }: BoostStatusCardProps) => {
+  if (loading) {
     return (
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xl flex items-center">
-            <Zap className="h-5 w-5 text-yellow-500 mr-2" />
-            Profile Boost
-          </CardTitle>
-          <CardDescription>Loading boost status...</CardDescription>
+        <CardHeader>
+          <CardTitle>Boost Status</CardTitle>
+          <CardDescription>Loading your boost status...</CardDescription>
         </CardHeader>
-        <CardContent className="pb-2">
-          <div className="h-20 flex items-center justify-center">
-            <div className="animate-pulse flex space-x-4">
-              <div className="h-3 bg-gray-200 rounded w-32"></div>
-            </div>
-          </div>
+        <CardContent>
+          <Skeleton className="w-full h-[100px]" />
         </CardContent>
       </Card>
     );
@@ -40,85 +30,105 @@ const BoostStatusCard = ({
 
   if (!boostStatus.isActive) {
     return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xl flex items-center">
-            <Zap className="h-5 w-5 text-yellow-500 mr-2" />
-            Profile Boost
+      <Card className="bg-muted/20">
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2 text-muted-foreground" />
+            No Active Boost
           </CardTitle>
           <CardDescription>
-            Increase your profile visibility and get more engagement
+            Your profile is currently not boosted
           </CardDescription>
         </CardHeader>
-        <CardContent className="pb-2">
-          <p className="text-sm text-muted-foreground mb-4">
-            Your profile is currently not boosted. Get up to 10x more views with a profile boost!
-          </p>
-          <Button onClick={onBoostProfile} className="w-full">
-            <Zap className="h-4 w-4 mr-2" />
-            Boost Profile
-          </Button>
+        <CardContent>
+          <div className="flex items-center justify-center py-6">
+            <div className="text-center">
+              <Zap className="h-16 w-16 mx-auto mb-4 text-muted-foreground/30" />
+              <p className="text-muted-foreground">
+                Boost your profile to increase visibility and engagement
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
+  const expiryDate = boostStatus.expiresAt?.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
   return (
-    <Card>
+    <Card className="border-primary/20 bg-primary/5">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-xl flex items-center">
-              <Zap className="h-5 w-5 text-yellow-500 mr-2" />
+            <CardTitle className="flex items-center">
+              <Zap className="h-5 w-5 mr-2 text-primary" />
               Active Boost
             </CardTitle>
             <CardDescription>
-              {boostStatus.boostPackage?.name || "Standard Boost"}
+              Your profile is currently boosted with {boostStatus.boostPackage?.name}
             </CardDescription>
           </div>
-          <div className="px-2 py-1 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 rounded text-xs font-medium flex items-center">
-            <Award className="h-3 w-3 mr-1" />
+          <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
             Active
           </div>
         </div>
       </CardHeader>
       <CardContent className="pb-2">
         <div className="space-y-4">
-          <div>
-            <div className="flex justify-between items-center mb-1 text-sm">
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                <span className="text-muted-foreground">Time Remaining:</span>
-              </div>
-              <span className="font-medium">{boostStatus.remainingTime}</span>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Package</div>
+              <div className="font-medium">{boostStatus.boostPackage?.name}</div>
             </div>
-            <Progress value={boostStatus.progress || 0} className="h-2" />
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Duration</div>
+              <div className="font-medium">
+                {boostStatus.boostPackage ? formatBoostDuration(boostStatus.boostPackage.duration) : "-"}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Expires</div>
+              <div className="font-medium">{expiryDate}</div>
+            </div>
+            <div className="space-y-1">
+              <div className="text-sm text-muted-foreground">Remaining</div>
+              <div className="font-medium flex items-center">
+                <Clock className="h-4 w-4 mr-1 text-amber-500" />
+                {boostStatus.remainingTime}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span>Progress</span>
+              <span>{Math.round(boostStatus.progress || 0)}%</span>
+            </div>
+            <Progress value={boostStatus.progress} className="h-2" />
           </div>
           
-          {boostStatus.boostPackage?.features && (
-            <div className="bg-muted/50 p-3 rounded-md">
-              <p className="text-sm font-medium mb-2">Active Benefits:</p>
-              <ul className="text-xs space-y-1 text-muted-foreground">
-                {boostStatus.boostPackage.features.map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <span className="mr-2">•</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
+          <div className="bg-primary/10 rounded-md p-3 flex items-start space-x-3">
+            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium">Your profile is being boosted</p>
+              <p className="text-muted-foreground mt-1">
+                Your profile is featured in search results, receives priority placement, 
+                and is highlighted to potential clients
+              </p>
             </div>
-          )}
+          </div>
         </div>
       </CardContent>
       <CardFooter>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full"
-          onClick={onBoostProfile}
-        >
-          <Zap className="h-4 w-4 mr-2" />
-          Extend Boost
+        <Button variant="outline" size="sm" onClick={onCancel} className="w-full">
+          Cancel Boost
         </Button>
       </CardFooter>
     </Card>

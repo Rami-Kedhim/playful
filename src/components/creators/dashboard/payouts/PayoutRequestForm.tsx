@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   DialogContent,
@@ -38,14 +37,14 @@ interface PayoutRequestFormProps {
     payoutDetails: Record<string, any>;
   }) => Promise<boolean>;
   onCancel: () => void;
-  isSubmitting?: boolean; // Added the isSubmitting property as optional
+  isSubmitting?: boolean; // Added isSubmitting property as optional
 }
 
 const PayoutRequestForm = ({
   earnings,
   onRequestPayout,
   onCancel,
-  isSubmitting: formIsSubmitting = false, // Renamed to avoid conflict
+  isSubmitting = false, // Default value for backwards compatibility
 }: PayoutRequestFormProps) => {
   const [amount, setAmount] = useState<number>(earnings.available);
   const [payoutMethod, setPayoutMethod] = useState<string>("bank_transfer");
@@ -54,7 +53,7 @@ const PayoutRequestForm = ({
     accountNumber: "",
     bankName: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingLocal, setIsSubmittingLocal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -74,7 +73,7 @@ const PayoutRequestForm = ({
   };
 
   const handleConfirmPayout = async () => {
-    setIsSubmitting(true);
+    setIsSubmittingLocal(true);
     setError(null);
     
     try {
@@ -92,7 +91,7 @@ const PayoutRequestForm = ({
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingLocal(false);
       setShowConfirmation(false);
     }
   };
@@ -206,9 +205,9 @@ const PayoutRequestForm = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting || formIsSubmitting || !isFormValid(amount, earnings.available, payoutMethod, details)}
+              disabled={isSubmitting || isSubmittingLocal || !isFormValid(amount, earnings.available, payoutMethod, details)}
             >
-              {isSubmitting || formIsSubmitting ? "Processing..." : "Request Payout"}
+              {isSubmitting || isSubmittingLocal ? "Processing..." : "Request Payout"}
             </Button>
           </DialogFooter>
         </form>
