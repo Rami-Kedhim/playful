@@ -1,4 +1,3 @@
-
 import { Session, User } from "@supabase/supabase-js";
 
 export interface AuthState {
@@ -10,36 +9,31 @@ export interface AuthState {
 }
 
 export interface AuthContextValue {
-  session: Session | null;
+  session: any | null;
   user: AuthUser | null;
   profile: any | null;
   isLoading: boolean;
   userRoles: string[];
-  signUp: (email: string, password: string, userData?: Record<string, any>) => Promise<void>;
+  isAuthenticated: boolean;
+  signUp: (email: string, password: string, options?: any) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  updatePassword: (newPassword: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
   checkRole: (role: string) => boolean;
-  
-  // Properties that components are expecting
-  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, username: string) => Promise<void>;
-  updateUserProfile: (userData: Partial<AuthUser>) => Promise<void>;
+  updateUserProfile: (userData: Partial<any>) => Promise<void>;
   error: string | null;
   clearError: () => void;
 }
 
-// Define the allowed gender values for the database
 export type DatabaseGender = "male" | "female" | "other";
 
-// User roles definition
 export type UserRole = "user" | "escort" | "creator" | "admin" | "moderator";
 
-// Define the user profile structure
 export interface UserProfile {
   id: string;
   username: string | null;
@@ -62,10 +56,10 @@ export interface UserProfile {
 
 export interface AuthUser {
   id: string;
-  username: string;
   email: string;
-  profileImageUrl?: string;
+  username: string;
+  profileImageUrl: string;
   lucoinsBalance: number;
-  isVerified?: boolean;
-  role?: string;
+  isVerified: boolean;
+  role: string;
 }
