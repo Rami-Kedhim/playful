@@ -1,53 +1,39 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 interface LoginFormProps {
-  setForgotPasswordMode: (value: boolean) => void;
   email: string;
   setEmail: (value: string) => void;
+  onLogin: (email: string, password: string) => Promise<void>;
+  onForgotPassword: () => void;
+  isLoading: boolean;
 }
 
-const LoginForm = ({ setForgotPasswordMode, email, setEmail }: LoginFormProps) => {
+const LoginForm: React.FC<LoginFormProps> = ({
+  email,
+  setEmail,
+  onLogin,
+  onForgotPassword,
+  isLoading,
+}) => {
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await signIn(email, password);
-      navigate("/");
-    } catch (error) {
-      console.error("Login error:", error);
-    } finally {
-      setLoading(false);
-    }
+    await onLogin(email, password);
   };
 
   return (
-    <form onSubmit={handleSignIn} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="login-email">Email</Label>
         <Input
-          id="email"
+          id="login-email"
           type="email"
           placeholder="Enter your email"
           value={email}
@@ -56,33 +42,48 @@ const LoginForm = ({ setForgotPasswordMode, email, setEmail }: LoginFormProps) =
         />
       </div>
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <button 
-            type="button" 
-            onClick={() => setForgotPasswordMode(true)}
-            className="text-xs text-primary hover:underline"
+        <div className="flex justify-between items-center">
+          <Label htmlFor="login-password">Password</Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={onForgotPassword}
+            disabled={isLoading}
           >
             Forgot password?
-          </button>
+          </Button>
         </div>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="relative">
+          <Input
+            id="login-password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="absolute right-0 top-0 h-full px-3"
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </Button>
+        </div>
       </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? (
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Signing in...
+            Logging in...
           </>
         ) : (
-          "Sign in"
+          "Login"
         )}
       </Button>
     </form>

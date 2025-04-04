@@ -1,10 +1,9 @@
 
 import { useState, useEffect, createContext, useContext } from "react";
-import { User } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/use-toast";
 
-// Mock data for demo purposes
-interface User {
+// Define the User interface internally to avoid conflicts
+interface AuthUser {
   id: string;
   username: string;
   email: string;
@@ -15,7 +14,7 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -24,14 +23,14 @@ interface AuthContextType {
   userRoles: string[];
   register: (email: string, password: string, username: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  updateUserProfile: (userData: Partial<User>) => Promise<void>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<void>;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userRoles, setUserRoles] = useState<string[]>([]);
@@ -73,7 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       // Mock successful login
-      const mockUser: User = {
+      const mockUser: AuthUser = {
         id: "user-1",
         username: "johndoe",
         email: email,
@@ -123,7 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Mock successful registration
-      const mockUser: User = {
+      const mockUser: AuthUser = {
         id: "user-" + Math.random().toString(36).substr(2, 9),
         username: username,
         email: email,
@@ -188,7 +187,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const updateUserProfile = async (userData: Partial<User>): Promise<void> => {
+  const updateUserProfile = async (userData: Partial<AuthUser>): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
