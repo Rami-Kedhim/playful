@@ -1,4 +1,3 @@
-
 export interface Escort {
   id: string;
   name: string;
@@ -75,6 +74,9 @@ export interface Escort {
   agencyId?: string;
   isAgency?: boolean;
   managedEscorts?: string[];
+  
+  // Boost score (0-100) for ranking in search results
+  boostScore?: number;
 }
 
 export type ServiceType = 

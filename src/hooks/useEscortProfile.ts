@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Escort, ServiceType } from "@/types/escort";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { updateEscortBoostScore } from "@/utils/boostScoreSystem";
 
 export const useEscortProfile = (escortId?: string) => {
   const { user } = useAuth();
@@ -63,7 +64,8 @@ export const useEscortProfile = (escortId?: string) => {
         reviews: 0,
         hasVirtualContent: profileData.providesVirtualContent || false,
         providesInPersonServices: profileData.providesInPersonServices || true,
-        created_at: new Date()
+        created_at: new Date(),
+        boostScore: 0 // Initialize with 0
       };
 
       // Use the any type to bypass TypeScript checks
@@ -74,6 +76,13 @@ export const useEscortProfile = (escortId?: string) => {
         .single();
 
       if (error) throw error;
+
+      // Calculate and update the initial boost score
+      if (data && data.id) {
+        updateEscortBoostScore(data.id).catch(err => {
+          console.error("Error updating initial boost score:", err);
+        });
+      }
 
       toast({
         title: "Profile Created",
@@ -127,6 +136,11 @@ export const useEscortProfile = (escortId?: string) => {
         .single();
 
       if (error) throw error;
+
+      // Update the boost score after profile updates
+      updateEscortBoostScore(id).catch(err => {
+        console.error("Error updating boost score after profile update:", err);
+      });
 
       toast({
         title: "Profile Updated",
