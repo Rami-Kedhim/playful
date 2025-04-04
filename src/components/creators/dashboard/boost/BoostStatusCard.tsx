@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, AlertCircle, CheckCircle2, Zap } from "lucide-react";
+import { Clock, AlertCircle, CheckCircle2, Zap, Info } from "lucide-react";
 import { BoostStatus } from "@/types/boost";
 import { formatBoostDuration } from "@/utils/boostCalculator";
 
@@ -11,9 +11,17 @@ interface BoostStatusCardProps {
   boostStatus: BoostStatus;
   onCancel: () => void;
   loading: boolean;
+  dailyBoostUsage?: number;
+  dailyBoostLimit?: number;
 }
 
-const BoostStatusCard = ({ boostStatus, onCancel, loading }: BoostStatusCardProps) => {
+const BoostStatusCard = ({ 
+  boostStatus, 
+  onCancel, 
+  loading,
+  dailyBoostUsage = 0,
+  dailyBoostLimit = 4
+}: BoostStatusCardProps) => {
   if (loading) {
     return (
       <Card>
@@ -48,6 +56,23 @@ const BoostStatusCard = ({ boostStatus, onCancel, loading }: BoostStatusCardProp
                 Boost your profile to increase visibility and engagement
               </p>
             </div>
+          </div>
+          
+          {/* Oxum Ethical Boosting Model - Daily Usage Indicator */}
+          <div className="mt-4 p-4 bg-muted/30 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium flex items-center">
+                <Info className="h-4 w-4 mr-2 text-blue-500" />
+                Daily Boost Usage
+              </span>
+              <span className="text-sm font-medium">
+                {dailyBoostUsage} of {dailyBoostLimit} used
+              </span>
+            </div>
+            <Progress value={(dailyBoostUsage / dailyBoostLimit) * 100} className="h-2" />
+            <p className="text-xs text-muted-foreground mt-2">
+              Ethically limited to {dailyBoostLimit} boosts (12 hours) per day
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -112,6 +137,20 @@ const BoostStatusCard = ({ boostStatus, onCancel, loading }: BoostStatusCardProp
               <span>{Math.round(boostStatus.progress || 0)}%</span>
             </div>
             <Progress value={boostStatus.progress} className="h-2" />
+          </div>
+          
+          {/* Oxum Ethical Boosting Model - Daily Usage Indicator */}
+          <div className="p-3 bg-muted/20 rounded-lg">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm flex items-center">
+                <Info className="h-4 w-4 mr-1 text-blue-500" />
+                Daily Boost Usage
+              </span>
+              <span className="text-sm">
+                {dailyBoostUsage} of {dailyBoostLimit} used
+              </span>
+            </div>
+            <Progress value={(dailyBoostUsage / dailyBoostLimit) * 100} className="h-1.5" />
           </div>
           
           <div className="bg-primary/10 rounded-md p-3 flex items-start space-x-3">

@@ -54,7 +54,9 @@ const BoostManager = ({
     cancelBoost,
     loading,
     error,
-    getBoostAnalytics
+    getBoostAnalytics,
+    dailyBoostUsage,
+    dailyBoostLimit
   } = useBoostManager(creatorId);
   
   useEffect(() => {
@@ -154,6 +156,8 @@ const BoostManager = ({
         boostStatus={boostStatus}
         onCancel={handleCancelBoost}
         loading={loading}
+        dailyBoostUsage={dailyBoostUsage}
+        dailyBoostLimit={dailyBoostLimit}
       />
       
       {!boostStatus.isActive && (

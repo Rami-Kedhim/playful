@@ -2,7 +2,7 @@
 import { BoostParams } from "@/types/boost";
 
 /**
- * Oxum Algorithm - Calculates boost price based on various parameters
+ * Oxum Ethical Boosting Algorithm - Fixed price model
  */
 export const calculateBoostPrice = ({
   country,
@@ -11,42 +11,8 @@ export const calculateBoostPrice = ({
   timeSlot,
   role,
 }: BoostParams): number => {
-  let basePrice = 50; // Base price in Lucoins
-
-  // Country-based price adjustment
-  if (["US", "Germany", "UK", "Australia", "Canada"].includes(country)) {
-    basePrice += 20;
-  } else if (["Japan", "France", "Italy", "Spain", "Netherlands"].includes(country)) {
-    basePrice += 15;
-  }
-
-  // Profile completeness affects price - incomplete profiles pay more
-  if (completeness < 40) {
-    basePrice += 50;
-  } else if (completeness < 60) {
-    basePrice += 30;
-  } else if (completeness < 80) {
-    basePrice += 15;
-  } else if (completeness > 95) {
-    basePrice -= 10; // Bonus for very complete profiles
-  }
-
-  // Rating-based adjustment
-  if (rating > 4.8) basePrice -= 15;
-  else if (rating > 4.5) basePrice -= 10;
-  else if (rating > 4.0) basePrice -= 5;
-  else if (rating < 3.0) basePrice += 15;
-
-  // Time slot - peak hours cost more
-  if (timeSlot === "peak") basePrice += 25;
-  else if (timeSlot === "normal") basePrice += 10;
-
-  // Role-based adjustment
-  if (role === "AI") basePrice += 10;
-  else if (role === "verified") basePrice -= 5;
-
-  // Ensure minimum price of 30
-  return Math.max(30, basePrice);
+  // Under the Oxum Ethical Boosting model, price is fixed at 15 Lucoins ($1.50)
+  return 15; // Fixed price for all boosts
 };
 
 /**
@@ -58,28 +24,28 @@ export const isEligibleForBoosting = (
   profileAge: number, // in days
   lastBoostTime?: Date
 ): { eligible: boolean; reason?: string } => {
+  // Oxum Ethical Boosting Model: Only verified escorts can boost
+  if (!isVerified) {
+    return { eligible: false, reason: "Only verified escorts can use the boost feature" };
+  }
+
   // Profile must be at least 30% complete
   if (profileCompleteness < 30) {
     return { eligible: false, reason: "Profile must be at least 30% complete" };
   }
 
-  // Unverified profiles need more completeness
-  if (!isVerified && profileCompleteness < 50) {
-    return { eligible: false, reason: "Unverified profiles need at least 50% completeness" };
-  }
-
   // New profiles need some age
-  if (profileAge < 3) {
-    return { eligible: false, reason: "Profile must be at least 3 days old" };
+  if (profileAge < 1) {
+    return { eligible: false, reason: "Profile must be at least 1 day old" };
   }
 
   // Check if last boost was recent (if applicable)
   if (lastBoostTime) {
     const hoursSinceLastBoost = (Date.now() - lastBoostTime.getTime()) / (1000 * 60 * 60);
-    if (hoursSinceLastBoost < 24) {
+    if (hoursSinceLastBoost < 3) { // Oxum model: 3-hour boosting periods
       return { 
         eligible: false, 
-        reason: `You can boost again in ${Math.ceil(24 - hoursSinceLastBoost)} hours` 
+        reason: `You can boost again in ${Math.ceil(3 - hoursSinceLastBoost)} hours` 
       };
     }
   }

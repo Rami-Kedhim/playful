@@ -14,40 +14,26 @@ export const useBoostPackages = (
     try {
       setLoading(true);
       // In a real implementation, this would be an API call
-      // For now, we'll use mock data
-      const mockPackages: BoostPackage[] = [
+      // For now, we'll implement the Oxum Ethical Boosting Model with fixed packages
+      const oxumEthicalBoostPackages: BoostPackage[] = [
         {
-          id: "boost-1",
-          name: "24 Hour Boost",
-          duration: "24:00:00",
-          price_lucoin: 50,
-          description: "Boost your profile for 24 hours"
-        },
-        {
-          id: "boost-2",
-          name: "Weekend Boost",
-          duration: "72:00:00",
-          price_lucoin: 120,
-          description: "Boost your profile for 3 days"
-        },
-        {
-          id: "boost-3",
-          name: "Weekly Boost",
-          duration: "168:00:00",
-          price_lucoin: 200,
-          description: "Boost your profile for a full week",
-          features: ["Featured section placement", "Special badge"]
+          id: "boost-standard",
+          name: "3-Hour Boost",
+          duration: "03:00:00", // 3 hours
+          price_lucoin: 15, // Equivalent to $1.50
+          description: "Boost your profile for 3 hours with priority placement",
+          features: ["Featured profile label", "Priority in search results", "Increased visibility"]
         }
       ];
       
-      setBoostPackages(mockPackages);
+      setBoostPackages(oxumEthicalBoostPackages);
       
-      // Auto-select the first package as default
-      if (mockPackages.length > 0 && !selectedPackage) {
-        setSelectedPackage(mockPackages[0].id);
+      // Auto-select the only package as default
+      if (oxumEthicalBoostPackages.length > 0 && !selectedPackage) {
+        setSelectedPackage(oxumEthicalBoostPackages[0].id);
       }
       
-      return mockPackages;
+      return oxumEthicalBoostPackages;
     } catch (err: any) {
       console.error("Error fetching boost packages:", err);
       return [];

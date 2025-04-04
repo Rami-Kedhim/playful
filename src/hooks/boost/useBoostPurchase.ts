@@ -35,52 +35,29 @@ export const useBoostPurchase = (
     try {
       setLoading(true);
       
-      // In a real implementation, this would be an API call to fetch the selected package
-      // For now, we'll simulate the process
-      const mockPackages = [
-        {
-          id: "boost-1",
-          name: "24 Hour Boost",
-          duration: "24:00:00",
-          price_lucoin: 50,
-          description: "Boost your profile for 24 hours"
-        },
-        {
-          id: "boost-2",
-          name: "Weekend Boost",
-          duration: "72:00:00",
-          price_lucoin: 120,
-          description: "Boost your profile for 3 days"
-        },
-        {
-          id: "boost-3",
-          name: "Weekly Boost",
-          duration: "168:00:00",
-          price_lucoin: 200,
-          description: "Boost your profile for a full week",
-          features: ["Featured section placement", "Special badge"]
-        }
-      ];
+      // In a real implementation, this would be an API call
+      // For now, we'll simulate the process with the Oxum model
       
-      // Find the selected package
-      const selectedBoostPackage = mockPackages.find(pkg => pkg.id === packageId);
-      if (!selectedBoostPackage) {
-        throw new Error("Selected package not found");
-      }
+      // Oxum Ethical Boost package (only one option)
+      const oxumBoostPackage = {
+        id: "boost-standard",
+        name: "3-Hour Boost",
+        duration: "03:00:00", // 3 hours
+        price_lucoin: 15, // $1.50 equivalent
+        description: "Boost your profile for 3 hours"
+      };
       
       // Simulate processing time
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Update the boost status - this will be handled by the parent component
       const endDate = new Date();
-      // Parse duration string (format: "168:00:00" for 7 days)
-      const hoursPart = selectedBoostPackage.duration.split(':')[0];
-      const hoursToAdd = parseInt(hoursPart);
-      endDate.setTime(endDate.getTime() + hoursToAdd * 60 * 60 * 1000);
+      // For the Oxum model, we add 3 hours
+      endDate.setTime(endDate.getTime() + 3 * 60 * 60 * 1000);
       
       toast({
         title: "Boost Purchased",
-        description: `Your profile has been boosted until ${endDate.toLocaleDateString()}`,
+        description: `Your profile has been boosted until ${endDate.toLocaleTimeString()}`,
       });
       
       return true;

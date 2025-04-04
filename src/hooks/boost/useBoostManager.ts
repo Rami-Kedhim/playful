@@ -24,7 +24,9 @@ const useBoostManager = (profileId?: string) => {
     fetchProfileData,
     checkActiveBoost,
     getBoostPrice,
-    cancelBoost
+    cancelBoost,
+    dailyBoostUsage,
+    dailyBoostLimit
   } = useBoostStatus(profileId);
   
   const {
@@ -88,6 +90,8 @@ const useBoostManager = (profileId?: string) => {
     analytics,
     loading,
     error,
+    dailyBoostUsage,
+    dailyBoostLimit,
     fetchBoostPackages,
     initializeBoostData
   };

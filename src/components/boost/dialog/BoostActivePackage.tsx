@@ -4,18 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { formatBoostDuration } from "@/utils/boostCalculator";
 import { BoostStatus, BoostAnalytics } from "@/types/boost";
-import { Zap, Clock, BarChart3, Loader2 } from "lucide-react";
+import { Zap, Clock, BarChart3, Loader2, Info } from "lucide-react";
+import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 
 interface BoostActivePackageProps {
   boostStatus: BoostStatus;
-  boostAnalytics: BoostAnalytics | null;
+  boostAnalytics: AnalyticsData | null;
   onCancel: () => Promise<boolean>;
+  dailyBoostUsage?: number;
+  dailyBoostLimit?: number;
 }
 
 const BoostActivePackage = ({ 
   boostStatus, 
   boostAnalytics,
-  onCancel 
+  onCancel,
+  dailyBoostUsage = 1,
+  dailyBoostLimit = 4  
 }: BoostActivePackageProps) => {
   const [cancelling, setCancelling] = useState(false);
   const [timeLeft, setTimeLeft] = useState(boostStatus.remainingTime || "");
@@ -82,6 +87,23 @@ const BoostActivePackage = ({
         <p className="text-muted-foreground">
           You don't have any active boosts.
         </p>
+        
+        {/* Oxum Daily Usage Display */}
+        <div className="mt-4 p-4 border border-muted rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm flex items-center">
+              <Info className="h-4 w-4 mr-2 text-blue-500" />
+              Daily Boost Usage
+            </span>
+            <span className="text-sm font-medium">
+              {dailyBoostUsage} of {dailyBoostLimit} used
+            </span>
+          </div>
+          <Progress value={(dailyBoostUsage / dailyBoostLimit) * 100} className="h-2" />
+          <p className="text-xs text-muted-foreground mt-2">
+            Ethically limited to {dailyBoostLimit} boosts (12 hours) per day
+          </p>
+        </div>
       </div>
     );
   }
@@ -92,7 +114,7 @@ const BoostActivePackage = ({
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-medium flex items-center">
             <Zap className="h-4 w-4 text-amber-500 mr-2" />
-            {boostStatus.boostPackage?.name || "Active Boost"}
+            {boostStatus.boostPackage?.name || "3-Hour Boost"}
           </h3>
           <div className="flex items-center text-sm">
             <Clock className="h-3.5 w-3.5 mr-1 text-amber-500" />
@@ -113,6 +135,18 @@ const BoostActivePackage = ({
               {boostStatus.boostPackage ? formatBoostDuration(boostStatus.boostPackage.duration) : "-"}
             </span>
           </div>
+        </div>
+        
+        {/* Oxum Daily Usage Display */}
+        <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800">
+          <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center text-sm">
+              <Info className="h-3.5 w-3.5 mr-1 text-amber-500" />
+              Daily Boost Usage
+            </div>
+            <span className="text-sm font-medium">{dailyBoostUsage}/{dailyBoostLimit}</span>
+          </div>
+          <Progress value={(dailyBoostUsage / dailyBoostLimit) * 100} className="h-1.5" />
         </div>
         
         {boostAnalytics && (

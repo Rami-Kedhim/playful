@@ -14,6 +14,8 @@ export const useBoostStatus = (profileId?: string) => {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
   const [eligibility, setEligibility] = useState<{ eligible: boolean; reason?: string }>({ eligible: false });
   const [profileData, setProfileData] = useState<any>(null);
+  const [dailyBoostUsage, setDailyBoostUsage] = useState<number>(0); // Track daily boost usage
+  const DAILY_BOOST_LIMIT = 4; // Oxum model: 4 boosts max per day (12 hours)
 
   // Fetch profile data to check completeness, rating, etc.
   const fetchProfileData = useCallback(async (id: string) => {
@@ -26,21 +28,40 @@ export const useBoostStatus = (profileId?: string) => {
         completeness: 75,
         rating: 4.2,
         country: "Germany",
-        isVerified: true,
+        isVerified: true, // Oxum model: Verified escorts only
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-        lastBoost: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+        lastBoost: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        dailyBoostsUsed: Math.floor(Math.random() * DAILY_BOOST_LIMIT) // Random number of used boosts today
       };
       
       setProfileData(mockProfile);
+      setDailyBoostUsage(mockProfile.dailyBoostsUsed);
       
       // Check if profile is eligible for boosting
       const profileAge = (Date.now() - mockProfile.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-      const eligibilityResult = isEligibleForBoosting(
-        mockProfile.completeness,
-        mockProfile.isVerified,
-        profileAge,
-        mockProfile.lastBoost
-      );
+      
+      // Check both verification and daily boost limit
+      let eligibilityResult;
+      
+      if (!mockProfile.isVerified) {
+        eligibilityResult = { 
+          eligible: false,
+          reason: "Only verified escorts can use the boost feature"
+        };
+      } else if (mockProfile.dailyBoostsUsed >= DAILY_BOOST_LIMIT) {
+        eligibilityResult = { 
+          eligible: false,
+          reason: `You've reached the daily limit of ${DAILY_BOOST_LIMIT} boosts (12 hours total)`
+        };
+      } else {
+        eligibilityResult = isEligibleForBoosting(
+          mockProfile.completeness,
+          mockProfile.isVerified,
+          profileAge,
+          mockProfile.lastBoost
+        );
+      }
+      
       setEligibility(eligibilityResult);
       
     } catch (err: any) {
@@ -59,16 +80,16 @@ export const useBoostStatus = (profileId?: string) => {
       const hasActiveBoost = Math.random() > 0.7; // 30% chance of having an active boost
       
       if (hasActiveBoost) {
-        const endDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000); // 2 days from now
+        const endDate = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now - simulating a 3-hour boost
         const mockPackage: BoostPackage = {
-          id: "boost-1",
-          name: "Weekly Boost",
-          duration: "168:00:00", // 7 days in hours:minutes:seconds
-          price_lucoin: 100
+          id: "boost-standard",
+          name: "3-Hour Boost",
+          duration: "03:00:00", // Oxum model: 3 hours per activation
+          price_lucoin: 15 // Oxum model: $1.50 equivalent
         };
         
         const remainingTime = calculateRemainingTime(endDate);
-        const totalDuration = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+        const totalDuration = 3 * 60 * 60 * 1000; // 3 hours in ms
         const elapsed = totalDuration - (endDate.getTime() - Date.now());
         const progress = Math.min(100, Math.floor((elapsed / totalDuration) * 100));
         
@@ -91,16 +112,9 @@ export const useBoostStatus = (profileId?: string) => {
 
   // Calculate dynamic boost price based on the Oxum algorithm
   const getBoostPrice = useCallback(() => {
-    if (!profileData) return 0;
-    
-    return calculateBoostPrice({
-      country: profileData.country,
-      completeness: profileData.completeness,
-      rating: profileData.rating,
-      timeSlot: getCurrentTimeSlot(),
-      role: profileData.isVerified ? "verified" : "regular"
-    });
-  }, [profileData]);
+    // Under the Oxum Ethical Boosting model, price is fixed at 15 Lucoins ($1.50)
+    return 15; // Fixed price for all boosts
+  }, []);
 
   // Cancel an active boost
   const cancelBoost = async (): Promise<boolean> => {
@@ -144,6 +158,8 @@ export const useBoostStatus = (profileId?: string) => {
     eligibility,
     profileData,
     loading,
+    dailyBoostUsage,
+    dailyBoostLimit: DAILY_BOOST_LIMIT,
     fetchProfileData,
     checkActiveBoost,
     getBoostPrice,

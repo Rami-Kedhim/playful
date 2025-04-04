@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Zap, Loader2 } from "lucide-react";
+import { Zap, Loader2, Info, Progress } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -44,7 +43,9 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
     purchaseBoost,
     cancelBoost,
     loading,
-    getBoostAnalytics
+    getBoostAnalytics,
+    dailyBoostUsage,
+    dailyBoostLimit
   } = useBoostManager(profileId);
 
   useEffect(() => {
@@ -136,13 +137,32 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
           
           <TabsContent value="packages" className="space-y-4 mt-4">
             {!eligibility.eligible ? renderEligibilityMessage() : (
-              <BoostPackageList
-                packages={boostPackages}
-                selectedPackage={selectedPackage}
-                onSelectPackage={setSelectedPackage}
-                formatBoostDuration={formatBoostDuration}
-                getBoostPrice={getBoostPrice}
-              />
+              <>
+                <BoostPackageList
+                  packages={boostPackages}
+                  selectedPackage={selectedPackage}
+                  onSelectPackage={setSelectedPackage}
+                  formatBoostDuration={formatBoostDuration}
+                  getBoostPrice={getBoostPrice}
+                />
+                
+                <div className="p-3 bg-muted/10 border border-muted rounded-md">
+                  <h4 className="text-sm font-medium mb-2 flex items-center">
+                    <Info className="h-4 w-4 mr-2 text-blue-500" />
+                    Oxum Ethical Boosting
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Limited to {dailyBoostLimit} boosts (12 hours) per day for fairness and equal opportunity.
+                  </p>
+                  <div className="mt-2">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>Daily usage</span>
+                      <span>{dailyBoostUsage} of {dailyBoostLimit}</span>
+                    </div>
+                    <Progress value={(dailyBoostUsage / dailyBoostLimit) * 100} className="h-1.5" />
+                  </div>
+                </div>
+              </>
             )}
           </TabsContent>
           
@@ -151,6 +171,8 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
               boostStatus={boostStatus}
               boostAnalytics={boostAnalytics}
               onCancel={handleCancel}
+              dailyBoostUsage={dailyBoostUsage}
+              dailyBoostLimit={dailyBoostLimit}
             />
           </TabsContent>
         </Tabs>
@@ -164,7 +186,7 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
             </Button>
             <Button 
               onClick={handlePurchase} 
-              disabled={!selectedPackage || loading}
+              disabled={!selectedPackage || loading || dailyBoostUsage >= dailyBoostLimit}
             >
               {loading ? (
                 <>
@@ -174,7 +196,7 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
               ) : (
                 <>
                   <Zap className="mr-2 h-4 w-4" />
-                  Boost Now
+                  Boost Now {boostPackages.find(p => p.id === selectedPackage)?.price_lucoin} LC
                 </>
               )}
             </Button>
