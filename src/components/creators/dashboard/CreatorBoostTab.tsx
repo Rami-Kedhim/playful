@@ -7,16 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Zap, TrendingUp, BarChart } from "lucide-react";
 import { useBoostManager } from "@/hooks/boost";
+import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics"; // Import the interface directly
 
 interface CreatorBoostTabProps {
   creatorId: string;
   profile: any;
-}
-
-interface AnalyticsData {
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
 }
 
 const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
@@ -29,17 +24,10 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
     getBoostAnalytics
   } = useBoostManager(creatorId);
   
-  // Wrapper to convert BoostAnalytics to AnalyticsData
+  // Use the imported interface
   const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
     const analytics = await getBoostAnalytics();
-    if (!analytics) return null;
-    
-    // Convert BoostAnalytics to AnalyticsData
-    return {
-      additionalViews: analytics.views.withBoost - analytics.views.withoutBoost,
-      engagementIncrease: analytics.clicks.increase,
-      rankingPosition: analytics.searchRanking.withBoost
-    };
+    return analytics;
   };
   
   useEffect(() => {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -13,6 +14,7 @@ import BoostPackageSelection from "./BoostPackageSelection";
 import BoostPurchaseConfirmation from "./BoostPurchaseConfirmation";
 import BoostEligibilityAlert from "./BoostEligibilityAlert";
 import { AlertCircle } from "lucide-react";
+import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics"; // Import the interface directly
 
 interface BoostManagerProps {
   creatorId: string;
@@ -23,12 +25,6 @@ interface BoostManagerProps {
   country: string;
   role: 'verified' | 'regular' | 'AI';
   lucoinBalance: number;
-}
-
-interface AnalyticsData {
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
 }
 
 const BoostManager = ({
@@ -98,16 +94,9 @@ const BoostManager = ({
     return () => clearTimeout(timer);
   }, [fetchBoostPackages]);
   
+  // Use the imported interface directly
   const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
-    const analytics = await getBoostAnalytics();
-    if (!analytics) return null;
-    
-    // Convert BoostAnalytics to AnalyticsData
-    return {
-      additionalViews: analytics.views.withBoost - analytics.views.withoutBoost,
-      engagementIncrease: analytics.clicks.increase,
-      rankingPosition: analytics.searchRanking.withBoost
-    };
+    return await getBoostAnalytics();
   };
   
   const handleBoostPurchase = async () => {

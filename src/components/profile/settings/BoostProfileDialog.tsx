@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Zap, Loader2 } from "lucide-react";
 import { 
@@ -57,12 +58,13 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
     }
   }, [open, boostStatus.isActive]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (): Promise<boolean> => {
     const analytics = await getBoostAnalytics();
     if (analytics) {
       setBoostAnalytics(analytics);
+      return true;
     }
-    return true; // Return boolean to satisfy TypeScript
+    return false;
   };
 
   const handlePurchase = async () => {
@@ -83,12 +85,12 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
     }
   };
 
-  const handleCancel = async () => {
+  const handleCancel = async (): Promise<boolean> => {
     const success = await cancelBoost();
     if (success && onSuccess) {
       onSuccess();
     }
-    return success; // Return boolean to satisfy TypeScript
+    return success;
   };
 
   const renderEligibilityMessage = () => {

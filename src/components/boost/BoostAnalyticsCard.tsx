@@ -4,14 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Loader2, TrendingUp, Eye, MousePointerClick, Search } from "lucide-react";
 import { BoostAnalytics } from "@/types/boost";
+import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 
 interface BoostAnalyticsCardProps {
   isActive: boolean;
-  getAnalytics: () => Promise<BoostAnalytics | null>;
+  getAnalytics: () => Promise<AnalyticsData | null>;
 }
 
 const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps) => {
-  const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
