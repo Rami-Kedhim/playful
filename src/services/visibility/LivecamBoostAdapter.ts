@@ -67,6 +67,34 @@ export class LivecamBoostAdapter {
       visibilitySystem.updateItemScore(livecamId, baseScore);
     }
   }
+
+  /**
+   * Check if a livecam is currently boosted and get boost information
+   */
+  public checkBoostStatus(livecamId: string): {
+    isBoosted: boolean;
+    timeRemaining?: number;
+    intensity?: number;
+  } {
+    const boostInfo = this.boostedLivecams.get(livecamId);
+    
+    if (!boostInfo) {
+      return { isBoosted: false };
+    }
+    
+    const now = Date.now();
+    const elapsedMs = now - boostInfo.startTime;
+    const elapsedHours = elapsedMs / (1000 * 60 * 60);
+    
+    // Estimate remaining time (assuming 24hr default duration)
+    const remainingHours = Math.max(0, 24 - elapsedHours);
+    
+    return {
+      isBoosted: true,
+      timeRemaining: remainingHours,
+      intensity: boostInfo.intensity
+    };
+  }
   
   /**
    * Update boost effect based on elapsed time (decay)

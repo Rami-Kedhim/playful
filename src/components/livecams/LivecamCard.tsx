@@ -1,97 +1,114 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { LivecamModel } from "@/types/livecams";
-import { Card } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CircleUser, Users, Video } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Users, Globe } from "lucide-react";
+import LivecamBoostControls from './LivecamBoostControls';
+import LivecamBoostBadge from './LivecamBoostBadge';
+import { LivecamModel } from '@/types/livecams';
 
 interface LivecamCardProps {
   model: LivecamModel;
+  showBoostControls?: boolean;
+  isBoosted?: boolean;
+  onBoost?: (livecamId: string, intensity: number, durationHours: number) => boolean;
+  onCancelBoost?: (livecamId: string) => boolean;
 }
 
-const LivecamCard: React.FC<LivecamCardProps> = ({ model }) => {
-  const [imgError, setImgError] = useState(false);
-  
-  // Create a unique and stable fallback image for each model
-  const uniqueSeed = `${model.id || model.username}-${model.username}`;
-  const fallbackImage = `https://picsum.photos/seed/${uniqueSeed}/500/500`;
+const LivecamCard = ({
+  model,
+  showBoostControls = false,
+  isBoosted = false,
+  onBoost = () => false,
+  onCancelBoost = () => false
+}: LivecamCardProps) => {
+  const livecam = {
+    id: model.id,
+    username: model.username,
+    name: model.displayName,
+    imageUrl: model.imageUrl,
+    thumbnailUrl: model.thumbnailUrl,
+    isStreaming: model.isLive,
+    viewerCount: model.viewerCount || 0,
+    region: model.country || 'unknown',
+    language: model.language || 'en',
+    tags: model.categories || [],
+    category: model.categories?.[0] || 'general'
+  };
 
-  // Debug logging for image URLs
-  console.log(`LivecamCard ${model.username}:`, { 
-    original: {
-      thumbnail: model.thumbnailUrl,
-      image: model.imageUrl
-    },
-    fallback: fallbackImage,
-    hasError: imgError
-  });
-  
   return (
-    <Link to={`/livecams/${model.username}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full">
-        <div className="relative">
-          <AspectRatio ratio={16/9}>
-            <img 
-              src={imgError ? fallbackImage : model.thumbnailUrl || model.imageUrl} 
-              alt={model.displayName} 
-              className="object-cover w-full h-full"
-              onError={() => {
-                console.log(`Image error for ${model.username}, using fallback`);
-                setImgError(true);
-              }}
-              loading="lazy"
-            />
-          </AspectRatio>
+    <Card className="overflow-hidden group">
+      <Link to={`/livecams/${model.username}`} className="relative block">
+        <div className="relative aspect-video overflow-hidden bg-muted">
+          <img 
+            src={model.thumbnailUrl || model.imageUrl} 
+            alt={model.displayName} 
+            className="object-cover w-full h-full transition-transform group-hover:scale-105"
+          />
           
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {model.isLive && (
-              <Badge className="bg-red-500 text-white">
-                <Video size={12} className="mr-1" />
-                Live
-              </Badge>
-            )}
-            {model.country && (
-              <Badge variant="outline" className="bg-background/60 backdrop-blur-sm">
-                {model.country}
-              </Badge>
-            )}
+          {model.isLive && (
+            <Badge 
+              variant="destructive" 
+              className="absolute top-2 left-2 z-10"
+            >
+              Live
+            </Badge>
+          )}
+          
+          <LivecamBoostBadge isBoosted={isBoosted} />
+          
+          {model.viewerCount && model.viewerCount > 0 && (
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {model.viewerCount.toLocaleString()}
+            </div>
+          )}
+        </div>
+      </Link>
+
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-medium truncate">{model.displayName}</h3>
+            <p className="text-sm text-muted-foreground truncate">{model.username}</p>
           </div>
           
-          {model.viewerCount !== undefined && model.viewerCount > 0 && (
-            <div className="absolute bottom-2 right-2">
-              <Badge variant="secondary" className="bg-background/60 backdrop-blur-sm">
-                <Users size={12} className="mr-1" />
-                {model.viewerCount.toLocaleString()} viewers
-              </Badge>
-            </div>
+          {showBoostControls && (
+            <LivecamBoostControls 
+              livecam={livecam}
+              isBoosted={isBoosted}
+              onBoost={onBoost}
+              onCancel={onCancelBoost}
+            />
           )}
         </div>
         
-        <div className="p-3">
-          <div className="flex justify-between items-start">
-            <h3 className="font-semibold text-base">{model.displayName}</h3>
-            {model.age && <span className="text-sm text-gray-400">{model.age}</span>}
-          </div>
-          
-          <div className="flex items-center text-sm text-gray-400 mt-1">
-            <CircleUser size={14} className="mr-1" />
-            <span>{model.username}</span>
-          </div>
+        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+          {model.country && (
+            <div className="flex items-center gap-1">
+              <Globe className="h-3 w-3" />
+              {model.country}
+            </div>
+          )}
           
           {model.categories && model.categories.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
-              {model.categories.map((category, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
+              {model.categories.slice(0, 2).map(category => (
+                <Badge key={category} variant="outline" className="text-xs">
                   {category}
                 </Badge>
               ))}
+              {model.categories.length > 2 && (
+                <Badge variant="outline" className="text-xs">
+                  +{model.categories.length - 2}
+                </Badge>
+              )}
             </div>
           )}
         </div>
-      </Card>
-    </Link>
+      </CardContent>
+    </Card>
   );
 };
 

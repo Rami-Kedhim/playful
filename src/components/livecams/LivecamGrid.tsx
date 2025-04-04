@@ -1,48 +1,78 @@
 
-import React from "react";
-import { LivecamModel } from "@/types/livecams";
-import LivecamCard from "./LivecamCard";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { LivecamModel } from '@/types/livecams';
+import LivecamCard from './LivecamCard';
+import { Button } from '@/components/ui/button';
 
 interface LivecamGridProps {
   models: LivecamModel[];
   loading: boolean;
   hasMore: boolean;
   onLoadMore: () => void;
+  showBoostControls?: boolean;
+  boostedIds?: string[];
+  onBoost?: (livecamId: string, intensity: number, durationHours: number) => boolean;
+  onCancelBoost?: (livecamId: string) => boolean;
 }
 
-const LivecamGrid: React.FC<LivecamGridProps> = ({ 
-  models, 
-  loading, 
-  hasMore, 
-  onLoadMore 
-}) => {
+const LivecamGrid = ({
+  models,
+  loading,
+  hasMore,
+  onLoadMore,
+  showBoostControls = false,
+  boostedIds = [],
+  onBoost = () => false,
+  onCancelBoost = () => false
+}: LivecamGridProps) => {
+  if (loading && models.length === 0) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div 
+            key={i} 
+            className="h-64 rounded-md bg-muted animate-pulse"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (!loading && models.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-lg font-medium">No live streams found</h3>
+        <p className="text-muted-foreground mt-2">
+          Try adjusting your filters or check back later
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {models.map((model) => (
-          <LivecamCard key={model.id} model={model} />
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {models.map(model => (
+          <LivecamCard 
+            key={model.id} 
+            model={model} 
+            showBoostControls={showBoostControls}
+            isBoosted={boostedIds.includes(model.id)}
+            onBoost={onBoost}
+            onCancelBoost={onCancelBoost}
+          />
         ))}
       </div>
       
-      {loading && (
-        <div className="flex justify-center py-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      )}
-      
-      {!loading && hasMore && (
+      {hasMore && (
         <div className="flex justify-center mt-6">
-          <Button onClick={onLoadMore}>
-            Load More
+          <Button
+            onClick={onLoadMore}
+            disabled={loading}
+            variant="outline"
+          >
+            {loading ? "Loading..." : "Load More"}
           </Button>
-        </div>
-      )}
-      
-      {!loading && models.length === 0 && (
-        <div className="text-center py-12">
-          <h3 className="text-xl font-medium text-gray-400">No models found</h3>
-          <p className="text-gray-500 mt-2">Try changing your filters or check back later</p>
         </div>
       )}
     </div>

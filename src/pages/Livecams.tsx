@@ -3,21 +3,25 @@ import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import LivecamGrid from "@/components/livecams/LivecamGrid";
 import LivecamFilters from "@/components/livecams/LivecamFilters";
-import useLivecams from "@/hooks/useLivecams";
-import { useToast } from "@/hooks/use-toast";
+import useBoostableLivecams from "@/hooks/useBoostableLivecams";
+import { useToast } from "@/components/ui/use-toast";
 
 const Livecams: React.FC = () => {
   const { toast } = useToast();
   const { 
-    models, 
+    livecams,
     loading, 
     error, 
     filters, 
     hasMore, 
     totalCount,
     loadMore, 
-    updateFilters 
-  } = useLivecams();
+    updateFilters,
+    boostLivecam,
+    cancelBoost,
+    isBoosted,
+    boostedIds
+  } = useBoostableLivecams();
 
   // Show error toast if something went wrong
   React.useEffect(() => {
@@ -45,19 +49,23 @@ const Livecams: React.FC = () => {
         </div>
         
         <div className="lg:col-span-3">
-          {!loading && models.length > 0 && (
+          {!loading && livecams.length > 0 && (
             <div className="mb-4 flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                Showing {models.length} of {totalCount} models
+                Showing {livecams.length} of {totalCount} models
               </p>
             </div>
           )}
           
           <LivecamGrid 
-            models={models} 
+            models={livecams} 
             loading={loading} 
             hasMore={hasMore} 
-            onLoadMore={loadMore} 
+            onLoadMore={loadMore}
+            showBoostControls={true}
+            boostedIds={boostedIds}
+            onBoost={boostLivecam}
+            onCancelBoost={cancelBoost}
           />
         </div>
       </div>
