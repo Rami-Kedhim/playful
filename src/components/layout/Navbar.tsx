@@ -48,7 +48,7 @@ const Navbar = () => {
               </Link>
             </Button>
             
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <>
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/favorites">
@@ -57,7 +57,7 @@ const Navbar = () => {
                 </Button>
                 
                 <UserDropdown 
-                  user={user!}
+                  user={user}
                   handleLogout={handleLogout} 
                 />
               </>

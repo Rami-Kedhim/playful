@@ -16,14 +16,10 @@ import {
   Settings,
   MessageCircle,
 } from "lucide-react";
+import { AuthUser } from "@/types/auth";
 
 interface MobileMenuProps {
-  user: {
-    username: string;
-    email: string;
-    profileImageUrl?: string;
-    lucoinsBalance: number;
-  } | null;
+  user: AuthUser | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handleLogout: () => void;

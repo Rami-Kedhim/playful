@@ -17,14 +17,10 @@ import {
   Bell,
   Settings,
 } from "lucide-react";
+import { AuthUser } from "@/types/auth";
 
 interface UserDropdownProps {
-  user: {
-    username: string;
-    email: string;
-    profileImageUrl?: string;
-    lucoinsBalance: number;
-  };
+  user: AuthUser;
   handleLogout: () => void;
 }
 
