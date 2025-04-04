@@ -19,9 +19,11 @@ import {
   useBoostManager,
   formatBoostDuration 
 } from "@/hooks/boost";
+import useHermesOxumBoost from "@/hooks/boost/useHermesOxumBoost";
 import BoostActivePackage from "./dialog/BoostActivePackage";
 import BoostPackageList from "./dialog/BoostPackageList";
 import BoostInfoTooltip from "./dialog/BoostInfoTooltip";
+import HermesBoostInfo from "./dialog/HermesBoostInfo";
 
 interface BoostProfileDialogProps {
   profileId: string;
@@ -49,6 +51,9 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
     dailyBoostUsage,
     dailyBoostLimit
   } = useBoostManager(profileId);
+
+  // Add Hermes + Oxum integration
+  const { hermesBoostStatus, loading: hermesLoading } = useHermesOxumBoost(profileId);
 
   useEffect(() => {
     if (open) {
@@ -176,6 +181,11 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
               dailyBoostUsage={dailyBoostUsage}
               dailyBoostLimit={dailyBoostLimit}
             />
+            
+            {/* Add Hermes Boost Info when active */}
+            {boostStatus.isActive && (
+              <HermesBoostInfo hermesData={hermesBoostStatus} />
+            )}
           </TabsContent>
         </Tabs>
         

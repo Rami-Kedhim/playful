@@ -1,6 +1,7 @@
 
 // Main boost hook composition
 export { default as useBoostManager } from './useBoostManager';
+export { default as useHermesOxumBoost } from './useHermesOxumBoost';
 
 // Individual boost hooks
 export * from './useBoostStatus';
