@@ -144,6 +144,7 @@ export const useEscortFilter = (escorts: Escort[]): EscortFilterHook => {
     setRatingMin,
     setAvailableNow,
     setServiceTypeFilter,
+    setIsLoading,
     clearFilters,
     
     // Filter results
