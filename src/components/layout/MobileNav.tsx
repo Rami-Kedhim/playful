@@ -1,10 +1,9 @@
-
 import { Link } from "react-router-dom";
 import { Heart, User, LogOut, Shield, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 interface MobileNavLinkProps {
   to: string;

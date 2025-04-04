@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AuthForm from "@/components/auth/AuthForm";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth/useAuth";
 import AppLayout from "@/components/layout/AppLayout";
 import { logContentAction } from "@/utils/debugUtils";
 import { Alert, AlertDescription } from "@/components/ui/alert";

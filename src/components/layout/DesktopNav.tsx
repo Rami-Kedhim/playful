@@ -1,7 +1,7 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { Search } from "lucide-react";
 import ServiceTypeMenu from "@/components/navigation/ServiceTypeMenu";
 
