@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { escorts } from "@/data/escortData";
 import { getEscortById } from "@/utils/escortUtils";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Shield, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import VerificationBadge from "@/components/verification/VerificationBadge";
 
 const EscortDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +39,9 @@ const EscortDetail = () => {
   
   const pageTitle = `${escort.name}, ${escort.age} | Escort in ${escort.location}`;
   const pageDescription = `Book ${escort.name}, a ${escort.age} year old escort in ${escort.location}. View photos, services, and rates.`;
+  
+  // Convert verificationLevel to the expected type
+  const verificationLevel = (escort.verificationLevel || "none") as "none" | "basic" | "enhanced" | "premium";
   
   return (
     <MainLayout showHeader={false}>

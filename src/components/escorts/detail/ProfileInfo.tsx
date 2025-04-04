@@ -1,14 +1,14 @@
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import ProfileHeader from "./ProfileHeader";
 import ProfileActions from "./ProfileActions";
-import ProfileTabs from "./ProfileTabs";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { VideoIcon, ImageIcon } from "lucide-react";
+import BookingDialog from "./booking/BookingDialog";
 
 interface ProfileInfoProps {
   escort: Escort;
@@ -26,6 +26,11 @@ const ProfileInfo = ({
   onShareOpen
 }: ProfileInfoProps) => {
   const [serviceTab, setServiceTab] = useState("in-person");
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  
+  const handleBookNow = () => {
+    setBookingDialogOpen(true);
+  };
   
   return (
     <div className="space-y-6">
@@ -55,7 +60,7 @@ const ProfileInfo = ({
                   <p className="text-muted-foreground text-sm">
                     Book {escort.name} for in-person encounters and enjoy personalized services.
                   </p>
-                  <Button onClick={onBookingOpen} className="w-full">
+                  <Button onClick={handleBookNow} className="w-full">
                     Book Now
                   </Button>
                 </div>
@@ -100,7 +105,12 @@ const ProfileInfo = ({
         </CardContent>
       </Card>
       
-      <ProfileTabs escort={escort} />
+      <BookingDialog 
+        escort={escort}
+        isOpen={bookingDialogOpen}
+        onClose={() => setBookingDialogOpen(false)}
+        onBookNow={onBookingOpen}
+      />
     </div>
   );
 };

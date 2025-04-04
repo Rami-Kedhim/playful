@@ -5,6 +5,7 @@ import { Heart, MapPin } from "lucide-react";
 import { Escort } from "@/data/escortData";
 import StarRating from "@/components/ui/StarRating";
 import { useFavorites } from "@/contexts/FavoritesContext";
+import VerificationBadge from "@/components/verification/VerificationBadge";
 
 interface ProfileHeaderProps {
   escort: Escort;
@@ -13,6 +14,9 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
   const { isFavorite } = useFavorites();
+  
+  // Convert verificationLevel to the expected type
+  const verificationLevel = (escort.verificationLevel || "none") as "none" | "basic" | "enhanced" | "premium";
   
   return (
     <>
@@ -24,20 +28,19 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
             <span>{escort.location}</span>
           </div>
           {/* Display gender and orientation */}
-          {(escort.gender || escort.sexualOrientation) && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {escort.gender && (
-                <Badge variant="outline" className="capitalize">
-                  {escort.gender}
-                </Badge>
-              )}
-              {escort.sexualOrientation && (
-                <Badge variant="outline" className="capitalize">
-                  {escort.sexualOrientation}
-                </Badge>
-              )}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-1 mt-2">
+            {escort.gender && (
+              <Badge variant="outline" className="capitalize">
+                {escort.gender}
+              </Badge>
+            )}
+            {escort.sexualOrientation && (
+              <Badge variant="outline" className="capitalize">
+                {escort.sexualOrientation}
+              </Badge>
+            )}
+            <VerificationBadge level={verificationLevel} />
+          </div>
         </div>
         
         <Button
@@ -57,12 +60,6 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
           <span className="ml-1">{escort.rating.toFixed(1)}</span>
           <span className="text-gray-400 ml-1">({escort.reviews})</span>
         </div>
-        
-        {escort.verified && (
-          <Badge className="ml-2 bg-primary text-primary-foreground">
-            Verified
-          </Badge>
-        )}
         
         <div className="ml-auto text-xl font-bold text-lucoin">
           {escort.price} LC/hr

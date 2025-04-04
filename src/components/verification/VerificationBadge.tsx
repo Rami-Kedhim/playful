@@ -1,89 +1,70 @@
 
 import React from 'react';
-import { Shield, ShieldCheck, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import { Shield, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+
+type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 
 interface VerificationBadgeProps {
-  level: "none" | "basic" | "enhanced" | "premium";
-  showLabel?: boolean;
-  size?: "sm" | "md" | "lg";
+  level: VerificationLevel;
   className?: string;
 }
 
-const VerificationBadge = ({ 
-  level, 
-  showLabel = false,
-  size = "md",
-  className
-}: VerificationBadgeProps) => {
-  
-  // Define sizes for the badge
-  const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-5 w-5",
-    lg: "h-6 w-6"
-  };
-  
-  // Define text sizes
-  const textSizes = {
-    sm: "text-xs",
-    md: "text-sm",
-    lg: "text-base"
-  };
-  
-  // Define colors and icons based on verification level
-  const config = {
-    none: {
-      icon: ShieldAlert,
-      color: "text-gray-400",
-      bgColor: "bg-gray-100",
-      label: "Not Verified",
-      description: "This profile has not been verified"
-    },
-    basic: {
-      icon: Shield,
-      color: "text-blue-500",
-      bgColor: "bg-blue-100",
-      label: "Basic Verification",
-      description: "ID verified"
-    },
-    enhanced: {
-      icon: ShieldCheck,
-      color: "text-green-500",
-      bgColor: "bg-green-100",
-      label: "Enhanced Verification",
-      description: "ID & phone verified"
-    },
-    premium: {
-      icon: BadgeCheck,
-      color: "text-purple-500",
-      bgColor: "bg-purple-100",
-      label: "Premium Verification",
-      description: "Fully verified with multiple checks"
+const VerificationBadge = ({ level, className = '' }: VerificationBadgeProps) => {
+  const getBadgeContent = () => {
+    switch (level) {
+      case 'premium':
+        return {
+          icon: <Shield className="h-4 w-4 mr-1" />,
+          text: 'Premium Verified',
+          description: 'This profile has completed our most rigorous verification process including government ID, photo verification, and background check.',
+          variant: 'default' as const,
+          color: 'bg-primary text-primary-foreground'
+        };
+      case 'enhanced':
+        return {
+          icon: <CheckCircle className="h-4 w-4 mr-1" />,
+          text: 'Enhanced Verification',
+          description: 'This profile has verified their identity with government ID and photo verification.',
+          variant: 'outline' as const,
+          color: 'bg-green-500/20 text-green-500 border-green-500/30'
+        };
+      case 'basic':
+        return {
+          icon: <Clock className="h-4 w-4 mr-1" />,
+          text: 'Basic Verification',
+          description: 'This profile has completed initial verification steps but has not completed the full process.',
+          variant: 'outline' as const,
+          color: 'bg-blue-500/20 text-blue-500 border-blue-500/30'
+        };
+      default:
+        return {
+          icon: <AlertTriangle className="h-4 w-4 mr-1" />,
+          text: 'Not Verified',
+          description: 'This profile has not been verified. Exercise caution when interacting.',
+          variant: 'outline' as const,
+          color: 'bg-amber-500/20 text-amber-500 border-amber-500/30'
+        };
     }
   };
-  
-  const { icon: Icon, color, bgColor, label, description } = config[level];
-  
+
+  const content = getBadgeContent();
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={cn("flex items-center gap-1.5", className)}>
-            <div className={cn("rounded-full p-1", bgColor)}>
-              <Icon className={cn(sizeClasses[size], color)} />
-            </div>
-            
-            {showLabel && (
-              <span className={cn("font-medium", color, textSizes[size])}>
-                {label}
-              </span>
-            )}
-          </div>
+          <Badge 
+            variant={content.variant} 
+            className={`flex items-center ${content.color} ${className}`}
+          >
+            {content.icon}
+            {content.text}
+          </Badge>
         </TooltipTrigger>
-        <TooltipContent>
-          <p>{description}</p>
+        <TooltipContent className="max-w-xs">
+          <p>{content.description}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
