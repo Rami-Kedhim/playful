@@ -5,3 +5,4 @@ export { default as LivecamSidebar } from "./LivecamSidebar";
 export { default as LivecamBoostPanel } from "./LivecamBoostPanel";
 export { default as LivecamStats } from "./LivecamStats";
 export { default as LivecamActions } from "./LivecamActions";
+export { default as LivecamChat } from "./LivecamChat";

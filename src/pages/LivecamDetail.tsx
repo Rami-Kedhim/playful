@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
-import { LivecamDetailLayout, LivecamMainContent, LivecamSidebar } from "@/components/livecams/detail";
+import { LivecamDetailLayout, LivecamMainContent, LivecamSidebar, LivecamChat } from "@/components/livecams/detail";
 import { LivecamModel } from "@/types/livecams";
 import { useToast } from "@/components/ui/use-toast";
 import livecamBoost from "@/services/visibility/LivecamBoostAdapter";
@@ -167,6 +167,14 @@ const LivecamDetail: React.FC = () => {
               boostStatus={boostStatus}
               onBoost={handleBoost}
               onCancelBoost={handleCancelBoost}
+            />
+          }
+          chatContent={
+            <LivecamChat
+              streamId={livecam.id}
+              isLive={livecam.isLive}
+              viewerCount={livecam.viewerCount || 0}
+              streamOwnerName={livecam.displayName}
             />
           }
         />
