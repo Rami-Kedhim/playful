@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Filter } from "lucide-react";
@@ -18,7 +17,6 @@ interface EscortContainerProps {
 
 const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
   const [showFilters, setShowFilters] = useState(false);
-  const [isFiltering, setIsFiltering] = useState(false);
   const location = useLocation();
   
   const {
@@ -36,12 +34,13 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     setSortBy,
     currentPage,
     setCurrentPage,
+    isLoading,
+    setIsLoading,
     clearFilters,
     filteredEscorts,
     sortedEscorts,
     paginatedEscorts,
     totalPages,
-    // Add new filter states and functions
     selectedGenders,
     toggleGender,
     selectedOrientations,
@@ -56,7 +55,6 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     setServiceTypeFilter
   } = useEscortFilter(escorts);
 
-  // Parse URL query parameters when the component loads
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const typeParam = params.get('type');
@@ -65,30 +63,6 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
       setServiceTypeFilter(typeParam as "in-person" | "virtual" | "both");
     }
   }, [location.search, setServiceTypeFilter]);
-
-  // Show loading state briefly when filters change
-  useEffect(() => {
-    const filtersChanged = searchQuery || locationFilter || 
-                          priceRange[0] > 0 || priceRange[1] < 500 ||
-                          verifiedOnly || selectedServices.length > 0 ||
-                          selectedGenders.length > 0 || selectedOrientations.length > 0 ||
-                          ageRange[0] > 18 || ageRange[1] < 50 ||
-                          ratingMin > 0 || availableNow ||
-                          serviceTypeFilter !== "";
-    
-    if (filtersChanged) {
-      setIsFiltering(true);
-      const timer = setTimeout(() => {
-        setIsFiltering(false);
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [
-    searchQuery, locationFilter, priceRange, verifiedOnly, selectedServices,
-    selectedGenders, selectedOrientations, ageRange, ratingMin, availableNow,
-    serviceTypeFilter
-  ]);
 
   return (
     <>
@@ -206,7 +180,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             totalPages={totalPages}
-            isLoading={isFiltering}
+            isLoading={isLoading}
           />
         </div>
       </div>

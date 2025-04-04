@@ -12,7 +12,7 @@ interface EscortResultsProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   totalPages: number;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 const EscortResults = ({ 
