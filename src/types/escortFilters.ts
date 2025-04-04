@@ -15,6 +15,7 @@ export interface EscortFilterState {
   ratingMin: number;
   availableNow: boolean;
   serviceTypeFilter: "in-person" | "virtual" | "both" | "";
+  isLoading: boolean;
 }
 
 export interface EscortFilterActions {

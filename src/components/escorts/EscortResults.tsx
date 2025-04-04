@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import EscortCard from "@/components/cards/EscortCard";
@@ -12,6 +12,7 @@ interface EscortResultsProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   totalPages: number;
+  isLoading?: boolean;
 }
 
 const EscortResults = ({ 
@@ -19,9 +20,26 @@ const EscortResults = ({
   clearFilters, 
   currentPage, 
   setCurrentPage, 
-  totalPages 
+  totalPages,
+  isLoading = false
 }: EscortResultsProps) => {
-  const [loading, setLoading] = useState(false);
+  // Local loading state for transitions between pages
+  const [localLoading, setLocalLoading] = useState(false);
+  
+  // Set local loading briefly when page changes for better UX
+  useEffect(() => {
+    if (currentPage) {
+      setLocalLoading(true);
+      const timer = setTimeout(() => {
+        setLocalLoading(false);
+      }, 300); // Short delay for better UX
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage]);
+  
+  // Combined loading state (either from props or local state)
+  const loading = isLoading || localLoading;
   
   // This handles loading state for when filters are applied
   if (loading) {

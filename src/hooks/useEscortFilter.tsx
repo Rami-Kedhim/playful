@@ -8,11 +8,12 @@ export const useEscortFilter = (escorts: Escort[]): EscortFilterHook => {
   // Filter state
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [location, setLocation] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("featured");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
   // New filter states
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
@@ -44,8 +45,14 @@ export const useEscortFilter = (escorts: Escort[]): EscortFilterHook => {
     filteredEscorts, 
     sortedEscorts,
     paginatedEscorts, 
-    totalPages 
+    totalPages,
+    isFiltering 
   } = useFilterResults(escorts, filters, currentPage, setCurrentPage);
+  
+  // Sync loading state
+  useEffect(() => {
+    setIsLoading(isFiltering);
+  }, [isFiltering]);
   
   // Handle price range change from slider component
   const handlePriceRangeChange = (values: number[]) => {
@@ -88,7 +95,7 @@ export const useEscortFilter = (escorts: Escort[]): EscortFilterHook => {
   const clearFilters = () => {
     setSearchQuery("");
     setLocation("");
-    setPriceRange([0, 1000]);
+    setPriceRange([0, 500]);
     setVerifiedOnly(false);
     setSelectedServices([]);
     setSortBy("featured");
@@ -116,6 +123,7 @@ export const useEscortFilter = (escorts: Escort[]): EscortFilterHook => {
     ratingMin,
     availableNow,
     serviceTypeFilter,
+    isLoading,
     
     // Filter actions
     setSearchQuery,
