@@ -56,15 +56,15 @@ export const submitVerificationRequest = async (
       .from('verification_requests')
       .insert({
         profile_id: userId,
-        requested_level: 'basic',
-        status: 'pending',
+        requested_level: 'basic' as const,
+        status: 'pending' as unknown as VerificationStatus,
         documents: {
           documentType: documentType,
           frontImage: frontImageUrl,
           backImage: backImageUrl,
           selfieImage: selfieImageUrl
         },
-        created_at: new Date()
+        created_at: new Date().toISOString()
       })
       .select()
       .single();
@@ -112,22 +112,37 @@ export const checkVerificationStatus = async (userId: string): Promise<{
     if (error) {
       // If no request found, return none
       if (error.code === 'PGRST116') {
-        return { status: 'pending' };
+        return { status: 'pending' as unknown as VerificationStatus };
       }
       throw error;
     }
     
+    // JSON parsing helper function to safely extract values
+    const getDocumentValue = <T>(documents: any, key: string, defaultValue: T): T => {
+      try {
+        if (typeof documents === 'string') {
+          const parsed = JSON.parse(documents);
+          return (parsed[key] as T) || defaultValue;
+        } else if (documents && typeof documents === 'object') {
+          return (documents[key] as T) || defaultValue;
+        }
+        return defaultValue;
+      } catch (e) {
+        return defaultValue;
+      }
+    };
+    
     // Convert the database fields to our expected VerificationRequest type
     return {
-      status: data.status as VerificationStatus,
+      status: data.status as unknown as VerificationStatus,
       lastRequest: {
         id: data.id,
         userId: data.profile_id,
-        documentType: data.documents?.documentType || 'other',
-        documentFrontImage: data.documents?.frontImage,
-        documentBackImage: data.documents?.backImage,
-        selfieImage: data.documents?.selfieImage,
-        status: data.status,
+        documentType: getDocumentValue(data.documents, 'documentType', 'other'),
+        documentFrontImage: getDocumentValue(data.documents, 'frontImage', ''),
+        documentBackImage: getDocumentValue(data.documents, 'backImage', ''),
+        selfieImage: getDocumentValue(data.documents, 'selfieImage', ''),
+        status: data.status as unknown as VerificationStatus,
         submittedAt: data.created_at,
         reviewedAt: data.reviewed_at,
         reviewedBy: data.reviewed_by,
@@ -138,7 +153,7 @@ export const checkVerificationStatus = async (userId: string): Promise<{
   } catch (error) {
     console.error("Error checking verification status:", error);
     // Return pending as a safe default
-    return { status: 'pending' };
+    return { status: 'pending' as unknown as VerificationStatus };
   }
 };
 
