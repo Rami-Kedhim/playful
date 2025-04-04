@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 interface FilterActionsProps {
   clearFilters: () => void;
@@ -8,17 +9,20 @@ interface FilterActionsProps {
 
 const FilterActions = ({ clearFilters, applyFilters }: FilterActionsProps) => {
   return (
-    <div className="flex gap-2 mt-4">
+    <div className="flex gap-3 mt-6">
       <Button 
         variant="outline" 
-        className="flex-1"
+        size="sm"
         onClick={clearFilters}
+        className="flex-1"
       >
-        Clear
+        <RotateCcw size={16} className="mr-1.5" />
+        Reset
       </Button>
       <Button 
-        className="flex-1"
         onClick={applyFilters}
+        size="sm"
+        className="flex-1"
       >
         Apply Filters
       </Button>
