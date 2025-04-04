@@ -1,16 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, Zap } from "lucide-react";
 import { useBoostManager } from "@/hooks/useBoostManager";
 import BoostStatusCard from "./BoostStatusCard";
-import BoostPackageGrid from "./BoostPackageGrid";
 import BoostAnalyticsCard from "./BoostAnalyticsCard";
 import BoostHistoryTable from "./BoostHistoryTable";
-import { formatBoostDuration } from "@/utils/boostCalculator";
+import BoostPackageSelection from "./BoostPackageSelection";
+import BoostPurchaseConfirmation from "./BoostPurchaseConfirmation";
+import BoostEligibilityAlert from "./BoostEligibilityAlert";
 
 interface BoostManagerProps {
   creatorId: string;
@@ -124,6 +123,8 @@ const BoostManager = ({
       }
     }
   };
+
+  const selectedBoostPackage = boostPackages.find(p => p.id === selectedPackage);
   
   if (error) {
     return (
@@ -154,115 +155,34 @@ const BoostManager = ({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!eligibility.eligible ? (
-              <Alert variant="warning" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Not Eligible for Boosting</AlertTitle>
-                <AlertDescription>
-                  {eligibility.reason || "Your profile doesn't meet the requirements for boosting."}
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <>
-                {activeStep === 'select' ? (
-                  <div className="space-y-6">
-                    <div className="bg-secondary/20 p-4 rounded-md mb-4">
-                      <div className="flex items-center mb-2">
-                        <Zap className="h-5 w-5 mr-2 text-amber-500" />
-                        <h3 className="font-medium">Boost Price Calculation</h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        The Oxum Algorithm calculates your boost price based on various factors:
-                      </p>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>Profile Completeness: {profileCompleteness}%</div>
-                        <div>Rating: {rating}</div>
-                        <div>Country: {country}</div>
-                        <div>Account Type: {role}</div>
-                      </div>
-                      <div className="mt-2 font-medium">
-                        Your base boost price: {getBoostPrice()} LC
-                      </div>
-                    </div>
-                    
-                    <BoostPackageGrid 
-                      packages={boostPackages}
-                      onSelectPackage={(pkg) => setSelectedPackage(pkg.id)}
-                      selectedPackageId={selectedPackage}
-                    />
-                    
-                    <div className="flex justify-end">
-                      <Button 
-                        onClick={() => setActiveStep('confirm')} 
-                        disabled={!selectedPackage || loading}
-                      >
-                        Continue to Payment
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="bg-muted p-4 rounded-md">
-                      <h3 className="font-medium mb-2">Confirm Your Purchase</h3>
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="text-sm text-muted-foreground">Package:</div>
-                        <div>
-                          {boostPackages.find(p => p.id === selectedPackage)?.name}
-                        </div>
-                        
-                        <div className="text-sm text-muted-foreground">Duration:</div>
-                        <div>
-                          {formatBoostDuration(
-                            boostPackages.find(p => p.id === selectedPackage)?.duration || ""
-                          )}
-                        </div>
-                        
-                        <div className="text-sm text-muted-foreground">Price:</div>
-                        <div className="font-medium">
-                          {boostPackages.find(p => p.id === selectedPackage)?.price_lucoin} LC
-                        </div>
-                        
-                        <div className="text-sm text-muted-foreground">Current Balance:</div>
-                        <div className={lucoinBalance < (boostPackages.find(p => p.id === selectedPackage)?.price_lucoin || 0) 
-                          ? "text-red-500" 
-                          : ""
-                        }>
-                          {lucoinBalance} LC
-                        </div>
-                      </div>
-                      
-                      {lucoinBalance < (boostPackages.find(p => p.id === selectedPackage)?.price_lucoin || 0) && (
-                        <Alert variant="destructive" className="mt-4">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertTitle>Insufficient Balance</AlertTitle>
-                          <AlertDescription>
-                            You don't have enough Lucoins to purchase this boost. Please add more credits to your account.
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setActiveStep('select')}
-                      >
-                        Back
-                      </Button>
-                      <Button 
-                        onClick={handleBoostPurchase} 
-                        disabled={
-                          loading || 
-                          lucoinBalance < (boostPackages.find(p => p.id === selectedPackage)?.price_lucoin || 0)
-                        }
-                      >
-                        Complete Purchase
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </>
+            <BoostEligibilityAlert 
+              eligible={eligibility.eligible} 
+              reason={eligibility.reason} 
+            />
+            
+            {eligibility.eligible && (
+              activeStep === 'select' ? (
+                <BoostPackageSelection
+                  profileCompleteness={profileCompleteness}
+                  rating={rating}
+                  country={country}
+                  role={role}
+                  getBoostPrice={getBoostPrice}
+                  packages={boostPackages}
+                  selectedPackage={selectedPackage}
+                  onSelectPackage={setSelectedPackage}
+                  onContinue={() => setActiveStep('confirm')}
+                  loading={loading}
+                />
+              ) : (
+                <BoostPurchaseConfirmation
+                  selectedPackage={selectedBoostPackage}
+                  lucoinBalance={lucoinBalance}
+                  onBack={() => setActiveStep('select')}
+                  onPurchase={handleBoostPurchase}
+                  loading={loading}
+                />
+              )
             )}
           </CardContent>
         </Card>
