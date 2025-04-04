@@ -1,11 +1,23 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+import { Zap, X, Settings } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Slider } from "@/components/ui/slider";
-import { Zap } from "lucide-react";
-import { Livecam } from "@/types/livecams";
+import { Livecam } from '@/types/livecams';
 
 interface LivecamBoostControlsProps {
   livecam: Livecam;
@@ -14,99 +26,111 @@ interface LivecamBoostControlsProps {
   onCancel: (livecamId: string) => boolean;
 }
 
-const LivecamBoostControls = ({ 
-  livecam, 
-  isBoosted, 
-  onBoost, 
-  onCancel 
+const LivecamBoostControls = ({
+  livecam,
+  isBoosted,
+  onBoost,
+  onCancel
 }: LivecamBoostControlsProps) => {
-  const [open, setOpen] = useState(false);
-  const [intensity, setIntensity] = useState(30);
-  const [duration, setDuration] = useState(24);
+  const [boostIntensity, setBoostIntensity] = useState(30); // Default intensity
+  const [boostDuration, setBoostDuration] = useState(24); // Default duration in hours
   
   const handleBoost = () => {
-    const success = onBoost(livecam.id, intensity, duration);
-    if (success) {
-      setOpen(false);
-    }
+    onBoost(livecam.id, boostIntensity, boostDuration);
   };
   
   const handleCancel = () => {
-    const success = onCancel(livecam.id);
-    if (success) {
-      setOpen(false);
-    }
+    onCancel(livecam.id);
   };
   
+  if (isBoosted) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 text-yellow-500" 
+              onClick={handleCancel}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Cancel boost</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+  
   return (
-    <>
-      <Button 
-        variant={isBoosted ? "destructive" : "outline"} 
-        size="sm" 
-        className="flex items-center gap-1"
-        onClick={() => setOpen(true)}
-      >
-        <Zap className="h-4 w-4" />
-        {isBoosted ? "Cancel Boost" : "Boost Stream"}
-      </Button>
+    <DropdownMenu>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Zap className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Boost this livecam</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {isBoosted ? "Cancel Stream Boost" : "Boost This Stream"}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {!isBoosted ? (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="intensity">Boost Intensity: {intensity}</Label>
-                <Slider
-                  id="intensity"
-                  min={10}
-                  max={50}
-                  step={5}
-                  value={[intensity]}
-                  onValueChange={(value) => setIntensity(value[0])}
-                />
-                <p className="text-xs text-muted-foreground">Higher intensity means more visibility in listings</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration (hours): {duration}</Label>
-                <Slider
-                  id="duration"
-                  min={1}
-                  max={72}
-                  step={1}
-                  value={[duration]}
-                  onValueChange={(value) => setDuration(value[0])}
-                />
-                <p className="text-xs text-muted-foreground">How long the boost will remain active</p>
-              </div>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>Boost Settings</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        
+        <div className="px-3 py-2">
+          <div className="mb-4">
+            <div className="flex justify-between mb-2">
+              <span className="text-xs">Boost Intensity</span>
+              <span className="text-xs font-medium">{boostIntensity}%</span>
             </div>
-          ) : (
-            <p>Are you sure you want to cancel the boost for {livecam.name || livecam.username}?</p>
-          )}
+            <Slider 
+              value={[boostIntensity]}
+              min={10}
+              max={100}
+              step={10}
+              onValueChange={(value) => setBoostIntensity(value[0])}
+              className="mb-1"
+            />
+          </div>
           
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant={isBoosted ? "destructive" : "default"} 
-              onClick={isBoosted ? handleCancel : handleBoost}
-            >
-              {isBoosted ? "Cancel Boost" : "Apply Boost"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+          <div className="mb-4">
+            <div className="flex justify-between mb-2">
+              <span className="text-xs">Duration</span>
+              <span className="text-xs font-medium">{boostDuration} hours</span>
+            </div>
+            <Slider 
+              value={[boostDuration]}
+              min={1}
+              max={72}
+              step={1}
+              onValueChange={(value) => setBoostDuration(value[0])}
+              className="mb-1"
+            />
+          </div>
+        </div>
+        
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="w-full cursor-pointer"
+            onClick={handleBoost}
+          >
+            <Zap className="h-3 w-3 mr-1" /> Boost Now
+          </Button>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

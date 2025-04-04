@@ -1,151 +1,204 @@
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { fetchLivecams } from "@/services/livecamsService";
-import { 
-  LivecamDetailLayout, 
-  LivecamMainContent, 
-  LivecamSidebar 
-} from "@/components/livecams/detail";
-import { toast } from "sonner";
-import LivecamBoostControls from "@/components/livecams/LivecamBoostControls";
-import LivecamBoostBadge from "@/components/livecams/LivecamBoostBadge";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import MainLayout from "@/components/layout/MainLayout";
+import { LivecamDetailLayout, LivecamMainContent, LivecamSidebar } from "@/components/livecams/detail";
+import { LivecamModel } from "@/types/livecams";
+import { useToast } from "@/components/ui/use-toast";
 import livecamBoost from "@/services/visibility/LivecamBoostAdapter";
+import { Button } from "@/components/ui/button";
+import { Zap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+// This would come from an API in a real application
+const fetchLivecamDetails = async (username: string): Promise<LivecamModel | null> => {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  // Mock data
+  return {
+    id: `livecam-${username}`,
+    username,
+    displayName: username.charAt(0).toUpperCase() + username.slice(1),
+    imageUrl: `https://picsum.photos/seed/${username}/800/450`,
+    thumbnailUrl: `https://picsum.photos/seed/${username}/200/200`,
+    isLive: Math.random() > 0.3,
+    viewerCount: Math.floor(Math.random() * 1000),
+    country: ['US', 'CA', 'UK', 'FR', 'DE'][Math.floor(Math.random() * 5)],
+    categories: ['chat', 'dance', 'games', 'music'].slice(0, Math.floor(Math.random() * 3) + 1),
+    age: 20 + Math.floor(Math.random() * 15),
+    language: ['English', 'Spanish', 'French', 'German'][Math.floor(Math.random() * 4)],
+    description: "Welcome to my stream! I love interacting with my viewers.",
+    streamUrl: "https://example.com/stream"
+  };
+};
 
 const LivecamDetail: React.FC = () => {
-  const { username } = useParams<{ username: string }>();
-  const [model, setModel] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
+  const [livecam, setLivecam] = useState<LivecamModel | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isBoosted, setIsBoosted] = useState(false);
-  const navigate = useNavigate();
-  
-  const handleGoBack = useCallback(() => {
-    navigate("/livecams");
-  }, [navigate]);
+  const [boostStatus, setBoostStatus] = useState<{timeRemaining?: number, intensity?: number} | null>(null);
   
   useEffect(() => {
-    const loadModel = async () => {
-      if (!username) {
-        setError("Invalid username parameter");
-        setLoading(false);
-        return;
-      }
-
+    const loadLivecamData = async () => {
+      if (!id) return;
+      
+      setLoading(true);
       try {
-        setLoading(true);
-        setError(null);
+        const livecamData = await fetchLivecamDetails(id);
+        setLivecam(livecamData);
         
-        // Fetch all models and find the one we need
-        const response = await fetchLivecams({ limit: 100 });
-        
-        console.log(`Looking for model with username: ${username}`);
-        const foundModel = response.models.find(m => m.username === username);
-        
-        if (foundModel) {
-          console.log("Found model:", foundModel);
-          setModel(foundModel);
-          document.title = `${foundModel.displayName} - Live Cam`;
-          
-          // Check if this livecam is boosted
-          const visibility = livecamBoost.checkBoostStatus(foundModel.id);
-          setIsBoosted(visibility.isBoosted);
-        } else {
-          console.error(`Model with username ${username} not found`);
-          setError("Model not found");
-          toast.error(`Could not find model with username: ${username}`);
+        // Check if this livecam is boosted
+        if (livecamData) {
+          const status = livecamBoost.checkBoostStatus(livecamData.id);
+          setIsBoosted(status.isBoosted);
+          if (status.isBoosted) {
+            setBoostStatus({
+              timeRemaining: status.timeRemaining,
+              intensity: status.intensity
+            });
+          }
         }
-      } catch (err: any) {
-        console.error("Error loading model:", err);
-        setError(err.message || "Failed to load model");
-        toast.error(`Error loading model: ${err.message || "Unknown error"}`);
+      } catch (error) {
+        console.error("Error loading livecam details:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load livecam details",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
     
-    loadModel();
+    loadLivecamData();
+  }, [id, toast]);
+  
+  const handleBoost = () => {
+    if (!livecam) return;
     
-    // Clean up function
-    return () => {
-      document.title = 'Live Cams';
-    };
-  }, [username]);
-
-  const handleBoost = (livecamId: string, intensity: number, durationHours: number) => {
-    if (!model) return false;
-    
-    const livecam = {
-      id: model.id,
-      username: model.username,
-      name: model.displayName,
-      imageUrl: model.imageUrl,
-      thumbnailUrl: model.thumbnailUrl,
-      isStreaming: model.isLive,
-      viewerCount: model.viewerCount || 0,
-      region: model.country || 'unknown',
-      language: model.language || 'en',
-      tags: model.categories || [],
-      category: model.categories?.[0] || 'general',
+    // Convert LivecamModel to the boost interface format
+    const boostableLivecam = {
+      id: livecam.id,
+      username: livecam.username,
+      name: livecam.displayName,
+      imageUrl: livecam.imageUrl,
+      thumbnailUrl: livecam.thumbnailUrl || livecam.imageUrl,
+      isStreaming: livecam.isLive,
+      viewerCount: livecam.viewerCount || 0,
+      region: livecam.country || 'unknown',
+      language: livecam.language || 'en',
+      tags: livecam.categories || [],
+      category: livecam.categories?.[0] || 'general',
       rating: 5 // Default high rating
     };
     
-    livecamBoost.boostLivecam(livecam, intensity, durationHours);
+    // Apply boost
+    livecamBoost.boostLivecam(boostableLivecam);
+    
+    // Update state
     setIsBoosted(true);
-    toast.success(`Boosted ${model.displayName}'s stream!`);
-    return true;
+    setBoostStatus({
+      timeRemaining: 24,
+      intensity: 30
+    });
+    
+    toast({
+      title: "Boost Applied",
+      description: `${livecam.displayName} has been boosted!`,
+    });
   };
   
-  const handleCancelBoost = (livecamId: string) => {
-    livecamBoost.removeLivecamBoost(livecamId);
+  const handleCancelBoost = () => {
+    if (!livecam) return;
+    
+    livecamBoost.removeLivecamBoost(livecam.id);
+    
     setIsBoosted(false);
-    toast.success(`Cancelled boost for ${model?.displayName}'s stream`);
-    return true;
+    setBoostStatus(null);
+    
+    toast({
+      title: "Boost Cancelled",
+      description: "The boost has been cancelled",
+    });
   };
-
+  
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="animate-pulse">
+          <div className="h-64 bg-muted rounded-lg mb-4"></div>
+          <div className="h-8 bg-muted rounded-lg w-1/3 mb-2"></div>
+          <div className="h-4 bg-muted rounded-lg w-1/4 mb-8"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-2 h-96 bg-muted rounded-lg"></div>
+            <div className="h-96 bg-muted rounded-lg"></div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+  
+  if (!livecam) {
+    return (
+      <MainLayout>
+        <div className="text-center py-20">
+          <h2 className="text-2xl font-bold mb-2">Livecam Not Found</h2>
+          <p className="text-muted-foreground">The requested livecam could not be found.</p>
+        </div>
+      </MainLayout>
+    );
+  }
+  
   return (
-    <LivecamDetailLayout
-      model={model}
-      loading={loading}
-      error={error}
-      onGoBack={handleGoBack}
-    >
-      {model && (
-        <>
-          <div className="md:col-span-2">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold">{model.displayName}</h1>
-                <LivecamBoostBadge isBoosted={isBoosted} />
+    <MainLayout title={livecam.displayName}>
+      <LivecamDetailLayout
+        sidebar={
+          <LivecamSidebar
+            livecam={livecam}
+            actionSlot={
+              <div className="mt-4">
+                {isBoosted ? (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        Boosted
+                      </Badge>
+                      {boostStatus?.timeRemaining && (
+                        <span className="text-xs text-muted-foreground">
+                          {Math.round(boostStatus.timeRemaining)}h remaining
+                        </span>
+                      )}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={handleCancelBoost}
+                    >
+                      Cancel Boost
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    className="w-full"
+                    onClick={handleBoost}
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    Boost This Livecam
+                  </Button>
+                )}
               </div>
-              
-              <LivecamBoostControls 
-                livecam={{
-                  id: model.id,
-                  username: model.username,
-                  name: model.displayName,
-                  imageUrl: model.imageUrl,
-                  thumbnailUrl: model.thumbnailUrl,
-                  isStreaming: model.isLive,
-                  viewerCount: model.viewerCount || 0,
-                  region: model.country || 'unknown',
-                  language: model.language || 'en',
-                  tags: model.categories || [],
-                  category: model.categories?.[0] || 'general'
-                }}
-                isBoosted={isBoosted}
-                onBoost={handleBoost}
-                onCancel={handleCancelBoost}
-              />
-            </div>
-            <LivecamMainContent model={model} />
-          </div>
-          <div className="md:col-span-1">
-            <LivecamSidebar model={model} />
-          </div>
-        </>
-      )}
-    </LivecamDetailLayout>
+            }
+          />
+        }
+        mainContent={
+          <LivecamMainContent livecam={livecam} />
+        }
+      />
+    </MainLayout>
   );
 };
 
