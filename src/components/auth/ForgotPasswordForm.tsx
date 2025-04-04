@@ -2,8 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import FormField from "./FormField";
 
 interface ForgotPasswordFormProps {
   email: string;
@@ -28,8 +28,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="forgot-email">Email</Label>
+      <FormField id="forgot-email" label="Email">
         <Input
           id="forgot-email"
           type="email"
@@ -38,7 +37,8 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-      </div>
+      </FormField>
+      
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? (
           <>
@@ -49,6 +49,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
           "Send Reset Link"
         )}
       </Button>
+      
       <div className="flex justify-center">
         <Button
           variant="link"

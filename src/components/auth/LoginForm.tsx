@@ -2,8 +2,9 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import FormField from "./FormField";
+import PasswordInput from "./PasswordInput";
 
 interface LoginFormProps {
   email: string;
@@ -21,7 +22,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
   isLoading,
 }) => {
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +30,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="login-email">Email</Label>
+      <FormField id="login-email" label="Email">
         <Input
           id="login-email"
           type="email"
@@ -40,10 +39,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-      </div>
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <Label htmlFor="login-password">Password</Label>
+      </FormField>
+
+      <FormField id="login-password" label="Password">
+        <div className="flex justify-between items-center mb-1">
+          <div></div> {/* Empty div to maintain spacing */}
           <Button
             type="button"
             variant="ghost"
@@ -55,27 +55,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
             Forgot password?
           </Button>
         </div>
-        <div className="relative">
-          <Input
-            id="login-password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="absolute right-0 top-0 h-full px-3"
-            onClick={() => setShowPassword(!showPassword)}
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-          </Button>
-        </div>
-      </div>
+        <PasswordInput
+          id="login-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+        />
+      </FormField>
+
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? (
           <>
