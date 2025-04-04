@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { LivecamDetailLayout, LivecamMainContent, LivecamSidebar } from "@/components/livecams/detail";
 import { LivecamModel } from "@/types/livecams";
@@ -35,11 +35,13 @@ const fetchLivecamDetails = async (username: string): Promise<LivecamModel | nul
 
 const LivecamDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [livecam, setLivecam] = useState<LivecamModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [isBoosted, setIsBoosted] = useState(false);
   const [boostStatus, setBoostStatus] = useState<{timeRemaining?: number, intensity?: number} | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const loadLivecamData = async () => {
@@ -63,6 +65,7 @@ const LivecamDetail: React.FC = () => {
         }
       } catch (error) {
         console.error("Error loading livecam details:", error);
+        setError("Failed to load livecam details");
         toast({
           title: "Error",
           description: "Failed to load livecam details",
@@ -124,81 +127,62 @@ const LivecamDetail: React.FC = () => {
       description: "The boost has been cancelled",
     });
   };
-  
-  if (loading) {
-    return (
-      <MainLayout>
-        <div className="animate-pulse">
-          <div className="h-64 bg-muted rounded-lg mb-4"></div>
-          <div className="h-8 bg-muted rounded-lg w-1/3 mb-2"></div>
-          <div className="h-4 bg-muted rounded-lg w-1/4 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="md:col-span-2 h-96 bg-muted rounded-lg"></div>
-            <div className="h-96 bg-muted rounded-lg"></div>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-  
-  if (!livecam) {
-    return (
-      <MainLayout>
-        <div className="text-center py-20">
-          <h2 className="text-2xl font-bold mb-2">Livecam Not Found</h2>
-          <p className="text-muted-foreground">The requested livecam could not be found.</p>
-        </div>
-      </MainLayout>
-    );
-  }
+
+  const handleGoBack = () => {
+    navigate("/livecams");
+  };
   
   return (
-    <MainLayout title={livecam.displayName}>
-      <LivecamDetailLayout
-        sidebar={
-          <LivecamSidebar
-            livecam={livecam}
-            actionSlot={
-              <div className="mt-4">
-                {isBoosted ? (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 flex items-center gap-1">
-                        <Zap className="h-3 w-3" />
-                        Boosted
-                      </Badge>
-                      {boostStatus?.timeRemaining && (
-                        <span className="text-xs text-muted-foreground">
-                          {Math.round(boostStatus.timeRemaining)}h remaining
-                        </span>
-                      )}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      onClick={handleCancelBoost}
-                    >
-                      Cancel Boost
-                    </Button>
-                  </div>
-                ) : (
-                  <Button 
-                    className="w-full"
-                    onClick={handleBoost}
-                  >
-                    <Zap className="h-4 w-4 mr-2" />
-                    Boost This Livecam
-                  </Button>
+    <LivecamDetailLayout
+      model={livecam}
+      loading={loading}
+      error={error}
+      onGoBack={handleGoBack}
+    >
+      <div className="md:col-span-2">
+        {livecam && <LivecamMainContent model={livecam} />}
+      </div>
+      <div>
+        {livecam && (
+          <LivecamSidebar 
+            model={livecam} 
+          />
+        )}
+        {/* Additional boost controls */}
+        <div className="mt-4">
+          {isBoosted ? (
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 flex items-center gap-1">
+                  <Zap className="h-3 w-3" />
+                  Boosted
+                </Badge>
+                {boostStatus?.timeRemaining && (
+                  <span className="text-xs text-muted-foreground">
+                    {Math.round(boostStatus.timeRemaining)}h remaining
+                  </span>
                 )}
               </div>
-            }
-          />
-        }
-        mainContent={
-          <LivecamMainContent livecam={livecam} />
-        }
-      />
-    </MainLayout>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={handleCancelBoost}
+              >
+                Cancel Boost
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              className="w-full"
+              onClick={handleBoost}
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Boost This Livecam
+            </Button>
+          )}
+        </div>
+      </div>
+    </LivecamDetailLayout>
   );
 };
 
