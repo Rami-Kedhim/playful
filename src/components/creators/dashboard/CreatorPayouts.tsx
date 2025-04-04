@@ -1,10 +1,9 @@
 
-import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import usePayouts from "./payouts/usePayouts";
 import EarningsSummary from "./payouts/EarningsSummary";
 import PayoutHistory from "./payouts/PayoutHistory";
-import PayoutDialogWrapper from "./payouts/PayoutDialogWrapper";
-import PayoutHeader from "./payouts/components/PayoutHeader";
-import usePayouts from "./payouts/usePayouts";
+import PayoutRequestManager from "./payouts/components/PayoutRequestManager";
 
 interface CreatorPayoutsProps {
   creatorId: string;
@@ -15,25 +14,43 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
     payouts,
     isLoading,
     earnings,
-    handlePayoutRequest
+    handlePayoutRequest,
+    isSubmitting
   } = usePayouts(creatorId);
-  
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
-      <PayoutHeader onRequestPayout={() => setDialogOpen(true)} />
+      <h2 className="text-2xl font-bold">Earnings & Payouts</h2>
       
-      <EarningsSummary earnings={earnings} isLoading={isLoading} />
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Earnings Summary Card */}
+        <EarningsSummary 
+          totalEarnings={earnings.total}
+          pendingPayouts={earnings.pending}
+          availableBalance={earnings.available}
+          isLoading={isLoading}
+        />
+        
+        {/* Payout Request Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Request Payout</CardTitle>
+            <CardDescription>
+              Withdraw your earnings to your preferred payment method
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PayoutRequestManager
+              availableAmount={earnings.available}
+              onRequestPayout={handlePayoutRequest}
+              isSubmitting={isSubmitting}
+            />
+          </CardContent>
+        </Card>
+      </div>
       
+      {/* Payout History Section */}
       <PayoutHistory payouts={payouts} isLoading={isLoading} />
-      
-      <PayoutDialogWrapper 
-        isOpen={dialogOpen}
-        onOpenChange={setDialogOpen}
-        earnings={earnings}
-        onRequestPayout={handlePayoutRequest}
-      />
     </div>
   );
 };
