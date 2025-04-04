@@ -76,7 +76,7 @@ export interface Escort {
   isLive?: boolean;
   
   // Additional fields to match usage in codebase
-  imageUrl?: string; // Changed from required to optional
+  imageUrl?: string;
   description?: string;
   gallery?: string[];
   videos?: Video[];
@@ -117,7 +117,7 @@ export interface EscortCardProps {
   rating: number;
   reviews: number;
   tags: string[];
-  imageUrl: string; // Required for the card component
+  imageUrl: string; // We keep this required for the card component
   price: number;
   verified: boolean;
   gender?: string;

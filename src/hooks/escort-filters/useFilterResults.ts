@@ -166,7 +166,7 @@ export const useFilterResults = (
     const start = (currentPage - 1) * pageSize;
     const end = start + pageSize;
     setPaginatedEscorts(sortedEscorts.slice(start, end));
-  }, [sortedEscorts, currentPage, pageSize]);
+  }, [sortedEscorts, currentPage]);
   
   return {
     filteredEscorts,
