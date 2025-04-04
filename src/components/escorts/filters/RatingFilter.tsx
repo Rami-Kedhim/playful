@@ -1,6 +1,6 @@
 
 import { Slider } from "@/components/ui/slider";
-import { StarIcon } from "lucide-react";
+import StarRating from "@/components/ui/StarRating";
 
 interface RatingFilterProps {
   ratingMin: number;
@@ -10,21 +10,20 @@ interface RatingFilterProps {
 const RatingFilter = ({ ratingMin, setRatingMin }: RatingFilterProps) => {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium">Minimum Rating</label>
       <div className="flex items-center gap-2">
-        <Slider
-          value={[ratingMin]}
-          min={0}
-          max={5}
-          step={0.5}
-          onValueChange={(value) => setRatingMin(value[0])}
-          className="flex-grow"
-        />
-        <div className="flex items-center gap-1 min-w-[40px]">
-          <span className="text-amber-500"><StarIcon size={14} /></span>
-          <span className="text-sm">{ratingMin}</span>
-        </div>
+        <span className="text-sm">Min rating:</span>
+        <StarRating rating={ratingMin} size={16} />
+        <span className="text-sm ml-1">({ratingMin}+)</span>
       </div>
+      <Slider
+        defaultValue={[ratingMin]}
+        min={0}
+        max={5}
+        step={0.5}
+        value={[ratingMin]}
+        onValueChange={(value) => setRatingMin(value[0])}
+        className="mt-4"
+      />
     </div>
   );
 };

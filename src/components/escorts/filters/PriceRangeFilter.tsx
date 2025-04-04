@@ -10,19 +10,19 @@ const PriceRangeFilter = ({ priceRange, setPriceRange }: PriceRangeFilterProps) 
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Price Range (LC)</label>
-      <div className="pt-2">
-        <Slider
-          value={priceRange}
-          min={0}
-          max={500}
-          step={10}
-          onValueChange={setPriceRange}
-        />
-        <div className="flex justify-between mt-2 text-sm text-gray-400">
-          <span>{priceRange[0]} LC</span>
-          <span>{priceRange[1]} LC</span>
-        </div>
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>{priceRange[0]}</span>
+        <span>{priceRange[1]}</span>
       </div>
+      <Slider
+        defaultValue={priceRange}
+        min={0}
+        max={1000}
+        step={10}
+        value={priceRange}
+        onValueChange={setPriceRange}
+        className="mt-6"
+      />
     </div>
   );
 };
