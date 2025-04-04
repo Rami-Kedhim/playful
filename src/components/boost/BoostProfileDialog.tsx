@@ -1,18 +1,16 @@
 
 import { useState, useEffect } from "react";
-import { Zap, Loader2, Info } from "lucide-react";
+import { Zap } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
   DialogDescription, 
-  DialogFooter, 
   DialogHeader, 
   DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress"; // Fixed import - Progress is a UI component, not an icon
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { 
@@ -21,9 +19,10 @@ import {
 } from "@/hooks/boost";
 import useHermesOxumBoost from "@/hooks/boost/useHermesOxumBoost";
 import BoostActivePackage from "./dialog/BoostActivePackage";
-import BoostPackageList from "./dialog/BoostPackageList";
 import BoostInfoTooltip from "./dialog/BoostInfoTooltip";
 import HermesBoostInfo from "./dialog/HermesBoostInfo";
+import BoostPackages from "./dialog/BoostPackages";
+import BoostEligibilityMessage from "./dialog/BoostEligibilityMessage";
 
 interface BoostProfileDialogProps {
   profileId: string;
@@ -34,7 +33,6 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("packages");
   const [boostAnalytics, setBoostAnalytics] = useState<any>(null);
-  const { user } = useAuth();
   
   const { 
     boostStatus, 
@@ -53,7 +51,7 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
   } = useBoostManager(profileId);
 
   // Add Hermes + Oxum integration
-  const { hermesBoostStatus, loading: hermesLoading } = useHermesOxumBoost(profileId);
+  const { hermesBoostStatus } = useHermesOxumBoost(profileId);
 
   useEffect(() => {
     if (open) {
@@ -69,7 +67,7 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
     if (analytics) {
       setBoostAnalytics(analytics);
     }
-    return true; // Return boolean to satisfy TypeScript
+    return true;
   };
 
   const handlePurchase = async () => {
@@ -95,25 +93,10 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
     if (success && onSuccess) {
       onSuccess();
     }
-    return success; // Return boolean to satisfy TypeScript
+    return success;
   };
 
-  const renderEligibilityMessage = () => {
-    if (!eligibility.eligible) {
-      return (
-        <div className="text-center py-8">
-          <div className="mb-4">
-            <Zap className="h-12 w-12 mx-auto text-destructive opacity-50" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">Not Eligible for Boosting</h3>
-          <p className="text-muted-foreground mb-4">
-            {eligibility.reason || "Your profile is not eligible for boosting at this time."}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
+  const handleDialogClose = () => setOpen(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -143,33 +126,21 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
           </TabsList>
           
           <TabsContent value="packages" className="space-y-4 mt-4">
-            {!eligibility.eligible ? renderEligibilityMessage() : (
-              <>
-                <BoostPackageList
-                  packages={boostPackages}
-                  selectedPackage={selectedPackage}
-                  onSelectPackage={setSelectedPackage}
-                  formatBoostDuration={formatBoostDuration}
-                  getBoostPrice={getBoostPrice}
-                />
-                
-                <div className="p-3 bg-muted/10 border border-muted rounded-md">
-                  <h4 className="text-sm font-medium mb-2 flex items-center">
-                    <Info className="h-4 w-4 mr-2 text-blue-500" />
-                    Oxum Ethical Boosting
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    Limited to {dailyBoostLimit} boosts (12 hours) per day for fairness and equal opportunity.
-                  </p>
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span>Daily usage</span>
-                      <span>{dailyBoostUsage} of {dailyBoostLimit}</span>
-                    </div>
-                    <Progress value={(dailyBoostUsage / dailyBoostLimit) * 100} className="h-1.5" />
-                  </div>
-                </div>
-              </>
+            {!eligibility.eligible ? (
+              <BoostEligibilityMessage reason={eligibility.reason} />
+            ) : (
+              <BoostPackages
+                packages={boostPackages}
+                selectedPackage={selectedPackage}
+                onSelectPackage={setSelectedPackage}
+                formatBoostDuration={formatBoostDuration}
+                getBoostPrice={getBoostPrice}
+                dailyBoostUsage={dailyBoostUsage}
+                dailyBoostLimit={dailyBoostLimit}
+                onPurchase={handlePurchase}
+                loading={loading}
+                onCancel={handleDialogClose}
+              />
             )}
           </TabsContent>
           
@@ -190,30 +161,6 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
         </Tabs>
         
         <BoostInfoTooltip />
-
-        {activeTab === "packages" && eligibility.eligible && (
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handlePurchase} 
-              disabled={!selectedPackage || loading || dailyBoostUsage >= dailyBoostLimit}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Zap className="mr-2 h-4 w-4" />
-                  Boost Now {boostPackages.find(p => p.id === selectedPackage)?.price_lucoin} LC
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        )}
       </DialogContent>
     </Dialog>
   );

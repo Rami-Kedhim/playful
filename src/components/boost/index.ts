@@ -14,3 +14,5 @@ export { default as BoostActivePackage } from './dialog/BoostActivePackage';
 export { default as BoostInfoTooltip } from './dialog/BoostInfoTooltip';
 export { default as BoostPackageList } from './dialog/BoostPackageList';
 export { default as HermesBoostInfo } from './dialog/HermesBoostInfo';
+export { default as BoostEligibilityMessage } from './dialog/BoostEligibilityMessage';
+export { default as BoostPackages } from './dialog/BoostPackages';
