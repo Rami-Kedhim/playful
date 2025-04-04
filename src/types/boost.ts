@@ -23,3 +23,35 @@ export interface BoostStatus {
   remainingTime?: string;
   progress?: number;
 }
+
+export interface BoostScoreData {
+  score: number;
+  factors: {
+    verification: number;
+    profileCompletion: number;
+    activity: number;
+    interaction: number;
+    content: number;
+    boostedCredits: number;
+  };
+  lastUpdated: Date;
+}
+
+export interface BoostAnalytics {
+  views: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  clicks: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  searchRanking: {
+    withBoost: number;
+    withoutBoost: number;
+    improvement: number;
+  };
+  effectiveness: number;
+}

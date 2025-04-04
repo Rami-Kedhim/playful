@@ -1,52 +1,54 @@
 
-import { useState, useCallback } from "react";
-import { BoostStatus } from "@/types/boost";
+import { useState, useCallback } from 'react';
 
-export interface BoostAnalytics {
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
+interface BoostAnalytics {
+  viewsWithBoost: number;
+  viewsWithoutBoost: number;
+  profileClicksWithBoost: number;
+  profileClicksWithoutBoost: number;
+  searchPositionAverage: number;
+  boostEffectiveness: number; // percentage increase
 }
 
-export const useBoostAnalytics = (profileId?: string, boostStatus?: BoostStatus) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const useBoostAnalytics = (profileId: string) => {
   const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Return analytics about the boost (views, engagement, etc.)
-  const getBoostAnalytics = useCallback(async (): Promise<BoostAnalytics | null> => {
-    if (!profileId || !boostStatus?.isActive) {
-      return null;
-    }
-
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
-      // In a real implementation, this would be an API call
-      // For now, we'll return mock data
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setError(null);
       
-      const data = {
-        additionalViews: Math.floor(Math.random() * 100) + 50,
-        engagementIncrease: Math.floor(Math.random() * 30) + 10,
-        rankingPosition: Math.floor(Math.random() * 5) + 1
+      // In a real implementation, this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      
+      // Simulate analytics data
+      const mockAnalytics: BoostAnalytics = {
+        viewsWithBoost: Math.floor(Math.random() * 200) + 100,
+        viewsWithoutBoost: Math.floor(Math.random() * 100) + 20,
+        profileClicksWithBoost: Math.floor(Math.random() * 50) + 25,
+        profileClicksWithoutBoost: Math.floor(Math.random() * 25) + 5,
+        searchPositionAverage: Math.random() * 4 + 1, // 1-5 position
+        boostEffectiveness: Math.floor(Math.random() * 30) + 70 // 70-100% effectiveness
       };
       
-      setAnalytics(data);
-      return data;
+      setAnalytics(mockAnalytics);
+      return mockAnalytics;
     } catch (err: any) {
-      console.error("Error fetching boost analytics:", err);
-      setError(err.message || "Failed to fetch analytics");
+      console.error('Error fetching boost analytics:', err);
+      setError(err.message || 'Failed to fetch boost analytics');
       return null;
     } finally {
       setLoading(false);
     }
-  }, [profileId, boostStatus?.isActive]);
+  }, [profileId]);
 
   return {
     analytics,
     loading,
     error,
-    getBoostAnalytics
+    fetchAnalytics
   };
 };
 
