@@ -10,6 +10,7 @@ interface BoostPackageSelectionProps {
   selectedPackage: string | null;
   onSelectPackage: (packageId: string) => void;
   formatBoostDuration: (duration: string) => string;
+  getBoostPrice?: () => number;
   isLoading?: boolean;
 }
 
@@ -18,6 +19,7 @@ const BoostPackageSelection: React.FC<BoostPackageSelectionProps> = ({
   selectedPackage,
   onSelectPackage,
   formatBoostDuration,
+  getBoostPrice,
   isLoading = false
 }) => {
   if (isLoading) {

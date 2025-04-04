@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useBoostStatus } from "./useBoostStatus";
 import { useBoostPackages } from "./useBoostPackages";
@@ -36,7 +35,6 @@ export const useBoostManager = (profileId?: string) => {
     fetchAnalytics 
   } = useBoostAnalytics(profileId);
 
-  // Get profile boost info when profileId changes
   useEffect(() => {
     if (profileId) {
       fetchProfileData(profileId);
@@ -44,10 +42,8 @@ export const useBoostManager = (profileId?: string) => {
     }
   }, [profileId, fetchProfileData, checkActiveBoost]);
 
-  // Combine loading states
   const loading = packagesLoading || purchaseLoading;
 
-  // Function to get analytics data
   const getBoostAnalytics = async () => {
     return await fetchAnalytics();
   };
