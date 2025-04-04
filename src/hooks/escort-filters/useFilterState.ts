@@ -12,7 +12,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
-  const [ageRange, setAgeRange] = useState<[number, number]>([18, 60]);
+  const [ageRange, setAgeRange] = useState<[number, number]>([21, 60]);
   const [ratingMin, setRatingMin] = useState(0);
   const [availableNow, setAvailableNow] = useState(false);
   const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "">("");
@@ -72,7 +72,7 @@ export const useFilterState = (): EscortFilterState & EscortFilterActions => {
     setCurrentPage(1);
     setSelectedGenders([]);
     setSelectedOrientations([]);
-    setAgeRange([18, 60]);
+    setAgeRange([21, 60]);
     setRatingMin(0);
     setAvailableNow(false);
     setServiceTypeFilter("");

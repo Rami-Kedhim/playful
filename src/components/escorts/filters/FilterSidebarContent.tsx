@@ -44,9 +44,6 @@ const FilterSidebarContent = ({
   setPriceRange,
   verifiedOnly,
   setVerifiedOnly,
-  selectedServices,
-  toggleService,
-  services,
   selectedGenders,
   toggleGender,
   selectedOrientations,
@@ -161,19 +158,6 @@ const FilterSidebarContent = ({
             toggleItem={toggleOrientation}
             formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
             idPrefix="orientation"
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="services">
-        <AccordionTrigger>Services</AccordionTrigger>
-        <AccordionContent>
-          <CheckboxGroup 
-            title="Services"
-            items={services}
-            selectedItems={selectedServices}
-            toggleItem={toggleService}
-            idPrefix="service"
           />
         </AccordionContent>
       </AccordionItem>

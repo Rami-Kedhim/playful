@@ -1,39 +1,37 @@
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
+import { getServiceTypeName } from "./ServiceTypeBadgeLabel";
 
 interface ServiceTypeFilterProps {
   serviceTypeFilter: "in-person" | "virtual" | "both" | "";
   setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
 }
 
-const ServiceTypeFilter = ({ 
-  serviceTypeFilter, 
-  setServiceTypeFilter 
+const ServiceTypeFilter = ({
+  serviceTypeFilter,
+  setServiceTypeFilter
 }: ServiceTypeFilterProps) => {
   return (
-    <RadioGroup 
-      value={serviceTypeFilter} 
-      onValueChange={(value) => setServiceTypeFilter(value as "in-person" | "virtual" | "both" | "")}
-      className="space-y-2"
-    >
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="" id="service-type-all" />
-        <Label htmlFor="service-type-all">All Service Types</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="in-person" id="service-type-in-person" />
-        <Label htmlFor="service-type-in-person">In-Person</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="virtual" id="service-type-virtual" />
-        <Label htmlFor="service-type-virtual">Virtual Only</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="both" id="service-type-both" />
-        <Label htmlFor="service-type-both">In-Person & Virtual</Label>
-      </div>
-    </RadioGroup>
+    <div className="space-y-2">
+      <Label htmlFor="service-type" className="text-sm font-medium">Service Type</Label>
+      <ToggleGroup 
+        type="single" 
+        value={serviceTypeFilter || undefined}
+        onValueChange={(value) => setServiceTypeFilter(value as "in-person" | "virtual" | "both" | "")}
+        className="justify-start w-full"
+      >
+        <ToggleGroupItem value="in-person" className="text-xs" id="service-type">
+          In-Person
+        </ToggleGroupItem>
+        <ToggleGroupItem value="virtual" className="text-xs">
+          Virtual
+        </ToggleGroupItem>
+        <ToggleGroupItem value="both" className="text-xs">
+          Both
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
   );
 };
 

@@ -18,7 +18,7 @@ const AgeRangeFilter = ({ ageRange, setAgeRange }: AgeRangeFilterProps) => {
       </div>
       <Slider
         defaultValue={ageRange}
-        min={18}
+        min={21}
         max={60}
         step={1}
         value={ageRange}

@@ -47,9 +47,6 @@ const MobileFilterContent = ({
   setPriceRange,
   verifiedOnly,
   setVerifiedOnly,
-  selectedServices,
-  toggleService,
-  services,
   clearFilters,
   setShowFilters,
   selectedGenders,
@@ -130,14 +127,6 @@ const MobileFilterContent = ({
             toggleItem={toggleOrientation}
             formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
             idPrefix="orientation-mobile"
-          />
-          
-          <CheckboxGroup
-            title="Services"
-            items={services}
-            selectedItems={selectedServices}
-            toggleItem={toggleService}
-            idPrefix="service-mobile"
           />
         </div>
       </ScrollArea>

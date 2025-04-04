@@ -101,7 +101,7 @@ export const useFilterResults = (
         );
       }
       
-      // Filter by age range
+      // Filter by age range (now 21+ years)
       filtered = filtered.filter(escort => 
         escort.age >= ageRange[0] && escort.age <= ageRange[1]
       );
