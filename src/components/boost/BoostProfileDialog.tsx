@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Zap, Loader2 } from "lucide-react";
 import { 
@@ -13,7 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/auth/useAuth";
-import { useBoostManager } from "@/hooks/boost";
+import { 
+  useBoostManager,
+  formatBoostDuration
+} from "@/hooks/boost";
 import BoostActivePackage from "./dialog/BoostActivePackage";
 import BoostPackageList from "./dialog/BoostPackageList";
 import BoostInfoTooltip from "./dialog/BoostInfoTooltip";

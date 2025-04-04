@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { 
-  useBoostManager, 
+  useBoostManager,
   formatBoostDuration 
 } from "@/hooks/boost";
 import { 
