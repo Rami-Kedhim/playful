@@ -24,14 +24,22 @@ export const useEscortMedia = (
 
   return {
     // Gallery functions
-    addGalleryImage: galleryManagement.addGalleryImage,
-    removeGalleryImage: galleryManagement.removeGalleryImage,
+    addGalleryImage: async (id: string, imageUrl: string, escort?: Escort | null) => {
+      return galleryManagement.addGalleryImage(id, imageUrl, escort);
+    },
+    removeGalleryImage: async (id: string, imageUrl: string, escort?: Escort | null) => {
+      return galleryManagement.removeGalleryImage(id, imageUrl, escort);
+    },
     
     // Profile image functions
     setProfileImage: profileImageManagement.setProfileImage,
     
     // Video functions
-    addVideo: videoManagement.addVideo,
-    removeVideo: videoManagement.removeVideo
+    addVideo: async (id: string, videoUrl: string, escort?: Escort | null) => {
+      return videoManagement.addVideo(id, videoUrl, escort);
+    },
+    removeVideo: async (id: string, videoIdOrUrl: string, escort?: Escort | null) => {
+      return videoManagement.removeVideo(id, videoIdOrUrl, escort);
+    }
   };
 };

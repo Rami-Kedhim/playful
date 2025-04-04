@@ -15,7 +15,7 @@ interface ProfileTabsProps {
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
   // Convert verificationLevel to the expected type
-  const verificationLevel = ((escort.verificationLevel || "none") as "none" | "basic" | "enhanced" | "premium");
+  const verificationLevel = (escort.verificationLevel || "none") as "none" | "basic" | "enhanced" | "premium";
   
   return (
     <Card className="mt-6">
