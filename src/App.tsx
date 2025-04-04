@@ -1,5 +1,4 @@
 
-import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -10,16 +9,12 @@ import "./styles/animations.css"; // Import our animations
 
 function App() {
   return (
-    <HelmetProvider>
-      <ThemeProvider defaultTheme="dark" storageKey="lucent-ui-theme">
-        <BrowserRouter>
-          <FavoritesProvider>
-            <Routes />
-            <Toaster />
-          </FavoritesProvider>
-        </BrowserRouter>
-      </ThemeProvider>
-    </HelmetProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="lucent-ui-theme">
+      <FavoritesProvider>
+        <Routes />
+        <Toaster />
+      </FavoritesProvider>
+    </ThemeProvider>
   );
 }
 

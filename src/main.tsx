@@ -19,13 +19,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <FavoritesProvider>
-              <SubscriptionProvider>
-                <NotificationsProvider>
-                  <App />
-                </NotificationsProvider>
-              </SubscriptionProvider>
-            </FavoritesProvider>
+            <SubscriptionProvider>
+              <NotificationsProvider>
+                <App />
+              </NotificationsProvider>
+            </SubscriptionProvider>
           </AuthProvider>
         </QueryClientProvider>
       </BrowserRouter>
