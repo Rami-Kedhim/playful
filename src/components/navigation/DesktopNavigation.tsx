@@ -2,7 +2,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
 import ServiceTypeMenu from "@/components/navigation/ServiceTypeMenu";
 
 const DesktopNavigation = () => {
@@ -35,6 +34,13 @@ const DesktopNavigation = () => {
         asChild
       >
         <Link to="/messages">Messages</Link>
+      </Button>
+      <Button
+        variant={isActive("/metaverse") ? "default" : "ghost"}
+        size="sm"
+        asChild
+      >
+        <Link to="/metaverse">Metaverse</Link>
       </Button>
     </nav>
   );

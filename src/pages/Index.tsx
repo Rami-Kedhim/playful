@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import HeroSection from "@/components/home/HeroSection";
@@ -9,6 +8,7 @@ import LucoinSection from "@/components/home/LucoinSection";
 import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
 import LucieAssistant from "@/components/home/LucieAssistant";
+import MetaverseSection from "@/components/home/MetaverseSection";
 
 // Transform existing escort data to match ProfileProps
 const transformedEscorts = [
@@ -118,6 +118,7 @@ const Index = () => {
         featuredCreators={transformedCreators}
       />
       <LucoinSection />
+      <MetaverseSection />
       <TrustSection />
       <CtaSection />
       <LucieAssistant />

@@ -13,7 +13,7 @@ const Footer = () => {
               UberEscorts
             </h2>
             <p className="text-gray-400 mb-4">
-              Next-generation Web3 adult platform with escort directories, content creators, and metaverse integration.
+              Next-generation Web3 adult platform with escort directories and metaverse integration.
             </p>
             <div className="flex space-x-4">
               <Button variant="ghost" size="icon">
@@ -37,18 +37,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/creators" className="text-gray-400 hover:text-primary">
-                  Content Creators
-                </Link>
-              </li>
-              <li>
-                <Link to="/livecams" className="text-gray-400 hover:text-primary">
-                  Livecams
-                </Link>
-              </li>
-              <li>
-                <Link to="/shop" className="text-gray-400 hover:text-primary">
-                  Shop
+                <Link to="/messages" className="text-gray-400 hover:text-primary">
+                  Messages
                 </Link>
               </li>
               <li>
