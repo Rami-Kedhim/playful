@@ -16,6 +16,7 @@ export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 
   const [ratingMin, setRatingMin] = useState(0);
   const [availableNow, setAvailableNow] = useState(false);
   const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "">("");
+  const [isLoading, setIsLoading] = useState(false);
   
   // Toggle service selection
   const toggleService = (service: string) => {
@@ -91,6 +92,8 @@ export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 
     availableNow,
     setAvailableNow,
     serviceTypeFilter,
-    setServiceTypeFilter
+    setServiceTypeFilter,
+    isLoading,
+    setIsLoading // Add setter for isLoading
   };
 };
