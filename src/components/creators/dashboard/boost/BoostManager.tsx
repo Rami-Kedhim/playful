@@ -10,6 +10,7 @@ import BoostPackageSelection from "./BoostPackageSelection";
 import BoostPurchaseConfirmation from "./BoostPurchaseConfirmation";
 import BoostEligibilityAlert from "./BoostEligibilityAlert";
 import { formatBoostDuration } from "@/utils/boostCalculator";
+import { AlertCircle } from "lucide-react";
 
 interface BoostManagerProps {
   creatorId: string;

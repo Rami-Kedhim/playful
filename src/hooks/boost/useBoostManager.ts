@@ -5,6 +5,7 @@ import { useBoostPackages } from "./useBoostPackages";
 import { useBoostPurchase } from "./useBoostPurchase";
 import { useBoostAnalytics } from "./useBoostAnalytics";
 import { BoostPackage } from "@/types/boost";
+import { formatBoostDuration } from "@/utils/boostCalculator";
 
 export const useBoostManager = (profileId?: string) => {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -28,7 +29,7 @@ export const useBoostManager = (profileId?: string) => {
   const { 
     purchaseBoost, 
     loading: purchaseLoading 
-  } = useBoostPurchase(profileId, boostStatus, setBoostStatus);
+  } = useBoostPurchase(profileId, boostStatus);
 
   const { getBoostAnalytics } = useBoostAnalytics(profileId, boostStatus);
 
@@ -55,7 +56,8 @@ export const useBoostManager = (profileId?: string) => {
     cancelBoost,
     loading,
     error,
-    getBoostAnalytics
+    getBoostAnalytics,
+    formatBoostDuration
   };
 };
 

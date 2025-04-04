@@ -7,8 +7,7 @@ import { calculateRemainingTime } from "@/utils/boostCalculator";
 
 export const useBoostPurchase = (
   profileId?: string,
-  boostStatus?: BoostStatus,
-  setBoostStatus?: React.Dispatch<React.SetStateAction<BoostStatus>>
+  boostStatus?: BoostStatus
 ) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -28,15 +27,6 @@ export const useBoostPurchase = (
       toast({
         title: "Error",
         description: "No profile selected for boosting",
-        variant: "destructive"
-      });
-      return false;
-    }
-
-    if (!setBoostStatus) {
-      toast({
-        title: "Error",
-        description: "Cannot update boost status",
         variant: "destructive"
       });
       return false;
@@ -81,20 +71,12 @@ export const useBoostPurchase = (
       // Simulate processing time
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Update the boost status
+      // Update the boost status - this will be handled by the parent component
       const endDate = new Date();
       // Parse duration string (format: "168:00:00" for 7 days)
       const hoursPart = selectedBoostPackage.duration.split(':')[0];
       const hoursToAdd = parseInt(hoursPart);
       endDate.setTime(endDate.getTime() + hoursToAdd * 60 * 60 * 1000);
-      
-      setBoostStatus({
-        isActive: true,
-        expiresAt: endDate,
-        boostPackage: selectedBoostPackage,
-        remainingTime: calculateRemainingTime(endDate),
-        progress: 0
-      });
       
       toast({
         title: "Boost Purchased",
