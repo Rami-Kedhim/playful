@@ -1,120 +1,105 @@
 
-import { useState } from "react";
+import { useState, useCallback } from 'react';
 import { toast } from "@/components/ui/use-toast";
-import { getEscortBoostScore, updateEscortBoostScore } from "@/utils/boostScoreSystem";
-import { useAuth } from "@/hooks/auth/useAuth";
 
-export const useBoostScore = () => {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+interface UseBoostScoreOptions {
+  initialScore?: number | null;
+}
+
+const useBoostScore = (options: UseBoostScoreOptions = {}) => {
+  const [boostScore, setBoostScore] = useState<number | null>(options.initialScore || null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [boostScore, setBoostScore] = useState<number | null>(null);
 
-  /**
-   * Fetches an escort's boost score
-   */
-  const fetchBoostScore = async (escortId: string) => {
+  const fetchBoostScore = useCallback(async (profileId: string) => {
     try {
       setLoading(true);
       setError(null);
       
-      const score = await getEscortBoostScore(escortId);
-      setBoostScore(score);
-      return score;
+      // In a real implementation, this would be an API call
+      // Mock data for demonstration
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Calculate a random score between 20 and 95
+      const randomScore = Math.floor(Math.random() * 75) + 20;
+      setBoostScore(randomScore);
     } catch (err: any) {
-      console.error("Error fetching boost score:", err);
-      setError(err.message || "Failed to load boost score");
-      return null;
+      console.error('Error fetching boost score:', err);
+      setError(err.message || 'Failed to fetch boost score');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  /**
-   * Updates an escort's boost score in the database
-   */
-  const updateBoostScore = async (escortId: string) => {
-    if (!user) {
-      setError("You must be logged in to update a boost score");
-      return false;
-    }
-
+  const updateBoostScore = useCallback(async (profileId: string) => {
     try {
       setLoading(true);
       setError(null);
       
-      const success = await updateEscortBoostScore(escortId);
+      // In a real implementation, this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (success) {
-        // Refetch the score to get the updated value
-        const updatedScore = await getEscortBoostScore(escortId);
-        setBoostScore(updatedScore);
-        
-        toast({
-          title: "Boost Score Updated",
-          description: `Your profile boost score is now ${updatedScore}/100.`
-        });
-      } else {
-        throw new Error("Failed to update boost score");
-      }
-      
-      return success;
-    } catch (err: any) {
-      console.error("Error updating boost score:", err);
-      setError(err.message || "Failed to update boost score");
+      // Calculate a slightly different score
+      const currentScore = boostScore || 50;
+      const adjustment = Math.floor(Math.random() * 20) - 10; // -10 to +10
+      const newScore = Math.max(0, Math.min(100, currentScore + adjustment));
+      setBoostScore(newScore);
       
       toast({
-        title: "Error",
-        description: err.message || "Failed to update boost score",
-        variant: "destructive"
+        title: 'Boost Score Updated',
+        description: adjustment > 0 
+          ? `Your score increased by ${adjustment} points!` 
+          : adjustment < 0 
+            ? `Your score decreased by ${Math.abs(adjustment)} points.`
+            : 'Your score remained the same.',
+      });
+    } catch (err: any) {
+      console.error('Error updating boost score:', err);
+      setError(err.message || 'Failed to update boost score');
+      
+      toast({
+        title: 'Error',
+        description: 'Failed to update boost score. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [boostScore]);
+
+  const purchaseBoostCredits = useCallback(async (amount: number) => {
+    try {
+      setLoading(true);
+      
+      // In a real implementation, this would be a payment API call
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      
+      toast({
+        title: 'Boost Credits Purchased',
+        description: `You've purchased ${amount} boost credits!`,
+      });
+      
+      // Simulate score increase due to purchased credits
+      if (boostScore !== null) {
+        const increase = Math.floor(amount / 10);
+        setBoostScore(Math.min(100, boostScore + increase));
+      }
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error purchasing boost credits:', err);
+      
+      toast({
+        title: 'Error',
+        description: 'Failed to purchase boost credits. Please try again.',
+        variant: 'destructive',
       });
       
       return false;
     } finally {
       setLoading(false);
     }
-  };
-
-  /**
-   * Purchases boost credits with Lucoin
-   */
-  const purchaseBoostCredits = async (amount: number) => {
-    if (!user) {
-      setError("You must be logged in to purchase boost credits");
-      return false;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // This would need to be implemented with your Lucoin system
-      // For now, we'll just mock a successful purchase
-      const success = true;
-      
-      if (success) {
-        toast({
-          title: "Boost Credits Purchased",
-          description: `You've successfully purchased ${amount} boost credits.`
-        });
-      }
-      
-      return success;
-    } catch (err: any) {
-      console.error("Error purchasing boost credits:", err);
-      setError(err.message || "Failed to purchase boost credits");
-      
-      toast({
-        title: "Error",
-        description: err.message || "Failed to purchase boost credits",
-        variant: "destructive"
-      });
-      
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [boostScore]);
 
   return {
     boostScore,

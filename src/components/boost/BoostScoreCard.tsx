@@ -5,28 +5,27 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Zap, ZapOff, Info, Lock } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import useBoostScore from '@/hooks/useBoostScore';
 import { useAuth } from '@/hooks/auth/useAuth';
 import BoostProfileDialog from './BoostProfileDialog';
 
 interface BoostScoreCardProps {
-  escortId: string;
+  profileId: string;
   isOwnProfile: boolean;
+  boostScore: number | null;
+  loading: boolean;
+  error: string | null;
+  onRefresh: () => Promise<void>;
 }
 
-const BoostScoreCard = ({ escortId, isOwnProfile }: BoostScoreCardProps) => {
+const BoostScoreCard = ({ 
+  profileId, 
+  isOwnProfile, 
+  boostScore, 
+  loading, 
+  error, 
+  onRefresh 
+}: BoostScoreCardProps) => {
   const { user } = useAuth();
-  const { boostScore, loading, error, fetchBoostScore, updateBoostScore } = useBoostScore();
-
-  useEffect(() => {
-    if (escortId) {
-      fetchBoostScore(escortId);
-    }
-  }, [escortId]);
-
-  const handleUpdateScore = async () => {
-    await updateBoostScore(escortId);
-  };
 
   const getScoreCategory = (score: number | null) => {
     if (score === null) return 'Unknown';
@@ -107,7 +106,7 @@ const BoostScoreCard = ({ escortId, isOwnProfile }: BoostScoreCardProps) => {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={handleUpdateScore} 
+            onClick={onRefresh} 
             disabled={loading}
             className="w-1/2"
           >
@@ -116,8 +115,8 @@ const BoostScoreCard = ({ escortId, isOwnProfile }: BoostScoreCardProps) => {
           </Button>
           {user ? (
             <BoostProfileDialog 
-              profileId={escortId} 
-              onSuccess={() => fetchBoostScore(escortId)}
+              profileId={profileId} 
+              onSuccess={onRefresh}
             />
           ) : (
             <Button 
