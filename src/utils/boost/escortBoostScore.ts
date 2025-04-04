@@ -28,7 +28,7 @@ export function calculateEscortBoostScore(
   );
   
   // Determine verification bonus (0-100)
-  const verificationBonus = escort.isVerified ? 100 : 0;
+  const verificationBonus = escort.verified ? 100 : 0;
   
   // Calculate rating bonus (-20 to +20, centered on 3.0 rating)
   const ratingBonus = ((escort.rating || 3) - 3) * 20;

@@ -16,6 +16,22 @@ export interface LivecamModel {
   previewVideoUrl?: string;
 }
 
+export interface Livecam {
+  id: string;
+  username: string;
+  name?: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  isStreaming: boolean;
+  viewerCount: number;
+  region: string;
+  language: string;
+  tags: string[];
+  category: string;
+  rating?: number;
+  price?: number;
+}
+
 export interface LivecamsResponse {
   models: LivecamModel[];
   totalCount: number;
