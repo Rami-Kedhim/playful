@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -6,16 +5,10 @@ import { LivecamDetailLayout, LivecamMainContent, LivecamSidebar } from "@/compo
 import { LivecamModel } from "@/types/livecams";
 import { useToast } from "@/components/ui/use-toast";
 import livecamBoost from "@/services/visibility/LivecamBoostAdapter";
-import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
-// This would come from an API in a real application
 const fetchLivecamDetails = async (username: string): Promise<LivecamModel | null> => {
-  // Simulate API call
   await new Promise(resolve => setTimeout(resolve, 800));
   
-  // Mock data
   return {
     id: `livecam-${username}`,
     username,
@@ -52,7 +45,6 @@ const LivecamDetail: React.FC = () => {
         const livecamData = await fetchLivecamDetails(id);
         setLivecam(livecamData);
         
-        // Check if this livecam is boosted
         if (livecamData) {
           const status = livecamBoost.checkBoostStatus(livecamData.id);
           setIsBoosted(status.isBoosted);
@@ -82,7 +74,6 @@ const LivecamDetail: React.FC = () => {
   const handleBoost = () => {
     if (!livecam) return;
     
-    // Convert LivecamModel to the boost interface format
     const boostableLivecam = {
       id: livecam.id,
       username: livecam.username,
@@ -95,13 +86,11 @@ const LivecamDetail: React.FC = () => {
       language: livecam.language || 'en',
       tags: livecam.categories || [],
       category: livecam.categories?.[0] || 'general',
-      rating: 5 // Default high rating
+      rating: 5
     };
     
-    // Apply boost
     livecamBoost.boostLivecam(boostableLivecam);
     
-    // Update state
     setIsBoosted(true);
     setBoostStatus({
       timeRemaining: 24,
@@ -132,6 +121,26 @@ const LivecamDetail: React.FC = () => {
     navigate("/livecams");
   };
   
+  useEffect(() => {
+    if (!livecam || !livecam.isLive) return;
+    
+    const interval = setInterval(() => {
+      setLivecam(prev => {
+        if (!prev) return prev;
+        
+        const fluctuation = Math.floor(Math.random() * 10) - 5;
+        const newCount = Math.max(0, (prev.viewerCount || 0) + fluctuation);
+        
+        return {
+          ...prev,
+          viewerCount: newCount
+        };
+      });
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [livecam]);
+  
   return (
     <LivecamDetailLayout
       model={livecam}
@@ -145,42 +154,13 @@ const LivecamDetail: React.FC = () => {
       <div>
         {livecam && (
           <LivecamSidebar 
-            model={livecam} 
+            model={livecam}
+            isBoosted={isBoosted}
+            boostStatus={boostStatus}
+            onBoost={handleBoost}
+            onCancelBoost={handleCancelBoost}
           />
         )}
-        {/* Additional boost controls */}
-        <div className="mt-4">
-          {isBoosted ? (
-            <div className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 flex items-center gap-1">
-                  <Zap className="h-3 w-3" />
-                  Boosted
-                </Badge>
-                {boostStatus?.timeRemaining && (
-                  <span className="text-xs text-muted-foreground">
-                    {Math.round(boostStatus.timeRemaining)}h remaining
-                  </span>
-                )}
-              </div>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                onClick={handleCancelBoost}
-              >
-                Cancel Boost
-              </Button>
-            </div>
-          ) : (
-            <Button 
-              className="w-full"
-              onClick={handleBoost}
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              Boost This Livecam
-            </Button>
-          )}
-        </div>
       </div>
     </LivecamDetailLayout>
   );

@@ -4,8 +4,8 @@ import { LivecamModel } from "@/types/livecams";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Button } from "@/components/ui/button";
-import { CircleUser, Heart, MessageSquare, Share2, Users } from "lucide-react";
+import { CircleUser, Users } from "lucide-react";
+import LivecamActions from "./LivecamActions";
 
 interface LivecamMainContentProps {
   model: LivecamModel;
@@ -17,13 +17,6 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   // Generate a unique fallback image for this specific model
   const uniqueSeed = `${model.id || model.username}-detail-${model.username}`;
   const fallbackImage = `https://picsum.photos/seed/${uniqueSeed}/800/450`;
-
-  // Debug log for image URLs
-  console.log(`LivecamMainContent for ${model.username}:`, { 
-    originalImage: model.imageUrl,
-    fallback: fallbackImage,
-    hasError: imgError
-  });
 
   return (
     <Card className="overflow-hidden">
@@ -62,17 +55,10 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
           </div>
         )}
       </div>
+      
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-4">
           <h1 className="text-2xl font-bold">{model.displayName}</h1>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon">
-              <Heart size={18} />
-            </Button>
-            <Button variant="outline" size="icon">
-              <Share2 size={18} />
-            </Button>
-          </div>
         </div>
         
         <div className="flex items-center mb-4">
@@ -104,17 +90,8 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
           </div>
         )}
         
-        <div className="flex gap-2 mt-6">
-          <Button className="flex-1">
-            <MessageSquare size={18} className="mr-2" />
-            Start Chat
-          </Button>
-          {!model.isLive && (
-            <Button variant="outline" className="flex-1">
-              <Heart size={18} className="mr-2" />
-              Follow
-            </Button>
-          )}
+        <div className="mt-6">
+          <LivecamActions isLive={model.isLive} />
         </div>
       </CardContent>
     </Card>
