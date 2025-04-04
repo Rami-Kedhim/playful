@@ -19,6 +19,12 @@ export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 
   
   // Toggle service selection
   const toggleService = (service: string) => {
+    if (service === "") {
+      // Special case for clearing services
+      setSelectedServices([]);
+      return;
+    }
+    
     if (selectedServices.includes(service)) {
       setSelectedServices(selectedServices.filter(s => s !== service));
     } else {
@@ -65,14 +71,17 @@ export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 
     verifiedOnly,
     setVerifiedOnly,
     selectedServices,
+    setSelectedServices, // Add direct setter for clearFilters to use
     toggleService,
     sortBy,
     setSortBy,
     currentPage,
     setCurrentPage,
     selectedGenders,
+    setSelectedGenders, // Add direct setter for clearFilters to use
     toggleGender,
     selectedOrientations,
+    setSelectedOrientations, // Add direct setter for clearFilters to use
     toggleOrientation,
     ageRange,
     setAgeRange,

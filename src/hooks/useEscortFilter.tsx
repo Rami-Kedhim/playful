@@ -13,9 +13,9 @@ export const useEscortFilter = (escorts: Escort[]): EscortFilterHook => {
     filterState.setLocation("");
     filterState.setPriceRange([0, 1000]);
     filterState.setVerifiedOnly(false);
-    filterState.setSelectedServices([]);
-    filterState.setSelectedGenders([]);
-    filterState.setSelectedOrientations([]);
+    filterState.toggleService(""); // Clear services by passing empty string as special case
+    filterState.setSelectedGenders([]); // Fix: Use proper setter from filterState
+    filterState.setSelectedOrientations([]); // Fix: Use proper setter from filterState
     filterState.setAgeRange([18, 60]);
     filterState.setRatingMin(0);
     filterState.setAvailableNow(false);

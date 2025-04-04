@@ -23,10 +23,13 @@ export interface EscortFilterActions {
   setPriceRange: (value: [number, number]) => void;
   handlePriceRangeChange: (values: number[]) => void;
   setVerifiedOnly: (value: boolean) => void;
+  setSelectedServices: (services: string[]) => void; // Add direct setter
   toggleService: (service: string) => void;
   setSortBy: (value: string) => void;
   setCurrentPage: (value: number) => void;
+  setSelectedGenders: (genders: string[]) => void; // Add direct setter
   toggleGender: (gender: string) => void;
+  setSelectedOrientations: (orientations: string[]) => void; // Add direct setter
   toggleOrientation: (orientation: string) => void;
   setAgeRange: (value: [number, number]) => void;
   handleAgeRangeChange: (values: number[]) => void;

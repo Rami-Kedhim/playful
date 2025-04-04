@@ -1,14 +1,14 @@
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 
-interface AppliedFiltersProps {
+export interface AppliedFiltersProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   location: string;
   setLocation: (value: string) => void;
-  priceRange: number[];
+  priceRange: [number, number];
   setPriceRange: (value: number[]) => void;
   verifiedOnly: boolean;
   setVerifiedOnly: (value: boolean) => void;
@@ -19,12 +19,14 @@ interface AppliedFiltersProps {
   toggleGender: (gender: string) => void;
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
-  ageRange?: number[];
-  setAgeRange?: (value: number[]) => void;
-  ratingMin?: number;
-  setRatingMin?: (value: number) => void;
-  availableNow?: boolean;
-  setAvailableNow?: (value: boolean) => void;
+  ageRange: [number, number];
+  setAgeRange: (value: number[]) => void;
+  ratingMin: number;
+  setRatingMin: (value: number) => void;
+  availableNow: boolean;
+  setAvailableNow: (value: boolean) => void;
+  serviceTypeFilter: "in-person" | "virtual" | "both" | "";
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
 }
 
 const AppliedFilters = ({
@@ -43,22 +45,43 @@ const AppliedFilters = ({
   toggleGender,
   selectedOrientations,
   toggleOrientation,
-  ageRange = [18, 50],
-  setAgeRange = () => {},
-  ratingMin = 0,
-  setRatingMin = () => {},
-  availableNow = false,
-  setAvailableNow = () => {},
+  ageRange,
+  setAgeRange,
+  ratingMin,
+  setRatingMin,
+  availableNow,
+  setAvailableNow,
+  serviceTypeFilter,
+  setServiceTypeFilter
 }: AppliedFiltersProps) => {
-  // Only render if there are any filters applied
-  if (!(searchQuery || location || verifiedOnly || selectedServices.length > 0 || 
-        priceRange[0] > 0 || priceRange[1] < 500 || 
-        selectedGenders.length > 0 || selectedOrientations.length > 0 ||
-        ageRange[0] > 18 || ageRange[1] < 50 ||
-        ratingMin > 0 || availableNow)) {
+  
+  // Only render if there are filters applied
+  const hasActiveFilters = 
+    searchQuery || 
+    location || 
+    verifiedOnly || 
+    selectedServices.length > 0 || 
+    selectedGenders.length > 0 || 
+    selectedOrientations.length > 0 || 
+    ageRange[0] > 18 || 
+    ageRange[1] < 60 || 
+    ratingMin > 0 || 
+    availableNow || 
+    !!serviceTypeFilter;
+    
+  if (!hasActiveFilters) {
     return null;
   }
-
+  
+  const getServiceTypeName = (type: string) => {
+    switch(type) {
+      case "in-person": return "In-Person Services";
+      case "virtual": return "Virtual Content";
+      case "both": return "In-Person & Virtual";
+      default: return "";
+    }
+  };
+  
   return (
     <div className="flex flex-wrap gap-2 mb-6">
       {searchQuery && (
@@ -66,7 +89,7 @@ const AppliedFilters = ({
           Search: {searchQuery}
           <X 
             size={14} 
-            className="cursor-pointer" 
+            className="cursor-pointer ml-1" 
             onClick={() => setSearchQuery("")}
           />
         </Badge>
@@ -77,63 +100,30 @@ const AppliedFilters = ({
           Location: {location}
           <X 
             size={14} 
-            className="cursor-pointer" 
+            className="cursor-pointer ml-1" 
             onClick={() => setLocation("")}
-          />
-        </Badge>
-      )}
-      
-      {(priceRange[0] > 0 || priceRange[1] < 500) && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          {priceRange[0]} - {priceRange[1]} LC
-          <X 
-            size={14} 
-            className="cursor-pointer" 
-            onClick={() => setPriceRange([0, 500])}
-          />
-        </Badge>
-      )}
-      
-      {(ageRange[0] > 18 || ageRange[1] < 50) && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Age: {ageRange[0]}-{ageRange[1]}
-          <X 
-            size={14} 
-            className="cursor-pointer" 
-            onClick={() => setAgeRange([18, 50])}
-          />
-        </Badge>
-      )}
-      
-      {ratingMin > 0 && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Rating: <Star size={12} className="fill-amber-500 text-amber-500" /> {ratingMin}+
-          <X 
-            size={14} 
-            className="cursor-pointer" 
-            onClick={() => setRatingMin(0)}
-          />
-        </Badge>
-      )}
-      
-      {availableNow && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Available now
-          <X 
-            size={14} 
-            className="cursor-pointer" 
-            onClick={() => setAvailableNow(false)}
           />
         </Badge>
       )}
       
       {verifiedOnly && (
         <Badge variant="secondary" className="flex items-center gap-1">
-          Verified only
+          Verified Only
           <X 
             size={14} 
-            className="cursor-pointer" 
+            className="cursor-pointer ml-1" 
             onClick={() => setVerifiedOnly(false)}
+          />
+        </Badge>
+      )}
+      
+      {(priceRange[0] > 0 || priceRange[1] < 1000) && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          Price: {priceRange[0]}-{priceRange[1]} LC
+          <X 
+            size={14} 
+            className="cursor-pointer ml-1" 
+            onClick={() => setPriceRange([0, 1000])}
           />
         </Badge>
       )}
@@ -143,33 +133,77 @@ const AppliedFilters = ({
           {service}
           <X 
             size={14} 
-            className="cursor-pointer" 
+            className="cursor-pointer ml-1" 
             onClick={() => toggleService(service)}
           />
         </Badge>
       ))}
       
       {selectedGenders.map(gender => (
-        <Badge key={`gender-${gender}`} variant="secondary" className="flex items-center gap-1 capitalize">
-          {gender}
+        <Badge key={gender} variant="secondary" className="flex items-center gap-1">
+          {gender.charAt(0).toUpperCase() + gender.slice(1)}
           <X 
             size={14} 
-            className="cursor-pointer" 
+            className="cursor-pointer ml-1" 
             onClick={() => toggleGender(gender)}
           />
         </Badge>
       ))}
       
       {selectedOrientations.map(orientation => (
-        <Badge key={`orientation-${orientation}`} variant="secondary" className="flex items-center gap-1 capitalize">
-          {orientation}
+        <Badge key={orientation} variant="secondary" className="flex items-center gap-1">
+          {orientation.charAt(0).toUpperCase() + orientation.slice(1)}
           <X 
             size={14} 
-            className="cursor-pointer" 
+            className="cursor-pointer ml-1" 
             onClick={() => toggleOrientation(orientation)}
           />
         </Badge>
       ))}
+      
+      {(ageRange[0] > 18 || ageRange[1] < 60) && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          Age: {ageRange[0]}-{ageRange[1]}
+          <X 
+            size={14} 
+            className="cursor-pointer ml-1" 
+            onClick={() => setAgeRange([18, 60])}
+          />
+        </Badge>
+      )}
+      
+      {ratingMin > 0 && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          Rating: {ratingMin}+
+          <X 
+            size={14} 
+            className="cursor-pointer ml-1" 
+            onClick={() => setRatingMin(0)}
+          />
+        </Badge>
+      )}
+      
+      {availableNow && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          Available Now
+          <X 
+            size={14} 
+            className="cursor-pointer ml-1" 
+            onClick={() => setAvailableNow(false)}
+          />
+        </Badge>
+      )}
+      
+      {serviceTypeFilter && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          {getServiceTypeName(serviceTypeFilter)}
+          <X 
+            size={14} 
+            className="cursor-pointer ml-1" 
+            onClick={() => setServiceTypeFilter("")}
+          />
+        </Badge>
+      )}
       
       <Button 
         variant="ghost" 

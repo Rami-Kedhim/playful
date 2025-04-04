@@ -1,7 +1,5 @@
 
 import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { 
   Accordion, 
@@ -9,13 +7,15 @@ import {
   AccordionItem, 
   AccordionTrigger 
 } from "@/components/ui/accordion";
-import { VideoIcon, UserIcon } from "lucide-react";
+
 import SearchFilter from "./filters/SearchFilter";
 import LocationFilter from "./filters/LocationFilter";
 import PriceRangeFilter from "./filters/PriceRangeFilter";
-import VerifiedFilter from "./filters/VerifiedFilter";
 import CheckboxGroup from "./filters/CheckboxGroup";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import ServiceTypeFilter from "./filters/ServiceTypeFilter";
+import AgeRangeFilter from "./filters/AgeRangeFilter";
+import RatingFilter from "./filters/RatingFilter";
+import AvailabilityFilter from "./filters/AvailabilityFilter";
 
 interface FilterSidebarProps {
   searchQuery: string;
@@ -103,38 +103,10 @@ const FilterSidebar = ({
         <AccordionItem value="serviceType">
           <AccordionTrigger>Service Type</AccordionTrigger>
           <AccordionContent>
-            <RadioGroup 
-              value={serviceTypeFilter} 
-              onValueChange={(value) => setServiceTypeFilter(value as "in-person" | "virtual" | "both" | "")}
-              className="space-y-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="" id="all-services" />
-                <Label htmlFor="all-services" className="flex items-center gap-2">
-                  All Services
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="in-person" id="in-person" />
-                <Label htmlFor="in-person" className="flex items-center gap-2">
-                  <UserIcon className="h-4 w-4" />
-                  In-Person
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="virtual" id="virtual" />
-                <Label htmlFor="virtual" className="flex items-center gap-2">
-                  <VideoIcon className="h-4 w-4" />
-                  Virtual
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="both" id="both" />
-                <Label htmlFor="both" className="flex items-center gap-2">
-                  Both
-                </Label>
-              </div>
-            </RadioGroup>
+            <ServiceTypeFilter
+              serviceTypeFilter={serviceTypeFilter}
+              setServiceTypeFilter={setServiceTypeFilter}
+            />
           </AccordionContent>
         </AccordionItem>
         
@@ -160,20 +132,33 @@ const FilterSidebar = ({
         
         <AccordionItem value="availability">
           <AccordionTrigger>Availability</AccordionTrigger>
-          <AccordionContent className="space-y-4">
-            <VerifiedFilter 
-              verifiedOnly={verifiedOnly} 
-              setVerifiedOnly={setVerifiedOnly} 
+          <AccordionContent>
+            <AvailabilityFilter
+              verifiedOnly={verifiedOnly}
+              setVerifiedOnly={setVerifiedOnly}
+              availableNow={availableNow}
+              setAvailableNow={setAvailableNow}
             />
-            
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="available-now" 
-                checked={availableNow}
-                onCheckedChange={setAvailableNow}
-              />
-              <Label htmlFor="available-now">Available Now</Label>
-            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="age">
+          <AccordionTrigger>Age</AccordionTrigger>
+          <AccordionContent>
+            <AgeRangeFilter
+              ageRange={ageRange}
+              setAgeRange={setAgeRange}
+            />
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="rating">
+          <AccordionTrigger>Rating</AccordionTrigger>
+          <AccordionContent>
+            <RatingFilter
+              ratingMin={ratingMin}
+              setRatingMin={setRatingMin}
+            />
           </AccordionContent>
         </AccordionItem>
         
@@ -182,10 +167,10 @@ const FilterSidebar = ({
           <AccordionContent>
             <CheckboxGroup 
               title="Gender"
-              options={genders}
-              selectedOptions={selectedGenders}
-              toggleOption={toggleGender}
-              formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+              items={genders}
+              selectedItems={selectedGenders}
+              toggleItem={toggleGender}
+              formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
               idPrefix="gender"
             />
           </AccordionContent>
@@ -196,10 +181,10 @@ const FilterSidebar = ({
           <AccordionContent>
             <CheckboxGroup 
               title="Sexual Orientation"
-              options={orientations}
-              selectedOptions={selectedOrientations}
-              toggleOption={toggleOrientation}
-              formatOption={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+              items={orientations}
+              selectedItems={selectedOrientations}
+              toggleItem={toggleOrientation}
+              formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
               idPrefix="orientation"
             />
           </AccordionContent>
@@ -210,9 +195,9 @@ const FilterSidebar = ({
           <AccordionContent>
             <CheckboxGroup 
               title="Services"
-              options={services}
-              selectedOptions={selectedServices}
-              toggleOption={toggleService}
+              items={services}
+              selectedItems={selectedServices}
+              toggleItem={toggleService}
               idPrefix="service"
             />
           </AccordionContent>
