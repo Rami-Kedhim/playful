@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import useBoostScore from '@/hooks/useBoostScore';
 import BoostScoreCard from './BoostScoreCard';
+import { useBoostManager } from '@/hooks/boost';
 
 interface BoostScoreCardContainerProps {
   profileId: string;
@@ -10,12 +11,13 @@ interface BoostScoreCardContainerProps {
 
 const BoostScoreCardContainer = ({ profileId, isOwnProfile }: BoostScoreCardContainerProps) => {
   const { boostScore, loading, error, fetchBoostScore, updateBoostScore } = useBoostScore();
+  const { boostStatus } = useBoostManager(profileId);
 
   useEffect(() => {
     if (profileId) {
       fetchBoostScore(profileId);
     }
-  }, [profileId, fetchBoostScore]);
+  }, [profileId, fetchBoostScore, boostStatus]);
 
   const handleRefresh = async () => {
     await updateBoostScore(profileId);

@@ -1,68 +1,94 @@
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useBoostStatus } from "./useBoostStatus";
 import { useBoostPackages } from "./useBoostPackages";
 import { useBoostPurchase } from "./useBoostPurchase";
 import { useBoostAnalytics } from "./useBoostAnalytics";
 import { BoostPackage } from "@/types/boost";
-import { formatBoostDuration } from "@/utils/boostCalculator";
 
-export const useBoostManager = (profileId?: string) => {
+/**
+ * Main hook that composes all boost-related functionality
+ * This maintains backward compatibility while using the new modular structure
+ */
+const useBoostManager = (profileId?: string) => {
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const { 
-    boostStatus, 
-    eligibility, 
-    checkActiveBoost,
+  
+  // Combine the individual hooks
+  const {
+    boostStatus,
+    setBoostStatus,
+    eligibility,
+    profileData,
+    loading: statusLoading,
     fetchProfileData,
-    cancelBoost,
-    getBoostPrice
+    checkActiveBoost,
+    getBoostPrice,
+    cancelBoost
   } = useBoostStatus(profileId);
-
-  const { 
-    boostPackages, 
-    loading: packagesLoading, 
-    fetchBoostPackages 
+  
+  const {
+    boostPackages,
+    loading: packagesLoading,
+    fetchBoostPackages
   } = useBoostPackages(selectedPackage, setSelectedPackage);
-
-  const { 
-    purchaseBoost, 
-    loading: purchaseLoading 
+  
+  const {
+    purchaseBoost,
+    loading: purchaseLoading
   } = useBoostPurchase(profileId, boostStatus);
-
-  const { 
+  
+  const {
     analytics,
-    fetchAnalytics 
+    loading: analyticsLoading,
+    fetchAnalytics
   } = useBoostAnalytics(profileId);
-
-  useEffect(() => {
-    if (profileId) {
-      fetchProfileData(profileId);
-      checkActiveBoost(profileId);
+  
+  const loading = statusLoading || packagesLoading || purchaseLoading || analyticsLoading;
+  
+  // Initialize the boost data
+  const initializeBoostData = useCallback(async () => {
+    try {
+      if (profileId) {
+        await Promise.all([
+          fetchProfileData(profileId),
+          checkActiveBoost(profileId),
+          fetchBoostPackages()
+        ]);
+      }
+    } catch (err: any) {
+      console.error("Error initializing boost data:", err);
+      setError(err.message || "Failed to initialize boost data");
     }
-  }, [profileId, fetchProfileData, checkActiveBoost]);
-
-  const loading = packagesLoading || purchaseLoading;
-
-  const getBoostAnalytics = async () => {
-    return await fetchAnalytics();
-  };
-
+  }, [profileId, fetchProfileData, checkActiveBoost, fetchBoostPackages]);
+  
+  // Get boost analytics
+  const getBoostAnalytics = useCallback(async () => {
+    try {
+      const data = await fetchAnalytics();
+      return data;
+    } catch (err: any) {
+      console.error("Error fetching boost analytics:", err);
+      setError(err.message || "Failed to fetch boost analytics");
+      return null;
+    }
+  }, [fetchAnalytics]);
+  
   return {
     boostStatus,
     eligibility,
+    profileData,
     boostPackages,
     selectedPackage,
     setSelectedPackage,
-    fetchBoostPackages,
-    getBoostPrice,
     purchaseBoost,
     cancelBoost,
+    getBoostPrice,
+    getBoostAnalytics,
     loading,
     error,
-    getBoostAnalytics,
-    formatBoostDuration
+    fetchBoostPackages,
+    initializeBoostData
   };
 };
 

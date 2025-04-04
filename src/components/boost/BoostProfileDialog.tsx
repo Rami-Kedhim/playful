@@ -44,7 +44,6 @@ const BoostProfileDialog = ({ profileId, onSuccess }: BoostProfileDialogProps) =
     purchaseBoost,
     cancelBoost,
     loading,
-    formatBoostDuration,
     getBoostAnalytics
   } = useBoostManager(profileId);
 
