@@ -37,7 +37,10 @@ const PayoutHistory = ({ payouts, isLoading }: PayoutHistoryProps) => {
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Completed Payouts</h3>
               {completedPayouts.length > 0 ? (
-                <PayoutHistoryList payouts={completedPayouts} />
+                <PayoutHistoryList 
+                  payouts={completedPayouts} 
+                  isLoading={false} // Adding the missing isLoading prop
+                />
               ) : (
                 <p className="text-sm text-muted-foreground">No completed payouts yet.</p>
               )}
