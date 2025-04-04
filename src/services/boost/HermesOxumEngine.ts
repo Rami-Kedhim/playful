@@ -1,48 +1,13 @@
-import { 
-  calculateVisibilityDecay,
-  calculateBoostScore,
-  getOptimalTimeWindow,
-  calculateDynamicDecayConstant 
-} from "@/utils/hermes/hermesMath";
-import {
-  computeCompositeScore,
-  updateBoostScores,
-  sortProfilesByScore,
-  applyRepetitionPenalty,
-  resetRepetitionPenalties,
-  ProfileScoreData
-} from "@/utils/oxum/oxumAlgorithm";
 
 /**
- * HermesOxumEngine - Core service that integrates Hermes visibility algorithms
- * with Oxum's fair rotation system to create an ethical and balanced boosting experience
+ * HermesOxumEngine - Integration of Hermes visibility algorithms
+ * with Oxum's fair rotation system
  */
+import { hermesEngine } from "./hermes/HermesEngine";
+import { oxumEngine } from "./oxum/OxumEngine";
+import { ProfileScoreData } from "@/utils/oxum/oxumAlgorithm";
+
 export class HermesOxumEngine {
-  private systemLoad: number = 0.5; // Default to medium load
-  private recentlyViewedProfiles: string[] = [];
-  private activeProfiles: Map<string, ProfileScoreData> = new Map();
-  private boostRotationInterval: number = 180; // 3 minutes in seconds
-  private lastRotationTime: number = Date.now();
-  
-  // Algorithm configuration constants
-  private config = {
-    maxBoostEffect: 100,
-    baseDecayConstant: 0.2,
-    aggressionFactor: 0.5,
-    rotationFactor: 0.85,
-    repetitionPenaltyFactor: 1.5,
-    resetThresholdHours: 4
-  };
-
-  constructor(initialConfig?: Partial<HermesOxumEngine['config']>) {
-    if (initialConfig) {
-      this.config = { ...this.config, ...initialConfig };
-    }
-    
-    // Start the rotation cycle
-    this.scheduleNextRotation();
-  }
-
   /**
    * Calculate effective boost score for a profile
    */
@@ -52,10 +17,10 @@ export class HermesOxumEngine {
     engagementScore: number,
     timeSinceLastTop: number = 0
   ): number {
-    // Create or update profile data in active profiles
+    // Create profile data
     const currentTime = new Date();
     
-    const profileData: ProfileScoreData = this.activeProfiles.get(profileId) || {
+    const profileData: ProfileScoreData = {
       profileId,
       boostScore,
       engagementScore,
@@ -66,164 +31,61 @@ export class HermesOxumEngine {
       lastCalculated: currentTime
     };
     
-    // Update existing profile with new values
-    profileData.boostScore = boostScore;
-    profileData.engagementScore = engagementScore;
-    profileData.timeSinceLastTop = timeSinceLastTop;
-    profileData.lastCalculated = currentTime;
-    
-    // Store updated profile
-    this.activeProfiles.set(profileId, profileData);
-    
-    // Calculate time of day factor using Hermes visibility equations
+    // Calculate time of day impact using Hermes
     const currentHour = currentTime.getHours() + (currentTime.getMinutes() / 60);
-    const optimalTime = getOptimalTimeWindow();
-    const timeImpact = calculateBoostScore(
-      this.config.maxBoostEffect,
-      this.config.aggressionFactor,
-      currentHour,
-      optimalTime
-    );
+    const timeImpact = hermesEngine.calculateTimeImpact(currentHour);
     
-    // Calculate decay based on time since boost activation
-    const decayConstant = calculateDynamicDecayConstant(
-      this.config.baseDecayConstant,
-      this.systemLoad
-    );
-    
-    const visibilityFactor = calculateVisibilityDecay(
+    // Calculate visibility decay using Hermes
+    const visibilityFactor = hermesEngine.calculateVisibilityScore(
       100, // Start from maximum
-      decayConstant,
       timeSinceLastTop
     );
     
-    // Combine time impact and visibility decay
-    const adjustedBoostScore = boostScore * (timeImpact / 100) * (visibilityFactor / 100);
+    // Apply time impact and visibility decay to boost score
+    profileData.boostScore = boostScore * (timeImpact / 100) * (visibilityFactor / 100);
     
-    // Calculate final score using Oxum's composite scoring
-    const compositeScore = computeCompositeScore(profileData);
+    // Add to Oxum engine for rotation management
+    oxumEngine.activateBoost(profileData);
     
-    return compositeScore;
+    // Get the final sorted queue to determine position
+    const queue = oxumEngine.getBoostQueue();
+    
+    // Find profile's position in queue
+    const position = queue.findIndex(p => p.profileId === profileId);
+    
+    // Calculate final effectiveness based on queue position
+    const positionFactor = position >= 0 ? 
+      Math.max(0.5, 1 - (position * 0.1)) : 0.5;
+    
+    return profileData.boostScore * positionFactor;
   }
   
   /**
-   * Get the current queue positions for boosted profiles
+   * Get the boost queue
    */
   public getBoostQueue(filters?: { region?: string, language?: string }): ProfileScoreData[] {
-    // Convert active profiles map to array
-    const profilesArray = Array.from(this.activeProfiles.values());
-    
-    // Update scores based on time elapsed
-    const updatedProfiles = updateBoostScores(profilesArray);
-    
-    // Apply penalties for recently viewed profiles
-    const penalizedProfiles = applyRepetitionPenalty(
-      updatedProfiles,
-      this.recentlyViewedProfiles,
-      this.config.repetitionPenaltyFactor
-    );
-    
-    // Sort profiles by their updated composite score
-    return sortProfilesByScore(penalizedProfiles, filters);
+    return oxumEngine.getBoostQueue(filters);
   }
   
   /**
-   * Record a profile view to implement fair rotation
+   * Record a profile view
    */
   public recordProfileView(profileId: string): void {
-    // Add to recently viewed list
-    if (!this.recentlyViewedProfiles.includes(profileId)) {
-      this.recentlyViewedProfiles.push(profileId);
-      
-      // Keep list at reasonable size
-      if (this.recentlyViewedProfiles.length > 50) {
-        this.recentlyViewedProfiles.shift();
-      }
-    }
-    
-    // Update profile's time since last top position
-    const profile = this.activeProfiles.get(profileId);
-    if (profile) {
-      profile.timeSinceLastTop = 0; // Reset time since last top
-      this.activeProfiles.set(profileId, profile);
-    }
+    oxumEngine.recordProfileView(profileId);
   }
   
   /**
-   * Update system load to dynamically adjust algorithms
-   */
-  public updateSystemLoad(load: number): void {
-    this.systemLoad = Math.max(0, Math.min(1, load));
-  }
-  
-  /**
-   * Add a profile to the boost queue
+   * Add a profile to boost queue
    */
   public activateBoost(profileData: ProfileScoreData): void {
-    this.activeProfiles.set(profileData.profileId, profileData);
+    oxumEngine.activateBoost(profileData);
   }
   
   /**
    * Remove a profile from the boost queue
    */
   public deactivateBoost(profileId: string): void {
-    this.activeProfiles.delete(profileId);
-  }
-  
-  /**
-   * Reset penalties periodically to ensure fair rotation
-   */
-  private resetPenalties(): void {
-    // Get all profiles as array
-    const profilesArray = Array.from(this.activeProfiles.values());
-    
-    // Reset penalties for profiles not seen recently
-    const resetProfiles = resetRepetitionPenalties(
-      profilesArray,
-      this.config.resetThresholdHours
-    );
-    
-    // Update active profiles map with reset penalties
-    resetProfiles.forEach(profile => {
-      this.activeProfiles.set(profile.profileId, profile);
-    });
-  }
-  
-  /**
-   * Schedule the next rotation to ensure fair distribution
-   */
-  private scheduleNextRotation(): void {
-    setTimeout(() => {
-      this.performRotation();
-      this.scheduleNextRotation();
-    }, this.boostRotationInterval * 1000);
-  }
-  
-  /**
-   * Perform rotation of boosted profiles
-   */
-  private performRotation(): void {
-    // Reset penalties
-    this.resetPenalties();
-    
-    // Calculate time since last rotation
-    const currentTime = Date.now();
-    const timeSinceLastRotation = (currentTime - this.lastRotationTime) / 1000;
-    
-    // Update time since last top for all profiles
-    this.activeProfiles.forEach(profile => {
-      profile.timeSinceLastTop += timeSinceLastRotation / 3600; // Convert seconds to hours
-    });
-    
-    // Update last rotation time
-    this.lastRotationTime = currentTime;
-  }
-  
-  /**
-   * Update engine configuration
-   */
-  public updateConfig(newConfig: Partial<HermesOxumEngine['config']>): void {
-    this.config = { ...this.config, ...newConfig };
+    oxumEngine.deactivateBoost(profileId);
   }
 }
 
