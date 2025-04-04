@@ -38,12 +38,14 @@ interface PayoutRequestFormProps {
     payoutDetails: Record<string, any>;
   }) => Promise<boolean>;
   onCancel: () => void;
+  isSubmitting?: boolean; // Added the isSubmitting property as optional
 }
 
 const PayoutRequestForm = ({
   earnings,
   onRequestPayout,
   onCancel,
+  isSubmitting = false, // Set a default value
 }: PayoutRequestFormProps) => {
   const [amount, setAmount] = useState<number>(earnings.available);
   const [payoutMethod, setPayoutMethod] = useState<string>("bank_transfer");
