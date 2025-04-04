@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -9,24 +8,7 @@ import { Star, MapPin, MessageSquare, Calendar, Heart, Shield, Clock, UserCheck 
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/ui/StarRating";
-
-interface EscortCardProps {
-  id: string;
-  name: string;
-  location: string;
-  age: number;
-  rating: number;
-  reviews: number;
-  tags: string[];
-  imageUrl: string;
-  price: number;
-  verified: boolean;
-  gender?: string;
-  sexualOrientation?: string;
-  availableNow?: boolean;
-  lastActive?: string;
-  responseRate?: number;
-}
+import { EscortCardProps } from "@/types/escort";
 
 const EscortCard = ({
   id,

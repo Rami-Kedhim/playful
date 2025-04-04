@@ -1,4 +1,3 @@
-
 import { Escort } from "../types/escort";
 
 export const escorts: Escort[] = [
@@ -66,7 +65,8 @@ export const escorts: Escort[] = [
       streams: 2
     },
     providesVirtualContent: true,
-    subscriptionPrice: 19.99
+    subscriptionPrice: 19.99,
+    serviceTypes: ["in-person", "virtual"]
   },
   {
     id: "2",

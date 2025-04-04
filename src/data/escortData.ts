@@ -1,4 +1,3 @@
-
 import { Escort } from "@/types/escort";
 
 export type { Escort } from "@/types/escort";
@@ -76,7 +75,6 @@ export const escorts: Escort[] = [
     verificationBadges: ["ID Verified", "Phone Verified", "Photo Verified"],
     serviceType: "both"
   },
-  // Add more escorts as needed with all required properties
   {
     id: "escort-2",
     name: "Isabella",
@@ -132,7 +130,6 @@ export const escorts: Escort[] = [
   }
 ];
 
-// Add availableServices export
 export const availableServices = [
   "GFE",
   "Massage",
@@ -160,7 +157,6 @@ export const availableServices = [
   "Tantric Massage"
 ];
 
-// Some helper functions for escort data
 export const getEscortById = (id: string): Escort | undefined => {
   return escorts.find(escort => escort.id === id);
 };
@@ -177,7 +173,7 @@ export const getEscortsByLocation = (location: string): Escort[] => {
 
 export const getEscortsByTag = (tag: string): Escort[] => {
   return escorts.filter(escort => 
-    escort.tags.some(t => t.toLowerCase() === tag.toLowerCase())
+    escort.tags && escort.tags.some(t => t.toLowerCase() === tag.toLowerCase())
   );
 };
 
@@ -185,5 +181,7 @@ export const getEscortsByServiceType = (type: 'in-person' | 'virtual' | 'both'):
   if (type === 'both') {
     return escorts;
   }
-  return escorts.filter(escort => escort.serviceType === type || escort.serviceType === 'both');
+  return escorts.filter(escort => 
+    escort.serviceTypes && (escort.serviceTypes.includes(type) || escort.serviceTypes.includes('both'))
+  );
 };

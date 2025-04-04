@@ -101,18 +101,7 @@ export const useEscortProfile = (escortId?: string) => {
    */
   const updatePhysicalAttributes = async (
     id: string, 
-    attributes: {
-      height?: number;
-      weight?: number;
-      measurements?: {
-        bust?: number;
-        waist?: number;
-        hips?: number;
-      };
-      hairColor?: string;
-      eyeColor?: string;
-      ethnicity?: string;
-    }
+    attributes: Partial<Pick<Escort, 'height' | 'weight' | 'measurements' | 'hairColor' | 'eyeColor' | 'ethnicity'>>
   ) => {
     if (!id) {
       toast({

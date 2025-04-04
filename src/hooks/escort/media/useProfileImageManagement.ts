@@ -14,6 +14,7 @@ export const useProfileImageManagement = (
   const setProfileImage = async (id: string, imageUrl: string) => {
     try {
       const updatedEscort = await updateEscortProfile(id, {
+        avatar_url: imageUrl,
         imageUrl: imageUrl
       });
       
