@@ -66,12 +66,49 @@ const useBoostScore = (options: UseBoostScoreOptions = {}) => {
     }
   }, []);
 
+  // Add the missing purchaseBoostCredits function
+  const purchaseBoostCredits = useCallback(async (amount: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // In a real implementation, this would be an API call
+      // Mock data for demonstration
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast({
+        title: "Boost credits purchased",
+        description: `Successfully purchased ${amount} boost credits.`
+      });
+      
+      // Increase the boost score after purchase
+      const newScore = (boostScore || 50) + Math.floor(amount / 10);
+      setBoostScore(Math.min(newScore, 100)); // Cap at 100
+      
+      return true;
+    } catch (err: any) {
+      console.error('Error purchasing boost credits:', err);
+      setError(err.message || 'Failed to purchase boost credits');
+      
+      toast({
+        title: "Error purchasing boost credits",
+        description: err.message || "There was a problem with your purchase",
+        variant: "destructive"
+      });
+      
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [boostScore]);
+
   return {
     boostScore,
     loading,
     error,
     fetchBoostScore,
-    updateBoostScore
+    updateBoostScore,
+    purchaseBoostCredits
   };
 };
 

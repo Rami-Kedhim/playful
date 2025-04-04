@@ -82,7 +82,7 @@ const BoostScoreCard = ({
         </Button>
         
         {isOwnProfile && (
-          <BoostProfileDialog />
+          <BoostProfileDialog profileId={profileId} />
         )}
       </CardFooter>
     </Card>

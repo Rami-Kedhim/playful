@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,16 +20,18 @@ const BoostScoreCard = ({ escortId, isOwnProfile }: BoostScoreCardProps) => {
     if (escortId) {
       fetchBoostScore(escortId);
     }
-  }, [escortId]);
+  }, [escortId, fetchBoostScore]);
 
   const handleUpdateScore = async () => {
     await updateBoostScore(escortId);
   };
 
   const handlePurchaseBoost = async () => {
-    await purchaseBoostCredits(100); // Purchase 100 boost credits
-    // After purchase, update the score to reflect new credits
-    await updateBoostScore(escortId);
+    if (purchaseBoostCredits) {
+      await purchaseBoostCredits(100); // Purchase 100 boost credits
+      // After purchase, update the score to reflect new credits
+      await updateBoostScore(escortId);
+    }
   };
 
   const getScoreCategory = (score: number | null) => {
