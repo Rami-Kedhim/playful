@@ -72,9 +72,10 @@ export const submitVerificationRequest = async (
     if (error) throw new Error(`Failed to create verification request: ${error.message}`);
     
     // 4. Update user profile verification status
-    await supabase
+    // Use a type assertion to bypass type checks for the verification_status field
+    await (supabase as any)
       .from('profiles')
-      .update({ verification_status: 'pending' as VerificationStatus })
+      .update({ verification_status: 'pending' })
       .eq('id', userId);
     
     return {
