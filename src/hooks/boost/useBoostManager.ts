@@ -85,6 +85,7 @@ const useBoostManager = (profileId?: string) => {
     cancelBoost,
     getBoostPrice,
     getBoostAnalytics,
+    analytics,
     loading,
     error,
     fetchBoostPackages,

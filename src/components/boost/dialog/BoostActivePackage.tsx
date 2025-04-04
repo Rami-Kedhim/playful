@@ -1,91 +1,148 @@
 
-import { Zap, Award } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { BoostStatus } from "@/types/boost";
-import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { formatBoostDuration } from "@/utils/boostCalculator";
+import { BoostStatus, BoostAnalytics } from "@/types/boost";
+import { Zap, Clock, BarChart3, Loader2 } from "lucide-react";
 
 interface BoostActivePackageProps {
   boostStatus: BoostStatus;
-  boostAnalytics: any | null;
-  onCancel: () => void;
+  boostAnalytics: BoostAnalytics | null;
+  onCancel: () => Promise<boolean>;
 }
 
-const BoostActivePackage = ({ boostStatus, boostAnalytics, onCancel }: BoostActivePackageProps) => {
+const BoostActivePackage = ({ 
+  boostStatus, 
+  boostAnalytics,
+  onCancel 
+}: BoostActivePackageProps) => {
+  const [cancelling, setCancelling] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(boostStatus.remainingTime || "");
+  const [progress, setProgress] = useState(boostStatus.progress || 0);
+  
+  useEffect(() => {
+    if (!boostStatus.isActive) return;
+    
+    // Update the time remaining every minute
+    const timer = setInterval(() => {
+      if (boostStatus.expiresAt) {
+        const now = new Date();
+        const expiry = new Date(boostStatus.expiresAt);
+        const diffMs = expiry.getTime() - now.getTime();
+        
+        if (diffMs <= 0) {
+          setTimeLeft("Expired");
+          clearInterval(timer);
+          return;
+        }
+        
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        let timeString = "";
+        if (days > 0) timeString += `${days}d `;
+        if (hours > 0 || days > 0) timeString += `${hours}h `;
+        timeString += `${minutes}m`;
+        
+        setTimeLeft(timeString);
+        
+        // Calculate progress percentage
+        if (boostStatus.boostPackage) {
+          const durationParts = boostStatus.boostPackage.duration.split(':');
+          const totalHours = parseInt(durationParts[0]);
+          const totalDuration = totalHours * 60 * 60 * 1000; // Convert to milliseconds
+          
+          const startTime = expiry.getTime() - totalDuration;
+          const elapsed = now.getTime() - startTime;
+          const progressPercent = Math.min(100, Math.floor((elapsed / totalDuration) * 100));
+          
+          setProgress(progressPercent);
+        }
+      }
+    }, 60000); // Update every minute
+    
+    return () => clearInterval(timer);
+  }, [boostStatus]);
+  
+  const handleCancel = async () => {
+    if (!window.confirm("Are you sure you want to cancel your active boost? This action cannot be undone.")) {
+      return;
+    }
+    
+    setCancelling(true);
+    await onCancel();
+    setCancelling(false);
+  };
+
   if (!boostStatus.isActive) {
     return (
       <div className="text-center py-8">
-        <div className="mb-4">
-          <Zap className="h-12 w-12 mx-auto text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-medium mb-2">No Active Boost</h3>
-        <p className="text-muted-foreground mb-4">
-          You don't have any active boost. Purchase one to increase your profile visibility.
+        <p className="text-muted-foreground">
+          You don't have any active boosts.
         </p>
-        <Button variant="outline">
-          <Zap className="mr-2 h-4 w-4" />
-          Purchase Boost
-        </Button>
       </div>
     );
   }
 
-  const getScoreColor = (progress: number | undefined) => {
-    if (progress === undefined) return 'bg-gray-500';
-    if (progress >= 80) return 'bg-red-500'; // Almost expired
-    if (progress >= 60) return 'bg-orange-500';
-    if (progress >= 40) return 'bg-yellow-500';
-    if (progress >= 20) return 'bg-green-500';
-    return 'bg-emerald-500'; // Just started
-  };
-
   return (
     <div className="space-y-4">
-      <div className="p-4 border rounded-lg bg-muted/30">
+      <div className="rounded-lg bg-gradient-to-r from-amber-500/20 to-yellow-500/20 p-4 border border-amber-200 dark:border-amber-800">
         <div className="flex justify-between items-center mb-2">
-          <Badge variant="secondary" className="gap-1 px-3 py-1">
-            <Award className="h-3.5 w-3.5" />
-            {boostStatus.boostPackage?.name}
-          </Badge>
-          <Badge variant="outline" className="px-3 py-1">
-            {boostStatus.remainingTime} remaining
-          </Badge>
+          <h3 className="font-medium flex items-center">
+            <Zap className="h-4 w-4 text-amber-500 mr-2" />
+            {boostStatus.boostPackage?.name || "Active Boost"}
+          </h3>
+          <div className="flex items-center text-sm">
+            <Clock className="h-3.5 w-3.5 mr-1 text-amber-500" />
+            {timeLeft} remaining
+          </div>
         </div>
         
-        <Progress 
-          value={boostStatus.progress} 
-          className={`h-2 ${getScoreColor(boostStatus.progress)}`}
-        />
+        <Progress value={progress} className="h-2 mb-3" />
         
-        <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
-          <span>Started</span>
-          <span>Expires {boostStatus.expiresAt?.toLocaleDateString()}</span>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span className="text-muted-foreground">Package:</span>{" "}
+            <span className="font-medium">{boostStatus.boostPackage?.name}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Duration:</span>{" "}
+            <span className="font-medium">
+              {boostStatus.boostPackage ? formatBoostDuration(boostStatus.boostPackage.duration) : "-"}
+            </span>
+          </div>
         </div>
+        
+        {boostAnalytics && (
+          <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-800">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center text-sm">
+                <BarChart3 className="h-3.5 w-3.5 mr-1 text-amber-500" />
+                Boost Effectiveness
+              </div>
+              <span className="font-medium">{boostAnalytics.effectiveness}%</span>
+            </div>
+          </div>
+        )}
       </div>
       
-      {boostAnalytics && (
-        <div className="grid grid-cols-3 gap-2 mt-4">
-          <Card className="p-3 text-center">
-            <h4 className="text-xs text-muted-foreground mb-1">Extra Views</h4>
-            <p className="text-xl font-bold">+{boostAnalytics.additionalViews}</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <h4 className="text-xs text-muted-foreground mb-1">Engagement</h4>
-            <p className="text-xl font-bold">+{boostAnalytics.engagementIncrease}%</p>
-          </Card>
-          <Card className="p-3 text-center">
-            <h4 className="text-xs text-muted-foreground mb-1">Rank</h4>
-            <p className="text-xl font-bold">#{boostAnalytics.rankingPosition}</p>
-          </Card>
-        </div>
-      )}
-      
-      <div className="flex justify-end mt-4">
-        <Button variant="outline" size="sm" onClick={onCancel}>
-          Cancel Boost
-        </Button>
-      </div>
+      <Button 
+        variant="outline" 
+        className="w-full" 
+        onClick={handleCancel} 
+        disabled={cancelling}
+      >
+        {cancelling ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Cancelling...
+          </>
+        ) : (
+          "Cancel Boost"
+        )}
+      </Button>
     </div>
   );
 };

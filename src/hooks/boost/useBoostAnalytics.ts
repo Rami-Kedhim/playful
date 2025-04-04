@@ -1,59 +1,67 @@
 
-import { useState, useCallback } from 'react';
-import { BoostAnalytics } from '@/types/boost';
-
-export type AnalyticsData = {
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-};
+import { useState, useCallback } from "react";
+import { BoostAnalytics } from "@/types/boost";
+import { toast } from "@/components/ui/use-toast";
 
 export const useBoostAnalytics = (profileId?: string) => {
   const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const fetchAnalytics = useCallback(async (): Promise<AnalyticsData | null> => {
+  // Fetch analytics for a specific boost
+  const fetchAnalytics = useCallback(async (): Promise<BoostAnalytics | null> => {
+    if (!profileId) return null;
+    
     try {
       setLoading(true);
-      setError(null);
       
-      // In a real implementation, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      
-      // Simulate analytics data
-      const mockBoostAnalytics: BoostAnalytics = {
+      // In a real implementation, this would call an API endpoint
+      // For now, use mock data to simulate analytics
+      const mockAnalytics: BoostAnalytics = {
         views: {
-          withBoost: Math.floor(Math.random() * 200) + 100,
-          withoutBoost: Math.floor(Math.random() * 100) + 20,
-          increase: Math.floor(Math.random() * 30) + 70
+          withBoost: Math.floor(Math.random() * 300) + 200,
+          withoutBoost: Math.floor(Math.random() * 100) + 50,
+          increase: 0 // Will be calculated
         },
         clicks: {
-          withBoost: Math.floor(Math.random() * 50) + 25,
-          withoutBoost: Math.floor(Math.random() * 25) + 5,
-          increase: Math.floor(Math.random() * 30) + 70
+          withBoost: Math.floor(Math.random() * 100) + 30,
+          withoutBoost: Math.floor(Math.random() * 20) + 5,
+          increase: 0 // Will be calculated
         },
         searchRanking: {
-          withBoost: Math.floor(Math.random() * 3) + 1,
-          withoutBoost: Math.floor(Math.random() * 5) + 5,
-          improvement: Math.floor(Math.random() * 30) + 70
+          withBoost: Math.floor(Math.random() * 5) + 1,
+          withoutBoost: Math.floor(Math.random() * 10) + 5,
+          improvement: 0 // Will be calculated
         },
-        effectiveness: Math.floor(Math.random() * 30) + 70
+        effectiveness: 0 // Will be calculated
       };
       
-      setAnalytics(mockBoostAnalytics);
+      // Calculate increases and improvements
+      mockAnalytics.views.increase = Math.round(
+        ((mockAnalytics.views.withBoost - mockAnalytics.views.withoutBoost) / mockAnalytics.views.withoutBoost) * 100
+      );
       
-      // Convert to AnalyticsData format for backward compatibility
-      const analyticsData: AnalyticsData = {
-        additionalViews: mockBoostAnalytics.views.withBoost - mockBoostAnalytics.views.withoutBoost,
-        engagementIncrease: mockBoostAnalytics.clicks.increase,
-        rankingPosition: mockBoostAnalytics.searchRanking.withBoost
-      };
+      mockAnalytics.clicks.increase = Math.round(
+        ((mockAnalytics.clicks.withBoost - mockAnalytics.clicks.withoutBoost) / mockAnalytics.clicks.withoutBoost) * 100
+      );
       
-      return analyticsData;
-    } catch (err: any) {
-      console.error('Error fetching boost analytics:', err);
-      setError(err.message || 'Failed to fetch boost analytics');
+      mockAnalytics.searchRanking.improvement = mockAnalytics.searchRanking.withoutBoost - mockAnalytics.searchRanking.withBoost;
+      
+      // Calculate overall effectiveness (0-100 scale)
+      mockAnalytics.effectiveness = Math.min(
+        100,
+        Math.round((mockAnalytics.views.increase + mockAnalytics.clicks.increase) / 4 + 
+        (mockAnalytics.searchRanking.improvement * 10))
+      );
+      
+      setAnalytics(mockAnalytics);
+      return mockAnalytics;
+    } catch (error) {
+      console.error("Error fetching boost analytics:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch boost analytics",
+        variant: "destructive"
+      });
       return null;
     } finally {
       setLoading(false);
@@ -63,9 +71,6 @@ export const useBoostAnalytics = (profileId?: string) => {
   return {
     analytics,
     loading,
-    error,
     fetchAnalytics
   };
 };
-
-export default useBoostAnalytics;

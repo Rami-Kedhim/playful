@@ -1,25 +1,56 @@
 
-import { Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const BoostInfoTooltip = () => {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center text-sm text-muted-foreground cursor-help mt-2">
-            <Info className="h-4 w-4 mr-1" />
-            How do profile boosts work?
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p className="max-w-xs">
-            Boosted profiles appear with a special badge and get higher priority in search 
-            results and browsing. The Oxum algorithm ensures fairness in the boosting system.
-          </p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className="mt-2 text-xs text-muted-foreground">
+      <div className="flex items-center gap-1">
+        <HelpCircle className="h-3 w-3" />
+        <span>About Boosts</span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="cursor-help">
+              <HelpCircle className="h-3 w-3 ml-1 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p>
+                Profile boosts increase your visibility in search results and the platform.
+                The Oxum Algorithm calculates your boost price based on factors like profile 
+                completeness, region, rating, and traffic patterns.
+              </p>
+              <p className="mt-2">
+                Higher profile completeness and ratings can lower your boost cost.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      <div className="mt-1 flex flex-col gap-1 pl-4">
+        <div className="flex items-center justify-between">
+          <span>Base price:</span>
+          <span>50 LC</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Premium locations:</span>
+          <span>+15-20 LC</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Low profile completeness:</span>
+          <span>+15-50 LC</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>High rating discount:</span>
+          <span>-5-15 LC</span>
+        </div>
+      </div>
+    </div>
   );
 };
 
