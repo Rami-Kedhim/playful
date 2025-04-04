@@ -4,8 +4,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import EscortCard from "@/components/cards/EscortCard";
 import { Escort } from "@/types/escort";
-import { getEscortById } from "@/data/escortData";
-import { escorts } from "@/data/escortData";
+import { getEscortById, escorts } from "@/data/escortData";
 
 const Favorites = () => {
   const { favorites } = useFavorites();
@@ -14,7 +13,7 @@ const Favorites = () => {
   useEffect(() => {
     // Get the actual escort objects from the IDs in favorites
     const escortObjects = favorites
-      .map(id => getEscortById(id, escorts))
+      .map(id => getEscortById(id))
       .filter((escort): escort is Escort => escort !== undefined);
     
     setFavoriteEscorts(escortObjects);
@@ -60,11 +59,6 @@ const Favorites = () => {
       )}
     </MainLayout>
   );
-};
-
-// Helper function to get escort by ID
-const getEscortById = (id: string, escorts: Escort[]): Escort | undefined => {
-  return escorts.find(escort => escort.id === id);
 };
 
 export default Favorites;
