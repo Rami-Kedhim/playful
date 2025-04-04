@@ -15,7 +15,7 @@ interface FilterState {
   ratingMin: number;
   availableNow: boolean;
   serviceTypeFilter: string;
-  currentPage: number; // Added this to match usage
+  currentPage: number;
 }
 
 export const useFilterResults = (
@@ -25,7 +25,7 @@ export const useFilterResults = (
   setCurrentPage: (page: number) => void
 ) => {
   const [filteredEscorts, setFilteredEscorts] = useState<Escort[]>([]);
-  const [sortedEscorts, setSortedEscorts] = useState<Escort[]>([]); // Added for completeness
+  const [sortedEscorts, setSortedEscorts] = useState<Escort[]>([]); 
   const [paginatedEscorts, setPaginatedEscorts] = useState<Escort[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 12;
@@ -154,7 +154,7 @@ export const useFilterResults = (
     }
     
     setFilteredEscorts(filtered);
-    setSortedEscorts(sorted); // Set the sorted escorts
+    setSortedEscorts(sorted);
     setTotalPages(Math.ceil(filtered.length / pageSize));
     
     // Reset to first page when filters change
@@ -165,12 +165,12 @@ export const useFilterResults = (
   useEffect(() => {
     const start = (currentPage - 1) * pageSize;
     const end = start + pageSize;
-    setPaginatedEscorts(filteredEscorts.slice(start, end));
-  }, [filteredEscorts, currentPage, pageSize]);
+    setPaginatedEscorts(sortedEscorts.slice(start, end));
+  }, [sortedEscorts, currentPage, pageSize]);
   
   return {
     filteredEscorts,
-    sortedEscorts, // Now including sortedEscorts
+    sortedEscorts,
     paginatedEscorts,
     totalPages
   };

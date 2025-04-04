@@ -72,11 +72,11 @@ export interface Escort {
   availability?: Record<string, string[]> | EscortAvailability;
   serviceTypes?: ServiceType[];
   featured?: boolean;
-  tags: string[]; // Now required
+  tags: string[];
   isLive?: boolean;
   
   // Additional fields to match usage in codebase
-  imageUrl?: string;
+  imageUrl?: string; // Changed from required to optional
   description?: string;
   gallery?: string[];
   videos?: Video[];
@@ -100,11 +100,11 @@ export interface Escort {
   lastActive?: string;
   responseRate?: number;
   virtualAvailability?: EscortAvailability;
-  social?: Social; // Added this
-  profileCompletion?: number; // Added this
+  social?: Social;
+  profileCompletion?: number;
   boosted?: boolean;
   verificationBadges?: string[];
-  serviceType?: string; // Added for backward compatibility
+  serviceType?: string;
   lastSeen?: string;
 }
 
@@ -117,7 +117,7 @@ export interface EscortCardProps {
   rating: number;
   reviews: number;
   tags: string[];
-  imageUrl: string;
+  imageUrl: string; // Required for the card component
   price: number;
   verified: boolean;
   gender?: string;

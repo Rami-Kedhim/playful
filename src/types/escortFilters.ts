@@ -41,7 +41,7 @@ export interface EscortFilterActions {
 
 export interface EscortFilterResults {
   filteredEscorts: Escort[];
-  sortedEscorts: Escort[]; // Ensure this is included
+  sortedEscorts: Escort[];
   paginatedEscorts: Escort[];
   totalPages: number;
 }

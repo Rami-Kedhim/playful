@@ -9,19 +9,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
-interface Escort {
-  id: string;
-  name: string;
-  location: string;
-  age: number;
-  rating: number;
-  reviews: number;
-  tags: string[];
-  imageUrl: string;
-  price: number;
-  verified: boolean;
-}
+import { Escort } from "@/types/escort";
 
 interface EscortResultsProps {
   escorts: Escort[];
@@ -55,7 +43,23 @@ const EscortResults = ({
       {escorts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {escorts.map(escort => (
-            <EscortCard key={escort.id} {...escort} />
+            <EscortCard key={escort.id} 
+              id={escort.id}
+              name={escort.name}
+              location={escort.location}
+              age={escort.age}
+              rating={escort.rating}
+              reviews={escort.reviews}
+              tags={escort.tags || []}
+              imageUrl={escort.imageUrl || escort.avatar_url || ""}
+              price={escort.price || 0}
+              verified={escort.verified || false}
+              gender={escort.gender}
+              sexualOrientation={escort.sexualOrientation}
+              availableNow={escort.availableNow}
+              lastActive={escort.lastActive}
+              responseRate={escort.responseRate}
+            />
           ))}
         </div>
       ) : (
