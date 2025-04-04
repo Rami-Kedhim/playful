@@ -3,12 +3,19 @@ import { useState, useCallback } from "react";
 import { BoostAnalytics } from "@/types/boost";
 import { toast } from "@/components/ui/use-toast";
 
+// Define the interface that matches what the components expect
+interface AnalyticsData {
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
+}
+
 export const useBoostAnalytics = (profileId?: string) => {
   const [analytics, setAnalytics] = useState<BoostAnalytics | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Fetch analytics for a specific boost
-  const fetchAnalytics = useCallback(async (): Promise<BoostAnalytics | null> => {
+  const fetchAnalytics = useCallback(async (): Promise<AnalyticsData | null> => {
     if (!profileId) return null;
     
     try {
@@ -54,7 +61,15 @@ export const useBoostAnalytics = (profileId?: string) => {
       );
       
       setAnalytics(mockAnalytics);
-      return mockAnalytics;
+      
+      // Return data in the format expected by components
+      const analyticsData: AnalyticsData = {
+        additionalViews: mockAnalytics.views.withBoost - mockAnalytics.views.withoutBoost,
+        engagementIncrease: mockAnalytics.clicks.increase,
+        rankingPosition: mockAnalytics.searchRanking.withBoost
+      };
+      
+      return analyticsData;
     } catch (error) {
       console.error("Error fetching boost analytics:", error);
       toast({

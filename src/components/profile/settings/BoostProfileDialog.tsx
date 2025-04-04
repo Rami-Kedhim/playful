@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Zap, Loader2 } from "lucide-react";
 import { 
@@ -63,6 +62,7 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
     if (analytics) {
       setBoostAnalytics(analytics);
     }
+    return true; // Return boolean to satisfy TypeScript
   };
 
   const handlePurchase = async () => {
@@ -88,6 +88,7 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
     if (success && onSuccess) {
       onSuccess();
     }
+    return success; // Return boolean to satisfy TypeScript
   };
 
   const renderEligibilityMessage = () => {

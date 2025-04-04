@@ -13,6 +13,12 @@ interface CreatorBoostTabProps {
   profile: any;
 }
 
+interface AnalyticsData {
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
+}
+
 const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
   const [activeTab, setActiveTab] = useState("boost");
   const [boostHistory, setBoostHistory] = useState<any[]>([]);
@@ -22,6 +28,19 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
     boostStatus,
     getBoostAnalytics
   } = useBoostManager(creatorId);
+  
+  // Wrapper to convert BoostAnalytics to AnalyticsData
+  const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
+    const analytics = await getBoostAnalytics();
+    if (!analytics) return null;
+    
+    // Convert BoostAnalytics to AnalyticsData
+    return {
+      additionalViews: analytics.views.withBoost - analytics.views.withoutBoost,
+      engagementIncrease: analytics.clicks.increase,
+      rankingPosition: analytics.searchRanking.withBoost
+    };
+  };
   
   useEffect(() => {
     // Mock fetch boost history data
@@ -93,7 +112,7 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <BoostAnalyticsCard 
               isActive={boostStatus.isActive} 
-              getAnalytics={getBoostAnalytics}
+              getAnalytics={getAnalyticsWrapper}
             />
             
             <Card>
