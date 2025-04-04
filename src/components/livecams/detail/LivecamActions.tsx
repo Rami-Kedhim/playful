@@ -1,7 +1,15 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Share2, Bookmark, Flag } from "lucide-react";
+import { 
+  Heart, 
+  MessageSquare, 
+  Share2, 
+  Bookmark, 
+  Flag, 
+  Bell,
+  BellOff
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -14,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/use-toast";
 
 interface LivecamActionsProps {
   isLive: boolean;
@@ -26,6 +35,47 @@ const LivecamActions: React.FC<LivecamActionsProps> = ({
   onChat = () => {},
   onFollow = () => {},
 }) => {
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isNotified, setIsNotified] = useState(false);
+  
+  const handleFollow = () => {
+    setIsFollowing(!isFollowing);
+    onFollow();
+    
+    toast({
+      title: isFollowing ? "Unfollowed" : "Following",
+      description: isFollowing ? "You will no longer follow this model" : "You are now following this model",
+    });
+  };
+  
+  const handleFavorite = () => {
+    setIsFavorite(!isFavorite);
+    
+    toast({
+      title: isFavorite ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite ? "Removed from your favorites" : "Added to your favorites",
+    });
+  };
+  
+  const handleNotification = () => {
+    setIsNotified(!isNotified);
+    
+    toast({
+      title: isNotified ? "Notifications off" : "Notifications on",
+      description: isNotified 
+        ? "You will no longer receive notifications" 
+        : "You'll be notified when this model goes live",
+    });
+  };
+  
+  const handleReport = () => {
+    toast({
+      title: "Report submitted",
+      description: "Thank you for your feedback. Our team will review this stream.",
+    });
+  };
+
   return (
     <div className="flex gap-2 flex-wrap">
       <Button className="flex-1" onClick={onChat}>
@@ -33,25 +83,56 @@ const LivecamActions: React.FC<LivecamActionsProps> = ({
         Start Chat
       </Button>
       
-      {!isLive && (
-        <Button variant="outline" className="flex-1" onClick={onFollow}>
-          <Heart size={18} className="mr-2" />
-          Follow
-        </Button>
-      )}
+      <Button 
+        variant={isFollowing ? "secondary" : "outline"} 
+        className="flex-1" 
+        onClick={handleFollow}
+      >
+        <Heart 
+          size={18} 
+          className={`mr-2 ${isFollowing ? "fill-current" : ""}`} 
+        />
+        {isFollowing ? "Following" : "Follow"}
+      </Button>
       
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Bookmark size={18} />
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleFavorite}
+            >
+              <Bookmark 
+                size={18} 
+                className={isFavorite ? "fill-current" : ""} 
+              />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Save to favorites</p>
+            <p>{isFavorite ? "Remove from favorites" : "Save to favorites"}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+      
+      {!isLive && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleNotification}
+              >
+                {isNotified ? <BellOff size={18} /> : <Bell size={18} />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isNotified ? "Turn off notifications" : "Get notified when live"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -60,7 +141,12 @@ const LivecamActions: React.FC<LivecamActionsProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>Copy link</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast({ title: "Link copied to clipboard" });
+          }}>
+            Copy link
+          </DropdownMenuItem>
           <DropdownMenuItem>Share to social</DropdownMenuItem>
           <DropdownMenuItem>Embed</DropdownMenuItem>
         </DropdownMenuContent>
@@ -69,7 +155,11 @@ const LivecamActions: React.FC<LivecamActionsProps> = ({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={handleReport}
+            >
               <Flag size={18} />
             </Button>
           </TooltipTrigger>
