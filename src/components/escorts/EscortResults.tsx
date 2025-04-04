@@ -21,7 +21,7 @@ const EscortResults = ({
   currentPage, 
   setCurrentPage, 
   totalPages,
-  isLoading = false
+  isLoading
 }: EscortResultsProps) => {
   // Local loading state for transitions between pages
   const [localLoading, setLocalLoading] = useState(false);
@@ -97,7 +97,6 @@ const EscortResults = ({
             rating={escort.rating}
             reviews={escort.reviews}
             tags={escort.tags}
-            // Use imageUrl or avatar_url or a default image if neither exists
             imageUrl={escort.imageUrl || escort.avatar_url || "https://via.placeholder.com/300x400"}
             price={escort.price || 0}
             verified={escort.verified || false}
