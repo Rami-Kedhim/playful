@@ -1,6 +1,7 @@
 
 // Export all boost-related components
 export { default as BoostProfileDialog } from './BoostProfileDialog';
+export { default as BoostDialogContainer } from './BoostDialogContainer';
 export { default as BoostScoreCard } from './BoostScoreCard';
 export { default as BoostScoreCardContainer } from './BoostScoreCardContainer';
 export { default as BoostAnalyticsCard } from './BoostAnalyticsCard';
@@ -16,3 +17,5 @@ export { default as BoostPackageList } from './dialog/BoostPackageList';
 export { default as HermesBoostInfo } from './dialog/HermesBoostInfo';
 export { default as BoostEligibilityMessage } from './dialog/BoostEligibilityMessage';
 export { default as BoostPackages } from './dialog/BoostPackages';
+export { default as BoostDialogHeader } from './dialog/BoostDialogHeader';
+export { default as BoostDialogTabs } from './dialog/BoostDialogTabs';
