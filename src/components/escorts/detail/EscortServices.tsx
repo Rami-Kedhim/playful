@@ -1,20 +1,18 @@
 
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { serviceCategories } from "@/data/serviceCategories";
-import { getServiceCategoryNames } from "@/utils/serviceUtils";
-import ServiceCategoryBadge from "./ServiceCategoryBadge";
 import { Sparkles } from "lucide-react";
+import useServices from "@/hooks/useServices";
+import ServiceCategoryList from "./ServiceCategoryList";
+import ServiceBadgeList from "./ServiceBadgeList";
 
 interface EscortServicesProps {
   tags: string[];
 }
 
 const EscortServices = ({ tags }: EscortServicesProps) => {
-  // Get unique category names from services
-  const categoryNames = getServiceCategoryNames(tags);
+  const { categoryNames, hasServices } = useServices(tags);
   
-  if (!tags.length) {
+  if (!hasServices) {
     return (
       <Card>
         <CardContent className="p-4 text-center">
@@ -31,33 +29,15 @@ const EscortServices = ({ tags }: EscortServicesProps) => {
     <Card>
       <CardContent className="p-4">
         <div className="mb-3">
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {categoryNames.slice(0, 3).map((category) => (
-              <Badge key={category} variant="outline" className="text-xs">
-                {category}
-              </Badge>
-            ))}
-            {categoryNames.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{categoryNames.length - 3} more
-              </Badge>
-            )}
-          </div>
+          <ServiceCategoryList 
+            categoryNames={categoryNames} 
+            className="mb-2" 
+          />
           
-          <div className="flex flex-wrap gap-1.5">
-            {tags.slice(0, 5).map((service) => (
-              <ServiceCategoryBadge 
-                key={service} 
-                serviceName={service} 
-                className="text-xs"
-              />
-            ))}
-            {tags.length > 5 && (
-              <Badge variant="secondary" className="text-xs">
-                +{tags.length - 5} more
-              </Badge>
-            )}
-          </div>
+          <ServiceBadgeList 
+            services={tags} 
+            limit={5} 
+          />
         </div>
       </CardContent>
     </Card>

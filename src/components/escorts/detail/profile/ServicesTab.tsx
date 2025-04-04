@@ -5,25 +5,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Escort } from "@/types/escort";
 import { serviceCategories } from "@/data/serviceCategories";
 import ServiceCategoryBadge from "../ServiceCategoryBadge";
-import { groupServicesByCategory } from "@/utils/serviceUtils";
 import { Sparkles } from "lucide-react";
+import useServices from "@/hooks/useServices";
 
 interface ServicesTabProps {
   escort: Escort;
 }
 
 const ServicesTab = ({ escort }: ServicesTabProps) => {
-  const [activeCategory, setActiveCategory] = useState<string>(serviceCategories[0]?.id || "companionship");
+  const { services = [] } = escort;
+  const { 
+    categoriesWithServices, 
+    servicesByCategory, 
+    hasServices 
+  } = useServices(services);
   
-  // Group the escort's services by category
-  const servicesByCategory = groupServicesByCategory(escort.services || []);
-  
-  // Get categories that have services
-  const categoriesWithServices = serviceCategories.filter(
-    category => servicesByCategory[category.id]?.length > 0
+  const [activeCategory, setActiveCategory] = useState<string>(
+    categoriesWithServices[0]?.id || "companionship"
   );
   
-  if (categoriesWithServices.length === 0) {
+  if (!hasServices) {
     return (
       <Card>
         <CardContent className="pt-6 text-center">
