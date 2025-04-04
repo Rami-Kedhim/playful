@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,13 +12,13 @@ import { profileFormSchema, ProfileFormData, MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES
 
 interface PersonalInfoFormProps {
   profile: any;
-  user: any;
+  user: AuthUser;
   loading: boolean;
   avatarPreview: string;
-  handleAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleAvatarRemove?: () => void;
+  handleAvatarChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAvatarRemove: () => void;
   onSubmit: (data: ProfileFormData) => Promise<void>;
-  uploadProgress?: number;
+  uploadProgress: number;
 }
 
 const PersonalInfoForm = ({ 
@@ -45,11 +44,9 @@ const PersonalInfoForm = ({
     },
   });
 
-  // Custom avatar validation function
   const validateAvatar = (file: File | null): boolean => {
     if (!file) return true;
     
-    // Check file size
     if (file.size > MAX_FILE_SIZE) {
       form.setError("avatar_url", {
         type: "manual",
@@ -58,7 +55,6 @@ const PersonalInfoForm = ({
       return false;
     }
     
-    // Check file type
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
       form.setError("avatar_url", {
         type: "manual",
@@ -70,15 +66,12 @@ const PersonalInfoForm = ({
     return true;
   };
 
-  // Custom avatar change handler with validation
   const onAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Clear previous errors
       form.clearErrors("avatar_url");
       
-      // Validate the file
       if (validateAvatar(file)) {
         handleAvatarChange(e);
       }

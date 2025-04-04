@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AccountItem from "./settings/AccountItem";
@@ -11,7 +10,7 @@ import { ExternalLink, Shield, Zap } from "lucide-react";
 import WalletConnect from "@/components/solana/WalletConnect";
 
 interface AccountSettingsProps {
-  user: any;
+  user: AuthUser;
   profile: any;
 }
 

@@ -1,4 +1,3 @@
-
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { DatabaseGender } from "@/types/auth";
@@ -6,9 +5,10 @@ import { DatabaseGender } from "@/types/auth";
 // This represents the Gender type as expected by our application code
 export type Gender = "male" | "female" | "non-binary" | "transgender" | "other" | "prefer-not-to-say";
 
+// Update the uploadAvatar function to accept a simplified user object with just the id
 export const uploadAvatar = async (
   avatarFile: File | null, 
-  user: User | null,
+  user: { id: string } | null,
   onProgress?: (progress: number) => void
 ): Promise<string | null> => {
   if (!avatarFile || !user) return null;

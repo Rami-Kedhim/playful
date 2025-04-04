@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/auth/useAuth"; // Make sure to use the correct import
 import AppLayout from "@/components/layout/AppLayout";
 import { 
   Card, 
@@ -13,6 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { AuthUser } from "@/types/auth"; // Import AuthUser
 
 // Import custom components
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -54,8 +55,8 @@ const ProfileManagement = () => {
           setUploadProgress(Math.min(Math.floor(10 + progress * 0.8), 90)); // Scale between 10% and 90%
         };
         
-        // Upload new avatar with progress tracking
-        const newAvatarUrl = await uploadAvatar(avatarFile, user, trackProgress);
+        // Here we need to adapt for the AuthUser type - use user.id instead of the full User object
+        const newAvatarUrl = await uploadAvatar(avatarFile, { id: user.id }, trackProgress);
         if (newAvatarUrl) {
           avatarUrl = newAvatarUrl;
         }
