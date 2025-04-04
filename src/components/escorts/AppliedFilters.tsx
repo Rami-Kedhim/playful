@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import FilterBadge from "./filters/FilterBadge";
+import getServiceTypeName from "./filters/ServiceTypeBadgeLabel";
 
 export interface AppliedFiltersProps {
   searchQuery: string;
@@ -73,136 +73,86 @@ const AppliedFilters = ({
     return null;
   }
   
-  const getServiceTypeName = (type: string) => {
-    switch(type) {
-      case "in-person": return "In-Person Services";
-      case "virtual": return "Virtual Content";
-      case "both": return "In-Person & Virtual";
-      default: return "";
-    }
-  };
-  
   return (
     <div className="flex flex-wrap gap-2 mb-6">
       {searchQuery && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Search: {searchQuery}
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setSearchQuery("")}
-          />
-        </Badge>
+        <FilterBadge 
+          label={`Search: ${searchQuery}`}
+          onRemove={() => setSearchQuery("")}
+        />
       )}
       
       {location && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Location: {location}
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setLocation("")}
-          />
-        </Badge>
+        <FilterBadge 
+          label={`Location: ${location}`}
+          onRemove={() => setLocation("")}
+        />
       )}
       
       {verifiedOnly && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Verified Only
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setVerifiedOnly(false)}
-          />
-        </Badge>
+        <FilterBadge 
+          label="Verified Only"
+          onRemove={() => setVerifiedOnly(false)}
+        />
       )}
       
       {(priceRange[0] > 0 || priceRange[1] < 1000) && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Price: {priceRange[0]}-{priceRange[1]} LC
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setPriceRange([0, 1000])}
-          />
-        </Badge>
+        <FilterBadge 
+          label={`Price: ${priceRange[0]}-${priceRange[1]} LC`}
+          onRemove={() => setPriceRange([0, 1000])}
+        />
       )}
       
       {selectedServices.map(service => (
-        <Badge key={service} variant="secondary" className="flex items-center gap-1">
-          {service}
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => toggleService(service)}
-          />
-        </Badge>
+        <FilterBadge 
+          key={service}
+          label={service}
+          onRemove={() => toggleService(service)}
+        />
       ))}
       
       {selectedGenders.map(gender => (
-        <Badge key={gender} variant="secondary" className="flex items-center gap-1">
-          {gender.charAt(0).toUpperCase() + gender.slice(1)}
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => toggleGender(gender)}
-          />
-        </Badge>
+        <FilterBadge 
+          key={gender}
+          label={gender.charAt(0).toUpperCase() + gender.slice(1)}
+          onRemove={() => toggleGender(gender)}
+        />
       ))}
       
       {selectedOrientations.map(orientation => (
-        <Badge key={orientation} variant="secondary" className="flex items-center gap-1">
-          {orientation.charAt(0).toUpperCase() + orientation.slice(1)}
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => toggleOrientation(orientation)}
-          />
-        </Badge>
+        <FilterBadge 
+          key={orientation}
+          label={orientation.charAt(0).toUpperCase() + orientation.slice(1)}
+          onRemove={() => toggleOrientation(orientation)}
+        />
       ))}
       
       {(ageRange[0] > 18 || ageRange[1] < 60) && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Age: {ageRange[0]}-{ageRange[1]}
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setAgeRange([18, 60])}
-          />
-        </Badge>
+        <FilterBadge 
+          label={`Age: ${ageRange[0]}-${ageRange[1]}`}
+          onRemove={() => setAgeRange([18, 60])}
+        />
       )}
       
       {ratingMin > 0 && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Rating: {ratingMin}+
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setRatingMin(0)}
-          />
-        </Badge>
+        <FilterBadge 
+          label={`Rating: ${ratingMin}+`}
+          onRemove={() => setRatingMin(0)}
+        />
       )}
       
       {availableNow && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          Available Now
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setAvailableNow(false)}
-          />
-        </Badge>
+        <FilterBadge 
+          label="Available Now"
+          onRemove={() => setAvailableNow(false)}
+        />
       )}
       
       {serviceTypeFilter && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          {getServiceTypeName(serviceTypeFilter)}
-          <X 
-            size={14} 
-            className="cursor-pointer ml-1" 
-            onClick={() => setServiceTypeFilter("")}
-          />
-        </Badge>
+        <FilterBadge 
+          label={getServiceTypeName(serviceTypeFilter)}
+          onRemove={() => setServiceTypeFilter("")}
+        />
       )}
       
       <Button 
