@@ -25,9 +25,11 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Earnings Summary Card */}
         <EarningsSummary 
-          totalEarnings={earnings.total}
-          pendingPayouts={earnings.pending}
-          availableBalance={earnings.available}
+          earnings={{
+            total: earnings.total,
+            pending: earnings.pending,
+            available: earnings.available
+          }}
           isLoading={isLoading}
         />
         

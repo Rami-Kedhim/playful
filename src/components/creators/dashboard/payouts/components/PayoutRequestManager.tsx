@@ -60,8 +60,13 @@ const PayoutRequestManager = ({
         />
       ) : (
         <PayoutRequestForm 
-          availableAmount={availableAmount} 
-          onSubmit={handleRequestSubmit}
+          earnings={{
+            total: 0,
+            pending: 0,
+            available: availableAmount
+          }}
+          onRequestPayout={handleRequestSubmit}
+          onCancel={() => {}}
           isSubmitting={isSubmitting}
         />
       )}
