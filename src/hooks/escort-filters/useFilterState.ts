@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { EscortFilterState, EscortFilterActions } from "@/types/escortFilters";
 
-export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 'clearFilters'> => {
+export const useFilterState = (): EscortFilterState & EscortFilterActions => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
@@ -61,6 +61,23 @@ export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 
     setAgeRange([values[0], values[1]] as [number, number]);
   };
   
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("");
+    setLocation("");
+    setPriceRange([0, 1000]);
+    setVerifiedOnly(false);
+    setSelectedServices([]);
+    setSortBy("newest");
+    setCurrentPage(1);
+    setSelectedGenders([]);
+    setSelectedOrientations([]);
+    setAgeRange([18, 60]);
+    setRatingMin(0);
+    setAvailableNow(false);
+    setServiceTypeFilter("");
+  };
+  
   return {
     searchQuery,
     setSearchQuery,
@@ -94,6 +111,7 @@ export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 
     serviceTypeFilter,
     setServiceTypeFilter,
     isLoading,
-    setIsLoading
+    setIsLoading,
+    clearFilters
   };
 };
