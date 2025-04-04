@@ -17,8 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+
+import BankTransferForm from "./components/BankTransferForm";
+import PaypalForm from "./components/PaypalForm";
+import CryptoForm from "./components/CryptoForm";
+import FormError from "./components/FormError";
+import { isFormValid } from "./utils/formValidation";
 
 interface PayoutRequestFormProps {
   earnings: {
@@ -63,26 +67,10 @@ const PayoutRequestForm = ({
     setDetails((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isFormValid = () => {
-    if (amount <= 0 || amount > earnings.available) {
-      return false;
-    }
-
-    if (payoutMethod === "bank_transfer") {
-      return (
-        details.accountName.trim() !== "" &&
-        details.accountNumber.trim() !== "" &&
-        details.bankName.trim() !== ""
-      );
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isFormValid()) {
+    if (!isFormValid(amount, earnings.available, payoutMethod, details)) {
       setError("Please fill all required fields with valid values");
       return;
     }
@@ -107,6 +95,38 @@ const PayoutRequestForm = ({
     }
   };
 
+  const renderPayoutMethodForm = () => {
+    switch (payoutMethod) {
+      case "bank_transfer":
+        return (
+          <BankTransferForm 
+            details={{
+              accountName: details.accountName || "",
+              accountNumber: details.accountNumber || "",
+              bankName: details.bankName || ""
+            }} 
+            onChange={handleDetailsChange} 
+          />
+        );
+      case "paypal":
+        return (
+          <PaypalForm 
+            email={details.paypalEmail || ""} 
+            onChange={handleDetailsChange} 
+          />
+        );
+      case "crypto":
+        return (
+          <CryptoForm 
+            walletAddress={details.walletAddress || ""} 
+            onChange={handleDetailsChange} 
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
@@ -118,12 +138,7 @@ const PayoutRequestForm = ({
       </DialogHeader>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+        <FormError error={error} />
 
         <div className="space-y-2">
           <Label htmlFor="amount">Amount (Available: {earnings.available.toFixed(2)} LC)</Label>
@@ -155,62 +170,7 @@ const PayoutRequestForm = ({
           </Select>
         </div>
 
-        {payoutMethod === "bank_transfer" && (
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="accountName">Account Holder Name</Label>
-              <Input
-                id="accountName"
-                name="accountName"
-                value={details.accountName}
-                onChange={handleDetailsChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="accountNumber">Account Number</Label>
-              <Input
-                id="accountNumber"
-                name="accountNumber"
-                value={details.accountNumber}
-                onChange={handleDetailsChange}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bankName">Bank Name</Label>
-              <Input
-                id="bankName"
-                name="bankName"
-                value={details.bankName}
-                onChange={handleDetailsChange}
-              />
-            </div>
-          </div>
-        )}
-
-        {payoutMethod === "paypal" && (
-          <div className="space-y-2">
-            <Label htmlFor="paypalEmail">PayPal Email</Label>
-            <Input
-              id="paypalEmail"
-              name="paypalEmail"
-              type="email"
-              value={details.paypalEmail || ""}
-              onChange={handleDetailsChange}
-            />
-          </div>
-        )}
-
-        {payoutMethod === "crypto" && (
-          <div className="space-y-2">
-            <Label htmlFor="walletAddress">Wallet Address</Label>
-            <Input
-              id="walletAddress"
-              name="walletAddress"
-              value={details.walletAddress || ""}
-              onChange={handleDetailsChange}
-            />
-          </div>
-        )}
+        {renderPayoutMethodForm()}
 
         <DialogFooter className="pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>
@@ -218,7 +178,7 @@ const PayoutRequestForm = ({
           </Button>
           <Button 
             type="submit" 
-            disabled={isSubmitting || !isFormValid()}
+            disabled={isSubmitting || !isFormValid(amount, earnings.available, payoutMethod, details)}
           >
             {isSubmitting ? "Processing..." : "Request Payout"}
           </Button>
