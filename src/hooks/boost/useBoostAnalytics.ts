@@ -4,10 +4,27 @@ import { BoostAnalytics } from "@/types/boost";
 import { toast } from "@/components/ui/use-toast";
 
 // Define the interface that matches what the components expect
-interface AnalyticsData {
+export interface AnalyticsData {
   additionalViews: number;
   engagementIncrease: number;
   rankingPosition: number;
+  // Adding the missing properties required by components
+  views: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  clicks: {
+    withBoost: number;
+    withoutBoost: number;
+    increase: number;
+  };
+  searchRanking: {
+    withBoost: number;
+    withoutBoost: number;
+    improvement: number;
+  };
+  effectiveness: number;
 }
 
 export const useBoostAnalytics = (profileId?: string) => {
@@ -62,11 +79,16 @@ export const useBoostAnalytics = (profileId?: string) => {
       
       setAnalytics(mockAnalytics);
       
-      // Return data in the format expected by components
+      // Return data with both simplified AnalyticsData format AND full BoostAnalytics structure
       const analyticsData: AnalyticsData = {
         additionalViews: mockAnalytics.views.withBoost - mockAnalytics.views.withoutBoost,
         engagementIncrease: mockAnalytics.clicks.increase,
-        rankingPosition: mockAnalytics.searchRanking.withBoost
+        rankingPosition: mockAnalytics.searchRanking.withBoost,
+        // Include the full BoostAnalytics structure as well to satisfy all component requirements
+        views: mockAnalytics.views,
+        clicks: mockAnalytics.clicks,
+        searchRanking: mockAnalytics.searchRanking,
+        effectiveness: mockAnalytics.effectiveness
       };
       
       return analyticsData;
