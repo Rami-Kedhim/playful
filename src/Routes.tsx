@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
+import { Routes as RouterRoutes, Route, Outlet } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 
 // Import pages
@@ -19,7 +19,14 @@ import ResetPassword from "./pages/ResetPassword";
 const Routes = () => {
   return (
     <RouterRoutes>
-      <Route path="/" element={<MainLayout />}>
+      <Route 
+        path="/" 
+        element={
+          <MainLayout>
+            <Outlet />
+          </MainLayout>
+        }
+      >
         <Route index element={<Index />} />
         <Route path="escorts" element={<Escorts />} />
         <Route path="escorts/:id" element={<EscortDetail />} />
