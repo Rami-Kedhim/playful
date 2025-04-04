@@ -18,8 +18,8 @@ export const useEscortVerification = () => {
     userId: string,
     documentType: VerificationRequest['documentType'],
     documentFrontImage: string,
-    documentBackImage?: string,
-    selfieImage: string
+    selfieImage: string,
+    documentBackImage?: string
   ) => {
     try {
       setLoading(true);
