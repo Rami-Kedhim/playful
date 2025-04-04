@@ -1,26 +1,27 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface SubmitButtonProps {
   loading: boolean;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
-const SubmitButton = ({ loading, disabled }: SubmitButtonProps) => {
+const SubmitButton = ({ loading, disabled = false }: SubmitButtonProps) => {
   return (
-    <Button type="submit" className="w-full" disabled={loading || disabled}>
+    <Button 
+      type="submit" 
+      className="w-full" 
+      disabled={loading || disabled}
+    >
       {loading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Submitting...
         </>
       ) : (
-        <>
-          <Upload className="mr-2 h-4 w-4" />
-          Submit Verification
-        </>
+        'Submit Verification Documents'
       )}
     </Button>
   );

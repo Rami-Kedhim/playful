@@ -1,33 +1,59 @@
 
 /**
  * Upload verification documents to storage
- * @param files Array of files to upload
- * @returns Array of URLs to the uploaded files
  */
 export const uploadVerificationDocuments = async (
+  userId: string,
   files: File[]
 ): Promise<string[]> => {
-  // In a real app, this would upload to a storage service
-  // For now, we'll simulate successful uploads with local URLs
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Create mock URLs for the "uploaded" files
-  const mockUrls = files.map(file => 
-    URL.createObjectURL(file)
-  );
-  
-  return mockUrls;
+  try {
+    // In a real implementation, this would upload the files to a storage service
+    // and return the URLs of the uploaded files
+    
+    // Simulate upload delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Mock URLs for the uploaded files
+    const urls = files.map((file, index) => 
+      `https://storage.example.com/verifications/${userId}/${index}_${file.name}`
+    );
+    
+    return urls;
+  } catch (error) {
+    console.error("Error uploading documents:", error);
+    throw error;
+  }
 };
 
+export interface DocumentUploadStatus {
+  uploaded: boolean;
+  url?: string;
+  error?: string;
+}
+
 /**
- * Get document upload status
- * @param documentId ID of the document
- * @returns Status of the document upload
+ * Get status of document upload
  */
-export const getDocumentUploadStatus = async (documentId: string): Promise<'pending' | 'complete' | 'failed'> => {
-  // In a real app, this would check the status of an upload
-  // For now, always return complete
-  return 'complete';
+export const getDocumentUploadStatus = async (
+  userId: string, 
+  documentId: string
+): Promise<DocumentUploadStatus> => {
+  try {
+    // In a real implementation, this would check the status of a document upload
+    
+    // Simulate a delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Mock response
+    return {
+      uploaded: true,
+      url: `https://storage.example.com/verifications/${userId}/${documentId}`
+    };
+  } catch (error) {
+    console.error("Error checking document upload status:", error);
+    return {
+      uploaded: false,
+      error: "Failed to retrieve document status"
+    };
+  }
 };

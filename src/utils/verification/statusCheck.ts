@@ -1,88 +1,71 @@
 
-import { VerificationStatus, VerificationRequest } from "@/types/escort";
+import { VerificationRequest, VerificationStatus } from '@/types/escort';
 
 /**
- * Check if verification status is pending
- * @param status The verification status
+ * Check if a verification request is pending
  */
-export const isPending = (status?: VerificationStatus): boolean => {
+export const isPending = (status: VerificationStatus): boolean => {
   return status === 'pending';
 };
 
 /**
- * Check if verification status is approved
- * @param status The verification status
+ * Check if a verification request is approved
  */
-export const isApproved = (status?: VerificationStatus): boolean => {
+export const isApproved = (status: VerificationStatus): boolean => {
   return status === 'approved';
 };
 
 /**
- * Check if verification status is rejected
- * @param status The verification status
+ * Check if a verification request is rejected
  */
-export const isRejected = (status?: VerificationStatus): boolean => {
+export const isRejected = (status: VerificationStatus): boolean => {
   return status === 'rejected';
 };
 
 /**
- * Check if verification is expired
- * @param request The verification request
+ * Check if a verification request is expired
  */
-export const isExpired = (request?: VerificationRequest): boolean => {
-  if (!request || !request.submittedAt || !request.id) return false;
-  
-  const submittedDate = new Date(request.submittedAt);
-  const expiryDate = new Date(submittedDate);
+export const isExpired = (request: VerificationRequest): boolean => {
+  const expiryDate = new Date(request.submittedAt);
   expiryDate.setDate(expiryDate.getDate() + 30); // Assuming 30 days validity
   
   return new Date() > expiryDate;
 };
 
 /**
- * Create a verification request
- * @param userId The user ID
- * @param documents Array of document URLs
- * @param documentType Type of document
+ * Create a new verification request
  */
 export const createVerificationRequest = async (
   userId: string,
-  documents: string[],
-  documentType: string
+  documentUrls: string[]
 ): Promise<VerificationRequest> => {
-  // In a real app, this would send to an API
-  // For now, we'll simulate it with a local object
+  // In a real implementation, this would create a new verification request in the database
   
-  const verificationRequest: VerificationRequest = {
-    id: `vr-${Date.now()}`,
-    escortId: userId,
+  // Mock creating a verification request
+  const request: VerificationRequest = {
+    id: `verification-${Date.now()}`,
+    userId,
+    escortId: userId, // Assuming the same ID for this mock
     status: 'pending',
-    documents,
-    submittedAt: new Date(),
-    documentType,
-    userId
+    documents: documentUrls,
+    submittedAt: new Date()
   };
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  return verificationRequest;
+  return request;
 };
 
 /**
- * Update verification status
- * @param requestId The request ID
- * @param status The new status
+ * Update the status of a verification request
  */
 export const updateVerificationStatus = async (
   requestId: string,
-  status: VerificationStatus
+  status: VerificationStatus,
+  notes?: string
 ): Promise<boolean> => {
-  // In a real app, this would send to an API
-  // For now, we'll just simulate success
+  // In a real implementation, this would update the status of a verification request in the database
   
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
+  // Mock updating a verification request
+  console.log(`Updating verification request ${requestId} to ${status}`, { notes });
   
   return true;
 };

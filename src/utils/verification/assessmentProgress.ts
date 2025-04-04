@@ -1,59 +1,45 @@
 
+import { VerificationRequest } from '@/types/escort';
+
 /**
- * Calculate the verification assessment progress for an escort profile
- * @param verificationRequest The verification request object
- * @returns Progress percentage from 0-100
+ * Calculate the verification progress as a percentage
  */
-export const calculateVerificationProgress = (
-  verificationRequest?: any
-): number => {
-  if (!verificationRequest) return 0;
-  
-  // Simple initial implementation - in the future this could be more sophisticated
-  // based on multiple stages of verification
-  
-  switch (verificationRequest.status) {
+export const calculateVerificationProgress = (request: VerificationRequest): number => {
+  switch (request.status) {
     case 'pending':
-      return 50; // Request submitted but not yet reviewed
+      return 25;
+    case 'in_review':
+      return 50;
     case 'approved':
-      return 100; // Verification completed successfully
+      return 100;
     case 'rejected':
-      return 25; // Request was rejected, partial progress
+      return 100;
     default:
-      return 0; // No verification or unknown status
+      return 0;
   }
 };
 
 /**
- * Get a human-readable status message for verification
- * @param verificationRequest The verification request object
- * @returns Status message string
+ * Get a user-friendly message about the verification status
  */
-export const getVerificationStatusMessage = (
-  verificationRequest?: any
-): string => {
-  if (!verificationRequest) return "Not started";
-  
-  switch (verificationRequest.status) {
+export const getVerificationStatusMessage = (request: VerificationRequest): string => {
+  switch (request.status) {
     case 'pending':
-      return "Under review";
+      return 'Your verification is pending review. This typically takes 24-48 hours.';
+    case 'in_review':
+      return 'Your verification is being reviewed by our team.';
     case 'approved':
-      return "Verified";
+      return 'Your verification has been approved. Your profile now shows as verified.';
     case 'rejected':
-      return "Verification rejected";
+      return 'Your verification was not approved. Please check your documents and try again.';
     default:
-      return "Not started";
+      return 'Unknown verification status.';
   }
 };
 
 /**
- * Determine if verification is currently in progress
- * @param verificationRequest The verification request object
- * @returns Boolean indicating if verification is in progress
+ * Check if verification is in progress (pending or in_review)
  */
-export const isVerificationInProgress = (
-  verificationRequest?: any
-): boolean => {
-  if (!verificationRequest) return false;
-  return verificationRequest.status === 'pending';
+export const isVerificationInProgress = (request: VerificationRequest): boolean => {
+  return request.status === 'pending' || request.status === 'in_review';
 };

@@ -3,15 +3,15 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Shield, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
-
-type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+import { VerificationLevel } from '@/types/escort';
 
 interface VerificationBadgeProps {
   level: VerificationLevel;
   className?: string;
+  showTooltip?: boolean;
 }
 
-const VerificationBadge = ({ level, className = '' }: VerificationBadgeProps) => {
+const VerificationBadge = ({ level, className = '', showTooltip = true }: VerificationBadgeProps) => {
   const getBadgeContent = () => {
     switch (level) {
       case 'premium':
@@ -50,18 +50,26 @@ const VerificationBadge = ({ level, className = '' }: VerificationBadgeProps) =>
   };
 
   const content = getBadgeContent();
+  
+  const badge = (
+    <Badge 
+      variant={content.variant} 
+      className={`flex items-center ${content.color} ${className}`}
+    >
+      {content.icon}
+      {content.text}
+    </Badge>
+  );
+
+  if (!showTooltip) {
+    return badge;
+  }
 
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge 
-            variant={content.variant} 
-            className={`flex items-center ${content.color} ${className}`}
-          >
-            {content.icon}
-            {content.text}
-          </Badge>
+          {badge}
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
           <p>{content.description}</p>

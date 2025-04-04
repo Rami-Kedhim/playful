@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MapPin } from "lucide-react";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import StarRating from "@/components/ui/StarRating";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import VerificationBadge from "@/components/verification/VerificationBadge";
@@ -22,7 +22,10 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
     <>
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h1 className="text-3xl font-bold">{escort.name}, {escort.age}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold">{escort.name}, {escort.age}</h1>
+            <VerificationBadge level={verificationLevel} />
+          </div>
           <div className="flex items-center text-gray-400 mt-1">
             <MapPin size={16} className="mr-1" />
             <span>{escort.location}</span>
@@ -39,7 +42,6 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
                 {escort.sexualOrientation}
               </Badge>
             )}
-            <VerificationBadge level={verificationLevel} />
           </div>
         </div>
         
@@ -61,9 +63,11 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
           <span className="text-gray-400 ml-1">({escort.reviews})</span>
         </div>
         
-        <div className="ml-auto text-xl font-bold text-lucoin">
-          {escort.price} LC/hr
-        </div>
+        {escort.price && (
+          <div className="ml-auto text-xl font-bold text-lucoin">
+            {escort.price} LC/hr
+          </div>
+        )}
       </div>
     </>
   );

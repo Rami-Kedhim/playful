@@ -28,4 +28,4 @@ export {
 export type { 
   VerificationEligibilityResponse,
   VerificationSubmissionResponse 
-} from './types';
+} from './requestSubmission';
