@@ -37,6 +37,7 @@ export interface EscortFilterActions {
   setRatingMin: (value: number) => void;
   setAvailableNow: (value: boolean) => void;
   setServiceTypeFilter: (value: "in-person" | "virtual" | "both" | "") => void;
+  setIsLoading: (value: boolean) => void;
   clearFilters: () => void;
 }
 

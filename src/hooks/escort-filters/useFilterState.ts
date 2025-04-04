@@ -94,6 +94,6 @@ export const useFilterState = (): EscortFilterState & Omit<EscortFilterActions, 
     serviceTypeFilter,
     setServiceTypeFilter,
     isLoading,
-    setIsLoading // Add setter for isLoading
+    setIsLoading
   };
 };
