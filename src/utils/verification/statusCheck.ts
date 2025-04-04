@@ -43,7 +43,7 @@ export const createVerificationRequest = (
     status: 'pending',
     documents,
     submittedAt: new Date(),
-    userId: escortUserId
+    userId: escortUserId // This is now expected in the type
   };
 };
 

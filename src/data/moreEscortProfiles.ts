@@ -16,19 +16,26 @@ export const moreEscorts: Escort[] = [
       "https://images.unsplash.com/photo-1532980400857-c99fe3968aca?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80"
     ],
     videos: [
-      "https://player.vimeo.com/external/491049658.sd.mp4?s=a64959a4b19389783a99c41853c86090898256e6&profile_id=164&oauth2_token_id=57447761"
+      {
+        id: "v6",
+        url: "https://player.vimeo.com/external/491049658.sd.mp4?s=a64959a4b19389783a99c41853c86090898256e6&profile_id=164&oauth2_token_id=57447761",
+        thumbnail: "https://images.unsplash.com/photo-1519085360753-af0119f825cd?w=200",
+        title: "Berlin Vibes"
+      }
     ],
     rating: 4.5,
     reviews: 12,
     tags: ["Anal Sex", "Deepthroat", "Kissing"],
     verified: true,
     availableNow: true,
-    lastActive: "3 hours ago",
-    responseRate: 92,
-    languages: ["German", "English"],
-    height: "160 cm",
-    weight: "50 kg",
-    measurements: "32-23-34",
+    description: "I'm a genuine and passionate companion based in Berlin, available for exciting adventures and intimate encounters.",
+    height: 160,
+    weight: 50,
+    measurements: {
+      bust: 32,
+      waist: 23,
+      hips: 34
+    },
     hairColor: "Red",
     eyeColor: "Blue",
     ethnicity: "European",
@@ -37,24 +44,20 @@ export const moreEscorts: Escort[] = [
       hours: "6:00 PM - 2:00 AM"
     },
     services: ["Anal Sex", "Deepthroat", "Kissing", "Bondage"],
+    languages: ["German", "English"],
     rates: {
       hourly: 280,
       twoHours: 500,
       overnight: 1400
     },
     verificationLevel: "enhanced",
-    verificationDate: "2023-03-15",
-    hasVirtualContent: true,
-    virtualUsername: "jessica_berlin",
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    providesLiveStreams: false,
-    isAIGenerated: false,
     contentStats: {
       photos: 65,
       videos: 7,
+      live: false,
       streams: 0
     },
+    providesVirtualContent: true,
     subscriptionPrice: 15.99
   },
   {
@@ -71,19 +74,26 @@ export const moreEscorts: Escort[] = [
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80"
     ],
     videos: [
-      "https://player.vimeo.com/external/511699453.sd.mp4?s=f1c97bb9a5a758a546882514919032950815a914&profile_id=164&oauth2_token_id=57447761"
+      {
+        id: "v7",
+        url: "https://player.vimeo.com/external/511699453.sd.mp4?s=f1c97bb9a5a758a546882514919032950815a914&profile_id=164&oauth2_token_id=57447761",
+        thumbnail: "https://images.unsplash.com/photo-1506794775202-5cd84ef86fef?w=200",
+        title: "Sydney Nights"
+      }
     ],
     rating: 4.7,
     reviews: 21,
     tags: ["Cosplay", "Striptease", "Roleplay"],
     verified: true,
     availableNow: false,
-    lastActive: "4 hours ago",
-    responseRate: 88,
-    languages: ["English", "Australian"],
-    height: "172 cm",
-    weight: "58 kg",
-    measurements: "34-25-36",
+    description: "Sydney-based companion specializing in roleplay and fantasy fulfillment. Let's create unforgettable memories together.",
+    height: 172,
+    weight: 58,
+    measurements: {
+      bust: 34,
+      waist: 25,
+      hips: 36
+    },
     hairColor: "Brunette",
     eyeColor: "Hazel",
     ethnicity: "Caucasian",
@@ -92,24 +102,20 @@ export const moreEscorts: Escort[] = [
       hours: "8:00 PM - 4:00 AM"
     },
     services: ["Cosplay", "Striptease", "Roleplay", "Massage"],
+    languages: ["English"],
     rates: {
       hourly: 320,
       twoHours: 600,
       overnight: 1600
     },
     verificationLevel: "enhanced",
-    verificationDate: "2023-02-20",
-    hasVirtualContent: true,
-    virtualUsername: "megan_sydney",
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    providesLiveStreams: true,
-    isAIGenerated: false,
     contentStats: {
       photos: 120,
       videos: 18,
+      live: true,
       streams: 4
     },
+    providesVirtualContent: true,
     subscriptionPrice: 22.99
   },
   {
@@ -126,19 +132,26 @@ export const moreEscorts: Escort[] = [
       "https://images.unsplash.com/photo-1532629338550-6869f3ca39e7?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80"
     ],
     videos: [
-      "https://player.vimeo.com/external/528922383.sd.mp4?s=948960a899c8465658b091ca5315a945b39ca45a&profile_id=164&oauth2_token_id=57447761"
+      {
+        id: "v8",
+        url: "https://player.vimeo.com/external/528922383.sd.mp4?s=948960a899c8465658b091ca5315a945b39ca45a&profile_id=164&oauth2_token_id=57447761",
+        thumbnail: "https://images.unsplash.com/photo-1521572267624-f04042956ba9?w=200",
+        title: "Madrid Evenings"
+      }
     ],
     rating: 4.8,
     reviews: 26,
     tags: ["Couples", "BDSM", "Massage"],
     verified: true,
     availableNow: true,
-    lastActive: "2 days ago",
-    responseRate: 95,
-    languages: ["Spanish", "English"],
-    height: "166 cm",
-    weight: "53 kg",
-    measurements: "33-24-35",
+    description: "Madrid-based companion available for couples and individuals. Fluent in Spanish and English with a passion for connection.",
+    height: 166,
+    weight: 53,
+    measurements: {
+      bust: 33,
+      waist: 24,
+      hips: 35
+    },
     hairColor: "Black",
     eyeColor: "Brown",
     ethnicity: "Hispanic",
@@ -147,18 +160,20 @@ export const moreEscorts: Escort[] = [
       hours: "9:00 PM - 5:00 AM"
     },
     services: ["Couples", "BDSM", "Massage", "Lingerie Shows"],
+    languages: ["Spanish", "English"],
     rates: {
       hourly: 290,
       twoHours: 520,
       overnight: 1500
     },
     verificationLevel: "enhanced",
-    verificationDate: "2023-01-10",
-    hasVirtualContent: false,
-    providesInPersonServices: true,
-    providesVirtualContent: false,
-    providesLiveStreams: false,
-    isAIGenerated: false
+    contentStats: {
+      photos: 85,
+      videos: 12,
+      live: false,
+      streams: 0
+    },
+    providesVirtualContent: false
   },
   {
     id: "8",
@@ -174,19 +189,26 @@ export const moreEscorts: Escort[] = [
       "https://images.unsplash.com/photo-1531427186611-ecfd6d936e79?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80"
     ],
     videos: [
-      "https://player.vimeo.com/external/546499472.sd.mp4?s=9940175221c944f992533c91c9ba49393d7b9ca3&profile_id=164&oauth2_token_id=57447761"
+      {
+        id: "v9",
+        url: "https://player.vimeo.com/external/546499472.sd.mp4?s=9940175221c944f992533c91c9ba49393d7b9ca3&profile_id=164&oauth2_token_id=57447761",
+        thumbnail: "https://images.unsplash.com/photo-1510547880183-3d4e62e77584?w=200",
+        title: "Roman Holiday"
+      }
     ],
     rating: 4.9,
     reviews: 30,
     tags: ["GFE", "Anal Sex", "Deepthroat"],
     verified: true,
     availableNow: true,
-    lastActive: "just now",
-    responseRate: 100,
-    languages: ["Italian", "English"],
-    height: "164 cm",
-    weight: "51 kg",
-    measurements: "32-23-33",
+    description: "Elegant Rome-based companion available throughout the day. Specializing in authentic girlfriend experiences with a touch of Italian passion.",
+    height: 164,
+    weight: 51,
+    measurements: {
+      bust: 32,
+      waist: 23,
+      hips: 33
+    },
     hairColor: "Blonde",
     eyeColor: "Blue",
     ethnicity: "European",
@@ -195,24 +217,20 @@ export const moreEscorts: Escort[] = [
       hours: "11:00 AM - 11:00 PM"
     },
     services: ["GFE", "Anal Sex", "Deepthroat", "French Kissing"],
+    languages: ["Italian", "English"],
     rates: {
       hourly: 310,
       twoHours: 580,
       overnight: 1700
     },
     verificationLevel: "premium",
-    verificationDate: "2023-05-01",
-    hasVirtualContent: true,
-    virtualUsername: "olivia_rome",
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    providesLiveStreams: true,
-    isAIGenerated: false,
     contentStats: {
       photos: 150,
       videos: 22,
+      live: true,
       streams: 5
     },
+    providesVirtualContent: true,
     subscriptionPrice: 24.99
   }
 ];

@@ -1,118 +1,92 @@
 
+import { useState } from "react";
 import { Escort } from "@/types/escort";
-import { toast } from "@/components/ui/use-toast";
+import { v4 as uuidv4 } from "uuid";
 
-/**
- * Custom hook for managing escort videos
- */
-export const useVideoManagement = (
-  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
-) => {
+interface UseVideoManagementProps {
+  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>;
+}
+
+export const useVideoManagement = ({ updateEscortProfile }: UseVideoManagementProps) => {
+  const [loading, setLoading] = useState(false);
+  
   /**
-   * Add a video to escort videos
+   * Add a video to an escort's gallery
    */
-  const addVideo = async (id: string, videoUrl: string, escort: Escort | null) => {
-    if (!escort) {
-      toast({
-        title: "Error adding video",
-        description: "Profile not found",
-        variant: "destructive",
-      });
-      return null;
-    }
+  const addVideo = async (
+    id: string, 
+    videoUrl: string, 
+    escort?: Escort | null,
+    thumbnail?: string,
+    title?: string
+  ) => {
+    if (!id) return null;
     
-    const videos = escort.videos || [];
-    
-    // Create a new video object
-    const newVideo = {
-      id: `video-${Date.now()}`,
-      url: videoUrl,
-      thumbnail: '',
-      title: `Video ${videos.length + 1}`
-    };
-    
-    // Check if video already exists
-    if (videos.some(v => v.url === videoUrl)) {
-      toast({
-        title: "Video exists",
-        description: "This video is already in your collection",
-      });
-      return escort;
-    }
+    setLoading(true);
     
     try {
+      const currentVideos = escort?.videos || [];
+      
+      // Create new video object
+      const newVideo = {
+        id: uuidv4(),
+        url: videoUrl,
+        thumbnail,
+        title
+      };
+      
       const updatedEscort = await updateEscortProfile(id, {
-        videos: [...videos, newVideo]
+        videos: [...currentVideos, newVideo]
       });
       
-      if (updatedEscort) {
-        toast({
-          title: "Video added",
-          description: "Video has been added to your collection",
-        });
-      }
-      
+      setLoading(false);
       return updatedEscort;
     } catch (error) {
       console.error("Error adding video:", error);
-      toast({
-        title: "Error adding video",
-        description: "Failed to add video to collection",
-        variant: "destructive",
-      });
+      setLoading(false);
       return null;
     }
   };
   
   /**
-   * Remove a video from escort videos
+   * Remove a video from an escort's gallery
    */
-  const removeVideo = async (id: string, videoUrl: string, escort: Escort | null) => {
-    if (!escort) {
-      toast({
-        title: "Error removing video",
-        description: "Profile not found",
-        variant: "destructive",
-      });
-      return null;
-    }
+  const removeVideo = async (
+    id: string, 
+    videoIdOrUrl: string, 
+    escort?: Escort | null
+  ) => {
+    if (!id || !escort) return null;
     
-    const videos = escort.videos || [];
-    
-    if (!videos.some(v => v.url === videoUrl)) {
-      toast({
-        title: "Video not found",
-        description: "This video is not in your collection",
-      });
-      return escort;
-    }
+    setLoading(true);
     
     try {
-      const updatedEscort = await updateEscortProfile(id, {
-        videos: videos.filter(v => v.url !== videoUrl)
+      const currentVideos = escort.videos || [];
+      
+      // Filter out the video to remove
+      // It can be either a video ID or URL
+      const updatedVideos = currentVideos.filter(video => {
+        return video.id !== videoIdOrUrl && video.url !== videoIdOrUrl;
       });
       
-      if (updatedEscort) {
-        toast({
-          title: "Video removed",
-          description: "Video has been removed from your collection",
-        });
-      }
+      const updatedEscort = await updateEscortProfile(id, {
+        videos: updatedVideos
+      });
       
+      setLoading(false);
       return updatedEscort;
     } catch (error) {
       console.error("Error removing video:", error);
-      toast({
-        title: "Error removing video",
-        description: "Failed to remove video from collection",
-        variant: "destructive",
-      });
+      setLoading(false);
       return null;
     }
   };
-
+  
   return {
+    loading,
     addVideo,
     removeVideo
   };
 };
+
+export default useVideoManagement;

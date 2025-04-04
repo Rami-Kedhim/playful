@@ -35,7 +35,7 @@ export const useEscortVerification = ({ updateEscortProfile }: UseEscortVerifica
         status: "pending" as VerificationStatus,
         documents,
         submittedAt: new Date(),
-        documentType
+        documentType // Now we properly pass the documentType
       };
       
       const updatedEscort = await updateEscortProfile(escortId, {
