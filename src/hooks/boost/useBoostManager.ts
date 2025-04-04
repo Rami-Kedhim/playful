@@ -31,7 +31,10 @@ export const useBoostManager = (profileId?: string) => {
     loading: purchaseLoading 
   } = useBoostPurchase(profileId, boostStatus);
 
-  const { getBoostAnalytics } = useBoostAnalytics(profileId, boostStatus);
+  const { 
+    analytics,
+    fetchAnalytics 
+  } = useBoostAnalytics(profileId);
 
   // Get profile boost info when profileId changes
   useEffect(() => {
@@ -43,6 +46,11 @@ export const useBoostManager = (profileId?: string) => {
 
   // Combine loading states
   const loading = packagesLoading || purchaseLoading;
+
+  // Function to get analytics data
+  const getBoostAnalytics = async () => {
+    return await fetchAnalytics();
+  };
 
   return {
     boostStatus,
