@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import BoostManager from "./boost/BoostManager";
 import BoostAnalyticsCard from "./boost/BoostAnalyticsCard";
@@ -6,7 +5,7 @@ import BoostHistoryTable from "./boost/BoostHistoryTable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Zap, TrendingUp, BarChart } from "lucide-react";
-import { useBoostManager } from "@/hooks/useBoostManager";
+import { useBoostManager } from "@/hooks/boost";
 
 interface CreatorBoostTabProps {
   creatorId: string;

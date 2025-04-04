@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Zap, Loader2, Calendar, Info, X, Award, TrendingUp } from "lucide-react";
 import { 
@@ -23,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/auth/useAuth";
-import useBoostManager from "@/hooks/useBoostManager";
+import { useBoostManager } from "@/hooks/boost";
 
 interface BoostProfileDialogProps {
   profileId: string;
