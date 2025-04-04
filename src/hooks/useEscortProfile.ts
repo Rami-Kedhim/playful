@@ -20,6 +20,7 @@ export const useEscortProfile = (escortId?: string) => {
       setLoading(true);
       setError(null);
 
+      // Use 'public' schema explicitly to avoid typing issues
       const { data, error } = await supabase
         .from('escorts')
         .select('*')
@@ -65,6 +66,7 @@ export const useEscortProfile = (escortId?: string) => {
         created_at: new Date()
       };
 
+      // Use 'public' schema explicitly
       const { data, error } = await supabase
         .from('escorts')
         .insert(escortData)
@@ -115,6 +117,7 @@ export const useEscortProfile = (escortId?: string) => {
         updated_at: new Date()
       };
 
+      // Use 'public' schema explicitly
       const { data, error } = await supabase
         .from('escorts')
         .update(updateData)

@@ -51,16 +51,20 @@ export const submitVerificationRequest = async (
       : null;
     
     // 3. Create verification request in database
+    // Use the correct field names based on your SQL schema
     const { data, error } = await supabase
       .from('verification_requests')
       .insert({
-        user_id: userId,
-        document_type: documentType,
-        document_front_image: frontImageUrl,
-        document_back_image: backImageUrl,
-        selfie_image: selfieImageUrl,
+        profile_id: userId,
+        requested_level: 'basic',
         status: 'pending',
-        submitted_at: new Date()
+        documents: {
+          documentType: documentType,
+          frontImage: frontImageUrl,
+          backImage: backImageUrl,
+          selfieImage: selfieImageUrl
+        },
+        created_at: new Date()
       })
       .select()
       .single();
@@ -100,8 +104,8 @@ export const checkVerificationStatus = async (userId: string): Promise<{
     const { data, error } = await supabase
       .from('verification_requests')
       .select('*')
-      .eq('user_id', userId)
-      .order('submitted_at', { ascending: false })
+      .eq('profile_id', userId)
+      .order('created_at', { ascending: false })
       .limit(1)
       .single();
       
@@ -113,21 +117,22 @@ export const checkVerificationStatus = async (userId: string): Promise<{
       throw error;
     }
     
+    // Convert the database fields to our expected VerificationRequest type
     return {
       status: data.status as VerificationStatus,
       lastRequest: {
         id: data.id,
-        userId: data.user_id,
-        documentType: data.document_type,
-        documentFrontImage: data.document_front_image,
-        documentBackImage: data.document_back_image,
-        selfieImage: data.selfie_image,
+        userId: data.profile_id,
+        documentType: data.documents?.documentType || 'other',
+        documentFrontImage: data.documents?.frontImage,
+        documentBackImage: data.documents?.backImage,
+        selfieImage: data.documents?.selfieImage,
         status: data.status,
-        submittedAt: data.submitted_at,
+        submittedAt: data.created_at,
         reviewedAt: data.reviewed_at,
         reviewedBy: data.reviewed_by,
         expiresAt: data.expires_at,
-        rejectionReason: data.rejection_reason
+        rejectionReason: data.reviewer_notes
       }
     };
   } catch (error) {
@@ -190,7 +195,7 @@ export const canSubmitVerification = async (userId: string): Promise<{
     const { data: pendingRequests, error: pendingError } = await supabase
       .from('verification_requests')
       .select('id')
-      .eq('user_id', userId)
+      .eq('profile_id', userId)
       .eq('status', 'pending')
       .limit(1);
       
@@ -209,17 +214,17 @@ export const canSubmitVerification = async (userId: string): Promise<{
     
     const { data: recentRequests, error: recentError } = await supabase
       .from('verification_requests')
-      .select('submitted_at')
-      .eq('user_id', userId)
-      .gte('submitted_at', twentyFourHoursAgo.toISOString())
-      .order('submitted_at', { ascending: false });
+      .select('created_at')
+      .eq('profile_id', userId)
+      .gte('created_at', twentyFourHoursAgo.toISOString())
+      .order('created_at', { ascending: false });
       
     if (recentError) throw recentError;
     
     // Limit to 3 requests per 24 hours
     if (recentRequests && recentRequests.length >= 3) {
       // Calculate cooldown remaining
-      const oldestRecentRequest = new Date(recentRequests[recentRequests.length - 1].submitted_at);
+      const oldestRecentRequest = new Date(recentRequests[recentRequests.length - 1].created_at);
       const cooldownEnds = new Date(oldestRecentRequest);
       cooldownEnds.setHours(cooldownEnds.getHours() + 24);
       
