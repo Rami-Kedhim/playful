@@ -1,6 +1,8 @@
 
 import { Escort } from "@/types/escort";
 
+export { Escort } from "@/types/escort";
+
 export const escorts: Escort[] = [
   {
     id: "escort-1",
@@ -28,6 +30,7 @@ export const escorts: Escort[] = [
     description: "Sophisticated and elegant companion for any occasion. I enjoy meaningful conversations and creating memorable experiences.",
     verified: true,
     gender: "Female",
+    sexualOrientation: "Straight",
     availability: {
       days: ["Monday", "Tuesday", "Thursday", "Friday", "Saturday"],
       hours: "7PM-2AM"
@@ -55,9 +58,13 @@ export const escorts: Escort[] = [
     contentStats: {
       photos: 24,
       videos: 3,
-      live: false
+      live: false,
+      streams: 0
     },
     providesVirtualContent: true,
+    providesInPersonServices: true,
+    subscriptionPrice: 29.99,
+    availableNow: true,
     virtualAvailability: {
       days: ["Monday", "Wednesday", "Friday"],
       hours: "6PM-10PM"
@@ -81,12 +88,14 @@ export const escorts: Escort[] = [
       "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
       "https://images.unsplash.com/photo-1530021232320-687d8e3dba54?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
     ],
+    videos: [],
     rating: 4.7,
     reviews: 85,
     tags: ["BDSM", "Fetish", "Roleplay"],
     description: "Adventurous and open-minded companion ready to explore your deepest fantasies and desires.",
     verified: true,
     gender: "Female",
+    sexualOrientation: "Bisexual",
     availability: {
       days: ["Tuesday", "Wednesday", "Friday", "Saturday", "Sunday"],
       hours: "6PM-1AM"
@@ -107,8 +116,48 @@ export const escorts: Escort[] = [
       weekend: 3500
     },
     providesVirtualContent: false,
+    providesInPersonServices: true,
+    availableNow: false,
+    subscriptionPrice: 0,
+    contentStats: {
+      photos: 15,
+      videos: 0,
+      live: false,
+      streams: 0
+    },
+    profileCompletion: 85,
+    featured: false,
+    boosted: false,
     serviceType: "in-person"
   }
+];
+
+// Add availableServices export
+export const availableServices = [
+  "GFE",
+  "Massage",
+  "Overnight",
+  "Dinner Date",
+  "Travel Companion",
+  "Domination",
+  "Roleplay",
+  "BDSM",
+  "French Kissing",
+  "Lingerie Shows",
+  "Exotic Dancing",
+  "Anal",
+  "Deepthroat",
+  "Kissing",
+  "Cosplay",
+  "Striptease",
+  "Couples",
+  "Fetish",
+  "Duo with Girl",
+  "Light Domination",
+  "Mutual French",
+  "Prostate Massage",
+  "Spanking",
+  "Tantric Massage"
 ];
 
 // Some helper functions for escort data

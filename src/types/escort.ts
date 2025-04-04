@@ -19,6 +19,7 @@ export interface Escort {
   description: string;
   verified: boolean;
   gender: string;
+  sexualOrientation?: string;
   availability: {
     days: string[];
     hours: string;
@@ -53,8 +54,12 @@ export interface Escort {
     photos: number;
     videos: number;
     live: boolean;
+    streams?: number;
   };
   providesVirtualContent: boolean;
+  providesInPersonServices?: boolean;
+  availableNow?: boolean;
+  subscriptionPrice?: number;
   virtualAvailability?: {
     days: string[];
     hours: string;
@@ -67,4 +72,26 @@ export interface Escort {
   boosted?: boolean;
   verificationBadges?: string[];
   serviceType?: 'in-person' | 'virtual' | 'both';
+}
+
+export type ServiceType = 
+  | 'in-person'
+  | 'virtual'
+  | 'both';
+
+export interface EscortAvailability {
+  days: string[];
+  hours: string;
+}
+
+export type VerificationStatus = 'pending' | 'approved' | 'rejected';
+
+export interface VerificationRequest {
+  id: string;
+  escortId: string;
+  status: VerificationStatus;
+  documents: string[];
+  submittedAt: Date;
+  reviewedAt?: Date;
+  notes?: string;
 }
