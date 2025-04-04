@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useState } from "react";
-import { AuthContextValue } from "@/types/auth";
+import { AuthContextValue, AuthUser } from "@/types/auth";
 import { useAuthState } from "./useAuthState";
 import { useAuthentication } from "./useAuthentication";
 import { User } from "@supabase/supabase-js";
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const clearError = () => setError(null);
 
   // Convert database user to AuthUser type for components
-  const mapUserToAuthUser = (user: User | null, profile: any | null) => {
+  const mapUserToAuthUser = (user: User | null, profile: any | null): AuthUser | null => {
     if (!user) return null;
     
     return {
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value: AuthContextValue = {
     session,
-    user: authUser as any, // Type casting to satisfy component requirements
+    user: authUser,
     profile,
     isLoading,
     userRoles,

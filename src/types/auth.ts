@@ -9,7 +9,12 @@ export interface AuthState {
   userRoles: string[];
 }
 
-export interface AuthContextValue extends AuthState {
+export interface AuthContextValue {
+  session: Session | null;
+  user: AuthUser | null;
+  profile: any | null;
+  isLoading: boolean;
+  userRoles: string[];
   signUp: (email: string, password: string, userData?: Record<string, any>) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -18,7 +23,7 @@ export interface AuthContextValue extends AuthState {
   refreshProfile: () => Promise<void>;
   checkRole: (role: string) => boolean;
   
-  // Add these properties that components are expecting
+  // Properties that components are expecting
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -61,6 +66,6 @@ export interface AuthUser {
   email: string;
   profileImageUrl?: string;
   lucoinsBalance: number;
-  role?: string;
   isVerified?: boolean;
+  role?: string;
 }
