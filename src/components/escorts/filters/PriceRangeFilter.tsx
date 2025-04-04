@@ -1,5 +1,6 @@
 
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 
 interface PriceRangeFilterProps {
   priceRange: number[];
@@ -9,10 +10,11 @@ interface PriceRangeFilterProps {
 const PriceRangeFilter = ({ priceRange, setPriceRange }: PriceRangeFilterProps) => {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium">Price Range (LC)</label>
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{priceRange[0]}</span>
-        <span>{priceRange[1]}</span>
+      <div className="flex justify-between items-center">
+        <label className="text-sm font-medium">Price Range</label>
+        <Badge variant="outline" className="font-normal">
+          {priceRange[0]}-{priceRange[1]} LC
+        </Badge>
       </div>
       <Slider
         defaultValue={priceRange}

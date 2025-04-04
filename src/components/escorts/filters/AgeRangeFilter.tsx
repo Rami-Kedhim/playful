@@ -1,5 +1,6 @@
 
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 
 interface AgeRangeFilterProps {
   ageRange: [number, number];
@@ -9,9 +10,11 @@ interface AgeRangeFilterProps {
 const AgeRangeFilter = ({ ageRange, setAgeRange }: AgeRangeFilterProps) => {
   return (
     <div className="space-y-2">
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>Min: {ageRange[0]}</span>
-        <span>Max: {ageRange[1]}</span>
+      <div className="flex justify-between items-center">
+        <label className="text-sm font-medium">Age Range</label>
+        <Badge variant="outline" className="font-normal">
+          {ageRange[0]}-{ageRange[1]} years
+        </Badge>
       </div>
       <Slider
         defaultValue={ageRange}
