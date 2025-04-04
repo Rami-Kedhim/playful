@@ -7,7 +7,6 @@ import { getCreatorPayouts, fetchCreatorPayouts, requestPayout } from "@/service
 const usePayouts = (creatorId: string) => {
   const [payouts, setPayouts] = useState<CreatorPayout[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [earnings, setEarnings] = useState({
     total: 0,
     pending: 0,
@@ -88,7 +87,6 @@ const usePayouts = (creatorId: string) => {
           variant: "default"
         });
         
-        setDialogOpen(false);
         return true;
       } else {
         throw new Error("Failed to request payout");
@@ -109,8 +107,6 @@ const usePayouts = (creatorId: string) => {
   return {
     payouts,
     isLoading,
-    dialogOpen,
-    setDialogOpen,
     earnings,
     handlePayoutRequest
   };

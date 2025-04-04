@@ -1,10 +1,9 @@
 
-import { Button } from "@/components/ui/button";
-import { Dialog } from "@/components/ui/dialog";
-import { CreditCard as CreditCardIcon } from "lucide-react";
+import { useState } from "react";
 import EarningsSummary from "./payouts/EarningsSummary";
 import PayoutHistory from "./payouts/PayoutHistory";
-import PayoutRequestForm from "./payouts/PayoutRequestForm";
+import PayoutDialogWrapper from "./payouts/PayoutDialogWrapper";
+import PayoutHeader from "./payouts/components/PayoutHeader";
 import usePayouts from "./payouts/usePayouts";
 
 interface CreatorPayoutsProps {
@@ -15,33 +14,26 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
   const {
     payouts,
     isLoading,
-    dialogOpen,
-    setDialogOpen,
     earnings,
     handlePayoutRequest
   } = usePayouts(creatorId);
+  
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Earnings & Payouts</h2>
-        <Button onClick={() => setDialogOpen(true)}>
-          <CreditCardIcon className="mr-2 h-4 w-4" />
-          Request Payout
-        </Button>
-      </div>
+      <PayoutHeader onRequestPayout={() => setDialogOpen(true)} />
       
       <EarningsSummary earnings={earnings} isLoading={isLoading} />
       
       <PayoutHistory payouts={payouts} isLoading={isLoading} />
       
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <PayoutRequestForm 
-          earnings={earnings}
-          onRequestPayout={handlePayoutRequest}
-          onCancel={() => setDialogOpen(false)}
-        />
-      </Dialog>
+      <PayoutDialogWrapper 
+        isOpen={dialogOpen}
+        onOpenChange={setDialogOpen}
+        earnings={earnings}
+        onRequestPayout={handlePayoutRequest}
+      />
     </div>
   );
 };
