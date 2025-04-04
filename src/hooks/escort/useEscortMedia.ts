@@ -19,8 +19,8 @@ export const useEscortMedia = (
   // Get profile image management functions
   const profileImageManagement = useProfileImageManagement(updateEscortProfile);
   
-  // Get video management functions
-  const videoManagement = useVideoManagement(updateEscortProfile);
+  // Get video management functions - Fix: Pass an object with updateEscortProfile property
+  const videoManagement = useVideoManagement({ updateEscortProfile });
 
   return {
     // Gallery functions
@@ -35,4 +35,3 @@ export const useEscortMedia = (
     removeVideo: videoManagement.removeVideo
   };
 };
-
