@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Zap, Loader2, Info, Progress } from "lucide-react";
+import { Zap, Loader2, Info } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress"; // Fixed import - Progress is a UI component, not an icon
 import { toast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { 
