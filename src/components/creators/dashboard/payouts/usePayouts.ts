@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { CreatorPayout, PayoutRequest } from "@/types/creator";
 import { getCreatorPayouts, fetchCreatorPayouts, requestPayout } from "@/services/creator/creatorPayoutsService";
+import { calculateEarnings, calculatePendingPayouts } from "./utils/payoutCalculations";
+import usePayoutLoading from "./hooks/usePayoutLoading";
 
 const usePayouts = (creatorId: string) => {
   const [payouts, setPayouts] = useState<CreatorPayout[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isLoading, setIsLoading, isSubmitting, setIsSubmitting } = usePayoutLoading();
   const [earnings, setEarnings] = useState({
     total: 0,
     pending: 0,
@@ -25,15 +27,9 @@ const usePayouts = (creatorId: string) => {
         
         // Calculate earnings
         const totalEarnings = 1250; // This would be fetched from an API in a real app
-        const pendingPayouts = result.data
-          .filter(payout => payout.status === 'pending')
-          .reduce((sum, payout) => sum + parseFloat(payout.amount), 0);
+        const pendingPayouts = calculatePendingPayouts(result.data);
         
-        setEarnings({
-          total: totalEarnings,
-          pending: pendingPayouts,
-          available: totalEarnings - pendingPayouts
-        });
+        setEarnings(calculateEarnings(totalEarnings, pendingPayouts));
       } catch (error) {
         console.error("Error loading payouts:", error);
         toast({
@@ -58,7 +54,7 @@ const usePayouts = (creatorId: string) => {
     payoutDetails: Record<string, any>;
   }) => {
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
       
       const request: PayoutRequest = {
         creatorId,
@@ -100,7 +96,7 @@ const usePayouts = (creatorId: string) => {
       });
       return false;
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -108,7 +104,8 @@ const usePayouts = (creatorId: string) => {
     payouts,
     isLoading,
     earnings,
-    handlePayoutRequest
+    handlePayoutRequest,
+    isSubmitting
   };
 };
 
