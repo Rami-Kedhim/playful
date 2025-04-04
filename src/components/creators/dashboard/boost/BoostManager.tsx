@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -11,6 +10,7 @@ import BoostStatusCard from "./BoostStatusCard";
 import BoostPackageGrid from "./BoostPackageGrid";
 import BoostAnalyticsCard from "./BoostAnalyticsCard";
 import BoostHistoryTable from "./BoostHistoryTable";
+import { formatBoostDuration } from "@/utils/boostCalculator";
 
 interface BoostManagerProps {
   creatorId: string;
