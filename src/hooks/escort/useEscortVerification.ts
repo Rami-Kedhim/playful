@@ -1,74 +1,99 @@
 
-import { useState } from "react";
 import { Escort, VerificationRequest, VerificationStatus } from "@/types/escort";
+import { 
+  createVerificationRequest, 
+  updateVerificationStatus,
+  isPending,
+  isApproved,
+  isRejected,
+  isExpired
+} from "@/utils/verification/statusCheck";
+import { 
+  canSubmitVerification, 
+  submitVerificationRequest 
+} from "@/utils/verification/requestSubmission";
+import { 
+  uploadVerificationDocuments,
+  getDocumentUploadStatus
+} from "@/utils/verification/documentUpload";
 import { toast } from "@/components/ui/use-toast";
 
-interface UseEscortVerificationProps {
-  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>;
-}
-
-export const useEscortVerification = ({ updateEscortProfile }: UseEscortVerificationProps) => {
-  const [submitting, setSubmitting] = useState(false);
-  
-  const submitVerificationRequest = async (
+/**
+ * Custom hook for handling escort verification
+ */
+export const useEscortVerification = (
+  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
+) => {
+  /**
+   * Submit verification documents
+   */
+  const submitVerification = async (
     escortId: string,
-    documents: string[],
-    documentType: string
+    documentType: string,
+    frontImage: File,
+    backImage?: File | null,
+    selfieImage?: File
   ) => {
-    if (!escortId) {
+    try {
+      // Check if can submit
+      const eligibility = await canSubmitVerification(escortId);
+      if (!eligibility.canSubmit) {
+        toast({
+          title: "Cannot submit verification",
+          description: eligibility.reason || "You cannot submit a verification request at this time",
+          variant: "destructive",
+        });
+        return null;
+      }
+      
+      // Upload documents
+      const documentUrls = await uploadVerificationDocuments(
+        [frontImage, ...(backImage ? [backImage] : []), ...(selfieImage ? [selfieImage] : [])]
+      );
+      
+      // Create verification request
+      const request = await createVerificationRequest(escortId, documentUrls, documentType);
+      
+      // Update escort profile with verification status
+      await updateEscortProfile(escortId, {
+        verificationLevel: "basic",
+        // Additional fields that might be relevant
+      });
+      
+      return request;
+    } catch (error) {
+      console.error("Error submitting verification:", error);
       toast({
-        title: "Error submitting verification",
-        description: "Escort ID is required",
+        title: "Verification submission failed",
+        description: "An error occurred while submitting your verification",
         variant: "destructive",
       });
       return null;
     }
-    
-    setSubmitting(true);
-    
+  };
+  
+  /**
+   * Check verification status
+   */
+  const checkVerificationStatus = async (escortId: string): Promise<VerificationStatus | null> => {
     try {
-      // In a real app, this would call an API endpoint
-      // For now, we'll just update the escort profile
-      const verificationRequest: VerificationRequest = {
-        id: `verification-${Date.now()}`,
-        escortId,
-        status: "pending" as VerificationStatus,
-        documents,
-        submittedAt: new Date(),
-        documentType // Now we properly pass the documentType
-      };
-      
-      const updatedEscort = await updateEscortProfile(escortId, {
-        verificationLevel: "pending"
-      });
-      
-      setSubmitting(false);
-      
-      if (updatedEscort) {
-        toast({
-          title: "Verification submitted",
-          description: "Your verification request has been submitted for review.",
-        });
-      }
-      
-      return verificationRequest;
+      // In a real app, this would fetch from the database
+      // For now, we'll return a mock status
+      return 'pending';
     } catch (error) {
-      console.error("Error submitting verification:", error);
-      setSubmitting(false);
-      
-      toast({
-        title: "Error submitting verification",
-        description: "Failed to submit verification request. Please try again.",
-        variant: "destructive",
-      });
-      
+      console.error("Error checking verification status:", error);
       return null;
     }
   };
   
   return {
-    submitting,
-    submitVerificationRequest
+    submitVerification,
+    checkVerificationStatus,
+    isPending,
+    isApproved,
+    isRejected,
+    isExpired,
+    canSubmitVerification
   };
 };
 

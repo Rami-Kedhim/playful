@@ -1,5 +1,7 @@
 
 import { VerificationEligibilityResponse, VerificationSubmissionResponse } from "./types";
+import { uploadVerificationDocuments } from "./documentUpload";
+import { createVerificationRequest } from "./statusCheck";
 
 /**
  * Check if a user can submit a verification request
@@ -7,6 +9,10 @@ import { VerificationEligibilityResponse, VerificationSubmissionResponse } from 
 export const canSubmitVerification = async (userId: string): Promise<VerificationEligibilityResponse> => {
   // In a real app, this would check against an API
   // For now, we'll simulate a successful response
+  
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
   return {
     canSubmit: true,
     reason: undefined
@@ -23,14 +29,40 @@ export const submitVerificationRequest = async (
   documentBackImage?: File | null,
   selfieImage?: File
 ): Promise<VerificationSubmissionResponse> => {
-  // In a real app, this would submit to an API endpoint
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return {
-    success: true,
-    message: "Verification request submitted successfully",
-    requestId: `vr-${Date.now()}`
-  };
+  try {
+    // In a real app, this would submit to an API endpoint
+    
+    // 1. Upload documents to storage
+    const documents: File[] = [
+      documentFrontImage
+    ];
+    
+    if (documentBackImage) {
+      documents.push(documentBackImage);
+    }
+    
+    if (selfieImage) {
+      documents.push(selfieImage);
+    }
+    
+    const documentUrls = await uploadVerificationDocuments(documents);
+    
+    // 2. Create verification request
+    const request = await createVerificationRequest(userId, documentUrls, documentType);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return {
+      success: true,
+      message: "Verification request submitted successfully",
+      requestId: request.id
+    };
+  } catch (error) {
+    console.error("Error submitting verification:", error);
+    return {
+      success: false,
+      message: "Failed to submit verification request"
+    };
+  }
 };
