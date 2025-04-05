@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { ChatHeader } from "./";
 import { ChatMessageList } from "./";
 import { ChatInputArea } from "./";
@@ -27,9 +26,7 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
   const [messageText, setMessageText] = useState("");
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
   
-  // Simulate initial messages when stream is live
   useEffect(() => {
     if (isLive) {
       const initialMessages: ChatMessage[] = [
@@ -59,7 +56,6 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
       
       setMessages(initialMessages);
       
-      // Simulate random messages coming in
       const interval = setInterval(() => {
         if (Math.random() > 0.7) {
           const randomViewers = ["Viewer123", "Fan456", "User789", "Chatter101", "Guest202"];
@@ -78,7 +74,6 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
           
           addMessage(username, message, "normal");
           
-          // Occasionally simulate the streamer responding
           if (Math.random() > 0.8) {
             setTimeout(() => {
               const responses = [
@@ -93,10 +88,9 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
             }, 2000);
           }
           
-          // Occasionally simulate someone tipping
           if (Math.random() > 0.9) {
             const tipper = randomViewers[Math.floor(Math.random() * randomViewers.length)];
-            const amount = Math.floor(Math.random() * 95) + 5; // $5 to $100
+            const amount = Math.floor(Math.random() * 95) + 5;
             const tipMessages = [
               "Keep up the great content!",
               "You're amazing!",
@@ -115,7 +109,6 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
         }
       }, 8000);
       
-      // Simulate users joining and leaving
       const joinLeaveInterval = setInterval(() => {
         const names = ["Alex", "Jordan", "Taylor", "Casey", "Morgan"];
         const randomName = names[Math.floor(Math.random() * names.length)];
@@ -137,7 +130,6 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
     }
   }, [isLive, streamOwnerName, onTipSent]);
   
-  // Scroll to bottom when new messages come in
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -195,7 +187,7 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
   };
   
   const handleSendTip = () => {
-    const amount = Math.floor(Math.random() * 95) + 5; // $5 to $100
+    const amount = Math.floor(Math.random() * 95) + 5;
     addTip("You", amount, "Thanks for the great content!");
     
     toast({

@@ -48,8 +48,20 @@ const ProfileActions = ({
       </Button>
       
       <Button 
+        variant="outline" 
+        className="w-full" 
+        onClick={handleFavoriteToggle}
+      >
+        <Heart 
+          size={16} 
+          className={`mr-2 ${isFavorite(escort.id) ? "fill-red-500 text-red-500" : ""}`} 
+        />
+        {isFavorite(escort.id) ? "Favorited" : "Favorite"}
+      </Button>
+      
+      <Button 
         variant="ghost" 
-        className="w-full col-span-2"
+        className="w-full"
         onClick={onShareOpen}
       >
         <Share2 size={16} className="mr-2" />

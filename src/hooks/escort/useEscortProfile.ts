@@ -1,4 +1,3 @@
-
 import { Escort, ServiceType } from "@/types/escort";
 import { useEscortProfileState } from "./useEscortProfileState";
 import { useEscortProfileFetch } from "./useEscortProfileFetch";
