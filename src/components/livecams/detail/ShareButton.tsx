@@ -97,7 +97,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ model }) => {
               className="flex-1"
             />
             <Button 
-              variant="primary" 
+              variant="default" 
               onClick={handleCopyLink}
               className="shrink-0"
             >
