@@ -21,7 +21,7 @@ import {
   BoostInfoTooltip,
   BoostActivePackage
 } from "@/components/boost";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast"; // Fixed import path
 
 interface BoostProfileDialogProps {
   onSuccess?: () => void;
