@@ -8,22 +8,25 @@ export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Get lucoins data
-  const lucoinsData = useLucoins();
+  // Get lucoin utilities from our hook
+  const {
+    processLucoinTransaction,
+    loading: lucoinsLoading,
+    ...lucoinsData
+  } = useLucoins();
   
-  // Set up safe defaults for when the hook returns undefined
-  const balance = lucoinsData?.balance ?? 0;
-  const deductLucoins = lucoinsData?.deductLucoins ?? ((amount: number) => {
-    console.warn("deductLucoins function not available");
-  });
-
+  // Access profile data from the returned context
+  // Note: In the useLucoins hook, the balance is available from the user profile
+  // and we can use processLucoinTransaction for deducting lucoins
+  const userBalance = lucoinsData?.lucoinBalance ?? 0;
+  
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {
       setLoading(true);
       setError(null);
       
       // Check if user has enough Lucoins
-      if (balance < boostPackage.price_lucoin) {
+      if (userBalance < boostPackage.price_lucoin) {
         toast({
           title: "Insufficient funds",
           description: `You need ${boostPackage.price_lucoin} Lucoins to purchase this boost`,
@@ -35,8 +38,16 @@ export const useBoostPurchase = () => {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1200));
       
-      // Deduct Lucoins
-      deductLucoins(boostPackage.price_lucoin);
+      // Use the processLucoinTransaction method to deduct Lucoins
+      const success = await processLucoinTransaction({
+        amount: -boostPackage.price_lucoin, // Negative amount for spending
+        transactionType: "boost_purchase",
+        description: `Purchased ${boostPackage.name} boost`
+      });
+      
+      if (!success) {
+        throw new Error("Failed to process transaction");
+      }
       
       toast({
         title: "Boost purchased",
