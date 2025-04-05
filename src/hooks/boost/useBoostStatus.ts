@@ -1,6 +1,5 @@
-
 import { useState, useCallback } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { BoostStatus, BoostPackage } from "@/types/boost";
 import { 
   calculateBoostPrice, 
@@ -17,30 +16,25 @@ export const useBoostStatus = (profileId?: string) => {
   const [dailyBoostUsage, setDailyBoostUsage] = useState<number>(0); // Track daily boost usage
   const DAILY_BOOST_LIMIT = 4; // Oxum model: 4 boosts max per day (12 hours)
 
-  // Fetch profile data to check completeness, rating, etc.
   const fetchProfileData = useCallback(async (id: string) => {
     try {
       setLoading(true);
-      // In a real implementation, this would be an API call
-      // For now, we'll simulate with mock data
       const mockProfile = {
         id,
         completeness: 75,
         rating: 4.2,
         country: "Germany",
-        isVerified: true, // Oxum model: Verified escorts only
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-        lastBoost: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-        dailyBoostsUsed: Math.floor(Math.random() * DAILY_BOOST_LIMIT) // Random number of used boosts today
+        isVerified: true,
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        lastBoost: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        dailyBoostsUsed: Math.floor(Math.random() * DAILY_BOOST_LIMIT)
       };
       
       setProfileData(mockProfile);
       setDailyBoostUsage(mockProfile.dailyBoostsUsed);
       
-      // Check if profile is eligible for boosting
       const profileAge = (Date.now() - mockProfile.createdAt.getTime()) / (1000 * 60 * 60 * 24);
       
-      // Check both verification and daily boost limit
       let eligibilityResult;
       
       if (!mockProfile.isVerified) {
@@ -71,25 +65,22 @@ export const useBoostStatus = (profileId?: string) => {
     }
   }, []);
 
-  // Check if profile has an active boost
   const checkActiveBoost = useCallback(async (id: string) => {
     try {
       setLoading(true);
-      // In a real implementation, this would be an API call
-      // For now, we'll simulate with mock data
-      const hasActiveBoost = Math.random() > 0.7; // 30% chance of having an active boost
+      const hasActiveBoost = Math.random() > 0.7;
       
       if (hasActiveBoost) {
-        const endDate = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours from now - simulating a 3-hour boost
+        const endDate = new Date(Date.now() + 2 * 60 * 60 * 1000);
         const mockPackage: BoostPackage = {
           id: "boost-standard",
           name: "3-Hour Boost",
-          duration: "03:00:00", // Oxum model: 3 hours per activation
-          price_lucoin: 15 // Oxum model: $1.50 equivalent
+          duration: "03:00:00",
+          price_lucoin: 15
         };
         
         const remainingTime = calculateRemainingTime(endDate);
-        const totalDuration = 3 * 60 * 60 * 1000; // 3 hours in ms
+        const totalDuration = 3 * 60 * 60 * 1000;
         const elapsed = totalDuration - (endDate.getTime() - Date.now());
         const progress = Math.min(100, Math.floor((elapsed / totalDuration) * 100));
         
@@ -110,13 +101,10 @@ export const useBoostStatus = (profileId?: string) => {
     }
   }, []);
 
-  // Calculate dynamic boost price based on the Oxum algorithm
   const getBoostPrice = useCallback(() => {
-    // Under the Oxum Ethical Boosting model, price is fixed at 15 Lucoins ($1.50)
-    return 15; // Fixed price for all boosts
+    return 15;
   }, []);
 
-  // Cancel an active boost
   const cancelBoost = async (): Promise<boolean> => {
     if (!profileId || !boostStatus.isActive) {
       return false;
@@ -125,8 +113,6 @@ export const useBoostStatus = (profileId?: string) => {
     try {
       setLoading(true);
       
-      // In a real implementation, this would be an API call
-      // For now, we'll simulate a successful cancellation
       await new Promise(resolve => setTimeout(resolve, 500));
       
       setBoostStatus({ isActive: false });

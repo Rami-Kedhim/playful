@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useBoostManager, formatBoostDuration } from "@/hooks/boost";
 import useHermesOxumBoost from "@/hooks/boost/useHermesOxumBoost";
 import BoostDialogHeader from "./dialog/BoostDialogHeader";

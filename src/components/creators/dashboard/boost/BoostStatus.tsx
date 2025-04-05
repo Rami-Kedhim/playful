@@ -5,7 +5,7 @@ import BoostEligibilityAlert from "./BoostEligibilityAlert";
 import BoostPackageSelection from "./BoostPackageSelection";
 import BoostPurchaseConfirmation from "./BoostPurchaseConfirmation";
 import { BoostStatus as BoostStatusType } from "@/types/boost";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
 interface BoostStatusProps {
