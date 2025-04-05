@@ -18,7 +18,7 @@ export const useBoostPurchase = () => {
   // Access profile data from the returned context
   // Note: In the useLucoins hook, the balance is available from the user profile
   // and we can use processLucoinTransaction for deducting lucoins
-  const userBalance = lucoinsData?.lucoinBalance ?? 0;
+  const userBalance = lucoinsData?.profile?.lucoin_balance ?? 0;
   
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {
