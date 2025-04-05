@@ -8,10 +8,12 @@ export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Get lucoins data with proper fallbacks
-  const lucoinsData = useLucoins?.() || {};
-  const balance = lucoinsData.balance || 0;
-  const deductLucoins = lucoinsData.deductLucoins || (() => {
+  // Get lucoins data
+  const lucoinsData = useLucoins();
+  
+  // Set up safe defaults for when the hook returns undefined
+  const balance = lucoinsData?.balance ?? 0;
+  const deductLucoins = lucoinsData?.deductLucoins ?? ((amount: number) => {
     console.warn("deductLucoins function not available");
   });
 
