@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Check } from "lucide-react";
 import { LivecamModel } from "@/types/livecams";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 interface FollowButtonProps {
   model: LivecamModel;

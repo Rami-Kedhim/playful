@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, Calendar, MessageSquare, Share2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { Escort } from "@/data/escortData";
 
@@ -19,7 +19,6 @@ const ProfileActions = ({
   onMessageOpen, 
   onShareOpen 
 }: ProfileActionsProps) => {
-  const { toast } = useToast();
   const { isFavorite, toggleFavorite } = useFavorites();
   
   const handleFavoriteToggle = () => {
