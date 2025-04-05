@@ -1,185 +1,123 @@
-import { useState, useMemo } from "react";
+
+import React, { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
-import { useFavorites } from "@/contexts/FavoritesContext";
-import EscortCard from "@/components/cards/EscortCard";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import CreatorCard from "@/components/cards/CreatorCard";
-import { useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
-import { escortProfiles } from "@/data/escortProfiles";
-import { Separator } from "@/components/ui/separator";
+import { Card } from "@/components/ui/card";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { Heart, Trash2 } from "lucide-react";
+import { featuredEscorts } from "@/components/home/MockData";
+import { useNotifications } from "@/contexts/NotificationsContext";
 
 const Favorites = () => {
-  const { favorites, clearFavorites } = useFavorites();
-  const [activeTab, setActiveTab] = useState<string>("escorts");
-  const navigate = useNavigate();
-
-  // Filter escorts that are in favorites
-  const favoriteEscorts = useMemo(() => {
-    return escortProfiles.filter(escort => favorites.includes(escort.id));
-  }, [favorites]);
+  const [activeTab, setActiveTab] = useState("escorts");
+  const { favorites, clearFavorites, removeFavorite } = useFavorites();
+  const { showWarning } = useNotifications();
   
-  // For creators, we'll handle this when we have actual creator data
-  const favoriteCreators = useMemo(() => {
-    // This would filter from actual creator data when available
-    return [];
-  }, [favorites]);
+  const escortFavorites = featuredEscorts.filter(escort => 
+    favorites.includes(escort.id)
+  );
   
   const handleClearFavorites = () => {
     clearFavorites();
+    showWarning("Favorites Cleared", "All items have been removed from your favorites");
   };
-
+  
   return (
     <AppLayout>
       <div className="container px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Your Favorites</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold flex items-center">
+            <Heart className="mr-2 text-primary h-6 w-6" />
+            My Favorites
+          </h1>
           
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-2"
-            onClick={() => navigate(-1)}
-          >
-            Back
-          </Button>
+          {favorites.length > 0 && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={handleClearFavorites}
+            >
+              <Trash2 className="h-4 w-4 mr-2" /> 
+              Clear All
+            </Button>
+          )}
         </div>
         
         <Tabs 
           defaultValue="escorts" 
-          value={activeTab} 
+          value={activeTab}
           onValueChange={setActiveTab}
           className="w-full"
         >
-          <TabsList className="mb-6">
-            <TabsTrigger value="escorts" className="flex gap-2">
-              <span>Escorts</span>
-              {favoriteEscorts.length > 0 && (
-                <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs">
-                  {favoriteEscorts.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="creators" className="flex gap-2">
-              <span>Creators</span>
-              {favoriteCreators.length > 0 && (
-                <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs">
-                  {favoriteCreators.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="livecams">
-              <span>Livecams</span>
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="escorts">Escorts</TabsTrigger>
+            <TabsTrigger value="creators">Creators</TabsTrigger>
+            <TabsTrigger value="livecams">Livecams</TabsTrigger>
           </TabsList>
           
           <TabsContent value="escorts">
-            {favoriteEscorts.length > 0 ? (
-              <>
-                <div className="flex justify-between items-center mb-4">
-                  <p className="text-sm text-muted-foreground">
-                    {favoriteEscorts.length} favorite{favoriteEscorts.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {favoriteEscorts.map(escort => (
-                    <EscortCard 
-                      key={escort.id}
-                      id={escort.id}
-                      name={escort.name}
-                      location={escort.location}
-                      age={escort.age}
-                      rating={escort.rating}
-                      reviews={escort.reviews}
-                      tags={escort.tags}
-                      imageUrl={escort.imageUrl || escort.avatar_url || ''}
-                      price={escort.price || 0}
-                      verified={escort.verified || false}
-                      gender={escort.gender}
-                      sexualOrientation={escort.sexualOrientation}
-                      availableNow={escort.availableNow}
-                      lastActive={escort.lastSeen}
-                      responseRate={escort.responseRate}
-                    />
-                  ))}
-                </div>
-              </>
+            {escortFavorites.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {escortFavorites.map(escort => (
+                  <Card key={escort.id} className="p-4">
+                    <div className="flex flex-col">
+                      <img 
+                        src={escort.imageUrl} 
+                        alt={escort.name} 
+                        className="w-full h-64 object-cover rounded-md mb-3"
+                      />
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="text-lg font-medium">{escort.name}</h3>
+                          <p className="text-sm text-muted-foreground">{escort.location}</p>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => removeFavorite(escort.id)}
+                        >
+                          <Heart className="h-5 w-5 fill-primary text-primary" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             ) : (
               <div className="text-center py-16">
-                <Heart className="mx-auto h-16 w-16 stroke-1 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-semibold">No Favorites Yet</h3>
-                <p className="mt-2 text-muted-foreground">
-                  You haven't added any escorts to your favorites.
+                <Heart className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                <h3 className="text-2xl font-medium mb-2">No Favorites Yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  You haven't added any escorts to your favorites
                 </p>
-                <Button 
-                  onClick={() => navigate('/escorts')}
-                  variant="outline" 
-                  className="mt-6"
-                >
-                  Browse Escorts
-                </Button>
+                <Button>Browse Escorts</Button>
               </div>
             )}
           </TabsContent>
           
           <TabsContent value="creators">
-            {favoriteCreators.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {/* Creator cards would go here when we have actual data */}
-                <p>Your favorite creators will appear here</p>
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <Heart className="mx-auto h-16 w-16 stroke-1 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-semibold">No Favorites Yet</h3>
-                <p className="mt-2 text-muted-foreground">
-                  You haven't added any creators to your favorites.
-                </p>
-                <Button 
-                  onClick={() => navigate('/creators')}
-                  variant="outline" 
-                  className="mt-6"
-                >
-                  Browse Creators
-                </Button>
-              </div>
-            )}
+            <div className="text-center py-16">
+              <Heart className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <h3 className="text-2xl font-medium mb-2">No Creator Favorites</h3>
+              <p className="text-muted-foreground mb-6">
+                You haven't added any creators to your favorites
+              </p>
+              <Button>Browse Creators</Button>
+            </div>
           </TabsContent>
           
           <TabsContent value="livecams">
             <div className="text-center py-16">
-              <Heart className="mx-auto h-16 w-16 stroke-1 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">No Favorites Yet</h3>
-              <p className="mt-2 text-muted-foreground">
-                You haven't added any livecams to your favorites.
+              <Heart className="h-12 w-12 mx-auto mb-4 opacity-20" />
+              <h3 className="text-2xl font-medium mb-2">No Livecam Favorites</h3>
+              <p className="text-muted-foreground mb-6">
+                You haven't added any livecams to your favorites
               </p>
-              <Button 
-                onClick={() => navigate('/livecams')}
-                variant="outline" 
-                className="mt-6"
-              >
-                Browse Livecams
-              </Button>
+              <Button>Browse Livecams</Button>
             </div>
           </TabsContent>
         </Tabs>
-        
-        {(favoriteEscorts.length > 0 || favoriteCreators.length > 0) && (
-          <>
-            <Separator className="my-8" />
-            <div className="flex justify-end">
-              <Button 
-                variant="ghost" 
-                className="text-destructive hover:text-destructive"
-                onClick={handleClearFavorites}
-              >
-                Clear all favorites
-              </Button>
-            </div>
-          </>
-        )}
       </div>
     </AppLayout>
   );

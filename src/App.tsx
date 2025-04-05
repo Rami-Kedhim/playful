@@ -1,7 +1,7 @@
 
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "./components/ui/theme-provider";
+import { ThemeProvider } from "next-themes";
 import Routes from "./Routes";
 import { Toaster } from "./components/ui/toaster";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
