@@ -8,6 +8,8 @@ export { default as LivecamActions } from "./LivecamActions";
 export { default as LivecamChat } from "./LivecamChat";
 export { default as VideoPlayer } from "./VideoPlayer";
 export { default as LivecamInfo } from "./LivecamInfo";
+export { default as LivecamLoadingState } from "./LivecamLoadingState";
+export { default as LivecamErrorState } from "./LivecamErrorState";
 
-// New chat components
+// Chat components
 export * from "./chat";
