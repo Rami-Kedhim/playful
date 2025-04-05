@@ -32,7 +32,7 @@ const BoostManagerContainer = ({
   role,
   lucoinBalance
 }: BoostManagerContainerProps) => {
-  const { toast: toastNotification } = useToast();
+  const { toast } = useToast();
   
   const {
     boostStatus,
@@ -62,7 +62,7 @@ const BoostManagerContainer = ({
   
   const handleBoostPurchase = async () => {
     if (!selectedPackage) {
-      toastNotification({
+      toast({
         title: "Please select a boost package",
         variant: "destructive",
       });
@@ -72,7 +72,7 @@ const BoostManagerContainer = ({
     const success = await purchaseBoost(selectedPackage);
     
     if (success) {
-      toastNotification({
+      toast({
         title: "Boost Purchased",
         description: "Your profile has been boosted successfully!",
       });
@@ -86,7 +86,7 @@ const BoostManagerContainer = ({
       const success = await cancelBoost();
       
       if (success) {
-        toastNotification({
+        toast({
           title: "Boost Cancelled",
           description: "Your profile boost has been cancelled",
         });
@@ -128,7 +128,7 @@ const BoostManagerContainer = ({
       <BoostAnalytics 
         isActive={boostStatus.isActive} 
         getAnalytics={getAnalyticsWrapper}
-        creatorId={creatorId} // Pass creatorId to BoostAnalytics
+        creatorId={creatorId}
       />
     </div>
   );
