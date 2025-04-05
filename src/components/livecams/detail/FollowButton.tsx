@@ -18,11 +18,13 @@ const FollowButton: React.FC<FollowButtonProps> = ({
 }) => {
   const [animateHeart, setAnimateHeart] = useState(false);
   const [animateScale, setAnimateScale] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const handleClick = () => {
     if (!isFollowing) {
       setAnimateHeart(true);
       setAnimateScale(true);
+      setShowConfetti(true);
     }
     onToggleFollow();
   };
@@ -42,6 +44,14 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       return () => clearTimeout(timer);
     }
   }, [animateScale]);
+
+  useEffect(() => {
+    // Remove confetti after animation completes
+    if (showConfetti) {
+      const timer = setTimeout(() => setShowConfetti(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [showConfetti]);
 
   return (
     <Button 
@@ -77,6 +87,17 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       
       {animateHeart && (
         <div className="absolute inset-0 bg-red-100 animate-fade-in opacity-20"></div>
+      )}
+      
+      {showConfetti && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="confetti-piece bg-red-500 left-[10%] top-[0%]"></div>
+          <div className="confetti-piece bg-pink-400 left-[20%] top-[10%]"></div>
+          <div className="confetti-piece bg-purple-500 left-[30%] top-[5%]"></div>
+          <div className="confetti-piece bg-yellow-400 right-[30%] top-[10%]"></div>
+          <div className="confetti-piece bg-blue-400 right-[20%] top-[0%]"></div>
+          <div className="confetti-piece bg-green-400 right-[10%] top-[5%]"></div>
+        </div>
       )}
     </Button>
   );

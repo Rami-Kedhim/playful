@@ -56,3 +56,51 @@
 .animate-bounce-light {
   animation: bounce 2s ease infinite;
 }
+
+/* Confetti animation */
+@keyframes confettiDrop {
+  0% {
+    transform: translateY(-15px) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(40px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  opacity: 0;
+  animation: confettiDrop 1.5s ease forwards;
+}
+
+.confetti-piece:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.confetti-piece:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.confetti-piece:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.confetti-piece:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+.confetti-piece:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.confetti-piece:nth-child(6) {
+  animation-delay: 0.35s;
+}
