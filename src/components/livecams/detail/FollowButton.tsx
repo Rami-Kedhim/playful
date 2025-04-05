@@ -17,10 +17,12 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   onToggleFollow 
 }) => {
   const [animateHeart, setAnimateHeart] = useState(false);
+  const [animateScale, setAnimateScale] = useState(false);
 
   const handleClick = () => {
     if (!isFollowing) {
       setAnimateHeart(true);
+      setAnimateScale(true);
     }
     onToggleFollow();
   };
@@ -33,6 +35,14 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     }
   }, [animateHeart]);
 
+  useEffect(() => {
+    // Reset scale animation after a shorter period
+    if (animateScale) {
+      const timer = setTimeout(() => setAnimateScale(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [animateScale]);
+
   return (
     <Button 
       variant={isFollowing ? "default" : "outline"} 
@@ -40,14 +50,21 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       onClick={handleClick}
       className={cn(
         isFollowing ? "bg-red-500 hover:bg-red-600 transition-colors" : "",
-        "group relative"
+        "group relative overflow-hidden",
+        animateScale ? "scale-110 transition-transform" : "transition-transform"
       )}
     >
       <div className="relative">
         {animateHeart && (
-          <Heart 
-            className="h-4 w-4 absolute animate-ping opacity-75 fill-current" 
-          />
+          <>
+            <Heart 
+              className="h-4 w-4 absolute animate-ping opacity-75 fill-current" 
+            />
+            <Heart 
+              className="h-4 w-4 absolute animate-bounce-light opacity-90 fill-current" 
+              style={{ animationDelay: "0.2s" }}
+            />
+          </>
         )}
         <Heart 
           className={cn(
@@ -57,6 +74,10 @@ const FollowButton: React.FC<FollowButtonProps> = ({
         />
       </div>
       <span className="ml-1">{isFollowing ? "Following" : "Follow"}</span>
+      
+      {animateHeart && (
+        <div className="absolute inset-0 bg-red-100 animate-fade-in opacity-20"></div>
+      )}
     </Button>
   );
 };
