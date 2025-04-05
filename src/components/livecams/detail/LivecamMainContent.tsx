@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { LivecamModel } from "@/types/livecams";
 import { LivecamStats } from "./";
 import { LivecamActions } from "./";
-import { Expand, Pause, Play, SpeakerX, Speaker, Settings } from "lucide-react";
+import { Expand, Pause, Play, Speaker, VolumeX, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -113,7 +113,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
                   className="text-white h-8 w-8"
                   onClick={toggleMute}
                 >
-                  {isMuted ? <SpeakerX className="h-5 w-5" /> : <Speaker className="h-5 w-5" />}
+                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Speaker className="h-5 w-5" />}
                 </Button>
               </div>
               

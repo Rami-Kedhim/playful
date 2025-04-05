@@ -10,7 +10,7 @@ interface LivecamStatsProps {
 const LivecamStats: React.FC<LivecamStatsProps> = ({ model }) => {
   const [streamDuration, setStreamDuration] = useState<number>(0);
   const [streamLikes, setStreamLikes] = useState<number>(Math.floor(Math.random() * 500));
-  const [streamRating, setStreamRating] = useState<number>((3 + Math.random() * 2).toFixed(1));
+  const [streamRating, setStreamRating] = useState<number>(Number((3 + Math.random() * 2).toFixed(1)));
   const [streamViewers, setStreamViewers] = useState<number>(model.viewerCount || 0);
 
   // Simulate stream duration
