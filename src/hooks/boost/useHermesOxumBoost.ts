@@ -2,10 +2,13 @@
 import { useState, useEffect } from 'react';
 
 export interface HermesBoostStatus {
-  queuePosition: number;
+  isActive: boolean;
+  position: number;
   totalUsers: number;
   estimatedWait: string;
-  boostEfficiency: number;
+  boostScore: number;
+  effectivenessScore: number;
+  timeRemaining: number;
   algorithmVersion: string;
 }
 
@@ -26,10 +29,13 @@ export const useHermesOxumBoost = (profileId?: string) => {
         await new Promise(resolve => setTimeout(resolve, 800));
         
         const mockStatus: HermesBoostStatus = {
-          queuePosition: Math.floor(Math.random() * 15) + 1,
+          isActive: Math.random() > 0.3, // 70% chance of being active
+          position: Math.floor(Math.random() * 15) + 1,
           totalUsers: Math.floor(Math.random() * 100) + 50,
           estimatedWait: `${Math.floor(Math.random() * 10) + 1} minutes`,
-          boostEfficiency: Math.floor(Math.random() * 25) + 75, // 75-100%
+          boostScore: Math.floor(Math.random() * 50) + 50, // Score between 50-100
+          effectivenessScore: Math.floor(Math.random() * 25) + 75, // 75-100%
+          timeRemaining: Math.floor(Math.random() * 180) + 30, // 30-210 minutes
           algorithmVersion: "Hermes-Oxum v3.2"
         };
         
