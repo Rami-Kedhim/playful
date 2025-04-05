@@ -25,10 +25,18 @@ import { toast } from "@/components/ui/use-toast"; // Fixed import path
 
 interface BoostProfileDialogProps {
   onSuccess?: () => void;
+  onClose?: () => void;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }
 
-const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
-  const [open, setOpen] = useState(false);
+const BoostProfileDialog = ({ 
+  onSuccess,
+  onClose,
+  open: controlledOpen,
+  setOpen: setControlledOpen
+}: BoostProfileDialogProps) => {
+  const [open, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("packages");
   const [boostAnalytics, setBoostAnalytics] = useState<any>(null);
   const { user } = useAuth();
@@ -51,14 +59,19 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
     dailyBoostLimit
   } = useBoostManager(profileId);
 
+  // Handle controlled/uncontrolled state
+  const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : open;
+  const setIsOpen = isControlled ? setControlledOpen : setInternalOpen;
+
   useEffect(() => {
-    if (open) {
+    if (isOpen) {
       fetchBoostPackages();
       if (boostStatus.isActive) {
         fetchAnalytics();
       }
     }
-  }, [open, boostStatus.isActive]);
+  }, [isOpen, boostStatus.isActive]);
 
   const fetchAnalytics = async (): Promise<boolean> => {
     const analytics = await getBoostAnalytics();
@@ -95,6 +108,11 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
     return success;
   };
 
+  const handleDialogClose = () => {
+    setIsOpen(false);
+    if (onClose) onClose();
+  };
+
   const renderEligibilityMessage = () => {
     if (!eligibility.eligible) {
       return (
@@ -113,13 +131,15 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Zap className="mr-2 h-4 w-4" />
-          Boost Profile
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Zap className="mr-2 h-4 w-4" />
+            Boost Profile
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Boost Your Profile</DialogTitle>
@@ -156,7 +176,7 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
 
         {!boostStatus.isActive && eligibility.eligible && (
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button variant="outline" onClick={handleDialogClose}>
               Cancel
             </Button>
             <Button 
