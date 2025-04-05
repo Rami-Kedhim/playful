@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -49,7 +49,6 @@ const Escorts: React.FC = () => {
             <EscortContainer 
               escorts={escorts}
               services={availableServices}
-              isLoading={loading}
             />
           )}
         </div>

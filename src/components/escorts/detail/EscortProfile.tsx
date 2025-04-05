@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import MediaSection from "./MediaSection";
 import ProfileInfo from "./ProfileInfo";

@@ -1,135 +1,81 @@
 
-import React, { useState } from "react";
-import { 
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Expand, X } from "lucide-react";
+import { useState } from 'react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
-interface EscortImageGalleryProps {
+export interface EscortImageGalleryProps {
   images: string[];
-  name: string;
+  name?: string;
+  isOpen?: boolean;
+  onClose?: () => void;
+  initialIndex?: number;
 }
 
-const EscortImageGallery: React.FC<EscortImageGalleryProps> = ({ images, name }) => {
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
-  
-  // Use a fallback image if no images are provided
-  const allImages = images.length > 0 ? images : ["https://via.placeholder.com/800x600?text=No+Image+Available"];
-  
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    e.currentTarget.src = "https://via.placeholder.com/800x600?text=Image+Not+Available";
-  };
-  
-  const openLightbox = (index: number) => {
-    setCurrentIndex(index);
-    setIsLightboxOpen(true);
-  };
-  
-  return (
-    <>
-      <div className="rounded-xl overflow-hidden border">
-        <Carousel className="w-full">
-          <CarouselContent>
-            {allImages.map((image, index) => (
-              <CarouselItem key={`gallery-${index}`}>
-                <div className="relative group cursor-pointer" onClick={() => openLightbox(index)}>
-                  <AspectRatio ratio={4/3}>
-                    <img
-                      src={image}
-                      alt={`${name} - Photo ${index + 1}`}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                      onError={handleImageError}
-                    />
-                  </AspectRatio>
-                  
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <Button variant="secondary" size="icon" className="bg-white/20 backdrop-blur-sm">
-                      <Expand className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-2" />
-          <CarouselNext className="right-2" />
-        </Carousel>
+const EscortImageGallery = ({ 
+  images, 
+  name = 'Escort',
+  isOpen = false,
+  onClose = () => {},
+  initialIndex = 0
+}: EscortImageGalleryProps) => {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
-        {allImages.length > 1 && (
-          <div className="grid grid-cols-5 gap-2 p-2 bg-muted/20">
-            {allImages.map((image, index) => (
-              <div 
-                key={`thumbnail-${index}`}
-                className={`aspect-video cursor-pointer rounded-md overflow-hidden border-2 ${
-                  currentIndex === index ? 'border-primary' : 'border-transparent'
-                }`}
-                onClick={() => openLightbox(index)}
-              >
-                <img
-                  src={image}
-                  alt={`${name} - Thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  onError={handleImageError}
-                />
-              </div>
-            ))}
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePrevious = () => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-4xl w-full h-[80vh] p-0 gap-0">
+        <div className="relative flex flex-col h-full">
+          <div className="absolute top-2 right-2 z-10">
+            <button 
+              onClick={onClose} 
+              className="bg-black/50 rounded-full p-2 text-white hover:bg-black/70 transition-colors"
+            >
+              <X size={24} />
+            </button>
           </div>
-        )}
-      </div>
-      
-      {/* Lightbox Modal */}
-      <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
-        <DialogContent className="max-w-6xl p-0 bg-black text-white">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 z-10 text-white"
-            onClick={() => setIsLightboxOpen(false)}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-          
-          <div className="relative w-full h-full">
-            <img
-              src={allImages[currentIndex]}
-              alt={`${name} - Full size ${currentIndex + 1}`}
-              className="w-full h-auto max-h-[80vh] object-contain"
-              onError={handleImageError}
+
+          <div className="flex items-center justify-center h-full bg-black">
+            <button 
+              className="absolute left-2 bg-black/50 rounded-full p-2 text-white hover:bg-black/70 transition-colors" 
+              onClick={handlePrevious}
+            >
+              <ChevronLeft size={24} />
+            </button>
+            
+            <img 
+              src={images[currentIndex]} 
+              alt={`${name} gallery image ${currentIndex + 1}`} 
+              className="max-h-full max-w-full object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+              }}
             />
+            
+            <button 
+              className="absolute right-2 bg-black/50 rounded-full p-2 text-white hover:bg-black/70 transition-colors" 
+              onClick={handleNext}
+            >
+              <ChevronRight size={24} />
+            </button>
           </div>
           
-          <div className="flex justify-between items-center p-4 bg-black/90">
-            <Button
-              variant="ghost"
-              onClick={() => setCurrentIndex(prev => (prev > 0 ? prev - 1 : allImages.length - 1))}
-              disabled={allImages.length <= 1}
-            >
-              Previous
-            </Button>
-            <div className="text-sm text-center">
-              {currentIndex + 1} / {allImages.length}
+          <div className="bg-black/90 text-white py-4 px-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-300">Image {currentIndex + 1} of {images.length}</p>
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              onClick={() => setCurrentIndex(prev => (prev < allImages.length - 1 ? prev + 1 : 0))}
-              disabled={allImages.length <= 1}
-            >
-              Next
-            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,5 +1,4 @@
-
-import { Escort } from "@/types/escort";
+import { Escort, VerificationLevel, ServiceType } from "@/types/escort";
 
 // Available services for filtering
 export const availableServices = [
@@ -328,11 +327,9 @@ export const escorts: Escort[] = [
   }
 ];
 
-// Store mock data in localStorage for persistence
-try {
-  localStorage.setItem("mockEscorts", JSON.stringify(escorts));
-} catch (error) {
-  console.error("Error storing mock data in localStorage:", error);
-}
+// Helper function to get escort by ID
+export const getEscortById = (id: string): Escort | undefined => {
+  return escorts.find(escort => escort.id === id);
+};
 
-export default escorts;
+export type { Escort };

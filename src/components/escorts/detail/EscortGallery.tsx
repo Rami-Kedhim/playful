@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ImageType, GalleryImage } from "./gallery/types";
@@ -18,7 +18,7 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
   // For demo purposes, we'll create a more structured array of images with types
   const allImages: GalleryImage[] = [
     {
-      url: escort.imageUrl,
+      url: escort.imageUrl || escort.avatar_url || '',
       type: "portrait",
       alt: `${escort.name} portrait photo`
     },
@@ -185,6 +185,7 @@ const EscortGallery = ({ escort }: EscortGalleryProps) => {
 
       <EscortImageGallery
         images={filteredImages.map(img => img.url)}
+        name={escort.name}
         isOpen={galleryOpen}
         onClose={() => setGalleryOpen(false)}
         initialIndex={currentImageIndex}

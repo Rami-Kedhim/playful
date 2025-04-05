@@ -5,8 +5,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { escorts } from "@/data/escortData";
-import { getEscortById } from "@/data/escortData";
+import { escorts, getEscortById } from "@/data/escortData";
 import VirtualContentGrid from "@/components/creators/VirtualContentGrid";
 import useVirtualCreatorContent from "@/hooks/useVirtualCreatorContent";
 
@@ -99,7 +98,7 @@ const EscortContent = () => {
               <div className="bg-card rounded-lg p-6 border">
                 <h3 className="font-medium text-lg mb-3">About {escort.name}</h3>
                 <p className="text-muted-foreground mb-4">
-                  {escort.description || `Experience the virtual side of ${escort.name}. Enjoy exclusive content available only to subscribers.`}
+                  {escort.description || escort.bio || `Experience the virtual side of ${escort.name}. Enjoy exclusive content available only to subscribers.`}
                 </p>
                 <div className="space-y-2">
                   <div className="flex justify-between">

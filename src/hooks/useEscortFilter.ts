@@ -1,233 +1,34 @@
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useFilterResults } from "@/hooks/escort-filters/useFilterResults";
 import { Escort } from "@/types/escort";
+import { EscortFilterHook } from "@/types/escortFilters";
 
-interface UseEscortFilterProps {
+export interface UseEscortFilterProps {
   escorts: Escort[];
 }
 
-export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
-  // Search filters
-  const [searchQuery, setSearchQuery] = useState("");
-  const [location, setLocation] = useState("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
+export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilterHook => {
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("featured");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
-  // Advanced filters
+  // New filter states
   const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
   const [selectedOrientations, setSelectedOrientations] = useState<string[]>([]);
-  const [ageRange, setAgeRange] = useState<[number, number]>([18, 65]);
+  const [ageRange, setAgeRange] = useState<[number, number]>([21, 50]);
   const [ratingMin, setRatingMin] = useState<number>(0);
   const [availableNow, setAvailableNow] = useState<boolean>(false);
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | null>(null);
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "">("");
   
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(9);
-  
-  // Loading state
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Filter operations
-  const handlePriceRangeChange = (range: [number, number]) => {
-    setPriceRange(range);
-  };
-  
-  const handleAgeRangeChange = (range: [number, number]) => {
-    setAgeRange(range);
-  };
-  
-  const toggleService = (service: string) => {
-    setSelectedServices(prev => 
-      prev.includes(service) 
-        ? prev.filter(s => s !== service) 
-        : [...prev, service]
-    );
-  };
-  
-  const toggleGender = (gender: string) => {
-    setSelectedGenders(prev => 
-      prev.includes(gender) 
-        ? prev.filter(g => g !== gender) 
-        : [...prev, gender]
-    );
-  };
-  
-  const toggleOrientation = (orientation: string) => {
-    setSelectedOrientations(prev => 
-      prev.includes(orientation) 
-        ? prev.filter(o => o !== orientation) 
-        : [...prev, orientation]
-    );
-  };
-  
-  // Reset all filters
-  const clearFilters = () => {
-    setSearchQuery("");
-    setLocation("");
-    setPriceRange([0, 1000]);
-    setVerifiedOnly(false);
-    setSelectedServices([]);
-    setSortBy("featured");
-    setSelectedGenders([]);
-    setSelectedOrientations([]);
-    setAgeRange([18, 65]);
-    setRatingMin(0);
-    setAvailableNow(false);
-    setServiceTypeFilter(null);
-  };
-  
-  // Filter escorts based on all criteria
-  const filteredEscorts = useMemo(() => {
-    return escorts.filter(escort => {
-      // Basic search filters
-      if (searchQuery && 
-          !escort.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-          !escort.location?.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-      
-      if (location && 
-          !escort.location?.toLowerCase().includes(location.toLowerCase())) {
-        return false;
-      }
-      
-      if (escort.price < priceRange[0] || escort.price > priceRange[1]) {
-        return false;
-      }
-      
-      if (verifiedOnly && !escort.verified) {
-        return false;
-      }
-      
-      if (selectedServices.length > 0 && 
-          !selectedServices.every(service => escort.tags?.includes(service))) {
-        return false;
-      }
-      
-      // Advanced filters
-      if (selectedGenders.length > 0 && 
-          !selectedGenders.includes(escort.gender || '')) {
-        return false;
-      }
-      
-      if (selectedOrientations.length > 0 && 
-          !selectedOrientations.includes(escort.sexualOrientation || '')) {
-        return false;
-      }
-      
-      if (escort.age < ageRange[0] || escort.age > ageRange[1]) {
-        return false;
-      }
-      
-      if (ratingMin > 0 && (escort.rating || 0) < ratingMin) {
-        return false;
-      }
-      
-      if (availableNow && !escort.availableNow) {
-        return false;
-      }
-      
-      if (serviceTypeFilter) {
-        const escortServiceType = escort.serviceType || 'both';
-        if (serviceTypeFilter !== 'both' && serviceTypeFilter !== escortServiceType) {
-          return false;
-        }
-      }
-      
-      return true;
-    });
-  }, [
-    escorts, 
-    searchQuery, 
-    location, 
-    priceRange, 
-    verifiedOnly, 
-    selectedServices,
-    selectedGenders,
-    selectedOrientations,
-    ageRange,
-    ratingMin,
-    availableNow,
-    serviceTypeFilter
-  ]);
-  
-  // Sort filtered results
-  const sortedEscorts = useMemo(() => {
-    return [...filteredEscorts].sort((a, b) => {
-      switch (sortBy) {
-        case "featured":
-          return ((b.featured ? 1 : 0) - (a.featured ? 1 : 0)) || 
-                 ((b.verified ? 1 : 0) - (a.verified ? 1 : 0));
-        case "priceAsc":
-          return (a.price || 0) - (b.price || 0);
-        case "priceDesc":
-          return (b.price || 0) - (a.price || 0);
-        case "rating":
-          return (b.rating || 0) - (a.rating || 0);
-        case "newest":
-          const aDate = a.lastActive ? new Date(a.lastActive) : new Date(0);
-          const bDate = b.lastActive ? new Date(b.lastActive) : new Date(0);
-          return bDate.getTime() - aDate.getTime();
-        default:
-          return 0;
-      }
-    });
-  }, [filteredEscorts, sortBy]);
-  
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedEscorts.length / itemsPerPage);
-  
-  const paginatedEscorts = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedEscorts.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedEscorts, currentPage, itemsPerPage]);
-  
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [
-    searchQuery, 
-    location, 
-    priceRange, 
-    verifiedOnly, 
-    selectedServices, 
-    sortBy,
-    selectedGenders,
-    selectedOrientations,
-    ageRange,
-    ratingMin,
-    availableNow,
-    serviceTypeFilter
-  ]);
-  
-  // Simulate loading state when filters change
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [
-    searchQuery, 
-    location, 
-    priceRange, 
-    verifiedOnly, 
-    selectedServices, 
-    sortBy,
-    currentPage,
-    selectedGenders,
-    selectedOrientations,
-    ageRange,
-    ratingMin,
-    availableNow,
-    serviceTypeFilter
-  ]);
-  
-  return {
-    // Filter states
+  // Combined filter state for useFilterResults hook
+  const filters = {
     searchQuery,
     location,
     priceRange,
@@ -240,38 +41,125 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
     ratingMin,
     availableNow,
     serviceTypeFilter,
+    currentPage
+  };
+  
+  // Get filtered, sorted, and paginated escorts
+  const { 
+    filteredEscorts, 
+    sortedEscorts,
+    paginatedEscorts, 
+    totalPages,
+    isFiltering 
+  } = useFilterResults(escorts, filters, currentPage, setCurrentPage);
+  
+  // Sync loading state
+  useEffect(() => {
+    setIsLoading(isFiltering);
+  }, [isFiltering]);
+  
+  // Handle price range change from slider component
+  const handlePriceRangeChange = (values: number[]) => {
+    setPriceRange([values[0], values[1]]);
+  };
+  
+  // Handle age range change from slider component
+  const handleAgeRangeChange = (values: number[]) => {
+    setAgeRange([values[0], values[1]]);
+  };
+  
+  // Toggle service selection
+  const toggleService = (service: string) => {
+    setSelectedServices(prev => 
+      prev.includes(service)
+        ? prev.filter(item => item !== service)
+        : [...prev, service]
+    );
+  };
+  
+  // Toggle gender selection
+  const toggleGender = (gender: string) => {
+    setSelectedGenders(prev => 
+      prev.includes(gender)
+        ? prev.filter(item => item !== gender)
+        : [...prev, gender]
+    );
+  };
+  
+  // Toggle orientation selection
+  const toggleOrientation = (orientation: string) => {
+    setSelectedOrientations(prev => 
+      prev.includes(orientation)
+        ? prev.filter(item => item !== orientation)
+        : [...prev, orientation]
+    );
+  };
+
+  // Set service type filter with proper type
+  const setServiceTypeFilterSafe = (type: "" | "in-person" | "virtual" | "both") => {
+    setServiceTypeFilter(type);
+  };
+  
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("");
+    setLocation("");
+    setPriceRange([0, 500]);
+    setVerifiedOnly(false);
+    setSelectedServices([]);
+    setSortBy("featured");
+    setCurrentPage(1);
+    setSelectedGenders([]);
+    setSelectedOrientations([]);
+    setAgeRange([21, 50]);
+    setRatingMin(0);
+    setAvailableNow(false);
+    setServiceTypeFilter("");
+  };
+  
+  return {
+    // Filter state
+    searchQuery,
+    location,
+    priceRange,
+    verifiedOnly,
+    selectedServices,
+    sortBy,
+    currentPage,
+    selectedGenders,
+    selectedOrientations,
+    ageRange,
+    ratingMin,
+    availableNow,
+    serviceTypeFilter,
+    isLoading,
     
-    // Filter setters
+    // Filter actions
     setSearchQuery,
     setLocation,
+    setPriceRange,
     handlePriceRangeChange,
     setVerifiedOnly,
+    setSelectedServices,
     toggleService,
     setSortBy,
+    setCurrentPage,
+    setSelectedGenders,
     toggleGender,
+    setSelectedOrientations,
     toggleOrientation,
+    setAgeRange,
     handleAgeRangeChange,
     setRatingMin,
     setAvailableNow,
-    setServiceTypeFilter,
+    setServiceTypeFilter: setServiceTypeFilterSafe,
+    setIsLoading,
+    clearFilters,
     
-    // Results
+    // Filter results
     filteredEscorts,
     sortedEscorts,
     paginatedEscorts,
-    
-    // Pagination
-    currentPage,
-    setCurrentPage,
-    totalPages,
-    
-    // Loading
-    isLoading,
-    setIsLoading,
-    
-    // Actions
-    clearFilters
+    totalPages
   };
 };
-
-export default useEscortFilter;

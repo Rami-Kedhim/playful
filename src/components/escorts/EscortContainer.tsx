@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Filter } from "lucide-react";
@@ -13,9 +14,10 @@ import { Escort } from "@/types/escort";
 interface EscortContainerProps {
   escorts: Escort[];
   services: string[];
+  isLoading?: boolean;
 }
 
-const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
+const EscortContainer = ({ escorts, services, isLoading: externalLoading = false }: EscortContainerProps) => {
   const [showFilters, setShowFilters] = useState(false);
   const location = useLocation();
   
@@ -53,16 +55,19 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
     setAvailableNow,
     serviceTypeFilter,
     setServiceTypeFilter
-  } = useEscortFilter(escorts);
+  } = useEscortFilter({ escorts });
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const typeParam = params.get('type');
     
     if (typeParam && ['in-person', 'virtual', 'both'].includes(typeParam)) {
-      setServiceTypeFilter(typeParam as "in-person" | "virtual" | "both");
+      setServiceTypeFilter(typeParam as "in-person" | "virtual" | "both" | "");
     }
   }, [location.search, setServiceTypeFilter]);
+
+  // Consider both internal and external loading states
+  const combinedIsLoading = isLoading || externalLoading;
 
   return (
     <>
@@ -180,7 +185,7 @@ const EscortContainer = ({ escorts, services }: EscortContainerProps) => {
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             totalPages={totalPages}
-            isLoading={isLoading}
+            isLoading={combinedIsLoading}
           />
         </div>
       </div>
