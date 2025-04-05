@@ -9,7 +9,8 @@ import {
   LivecamChat, 
   LivecamLoadingState,
   LivecamErrorState,
-  ShareButton
+  ShareButton,
+  FollowButton
 } from "@/components/livecams/detail";
 import { Separator } from "@/components/ui/separator";
 import { useLivecamDetail } from "@/hooks/useLivecamDetail";
@@ -23,12 +24,14 @@ const LivecamDetail: React.FC = () => {
     loading,
     error,
     isBoosted,
+    isFollowing,
     boostStatus,
     isChatActive,
     handleBoost,
     handleCancelBoost,
     handleTipSent,
-    handleStartChat
+    handleStartChat,
+    handleToggleFollow
   } = useLivecamDetail(id);
 
   const handleGoBack = () => {
@@ -50,7 +53,14 @@ const LivecamDetail: React.FC = () => {
                 <p className="text-sm text-green-500">Live now with {livecam.viewerCount} viewers</p>
               )}
             </div>
-            <ShareButton model={livecam} />
+            <div className="flex gap-2">
+              <FollowButton 
+                model={livecam} 
+                isFollowing={isFollowing} 
+                onToggleFollow={handleToggleFollow} 
+              />
+              <ShareButton model={livecam} />
+            </div>
           </div>
           
           <LivecamDetailLayout

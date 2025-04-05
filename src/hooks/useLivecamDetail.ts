@@ -29,6 +29,7 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
   const [livecam, setLivecam] = useState<LivecamModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [isBoosted, setIsBoosted] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [boostStatus, setBoostStatus] = useState<{timeRemaining?: number, intensity?: number} | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isChatActive, setIsChatActive] = useState(false);
@@ -53,6 +54,12 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
               intensity: status.intensity
             });
           }
+          
+          // Check if user is following this livecam (mock implementation)
+          // In a real app, this would check against user data in a database
+          const mockFollowedStreams = localStorage.getItem('followedStreams');
+          const followedStreams = mockFollowedStreams ? JSON.parse(mockFollowedStreams) : [];
+          setIsFollowing(followedStreams.includes(livecamData.id));
         }
       } catch (error) {
         console.error("Error loading livecam details:", error);
@@ -90,6 +97,34 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
     
     return () => clearInterval(interval);
   }, [livecam]);
+
+  // Handle follow/unfollow actions
+  const handleToggleFollow = useCallback(() => {
+    if (!livecam) return;
+    
+    // Mock implementation using localStorage
+    // In a real app, this would be an API call to update user preferences in a database
+    const mockFollowedStreams = localStorage.getItem('followedStreams');
+    const followedStreams = mockFollowedStreams ? JSON.parse(mockFollowedStreams) : [];
+    
+    if (isFollowing) {
+      const updatedStreams = followedStreams.filter((id: string) => id !== livecam.id);
+      localStorage.setItem('followedStreams', JSON.stringify(updatedStreams));
+      setIsFollowing(false);
+      toast({
+        title: "Unfollowed",
+        description: `You are no longer following ${livecam.displayName}`,
+      });
+    } else {
+      followedStreams.push(livecam.id);
+      localStorage.setItem('followedStreams', JSON.stringify(followedStreams));
+      setIsFollowing(true);
+      toast({
+        title: "Following",
+        description: `You are now following ${livecam.displayName}`,
+      });
+    }
+  }, [livecam, isFollowing, toast]);
 
   // Handle boost actions
   const handleBoost = useCallback(() => {
@@ -165,12 +200,14 @@ export const useLivecamDetail = (livecamId: string | undefined) => {
     loading,
     error,
     isBoosted,
+    isFollowing,
     boostStatus,
     isChatActive,
     recentTips,
     handleBoost,
     handleCancelBoost,
     handleTipSent,
-    handleStartChat
+    handleStartChat,
+    handleToggleFollow
   };
 };
