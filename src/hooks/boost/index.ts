@@ -1,19 +1,8 @@
 
-// Main boost hook composition
-export { default as useBoostManager } from './useBoostManager';
-export { default as useHermesOxumBoost } from './useHermesOxumBoost';
-
-// Individual boost hooks
-export * from './useBoostStatus';
-export * from './useBoostAnalytics';
-export * from './useBoostPurchase';
-export * from './useBoostPackages';
-
-// Utility functions
-export { 
-  formatBoostDuration,
-  calculateBoostPrice,
-  isEligibleForBoosting,
-  calculateRemainingTime,
-  getCurrentTimeSlot
-} from '@/utils/boostCalculator';
+export { useBoostAnalytics } from './useBoostAnalytics';
+export { useBoostContext } from '@/contexts/BoostContext';
+export { useBoostManager, formatBoostDuration } from './useBoostManager';
+export { useBoostPackages } from './useBoostPackages';
+export { useBoostPurchase } from './useBoostPurchase';
+export { useHermesOxumBoost } from './useHermesOxumBoost';
+export { useBoostStatus } from './useBoostStatus';

@@ -1,113 +1,119 @@
 
 import { BoostParams } from "@/types/boost";
 
-/**
- * Oxum Ethical Boosting Algorithm - Fixed price model
- */
-export const calculateBoostPrice = ({
-  country,
-  completeness,
-  rating,
-  timeSlot,
-  role,
-}: BoostParams): number => {
-  // Under the Oxum Ethical Boosting model, price is fixed at 15 Lucoins ($1.50)
-  return 15; // Fixed price for all boosts
+export const calculateRemainingTime = (endDate: Date): string => {
+  const now = new Date();
+  const diff = endDate.getTime() - now.getTime();
+  
+  if (diff <= 0) return "Expired";
+  
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  
+  return `${minutes}m`;
 };
 
-/**
- * Determines if a profile is eligible for boosting
- */
+export const formatBoostDuration = (durationStr: string): string => {
+  const [hours, minutes] = durationStr.split(':');
+  if (parseInt(hours) > 0) {
+    return `${parseInt(hours)} hour${parseInt(hours) > 1 ? 's' : ''}`;
+  }
+  return `${parseInt(minutes)} minutes`;
+};
+
 export const isEligibleForBoosting = (
   profileCompleteness: number,
   isVerified: boolean,
-  profileAge: number, // in days
-  lastBoostTime?: Date
+  profileAgeInDays: number,
+  lastBoostDate?: Date
 ): { eligible: boolean; reason?: string } => {
-  // Oxum Ethical Boosting Model: Only verified escorts can boost
+  // Check profile completeness
+  if (profileCompleteness < 60) {
+    return { 
+      eligible: false, 
+      reason: "Your profile must be at least 60% complete to boost" 
+    };
+  }
+  
+  // Check verification status
   if (!isVerified) {
-    return { eligible: false, reason: "Only verified escorts can use the boost feature" };
+    return { 
+      eligible: false, 
+      reason: "Only verified profiles can use boost features" 
+    };
   }
-
-  // Profile must be at least 30% complete
-  if (profileCompleteness < 30) {
-    return { eligible: false, reason: "Profile must be at least 30% complete" };
+  
+  // Check profile age
+  if (profileAgeInDays < 3) {
+    return { 
+      eligible: false, 
+      reason: "Your profile must be at least 3 days old to boost" 
+    };
   }
-
-  // New profiles need some age
-  if (profileAge < 1) {
-    return { eligible: false, reason: "Profile must be at least 1 day old" };
-  }
-
-  // Check if last boost was recent (if applicable)
-  if (lastBoostTime) {
-    const hoursSinceLastBoost = (Date.now() - lastBoostTime.getTime()) / (1000 * 60 * 60);
-    if (hoursSinceLastBoost < 3) { // Oxum model: 3-hour boosting periods
+  
+  // Check if boost cooldown has passed
+  if (lastBoostDate) {
+    const hoursSinceLastBoost = (Date.now() - lastBoostDate.getTime()) / (1000 * 60 * 60);
+    if (hoursSinceLastBoost < 6) {
       return { 
         eligible: false, 
-        reason: `You can boost again in ${Math.ceil(3 - hoursSinceLastBoost)} hours` 
+        reason: `You must wait ${Math.ceil(6 - hoursSinceLastBoost)} more hours before boosting again` 
       };
     }
   }
-
+  
   return { eligible: true };
 };
 
-/**
- * Determines the current time slot based on hour
- */
 export const getCurrentTimeSlot = (): 'off_peak' | 'normal' | 'peak' => {
   const hour = new Date().getHours();
   
-  // Peak hours: 7-9 AM, 5-8 PM (typical browsing times)
-  if ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 20)) {
+  // Peak hours: 8pm-11pm (20-23)
+  if (hour >= 20 && hour < 23) {
     return 'peak';
   }
   
-  // Off-peak hours: late night and early morning
-  if (hour >= 0 && hour <= 5) {
+  // Off-peak hours: 2am-8am (2-8)
+  if (hour >= 2 && hour < 8) {
     return 'off_peak';
   }
   
-  // All other times are normal
+  // Normal hours: all other times
   return 'normal';
 };
 
-/**
- * Calculate remaining time in a readable format
- */
-export const calculateRemainingTime = (endTime: Date): string => {
-  const now = new Date();
-  const diffMs = endTime.getTime() - now.getTime();
+export const calculateBoostPrice = (params: BoostParams): number => {
+  let basePrice = 15; // Standard price in Lucoins
   
-  if (diffMs <= 0) return "Expired";
-  
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-  
-  let timeString = "";
-  if (days > 0) timeString += `${days}d `;
-  if (hours > 0 || days > 0) timeString += `${hours}h `;
-  timeString += `${minutes}m`;
-  
-  return timeString;
-};
-
-/**
- * Format boost duration in a readable format
- */
-export const formatBoostDuration = (durationStr: string): string => {
-  // Parse the PostgreSQL interval format "168:00:00" (hours:minutes:seconds)
-  const parts = durationStr.split(':');
-  const hours = parseInt(parts[0]);
-  
-  const days = Math.floor(hours / 24);
-  const remainingHours = hours % 24;
-  
-  if (days > 0) {
-    return `${days} day${days !== 1 ? 's' : ''}${remainingHours > 0 ? ` ${remainingHours} hours` : ''}`;
+  // Apply country modifier (different markets have different pricing)
+  if (['USA', 'Canada', 'Australia', 'UK'].includes(params.country)) {
+    basePrice *= 1.2; // 20% premium for high-value markets
+  } else if (['Germany', 'France', 'Italy', 'Spain'].includes(params.country)) {
+    basePrice *= 1.1; // 10% premium for medium-value markets
   }
   
-  return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  // Apply profile quality modifier
+  const qualityFactor = (params.completeness / 100) * 0.8 + (params.rating / 5) * 0.2;
+  basePrice = basePrice * (1 - (qualityFactor * 0.2)); // Up to 20% discount for quality profiles
+  
+  // Apply time slot modifier
+  if (params.timeSlot === 'peak') {
+    basePrice *= 1.5; // 50% premium during peak hours
+  } else if (params.timeSlot === 'off_peak') {
+    basePrice *= 0.7; // 30% discount during off-peak hours
+  }
+  
+  // Apply role-based discounts
+  if (params.role === 'verified') {
+    basePrice *= 0.9; // 10% discount for verified users
+  } else if (params.role === 'AI') {
+    basePrice *= 1.2; // 20% premium for AI profiles
+  }
+  
+  // Round to nearest whole number
+  return Math.max(5, Math.round(basePrice));
 };

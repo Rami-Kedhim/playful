@@ -1,50 +1,59 @@
 
-import { useState, useCallback } from "react";
-import { BoostPackage } from "@/types/boost";
+import { useState, useCallback } from 'react';
+import { BoostPackage } from '@/types/boost';
 
-export const useBoostPackages = (
-  selectedPackage: string | null,
-  setSelectedPackage: (packageId: string | null) => void
-) => {
+export const useBoostPackages = () => {
+  const [packages, setPackages] = useState<BoostPackage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [boostPackages, setBoostPackages] = useState<BoostPackage[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch available boost packages
-  const fetchBoostPackages = useCallback(async () => {
+  const fetchPackages = useCallback(async () => {
     try {
       setLoading(true);
-      // In a real implementation, this would be an API call
-      // For now, we'll implement the Oxum Ethical Boosting Model with fixed packages
-      const oxumEthicalBoostPackages: BoostPackage[] = [
+      
+      // In a real app, this would be an API call
+      // For demo, we'll use mock data
+      const mockPackages: BoostPackage[] = [
         {
-          id: "boost-standard",
+          id: "boost-1",
+          name: "1-Hour Boost",
+          duration: "01:00:00",
+          price_lucoin: 5,
+          description: "Quick visibility boost",
+          features: ["Top search position", "Featured badge"]
+        },
+        {
+          id: "boost-3",
           name: "3-Hour Boost",
-          duration: "03:00:00", // 3 hours
-          price_lucoin: 15, // Equivalent to $1.50
-          description: "Boost your profile for 3 hours with priority placement",
-          features: ["Featured profile label", "Priority in search results", "Increased visibility"]
+          duration: "03:00:00",
+          price_lucoin: 15,
+          description: "Standard visibility boost",
+          features: ["Top search position", "Featured badge", "Profile highlighting"]
+        },
+        {
+          id: "boost-24",
+          name: "24-Hour Boost",
+          duration: "24:00:00",
+          price_lucoin: 50,
+          description: "Full day visibility boost",
+          features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
         }
       ];
       
-      setBoostPackages(oxumEthicalBoostPackages);
-      
-      // Auto-select the only package as default
-      if (oxumEthicalBoostPackages.length > 0 && !selectedPackage) {
-        setSelectedPackage(oxumEthicalBoostPackages[0].id);
-      }
-      
-      return oxumEthicalBoostPackages;
-    } catch (err: any) {
+      setPackages(mockPackages);
+      setError(null);
+    } catch (err) {
       console.error("Error fetching boost packages:", err);
-      return [];
+      setError("Failed to fetch boost packages");
     } finally {
       setLoading(false);
     }
-  }, [selectedPackage, setSelectedPackage]);
+  }, []);
 
   return {
-    boostPackages,
+    packages,
     loading,
-    fetchBoostPackages
+    error,
+    fetchPackages
   };
 };

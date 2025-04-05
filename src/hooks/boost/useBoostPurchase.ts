@@ -1,42 +1,49 @@
 
 import { useState } from 'react';
-import { toast } from '@/components/ui/use-toast'; // Using correct UI component path
-import { BoostStatus } from '@/types/boost';
+import { toast } from '@/hooks/use-toast';
+import { BoostPackage } from '@/types/boost';
+import { useLucoins } from '@/hooks/useLucoins';
 
-export const useBoostPurchase = (profileId?: string, boostStatus?: BoostStatus) => {
+export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
-  
-  const purchaseBoost = async (packageId: string): Promise<boolean> => {
-    if (!profileId) {
-      toast({
-        title: "Error",
-        description: "No profile ID provided",
-        variant: "destructive"
-      });
-      return false;
-    }
-    
+  const [error, setError] = useState<string | null>(null);
+  // In a real app, this would be integrated with actual wallet logic
+  const { balance = 1000, deductLucoins = () => {} } = useLucoins?.() || {};
+
+  const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {
       setLoading(true);
+      setError(null);
       
-      console.log(`Purchasing boost package ${packageId} for profile ${profileId}`);
+      // Check if user has enough Lucoins
+      if (balance < boostPackage.price_lucoin) {
+        toast({
+          title: "Insufficient funds",
+          description: `You need ${boostPackage.price_lucoin} Lucoins to purchase this boost`,
+          variant: "destructive"
+        });
+        return false;
+      }
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1200));
       
-      // Mock success response
+      // Deduct Lucoins
+      deductLucoins(boostPackage.price_lucoin);
+      
       toast({
-        title: "Success",
-        description: "Profile boost purchased successfully",
+        title: "Boost purchased",
+        description: `Successfully purchased ${boostPackage.name} for ${boostPackage.price_lucoin} Lucoins`
       });
       
       return true;
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error purchasing boost:", err);
+      setError("Failed to process boost purchase");
       
       toast({
-        title: "Error",
-        description: err.message || "Failed to purchase boost",
+        title: "Purchase failed",
+        description: "There was an error processing your boost purchase",
         variant: "destructive"
       });
       
@@ -45,9 +52,10 @@ export const useBoostPurchase = (profileId?: string, boostStatus?: BoostStatus) 
       setLoading(false);
     }
   };
-  
+
   return {
     purchaseBoost,
-    loading
+    loading,
+    error
   };
 };
