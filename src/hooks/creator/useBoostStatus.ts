@@ -5,7 +5,9 @@ import { calculateRemainingTime, formatBoostDuration } from "@/utils/boostCalcul
 
 export const useBoostStatus = (creatorId: string | undefined) => {
   const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false
+    isActive: false,
+    progress: 0,
+    remainingTime: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +35,7 @@ export const useBoostStatus = (creatorId: string | undefined) => {
             name: "Premium Boost",
             duration: "72:00:00", // 3 days
             price_lucoin: 150,
-            features: ["Top search results", "Featured badge", "Highlighted profile"],
-            description: "Premium visibility boost for 3 days"
+            features: ["Top search results", "Featured badge", "Highlighted profile"]
           };
           
           // Calculate progress (0-100)
@@ -51,7 +52,9 @@ export const useBoostStatus = (creatorId: string | undefined) => {
           });
         } else {
           setBoostStatus({
-            isActive: false
+            isActive: false,
+            progress: 0,
+            remainingTime: ''
           });
         }
         

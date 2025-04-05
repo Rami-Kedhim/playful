@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { BoostStatus, BoostPackage } from "@/types/boost";
@@ -10,7 +11,11 @@ import {
 
 export const useBoostStatus = (profileId?: string) => {
   const [loading, setLoading] = useState(false);
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ isActive: false });
+  const [boostStatus, setBoostStatus] = useState<BoostStatus>({ 
+    isActive: false,
+    progress: 0,
+    remainingTime: ''
+  });
   const [eligibility, setEligibility] = useState<{ eligible: boolean; reason?: string }>({ eligible: false });
   const [profileData, setProfileData] = useState<any>(null);
   const [dailyBoostUsage, setDailyBoostUsage] = useState<number>(0); // Track daily boost usage
@@ -92,7 +97,11 @@ export const useBoostStatus = (profileId?: string) => {
           progress
         });
       } else {
-        setBoostStatus({ isActive: false });
+        setBoostStatus({ 
+          isActive: false,
+          progress: 0,
+          remainingTime: ''
+        });
       }
     } catch (err: any) {
       console.error("Error checking active boost:", err);
@@ -115,7 +124,11 @@ export const useBoostStatus = (profileId?: string) => {
       
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      setBoostStatus({ isActive: false });
+      setBoostStatus({ 
+        isActive: false,
+        progress: 0,
+        remainingTime: ''
+      });
       
       toast({
         title: "Boost Cancelled",
