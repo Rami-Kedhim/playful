@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, Check } from "lucide-react";
 import { LivecamModel } from "@/types/livecams";
 import { cn } from "@/lib/utils";
 
@@ -19,12 +19,14 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   const [animateHeart, setAnimateHeart] = useState(false);
   const [animateScale, setAnimateScale] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [showCheckmark, setShowCheckmark] = useState(false);
 
   const handleClick = () => {
     if (!isFollowing) {
       setAnimateHeart(true);
       setAnimateScale(true);
       setShowConfetti(true);
+      setShowCheckmark(true);
     }
     onToggleFollow();
   };
@@ -53,6 +55,14 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     }
   }, [showConfetti]);
 
+  useEffect(() => {
+    // Remove checkmark after animation completes
+    if (showCheckmark) {
+      const timer = setTimeout(() => setShowCheckmark(false), 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [showCheckmark]);
+
   return (
     <Button 
       variant={isFollowing ? "default" : "outline"} 
@@ -75,6 +85,11 @@ const FollowButton: React.FC<FollowButtonProps> = ({
               style={{ animationDelay: "0.2s" }}
             />
           </>
+        )}
+        {showCheckmark && !isFollowing && (
+          <Check 
+            className="h-4 w-4 absolute animate-checkmark text-green-500" 
+          />
         )}
         <Heart 
           className={cn(
