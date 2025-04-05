@@ -8,11 +8,12 @@ export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // In a real app, this would be integrated with actual wallet logic
-  // Fixed to provide default values with optional chaining
-  const lucoins = useLucoins?.() || {};
-  const balance = lucoins?.balance ?? 1000;
-  const deductLucoins = lucoins?.deductLucoins ?? (() => {});
+  // Get lucoins data with proper fallbacks
+  const lucoinsData = useLucoins?.() || {};
+  const balance = lucoinsData.balance || 0;
+  const deductLucoins = lucoinsData.deductLucoins || (() => {
+    console.warn("deductLucoins function not available");
+  });
 
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {

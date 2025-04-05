@@ -37,7 +37,7 @@ const HermesBoostInfo = ({ hermesData }: HermesBoostInfoProps) => {
         <div className="flex items-center text-xs text-muted-foreground">
           <Users className="h-3.5 w-3.5 mr-1.5" />
           <span>Queue position: </span>
-          <span className="ml-auto font-medium text-foreground">{hermesData.queuePosition}/{hermesData.totalUsers}</span>
+          <span className="ml-auto font-medium text-foreground">{hermesData.position}/{hermesData.totalUsers}</span>
         </div>
         <div className="flex items-center text-xs text-muted-foreground">
           <Clock className="h-3.5 w-3.5 mr-1.5" />
@@ -49,9 +49,9 @@ const HermesBoostInfo = ({ hermesData }: HermesBoostInfoProps) => {
       <div className="space-y-2">
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground">Boost efficiency</span>
-          <span className="font-medium">{hermesData.boostEfficiency}%</span>
+          <span className="font-medium">{hermesData.effectivenessScore}%</span>
         </div>
-        <Progress value={hermesData.boostEfficiency} className="h-1.5" />
+        <Progress value={hermesData.effectivenessScore} className="h-1.5" />
       </div>
       
       <div className="mt-3 text-center text-xs text-muted-foreground">
