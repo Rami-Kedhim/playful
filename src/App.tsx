@@ -1,6 +1,5 @@
 
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import Routes from "./Routes";
 import { Toaster } from "./components/ui/toaster";
@@ -12,10 +11,8 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="oxum-theme">
       <NotificationsProvider>
         <FavoritesProvider>
-          <BrowserRouter>
-            <Routes />
-            <Toaster />
-          </BrowserRouter>
+          <Routes />
+          <Toaster />
         </FavoritesProvider>
       </NotificationsProvider>
     </ThemeProvider>

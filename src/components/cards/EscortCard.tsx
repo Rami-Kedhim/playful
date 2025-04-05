@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, MapPin, Star, CheckCircle, Clock } from "lucide-react";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { useNotifications } from "@/contexts/NotificationsContext";
@@ -47,7 +46,7 @@ const EscortCard: React.FC<EscortCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
-  const { showSuccess, showInfo } = useNotifications();
+  const { showInfo } = useNotifications();
   
   const handleCardClick = () => {
     navigate(`/escorts/${id}`);
@@ -60,7 +59,7 @@ const EscortCard: React.FC<EscortCardProps> = ({
     toggleFavorite(id);
     
     if (!wasAlreadyFavorite) {
-      showInfo("Profile details", "You can see all your favorites in the Favorites tab.");
+      showInfo && showInfo("Profile details", "You can see all your favorites in the Favorites tab.");
     }
   };
   
