@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
 import { AlertCircle } from "lucide-react";
 import { 
   useBoostManager, 
@@ -10,6 +9,8 @@ import {
 import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 import BoostStatus from "./BoostStatus";
 import BoostAnalytics from "./BoostAnalytics";
+// Direct import from hooks to avoid circular dependencies
+import { toast } from "@/hooks/use-toast";
 
 interface BoostManagerContainerProps {
   creatorId: string;
@@ -32,7 +33,6 @@ const BoostManagerContainer = ({
   role,
   lucoinBalance
 }: BoostManagerContainerProps) => {
-  const { toast } = useToast();
   
   const {
     boostStatus,

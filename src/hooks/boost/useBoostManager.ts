@@ -5,6 +5,7 @@ import { useBoostPackages } from "./useBoostPackages";
 import { useBoostPurchase } from "./useBoostPurchase";
 import { useBoostAnalytics } from "./useBoostAnalytics";
 import { BoostPackage } from "@/types/boost";
+import { toast } from "@/hooks/use-toast";
 
 /**
  * Main hook that composes all boost-related functionality
@@ -61,6 +62,12 @@ const useBoostManager = (profileId?: string) => {
     } catch (err: any) {
       console.error("Error initializing boost data:", err);
       setError(err.message || "Failed to initialize boost data");
+      
+      toast({
+        title: "Failed to initialize boost data",
+        description: err.message || "An error occurred while loading boost data",
+        variant: "destructive"
+      });
     }
   }, [profileId, fetchProfileData, checkActiveBoost, fetchBoostPackages]);
   
@@ -72,6 +79,13 @@ const useBoostManager = (profileId?: string) => {
     } catch (err: any) {
       console.error("Error fetching boost analytics:", err);
       setError(err.message || "Failed to fetch boost analytics");
+      
+      toast({
+        title: "Failed to fetch analytics",
+        description: err.message || "An error occurred while loading analytics data",
+        variant: "destructive"
+      });
+      
       return null;
     }
   }, [fetchAnalytics]);
