@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Check } from "lucide-react";
 import { LivecamModel } from "@/types/livecams";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 
 interface FollowButtonProps {
   model: LivecamModel;
@@ -24,11 +25,26 @@ const FollowButton: React.FC<FollowButtonProps> = ({
 
   const handleClick = () => {
     if (!isFollowing) {
+      // Animations for following
       setAnimateHeart(true);
       setAnimateScale(true);
       setShowConfetti(true);
       setShowCheckmark(true);
       setPulseGlow(true);
+      
+      // Show toast notification for follow
+      toast({
+        title: "Following",
+        description: `You are now following ${model.displayName}`,
+        variant: "default",
+      });
+    } else {
+      // Show toast notification for unfollow
+      toast({
+        title: "Unfollowed",
+        description: `You have unfollowed ${model.displayName}`,
+        variant: "destructive",
+      });
     }
     onToggleFollow();
   };
