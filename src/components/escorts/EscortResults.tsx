@@ -103,7 +103,8 @@ const EscortResults = ({
             gender={escort.gender}
             sexualOrientation={escort.sexualOrientation}
             availableNow={escort.availableNow}
-            lastActive={escort.lastActive}
+            // Fix: Convert string lastActive to a Date object if it exists
+            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
             responseRate={escort.responseRate}
           />
         ))}

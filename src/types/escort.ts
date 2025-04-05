@@ -1,4 +1,3 @@
-
 export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 export type ServiceType = 'in-person' | 'virtual' | 'both';
@@ -123,6 +122,6 @@ export interface EscortCardProps {
   gender?: string;
   sexualOrientation?: string;
   availableNow?: boolean;
-  lastActive?: string;
+  lastActive?: Date;
   responseRate?: number;
 }
