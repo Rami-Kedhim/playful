@@ -1,4 +1,5 @@
 
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -124,3 +125,4 @@
 .confetti-piece:nth-child(6) {
   animation-delay: 0.35s;
 }
+

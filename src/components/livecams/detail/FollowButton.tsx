@@ -20,6 +20,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   const [animateScale, setAnimateScale] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showCheckmark, setShowCheckmark] = useState(false);
+  const [pulseGlow, setPulseGlow] = useState(false);
 
   const handleClick = () => {
     if (!isFollowing) {
@@ -27,6 +28,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       setAnimateScale(true);
       setShowConfetti(true);
       setShowCheckmark(true);
+      setPulseGlow(true);
     }
     onToggleFollow();
   };
@@ -63,6 +65,14 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     }
   }, [showCheckmark]);
 
+  useEffect(() => {
+    // Reset pulse glow effect after animation completes
+    if (pulseGlow) {
+      const timer = setTimeout(() => setPulseGlow(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [pulseGlow]);
+
   return (
     <Button 
       variant={isFollowing ? "default" : "outline"} 
@@ -71,7 +81,8 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       className={cn(
         isFollowing ? "bg-red-500 hover:bg-red-600 transition-colors" : "",
         "group relative overflow-hidden",
-        animateScale ? "scale-110 transition-transform" : "transition-transform"
+        animateScale ? "scale-110 transition-transform" : "transition-transform",
+        pulseGlow && !isFollowing ? "animate-pulse-glow" : ""
       )}
     >
       <div className="relative">
