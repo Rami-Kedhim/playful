@@ -40,26 +40,22 @@ const FollowButton: React.FC<FollowButtonProps> = ({
       onClick={handleClick}
       className={cn(
         isFollowing ? "bg-red-500 hover:bg-red-600 transition-colors" : "",
-        "group"
+        "group relative"
       )}
     >
-      <Heart 
-        className={cn(
-          "h-4 w-4 mr-1",
-          isFollowing ? "fill-current" : "",
-          animateHeart ? "animate-ping absolute opacity-75" : ""
-        )} 
-      />
-      {animateHeart && (
+      <div className="relative">
+        {animateHeart && (
+          <Heart 
+            className="h-4 w-4 absolute animate-ping opacity-75 fill-current" 
+          />
+        )}
         <Heart 
-          className="h-4 w-4 mr-1 fill-current"
+          className={cn(
+            "h-4 w-4 relative",
+            isFollowing ? "fill-current" : ""
+          )} 
         />
-      )}
-      {!animateHeart && (
-        <Heart 
-          className={`h-4 w-4 mr-1 ${isFollowing ? "fill-current" : ""}`}
-        />
-      )}
+      </div>
       <span className="ml-1">{isFollowing ? "Following" : "Follow"}</span>
     </Button>
   );
