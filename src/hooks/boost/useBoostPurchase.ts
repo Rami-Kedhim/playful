@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { BoostStatus } from "@/types/boost";
 import { calculateRemainingTime } from "@/utils/boostCalculator";
