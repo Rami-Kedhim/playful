@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
-import useHermesOxumBoost from "@/hooks/boost/useHermesOxumBoost";
+import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
 import hermesOxumEngine from "@/services/boost/HermesOxumEngine";
 import { Zap, TrendingUp, Users } from "lucide-react";
 
@@ -21,7 +21,8 @@ interface HermesOxumQueueVisualizationProps {
 }
 
 const HermesOxumQueueVisualization: React.FC<HermesOxumQueueVisualizationProps> = ({ profileId }) => {
-  const { hermesBoostStatus } = useHermesOxumBoost(profileId);
+  // Fixed import to use named export
+  const { hermesStatus: hermesBoostStatus } = useHermesOxumBoost(profileId);
   const [queueData, setQueueData] = useState<any[]>([]);
   
   // Generate mock queue data
