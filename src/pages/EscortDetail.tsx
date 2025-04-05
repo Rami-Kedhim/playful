@@ -1,88 +1,139 @@
 
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { escorts } from "@/data/escortData";
-import { getEscortById } from "@/data/escortData";
+import { Helmet } from "react-helmet-async";
 import MainLayout from "@/components/layout/MainLayout";
-import EscortProfile from "@/components/escorts/detail/EscortProfile";
+import { useEscortDetail } from "@/hooks/useEscortDetail";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import ProfileInfo from "@/components/escorts/detail/ProfileInfo";
+import ProfileTabs from "@/components/escorts/detail/ProfileTabs";
+import EscortImageGallery from "@/components/escorts/detail/EscortImageGallery";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Shield, AlertTriangle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import VerificationBadge from "@/components/verification/VerificationBadge";
+import { ArrowLeft, Share2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const EscortDetail = () => {
+const EscortDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { escort, loading, error } = useEscortDetail(id);
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { showSuccess } = useNotifications();
   
-  const escort = id ? getEscortById(id) : undefined;
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   
-  if (!escort) {
+  const handleFavoriteToggle = () => {
+    if (escort) {
+      toggleFavorite(escort.id);
+    }
+  };
+  
+  const handleShare = () => {
+    // In a real app, this would open a share dialog
+    setShareOpen(true);
+    navigator.clipboard.writeText(window.location.href);
+    if (showSuccess) showSuccess("Link Copied", "Profile link copied to clipboard");
+  };
+  
+  if (loading) {
     return (
-      <MainLayout containerClass="text-center">
-        <h1 className="text-2xl font-bold mb-4">Escort Not Found</h1>
-        <p className="mb-6">The escort you're looking for doesn't exist or has been removed.</p>
-        <Button onClick={() => navigate('/escorts')}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Escorts
-        </Button>
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Button variant="ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2">
+              <Skeleton className="h-[500px] w-full rounded-xl" />
+            </div>
+            
+            <div className="md:col-span-1">
+              <Skeleton className="h-[200px] w-full mb-4 rounded-xl" />
+              <Skeleton className="h-[300px] w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
       </MainLayout>
     );
   }
   
-  const handleBookNow = () => {
-    toast({
-      title: "Booking Request Sent",
-      description: `Your booking request for ${escort.name} has been sent.`,
-    });
-  };
-  
-  const pageTitle = `${escort.name}, ${escort.age} | Escort in ${escort.location}`;
-  const pageDescription = `Book ${escort.name}, a ${escort.age} year old escort in ${escort.location}. View photos, services, and rates.`;
-  
-  // Convert verificationLevel to the expected type
-  const verificationLevel = (escort.verificationLevel || "none") as "none" | "basic" | "enhanced" | "premium";
+  if (error || !escort) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Button variant="ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </div>
+          
+          <div className="bg-red-500/10 border border-red-500 rounded-lg p-8 text-center">
+            <h2 className="text-2xl font-bold text-red-500 mb-2">Profile Not Found</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {error || "The escort profile you're looking for doesn't exist or has been removed."}
+            </p>
+            <Button onClick={() => navigate('/escorts')}>
+              Browse Other Profiles
+            </Button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
   
   return (
-    <MainLayout showHeader={false}>
-      <div>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        
-        <div className="flex justify-between items-center mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/escorts')}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Escorts
-          </Button>
+    <>
+      <Helmet>
+        <title>{`${escort.name} - Escort Profile | Premium Directory`}</title>
+        <meta name="description" content={`${escort.name} - ${escort.age} years old escort from ${escort.location}. View photos, services, and booking information.`} />
+      </Helmet>
+      
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to search
+            </Button>
+            
+            <Button variant="outline" onClick={handleShare}>
+              <Share2 className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <EscortImageGallery 
+                images={escort.gallery_images || [escort.imageUrl || escort.avatar_url || '']} 
+                name={escort.name}
+              />
+              
+              <div className="mt-8">
+                <ProfileTabs escort={escort} />
+              </div>
+            </div>
+            
+            <div className="lg:col-span-1">
+              <ProfileInfo 
+                escort={escort}
+                onFavoriteToggle={handleFavoriteToggle}
+                onBookingOpen={() => setBookingOpen(true)}
+                onMessageOpen={() => setMessageOpen(true)}
+                onShareOpen={() => setShareOpen(true)}
+              />
+            </div>
+          </div>
         </div>
-        
-        {escort.verified ? (
-          <Alert className="mb-6 bg-primary/10 border-primary/20">
-            <Shield className="h-4 w-4 text-primary" />
-            <AlertTitle>Verified Escort</AlertTitle>
-            <AlertDescription>
-              This escort has been verified by our team. Their identity and photos are real.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <Alert className="mb-6 bg-amber-500/10 border-amber-500/20">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <AlertTitle>Verification Pending</AlertTitle>
-            <AlertDescription>
-              This escort has not been verified yet. Please exercise caution.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <EscortProfile 
-          escort={escort} 
-          onBookNow={handleBookNow} 
-        />
-      </div>
-    </MainLayout>
+      </MainLayout>
+    </>
   );
 };
 

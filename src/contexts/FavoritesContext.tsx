@@ -1,99 +1,73 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNotifications } from "./NotificationsContext";
 
-interface FavoritesContextType {
+type FavoritesContextType = {
   favorites: string[];
-  addFavorite: (escortId: string) => void;
-  removeFavorite: (escortId: string) => void;
-  toggleFavorite: (escortId: string) => void;
-  isFavorite: (escortId: string) => boolean;
+  isFavorite: (id: string) => boolean;
+  toggleFavorite: (id: string) => void;
   clearFavorites: () => void;
-  count: number;
-}
-
-const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
-
-export const useFavorites = () => {
-  const context = useContext(FavoritesContext);
-  if (context === undefined) {
-    throw new Error("useFavorites must be used within a FavoritesProvider");
-  }
-  return context;
 };
 
-interface FavoritesProviderProps {
-  children: ReactNode;
-}
+const FavoritesContext = createContext<FavoritesContextType>({
+  favorites: [],
+  isFavorite: () => false,
+  toggleFavorite: () => {},
+  clearFavorites: () => {},
+});
 
-export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
+export const useFavorites = () => useContext(FavoritesContext);
+
+export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<string[]>([]);
-  const { showSuccess, showWarning } = useNotifications();
-
-  // Load favorites from localStorage on initial render
+  const { showSuccess, showError } = useNotifications();
+  
+  // Load favorites from localStorage on mount
   useEffect(() => {
-    const storedFavorites = localStorage.getItem("favorites");
-    if (storedFavorites) {
-      try {
-        const parsedFavorites = JSON.parse(storedFavorites);
-        if (Array.isArray(parsedFavorites)) {
-          setFavorites(parsedFavorites);
-        }
-      } catch (error) {
-        console.error("Error parsing favorites from localStorage:", error);
+    try {
+      const storedFavorites = localStorage.getItem("oxum_favorites");
+      if (storedFavorites) {
+        setFavorites(JSON.parse(storedFavorites));
       }
+    } catch (error) {
+      console.error("Error loading favorites from localStorage:", error);
     }
   }, []);
 
-  // Save favorites to localStorage whenever they change
+  // Save favorites to localStorage on change
   useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-  }, [favorites]);
-
-  const addFavorite = (id: string) => {
-    setFavorites((prev) => {
-      if (prev.includes(id)) return prev;
-      return [...prev, id];
-    });
-    
-    showSuccess("Added to favorites", "This profile has been added to your favorites.");
-  };
-
-  const removeFavorite = (id: string) => {
-    setFavorites((prev) => prev.filter((item) => item !== id));
-    
-    showWarning("Removed from favorites", "This profile has been removed from your favorites.");
-  };
-
-  const toggleFavorite = (id: string) => {
-    if (isFavorite(id)) {
-      removeFavorite(id);
-    } else {
-      addFavorite(id);
+    try {
+      localStorage.setItem("oxum_favorites", JSON.stringify(favorites));
+    } catch (error) {
+      console.error("Error saving favorites to localStorage:", error);
     }
-  };
+  }, [favorites]);
 
   const isFavorite = (id: string) => {
     return favorites.includes(id);
   };
-  
+
+  const toggleFavorite = (id: string) => {
+    setFavorites(prev => {
+      if (prev.includes(id)) {
+        if (showSuccess) showSuccess("Removed from Favorites", "Profile removed from your favorites list");
+        return prev.filter(favId => favId !== id);
+      } else {
+        if (showSuccess) showSuccess("Added to Favorites", "Profile added to your favorites list");
+        return [...prev, id];
+      }
+    });
+  };
+
   const clearFavorites = () => {
-    setFavorites([]);
-    showWarning("Favorites cleared", "All favorites have been removed.");
+    if (window.confirm("Are you sure you want to clear all favorites?")) {
+      setFavorites([]);
+      if (showSuccess) showSuccess("Favorites Cleared", "All favorites have been removed");
+    }
   };
 
   return (
-    <FavoritesContext.Provider
-      value={{
-        favorites,
-        addFavorite,
-        removeFavorite,
-        toggleFavorite,
-        isFavorite,
-        clearFavorites,
-        count: favorites.length
-      }}
-    >
+    <FavoritesContext.Provider value={{ favorites, isFavorite, toggleFavorite, clearFavorites }}>
       {children}
     </FavoritesContext.Provider>
   );
