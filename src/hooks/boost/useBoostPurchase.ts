@@ -15,8 +15,8 @@ export const useBoostPurchase = () => {
     ...lucoinsData
   } = useLucoins();
   
-  // Access balance directly from what's returned by useLucoins
-  // Looking at the hook implementation, we can see the balance should be directly available
+  // Looking at the hook implementation in useLucoins.ts, 
+  // we can see the user balance is directly returned from the hook
   const userBalance = lucoinsData?.lucoin_balance ?? 0;
   
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
