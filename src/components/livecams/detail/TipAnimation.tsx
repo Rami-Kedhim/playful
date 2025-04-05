@@ -38,13 +38,43 @@ const TipAnimation: React.FC<TipAnimationProps> = ({
         >
           <div className="bg-black/70 text-white px-6 py-4 rounded-lg text-center">
             <div className="flex justify-center mb-2">
-              <div className="bg-green-500 rounded-full p-3">
+              <motion.div 
+                className="bg-green-500 rounded-full p-3"
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 0.8,
+                  repeat: 1
+                }}
+              >
                 <Gift className="h-6 w-6" />
-              </div>
+              </motion.div>
             </div>
-            <h3 className="text-xl font-bold">{username}</h3>
-            <p className="text-3xl font-bold text-green-400">${amount}</p>
-            <p className="text-sm opacity-80">Thanks for the tip!</p>
+            <motion.h3 
+              className="text-xl font-bold"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 1, times: [0, 0.5, 1] }}
+            >
+              {username}
+            </motion.h3>
+            <motion.p 
+              className="text-3xl font-bold text-green-400"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              ${amount}
+            </motion.p>
+            <motion.p 
+              className="text-sm opacity-80"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.8 }}
+              transition={{ delay: 0.4 }}
+            >
+              Thanks for the tip!
+            </motion.p>
           </div>
         </motion.div>
       )}
