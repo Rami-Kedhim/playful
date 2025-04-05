@@ -6,3 +6,5 @@ export { default as LivecamBoostPanel } from "./LivecamBoostPanel";
 export { default as LivecamStats } from "./LivecamStats";
 export { default as LivecamActions } from "./LivecamActions";
 export { default as LivecamChat } from "./LivecamChat";
+export { default as VideoPlayer } from "./VideoPlayer";
+export { default as LivecamInfo } from "./LivecamInfo";
