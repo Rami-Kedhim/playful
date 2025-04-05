@@ -19,6 +19,8 @@ export const useBoostPurchase = (profileId?: string, boostStatus?: BoostStatus) 
     try {
       setLoading(true);
       
+      console.log(`Purchasing boost package ${packageId} for profile ${profileId}`);
+      
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
