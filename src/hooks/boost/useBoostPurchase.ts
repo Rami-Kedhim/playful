@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast'; // Corrected import path
 import { BoostStatus } from '@/types/boost';
 
 export const useBoostPurchase = (profileId?: string, boostStatus?: BoostStatus) => {
