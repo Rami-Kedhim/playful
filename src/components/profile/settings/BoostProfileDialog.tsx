@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Zap, Loader2 } from "lucide-react";
 import { 
@@ -21,7 +20,7 @@ import {
   BoostInfoTooltip,
   BoostActivePackage
 } from "@/components/boost";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface BoostProfileDialogProps {
   onSuccess?: () => void;
@@ -46,7 +45,9 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
     purchaseBoost,
     cancelBoost,
     loading,
-    getBoostAnalytics
+    getBoostAnalytics,
+    dailyBoostUsage,
+    dailyBoostLimit
   } = useBoostManager(profileId);
 
   useEffect(() => {
@@ -132,6 +133,8 @@ const BoostProfileDialog = ({ onSuccess }: BoostProfileDialogProps) => {
               boostStatus={boostStatus}
               boostAnalytics={boostAnalytics}
               onCancel={handleCancel}
+              dailyBoostUsage={dailyBoostUsage || 0}
+              dailyBoostLimit={dailyBoostLimit || 4}
             />
           ) : (
             <>
