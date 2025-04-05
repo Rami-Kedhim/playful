@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { BoostPackage } from '@/types/boost';
 import { useLucoins } from '@/hooks/useLucoins';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
@@ -15,9 +16,10 @@ export const useBoostPurchase = () => {
     ...lucoinsData
   } = useLucoins();
   
-  // Looking at the hook implementation in useLucoins.ts, 
-  // we can see the user balance is directly returned from the hook
-  const userBalance = lucoinsData?.lucoin_balance ?? 0;
+  // Get the user's profile from the Auth context to access their balance
+  const { profile } = useAuth();
+  // Access the lucoin balance from the profile
+  const userBalance = profile?.lucoin_balance ?? 0;
   
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {
