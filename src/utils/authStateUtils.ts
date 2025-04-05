@@ -1,7 +1,5 @@
 
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthState, UserProfile } from "@/types/auth";
 import { toast } from "@/components/ui/use-toast";
 
 /**
@@ -19,7 +17,7 @@ export const fetchUserRoles = async (userId: string) => {
       return [];
     }
     
-    return data.map(roleObj => roleObj.role);
+    return data?.map(roleObj => roleObj.role) || [];
   } catch (error) {
     console.error("Error in fetchUserRoles:", error);
     return [];

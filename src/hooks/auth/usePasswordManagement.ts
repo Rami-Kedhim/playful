@@ -1,11 +1,9 @@
 
+import React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import { handleAuthError } from "@/utils/authStateUtils";
 
-export const usePasswordManagement = (
-  setIsLoading: (value: boolean) => void
-) => {
+export const usePasswordManagement = (setIsLoading: (value: boolean) => void) => {
   // Reset password function
   const resetPassword = async (email: string) => {
     try {

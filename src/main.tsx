@@ -23,13 +23,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <SubscriptionProvider>
-            <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
+            <SubscriptionProvider>
               <App />
-            </BrowserRouter>
-          </SubscriptionProvider>
-        </AuthProvider>
+            </SubscriptionProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </QueryClientProvider>
     </HelmetProvider>
   </React.StrictMode>,

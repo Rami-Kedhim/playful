@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { AuthContextValue, AuthUser } from "@/types/auth";
 import { useAuthState } from "./useAuthState";
 import { useAuthentication } from "./useAuthentication";
@@ -8,7 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile] = useAuthState();
   const { signUp, signIn, signOut, resetPassword, updatePassword, updateProfile } = useAuthentication(setIsLoading, refreshProfile);
   const [error, setError] = useState<string | null>(null);

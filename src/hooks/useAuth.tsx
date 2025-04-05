@@ -1,4 +1,5 @@
 
 // Re-export from new location for backward compatibility
-export { useAuth, AuthProvider } from "./auth/useAuth";
-export { default } from "./auth/useAuth";
+import { useAuth, AuthProvider } from "./auth/useAuth";
+export { useAuth, AuthProvider };
+export default useAuth;
