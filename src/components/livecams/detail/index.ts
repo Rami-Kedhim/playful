@@ -10,6 +10,7 @@ export { default as VideoPlayer } from "./VideoPlayer";
 export { default as LivecamInfo } from "./LivecamInfo";
 export { default as LivecamLoadingState } from "./LivecamLoadingState";
 export { default as LivecamErrorState } from "./LivecamErrorState";
+export { default as ShareButton } from "./ShareButton";
 
 // Chat components
 export * from "./chat";

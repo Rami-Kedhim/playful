@@ -6,10 +6,11 @@ import {
   LivecamDetailLayout, 
   LivecamMainContent, 
   LivecamSidebar, 
-  LivecamChat 
+  LivecamChat, 
+  LivecamLoadingState,
+  LivecamErrorState,
+  ShareButton
 } from "@/components/livecams/detail";
-import LivecamLoadingState from "@/components/livecams/detail/LivecamLoadingState";
-import LivecamErrorState from "@/components/livecams/detail/LivecamErrorState";
 import { Separator } from "@/components/ui/separator";
 import { useLivecamDetail } from "@/hooks/useLivecamDetail";
 
@@ -42,6 +43,16 @@ const LivecamDetail: React.FC = () => {
       
       {livecam && (
         <>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">{livecam.displayName}'s Stream</h1>
+              {livecam.isLive && (
+                <p className="text-sm text-green-500">Live now with {livecam.viewerCount} viewers</p>
+              )}
+            </div>
+            <ShareButton model={livecam} />
+          </div>
+          
           <LivecamDetailLayout
             mainContent={
               <LivecamMainContent 
