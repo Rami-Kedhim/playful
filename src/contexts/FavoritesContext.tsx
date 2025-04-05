@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Escort } from "@/data/escortData";
+import { toast } from "@/hooks/use-toast";
 
 interface FavoritesContextType {
   favorites: string[];
@@ -8,6 +8,8 @@ interface FavoritesContextType {
   removeFavorite: (escortId: string) => void;
   toggleFavorite: (escortId: string) => void;
   isFavorite: (escortId: string) => boolean;
+  clearFavorites: () => void;
+  count: number;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
@@ -31,7 +33,14 @@ export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
   useEffect(() => {
     const storedFavorites = localStorage.getItem("favorites");
     if (storedFavorites) {
-      setFavorites(JSON.parse(storedFavorites));
+      try {
+        const parsedFavorites = JSON.parse(storedFavorites);
+        if (Array.isArray(parsedFavorites)) {
+          setFavorites(parsedFavorites);
+        }
+      } catch (error) {
+        console.error("Error parsing favorites from localStorage:", error);
+      }
     }
   }, []);
 
@@ -40,24 +49,45 @@ export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   }, [favorites]);
 
-  const addFavorite = (escortId: string) => {
-    setFavorites((prev) => [...prev, escortId]);
+  const addFavorite = (id: string) => {
+    setFavorites((prev) => {
+      if (prev.includes(id)) return prev;
+      return [...prev, id];
+    });
+    
+    toast({
+      title: "Added to favorites",
+      description: "This profile has been added to your favorites."
+    });
   };
 
-  const removeFavorite = (escortId: string) => {
-    setFavorites((prev) => prev.filter((id) => id !== escortId));
+  const removeFavorite = (id: string) => {
+    setFavorites((prev) => prev.filter((item) => item !== id));
+    
+    toast({
+      title: "Removed from favorites",
+      description: "This profile has been removed from your favorites."
+    });
   };
 
-  const toggleFavorite = (escortId: string) => {
-    if (isFavorite(escortId)) {
-      removeFavorite(escortId);
+  const toggleFavorite = (id: string) => {
+    if (isFavorite(id)) {
+      removeFavorite(id);
     } else {
-      addFavorite(escortId);
+      addFavorite(id);
     }
   };
 
-  const isFavorite = (escortId: string) => {
-    return favorites.includes(escortId);
+  const isFavorite = (id: string) => {
+    return favorites.includes(id);
+  };
+  
+  const clearFavorites = () => {
+    setFavorites([]);
+    toast({
+      title: "Favorites cleared",
+      description: "All favorites have been removed."
+    });
   };
 
   return (
@@ -68,6 +98,8 @@ export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
         removeFavorite,
         toggleFavorite,
         isFavorite,
+        clearFavorites,
+        count: favorites.length
       }}
     >
       {children}

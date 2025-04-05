@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
+import Favorites from "./pages/Favorites";
 
 const Routes = () => {
   return (
@@ -37,6 +38,7 @@ const Routes = () => {
         <Route path="login" element={<Auth />} />
         <Route path="register" element={<Auth />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="favorites" element={<Favorites />} />
         <Route path="reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Route>

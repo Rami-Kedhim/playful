@@ -1,49 +1,57 @@
 
-import { Link } from "react-router-dom";
+import React from "react";
+import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { Search } from "lucide-react";
-import ServiceTypeMenu from "@/components/navigation/ServiceTypeMenu";
+import { Search, Heart, MessageSquare, Bell } from "lucide-react";
+import UserDropdown from "@/components/navigation/UserDropdown";
+import { useAuth } from "@/contexts/AuthContext";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
-const DesktopNav = () => {
+const DesktopNav: React.FC = () => {
   const { user } = useAuth();
-
+  const { count: favoriteCount } = useFavorites();
+  
   return (
-    <div className="hidden md:flex w-full items-center justify-between">
-      <div className="flex items-center gap-8">
-        <Link to="/" className="text-xl font-bold">
-          Luscious
-        </Link>
-        
-        <div className="flex items-center gap-2">
-          <Link to="/">
-            <Button variant="ghost">Home</Button>
-          </Link>
-          
-          <ServiceTypeMenu />
-          
-          <Link to="/escort-application">
-            <Button variant="ghost">Become an Escort</Button>
-          </Link>
-        </div>
-      </div>
+    <div className="hidden md:flex items-center gap-1">
+      <NavLink to="/escorts">
+        <Button variant="ghost">Escorts</Button>
+      </NavLink>
       
-      <div className="flex items-center gap-4">
-        <Link to="/search">
-          <Button variant="ghost" size="icon">
-            <Search className="h-[1.2rem] w-[1.2rem]" />
-          </Button>
-        </Link>
+      <NavLink to="/creators">
+        <Button variant="ghost">Creators</Button>
+      </NavLink>
+      
+      <NavLink to="/livecams">
+        <Button variant="ghost">Livecams</Button>
+      </NavLink>
+      
+      <div className="ml-4 flex items-center gap-1">
+        <Button variant="ghost" size="icon" className="relative">
+          <Search className="h-[1.2rem] w-[1.2rem]" />
+        </Button>
         
-        {user ? (
-          <Link to="/profile">
-            <Button variant="default">My Account</Button>
-          </Link>
-        ) : (
-          <Link to="/auth">
-            <Button variant="default">Sign In</Button>
-          </Link>
-        )}
+        <NavLink to="/favorites">
+          <Button variant="ghost" size="icon" className="relative">
+            <Heart className="h-[1.2rem] w-[1.2rem]" />
+            {favoriteCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5">
+                {favoriteCount}
+              </span>
+            )}
+          </Button>
+        </NavLink>
+        
+        <NavLink to="/messages">
+          <Button variant="ghost" size="icon">
+            <MessageSquare className="h-[1.2rem] w-[1.2rem]" />
+          </Button>
+        </NavLink>
+        
+        <Button variant="ghost" size="icon">
+          <Bell className="h-[1.2rem] w-[1.2rem]" />
+        </Button>
+        
+        <UserDropdown />
       </div>
     </div>
   );
