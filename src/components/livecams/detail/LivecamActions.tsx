@@ -8,9 +8,10 @@ import { toast } from "@/components/ui/use-toast";
 interface LivecamActionsProps {
   model: LivecamModel;
   onStartChat?: () => void;
+  onTipClick?: () => void;
 }
 
-const LivecamActions: React.FC<LivecamActionsProps> = ({ model, onStartChat }) => {
+const LivecamActions: React.FC<LivecamActionsProps> = ({ model, onStartChat, onTipClick }) => {
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
   
@@ -57,10 +58,14 @@ const LivecamActions: React.FC<LivecamActionsProps> = ({ model, onStartChat }) =
   };
   
   const handleTip = () => {
-    toast({
-      title: "Tip",
-      description: "Tipping functionality will be available soon",
-    });
+    if (onTipClick) {
+      onTipClick();
+    } else {
+      toast({
+        title: "Tip",
+        description: "Tipping functionality will be available soon",
+      });
+    }
   };
   
   return (

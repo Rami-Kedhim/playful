@@ -7,6 +7,8 @@ import { Expand, Pause, Play, Speaker, VolumeX, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import TipAnimation from "./TipAnimation";
+import { toast } from "@/components/ui/use-toast";
 
 interface LivecamMainContentProps {
   model: LivecamModel;
@@ -17,6 +19,8 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [loadProgress, setLoadProgress] = useState<number>(0);
+  const [showTipAnimation, setShowTipAnimation] = useState<boolean>(false);
+  const [tipDetails, setTipDetails] = useState<{username: string, amount: number} | null>(null);
   
   // Simulate video loading
   useEffect(() => {
@@ -31,6 +35,25 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
     
     return () => clearInterval(interval);
   }, [model.isLive]);
+  
+  // Simulate random tips every so often
+  useEffect(() => {
+    if (!model.isLive || loadProgress < 100) return;
+    
+    const tipInterval = setInterval(() => {
+      // 10% chance to show a tip animation
+      if (Math.random() < 0.1) {
+        const tipUsers = ["John", "Maria", "Alex", "Sarah", "Mike"];
+        const username = tipUsers[Math.floor(Math.random() * tipUsers.length)];
+        const amount = Math.floor(Math.random() * 95) + 5; // $5 to $100
+        
+        setTipDetails({ username, amount });
+        setShowTipAnimation(true);
+      }
+    }, 30000); // Check every 30 seconds
+    
+    return () => clearInterval(tipInterval);
+  }, [model.isLive, loadProgress]);
   
   const togglePlay = () => {
     if (!model.isLive) return;
@@ -55,6 +78,19 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
         setIsFullscreen(false);
       }
     }
+  };
+  
+  const handleOnTipClick = () => {
+    // For manual testing of the tip animation
+    const tipAmount = Math.floor(Math.random() * 95) + 5;
+    
+    setTipDetails({ username: "You", amount: tipAmount });
+    setShowTipAnimation(true);
+    
+    toast({
+      title: "Tip Sent!",
+      description: `You tipped ${model.displayName} $${tipAmount}`,
+    });
   };
   
   return (
@@ -87,6 +123,15 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
                 />
               )}
             </div>
+            
+            {/* Tip animation */}
+            {showTipAnimation && tipDetails && (
+              <TipAnimation 
+                username={tipDetails.username} 
+                amount={tipDetails.amount} 
+                onComplete={() => setShowTipAnimation(false)}
+              />
+            )}
             
             {/* Overlay for live status */}
             <div className="absolute top-4 left-4 z-10">
@@ -169,7 +214,7 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
           
           {model.isLive && <LivecamStats model={model} />}
           
-          <LivecamActions model={model} />
+          <LivecamActions model={model} onTipClick={handleOnTipClick} />
         </CardContent>
       </Card>
     </div>

@@ -1,211 +1,342 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SendHorizontal, SmilePlus } from "lucide-react";
+import { Heart, Gift, Smile, Send } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { EmojiPicker } from "../chat/EmojiPicker";
+
+interface LivecamChatProps {
+  streamId: string;
+  isLive: boolean;
+  viewerCount: number;
+  streamOwnerName: string;
+}
+
+type MessageType = "normal" | "tip" | "system" | "join" | "leave";
 
 interface ChatMessage {
   id: string;
   username: string;
   message: string;
   timestamp: Date;
+  type: MessageType;
   isOwner?: boolean;
   isModerator?: boolean;
-  avatarUrl?: string;
+  tipAmount?: number;
 }
 
-interface LivecamChatProps {
-  streamId: string;
-  streamOwnerName: string;
-  isLive: boolean;
-  viewerCount: number;
-}
+const mockUsers = [
+  "Alex", "Taylor", "Jordan", "Casey", "Riley", 
+  "Morgan", "Jamie", "Avery", "Charlie", "Skyler",
+  "Sam", "Drew", "Blake", "Quinn", "Reese"
+];
 
-const LivecamChat: React.FC<LivecamChatProps> = ({
-  streamId,
-  streamOwnerName,
-  isLive,
-  viewerCount
+const LivecamChat: React.FC<LivecamChatProps> = ({ 
+  streamId, 
+  isLive, 
+  viewerCount, 
+  streamOwnerName 
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputMessage, setInputMessage] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // In a real app, get this from auth context
+  const [messageText, setMessageText] = useState("");
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   
-  // Simulate user login state - in a real app, get this from authentication context
-  useEffect(() => {
-    // Simulate checking login status
-    const checkLoginStatus = async () => {
-      // Mocked authentication check
-      const mockLoggedIn = Math.random() > 0.3; // 70% chance of being logged in
-      setIsLoggedIn(mockLoggedIn);
-    };
+  // Generate random system message
+  const generateSystemMessage = (): ChatMessage => {
+    const systemMessages = [
+      `${streamOwnerName} started a poll! Vote now!`,
+      "Reminder: Be respectful in chat",
+      "New milestone reached! Thanks for your support!",
+      `${streamOwnerName} will be live again tomorrow at 7PM!`,
+      "Subscribe to unlock exclusive content!"
+    ];
     
-    checkLoginStatus();
-  }, []);
+    return {
+      id: `system-${Date.now()}`,
+      username: "System",
+      message: systemMessages[Math.floor(Math.random() * systemMessages.length)],
+      timestamp: new Date(),
+      type: "system"
+    };
+  };
   
-  // Scroll to bottom when messages change
+  // Generate random user message
+  const generateUserMessage = (): ChatMessage => {
+    const userMessages = [
+      "Hi everyone! Just joined :)",
+      "Looking great today!",
+      "How's everyone doing?",
+      "Love the stream!",
+      "Where are you from?",
+      "Any plans for the weekend?",
+      "That's so funny 😂",
+      "I agree with you",
+      "Great music choice!",
+      "Can you do a dance?",
+      "You're amazing!",
+      "How long have you been streaming?"
+    ];
+    
+    const username = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+    const messageType: MessageType = Math.random() > 0.9 ? "tip" : "normal";
+    
+    return {
+      id: `user-${Date.now()}-${Math.random()}`,
+      username,
+      message: userMessages[Math.floor(Math.random() * userMessages.length)],
+      timestamp: new Date(),
+      type: messageType,
+      isOwner: false,
+      isModerator: Math.random() > 0.9,
+      tipAmount: messageType === "tip" ? Math.floor(Math.random() * 50) + 5 : undefined
+    };
+  };
+  
+  // Generate initial messages
+  useEffect(() => {
+    if (!isLive) return;
+    
+    // Add initial welcome message
+    const initialMessages: ChatMessage[] = [
+      {
+        id: "welcome",
+        username: "System",
+        message: `Welcome to ${streamOwnerName}'s live stream!`,
+        timestamp: new Date(),
+        type: "system"
+      }
+    ];
+    
+    // Add some random initial messages
+    for (let i = 0; i < 5; i++) {
+      initialMessages.push(generateUserMessage());
+    }
+    
+    setMessages(initialMessages);
+    
+    // Simulate join messages
+    const joinInterval = setInterval(() => {
+      if (Math.random() > 0.6) {
+        const username = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+        setMessages(prevMessages => [
+          ...prevMessages,
+          {
+            id: `join-${Date.now()}`,
+            username,
+            message: `${username} joined the chat`,
+            timestamp: new Date(),
+            type: "join"
+          }
+        ]);
+      }
+    }, 20000);
+    
+    return () => clearInterval(joinInterval);
+  }, [isLive, streamOwnerName]);
+  
+  // Simulate chat activity
+  useEffect(() => {
+    if (!isLive) return;
+    
+    const messageInterval = setInterval(() => {
+      // 80% chance to add a new message
+      if (Math.random() < 0.8) {
+        const newMessage = Math.random() > 0.9 
+          ? generateSystemMessage() 
+          : generateUserMessage();
+          
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+      }
+    }, 3000);
+    
+    return () => clearInterval(messageInterval);
+  }, [isLive]);
+  
+  // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
-  // Simulate receiving chat messages
-  useEffect(() => {
-    if (!isLive) return;
-    
-    // Initial messages
-    const initialMessages: ChatMessage[] = [
-      {
-        id: `system-welcome`,
-        username: "System",
-        message: `Welcome to ${streamOwnerName}'s live stream!`,
-        timestamp: new Date(),
-        isModerator: true
-      }
-    ];
-    
-    setMessages(initialMessages);
-    
-    // Simulate getting periodic messages
-    const interval = setInterval(() => {
-      if (Math.random() > 0.6) { // 40% chance of new message
-        const mockUsernames = ["Alex", "Robin", "Jordan", "Taylor", "Casey"];
-        const mockMessages = [
-          "Hello everyone!",
-          "How are you today?",
-          "Great stream!",
-          "Love your content!",
-          "Where are you from?",
-          "How long are you streaming today?",
-          "You look amazing!",
-          "What's your favorite music?",
-          "Do you stream every day?"
-        ];
-        
-        const newMessage: ChatMessage = {
-          id: `msg-${Date.now()}-${Math.random()}`,
-          username: mockUsernames[Math.floor(Math.random() * mockUsernames.length)],
-          message: mockMessages[Math.floor(Math.random() * mockMessages.length)],
-          timestamp: new Date(),
-          avatarUrl: `https://picsum.photos/seed/${Math.random()}/50/50`
-        };
-        
-        setMessages(prev => [...prev, newMessage]);
-      }
-      
-      // Occasionally add a message from the stream owner
-      if (Math.random() > 0.9) { // 10% chance
-        const ownerMessage: ChatMessage = {
-          id: `owner-${Date.now()}`,
-          username: streamOwnerName,
-          message: "Thanks for watching my stream everyone! Don't forget to subscribe!",
-          timestamp: new Date(),
-          isOwner: true,
-          avatarUrl: `https://picsum.photos/seed/${streamOwnerName}/50/50`
-        };
-        
-        setMessages(prev => [...prev, ownerMessage]);
-      }
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, [isLive, streamOwnerName]);
-  
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputMessage.trim() || !isLoggedIn) return;
+  // Handle sending a message
+  const handleSendMessage = () => {
+    if (!messageText.trim()) return;
     
     const newMessage: ChatMessage = {
       id: `user-${Date.now()}`,
-      username: "You", // In a real app, get from auth context
-      message: inputMessage.trim(),
+      username: "You",
+      message: messageText.trim(),
       timestamp: new Date(),
-      avatarUrl: "https://picsum.photos/seed/currentuser/50/50" // In a real app, get from user profile
+      type: "normal"
     };
     
-    setMessages(prev => [...prev, newMessage]);
-    setInputMessage("");
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    setMessageText("");
+    setIsEmojiPickerOpen(false);
+  };
+  
+  // Handle pressing Enter to send a message
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+  
+  // Handle adding an emoji to the message
+  const handleEmojiSelect = (emoji: string) => {
+    setMessageText(prev => prev + emoji);
+    setIsEmojiPickerOpen(false);
+  };
+  
+  // Handle sending a tip
+  const handleSendTip = () => {
+    toast({
+      title: "Tip feature",
+      description: "Tipping functionality will be available soon!",
+    });
+  };
+  
+  // Render a chat message
+  const renderMessage = (message: ChatMessage) => {
+    switch (message.type) {
+      case "normal":
+        return (
+          <div key={message.id} className="py-1 px-2 hover:bg-muted/50 rounded">
+            <div className="flex gap-2 items-baseline">
+              <span className={`font-semibold ${message.isOwner ? "text-primary" : message.isModerator ? "text-blue-500" : ""}`}>
+                {message.username}
+                {message.isOwner && <Badge variant="outline" className="ml-1 text-[10px]">Host</Badge>}
+                {message.isModerator && <Badge variant="outline" className="ml-1 text-[10px]">Mod</Badge>}
+              </span>
+              <span className="text-muted-foreground text-xs">{message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <p className="text-sm">{message.message}</p>
+          </div>
+        );
+        
+      case "tip":
+        return (
+          <div key={message.id} className="py-1 px-2 bg-green-500/10 border-l-2 border-green-500 rounded">
+            <div className="flex gap-2 items-baseline">
+              <span className="font-semibold text-green-500">{message.username}</span>
+              <span className="text-muted-foreground text-xs">{message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <p className="text-sm flex items-center">
+              <Gift className="h-4 w-4 inline-block mr-1 text-green-500" />
+              Tipped ${message.tipAmount}!
+            </p>
+            <p className="text-sm mt-1">{message.message}</p>
+          </div>
+        );
+        
+      case "system":
+        return (
+          <div key={message.id} className="py-1 px-2 bg-blue-500/10 border-l-2 border-blue-500 rounded">
+            <p className="text-sm text-blue-500">{message.message}</p>
+          </div>
+        );
+        
+      case "join":
+      case "leave":
+        return (
+          <div key={message.id} className="py-0.5 px-2">
+            <p className="text-xs text-muted-foreground">{message.message}</p>
+          </div>
+        );
+        
+      default:
+        return null;
+    }
   };
   
   return (
-    <div className="flex flex-col h-full rounded-md border bg-background shadow">
-      <div className="p-3 border-b">
-        <h3 className="font-semibold flex items-center justify-between">
-          <span>Live Chat</span>
-          <span className="text-sm text-muted-foreground">
-            {viewerCount} {viewerCount === 1 ? 'viewer' : 'viewers'}
-          </span>
-        </h3>
+    <div className="flex flex-col h-full border rounded-lg overflow-hidden bg-background">
+      {/* Chat header */}
+      <div className="p-3 border-b flex justify-between items-center">
+        <div>
+          <h3 className="font-medium">Live Chat</h3>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs">
+              {isLive ? "Live" : "Offline"}
+            </Badge>
+            <span className="text-xs text-muted-foreground">
+              {viewerCount} {viewerCount === 1 ? "viewer" : "viewers"}
+            </span>
+          </div>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => toast({ title: "Feature coming soon", description: "Chat settings will be available in a future update" })}>
+          Settings
+        </Button>
       </div>
       
-      <ScrollArea className="flex-grow p-3">
-        {messages.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-            No messages yet
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className="flex items-start gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={msg.avatarUrl} alt={msg.username} />
-                  <AvatarFallback>{msg.username.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className={`font-medium text-sm ${msg.isOwner ? "text-primary" : msg.isModerator ? "text-blue-500" : ""}`}>
-                      {msg.username}
-                      {msg.isOwner && <span className="ml-1 text-xs bg-primary/20 text-primary px-1 rounded">Host</span>}
-                      {msg.isModerator && <span className="ml-1 text-xs bg-blue-500/20 text-blue-500 px-1 rounded">Mod</span>}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {msg.timestamp.toLocaleTimeString()}
-                    </span>
-                  </div>
-                  <p className="text-sm mt-0.5">{msg.message}</p>
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+      {/* Chat messages */}
+      <ScrollArea className="flex-1">
+        <div className="p-3 space-y-1">
+          {isLive ? (
+            messages.map(message => renderMessage(message))
+          ) : (
+            <div className="h-full flex items-center justify-center py-8">
+              <p className="text-muted-foreground text-center">
+                Chat is unavailable when the stream is offline.<br />
+                Check back when {streamOwnerName} is live again.
+              </p>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </ScrollArea>
       
-      <form onSubmit={handleSendMessage} className="p-3 border-t">
-        {isLoggedIn ? (
-          <div className="flex gap-2">
-            <Button
+      {/* Chat input */}
+      {isLive && (
+        <div className="p-3 border-t">
+          <div className="flex items-center gap-2 relative">
+            <Button 
+              size="icon" 
               variant="ghost" 
-              size="icon"
-              type="button"
-              className="shrink-0"
-              title="Add emoji"
+              className="shrink-0" 
+              onClick={() => setIsEmojiPickerOpen(!isEmojiPickerOpen)}
             >
-              <SmilePlus className="h-5 w-5" />
+              <Smile className="h-5 w-5" />
             </Button>
-            <Input
+            
+            <Input 
               placeholder="Type a message..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              className="flex-grow"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1"
             />
-            <Button size="icon" className="shrink-0" disabled={!inputMessage.trim()}>
-              <SendHorizontal className="h-5 w-5" />
+            
+            <Button 
+              size="icon" 
+              className="shrink-0 bg-green-600 hover:bg-green-700 text-white"
+              onClick={handleSendTip}
+            >
+              <Gift className="h-5 w-5" />
             </Button>
-          </div>
-        ) : (
-          <div className="text-center p-2">
-            <p className="text-sm text-muted-foreground mb-2">
-              You need to sign in to chat
-            </p>
-            <Button variant="outline" size="sm">
-              Sign In
+            
+            <Button 
+              size="icon" 
+              className="shrink-0"
+              onClick={handleSendMessage}
+              disabled={!messageText.trim()}
+            >
+              <Send className="h-5 w-5" />
             </Button>
+            
+            {isEmojiPickerOpen && (
+              <EmojiPicker 
+                onEmojiSelect={handleEmojiSelect} 
+                onClose={() => setIsEmojiPickerOpen(false)}
+              />
+            )}
           </div>
-        )}
-      </form>
+        </div>
+      )}
     </div>
   );
 };
