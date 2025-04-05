@@ -1,16 +1,34 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, MessageSquare, Calendar, Heart, Shield, Clock, UserCheck } from "lucide-react";
-import { useFavorites } from "@/contexts/FavoritesContext";
-import { useToast } from "@/hooks/use-toast";
-import StarRating from "@/components/ui/StarRating";
-import { EscortCardProps } from "@/types/escort";
 
-const EscortCard = ({
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Heart, MapPin, Star, CheckCircle, Clock } from "lucide-react";
+import { useFavorites } from "@/contexts/FavoritesContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import { formatDistanceToNow } from "date-fns";
+
+interface EscortCardProps {
+  id: string;
+  name: string;
+  location: string;
+  age?: number;
+  rating?: number;
+  reviews?: number;
+  tags?: string[];
+  imageUrl: string;
+  price: number;
+  verified?: boolean;
+  gender?: string;
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  lastActive?: Date;
+  responseRate?: number;
+}
+
+const EscortCard: React.FC<EscortCardProps> = ({
   id,
   name,
   location,
@@ -20,140 +38,145 @@ const EscortCard = ({
   tags,
   imageUrl,
   price,
-  verified,
+  verified = false,
   gender,
   sexualOrientation,
-  availableNow = false,
+  availableNow,
   lastActive,
-  responseRate = 95
-}: EscortCardProps) => {
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const { toast } = useToast();
-  const favorited = isFavorite(id);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
+  responseRate,
+}) => {
+  const navigate = useNavigate();
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const { showSuccess, showInfo } = useNotifications();
+  
+  const handleCardClick = () => {
+    navigate(`/escorts/${id}`);
+  };
+  
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
     e.stopPropagation();
+    
+    const wasAlreadyFavorite = isFavorite(id);
     toggleFavorite(id);
     
-    toast({
-      title: favorited ? "Removed from favorites" : "Added to favorites",
-      description: favorited 
-        ? `${name} has been removed from your favorites` 
-        : `${name} has been added to your favorites`,
-    });
+    if (wasAlreadyFavorite) {
+      // The notification will be shown through the toggleFavorite in FavoritesContext
+    } else {
+      showInfo("Profile details", "You can see all your favorites in the Favorites tab.");
+    }
   };
-
+  
+  const getLastActiveText = () => {
+    if (availableNow) return "Available now";
+    if (!lastActive) return "Recently active";
+    return `Active ${formatDistanceToNow(lastActive, { addSuffix: true })}`;
+  };
+  
   return (
-    <Link to={`/escorts/${id}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full bg-card border-border">
-        <div className="relative">
-          <AspectRatio ratio={2/3}>
-            <div className={`absolute inset-0 bg-gray-600 animate-pulse ${imageLoaded ? 'hidden' : 'block'}`} />
-            <img 
-              src={imageUrl} 
-              alt={name} 
-              className={`object-cover w-full h-full transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-              onLoad={() => setImageLoaded(true)}
-              loading="lazy"
-            />
-          </AspectRatio>
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group relative"
+      onClick={handleCardClick}
+    >
+      <div className="relative">
+        <img 
+          src={imageUrl} 
+          alt={name}
+          className="h-64 w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+        />
+        
+        <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-center">
+          <Badge variant={availableNow ? "default" : "secondary"} className="flex gap-1 items-center">
+            {availableNow ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                Available
+              </>
+            ) : (
+              <>
+                <Clock className="h-3 w-3" />
+                {getLastActiveText()}
+              </>
+            )}
+          </Badge>
           
-          <Button
+          <Button 
+            variant="ghost" 
             size="icon"
-            variant="ghost"
-            className={`absolute top-2 right-2 rounded-full bg-black/30 backdrop-blur-sm ${
-              favorited ? "text-red-500" : "text-white"
+            className={`bg-black/30 backdrop-blur-sm hover:bg-black/50 text-white rounded-full ${
+              isFavorite(id) ? "text-red-500" : ""
             }`}
             onClick={handleFavoriteClick}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
           >
-            <Heart size={18} fill={favorited ? "currentColor" : "none"} />
+            <Heart className={`h-5 w-5 ${isFavorite(id) ? "fill-current" : ""}`} />
           </Button>
-          
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {verified && (
-              <Badge className="bg-primary text-primary-foreground flex items-center gap-1">
-                <Shield size={10} className="mr-1" />
-                Verified
-              </Badge>
-            )}
-            {availableNow && (
-              <Badge className="bg-green-600 text-white flex items-center gap-1">
-                <Clock size={10} className="mr-1" />
-                Available Now
-              </Badge>
-            )}
-            {gender && (
-              <Badge variant="outline" className="bg-background/60 backdrop-blur-sm capitalize">
-                {gender}
-              </Badge>
-            )}
+        </div>
+        
+        {verified && (
+          <Badge 
+            variant="secondary" 
+            className="absolute bottom-3 left-3 gap-1 items-center bg-primary/70 text-primary-foreground"
+          >
+            <CheckCircle className="h-3 w-3" />
+            Verified
+          </Badge>
+        )}
+      </div>
+      
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-semibold text-lg">{name}</h3>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <MapPin className="h-3 w-3" />
+              <span>{location}</span>
+            </div>
           </div>
           
-          <div className="absolute bottom-2 right-2">
-            <Badge className="bg-lucoin text-white">
-              {price} LC/hr
-            </Badge>
+          <div className="flex items-center gap-1">
+            {rating && (
+              <>
+                <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                <span>
+                  {rating.toFixed(1)}{" "}
+                  {reviews && <span className="text-xs text-muted-foreground">({reviews})</span>}
+                </span>
+              </>
+            )}
           </div>
         </div>
         
-        <div className="p-4">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="font-semibold text-lg">{name}, {age}</h3>
-            <div className="flex items-center">
-              <StarRating rating={rating} size={14} />
-              <span className="text-sm ml-1">
-                {rating} <span className="text-gray-400">({reviews})</span>
-              </span>
-            </div>
-          </div>
-          
-          <div className="flex items-center text-sm text-gray-400 mb-2">
-            <MapPin size={14} className="mr-1" />
-            <span>{location}</span>
-          </div>
-          
+        <div className="flex items-center gap-2 mt-2">
+          {age && <Badge variant="outline">{age} y.o.</Badge>}
+          {gender && <Badge variant="outline" className="capitalize">{gender}</Badge>}
           {sexualOrientation && (
-            <div className="flex flex-wrap gap-1 mb-2">
-              <Badge variant="secondary" className="text-xs capitalize">
-                {sexualOrientation}
-              </Badge>
-            </div>
+            <Badge variant="outline" className="capitalize">
+              {sexualOrientation}
+            </Badge>
           )}
-          
-          <div className="flex flex-wrap gap-1 mb-3">
-            {tags.slice(0, 3).map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {tags.length > 3 && (
-              <Badge variant="secondary" className="text-xs">
-                +{tags.length - 3}
-              </Badge>
-            )}
-          </div>
-          
-          <div className="flex items-center text-xs text-gray-400 mb-3">
-            <UserCheck size={12} className="mr-1" />
-            <span>{responseRate}% Response Rate</span>
-          </div>
-          
-          <div className="flex space-x-2 mt-2">
-            <Button size="sm" className="flex-1 bg-secondary hover:bg-secondary/80">
-              <MessageSquare size={14} className="mr-2" />
-              Chat
-            </Button>
-            <Button size="sm" className="flex-1 bg-primary hover:bg-primary/80">
-              <Calendar size={14} className="mr-2" />
-              Book
-            </Button>
-          </div>
         </div>
-      </Card>
-    </Link>
+        
+        <div className="flex flex-wrap gap-1 mt-2">
+          {tags?.slice(0, 3).map((tag, index) => (
+            <Badge key={index} variant="secondary" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+          {tags && tags.length > 3 && (
+            <Badge variant="secondary" className="text-xs">
+              +{tags.length - 3} more
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+      
+      <CardFooter className="flex justify-between items-center p-4 pt-0 border-t border-border mt-2">
+        <div>
+          <div className="text-sm font-medium">From ${price}/hour</div>
+        </div>
+        
+        <Button size="sm">View Profile</Button>
+      </CardFooter>
+    </Card>
   );
 };
 

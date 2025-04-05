@@ -1,23 +1,23 @@
 
-import React from 'react';
-import { ThemeProvider } from './components/theme-provider';
-import { Toaster } from './components/ui/toaster';
-import Routes from './Routes';
-import { AuthProvider } from './hooks/auth/useAuth';
-import { BoostProvider } from './contexts/BoostContext';
-import { FavoritesProvider } from './contexts/FavoritesContext';
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "./components/ui/theme-provider";
+import Routes from "./Routes";
+import { Toaster } from "./components/ui/toaster";
+import { FavoritesProvider } from "./contexts/FavoritesContext";
+import { NotificationsProvider } from "./contexts/NotificationsContext";
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="lucent-ui-theme">
-      <AuthProvider>
-        <BoostProvider>
-          <FavoritesProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="oxum-theme">
+      <NotificationsProvider>
+        <FavoritesProvider>
+          <BrowserRouter>
             <Routes />
             <Toaster />
-          </FavoritesProvider>
-        </BoostProvider>
-      </AuthProvider>
+          </BrowserRouter>
+        </FavoritesProvider>
+      </NotificationsProvider>
     </ThemeProvider>
   );
 }

@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { toast } from "@/hooks/use-toast";
+import { useNotifications } from "./NotificationsContext";
 
 interface FavoritesContextType {
   favorites: string[];
@@ -28,6 +28,7 @@ interface FavoritesProviderProps {
 
 export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const { showSuccess, showWarning } = useNotifications();
 
   // Load favorites from localStorage on initial render
   useEffect(() => {
@@ -55,19 +56,13 @@ export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
       return [...prev, id];
     });
     
-    toast({
-      title: "Added to favorites",
-      description: "This profile has been added to your favorites."
-    });
+    showSuccess("Added to favorites", "This profile has been added to your favorites.");
   };
 
   const removeFavorite = (id: string) => {
     setFavorites((prev) => prev.filter((item) => item !== id));
     
-    toast({
-      title: "Removed from favorites",
-      description: "This profile has been removed from your favorites."
-    });
+    showWarning("Removed from favorites", "This profile has been removed from your favorites.");
   };
 
   const toggleFavorite = (id: string) => {
@@ -84,10 +79,7 @@ export const FavoritesProvider = ({ children }: FavoritesProviderProps) => {
   
   const clearFavorites = () => {
     setFavorites([]);
-    toast({
-      title: "Favorites cleared",
-      description: "All favorites have been removed."
-    });
+    showWarning("Favorites cleared", "All favorites have been removed.");
   };
 
   return (
