@@ -35,6 +35,8 @@ const LivecamDetail: React.FC = () => {
   const [isBoosted, setIsBoosted] = useState(false);
   const [boostStatus, setBoostStatus] = useState<{timeRemaining?: number, intensity?: number} | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isChatActive, setIsChatActive] = useState(false);
+  const [recentTips, setRecentTips] = useState<{username: string, amount: number}[]>([]);
   
   useEffect(() => {
     const loadLivecamData = async () => {
@@ -141,6 +143,28 @@ const LivecamDetail: React.FC = () => {
     return () => clearInterval(interval);
   }, [livecam]);
   
+  const handleTipSent = (username: string, amount: number) => {
+    setRecentTips(prev => [...prev, { username, amount }].slice(-5));
+    
+    if (username !== "You") {
+      toast({
+        title: "New Tip!",
+        description: `${username} tipped ${livecam?.displayName || 'the streamer'} $${amount}`,
+      });
+    }
+  };
+  
+  const handleStartChat = () => {
+    setIsChatActive(true);
+    
+    if (window.innerWidth < 768) {
+      const chatElement = document.getElementById('livecam-chat');
+      if (chatElement) {
+        chatElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+  
   return (
     <MainLayout>
       {loading && <div className="flex justify-center p-8">Loading...</div>}
@@ -159,7 +183,13 @@ const LivecamDetail: React.FC = () => {
       
       {livecam && (
         <LivecamDetailLayout
-          mainContent={<LivecamMainContent model={livecam} />}
+          mainContent={
+            <LivecamMainContent 
+              model={livecam} 
+              onTipSent={handleTipSent}
+              onStartChat={handleStartChat}
+            />
+          }
           sidebar={
             <LivecamSidebar
               model={livecam}
@@ -170,12 +200,15 @@ const LivecamDetail: React.FC = () => {
             />
           }
           chatContent={
-            <LivecamChat
-              streamId={livecam.id}
-              isLive={livecam.isLive}
-              viewerCount={livecam.viewerCount || 0}
-              streamOwnerName={livecam.displayName}
-            />
+            <div id="livecam-chat">
+              <LivecamChat
+                streamId={livecam.id}
+                isLive={livecam.isLive}
+                viewerCount={livecam.viewerCount || 0}
+                streamOwnerName={livecam.displayName}
+                onTipSent={handleTipSent}
+              />
+            </div>
           }
         />
       )}

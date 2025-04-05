@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ interface LivecamChatProps {
   isLive: boolean;
   viewerCount: number;
   streamOwnerName: string;
+  onTipSent?: (username: string, amount: number) => void;
 }
 
 type MessageType = "normal" | "tip" | "system" | "join" | "leave";
@@ -38,7 +38,8 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
   streamId, 
   isLive, 
   viewerCount, 
-  streamOwnerName 
+  streamOwnerName,
+  onTipSent 
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
@@ -46,7 +47,6 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // Generate random system message
   const generateSystemMessage = (): ChatMessage => {
     const systemMessages = [
       `${streamOwnerName} started a poll! Vote now!`,
@@ -65,7 +65,6 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
     };
   };
   
-  // Generate random user message
   const generateUserMessage = (): ChatMessage => {
     const userMessages = [
       "Hi everyone! Just joined :)",
@@ -97,11 +96,9 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
     };
   };
   
-  // Generate initial messages
   useEffect(() => {
     if (!isLive) return;
     
-    // Add initial welcome message
     const initialMessages: ChatMessage[] = [
       {
         id: "welcome",
@@ -112,14 +109,12 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
       }
     ];
     
-    // Add some random initial messages
     for (let i = 0; i < 5; i++) {
       initialMessages.push(generateUserMessage());
     }
     
     setMessages(initialMessages);
     
-    // Simulate join messages
     const joinInterval = setInterval(() => {
       if (Math.random() > 0.6) {
         const username = mockUsers[Math.floor(Math.random() * mockUsers.length)];
@@ -139,30 +134,30 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
     return () => clearInterval(joinInterval);
   }, [isLive, streamOwnerName]);
   
-  // Simulate chat activity
   useEffect(() => {
     if (!isLive) return;
     
     const messageInterval = setInterval(() => {
-      // 80% chance to add a new message
       if (Math.random() < 0.8) {
         const newMessage = Math.random() > 0.9 
           ? generateSystemMessage() 
           : generateUserMessage();
           
         setMessages(prevMessages => [...prevMessages, newMessage]);
+        
+        if (newMessage.type === "tip" && onTipSent && newMessage.tipAmount) {
+          onTipSent(newMessage.username, newMessage.tipAmount);
+        }
       }
     }, 3000);
     
     return () => clearInterval(messageInterval);
-  }, [isLive]);
+  }, [isLive, onTipSent]);
   
-  // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
-  // Handle sending a message
   const handleSendMessage = () => {
     if (!messageText.trim()) return;
     
@@ -179,28 +174,43 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
     setIsEmojiPickerOpen(false);
   };
   
-  // Handle pressing Enter to send a message
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSendMessage();
     }
   };
   
-  // Handle adding an emoji to the message
   const handleEmojiSelect = (emoji: string) => {
     setMessageText(prev => prev + emoji);
     setIsEmojiPickerOpen(false);
   };
   
-  // Handle sending a tip
   const handleSendTip = () => {
+    if (!isLive) return;
+    
+    const tipAmount = Math.floor(Math.random() * 95) + 5;
+    
+    const newTipMessage: ChatMessage = {
+      id: `tip-${Date.now()}`,
+      username: "You",
+      message: "Thanks for the great stream!",
+      timestamp: new Date(),
+      type: "tip",
+      tipAmount
+    };
+    
+    setMessages(prevMessages => [...prevMessages, newTipMessage]);
+    
+    if (onTipSent) {
+      onTipSent("You", tipAmount);
+    }
+    
     toast({
-      title: "Tip feature",
-      description: "Tipping functionality will be available soon!",
+      title: "Tip Sent!",
+      description: `You tipped ${streamOwnerName} $${tipAmount}`,
     });
   };
   
-  // Render a chat message
   const renderMessage = (message: ChatMessage) => {
     switch (message.type) {
       case "normal":
@@ -255,7 +265,6 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
   
   return (
     <div className="flex flex-col h-full border rounded-lg overflow-hidden bg-background">
-      {/* Chat header */}
       <div className="p-3 border-b flex justify-between items-center">
         <div>
           <h3 className="font-medium">Live Chat</h3>
@@ -273,7 +282,6 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
         </Button>
       </div>
       
-      {/* Chat messages */}
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-1">
           {isLive ? (
@@ -290,7 +298,6 @@ const LivecamChat: React.FC<LivecamChatProps> = ({
         </div>
       </ScrollArea>
       
-      {/* Chat input */}
       {isLive && (
         <div className="p-3 border-t">
           <div className="flex items-center gap-2 relative">

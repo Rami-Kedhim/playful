@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2, Flag, Gift, Wallet, Star, MessageCircle } from "lucide-react";
@@ -9,28 +8,44 @@ interface LivecamActionsProps {
   model: LivecamModel;
   onStartChat?: () => void;
   onTipClick?: () => void;
+  onLike?: () => void;
+  onFavorite?: () => void;
 }
 
-const LivecamActions: React.FC<LivecamActionsProps> = ({ model, onStartChat, onTipClick }) => {
+const LivecamActions: React.FC<LivecamActionsProps> = ({ 
+  model, 
+  onStartChat, 
+  onTipClick,
+  onLike,
+  onFavorite
+}) => {
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
   
   const handleLike = () => {
     setLiked(!liked);
-    toast({
-      title: liked ? "Like removed" : "Thanks for your like!",
-      description: liked ? `You've removed your like from ${model.displayName}'s stream` : `You've liked ${model.displayName}'s stream`,
-    });
+    if (onLike) {
+      onLike();
+    } else {
+      toast({
+        title: liked ? "Like removed" : "Thanks for your like!",
+        description: liked ? `You've removed your like from ${model.displayName}'s stream` : `You've liked ${model.displayName}'s stream`,
+      });
+    }
   };
   
   const handleFavorite = () => {
     setFavorited(!favorited);
-    toast({
-      title: favorited ? "Removed from favorites" : "Added to favorites!",
-      description: favorited 
-        ? `${model.displayName} has been removed from your favorites` 
-        : `${model.displayName} has been added to your favorites`,
-    });
+    if (onFavorite) {
+      onFavorite();
+    } else {
+      toast({
+        title: favorited ? "Removed from favorites" : "Added to favorites!",
+        description: favorited 
+          ? `${model.displayName} has been removed from your favorites` 
+          : `${model.displayName} has been added to your favorites`,
+      });
+    }
   };
   
   const handleShare = () => {

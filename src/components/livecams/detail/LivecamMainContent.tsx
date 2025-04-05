@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { LivecamModel } from "@/types/livecams";
 import { LivecamStats } from "./";
@@ -12,9 +11,11 @@ import { toast } from "@/components/ui/use-toast";
 
 interface LivecamMainContentProps {
   model: LivecamModel;
+  onTipSent?: (username: string, amount: number) => void;
+  onStartChat?: () => void;
 }
 
-const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
+const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model, onTipSent, onStartChat }) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(model.isLive);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -22,7 +23,6 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   const [showTipAnimation, setShowTipAnimation] = useState<boolean>(false);
   const [tipDetails, setTipDetails] = useState<{username: string, amount: number} | null>(null);
   
-  // Simulate video loading
   useEffect(() => {
     if (!model.isLive) return;
     
@@ -36,12 +36,10 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
     return () => clearInterval(interval);
   }, [model.isLive]);
   
-  // Simulate random tips every so often
   useEffect(() => {
     if (!model.isLive || loadProgress < 100) return;
     
     const tipInterval = setInterval(() => {
-      // 10% chance to show a tip animation
       if (Math.random() < 0.1) {
         const tipUsers = ["John", "Maria", "Alex", "Sarah", "Mike"];
         const username = tipUsers[Math.floor(Math.random() * tipUsers.length)];
@@ -49,11 +47,15 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
         
         setTipDetails({ username, amount });
         setShowTipAnimation(true);
+        
+        if (onTipSent) {
+          onTipSent(username, amount);
+        }
       }
-    }, 30000); // Check every 30 seconds
+    }, 30000);
     
     return () => clearInterval(tipInterval);
-  }, [model.isLive, loadProgress]);
+  }, [model.isLive, loadProgress, onTipSent]);
   
   const togglePlay = () => {
     if (!model.isLive) return;
@@ -81,11 +83,14 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
   };
   
   const handleOnTipClick = () => {
-    // For manual testing of the tip animation
     const tipAmount = Math.floor(Math.random() * 95) + 5;
     
     setTipDetails({ username: "You", amount: tipAmount });
     setShowTipAnimation(true);
+    
+    if (onTipSent) {
+      onTipSent("You", tipAmount);
+    }
     
     toast({
       title: "Tip Sent!",
@@ -93,16 +98,28 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
     });
   };
   
+  const handleLikeAction = () => {
+    toast({
+      title: "Thanks for your like!",
+      description: `You've liked ${model.displayName}'s stream`,
+    });
+  };
+  
+  const handleFavoriteAction = () => {
+    toast({
+      title: "Added to favorites!",
+      description: `${model.displayName} has been added to your favorites`,
+    });
+  };
+  
   return (
     <div className="flex flex-col gap-4">
-      {/* Video player */}
       <div 
         id="video-container"
         className="aspect-video relative rounded-md overflow-hidden border bg-zinc-950"
       >
         {model.isLive ? (
           <>
-            {/* Mock video player - in a real app, use a proper video player component */}
             <div className="absolute inset-0 flex items-center justify-center">
               {loadProgress < 100 ? (
                 <div className="flex flex-col items-center gap-2">
@@ -124,23 +141,18 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
               )}
             </div>
             
-            {/* Tip animation */}
-            {showTipAnimation && tipDetails && (
-              <TipAnimation 
-                username={tipDetails.username} 
-                amount={tipDetails.amount} 
-                onComplete={() => setShowTipAnimation(false)}
-              />
-            )}
+            <TipAnimation 
+              username={tipDetails?.username} 
+              amount={tipDetails?.amount} 
+              onComplete={() => setShowTipAnimation(false)}
+            />
             
-            {/* Overlay for live status */}
             <div className="absolute top-4 left-4 z-10">
               <Badge variant="destructive" className="bg-red-600 text-white">
                 LIVE
               </Badge>
             </div>
             
-            {/* Video controls */}
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Button 
@@ -192,7 +204,6 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
         )}
       </div>
       
-      {/* Stream info */}
       <Card>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
@@ -214,7 +225,13 @@ const LivecamMainContent: React.FC<LivecamMainContentProps> = ({ model }) => {
           
           {model.isLive && <LivecamStats model={model} />}
           
-          <LivecamActions model={model} onTipClick={handleOnTipClick} />
+          <LivecamActions 
+            model={model} 
+            onTipClick={handleOnTipClick}
+            onStartChat={onStartChat}
+            onLike={handleLikeAction}
+            onFavorite={handleFavoriteAction}
+          />
         </CardContent>
       </Card>
     </div>
