@@ -35,13 +35,13 @@ const EscortCard: React.FC<EscortCardProps> = ({
   age,
   rating,
   reviews,
-  tags,
+  tags = [],
   imageUrl,
   price,
   verified = false,
   gender,
   sexualOrientation,
-  availableNow,
+  availableNow = false,
   lastActive,
   responseRate,
 }) => {
@@ -59,9 +59,7 @@ const EscortCard: React.FC<EscortCardProps> = ({
     const wasAlreadyFavorite = isFavorite(id);
     toggleFavorite(id);
     
-    if (wasAlreadyFavorite) {
-      // The notification will be shown through the toggleFavorite in FavoritesContext
-    } else {
+    if (!wasAlreadyFavorite) {
       showInfo("Profile details", "You can see all your favorites in the Favorites tab.");
     }
   };
@@ -69,7 +67,13 @@ const EscortCard: React.FC<EscortCardProps> = ({
   const getLastActiveText = () => {
     if (availableNow) return "Available now";
     if (!lastActive) return "Recently active";
-    return `Active ${formatDistanceToNow(lastActive, { addSuffix: true })}`;
+    
+    try {
+      return `Active ${formatDistanceToNow(lastActive, { addSuffix: true })}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Recently active";
+    }
   };
   
   return (
@@ -82,6 +86,10 @@ const EscortCard: React.FC<EscortCardProps> = ({
           src={imageUrl} 
           alt={name}
           className="h-64 w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            // Fallback image if the primary image fails to load
+            (e.target as HTMLImageElement).src = "https://via.placeholder.com/300x400";
+          }}
         />
         
         <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-center">
@@ -133,15 +141,17 @@ const EscortCard: React.FC<EscortCardProps> = ({
           </div>
           
           <div className="flex items-center gap-1">
-            {rating && (
+            {rating && rating > 0 ? (
               <>
                 <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                 <span>
                   {rating.toFixed(1)}{" "}
-                  {reviews && <span className="text-xs text-muted-foreground">({reviews})</span>}
+                  {reviews && reviews > 0 ? (
+                    <span className="text-xs text-muted-foreground">({reviews})</span>
+                  ) : null}
                 </span>
               </>
-            )}
+            ) : null}
           </div>
         </div>
         
@@ -156,12 +166,12 @@ const EscortCard: React.FC<EscortCardProps> = ({
         </div>
         
         <div className="flex flex-wrap gap-1 mt-2">
-          {tags?.slice(0, 3).map((tag, index) => (
+          {tags.slice(0, 3).map((tag, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {tag}
             </Badge>
           ))}
-          {tags && tags.length > 3 && (
+          {tags.length > 3 && (
             <Badge variant="secondary" className="text-xs">
               +{tags.length - 3} more
             </Badge>

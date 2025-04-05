@@ -62,7 +62,7 @@ const EscortResults = ({
   }
   
   // Shows empty state when no escorts match the filters
-  if (escorts.length === 0) {
+  if (!escorts || escorts.length === 0) {
     return (
       <div className="text-center py-12">
         <h3 className="text-lg font-medium mb-2">No escorts found</h3>
@@ -91,19 +91,19 @@ const EscortResults = ({
           <EscortCard
             key={escort.id}
             id={escort.id}
-            name={escort.name}
-            age={escort.age}
-            location={escort.location}
-            rating={escort.rating}
-            reviews={escort.reviews}
-            tags={escort.tags}
+            name={escort.name || "Unknown"}
+            age={escort.age || 0}
+            location={escort.location || "Unknown location"}
+            rating={escort.rating || 0}
+            reviews={escort.reviews || 0}
+            tags={escort.tags || []}
             imageUrl={escort.imageUrl || escort.avatar_url || "https://via.placeholder.com/300x400"}
             price={escort.price || 0}
             verified={escort.verified || false}
             gender={escort.gender}
             sexualOrientation={escort.sexualOrientation}
-            availableNow={escort.availableNow}
-            // Fix: Convert string lastActive to a Date object if it exists
+            availableNow={escort.availableNow || false}
+            // Convert string lastActive to a Date object if it exists
             lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
             responseRate={escort.responseRate}
           />
@@ -117,24 +117,31 @@ const EscortResults = ({
             <PaginationContent>
               {currentPage > 1 && (
                 <PaginationItem>
-                  <PaginationPrevious onClick={() => setCurrentPage(currentPage - 1)} />
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    aria-label="Go to previous page" 
+                  />
                 </PaginationItem>
               )}
               
-              {[...Array(totalPages)].map((_, i) => (
-                <PaginationItem key={i}>
+              {Array.from({length: totalPages}, (_, i) => i + 1).map((pageNum) => (
+                <PaginationItem key={pageNum}>
                   <PaginationLink 
-                    onClick={() => setCurrentPage(i + 1)}
-                    isActive={currentPage === i + 1}
+                    onClick={() => setCurrentPage(pageNum)}
+                    isActive={currentPage === pageNum}
+                    aria-label={`Page ${pageNum}`}
                   >
-                    {i + 1}
+                    {pageNum}
                   </PaginationLink>
                 </PaginationItem>
               ))}
               
               {currentPage < totalPages && (
                 <PaginationItem>
-                  <PaginationNext onClick={() => setCurrentPage(currentPage + 1)} />
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    aria-label="Go to next page" 
+                  />
                 </PaginationItem>
               )}
             </PaginationContent>
