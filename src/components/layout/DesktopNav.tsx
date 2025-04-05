@@ -8,8 +8,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
 const DesktopNav: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { count: favoriteCount } = useFavorites();
+  
+  const handleLogout = () => {
+    logout();
+  };
   
   return (
     <div className="hidden md:flex items-center gap-1">
@@ -51,7 +55,7 @@ const DesktopNav: React.FC = () => {
           <Bell className="h-[1.2rem] w-[1.2rem]" />
         </Button>
         
-        <UserDropdown />
+        {user && <UserDropdown user={user} handleLogout={handleLogout} />}
       </div>
     </div>
   );

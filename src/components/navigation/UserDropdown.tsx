@@ -22,9 +22,11 @@ import { AuthUser } from "@/types/auth";
 interface UserDropdownProps {
   user: AuthUser;
   handleLogout: () => void;
+  isMobile?: boolean; // Added to support MobileNav usage
+  onClose?: () => void; // Added to support MobileNav usage
 }
 
-const UserDropdown = ({ user, handleLogout }: UserDropdownProps) => {
+const UserDropdown = ({ user, handleLogout, isMobile, onClose }: UserDropdownProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -46,32 +48,54 @@ const UserDropdown = ({ user, handleLogout }: UserDropdownProps) => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="cursor-pointer">
+          <Link 
+            to="/profile" 
+            className="cursor-pointer" 
+            onClick={isMobile && onClose ? onClose : undefined}
+          >
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/notifications" className="cursor-pointer">
+          <Link 
+            to="/notifications" 
+            className="cursor-pointer"
+            onClick={isMobile && onClose ? onClose : undefined}
+          >
             <Bell className="mr-2 h-4 w-4" />
             <span>Notifications</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/wallet" className="cursor-pointer">
+          <Link 
+            to="/wallet" 
+            className="cursor-pointer"
+            onClick={isMobile && onClose ? onClose : undefined}
+          >
             <CreditCard className="mr-2 h-4 w-4" />
             <span>Wallet ({user.lucoinsBalance} LC)</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/settings" className="cursor-pointer">
+          <Link 
+            to="/settings" 
+            className="cursor-pointer"
+            onClick={isMobile && onClose ? onClose : undefined}
+          >
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+        <DropdownMenuItem 
+          onClick={() => {
+            handleLogout();
+            if (isMobile && onClose) onClose();
+          }} 
+          className="cursor-pointer"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

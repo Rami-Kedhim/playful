@@ -4,14 +4,25 @@ import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Search, Menu, X, Heart, MessageSquare, Bell, Home, Users, Video } from "lucide-react";
 import UserDropdown from "@/components/navigation/UserDropdown";
+import { useAuth } from "@/contexts/AuthContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
 const MobileNav: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
   const { count: favoriteCount } = useFavorites();
   
   const toggleMenu = () => {
     setIsOpen(!isOpen);
+  };
+  
+  const handleLogout = () => {
+    logout();
+    setIsOpen(false);
+  };
+  
+  const handleCloseMenu = () => {
+    setIsOpen(false);
   };
   
   return (
@@ -90,7 +101,14 @@ const MobileNav: React.FC = () => {
               </NavLink>
               
               <div className="pt-6 border-t border-border">
-                <UserDropdown isMobile={true} onClose={toggleMenu} />
+                {user && (
+                  <UserDropdown 
+                    user={user} 
+                    handleLogout={handleLogout} 
+                    isMobile={true} 
+                    onClose={handleCloseMenu} 
+                  />
+                )}
               </div>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -12,7 +11,7 @@ import { escortProfiles } from "@/data/escortProfiles";
 import { Separator } from "@/components/ui/separator";
 
 const Favorites = () => {
-  const { favorites } = useFavorites();
+  const { favorites, clearFavorites } = useFavorites();
   const [activeTab, setActiveTab] = useState<string>("escorts");
   const navigate = useNavigate();
 
@@ -28,7 +27,7 @@ const Favorites = () => {
   }, [favorites]);
   
   const handleClearFavorites = () => {
-    // Will be implemented when we add the clear favorites functionality
+    clearFavorites();
   };
 
   return (

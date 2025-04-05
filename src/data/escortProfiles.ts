@@ -1,6 +1,6 @@
 import { Escort } from "../types/escort";
 
-export const escorts: Escort[] = [
+export const escortProfiles: Escort[] = [
   {
     id: "1",
     name: "Sophia",
