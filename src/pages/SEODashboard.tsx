@@ -5,13 +5,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SEOModule from "@/components/admin/dashboard/SEOModule";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import HermesSeoOptimizer from "@/components/seo/HermesSeoOptimizer";
 import HermesSeoMetrics from "@/components/seo/HermesSeoMetrics";
+import HermesSeoHistory from "@/components/seo/HermesSeoHistory";
 import { Separator } from "@/components/ui/separator";
-import { Brain } from "lucide-react";
+import { Brain, LineChart, BarChart } from "lucide-react";
 
 // Sample content for demonstration
 const sampleContent = {
@@ -54,9 +53,13 @@ const SEODashboard = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="admin">Admin Settings</TabsTrigger>
           <TabsTrigger value="content">Content Optimization</TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center">
+            <LineChart className="h-4 w-4 mr-2" />
+            Analytics
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="admin" className="space-y-6 mt-6">
@@ -173,6 +176,121 @@ const SEODashboard = () => {
                 contentType={contentType}
                 onOptimizationsApplied={handleOptimizationsApplied}
               />
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="analytics" className="mt-6">
+          <div className="grid grid-cols-1 gap-6">
+            <HermesSeoHistory />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart className="h-5 w-5 mr-2 text-primary" />
+                    Performance by Content Type
+                  </CardTitle>
+                  <CardDescription>
+                    Average visibility scores across different content types
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px]">
+                    {/* This would be populated with real data in a production environment */}
+                    <div className="flex flex-col h-full justify-center items-center space-y-4">
+                      <div className="flex items-center justify-between w-full">
+                        <span>Profiles</span>
+                        <span>85%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2.5">
+                        <div className="bg-primary h-2.5 rounded-full" style={{width: "85%"}}></div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between w-full">
+                        <span>Content</span>
+                        <span>78%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2.5">
+                        <div className="bg-primary h-2.5 rounded-full" style={{width: "78%"}}></div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between w-full">
+                        <span>Livecams</span>
+                        <span>92%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2.5">
+                        <div className="bg-primary h-2.5 rounded-full" style={{width: "92%"}}></div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between w-full">
+                        <span>Events</span>
+                        <span>72%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2.5">
+                        <div className="bg-primary h-2.5 rounded-full" style={{width: "72%"}}></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Performing Content</CardTitle>
+                  <CardDescription>
+                    Content with the highest visibility scores
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* This would be populated with real data in a production environment */}
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <div>
+                        <p className="font-medium">Live Show</p>
+                        <p className="text-sm text-muted-foreground">Livecam</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-green-500">98%</p>
+                        <p className="text-sm text-muted-foreground">+12%</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <div>
+                        <p className="font-medium">VIP Model</p>
+                        <p className="text-sm text-muted-foreground">Profile</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-green-500">94%</p>
+                        <p className="text-sm text-muted-foreground">+8%</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between border-b pb-2">
+                      <div>
+                        <p className="font-medium">Premium Adult Content</p>
+                        <p className="text-sm text-muted-foreground">Content</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-green-500">88%</p>
+                        <p className="text-sm text-muted-foreground">+15%</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Escort in LA</p>
+                        <p className="text-sm text-muted-foreground">Profile</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-green-500">85%</p>
+                        <p className="text-sm text-muted-foreground">+5%</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </TabsContent>
