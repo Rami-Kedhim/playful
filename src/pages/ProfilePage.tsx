@@ -8,25 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { Camera, Globe, Phone, Mail, MapPin, Shield, Settings, UserCircle } from 'lucide-react';
-
-// Create placeholder components for missing imports
-const useUserPreferences = () => {
-  return {
-    theme: 'light',
-    toggleTheme: () => {},
-    language: 'en',
-    setLanguage: () => {},
-  };
-};
-
-const VerificationStatus = () => {
-  return <div>Verification Status Component</div>;
-};
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { VerificationStatus } from '@/components/verification';
 
 const ProfilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, updateUser } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const { toast } = useToast();
   const { theme, toggleTheme, language, setLanguage } = useUserPreferences();
   
@@ -49,12 +37,12 @@ const ProfilePage = () => {
     if (!user) return;
     
     try {
-      await updateUser({
+      await updateUserProfile({
         full_name: profileData.name,
         phone: profileData.phone,
         location: profileData.location,
         bio: profileData.bio,
-        profileImageUrl: user.profileImageUrl, // Use profileImageUrl instead of avatar_url
+        profileImageUrl: user.profileImageUrl,
       });
       
       setIsEditing(false);
@@ -104,10 +92,10 @@ const ProfilePage = () => {
                 <div className="flex flex-col items-center">
                   <Avatar className="h-24 w-24 mb-4">
                     <AvatarImage src={user.profileImageUrl} />
-                    <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                    <AvatarFallback>{user.full_name?.charAt(0) || user.username?.charAt(0) || 'U'}</AvatarFallback>
                   </Avatar>
                   
-                  <h2 className="text-xl font-semibold">{user.full_name}</h2>
+                  <h2 className="text-xl font-semibold">{user.full_name || user.username}</h2>
                   <p className="text-muted-foreground">{user.email}</p>
                   
                   <div className="mt-4 space-y-2 w-full">
@@ -186,7 +174,6 @@ const ProfilePage = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {/* Profile information form would go here */}
                     <p className="mb-4">Basic profile information</p>
                   </CardContent>
                 </Card>
@@ -215,7 +202,6 @@ const ProfilePage = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {/* Account settings form would go here */}
                     <p className="mb-4">Account preferences and settings</p>
                   </CardContent>
                 </Card>

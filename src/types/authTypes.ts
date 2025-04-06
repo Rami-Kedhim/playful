@@ -1,4 +1,3 @@
-
 export interface AuthUser {
   id: string;
   username?: string;
@@ -9,6 +8,11 @@ export interface AuthUser {
   isVerified?: boolean;
   // User profile data
   avatarUrl?: string;
+  // Additional profile fields
+  full_name?: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
   // Supabase User properties
   app_metadata: Record<string, any>;
   user_metadata: Record<string, any>;
