@@ -106,7 +106,6 @@ const MobileNav: React.FC = () => {
                   <UserDropdown 
                     user={user} 
                     handleLogout={handleLogout} 
-                    isMobile={true} 
                     onClose={handleCloseMenu} 
                   />
                 )}

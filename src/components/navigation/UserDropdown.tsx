@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -17,9 +18,11 @@ import { User, Wallet, Settings, LogOut, Shield } from 'lucide-react';
 interface UserDropdownProps {
   user: any;
   handleLogout: () => Promise<void>;
+  isMobile?: boolean;
+  onClose?: () => void;
 }
 
-const UserDropdown = ({ user, handleLogout }: UserDropdownProps) => {
+const UserDropdown = ({ user, handleLogout, isMobile, onClose }: UserDropdownProps) => {
   // Get initials for avatar fallback
   const getInitials = (name: string) => {
     if (!name) return 'U';
@@ -56,19 +59,19 @@ const UserDropdown = ({ user, handleLogout }: UserDropdownProps) => {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link to="/profile" className="w-full cursor-pointer">
+            <Link to="/profile" className="w-full cursor-pointer" onClick={onClose}>
               <User className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/wallet" className="w-full cursor-pointer">
+            <Link to="/wallet" className="w-full cursor-pointer" onClick={onClose}>
               <Wallet className="mr-2 h-4 w-4" />
               <span>Wallet ({user?.lucoinsBalance || 0} LC)</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link to="/settings" className="w-full cursor-pointer">
+            <Link to="/settings" className="w-full cursor-pointer" onClick={onClose}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </Link>
@@ -80,7 +83,7 @@ const UserDropdown = ({ user, handleLogout }: UserDropdownProps) => {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link to="/dashboard" className="w-full cursor-pointer">
+                <Link to="/dashboard" className="w-full cursor-pointer" onClick={onClose}>
                   <Shield className="mr-2 h-4 w-4" />
                   <span>Escort Dashboard</span>
                 </Link>
@@ -94,7 +97,7 @@ const UserDropdown = ({ user, handleLogout }: UserDropdownProps) => {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link to="/seo" className="w-full cursor-pointer">
+                <Link to="/seo" className="w-full cursor-pointer" onClick={onClose}>
                   <Shield className="mr-2 h-4 w-4" />
                   <span>SEO Dashboard</span>
                 </Link>

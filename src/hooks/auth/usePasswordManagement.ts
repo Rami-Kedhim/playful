@@ -1,7 +1,8 @@
 
-import React from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { handleAuthError } from "@/utils/authStateUtils";
 
 export const usePasswordManagement = (setIsLoading: (value: boolean) => void) => {
   // Reset password function
@@ -13,11 +14,7 @@ export const usePasswordManagement = (setIsLoading: (value: boolean) => void) =>
       });
       
       if (error) {
-        toast({
-          title: "Password reset failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        handleAuthError(error);
         throw error;
       }
       
@@ -25,8 +22,8 @@ export const usePasswordManagement = (setIsLoading: (value: boolean) => void) =>
         title: "Password reset email sent",
         description: "Please check your email for the password reset link",
       });
-    } catch (error: any) {
-      console.error("Error resetting password:", error.message);
+    } catch (error) {
+      console.error("Error resetting password:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -40,11 +37,7 @@ export const usePasswordManagement = (setIsLoading: (value: boolean) => void) =>
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       
       if (error) {
-        toast({
-          title: "Password update failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        handleAuthError(error);
         throw error;
       }
       
@@ -52,8 +45,8 @@ export const usePasswordManagement = (setIsLoading: (value: boolean) => void) =>
         title: "Password updated",
         description: "Your password has been updated successfully",
       });
-    } catch (error: any) {
-      console.error("Error updating password:", error.message);
+    } catch (error) {
+      console.error("Error updating password:", error);
       throw error;
     } finally {
       setIsLoading(false);
