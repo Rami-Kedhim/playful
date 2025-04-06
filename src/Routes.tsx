@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
@@ -17,6 +16,7 @@ import MetaversePage from './pages/MetaversePage';
 import SearchPage from './pages/SearchPage';
 import { useLanguage } from './contexts/LanguageContext';
 import { languages } from './i18n/i18n';
+import AIProfiles from "@/pages/AIProfiles";
 
 // Language route wrapper to handle language parameter
 const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
@@ -32,7 +32,7 @@ const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AppRoutes = () => {
+const Routes = () => {
   const { isLoading } = useAuth();
   const { currentLanguage } = useLanguage();
 
@@ -103,4 +103,4 @@ const AppRoutes = () => {
   );
 };
 
-export default AppRoutes;
+export default Routes;
