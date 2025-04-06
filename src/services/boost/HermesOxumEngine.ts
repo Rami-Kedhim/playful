@@ -8,6 +8,9 @@ import { oxumEngine } from "./oxum/OxumEngine";
 import { ProfileScoreData } from "@/utils/oxum/oxumAlgorithm";
 
 export class HermesOxumEngine {
+  // System load value (0-1)
+  private systemLoad: number = 0.5;
+  
   /**
    * Calculate effective boost score for a profile
    */
@@ -86,6 +89,23 @@ export class HermesOxumEngine {
    */
   public deactivateBoost(profileId: string): void {
     oxumEngine.deactivateBoost(profileId);
+  }
+  
+  /**
+   * Update the system load value
+   */
+  public updateSystemLoad(load: number): void {
+    this.systemLoad = Math.max(0, Math.min(1, load));
+    
+    // Pass system load to Hermes engine
+    hermesEngine.updateSystemLoad(this.systemLoad);
+  }
+  
+  /**
+   * Get current system load
+   */
+  public getSystemLoad(): number {
+    return this.systemLoad;
   }
 }
 

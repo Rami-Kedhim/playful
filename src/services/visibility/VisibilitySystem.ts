@@ -5,6 +5,7 @@
  */
 import hermesOxumEngine from "@/services/boost/HermesOxumEngine";
 import { ProfileScoreData } from "@/utils/oxum/oxumAlgorithm";
+import { neuralHub } from "@/services/neural/HermesOxumNeuralHub";
 
 // Type definitions for content visibility
 export interface VisibilityItem {
@@ -105,16 +106,33 @@ export class VisibilitySystem {
       item.score = newScore;
       this.items.set(id, item);
       
-      // Update in HermesOxum engine
-      const effectiveScore = hermesOxumEngine.calculateEffectiveBoostScore(
-        id,
-        newScore,
-        50, // Default engagement score
-        item.lastViewedAt ? 
-          (Date.now() - item.lastViewedAt.getTime()) / (1000 * 60 * 60) : 0
-      );
-      
-      console.log(`Updated item ${id} score to ${newScore}, effective: ${effectiveScore}`);
+      // Use Neural Hub for enhanced boost calculation if available
+      try {
+        // Map content type from visibility system to neural hub
+        const contentType = this.mapVisibilityTypeToContentType(item.type);
+        
+        // Calculate boost score with neural hub enhanced algorithms
+        const effectiveScore = neuralHub.applyBoostToContent(
+          id,
+          contentType,
+          newScore,
+          item.region,
+          item.language
+        );
+        
+        console.log(`Updated item ${id} score to ${newScore}, effective: ${effectiveScore} (Neural Hub enhanced)`);
+      } catch (e) {
+        // Fallback to regular HermesOxum engine
+        const effectiveScore = hermesOxumEngine.calculateEffectiveBoostScore(
+          id,
+          newScore,
+          50, // Default engagement score
+          item.lastViewedAt ? 
+            (Date.now() - item.lastViewedAt.getTime()) / (1000 * 60 * 60) : 0
+        );
+        
+        console.log(`Updated item ${id} score to ${newScore}, effective: ${effectiveScore} (Standard)`);
+      }
     }
   }
 
@@ -123,6 +141,19 @@ export class VisibilitySystem {
    */
   public getItem(id: string): VisibilityItem | undefined {
     return this.items.get(id);
+  }
+  
+  /**
+   * Map visibility system types to Neural Hub content types
+   */
+  private mapVisibilityTypeToContentType(visibilityType: string): 'profile' | 'post' | 'video' | 'livecam' | 'event' | 'metaverse' {
+    switch (visibilityType) {
+      case 'escort': return 'profile';
+      case 'creator': return 'profile';
+      case 'content': return 'post';
+      case 'livecam': return 'livecam';
+      default: return 'post';
+    }
   }
 }
 

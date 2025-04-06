@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
@@ -11,9 +12,11 @@ import {
   Settings, 
   ShieldAlert, 
   BarChart4,
-  Search
+  Search,
+  Brain
 } from "lucide-react";
 import SEOModule from "@/components/admin/dashboard/SEOModule";
+import HermesOxumControl from "@/components/admin/dashboard/HermesOxumControl";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -27,7 +30,7 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-2 md:grid-cols-8 w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-9 w-full">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="creators">Creators</TabsTrigger>
@@ -37,6 +40,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="seo">
               <Search className="h-4 w-4 mr-2" />
               SEO
+            </TabsTrigger>
+            <TabsTrigger value="hermes">
+              <Brain className="h-4 w-4 mr-2" />
+              HERMES
             </TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -111,6 +118,10 @@ const AdminDashboard = () => {
                       <span>Authentication</span>
                       <span className="text-green-500">Operational</span>
                     </div>
+                    <div className="flex justify-between items-center">
+                      <span>HERMES-OXUM Engine</span>
+                      <span className="text-green-500">Operational</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -179,6 +190,10 @@ const AdminDashboard = () => {
           
           <TabsContent value="seo" className="space-y-4">
             <SEOModule />
+          </TabsContent>
+          
+          <TabsContent value="hermes" className="space-y-4">
+            <HermesOxumControl />
           </TabsContent>
           
           <TabsContent value="settings" className="space-y-4">
