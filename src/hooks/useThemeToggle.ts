@@ -16,7 +16,9 @@ export const useThemeToggle = () => {
     }
     
     // Add transition classes to body for smooth theme transitions
-    document.body.classList.add('transition-colors', 'duration-300');
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.add('transition-colors', 'duration-300');
+    }
     
   }, [theme, setTheme]);
   

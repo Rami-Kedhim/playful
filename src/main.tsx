@@ -7,8 +7,7 @@ import { AuthProvider } from "./hooks/auth/useAuth";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
 import "./index.css";
 
-// Force dark mode by default
-document.documentElement.classList.add('dark');
+// Note: We're removing the forced dark mode here since we're using the ThemeProvider
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
