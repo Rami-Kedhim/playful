@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,7 +57,9 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
       const mockGift: AIGift = {
         id: Math.random().toString(36).substring(2, 15),
         gift_type: giftType,
-        amount,
+        name: giftType, // Added name property based on AIGift type
+        description: `A ${giftType} gift`, // Added description property
+        price: amount, // Using amount as price
         user_id: 'current-user',
         profile_id: profileId,
         created_at: new Date().toISOString()

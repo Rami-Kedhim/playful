@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { ProgressBar } from "@/components/ui/progress";
+import { Progress } from "@/components/ui/progress"; // Fixed import
 import { Badge } from "@/components/ui/badge";
 import { Zap, ZapOff, Coins } from "lucide-react";
 import { useAIModelMonetization } from "@/hooks/ai/useAIModelMonetization";
@@ -160,7 +160,7 @@ const AIModelBoost = ({ profileId }: AIModelBoostProps) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <ProgressBar value={boostStatus.progress} className="h-2" />
+              <Progress value={boostStatus.progress} className="h-2" /> {/* Fixed component name */}
               <div className="text-sm text-muted-foreground text-right">
                 Time Remaining: {formatRemainingTime(boostStatus.remainingTime)}
               </div>
