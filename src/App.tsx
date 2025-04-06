@@ -1,13 +1,33 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import AppRoutes from './Routes';
 import { Toaster } from './components/ui/toaster';
 import { useAuth } from './hooks/auth/useAuth';
 import { Loader2 } from 'lucide-react';
-import { ToastProvider } from './hooks/use-toast';
+import { ToastProvider, useToast } from './hooks/use-toast';
 
-function App() {
+function AppContent() {
   const { isLoading } = useAuth();
+  const { addToast } = useToast();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Set the global toast function
+      (window as any).__TOAST_ADD_FUNCTION__ = addToast;
+      
+      // Add a marker to indicate that toast context is available
+      const markerElement = document.createElement('div');
+      markerElement.id = 'toast-context-element';
+      markerElement.dataset.hasToastContext = 'true';
+      markerElement.style.display = 'none';
+      document.body.appendChild(markerElement);
+      
+      return () => {
+        document.body.removeChild(markerElement);
+        (window as any).__TOAST_ADD_FUNCTION__ = null;
+      };
+    }
+  }, [addToast]);
 
   // Show loading state while authentication is being determined
   if (isLoading) {
@@ -19,9 +39,17 @@ function App() {
   }
 
   return (
-    <ToastProvider>
+    <>
       <AppRoutes />
       <Toaster />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
     </ToastProvider>
   );
 }

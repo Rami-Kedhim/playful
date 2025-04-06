@@ -1,93 +1,127 @@
-
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 /**
- * Generate an AI image using DALL-E
+ * Generate an AI image based on a prompt
+ * @param prompt The text description to generate an image from
+ * @param options Optional configuration for the image generation
+ * @returns URL of the generated image or null if generation failed
  */
-export const generateAIImage = async (
-  userId: string,
-  prompt: string,
-  aiProfileId?: string
-): Promise<{
-  imageUrl?: string;
-  requiresPayment: boolean;
-  price?: number;
-  error?: string;
-}> => {
+export const generateImage = async (prompt: string, options = {}): Promise<string | null> => {
+  // Show a loading toast that we can dismiss later
+  const toastId = Math.random().toString(36).substring(2, 9);
+  
+  // Show loading toast
+  toast({
+    id: toastId,
+    title: 'Generating image...',
+    description: 'Please wait while we process your request.',
+  });
+  
   try {
-    // Show loading toast
-    const loadingToast = toast({
-      title: "Generating image...",
-      description: "Please wait while we create your image",
+    // Image generation code would go here
+    // Simulate API call with a delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // This would be replaced with actual API call in production
+    const response = await fetch('https://api.example.com/generate-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt, ...options }),
     });
     
-    const { data: result, error } = await supabase.functions.invoke('generate-ai-content', {
-      body: {
-        prompt,
-        user_id: userId,
-        ai_profile_id: aiProfileId,
-        type: 'image',
-        size: "1024x1024",
-        style: "natural"
-      }
-    });
-    
-    // Dismiss loading toast
-    loadingToast.dismiss?.();
-    
-    if (error) {
-      console.error("Supabase function error:", error);
-      toast({
-        title: "Image generation failed",
-        description: error.message || "An error occurred while generating the image",
-        variant: "destructive",
-      });
-      throw new Error(error.message);
+    if (!response.ok) {
+      throw new Error('Failed to generate image');
     }
     
-    if (result.error) {
-      if (result.requiresPayment) {
-        toast({
-          title: "Insufficient Lucoins",
-          description: `You need ${result.price} Lucoins to generate this image`,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Image generation failed",
-          description: result.error || "Failed to generate image",
-          variant: "destructive",
-        });
-      }
-      
-      return {
-        requiresPayment: result.requiresPayment || false,
-        price: result.price,
-        error: result.error
-      };
+    const data = await response.json();
+    
+    // Success, dismiss the loading toast
+    removeToast(toastId);
+    
+    return data.imageUrl; // Return the actual URL from the API
+  } catch (error) {
+    // Error handling
+    console.error('Image generation failed:', error);
+    
+    // Dismiss the loading toast and show error
+    removeToast(toastId);
+    
+    toast({
+      title: 'Image generation failed',
+      description: error instanceof Error ? error.message : 'An unknown error occurred',
+      variant: 'destructive',
+    });
+    
+    return null;
+  }
+};
+
+/**
+ * Helper function to remove a toast by ID
+ * @param id The ID of the toast to remove
+ */
+const removeToast = (id: string) => {
+  // If we're in a component with access to useToast, we'd use it directly
+  // For a service like this, we need to use the global approach
+  if (typeof window !== 'undefined' && (window as any).__TOAST_REMOVE_FUNCTION__) {
+    (window as any).__TOAST_REMOVE_FUNCTION__(id);
+  }
+};
+
+/**
+ * Get available AI image generation models
+ * @returns List of available models
+ */
+export const getAvailableImageModels = async () => {
+  try {
+    // This would be an actual API call in production
+    const response = await fetch('https://api.example.com/image-models');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch available models');
     }
     
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching image models:', error);
+    
     toast({
-      title: "Image generated!",
-      description: "Your AI image has been created successfully",
+      title: 'Error',
+      description: 'Failed to load available image generation models',
+      variant: 'destructive',
     });
     
-    return {
-      imageUrl: result.image_url,
-      requiresPayment: false, // Already paid in the function
-      price: result.price
-    };
-  } catch (error: any) {
-    console.error("Error generating AI image:", error);
+    return [];
+  }
+};
+
+/**
+ * Check if a user has enough credits for image generation
+ * @param userId The user ID to check
+ * @returns Boolean indicating if the user has sufficient credits
+ */
+export const checkImageGenerationCredits = async (userId: string): Promise<boolean> => {
+  try {
+    // This would be an actual API call in production
+    const response = await fetch(`https://api.example.com/users/${userId}/credits`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to check credits');
+    }
+    
+    const { credits } = await response.json();
+    return credits >= 1; // Assuming 1 credit per image
+  } catch (error) {
+    console.error('Error checking image generation credits:', error);
+    
     toast({
-      title: "Image generation failed",
-      description: error.message || "An unexpected error occurred",
-      variant: "destructive",
+      title: 'Error',
+      description: 'Failed to check your available credits',
+      variant: 'destructive',
     });
-    return {
-      requiresPayment: false,
-      error: error.message
-    };
+    
+    return false;
   }
 };

@@ -1,8 +1,8 @@
 
-import { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 
 // Types for toast
-interface Toast {
+export interface Toast {
   id: string;
   title?: string;
   description?: string;
@@ -14,19 +14,21 @@ interface ToastContextType {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, "id">) => void;
   removeToast: (id: string) => void;
+  toast: (props: Omit<Toast, "id">) => void; // Add the toast function to the context
 }
 
 const ToastContext = createContext<ToastContextType>({
   toasts: [],
   addToast: () => {},
   removeToast: () => {},
+  toast: () => {},
 });
 
-export function ToastProvider({
-  children,
-}: {
+interface ToastProviderProps {
   children: React.ReactNode;
-}) {
+}
+
+export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = (toast: Omit<Toast, "id">) => {
@@ -43,15 +45,18 @@ export function ToastProvider({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Set up the global toast function
-  useEffect(() => {
-    if (typeof window !== "undefined" && typeof toast.__internal__setAddToast === "function") {
-      toast.__internal__setAddToast(addToast);
-    }
-  }, []);
+  // Create the toast function directly within the provider
+  const toastFunction = (props: Omit<Toast, "id">) => {
+    addToast(props);
+  };
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={{ 
+      toasts, 
+      addToast, 
+      removeToast,
+      toast: toastFunction 
+    }}>
       {children}
     </ToastContext.Provider>
   );
@@ -59,27 +64,39 @@ export function ToastProvider({
 
 export function useToast() {
   const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
   return context;
 }
 
 // Create a standalone toast function that doesn't require hooks
-let addToast: (toast: Omit<Toast, "id">) => void;
 export const toast = (props: Omit<Toast, "id">) => {
-  if (typeof addToast !== "function") {
+  // Check if we're in a browser environment
+  if (typeof window === "undefined") {
+    console.warn("Toast called in non-browser environment");
+    return;
+  }
+  
+  // Try to find the ToastContext in the global scope
+  const toastContextElement = document.getElementById("toast-context-element");
+  
+  if (!toastContextElement || !toastContextElement.dataset.hasToastContext) {
     console.error("toast was called before ToastProvider was mounted");
     return;
   }
-  addToast(props);
+  
+  // Access the global addToast function
+  const addToast = (window as any).__TOAST_ADD_FUNCTION__;
+  if (typeof addToast === "function") {
+    addToast(props);
+  } else {
+    console.error("Toast function not available");
+  }
 };
 
-// This effect runs only in the browser to set up the toast function
+// Set up global access to the toast function
 if (typeof window !== "undefined") {
-  Object.defineProperty(toast, "__internal__setAddToast", {
-    value: (fn: typeof addToast) => {
-      addToast = fn;
-    },
-    enumerable: false,
-    configurable: false,
-    writable: false,
-  });
+  // Will be set by the ToastProvider when it mounts
+  (window as any).__TOAST_ADD_FUNCTION__ = null;
 }

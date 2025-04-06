@@ -2,15 +2,16 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { toast } from '@/hooks/use-toast';
 
-interface Notification {
+export interface Notification {
   id: string;
   user_id: string;
   type: string;
   title: string;
-  content: string;
-  is_read: boolean;
-  created_at: string;
+  content: string; // Using content instead of message
+  is_read: boolean; // Using is_read instead of read
+  created_at: string; // Using created_at instead of timestamp
 }
 
 interface NotificationsContextType {
@@ -21,6 +22,11 @@ interface NotificationsContextType {
   fetchNotifications: () => Promise<void>;
   markAsRead: (notificationId: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
+  // Add these methods for showing notifications via toast
+  showSuccess: (title: string, message: string) => void;
+  showError: (title: string, message: string) => void;
+  showInfo: (title: string, message: string) => void; 
+  showWarning: (title: string, message: string) => void;
 }
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
@@ -112,6 +118,39 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [user, unreadCount]);
 
+  // Add toast notification helpers
+  const showSuccess = useCallback((title: string, message: string) => {
+    toast({
+      title,
+      description: message,
+      variant: "default"
+    });
+  }, []);
+
+  const showError = useCallback((title: string, message: string) => {
+    toast({
+      title,
+      description: message,
+      variant: "destructive"
+    });
+  }, []);
+
+  const showInfo = useCallback((title: string, message: string) => {
+    toast({
+      title,
+      description: message,
+      variant: "default"
+    });
+  }, []);
+
+  const showWarning = useCallback((title: string, message: string) => {
+    toast({
+      title,
+      description: message,
+      variant: "destructive"
+    });
+  }, []);
+
   // Initial fetch
   React.useEffect(() => {
     if (user) {
@@ -127,6 +166,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchNotifications,
     markAsRead,
     markAllAsRead,
+    showSuccess,
+    showError,
+    showInfo,
+    showWarning
   };
 
   return (

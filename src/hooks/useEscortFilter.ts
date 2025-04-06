@@ -1,8 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useFilterResults } from "@/hooks/escort-filters/useFilterResults";
-import { Escort } from "@/types/escort";
-import { EscortFilterHook } from "@/types/escortFilters";
+import { Escort, EscortFilterHook } from "@/types/escortFilters";
 
 export interface UseEscortFilterProps {
   escorts: Escort[];

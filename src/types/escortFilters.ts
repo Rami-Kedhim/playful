@@ -64,3 +64,11 @@ export interface FilterOptions {
   sortOptions: { id: string; label: string }[];
   serviceTypes: { id: string; label: string }[];
 }
+
+// Add the EscortFilterHook interface that combines state and results
+export interface EscortFilterHook extends EscortFilterState, EscortFilterActions {
+  filteredEscorts: Escort[];
+  sortedEscorts: Escort[];
+  paginatedEscorts: Escort[];
+  totalPages: number;
+}

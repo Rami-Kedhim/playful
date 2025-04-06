@@ -51,10 +51,10 @@ const NotificationsMenu = () => {
                 key={notification.id}
                 id={notification.id}
                 title={notification.title}
-                message={notification.message}
+                message={notification.content} // Changed from message to content
                 type={notification.type}
-                isRead={notification.read}
-                createdAt={notification.timestamp} // Use timestamp instead of createdAt
+                isRead={notification.is_read} // Changed from read to is_read
+                createdAt={notification.created_at} // Changed from timestamp to created_at
                 onMarkAsRead={markAsRead}
               />
             ))
