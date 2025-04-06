@@ -36,7 +36,7 @@ export const mockReviews: CreatorReview[] = [
     reviewer_id: 'user3',
     creator_id: 'creator2',
     rating: 5,
-    comment: 'Best creator I've subscribed to!',
+    comment: 'Best creator I\'ve subscribed to!',
     created_at: '2023-10-05T09:20:00Z',
     reviewer: {
       id: 'user3',
