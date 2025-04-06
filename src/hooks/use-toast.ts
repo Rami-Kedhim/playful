@@ -43,6 +43,13 @@ export function ToastProvider({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Set up the global toast function
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof toast.__internal__setAddToast === "function") {
+      toast.__internal__setAddToast(addToast);
+    }
+  }, []);
+
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
       {children}
