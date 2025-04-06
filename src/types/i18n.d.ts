@@ -1,8 +1,8 @@
 
-declare module 'react-i18next' {
-  import i18next from 'i18next';
-  import { ReactNode } from 'react';
+import i18next from 'i18next';
+import { ReactNode } from 'react';
 
+declare module 'react-i18next' {
   export interface UseTranslationOptions {
     keyPrefix?: string;
     nsMode?: string;
@@ -45,6 +45,45 @@ declare module 'react-i18next' {
   export const Trans: React.ComponentType<TransProps>;
 }
 
+declare module 'i18next' {
+  export interface InitOptions {
+    resources?: any;
+    lng?: string;
+    fallbackLng?: string | string[];
+    ns?: string | string[];
+    defaultNS?: string;
+    fallbackNS?: string | string[];
+    debug?: boolean;
+    interpolation?: {
+      escapeValue?: boolean;
+      formatSeparator?: string;
+      format?: (value: any, format: string, lng: string) => string;
+    };
+    detection?: {
+      order?: string[];
+      lookupFromPathIndex?: number;
+      caches?: string[];
+    };
+    [key: string]: any;
+  }
+
+  export interface i18n {
+    t: (key: string | string[], options?: any) => string;
+    changeLanguage: (lng: string, callback?: (err: Error | null, t: TFunction) => void) => Promise<TFunction>;
+    language?: string;
+    languages: string[];
+    getFixedT: (lng: string, ns?: string | string[]) => TFunction;
+    [key: string]: any;
+  }
+
+  interface TFunction {
+    (key: string | string[], options?: any): string;
+  }
+
+  const i18next: i18n;
+  export default i18next;
+}
+
 declare module 'i18next-browser-languagedetector' {
   import i18next from 'i18next';
   
@@ -55,4 +94,9 @@ declare module 'i18next-browser-languagedetector' {
     cacheUserLanguage(lng: string): void;
     type: 'languageDetector';
   }
+}
+
+declare module '*.json' {
+  const value: Record<string, any>;
+  export default value;
 }

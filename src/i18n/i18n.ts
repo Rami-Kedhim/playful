@@ -19,7 +19,7 @@ i18n
   // detect language from browser
   .use(LanguageDetector)
   // pass i18n instance to react-i18next
-  .use(initReactI18next as any)
+  .use(initReactI18next)
   // init i18next
   .init({
     resources: {
