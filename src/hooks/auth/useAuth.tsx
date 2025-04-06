@@ -1,24 +1,24 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { AuthContextValue, UserRole } from "@/types/auth";
 import { useAuthState } from "@/hooks/auth/useAuthState";
-import { useAuthentication } from "@/hooks/auth/useAuthentication";
-import { User } from "@supabase/supabase-js";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
+import { usePasswordManagement } from "@/hooks/auth/usePasswordManagement";
 import { toast } from "@/components/ui/use-toast";
+import { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile] = useAuthState();
-  const { signUp, signIn, signOut, resetPassword, updatePassword, updateProfile } = useAuthentication(setIsLoading, refreshProfile);
+  const { resetPassword, updatePassword } = usePasswordManagement(setIsLoading);
+  const { signUp, signIn, signOut } = useAuthActions(setIsLoading, refreshProfile);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to check if user has a specific role
   const checkRole = (role: string): boolean => {
     return userRoles.includes(role);
   };
 
-  // Additional methods expected by components
   const login = async (email: string, password: string) => {
     try {
       setError(null);
@@ -54,8 +54,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       if (!user) throw new Error("User not logged in");
       
-      // Pass user.id as the userId parameter
-      await updateProfile(user.id, userData);
+      const { data, error: updateError } = await supabase
+        .from('profiles')
+        .update(userData)
+        .eq('id', user.id)
+        .single();
+      
+      if (updateError) throw updateError;
+      
       await refreshProfile();
       
       toast({
@@ -70,12 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const clearError = () => setError(null);
 
-  // Convert database user to AuthUser type for components
   const mapUserToAuthUser = (dbUser: User | null, profile: any | null) => {
     if (!dbUser) return null;
     
-    // Determine role - use the first role from userRoles array or default to "user"
-    // Cast it to UserRole type to match our interface
     const roleValue: UserRole = (userRoles.length > 0 ? userRoles[0] : "user") as UserRole;
     
     return {
@@ -93,8 +96,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
-  // If we have a user and we're not using the updated user object from useAuthState,
-  // map it for consistency with the rest of the app
   const authUser = user || (session?.user ? mapUserToAuthUser(session.user, profile) : null);
 
   const value: AuthContextValue = {
@@ -110,7 +111,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updatePassword,
     refreshProfile,
     checkRole,
-    // Additional properties expected by components
     isAuthenticated: !!session,
     login,
     logout,

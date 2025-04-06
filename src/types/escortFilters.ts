@@ -1,51 +1,66 @@
 
-import { Escort } from "./escort";
-
 export interface EscortFilterState {
   searchQuery: string;
+  setSearchQuery: (query: string) => void;
   location: string;
+  setLocation: (location: string) => void;
   priceRange: [number, number];
+  setPriceRange: (range: [number, number]) => void;
+  handlePriceRangeChange: (values: number[]) => void;
   verifiedOnly: boolean;
+  setVerifiedOnly: (verified: boolean) => void;
   selectedServices: string[];
+  setSelectedServices: (services: string[]) => void;
   sortBy: string;
+  setSortBy: (sortBy: string) => void;
   currentPage: number;
+  setCurrentPage: (page: number) => void;
   selectedGenders: string[];
+  setSelectedGenders: (genders: string[]) => void;
   selectedOrientations: string[];
+  setSelectedOrientations: (orientations: string[]) => void;
   ageRange: [number, number];
+  setAgeRange: (range: [number, number]) => void;
+  handleAgeRangeChange: (values: number[]) => void;
   ratingMin: number;
+  setRatingMin: (rating: number) => void;
   availableNow: boolean;
+  setAvailableNow: (available: boolean) => void;
   serviceTypeFilter: "in-person" | "virtual" | "both" | "";
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
   isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 export interface EscortFilterActions {
-  setSearchQuery: (value: string) => void;
-  setLocation: (value: string) => void;
-  setPriceRange: (value: [number, number]) => void;
-  handlePriceRangeChange: (values: number[]) => void;
-  setVerifiedOnly: (value: boolean) => void;
-  setSelectedServices: (services: string[]) => void; 
   toggleService: (service: string) => void;
-  setSortBy: (value: string) => void;
-  setCurrentPage: (value: number) => void;
-  setSelectedGenders: (genders: string[]) => void;
   toggleGender: (gender: string) => void;
-  setSelectedOrientations: (orientations: string[]) => void;
   toggleOrientation: (orientation: string) => void;
-  setAgeRange: (value: [number, number]) => void;
-  handleAgeRangeChange: (values: number[]) => void;
-  setRatingMin: (value: number) => void;
-  setAvailableNow: (value: boolean) => void;
-  setServiceTypeFilter: (value: "in-person" | "virtual" | "both" | "") => void;
-  setIsLoading: (value: boolean) => void;
   clearFilters: () => void;
 }
 
-export interface EscortFilterResults {
-  filteredEscorts: Escort[];
-  sortedEscorts: Escort[];
-  paginatedEscorts: Escort[];
-  totalPages: number;
+export interface Escort {
+  id: string;
+  name: string;
+  bio?: string;
+  location: string;
+  price?: number;
+  verified?: boolean;
+  services?: string[];
+  gender?: string;
+  sexualOrientation?: string;
+  age: number;
+  rating: number;
+  availableNow?: boolean;
+  serviceTypes?: string[];
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
 }
 
-export interface EscortFilterHook extends EscortFilterState, EscortFilterActions, EscortFilterResults {}
+export interface FilterOptions {
+  genders: { id: string; label: string }[];
+  orientations: { id: string; label: string }[];
+  services: { id: string; label: string }[];
+  sortOptions: { id: string; label: string }[];
+  serviceTypes: { id: string; label: string }[];
+}

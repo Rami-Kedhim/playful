@@ -4,6 +4,7 @@ import AppRoutes from './Routes';
 import { Toaster } from './components/ui/toaster';
 import { useAuth } from './hooks/auth/useAuth';
 import { Loader2 } from 'lucide-react';
+import { ToastProvider } from './hooks/use-toast';
 
 function App() {
   const { isLoading } = useAuth();
@@ -18,10 +19,10 @@ function App() {
   }
 
   return (
-    <>
+    <ToastProvider>
       <AppRoutes />
       <Toaster />
-    </>
+    </ToastProvider>
   );
 }
 

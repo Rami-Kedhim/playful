@@ -1,46 +1,56 @@
 
-export interface BoostStatus {
-  isActive: boolean;
-  progress: number;
-  remainingTime: string;
-  expiresAt?: Date;
-  boostPackage?: BoostPackage;
-}
-
+/**
+ * Represents a boost package that can be purchased
+ */
 export interface BoostPackage {
   id: string;
   name: string;
-  duration: string;
+  duration: string; // Format: "HH:MM:SS"
   price_lucoin: number;
+  description?: string;
   features?: string[];
-  description?: string; // Added this field
 }
 
-// Add BoostAnalytics interface
+/**
+ * Represents an active or inactive boost status
+ */
+export interface BoostStatus {
+  isActive: boolean;
+  expiresAt?: Date;
+  boostPackage?: BoostPackage;
+  remainingTime: string;
+  progress: number; // 0-100
+}
+
+/**
+ * Analytics data for a boost
+ */
 export interface BoostAnalytics {
-  views: {
-    withBoost: number;
-    withoutBoost: number;
-    increase: number;
-  };
-  clicks: {
-    withBoost: number;
-    withoutBoost: number;
-    increase: number;
-  };
-  searchRanking: {
-    withBoost: number;
-    withoutBoost: number;
-    improvement: number;
-  };
-  effectiveness: number;
+  id: string;
+  boost_id: string;
+  profile_id: string;
+  views_before: number;
+  views_after: number;
+  clicks_before: number;
+  clicks_after: number;
+  ranking_before: number;
+  ranking_after: number;
+  effectiveness_score: number;
+  created_at: string;
 }
 
-// Add BoostParams interface for boost calculation
-export interface BoostParams {
-  country: string;
-  completeness: number;
-  rating: number;
-  timeSlot: 'off_peak' | 'normal' | 'peak';
-  role: 'verified' | 'regular' | 'AI';
+/**
+ * History record of a boost purchase
+ */
+export interface BoostHistory {
+  id: string;
+  profile_id: string;
+  package_id: string;
+  package_name: string;
+  price_paid: number;
+  started_at: string;
+  ended_at: string;
+  duration: string;
+  was_cancelled: boolean;
+  created_at: string;
 }

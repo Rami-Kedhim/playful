@@ -1,171 +1,134 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
-import { toast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 
-export interface Notification {
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/auth/useAuth';
+
+interface Notification {
   id: string;
+  user_id: string;
+  type: string;
   title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "error";
-  read: boolean;
-  timestamp: number;
-  createdAt: Date;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
+  content: string;
+  is_read: boolean;
+  created_at: string;
 }
 
-export interface NotificationsContextType {
+interface NotificationsContextType {
   notifications: Notification[];
   unreadCount: number;
-  showInfo: (title: string, message: string) => void;
-  showSuccess: (title: string, message: string) => void;
-  showWarning: (title: string, message: string) => void;
-  showError: (title: string, message: string) => void;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  clearNotifications: () => void;
-  deleteNotification: (id: string) => void;
-  fetchNotifications: () => void;
+  isLoading: boolean;
+  error: string | null;
+  fetchNotifications: () => Promise<void>;
+  markAsRead: (notificationId: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
 }
 
-const defaultContext: NotificationsContextType = {
-  notifications: [],
-  unreadCount: 0,
-  showInfo: () => {},
-  showSuccess: () => {},
-  showWarning: () => {},
-  showError: () => {},
-  markAsRead: () => {},
-  markAllAsRead: () => {},
-  clearNotifications: () => {},
-  deleteNotification: () => {},
-  fetchNotifications: () => {}
-};
+const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
 
-export const NotificationsContext = createContext<NotificationsContextType>(defaultContext);
-
-export const useNotifications = () => {
-  return useContext(NotificationsContext);
-};
-
-export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  
-  // Load notifications from localStorage on mount
-  useEffect(() => {
-    const savedNotifications = localStorage.getItem("notifications");
-    if (savedNotifications) {
-      try {
-        setNotifications(JSON.parse(savedNotifications));
-      } catch (error) {
-        console.error("Error parsing notifications from localStorage:", error);
-      }
-    }
-  }, []);
-  
-  // Save to localStorage when notifications change
-  useEffect(() => {
-    localStorage.setItem("notifications", JSON.stringify(notifications));
-  }, [notifications]);
-  
-  const unreadCount = notifications.filter(n => !n.read).length;
-  
-  const addNotification = (
-    title: string, 
-    message: string, 
-    type: "info" | "success" | "warning" | "error",
-    action?: { label: string; onClick: () => void }
-  ) => {
-    const newNotification: Notification = {
-      id: Date.now().toString(),
-      title,
-      message,
-      type,
-      read: false,
-      timestamp: Date.now(),
-      createdAt: new Date(),
-      action
-    };
-    
-    setNotifications(prev => [newNotification, ...prev]);
-    
-    // Also show as toast
-    toast({
-      title,
-      description: message,
-      variant: type === "error" ? "destructive" : "default",
-      action: action ? (
-        <ToastAction altText={action.label} onClick={action.onClick}>
-          {action.label}
-        </ToastAction>
-      ) : undefined
-    });
-    
-    return newNotification.id;
-  };
-  
-  const showInfo = (title: string, message: string) => {
-    addNotification(title, message, "info");
-  };
-  
-  const showSuccess = (title: string, message: string) => {
-    addNotification(title, message, "success");
-  };
-  
-  const showWarning = (title: string, message: string) => {
-    addNotification(title, message, "warning");
-  };
-  
-  const showError = (title: string, message: string) => {
-    addNotification(title, message, "error");
-  };
-  
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(n => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
-  
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
-  
-  const clearNotifications = () => {
-    setNotifications([]);
-  };
-  
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock fetch notifications function
-  const fetchNotifications = () => {
-    // In a real app, this would be an API call
-    console.log("Fetching notifications...");
-    // For demo purposes, we could add a mock notification
-    if (notifications.length === 0) {
-      showInfo("Welcome", "Thanks for using our app!");
+  const fetchNotifications = useCallback(async () => {
+    if (!user) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
     }
-  };
-  
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const { data, error: fetchError } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (fetchError) throw new Error(fetchError.message);
+
+      setNotifications(data || []);
+      setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+    } catch (err: any) {
+      console.error('Error fetching notifications:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const markAsRead = useCallback(async (notificationId: string) => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+
+      const { error: updateError } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+        .eq('user_id', user.id);
+
+      if (updateError) throw new Error(updateError.message);
+
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err: any) {
+      console.error('Error marking notification as read:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const markAllAsRead = useCallback(async () => {
+    if (!user || unreadCount === 0) return;
+
+    try {
+      setIsLoading(true);
+
+      const { error: updateError } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+
+      if (updateError) throw new Error(updateError.message);
+
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+    } catch (err: any) {
+      console.error('Error marking all notifications as read:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, unreadCount]);
+
+  // Initial fetch
+  React.useEffect(() => {
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user, fetchNotifications]);
+
   const value = {
     notifications,
     unreadCount,
-    showInfo,
-    showSuccess,
-    showWarning,
-    showError,
+    isLoading,
+    error,
+    fetchNotifications,
     markAsRead,
     markAllAsRead,
-    clearNotifications,
-    deleteNotification,
-    fetchNotifications
   };
-  
+
   return (
     <NotificationsContext.Provider value={value}>
       {children}
@@ -173,4 +136,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export default NotificationsContext;
+export const useNotifications = () => {
+  const context = useContext(NotificationsContext);
+  if (context === undefined) {
+    throw new Error('useNotifications must be used within a NotificationsProvider');
+  }
+  return context;
+};
