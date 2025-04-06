@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/auth/useAuth";
@@ -13,8 +12,8 @@ const Navbar = () => {
   const { user, logout, isAuthenticated, userRoles = [] } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     setIsMobileMenuOpen(false);
   };
   
@@ -27,7 +26,6 @@ const Navbar = () => {
       .substring(0, 2);
   };
 
-  // Check if user has admin or moderator role for SEO access
   const hasAdminAccess = userRoles.some(role => ['admin', 'moderator'].includes(role));
   
   return (

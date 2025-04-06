@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -26,7 +25,7 @@ interface MobileMenuProps {
   user: AuthUser | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  handleLogout: () => void;
+  handleLogout: () => Promise<void>;
   hasAdminAccess?: boolean;
 }
 
@@ -39,7 +38,6 @@ const MobileMenu = ({ user, isOpen, setIsOpen, handleLogout, hasAdminAccess = fa
     { label: "Metaverse", path: "/metaverse", icon: Video },
   ];
 
-  // Add SEO link only for admin users
   if (hasAdminAccess) {
     mainLinks.push({ label: "SEO Dashboard", path: "/seo", icon: Search });
   }

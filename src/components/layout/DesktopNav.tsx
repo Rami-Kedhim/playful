@@ -11,8 +11,9 @@ const DesktopNav: React.FC = () => {
   const { user, logout } = useAuth();
   const { count: favoriteCount } = useFavorites();
   
-  const handleLogout = () => {
-    logout();
+  // Convert logout to async to match the expected Promise<void> type
+  const handleLogout = async () => {
+    await logout();
   };
   
   return (

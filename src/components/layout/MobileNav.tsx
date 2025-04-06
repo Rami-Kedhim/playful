@@ -16,8 +16,9 @@ const MobileNav: React.FC = () => {
     setIsOpen(!isOpen);
   };
   
-  const handleLogout = () => {
-    logout();
+  // Convert logout to async to match the expected Promise<void> type
+  const handleLogout = async () => {
+    await logout();
     setIsOpen(false);
   };
   
