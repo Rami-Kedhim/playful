@@ -2,11 +2,10 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AppLayout from "@/components/layout/AppLayout";
-import AIProfileGrid from "@/components/ai/AIProfileGrid";
-import AIProfileGenerator from "@/components/ai/AIProfileGenerator";
 import AIProfileDetail from "@/components/ai/AIProfileDetail";
+import AIProfileGenerator from "@/components/ai/AIProfileGenerator";
 import useAIProfileStore from "@/store/aiProfileStore";
-import { AIProfile } from "@/types/ai";
+import { AIProfile } from "@/types/ai-profile";
 import { Card } from "@/components/ui/card";
 
 const AIProfiles = () => {
@@ -44,18 +43,28 @@ const AIProfiles = () => {
               <>
                 <section>
                   <h2 className="text-2xl font-bold mb-4">Featured Companions</h2>
-                  <AIProfileGrid 
-                    profiles={featuredProfiles}
-                    onSelectProfile={handleSelectProfile}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {featuredProfiles.map(profile => (
+                      <AIProfileCard 
+                        key={profile.id} 
+                        profile={profile} 
+                        onChatClick={() => handleSelectProfile(profile)}
+                      />
+                    ))}
+                  </div>
                 </section>
                 
                 <section>
                   <h2 className="text-2xl font-bold mb-4">All Companions</h2>
-                  <AIProfileGrid 
-                    profiles={profiles}
-                    onSelectProfile={handleSelectProfile} 
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {profiles.map(profile => (
+                      <AIProfileCard 
+                        key={profile.id} 
+                        profile={profile} 
+                        onChatClick={() => handleSelectProfile(profile)}
+                      />
+                    ))}
+                  </div>
                 </section>
               </>
             )}

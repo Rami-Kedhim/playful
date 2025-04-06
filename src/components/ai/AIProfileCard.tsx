@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { AIProfile } from '@/types/ai-profile';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +36,7 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
       return profile.sample_messages[Math.floor(Math.random() * profile.sample_messages.length)];
     }
     
-    switch(profile.personality.type) {
+    switch(profile.personality?.type) {
       case 'flirty':
         return "Can't wait to chat with you... I've been thinking about it all day 😘";
       case 'shy':
@@ -49,40 +48,6 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
       default:
         return "Hello, I'd be happy to have a conversation with you.";
     }
-  };
-
-  // Get online status
-  const getOnlineStatus = () => {
-    if (profile.availability_status === 'online') {
-      return (
-        <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-          Online now
-        </Badge>
-      );
-    }
-    
-    if (profile.availability_status === 'away') {
-      return (
-        <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20">
-          Away
-        </Badge>
-      );
-    }
-    
-    if (profile.last_active) {
-      return (
-        <Badge variant="outline" className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-          Active {formatDistanceToNow(new Date(profile.last_active), { addSuffix: true })}
-        </Badge>
-      );
-    }
-    
-    return (
-      <Badge variant="outline" className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-        <Clock className="w-3 h-3 mr-1" />
-        Replies in 2-5 min
-      </Badge>
-    );
   };
 
   return (
@@ -116,9 +81,11 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
           <div className="flex items-center gap-2">
             <h3 className="text-xl font-semibold">{profile.name}</h3>
-            <Badge className={`${getPersonalityColor(profile.personality.type)} capitalize`}>
-              {profile.personality.type}
-            </Badge>
+            {profile.personality?.type && (
+              <Badge className={`${getPersonalityColor(profile.personality.type)} capitalize`}>
+                {profile.personality.type}
+              </Badge>
+            )}
           </div>
           <p className="text-sm opacity-90">{profile.location}</p>
         </div>
@@ -126,7 +93,16 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
       
       <CardContent className="p-4 flex-1">
         <div className="flex items-center mb-2">
-          {getOnlineStatus()}
+          {profile.availability_status === 'online' ? (
+            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+              Online now
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="bg-gray-500/10 text-gray-500 border-gray-500/20">
+              <Clock className="w-3 h-3 mr-1" />
+              Replies in 2-5 min
+            </Badge>
+          )}
         </div>
         
         <p className="text-sm text-muted-foreground line-clamp-3 min-h-[4.5rem]">
@@ -138,12 +114,12 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
         </div>
         
         <div className="flex flex-wrap gap-1 mt-3">
-          {profile.interests.slice(0, 3).map((interest, i) => (
+          {profile.interests?.slice(0, 3).map((interest, i) => (
             <Badge key={i} variant="secondary" className="text-xs capitalize">
               {interest}
             </Badge>
           ))}
-          {profile.interests.length > 3 && (
+          {profile.interests && profile.interests.length > 3 && (
             <Badge variant="outline" className="text-xs">
               +{profile.interests.length - 3} more
             </Badge>
@@ -158,7 +134,7 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
           onClick={onChatClick}
         >
           <MessageSquare className="w-4 h-4 mr-2" />
-          Chat ({profile.lucoin_chat_price} LC)
+          Chat ({profile.lucoin_chat_price || 5} LC)
         </Button>
         
         <TooltipProvider>
@@ -169,7 +145,7 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Request images ({profile.lucoin_image_price} LC each)</p>
+              <p>Request images ({profile.lucoin_image_price || 10} LC each)</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

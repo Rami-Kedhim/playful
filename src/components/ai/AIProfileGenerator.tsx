@@ -2,11 +2,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
 import { generateMultipleProfiles } from '@/services/aiProfileGenerator';
-import { AIProfile } from '@/types/ai';
+import { AIProfile } from '@/types/ai-profile';
 import AIProfileCard from '@/components/ai/AIProfileCard';
 
 interface AIProfileGeneratorProps {
@@ -70,7 +69,7 @@ const AIProfileGenerator = ({ onSelectProfile }: AIProfileGeneratorProps) => {
               <AIProfileCard 
                 key={profile.id} 
                 profile={profile} 
-                onClick={() => onSelectProfile?.(profile)}
+                onChatClick={() => onSelectProfile?.(profile)}
               />
             ))}
           </div>

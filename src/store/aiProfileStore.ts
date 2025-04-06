@@ -1,7 +1,24 @@
 
 import { create } from 'zustand';
-import { AIProfile, AIConversation, AIMessage } from '@/types/ai';
+import { AIProfile } from '@/types/ai-profile';
 import { generateMultipleProfiles } from '@/services/aiProfileGenerator';
+
+interface AIConversation {
+  id: string;
+  profileId: string;
+  userId: string;
+  messages: {
+    id: string;
+    profileId: string;
+    content: string;
+    timestamp: Date;
+    type: 'text' | 'audio';
+    audioUrl?: string;
+    isUserMessage: boolean;
+  }[];
+  lastMessageAt: Date;
+  createdAt: Date;
+}
 
 interface AIProfileStore {
   profiles: AIProfile[];
@@ -50,7 +67,7 @@ const useAIProfileStore = create<AIProfileStore>((set, get) => ({
     
     set({ 
       profiles: generatedProfiles,
-      featuredProfiles: generatedProfiles.filter(profile => profile.featured)
+      featuredProfiles: generatedProfiles.filter(profile => Math.random() > 0.7)
     });
   },
   
@@ -67,12 +84,12 @@ const useAIProfileStore = create<AIProfileStore>((set, get) => ({
     
     let conversation = activeConversations.find(conv => conv.profileId === profileId);
     
-    const newMessage: AIMessage = {
+    const newMessage = {
       id: Math.random().toString(36).substring(2, 15),
       profileId,
       content,
       timestamp: now,
-      type: 'text',
+      type: 'text' as const,
       isUserMessage: true
     };
     
@@ -120,20 +137,20 @@ const useAIProfileStore = create<AIProfileStore>((set, get) => ({
     
     const responseOptions = [
       `Hi there! I'm ${profile.name}. How are you doing today?`,
-      `It's nice to meet you! I love talking about ${profile.personality.interests[0]}.`,
-      `Hello! I've been enjoying ${profile.personality.interests[1]} lately. Do you have any hobbies?`,
+      `It's nice to meet you! I love talking about ${profile.interests[0]}.`,
+      `Hello! I've been enjoying ${profile.interests[1]} lately. Do you have any hobbies?`,
       `Hey! Thanks for reaching out. What brings you here today?`,
       `I'm glad you messaged me! Would you like to know more about me?`
     ];
     
     const responseContent = responseOptions[Math.floor(Math.random() * responseOptions.length)];
     
-    const aiResponse: AIMessage = {
+    const aiResponse = {
       id: Math.random().toString(36).substring(2, 15),
       profileId,
       content: responseContent,
       timestamp: new Date(),
-      type: 'text',
+      type: 'text' as const,
       isUserMessage: false
     };
     

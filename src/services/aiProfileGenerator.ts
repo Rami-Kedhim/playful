@@ -1,7 +1,8 @@
 
-import { AIPersonality, AIProfile } from "@/types/ai";
+import { AIProfile } from "@/types/ai-profile";
 
 const PERSONALITY_TYPES = ['friendly', 'flirty', 'shy', 'confident', 'mysterious'] as const;
+type PersonalityType = typeof PERSONALITY_TYPES[number];
 
 const INTERESTS_POOL = [
   'Reading', 'Travel', 'Music', 'Art', 'Dancing', 'Photography',
@@ -40,8 +41,8 @@ function generateRandomAge(min: number = 21, max: number = 35): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function generateTraits(personality: string): string[] {
-  const traitSets = {
+function generateTraits(personality: PersonalityType): string[] {
+  const traitSets: Record<PersonalityType, string[]> = {
     'friendly': ['Kind', 'Warm', 'Caring', 'Cheerful', 'Sociable', 'Approachable', 'Supportive'],
     'flirty': ['Playful', 'Charming', 'Witty', 'Seductive', 'Confident', 'Bold', 'Adventurous'],
     'shy': ['Quiet', 'Thoughtful', 'Sensitive', 'Introspective', 'Modest', 'Gentle', 'Reserved'],
@@ -49,11 +50,11 @@ function generateTraits(personality: string): string[] {
     'mysterious': ['Enigmatic', 'Intriguing', 'Private', 'Complex', 'Unpredictable', 'Deep', 'Alluring']
   };
   
-  return getRandomSubset(traitSets[personality] || [], 3);
+  return getRandomSubset(traitSets[personality], 3);
 }
 
-function generateBackstory(name: string, personality: string, interests: string[]): string {
-  const backstories = {
+function generateBackstory(name: string, personality: PersonalityType, interests: string[]): string {
+  const backstories: Record<PersonalityType, string> = {
     'friendly': `${name} grew up in a small town where she learned the value of community. She's always been the friend everyone turns to for advice and support. She loves ${interests[0].toLowerCase()} and ${interests[1].toLowerCase()}, which help her connect with new people.`,
     
     'flirty': `${name} has always been the life of the party. With her playful personality and quick wit, she's never had trouble making friends or finding admirers. She's passionate about ${interests[0].toLowerCase()} and enjoys ${interests[1].toLowerCase()} in her free time.`,
@@ -65,10 +66,10 @@ function generateBackstory(name: string, personality: string, interests: string[
     'mysterious': `Not much is known about ${name}'s past, which adds to her allure. She appears suddenly in people's lives, sharing her unique perspective and then vanishing just as quickly. Her interests in ${interests[0].toLowerCase()} and ${interests[1].toLowerCase()} hint at a complex inner world.`
   };
   
-  return backstories[personality] || `${name} is an interesting person with varied interests including ${interests.join(' and ')}.`;
+  return backstories[personality];
 }
 
-function generateBio(name: string, personality: string, traits: string[], interests: string[]): string {
+function generateBio(name: string, personality: PersonalityType, traits: string[], interests: string[]): string {
   return `Hi, I'm ${name}. ${
     personality === 'friendly' ? "I love meeting new people and making connections." :
     personality === 'flirty' ? "Life is too short not to have fun and be playful." :
@@ -82,27 +83,13 @@ function generateBio(name: string, personality: string, traits: string[], intere
   Let's get to know each other better!`;
 }
 
-function generatePersonality(): AIPersonality {
+export function generateAIProfile(): AIProfile {
   const type = getRandomElement(PERSONALITY_TYPES);
   const name = getRandomElement(NAMES_FEMALE);
   const interests = getRandomSubset(INTERESTS_POOL, 4);
   const traits = generateTraits(type);
   const backstory = generateBackstory(name, type, interests);
   const voiceType = getRandomElement(VOICE_TYPES);
-  
-  return {
-    name,
-    type,
-    traits,
-    interests,
-    backstory,
-    voiceType,
-    speaking_style: `${type}, ${voiceType}, expressive`
-  };
-}
-
-export function generateAIProfile(): AIProfile {
-  const personality = generatePersonality();
   const location = getRandomElement(LOCATIONS);
   const age = generateRandomAge();
   const now = new Date();
@@ -114,18 +101,32 @@ export function generateAIProfile(): AIProfile {
   
   return {
     id,
-    name: personality.name,
-    personality,
-    avatarUrl,
-    bio: generateBio(personality.name, personality.type, personality.traits, personality.interests),
+    name,
     age,
     location,
-    status: Math.random() > 0.3 ? 'online' : 'offline',
-    popularity: Math.floor(Math.random() * 100),
-    featured: Math.random() > 0.8,
-    tags: [...personality.traits, ...personality.interests.slice(0, 2)],
-    createdAt: now,
-    updatedAt: now
+    bio: generateBio(name, type, traits, interests),
+    avatar_url: avatarUrl,
+    gallery_images: [
+      `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=800&h=1000`,
+      `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=800&h=1000`
+    ],
+    personality: {
+      type: type === 'flirty' ? 'flirty' : 
+            type === 'shy' ? 'shy' : 
+            type === 'confident' ? 'dominant' : 
+            type === 'mysterious' ? 'mysterious' : 'playful',
+      traits,
+      responseStyle: `${type}, ${voiceType}, expressive`
+    },
+    interests,
+    is_ai: true,
+    systemPrompt: `You are ${name}, a ${type} person with interests in ${interests.join(', ')}. ${backstory}`,
+    delayed_response_min: 2000,
+    delayed_response_max: 5000,
+    created_at: now.toISOString(),
+    lucoin_chat_price: 5,
+    lucoin_image_price: 10,
+    availability_status: Math.random() > 0.3 ? 'online' : 'offline'
   };
 }
 

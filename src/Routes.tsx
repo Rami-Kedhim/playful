@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Route, Navigate, useParams } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import Index from './pages/Index';
 import SEODashboard from './pages/SEODashboard';
@@ -19,7 +20,7 @@ import { languages } from './i18n/i18n';
 import AIProfiles from "@/pages/AIProfiles";
 
 // Language route wrapper to handle language parameter
-const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
+const LanguageRoute = ({ children }: React.PropsWithChildren<{}>) => {
   const { lang } = useParams<{ lang: string }>();
   const { changeLanguage } = useLanguage();
   
@@ -32,7 +33,7 @@ const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const Routes = () => {
+const AppRoutes = () => {
   const { isLoading } = useAuth();
   const { currentLanguage } = useLanguage();
 
@@ -45,7 +46,7 @@ const Routes = () => {
   }
 
   return (
-    <Routes>
+    <React.Fragment>
       {/* Language root redirect */}
       <Route path="/" element={<Navigate to={`/${currentLanguage}`} replace />} />
       
@@ -61,6 +62,7 @@ const Routes = () => {
         <Route path="creators" element={<Creators />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="auth" element={<AuthPage />} />
+        <Route path="ai-profiles" element={<AIProfiles />} />
         
         {/* Protected Routes - Require Authentication */}
         <Route path="favorites" element={
@@ -99,8 +101,8 @@ const Routes = () => {
       
       {/* Catch-all redirect to language route */}
       <Route path="*" element={<Navigate to={`/${currentLanguage}`} replace />} />
-    </Routes>
+    </React.Fragment>
   );
 };
 
-export default Routes;
+export default AppRoutes;
