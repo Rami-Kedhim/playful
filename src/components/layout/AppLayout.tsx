@@ -5,9 +5,10 @@ import { useNotifications } from "@/contexts/NotificationsContext";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { isNewUser, createWelcomeNotification } from "@/services/accountService";
+import { Outlet } from "react-router-dom";
 
 interface AppLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const AppLayout = ({ children }: AppLayoutProps) => {
@@ -35,7 +36,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow pt-16">
-        {children}
+        {children || <Outlet />}
       </main>
       <Footer />
     </div>

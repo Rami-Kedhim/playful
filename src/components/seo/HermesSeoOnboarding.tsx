@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Check, Brain, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
+import { Check, Brain, ChevronRight, ChevronLeft, Sparkles, FileText, TrendingUp } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -91,8 +91,6 @@ const HermesSeoOnboarding: React.FC<HermesSeoOnboardingProps> = ({ onComplete })
       onComplete();
     }
   };
-  
-  // If Dialog not imported, replace with import { Brain, FileText, TrendingUp } from 'lucide-react';
   
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
