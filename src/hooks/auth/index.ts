@@ -1,4 +1,5 @@
 
+// Export all authentication related hooks from a single file
 export { useAuth, AuthProvider } from "./useAuth";
 export { useAuthState } from "./useAuthState";
 export { useAuthActions } from "./useAuthActions";

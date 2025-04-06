@@ -41,7 +41,7 @@ export function useAuthState(): [
       email: supabaseUser.email || "",
       app_metadata: supabaseUser.app_metadata,
       user_metadata: supabaseUser.user_metadata,
-      aud: supabaseUser.aud, // This is required now
+      aud: supabaseUser.aud, 
       created_at: supabaseUser.created_at
     };
   };

@@ -5,7 +5,6 @@ import { useAuthState } from "@/hooks/auth/useAuthState";
 import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { usePasswordManagement } from "@/hooks/auth/usePasswordManagement";
 import { toast } from "@/components/ui/use-toast";
-import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -77,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const clearError = () => setError(null);
 
-  const mapUserToAuthUser = (dbUser: User | null, profile: any | null) => {
+  const mapUserToAuthUser = (dbUser: any | null, profile: any | null) => {
     if (!dbUser) return null;
     
     const roleValue: UserRole = (userRoles.length > 0 ? userRoles[0] : "user") as UserRole;
