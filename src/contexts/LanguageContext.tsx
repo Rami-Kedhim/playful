@@ -1,0 +1,76 @@
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { languages, Language } from '../i18n/i18n';
+
+interface LanguageContextType {
+  currentLanguage: Language;
+  changeLanguage: (lang: Language) => void;
+  languages: typeof languages;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+export const useLanguage = (): LanguageContextType => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};
+
+interface LanguageProviderProps {
+  children: ReactNode;
+}
+
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const { i18n } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Initialize with the current language from i18n
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(
+    (i18n.language?.split('-')[0] as Language) || 'en'
+  );
+  
+  // When the language changes, update routes and localStorage
+  const changeLanguage = (lang: Language) => {
+    i18n.changeLanguage(lang);
+    setCurrentLanguage(lang);
+    
+    // Update URL to reflect the language change
+    const pathParts = location.pathname.split('/');
+    
+    // If the first segment is a language code, replace it
+    if (Object.keys(languages).includes(pathParts[1])) {
+      pathParts[1] = lang;
+      navigate(pathParts.join('/') + location.search);
+    } else {
+      // Otherwise, prepend the language code
+      navigate(`/${lang}${location.pathname}${location.search}`);
+    }
+  };
+  
+  // Effect to sync language with URL on initial load and changes
+  useEffect(() => {
+    const pathParts = location.pathname.split('/');
+    const langInUrl = pathParts[1];
+    
+    if (Object.keys(languages).includes(langInUrl)) {
+      // If URL has valid language code that's different from current
+      if (langInUrl !== currentLanguage) {
+        i18n.changeLanguage(langInUrl as Language);
+        setCurrentLanguage(langInUrl as Language);
+      }
+    } else {
+      // If URL has no language code, redirect to include it
+      navigate(`/${currentLanguage}${location.pathname}${location.search}`, { replace: true });
+    }
+  }, [location.pathname, i18n, navigate, currentLanguage]);
+  
+  return (
+    <LanguageContext.Provider value={{ currentLanguage, changeLanguage, languages }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};

@@ -9,10 +9,15 @@ import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import UserDropdown from "@/components/navigation/UserDropdown";
 import MobileMenu from "@/components/navigation/MobileMenu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import LanguageSwitcher from "@/components/language/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, userRoles = [] } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
   
   const handleLogout = async () => {
     await logout();
@@ -35,9 +40,9 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link to="/" className="text-2xl font-bold mr-8">
+            <Link to={`/${currentLanguage}`} className="text-2xl font-bold mr-8">
               <span className="bg-gradient-to-r from-primary to-lucoin bg-clip-text text-transparent">
-                UberEscorts
+                {t('app.name')}
               </span>
             </Link>
             
@@ -46,9 +51,10 @@ const Navbar = () => {
           
           <div className="flex items-center space-x-2">
             <ThemeToggle />
+            <LanguageSwitcher />
             
             <Button variant="ghost" size="icon" asChild>
-              <Link to="/search">
+              <Link to={`/${currentLanguage}/search`}>
                 <Search size={20} />
               </Link>
             </Button>
@@ -56,7 +62,7 @@ const Navbar = () => {
             {isAuthenticated && user ? (
               <>
                 <Button variant="ghost" size="icon" asChild>
-                  <Link to="/favorites">
+                  <Link to={`/${currentLanguage}/favorites`}>
                     <Heart size={20} />
                   </Link>
                 </Button>
@@ -68,7 +74,7 @@ const Navbar = () => {
               </>
             ) : (
               <Button asChild>
-                <Link to="/auth">Sign In</Link>
+                <Link to={`/${currentLanguage}/auth`}>{t('nav.signIn')}</Link>
               </Button>
             )}
             

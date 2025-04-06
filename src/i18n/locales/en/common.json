@@ -1,0 +1,47 @@
+
+{
+  "app": {
+    "name": "UberEscorts"
+  },
+  "nav": {
+    "home": "Home",
+    "escorts": "Escorts",
+    "creators": "Creators",
+    "metaverse": "Metaverse",
+    "search": "Search",
+    "favorites": "Favorites",
+    "messages": "Messages",
+    "profile": "Profile",
+    "signIn": "Sign In"
+  },
+  "actions": {
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear All",
+    "apply": "Apply",
+    "continue": "Continue",
+    "back": "Back"
+  },
+  "auth": {
+    "login": "Log In",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password"
+  },
+  "profile": {
+    "settings": "Settings",
+    "account": "Account",
+    "verification": "Verification",
+    "logout": "Log Out"
+  },
+  "common": {
+    "welcomeBack": "Welcome back",
+    "loading": "Loading",
+    "error": "Something went wrong",
+    "notFound": "Not Found",
+    "viewAll": "View All"
+  }
+}

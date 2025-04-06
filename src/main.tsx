@@ -5,6 +5,8 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./hooks/auth/useAuth";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import "./i18n/i18n"; // Import i18n configuration
 import "./index.css";
 
 // Note: We're removing the forced dark mode here since we're using the ThemeProvider
@@ -14,7 +16,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <BrowserRouter>
       <AuthProvider>
         <NotificationsProvider>
-          <App />
+          <LanguageProvider>
+            <App />
+          </LanguageProvider>
         </NotificationsProvider>
       </AuthProvider>
     </BrowserRouter>

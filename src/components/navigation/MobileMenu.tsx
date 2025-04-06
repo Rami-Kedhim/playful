@@ -1,156 +1,107 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Menu, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Menu,
-  User,
-  LogOut,
-  CreditCard,
-  Settings,
-  MessageCircle,
-  Home,
-  Users,
-  Video,
-  Search,
-} from "lucide-react";
-import { AuthUser } from "@/types/auth";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "react-i18next";
 
 interface MobileMenuProps {
-  user: AuthUser | null;
+  user: any;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  handleLogout: () => Promise<void>;
-  hasAdminAccess?: boolean;
+  handleLogout: () => void;
+  hasAdminAccess: boolean;
 }
 
-const MobileMenu = ({ user, isOpen, setIsOpen, handleLogout, hasAdminAccess = false }: MobileMenuProps) => {
-  const mainLinks = [
-    { label: "Home", path: "/", icon: Home },
-    { label: "Escorts", path: "/escorts", icon: Users },
-    { label: "Creators", path: "/creators", icon: Users },
-    { label: "Messages", path: "/messages", icon: MessageCircle },
-    { label: "Metaverse", path: "/metaverse", icon: Video },
+const MobileMenu: React.FC<MobileMenuProps> = ({
+  user,
+  isOpen,
+  setIsOpen,
+  handleLogout,
+  hasAdminAccess,
+}) => {
+  const { isAuthenticated } = useAuth();
+  const { currentLanguage } = useLanguage();
+  const { t } = useTranslation();
+
+  const closeMenu = () => setIsOpen(false);
+
+  const navItems = [
+    { name: t('nav.home'), path: `/${currentLanguage}`, auth: false },
+    { name: t('nav.escorts'), path: `/${currentLanguage}/escorts`, auth: false },
+    { name: t('nav.creators'), path: `/${currentLanguage}/creators`, auth: false },
+    { name: t('nav.search'), path: `/${currentLanguage}/search`, auth: false },
+    { name: t('nav.favorites'), path: `/${currentLanguage}/favorites`, auth: true },
+    { name: t('nav.messages'), path: `/${currentLanguage}/messages`, auth: true },
+    { name: t('nav.profile'), path: `/${currentLanguage}/profile`, auth: true },
   ];
 
+  // Add admin routes if user has admin access
   if (hasAdminAccess) {
-    mainLinks.push({ label: "SEO Dashboard", path: "/seo", icon: Search });
+    navItems.push({ name: 'SEO', path: `/${currentLanguage}/seo`, auth: true });
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-[85vw] sm:w-[350px]">
-        <div className="flex flex-col h-full py-6">
-          {user && (
-            <div className="flex items-center space-x-3 mb-6">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={user.profileImageUrl} />
-                <AvatarFallback className="bg-primary/10">
-                  {user.username ? user.username.substring(0, 2).toUpperCase() : "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="font-medium">{user.username}</div>
-                <div className="text-sm text-muted-foreground truncate max-w-[180px]">
-                  {user.email}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <nav className="space-y-1">
-            {mainLinks.map((link) => (
-              <Button
-                key={link.path}
-                variant="ghost"
-                className="w-full justify-start"
-                asChild
-                onClick={() => setIsOpen(false)}
-              >
-                <Link to={link.path}>
-                  {link.icon && <link.icon className="mr-2 h-4 w-4" />}
-                  {link.label}
-                </Link>
-              </Button>
-            ))}
+    <div className="md:hidden">
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <Menu size={24} />
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-[300px]">
+          <SheetHeader>
+            <SheetTitle className="text-left">Menu</SheetTitle>
+          </SheetHeader>
+          <Separator className="my-4" />
+          <nav>
+            <ul className="space-y-3 mt-6">
+              {navItems.map((item) => {
+                // Skip auth-required items if not authenticated
+                if (item.auth && !isAuthenticated) return null;
+                
+                return (
+                  <li key={item.path}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start"
+                      asChild
+                      onClick={closeMenu}
+                    >
+                      <Link to={item.path} className="flex items-center">
+                        <span className="flex-grow text-left">{item.name}</span>
+                        <ChevronRight size={16} />
+                      </Link>
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
-          
-          {user ? (
-            <>
-              <div className="border-t border-gray-800 my-4 pt-4">
-                <div className="text-sm font-medium mb-2">Account</div>
-                <div className="space-y-1">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    asChild
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Link to="/profile">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    asChild
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Link to="/wallet">
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Wallet {user.lucoinsBalance ? `(${user.lucoinsBalance} LC)` : ''}
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    asChild
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Link to="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </Button>
-                </div>
+          <Separator className="my-6" />
+          {isAuthenticated ? (
+            <div className="flex flex-col gap-2">
+              <div className="text-sm text-muted-foreground">
+                {t('common.welcomeBack')}, {user?.username || 'User'}
               </div>
-              
-              <div className="border-t border-gray-800 mt-4 pt-4 mt-auto">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="border-t border-gray-800 mt-4 pt-4 mt-auto">
-              <Button
-                className="w-full"
-                asChild
-                onClick={() => setIsOpen(false)}
-              >
-                <Link to="/auth">Sign In</Link>
+              <Button variant="ghost" size="sm" onClick={() => { handleLogout(); closeMenu(); }}>
+                {t('profile.logout')}
               </Button>
             </div>
+          ) : (
+            <Button className="w-full" asChild onClick={closeMenu}>
+              <Link to={`/${currentLanguage}/auth`}>{t('nav.signIn')}</Link>
+            </Button>
           )}
-        </div>
-      </SheetContent>
-    </Sheet>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 };
 

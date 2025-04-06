@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import Index from './pages/Index';
 import SEODashboard from './pages/SEODashboard';
@@ -15,9 +15,26 @@ import FavoritesPage from './pages/FavoritesPage';
 import MessagesPage from './pages/MessagesPage';
 import MetaversePage from './pages/MetaversePage';
 import SearchPage from './pages/SearchPage';
+import { useLanguage } from './contexts/LanguageContext';
+import { languages } from './i18n/i18n';
+
+// Language route wrapper to handle language parameter
+const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
+  const { lang } = useParams<{ lang: string }>();
+  const { changeLanguage } = useLanguage();
+  
+  React.useEffect(() => {
+    if (lang && Object.keys(languages).includes(lang)) {
+      changeLanguage(lang as keyof typeof languages);
+    }
+  }, [lang, changeLanguage]);
+  
+  return <>{children}</>;
+};
 
 const AppRoutes = () => {
   const { isLoading } = useAuth();
+  const { currentLanguage } = useLanguage();
 
   if (isLoading) {
     return (
@@ -29,41 +46,46 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route path="/auth" element={<AuthPage />} />
+      {/* Language root redirect */}
+      <Route path="/" element={<Navigate to={`/${currentLanguage}`} replace />} />
       
-      {/* App Layout Routes */}
-      <Route element={<AppLayout />}>
+      {/* Root path for each language */}
+      <Route path="/:lang" element={
+        <LanguageRoute>
+          <AppLayout />
+        </LanguageRoute>
+      }>
         {/* Public Routes */}
-        <Route path="/" element={<Index />} />
-        <Route path="/escorts" element={<Escorts />} />
-        <Route path="/creators" element={<Creators />} />
-        <Route path="/search" element={<SearchPage />} />
+        <Route index element={<Index />} />
+        <Route path="escorts" element={<Escorts />} />
+        <Route path="creators" element={<Creators />} />
+        <Route path="search" element={<SearchPage />} />
+        <Route path="auth" element={<AuthPage />} />
         
         {/* Protected Routes - Require Authentication */}
-        <Route path="/favorites" element={
+        <Route path="favorites" element={
           <ProtectedRoute>
             <FavoritesPage />
           </ProtectedRoute>
         } />
-        <Route path="/messages" element={
+        <Route path="messages" element={
           <ProtectedRoute>
             <MessagesPage />
           </ProtectedRoute>
         } />
-        <Route path="/metaverse" element={
+        <Route path="metaverse" element={
           <ProtectedRoute>
             <MetaversePage />
           </ProtectedRoute>
         } />
-        <Route path="/profile" element={
+        <Route path="profile" element={
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
         } />
         
         {/* Protected SEO Routes - Require Admin/Moderator roles */}
-        <Route path="/seo/*" element={
+        <Route path="seo/*" element={
           <ProtectedRoute>
             <RoleGuard allowedRoles={['admin', 'moderator']}>
               <SEODashboard />
@@ -74,6 +96,9 @@ const AppRoutes = () => {
         {/* Add a 404 catch-all route */}
         <Route path="*" element={<div className="container mx-auto px-4 py-8"><h1 className="text-2xl font-bold">Page Not Found</h1></div>} />
       </Route>
+      
+      {/* Catch-all redirect to language route */}
+      <Route path="*" element={<Navigate to={`/${currentLanguage}`} replace />} />
     </Routes>
   );
 };
