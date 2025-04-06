@@ -83,10 +83,21 @@
   }
 }
 
-* {
-  @apply border-border;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
 }
 
-body {
-  @apply bg-background text-foreground;
+#root {
+  width: 100%;
+  min-height: 100vh;
 }
