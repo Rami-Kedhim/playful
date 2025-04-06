@@ -4,14 +4,7 @@ import { AIProfile } from '@/types/ai-profile';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  MessageSquare, 
-  Heart, 
-  Info, 
-  Image,
-  Clock
-} from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { MessageSquare, Heart, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface AIProfileCardProps {
@@ -30,33 +23,13 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
     }
   };
 
-  // Get a personality-specific message preview
-  const getMessagePreview = () => {
-    if (profile.sample_messages && profile.sample_messages.length > 0) {
-      return profile.sample_messages[Math.floor(Math.random() * profile.sample_messages.length)];
-    }
-    
-    switch(profile.personality?.type) {
-      case 'flirty':
-        return "Can't wait to chat with you... I've been thinking about it all day 😘";
-      case 'shy':
-        return "Hi... I don't usually talk much, but I'd like to get to know you...";
-      case 'dominant':
-        return "I expect you to be on your best behavior when we talk.";
-      case 'playful':
-        return "Hey there! Ready for some fun conversation? I sure am! 😊";
-      default:
-        return "Hello, I'd be happy to have a conversation with you.";
-    }
-  };
-
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col">
       <div className="relative">
         <img 
           src={profile.avatar_url} 
           alt={profile.name} 
-          className="w-full h-[300px] object-cover object-center"
+          className="w-full h-[220px] object-cover object-center"
         />
         
         <div className="absolute top-2 right-2 flex gap-1">
@@ -92,26 +65,9 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
       </div>
       
       <CardContent className="p-4 flex-1">
-        <div className="flex items-center mb-2">
-          {profile.availability_status === 'online' ? (
-            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-              Online now
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="bg-gray-500/10 text-gray-500 border-gray-500/20">
-              <Clock className="w-3 h-3 mr-1" />
-              Replies in 2-5 min
-            </Badge>
-          )}
-        </div>
-        
-        <p className="text-sm text-muted-foreground line-clamp-3 min-h-[4.5rem]">
+        <p className="text-sm text-muted-foreground line-clamp-3">
           {profile.bio}
         </p>
-        
-        <div className="mt-3 p-3 bg-muted/50 rounded-lg">
-          <p className="text-sm italic line-clamp-2">"{getMessagePreview()}"</p>
-        </div>
         
         <div className="flex flex-wrap gap-1 mt-3">
           {profile.interests?.slice(0, 3).map((interest, i) => (
@@ -137,31 +93,9 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
           Chat ({profile.lucoin_chat_price || 5} LC)
         </Button>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" className="px-4">
-                <Image className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Request images ({profile.lucoin_image_price || 10} LC each)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" className="px-4">
-                <Heart className="w-4 h-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Add to favorites</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Button variant="outline" className="px-4">
+          <Heart className="w-4 h-4" />
+        </Button>
       </CardFooter>
     </Card>
   );

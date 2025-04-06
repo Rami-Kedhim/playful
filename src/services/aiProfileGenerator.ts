@@ -84,7 +84,9 @@ function generateBio(name: string, personality: PersonalityType, traits: string[
 }
 
 export function generateAIProfile(): AIProfile {
-  const type = getRandomElement(PERSONALITY_TYPES);
+  // Use a local copy of the array instead of using the readonly constant directly
+  const personalityTypes = [...PERSONALITY_TYPES] as PersonalityType[];
+  const type = getRandomElement(personalityTypes);
   const name = getRandomElement(NAMES_FEMALE);
   const interests = getRandomSubset(INTERESTS_POOL, 4);
   const traits = generateTraits(type);
@@ -99,6 +101,26 @@ export function generateAIProfile(): AIProfile {
   const avatarIndex = Math.floor(Math.random() * 10) + 1;
   const avatarUrl = `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=500&h=500`;
   
+  let personalityTypeForAI: "flirty" | "shy" | "dominant" | "playful" | "professional";
+  
+  // Map our personality types to the allowed types in the AIProfile interface
+  switch(type) {
+    case 'flirty':
+      personalityTypeForAI = 'flirty';
+      break;
+    case 'shy':
+      personalityTypeForAI = 'shy';
+      break;
+    case 'confident':
+      personalityTypeForAI = 'dominant';
+      break;
+    case 'mysterious':
+    case 'friendly':
+    default:
+      personalityTypeForAI = 'playful';
+      break;
+  }
+
   return {
     id,
     name,
@@ -111,10 +133,7 @@ export function generateAIProfile(): AIProfile {
       `https://images.unsplash.com/photo-15${Math.floor(Math.random() * 1000000)}?fit=crop&w=800&h=1000`
     ],
     personality: {
-      type: type === 'flirty' ? 'flirty' : 
-            type === 'shy' ? 'shy' : 
-            type === 'confident' ? 'dominant' : 
-            type === 'mysterious' ? 'mysterious' : 'playful',
+      type: personalityTypeForAI,
       traits,
       responseStyle: `${type}, ${voiceType}, expressive`
     },

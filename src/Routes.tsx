@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route, Navigate, useParams } from 'react-router-dom';
+import { Routes as RouterRoutes, Route, Navigate, useParams } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import Index from './pages/Index';
 import SEODashboard from './pages/SEODashboard';
@@ -20,7 +20,7 @@ import { languages } from './i18n/i18n';
 import AIProfiles from "@/pages/AIProfiles";
 
 // Language route wrapper to handle language parameter
-const LanguageRoute = ({ children }: React.PropsWithChildren<{}>) => {
+const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
   const { lang } = useParams<{ lang: string }>();
   const { changeLanguage } = useLanguage();
   
@@ -46,7 +46,7 @@ const AppRoutes = () => {
   }
 
   return (
-    <React.Fragment>
+    <RouterRoutes>
       {/* Language root redirect */}
       <Route path="/" element={<Navigate to={`/${currentLanguage}`} replace />} />
       
@@ -101,7 +101,7 @@ const AppRoutes = () => {
       
       {/* Catch-all redirect to language route */}
       <Route path="*" element={<Navigate to={`/${currentLanguage}`} replace />} />
-    </React.Fragment>
+    </RouterRoutes>
   );
 };
 
