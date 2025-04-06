@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +22,12 @@ interface AIModelMonetizationState {
   trackContentView: (contentId: string) => void;
   getContentViewCount: (contentId: string) => number;
   getProfileBoostLevel: (profileId: string) => number;
+  
+  // Add the missing methods for images and videos
+  unlockImage: (profileId: string, imageUrl: string, price: number) => Promise<boolean>;
+  isImageUnlocked: (profileId: string, imageUrl: string) => boolean;
+  unlockVideo: (profileId: string, videoId: string, price: number) => Promise<boolean>;
+  isVideoUnlocked: (profileId: string, videoId: string) => boolean;
 }
 
 const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) => ({
@@ -221,6 +226,82 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
     );
     
     return activeBoost ? activeBoost.boost_level : 0;
+  },
+  
+  unlockImage: async (profileId, imageUrl, price) => {
+    try {
+      set({ loading: true, error: null });
+      
+      // Generate a unique content ID for the image
+      const imageId = `image-${profileId}-${imageUrl.split('/').pop()}`;
+      
+      // Use the existing purchaseContent function
+      const success = await get().purchaseContent(imageId, profileId, price);
+      
+      if (success) {
+        // Track analytics for image unlocking
+        await AIAnalyticsService.trackEvent(
+          profileId,
+          'image_unlock',
+          { imageUrl, price }
+        );
+        
+        // Add to unlocked content
+        set(state => ({
+          unlockedContent: [...state.unlockedContent, imageId]
+        }));
+      }
+      
+      return success;
+    } catch (error: any) {
+      set({ error: error.message || "Failed to unlock image" });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+  
+  isImageUnlocked: (profileId, imageUrl) => {
+    const imageId = `image-${profileId}-${imageUrl.split('/').pop()}`;
+    return get().unlockedContent.includes(imageId);
+  },
+  
+  unlockVideo: async (profileId, videoId, price) => {
+    try {
+      set({ loading: true, error: null });
+      
+      // Generate a unique content ID for the video
+      const contentId = `video-${profileId}-${videoId}`;
+      
+      // Use the existing purchaseContent function
+      const success = await get().purchaseContent(contentId, profileId, price);
+      
+      if (success) {
+        // Track analytics for video unlocking
+        await AIAnalyticsService.trackEvent(
+          profileId,
+          'video_unlock',
+          { videoId, price }
+        );
+        
+        // Add to unlocked content
+        set(state => ({
+          unlockedContent: [...state.unlockedContent, contentId]
+        }));
+      }
+      
+      return success;
+    } catch (error: any) {
+      set({ error: error.message || "Failed to unlock video" });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+  
+  isVideoUnlocked: (profileId, videoId) => {
+    const contentId = `video-${profileId}-${videoId}`;
+    return get().unlockedContent.includes(contentId);
   }
 }));
 
