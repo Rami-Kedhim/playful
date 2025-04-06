@@ -1,9 +1,10 @@
 
 import { Escort as EscortType } from "./escort";
 
-export interface Escort extends EscortType {
-  // Add any additional fields that might be needed
+export interface Escort extends Omit<EscortType, 'reviews'> {
+  // Override reviews to be compatible with the original type
   reviews?: any[];
+  // Add any additional fields that might be needed
   tags?: string[];
 }
 
