@@ -1,7 +1,7 @@
 
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/useAuth';
 import Routes from '@/Routes';
@@ -22,7 +22,7 @@ function App() {
     <BrowserRouter>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
+          <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
             <AuthProvider>
               <Routes />
               <Toaster />
