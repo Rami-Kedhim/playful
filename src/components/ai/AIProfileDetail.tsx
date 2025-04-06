@@ -1,194 +1,177 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { AIProfile } from '@/types/ai-profile';
-import { MessageSquare, Gift, Image, Video, CreditCard, Lock, Star } from 'lucide-react';
-import AIModelBoost from './AIModelBoost';
-import AIProfileConversation from './AIProfileConversation';
-import AIProfileGallery from './AIProfileGallery';
-import AIProfileGiftSection from './AIProfileGiftSection';
-import AIProfileVideoSection from './AIProfileVideoSection';
-import AIProfileSubscription from './AIProfileSubscription';
+import { useState } from "react";
+import { AIProfile } from "@/types/ai-profile";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import AIProfileConversation from "./AIProfileConversation";
+import AIProfileGallery from "./AIProfileGallery";
+import AIProfileGiftSection from "./AIProfileGiftSection";
+import AIProfileVideoSection from "./AIProfileVideoSection";
+import AIProfileSubscription from "./AIProfileSubscription";
+import { toast } from "@/hooks/use-toast";
+import AIModelBoost from "./AIModelBoost";
+import { Heart, Calendar, Clock, MapPin, Flame } from "lucide-react";
 
 interface AIProfileDetailProps {
   profile: AIProfile;
 }
 
 const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
-  const [activeTab, setActiveTab] = React.useState('chat');
+  const [subscribeDialogOpen, setSubscribeDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("chat");
   
-  // Function to handle profile boost completion
+  const handleSubscribe = () => {
+    toast({
+      title: "Subscription Started",
+      description: `You are now subscribed to ${profile.name}'s premium content!`,
+    });
+    setSubscribeDialogOpen(false);
+  };
+  
   const handleBoostComplete = () => {
-    // In a real application, we might refresh the profile data 
-    // or update the UI to show the boosted status
-    console.log("Profile boost completed for:", profile.id);
+    toast({
+      title: "Boost Complete",
+      description: `You've successfully boosted ${profile.name}'s profile!`,
+    });
+  };
+
+  const getVerificationBadge = () => {
+    if (profile.verification_status === "verified") {
+      return <Badge className="ml-2 bg-green-500">Verified</Badge>;
+    }
+    return null;
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Left column: Profile info & monetization options */}
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
-              <div>
-                <CardTitle>{profile.name}, {profile.age}</CardTitle>
-                <CardDescription>{profile.location}</CardDescription>
+              <div className="flex items-center">
+                <Avatar className="h-16 w-16 mr-4">
+                  <AvatarImage src={profile.avatar_url} alt={profile.name} />
+                </Avatar>
+                <div>
+                  <h1 className="text-2xl font-bold flex items-center">
+                    {profile.name}, {profile.age} {getVerificationBadge()}
+                  </h1>
+                  <div className="flex items-center text-sm text-muted-foreground mt-1">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {profile.location}
+                    
+                    {profile.availability_status && (
+                      <span className="ml-4 flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span className={
+                          profile.availability_status === "online" 
+                            ? "text-green-500" 
+                            : profile.availability_status === "away" 
+                              ? "text-amber-500" 
+                              : "text-gray-500"
+                        }>
+                          {profile.availability_status.charAt(0).toUpperCase() + profile.availability_status.slice(1)}
+                        </span>
+                      </span>
+                    )}
+                    
+                    {profile.last_active && (
+                      <span className="ml-4 flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Active {new Date(profile.last_active).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <Badge variant={profile.availability_status === 'online' ? 'default' : 'secondary'}>
-                {profile.availability_status || 'offline'}
-              </Badge>
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm">
+                  <Heart className="h-4 w-4 mr-1" />
+                  Favorite
+                </Button>
+                {profile.boost_status?.is_boosted && (
+                  <Button variant="outline" size="sm" className="text-amber-500">
+                    <Flame className="h-4 w-4 mr-1 text-amber-500" />
+                    Boosted
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="w-full aspect-square rounded-md overflow-hidden mb-4">
-              <img 
-                src={profile.avatar_url} 
-                alt={profile.name} 
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <p className="text-sm text-muted-foreground mb-4">{profile.bio}</p>
             
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-1">
-                {profile.personality.traits.map((trait, i) => (
-                  <Badge key={i} variant="outline">{trait}</Badge>
-                ))}
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium">About</h3>
-                <p className="text-sm text-muted-foreground">{profile.bio}</p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-medium">Interests</h3>
-                <p className="text-sm text-muted-foreground">{profile.interests.join(', ')}</p>
-              </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {profile.interests?.map(interest => (
+                <Badge key={interest} variant="secondary">
+                  {interest}
+                </Badge>
+              ))}
             </div>
           </CardContent>
-          <CardFooter className="border-t pt-4 flex flex-col items-stretch">
-            <div className="grid grid-cols-2 gap-2 w-full mb-2">
-              <Button variant="outline" className="w-full">
-                <Gift className="mr-2 h-4 w-4" />
-                Send Gift
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Star className="mr-2 h-4 w-4" />
-                Favorite
-              </Button>
-            </div>
-          </CardFooter>
         </Card>
-        
-        {/* AIProfileBoost component with correct props */}
-        <AIModelBoost 
-          profile={profile} 
-          onBoostComplete={handleBoostComplete}
-        />
-        
-        {/* AIProfileSubscription component (stub) */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center">
-              <CreditCard className="mr-2 h-5 w-5" />
-              Premium Subscription
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm">Monthly</span>
-              <span className="text-sm font-medium">{profile.subscription_price || 50} Lucoins</span>
-            </div>
-            <ul className="text-sm space-y-1">
-              <li className="flex items-center">
-                <Lock className="h-3 w-3 mr-2 text-muted-foreground" />
-                Unlock all premium photos
-              </li>
-              <li className="flex items-center">
-                <Lock className="h-3 w-3 mr-2 text-muted-foreground" />
-                Unlock all premium videos
-              </li>
-              <li className="flex items-center">
-                <Lock className="h-3 w-3 mr-2 text-muted-foreground" />
-                Priority messaging
-              </li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button className="w-full">
-              Subscribe
-            </Button>
-          </CardFooter>
-        </Card>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="chat">Chat</TabsTrigger>
+            <TabsTrigger value="gallery">Gallery</TabsTrigger>
+            <TabsTrigger value="video">Videos</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="chat" className="mt-4">
+            <AIProfileConversation profile={profile} />
+          </TabsContent>
+          
+          <TabsContent value="gallery" className="mt-4">
+            <AIProfileGallery profile={profile} />
+          </TabsContent>
+          
+          <TabsContent value="video" className="mt-4">
+            <AIProfileVideoSection profile={profile} />
+          </TabsContent>
+        </Tabs>
       </div>
       
-      {/* Right column: Interaction tabs */}
-      <div className="md:col-span-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="chat" className="flex items-center">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Chat
-                </TabsTrigger>
-                <TabsTrigger value="photos" className="flex items-center">
-                  <Image className="h-4 w-4 mr-2" />
-                  Photos
-                </TabsTrigger>
-                <TabsTrigger value="videos" className="flex items-center">
-                  <Video className="h-4 w-4 mr-2" />
-                  Videos
-                </TabsTrigger>
-                <TabsTrigger value="gifts" className="flex items-center">
-                  <Gift className="h-4 w-4 mr-2" />
-                  Gifts
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          
-          <CardContent className="pt-4">
-            <TabsContent value="chat" className="mt-0">
-              {/* This would be the chat interface component */}
-              <div className="h-[600px] flex flex-col">
-                <AIProfileConversation profileId={profile.id} />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="photos" className="mt-0">
-              {/* Gallery component */}
-              <div className="h-[600px] flex flex-col">
-                <AIProfileGallery 
-                  profileId={profile.id} 
-                  images={profile.gallery_images} 
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="videos" className="mt-0">
-              {/* Videos component */}
-              <div className="h-[600px] flex flex-col">
-                <AIProfileVideoSection profileId={profile.id} />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="gifts" className="mt-0">
-              {/* Gifts component */}
-              <div className="h-[600px] flex flex-col">
-                <AIProfileGiftSection 
-                  profileId={profile.id}
-                  giftPreferences={profile.gift_preferences || []}
-                />
-              </div>
-            </TabsContent>
-          </CardContent>
-        </Card>
+      <div className="space-y-6">
+        <AIProfileSubscription 
+          profile={profile} 
+          onSubscribe={() => setSubscribeDialogOpen(true)} 
+        />
+        
+        <AIModelBoost 
+          profile={profile} 
+          onBoostComplete={handleBoostComplete} 
+        />
+        
+        <AIProfileGiftSection profile={profile} />
       </div>
+      
+      <Dialog open={subscribeDialogOpen} onOpenChange={setSubscribeDialogOpen}>
+        <DialogContent>
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-center">
+              Subscribe to {profile.name}
+            </h2>
+            
+            <p>
+              You're about to subscribe to {profile.name}'s premium content for {profile.subscription_price || 29} LC per month.
+            </p>
+            
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button variant="outline" onClick={() => setSubscribeDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubscribe}>
+                Confirm Subscription
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

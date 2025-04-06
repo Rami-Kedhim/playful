@@ -1,282 +1,220 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { useAIModelGenerator } from '@/hooks/ai/useAIModelGenerator';
-import { Bot, BarChart3, Zap, Cpu, RefreshCcw, Settings } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { AlertCircle, Zap, Brain, Activity } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { hermesOxumEngine } from '@/services/boost/HermesOxumEngine';
 
-interface SystemMetric {
-  name: string;
-  value: number;
-  status: 'healthy' | 'warning' | 'critical';
-  max: number;
-}
+// Mock data
+const performanceData = [
+  { name: '12AM', hermes: 40, oxum: 24 },
+  { name: '4AM', hermes: 30, oxum: 35 },
+  { name: '8AM', hermes: 20, oxum: 32 },
+  { name: '12PM', hermes: 27, oxum: 38 },
+  { name: '4PM', hermes: 90, oxum: 75 },
+  { name: '8PM', hermes: 120, oxum: 100 },
+];
+
+const boostDistributionData = [
+  { name: 'VIP', ai: 40, real: 60 },
+  { name: 'Premium', ai: 60, real: 40 },
+  { name: 'Standard', ai: 80, real: 20 },
+  { name: 'Basic', ai: 100, real: 10 },
+];
 
 const HermesOxumMonitor: React.FC = () => {
-  const { fetchOptimizationMetrics, optimizationMetrics } = useAIModelGenerator();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetric[]>([
-    { name: 'CPU Usage', value: 42, status: 'healthy', max: 100 },
-    { name: 'Memory Usage', value: 68, status: 'warning', max: 100 },
-    { name: 'API Requests', value: 1362, status: 'healthy', max: 5000 },
-    { name: 'Queue Size', value: 23, status: 'healthy', max: 500 },
-    { name: 'Error Rate', value: 0.5, status: 'healthy', max: 5 }
-  ]);
+  const [systemLoad, setSystemLoad] = useState<number>(50);
+  const [isFairRotationEnabled, setIsFairRotationEnabled] = useState(true);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   
-  const refreshMetrics = async () => {
-    setIsRefreshing(true);
+  const handleSystemLoadChange = (value: number[]) => {
+    const loadValue = value[0];
+    setSystemLoad(loadValue);
     
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      
-      // Update metrics with random values
-      setSystemMetrics(metrics => 
-        metrics.map(metric => {
-          let newValue: number;
-          
-          if (metric.name === 'Error Rate') {
-            newValue = Math.random() * 2;
-          } else if (metric.name === 'API Requests') {
-            newValue = Math.floor(Math.random() * 3000) + 500;
-          } else if (metric.name === 'Queue Size') {
-            newValue = Math.floor(Math.random() * 100) + 10;
-          } else {
-            newValue = Math.floor(Math.random() * 90) + 10;
-          }
-          
-          const status = 
-            newValue > metric.max * 0.8 ? 'critical' :
-            newValue > metric.max * 0.6 ? 'warning' : 'healthy';
-            
-          return { ...metric, value: newValue, status };
-        })
-      );
-      
-      // Fetch fresh optimization metrics
-      await fetchOptimizationMetrics();
-      
-      toast({
-        title: "Metrics Refreshed",
-        description: "The Hermes + Oxum system metrics have been updated.",
-      });
-    } catch (error) {
-      toast({
-        title: "Refresh Failed",
-        description: "Failed to update system metrics.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
+    // Update the actual system load in the engine (scale to 0-1)
+    hermesOxumEngine.updateSystemLoad(loadValue / 100);
+  };
+  
+  const handleOptimizeSystem = () => {
+    setIsOptimizing(true);
+    
+    // Simulate optimization process
+    setTimeout(() => {
+      setIsOptimizing(false);
+    }, 2000);
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center">
-              <Cpu className="mr-2 h-5 w-5 text-primary" />
-              Hermes + Oxum Monitor
-            </CardTitle>
-            <CardDescription>
-              AI model generation and optimization system
-            </CardDescription>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refreshMetrics}
-            disabled={isRefreshing}
-          >
-            <RefreshCcw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center">
+            <Brain className="mr-2 h-6 w-6" />
+            Hermes + Oxum AI System
+          </h2>
+          <p className="text-muted-foreground">
+            Unified visibility and recommendation engine monitoring
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="pb-1">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              {systemMetrics.map((metric) => (
-                <div key={metric.name} className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label>{metric.name}</Label>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      metric.status === 'healthy' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
-                      metric.status === 'warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
-                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                    }`}>
-                      {metric.name === 'Error Rate' ? `${metric.value.toFixed(1)}%` : 
-                      metric.name === 'CPU Usage' || metric.name === 'Memory Usage' ? 
-                        `${Math.round(metric.value)}%` : 
-                        metric.value.toLocaleString()}
-                    </span>
-                  </div>
-                  <Progress 
-                    value={(metric.value / metric.max) * 100} 
-                    className={`h-2 ${
-                      metric.status === 'healthy' ? 'bg-green-100' :
-                      metric.status === 'warning' ? 'bg-yellow-100' :
-                      'bg-red-100'
-                    }`}
-                  />
-                </div>
-              ))}
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="border rounded-md p-4">
-                <h4 className="text-sm font-medium mb-3 flex items-center">
-                  <Bot className="mr-2 h-4 w-4" />
-                  Active AI Models
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Total Models</span>
-                    <span className="font-medium">487</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Active Now</span>
-                    <span className="font-medium">312</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>In Generation</span>
-                    <span className="font-medium">24</span>
-                  </div>
-                </div>
+        
+        <Button onClick={handleOptimizeSystem} disabled={isOptimizing}>
+          {isOptimizing ? (
+            <>Optimizing...</>
+          ) : (
+            <>
+              <Zap className="mr-2 h-4 w-4" />
+              Optimize System
+            </>
+          )}
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center">
+              <Activity className="mr-2 h-4 w-4" />
+              System Load
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold">{systemLoad}%</span>
+                <Badge className={systemLoad > 80 ? "bg-red-500" : systemLoad > 60 ? "bg-amber-500" : "bg-green-500"}>
+                  {systemLoad > 80 ? "High" : systemLoad > 60 ? "Moderate" : "Optimal"}
+                </Badge>
               </div>
               
-              <div className="border rounded-md p-4">
-                <h4 className="text-sm font-medium mb-3 flex items-center">
-                  <Zap className="mr-2 h-4 w-4" />
-                  System Performance
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Avg. Generation Time</span>
-                    <span className="font-medium">12.4s</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Avg. Response Time</span>
-                    <span className="font-medium">0.8s</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Request Success Rate</span>
-                    <span className="font-medium">99.5%</span>
-                  </div>
-                </div>
+              <Slider
+                value={[systemLoad]}
+                max={100}
+                step={1}
+                onValueChange={handleSystemLoadChange}
+                className="py-4"
+              />
+              
+              <p className="text-xs text-muted-foreground">
+                Current system load affects recommendation quality and distribution fairness
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Boost Queue Size
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl font-bold">243</div>
+              <Badge variant="outline">Active</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              96 AI models, 147 real escorts in queue
+            </p>
+            <div className="mt-4">
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="fair-rotation" 
+                  checked={isFairRotationEnabled} 
+                  onCheckedChange={setIsFairRotationEnabled} 
+                />
+                <Label htmlFor="fair-rotation">Fair rotation enabled</Label>
               </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="analytics">
-            <div className="space-y-4 mt-4">
-              <div className="border rounded-md p-4">
-                <h4 className="text-sm font-medium mb-3 flex items-center">
-                  <BarChart3 className="mr-2 h-4 w-4" />
-                  AI Model Performance Metrics
-                </h4>
-                
-                {optimizationMetrics ? (
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-sm">Conversion Rate</span>
-                        <span className="text-sm font-medium">
-                          {(optimizationMetrics.conversionRate * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                      <Progress value={optimizationMetrics.conversionRate * 100} className="h-2" />
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-sm">Engagement Score</span>
-                        <span className="text-sm font-medium">
-                          {optimizationMetrics.engagementScore.toFixed(1)}/100
-                        </span>
-                      </div>
-                      <Progress value={optimizationMetrics.engagementScore} className="h-2" />
-                    </div>
-                    
-                    <div className="mt-4">
-                      <h5 className="text-sm font-medium mb-2">Recommended Optimizations:</h5>
-                      <ul className="space-y-1 text-sm">
-                        {optimizationMetrics.recommendedChanges.map((recommendation, index) => (
-                          <li key={index} className="flex items-start">
-                            <span className="text-primary mr-2">•</span>
-                            {recommendation}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    No optimization metrics available. Click refresh to fetch the latest data.
-                  </div>
-                )}
-              </div>
-              
-              <Button variant="outline" className="w-full" onClick={() => fetchOptimizationMetrics()}>
-                <RefreshCcw className="mr-2 h-4 w-4" />
-                Refresh Metrics
-              </Button>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">
+              Time-Based Impact
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="text-2xl font-bold">78%</div>
+              <Badge className="bg-green-500">Peak Time</Badge>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="api-key">API Key</Label>
-                <Input id="api-key" type="password" value="••••••••••••••••" disabled />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="endpoint">API Endpoint</Label>
-                <Input id="endpoint" value="https://api.hermes-oxum.uberescorts.com/v1" disabled />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="model-quota">Daily Model Generation Quota</Label>
-                  <Input id="model-quota" type="number" value="500" />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="content-quota">Daily Content Generation Quota</Label>
-                  <Input id="content-quota" type="number" value="2500" />
-                </div>
-              </div>
-              
-              <Button className="w-full mt-2">
-                <Settings className="mr-2 h-4 w-4" />
-                Save Settings
-              </Button>
+            <p className="text-xs text-muted-foreground mt-1">
+              Current time-of-day visibility multiplier
+            </p>
+            <div className="mt-4">
+              <Label className="text-xs">Peak hours adjustment</Label>
+              <Input type="time" className="mt-1" defaultValue="20:00" />
             </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      <CardFooter className="pt-1">
-        <p className="text-xs text-muted-foreground w-full text-center">
-          Hermes + Oxum System v1.2.4 • Last Updated: {new Date().toLocaleString()}
-        </p>
-      </CardFooter>
-    </Card>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Attention</AlertTitle>
+        <AlertDescription>
+          Boost effectiveness is currently 23% higher than last week due to optimized visibility distribution.
+        </AlertDescription>
+      </Alert>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Performance Metrics</CardTitle>
+            <CardDescription>
+              Hermes vs Oxum engine efficiency over time
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={performanceData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="hermes" stroke="#8884d8" name="Hermes (Visibility)" />
+                  <Line type="monotone" dataKey="oxum" stroke="#82ca9d" name="Oxum (Fairness)" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Boost Distribution</CardTitle>
+            <CardDescription>
+              AI vs Real profile boost allocation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={boostDistributionData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="ai" fill="#8884d8" name="AI Models" />
+                  <Bar dataKey="real" fill="#82ca9d" name="Real Escorts" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
