@@ -6,6 +6,7 @@ import { useAuth } from './hooks/auth/useAuth';
 import { Loader2 } from 'lucide-react';
 import { ThemeProvider } from './components/theme-provider';
 import { ToastProvider, useToast } from './hooks/use-toast';
+import { HelmetProvider } from 'react-helmet-async';
 
 function AppContent() {
   const { isLoading } = useAuth();
@@ -51,11 +52,13 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" attribute="class">
-      <ToastProvider>
-        <AppContent />
-      </ToastProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider defaultTheme="dark" attribute="class">
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 
