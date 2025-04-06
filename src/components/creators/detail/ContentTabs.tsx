@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Lock, Image as ImageIcon, Video, Clock } from "lucide-react";
 import { Creator } from "@/hooks/useCreators";
 import { Badge } from "@/components/ui/badge";
+import VirtualContentGallery from "./VirtualContentGallery";
 
 interface ContentTabsProps {
   creator: Creator;
@@ -14,13 +15,15 @@ interface ContentTabsProps {
 
 const ContentTabs: React.FC<ContentTabsProps> = ({ creator, handleSubscribe }) => {
   const [activeTab, setActiveTab] = useState("about");
+  const [photosDisplayMode, setPhotosDisplayMode] = useState<'grid' | 'carousel'>('grid');
 
   // Placeholder for when we don't have actual content
   const dummyImages = Array(6).fill(null).map((_, i) => ({
     id: `img-${i}`,
     url: `https://source.unsplash.com/random/300x300?sig=${i}`,
     title: `Image ${i+1}`,
-    isPremium: i % 3 === 0
+    isPremium: i % 3 === 0,
+    rating: i % 2 === 0 ? 4.5 : 5.0
   }));
 
   const dummyVideos = Array(4).fill(null).map((_, i) => ({
@@ -65,30 +68,31 @@ const ContentTabs: React.FC<ContentTabsProps> = ({ creator, handleSubscribe }) =
       </TabsContent>
       
       <TabsContent value="photos" className="mt-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {dummyImages.map(image => (
-            <div key={image.id} className="relative rounded-lg overflow-hidden aspect-square">
-              <img 
-                src={image.url} 
-                alt={image.title}
-                className="w-full h-full object-cover"
-              />
-              {image.isPremium && (
-                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                  <Lock className="h-8 w-8 text-white mb-2" />
-                  <p className="text-white text-sm">Premium Content</p>
-                  <Button 
-                    size="sm" 
-                    className="mt-2"
-                    onClick={handleSubscribe}
-                  >
-                    Subscribe to View
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="mb-4 flex justify-between items-center">
+          <h3 className="text-lg font-medium">Photo Gallery</h3>
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant={photosDisplayMode === 'grid' ? "default" : "outline"} 
+              onClick={() => setPhotosDisplayMode('grid')}
+            >
+              Grid
+            </Button>
+            <Button 
+              size="sm" 
+              variant={photosDisplayMode === 'carousel' ? "default" : "outline"} 
+              onClick={() => setPhotosDisplayMode('carousel')}
+            >
+              Carousel
+            </Button>
+          </div>
         </div>
+        
+        <VirtualContentGallery
+          items={dummyImages}
+          displayMode={photosDisplayMode}
+          onSubscribe={handleSubscribe}
+        />
       </TabsContent>
       
       <TabsContent value="videos" className="mt-4">
