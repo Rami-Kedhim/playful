@@ -1,110 +1,77 @@
 
-/**
- * Hook for using HERMES-powered SEO optimization in components
- */
-import { useState, useCallback } from 'react';
-import hermesSeoService, { SeoOptimizationRequest, SeoOptimizationResult } from '@/services/seo/HermesSeoService';
+import { useState } from 'react';
+import hermesSeoService, { 
+  SeoOptimizationRequest, 
+  SeoOptimizationResult 
+} from '@/services/seo/HermesSeoService';
 
-export interface UseSeoOptimizationResult {
-  optimizeSeo: (request: SeoOptimizationRequest) => Promise<SeoOptimizationResult>;
-  applyOptimizations: (contentId: string, optimizations: SeoOptimizationResult) => Promise<boolean>;
-  enhanceContentSeo: (
-    contentId: string,
-    contentType: 'profile' | 'content' | 'livecam' | 'event',
-    currentTitle: string,
-    currentDescription: string,
-    keywords: string[]
-  ) => Promise<SeoOptimizationResult>;
-  optimizationResult: SeoOptimizationResult | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export const useHermesSeo = (): UseSeoOptimizationResult => {
+export const useHermesSeo = () => {
   const [optimizationResult, setOptimizationResult] = useState<SeoOptimizationResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
   /**
-   * Request SEO optimization from HERMES
+   * Enhance content SEO using HERMES intelligence
    */
-  const optimizeSeo = useCallback(async (request: SeoOptimizationRequest): Promise<SeoOptimizationResult> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const result = await hermesSeoService.optimizeSeo(request);
-      setOptimizationResult(result);
-      
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error during SEO optimization';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-  
-  /**
-   * Apply HERMES-recommended SEO optimizations
-   */
-  const applyOptimizations = useCallback(async (
-    contentId: string,
-    optimizations: SeoOptimizationResult
-  ): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const result = await hermesSeoService.applyOptimizations(contentId, optimizations);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to apply SEO optimizations';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-  
-  /**
-   * Generate SEO enhancements for content
-   */
-  const enhanceContentSeo = useCallback(async (
+  const enhanceContentSeo = async (
     contentId: string,
     contentType: 'profile' | 'content' | 'livecam' | 'event',
-    currentTitle: string,
-    currentDescription: string,
+    title: string,
+    description: string,
     keywords: string[]
   ): Promise<SeoOptimizationResult> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      
       const result = await hermesSeoService.enhanceContentSeo(
         contentId,
         contentType,
-        currentTitle,
-        currentDescription,
+        title,
+        description,
         keywords
       );
       
       setOptimizationResult(result);
       return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to enhance content SEO';
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Failed to optimize content with HERMES';
       setError(errorMessage);
-      throw err;
+      throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
+  
+  /**
+   * Apply optimizations to content
+   */
+  const applyOptimizations = async (
+    contentId: string,
+    optimizations: SeoOptimizationResult
+  ): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const success = await hermesSeoService.applyOptimizations(
+        contentId,
+        optimizations
+      );
+      
+      return success;
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Failed to apply HERMES optimizations';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return {
-    optimizeSeo,
-    applyOptimizations,
     enhanceContentSeo,
+    applyOptimizations,
     optimizationResult,
     isLoading,
     error

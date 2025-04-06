@@ -1,115 +1,82 @@
-
 import { useState, useEffect } from 'react';
 import { SeoOptimizationResult } from '@/services/seo/HermesSeoService';
 
-interface SeoHistoryEntry {
-  timestamp: number;
+interface HistoryEntry {
   contentId: string;
   contentType: 'profile' | 'content' | 'livecam' | 'event';
+  timestamp: string;
   result: SeoOptimizationResult;
 }
 
 export const useHermesSeoHistory = (contentId?: string) => {
-  const [history, setHistory] = useState<SeoHistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  
+  // Load history from local storage on mount
   useEffect(() => {
-    // Load history from localStorage on component mount
-    const loadHistory = () => {
+    const savedHistory = localStorage.getItem('hermes_seo_history');
+    if (savedHistory) {
       try {
-        setIsLoading(true);
-        const storedHistory = localStorage.getItem('hermes_seo_history');
-        if (storedHistory) {
-          const parsedHistory: SeoHistoryEntry[] = JSON.parse(storedHistory);
-          
-          // Filter by contentId if provided
-          const filteredHistory = contentId 
-            ? parsedHistory.filter(entry => entry.contentId === contentId) 
-            : parsedHistory;
-          
-          // Sort by timestamp (newest first)
-          const sortedHistory = filteredHistory.sort((a, b) => b.timestamp - a.timestamp);
-          
-          setHistory(sortedHistory);
+        const parsedHistory = JSON.parse(savedHistory) as HistoryEntry[];
+        
+        // If contentId is provided, filter history for that content
+        if (contentId) {
+          setHistory(parsedHistory.filter(entry => entry.contentId === contentId));
+        } else {
+          setHistory(parsedHistory);
         }
       } catch (error) {
-        console.error('Error loading SEO history:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Failed to parse SEO history:', error);
+        // If parsing fails, start with empty history
+        setHistory([]);
       }
-    };
-
-    loadHistory();
+    }
   }, [contentId]);
-
+  
+  // Add a new entry to history
   const addHistoryEntry = (
     contentId: string,
     contentType: 'profile' | 'content' | 'livecam' | 'event',
     result: SeoOptimizationResult
   ) => {
-    try {
-      // Create new entry
-      const newEntry: SeoHistoryEntry = {
-        timestamp: Date.now(),
-        contentId,
-        contentType,
-        result
-      };
-
-      // Get existing history
-      const storedHistory = localStorage.getItem('hermes_seo_history');
-      const parsedHistory: SeoHistoryEntry[] = storedHistory ? JSON.parse(storedHistory) : [];
-      
-      // Add new entry
-      const updatedHistory = [newEntry, ...parsedHistory];
-      
-      // Limit history to 50 entries to prevent localStorage bloat
-      const limitedHistory = updatedHistory.slice(0, 50);
-      
-      // Save back to localStorage
-      localStorage.setItem('hermes_seo_history', JSON.stringify(limitedHistory));
-      
-      // Update state
-      setHistory(contentId 
-        ? limitedHistory.filter(entry => entry.contentId === contentId)
-        : limitedHistory
-      );
-      
-      return newEntry;
-    } catch (error) {
-      console.error('Error saving SEO history:', error);
-      return null;
-    }
-  };
-
-  const clearHistory = () => {
-    try {
-      if (contentId) {
-        // Only clear entries for this contentId
-        const storedHistory = localStorage.getItem('hermes_seo_history');
-        if (storedHistory) {
-          const parsedHistory: SeoHistoryEntry[] = JSON.parse(storedHistory);
-          const filteredHistory = parsedHistory.filter(entry => entry.contentId !== contentId);
-          localStorage.setItem('hermes_seo_history', JSON.stringify(filteredHistory));
-          setHistory([]);
-        }
-      } else {
-        // Clear all history
-        localStorage.removeItem('hermes_seo_history');
-        setHistory([]);
+    const newEntry: HistoryEntry = {
+      contentId,
+      contentType,
+      timestamp: new Date().toISOString(),
+      result
+    };
+    
+    // Get current history from localStorage
+    const savedHistory = localStorage.getItem('hermes_seo_history');
+    let fullHistory: HistoryEntry[] = [];
+    
+    if (savedHistory) {
+      try {
+        fullHistory = JSON.parse(savedHistory);
+      } catch (error) {
+        console.error('Failed to parse existing history:', error);
       }
-      return true;
-    } catch (error) {
-      console.error('Error clearing SEO history:', error);
-      return false;
+    }
+    
+    // Add new entry to full history
+    const updatedHistory = [newEntry, ...fullHistory];
+    
+    // Keep only the latest 100 entries to prevent localStorage from growing too large
+    const trimmedHistory = updatedHistory.slice(0, 100);
+    
+    // Save back to localStorage
+    localStorage.setItem('hermes_seo_history', JSON.stringify(trimmedHistory));
+    
+    // Update state with history filtered for current contentId if needed
+    if (contentId) {
+      setHistory(trimmedHistory.filter(entry => entry.contentId === contentId));
+    } else {
+      setHistory(trimmedHistory);
     }
   };
-
+  
   return {
     history,
-    isLoading,
-    addHistoryEntry,
-    clearHistory
+    addHistoryEntry
   };
 };
 
