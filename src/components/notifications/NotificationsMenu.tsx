@@ -51,10 +51,10 @@ const NotificationsMenu = () => {
                 key={notification.id}
                 id={notification.id}
                 title={notification.title}
-                message={notification.content} // Content field instead of message
-                type={notification.type as "success" | "error" | "info" | "warning"} // Type cast to match the expected type
-                isRead={notification.is_read} // is_read instead of read
-                createdAt={typeof notification.created_at === 'string' ? new Date(notification.created_at) : notification.created_at} // Convert string to Date if needed
+                message={notification.content}
+                type={notification.type}
+                isRead={notification.is_read}
+                createdAt={notification.created_at}
                 onMarkAsRead={markAsRead}
               />
             ))

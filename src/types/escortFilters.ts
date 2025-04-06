@@ -1,5 +1,11 @@
 
-import { Escort } from "./escort";
+import { Escort as EscortType } from "./escort";
+
+export interface Escort extends EscortType {
+  // Add any additional fields that might be needed
+  reviews?: any[];
+  tags?: string[];
+}
 
 export interface EscortFilterState {
   searchQuery: string;

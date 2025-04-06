@@ -1,6 +1,7 @@
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { getNotifications } from '@/services/notificationsService';
 
 export interface Notification {
   id: string;
@@ -24,6 +25,8 @@ export interface NotificationsContextType {
   showError: (title: string, content: string) => void;
   showInfo: (title: string, content: string) => void;
   showWarning: (title: string, content: string) => void;
+  // Add fetchNotifications method
+  fetchNotifications: () => Promise<void>;
 }
 
 const NotificationsContext = createContext<NotificationsContextType | null>(null);
@@ -45,6 +48,31 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   const { toast } = useToast();
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      // Mock fetching notifications
+      // In a real app, this would be an API call
+      console.log('Fetching notifications...');
+      
+      // If using the real service:
+      // const userId = user?.id;
+      // if (userId) {
+      //   const notificationData = await getNotifications(userId);
+      //   setNotifications(notificationData);
+      // }
+      
+      // For now, we'll just refresh the current state
+      setNotifications(current => [...current]);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    }
+  }, []);
+
+  // Fetch notifications on mount
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const addNotification = useCallback((notification: Omit<Notification, "id" | "is_read" | "created_at">) => {
     const newNotification: Notification = {
@@ -130,7 +158,8 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
       showSuccess,
       showError,
       showInfo,
-      showWarning
+      showWarning,
+      fetchNotifications
     }}>
       {children}
     </NotificationsContext.Provider>

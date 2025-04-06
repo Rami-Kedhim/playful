@@ -1,12 +1,13 @@
+
 import React, { useEffect, useRef, useState } from 'react';
-import { useAIMessaging } from '@/hooks/useAIMessaging';
+import { useAIMessaging, AIMessage } from '@/hooks/useAIMessaging';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Send, Coins, Image, X, MessageSquare, Info } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { UserProfile } from '@/types/auth';
@@ -40,7 +41,7 @@ const AIChat: React.FC<AIChatProps> = ({
     initializeConversation,
     sendMessage,
     processPayment,
-    generateImage
+    generateAIImage
   } = useAIMessaging({ profileId, conversationId });
   
   const [inputValue, setInputValue] = useState('');
@@ -89,7 +90,7 @@ const AIChat: React.FC<AIChatProps> = ({
     
     if (!imagePrompt.trim()) return;
     
-    const imageUrl = await generateImage(imagePrompt);
+    const imageUrl = await generateAIImage(imagePrompt);
     if (imageUrl) {
       setGeneratedImage(imageUrl);
       // Add a system message about the image generation
@@ -145,7 +146,7 @@ const AIChat: React.FC<AIChatProps> = ({
             <div className="flex items-center space-x-3">
               <Avatar>
                 <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-                <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
                 <div className="flex items-center gap-2">
@@ -194,13 +195,14 @@ const AIChat: React.FC<AIChatProps> = ({
           <div className="space-y-4">
             {messages.map((message) => {
               const isUser = !message.is_ai;
+              const messageCreatedAt = message.created_at ? new Date(message.created_at) : message.timestamp;
               
               return (
                 <div key={message.id} className={`flex ${isUser ? 'justify-end' : ''}`}>
                   {!isUser && (
                     <Avatar className="h-8 w-8 mr-2 mt-1">
                       <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-                      <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
                     </Avatar>
                   )}
                   
@@ -219,7 +221,7 @@ const AIChat: React.FC<AIChatProps> = ({
                     )}
                     
                     <p className={`text-xs mt-1 ${isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                      {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                      {formatDistanceToNow(messageCreatedAt, { addSuffix: true })}
                     </p>
                     
                     {message.requires_payment && message.payment_status === 'pending' && (
@@ -229,7 +231,7 @@ const AIChat: React.FC<AIChatProps> = ({
                         onClick={handlePurchaseResponse}
                       >
                         <Coins className="w-4 h-4 mr-2" />
-                        Continue chatting ({message.price} LC)
+                        Continue chatting ({message.price || 5} LC)
                       </Button>
                     )}
                   </div>
@@ -248,7 +250,7 @@ const AIChat: React.FC<AIChatProps> = ({
               <div className="flex">
                 <Avatar className="h-8 w-8 mr-2 mt-1">
                   <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-                  <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
                 </Avatar>
                 <div className="bg-muted rounded-lg p-3 max-w-[80%]">
                   <div className="flex space-x-2">
@@ -264,7 +266,7 @@ const AIChat: React.FC<AIChatProps> = ({
               <div className="flex">
                 <Avatar className="h-8 w-8 mr-2 mt-1">
                   <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-                  <AvatarFallback>{profile?.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
                 </Avatar>
                 <div className="bg-muted rounded-lg p-3 max-w-[80%]">
                   <div className="flex space-x-2">
@@ -324,7 +326,7 @@ const AIChat: React.FC<AIChatProps> = ({
           <DialogHeader>
             <DialogTitle>Request an AI-generated image</DialogTitle>
             <DialogDescription>
-              Describe what you'd like {profile?.name} to generate for you. This will cost {profile?.lucoin_image_price || 10} Lucoins.
+              Describe what you'd like {profile?.name || 'the AI'} to generate for you. This will cost {profile?.lucoin_image_price || 10} Lucoins.
             </DialogDescription>
           </DialogHeader>
           

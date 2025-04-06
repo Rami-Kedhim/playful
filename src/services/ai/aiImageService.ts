@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
  * @returns URL of the generated image or null if generation failed
  */
 export const generateImage = async (prompt: string, options = {}): Promise<string | null> => {
-  // Show a loading toast that we can dismiss later
+  // Show a loading toast
   toast({
     title: 'Generating image...',
     description: 'Please wait while we process your request.',
