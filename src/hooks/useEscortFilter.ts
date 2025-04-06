@@ -1,6 +1,16 @@
+
 import { useState, useEffect } from "react";
 import { useFilterResults } from "@/hooks/escort-filters/useFilterResults";
-import { Escort, EscortFilterHook } from "@/types/escortFilters";
+import { Escort } from "@/types/escort";
+import { EscortFilterState, EscortFilterActions } from "@/types/escortFilters";
+
+// Define the EscortFilterHook interface that extends the state and actions
+export interface EscortFilterHook extends EscortFilterState, EscortFilterActions {
+  filteredEscorts: Escort[];
+  sortedEscorts: Escort[];
+  paginatedEscorts: Escort[];
+  totalPages: number;
+}
 
 export interface UseEscortFilterProps {
   escorts: Escort[];
@@ -92,7 +102,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilter
         : [...prev, orientation]
     );
   };
-
+  
   // Set service type filter with proper type
   const setServiceTypeFilterSafe = (type: "" | "in-person" | "virtual" | "both") => {
     setServiceTypeFilter(type);

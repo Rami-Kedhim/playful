@@ -99,4 +99,5 @@ export const toast = (props: Omit<Toast, "id">) => {
 if (typeof window !== "undefined") {
   // Will be set by the ToastProvider when it mounts
   (window as any).__TOAST_ADD_FUNCTION__ = null;
+  (window as any).__TOAST_REMOVE_FUNCTION__ = null;
 }

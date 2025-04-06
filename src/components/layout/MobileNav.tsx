@@ -105,8 +105,7 @@ const MobileNav: React.FC = () => {
                 {user && (
                   <UserDropdown 
                     user={user} 
-                    handleLogout={handleLogout} 
-                    onClose={handleCloseMenu} 
+                    handleLogout={handleLogout}
                   />
                 )}
               </div>

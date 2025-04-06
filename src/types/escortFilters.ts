@@ -1,4 +1,6 @@
 
+import { Escort } from "./escort";
+
 export interface EscortFilterState {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -37,24 +39,6 @@ export interface EscortFilterActions {
   toggleGender: (gender: string) => void;
   toggleOrientation: (orientation: string) => void;
   clearFilters: () => void;
-}
-
-export interface Escort {
-  id: string;
-  name: string;
-  bio?: string;
-  location: string;
-  price?: number;
-  verified?: boolean;
-  services?: string[];
-  gender?: string;
-  sexualOrientation?: string;
-  age: number;
-  rating: number;
-  availableNow?: boolean;
-  serviceTypes?: string[];
-  providesInPersonServices?: boolean;
-  providesVirtualContent?: boolean;
 }
 
 export interface FilterOptions {

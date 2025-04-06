@@ -8,12 +8,13 @@ import { ToastProvider, useToast } from './hooks/use-toast';
 
 function AppContent() {
   const { isLoading } = useAuth();
-  const { addToast } = useToast();
+  const { addToast, removeToast } = useToast();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Set the global toast function
+      // Set the global toast functions
       (window as any).__TOAST_ADD_FUNCTION__ = addToast;
+      (window as any).__TOAST_REMOVE_FUNCTION__ = removeToast;
       
       // Add a marker to indicate that toast context is available
       const markerElement = document.createElement('div');
@@ -25,9 +26,10 @@ function AppContent() {
       return () => {
         document.body.removeChild(markerElement);
         (window as any).__TOAST_ADD_FUNCTION__ = null;
+        (window as any).__TOAST_REMOVE_FUNCTION__ = null;
       };
     }
-  }, [addToast]);
+  }, [addToast, removeToast]);
 
   // Show loading state while authentication is being determined
   if (isLoading) {

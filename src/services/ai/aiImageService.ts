@@ -1,3 +1,4 @@
+
 import { toast } from "@/hooks/use-toast";
 
 /**
@@ -8,11 +9,7 @@ import { toast } from "@/hooks/use-toast";
  */
 export const generateImage = async (prompt: string, options = {}): Promise<string | null> => {
   // Show a loading toast that we can dismiss later
-  const toastId = Math.random().toString(36).substring(2, 9);
-  
-  // Show loading toast
   toast({
-    id: toastId,
     title: 'Generating image...',
     description: 'Please wait while we process your request.',
   });
@@ -37,16 +34,16 @@ export const generateImage = async (prompt: string, options = {}): Promise<strin
     
     const data = await response.json();
     
-    // Success, dismiss the loading toast
-    removeToast(toastId);
+    // Show success toast
+    toast({
+      title: 'Image generated',
+      description: 'Your image was successfully created',
+    });
     
     return data.imageUrl; // Return the actual URL from the API
   } catch (error) {
     // Error handling
     console.error('Image generation failed:', error);
-    
-    // Dismiss the loading toast and show error
-    removeToast(toastId);
     
     toast({
       title: 'Image generation failed',
@@ -55,18 +52,6 @@ export const generateImage = async (prompt: string, options = {}): Promise<strin
     });
     
     return null;
-  }
-};
-
-/**
- * Helper function to remove a toast by ID
- * @param id The ID of the toast to remove
- */
-const removeToast = (id: string) => {
-  // If we're in a component with access to useToast, we'd use it directly
-  // For a service like this, we need to use the global approach
-  if (typeof window !== 'undefined' && (window as any).__TOAST_REMOVE_FUNCTION__) {
-    (window as any).__TOAST_REMOVE_FUNCTION__(id);
   }
 };
 
