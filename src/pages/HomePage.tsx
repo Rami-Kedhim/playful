@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
@@ -11,7 +12,9 @@ import LucieAssistant from "@/components/home/LucieAssistant";
 import MetaverseSection from "@/components/home/MetaverseSection";
 import WelcomeAlert from "@/components/layout/WelcomeAlert";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { Helmet } from "react-helmet-async";
 
+// Sample data for featured profiles
 const featuredEscorts = [
   {
     id: "escort-1",
@@ -57,6 +60,7 @@ const featuredEscorts = [
   }
 ];
 
+// Sample data for featured creators
 const featuredCreators = [
   {
     id: "creator-1",
@@ -104,10 +108,15 @@ const featuredCreators = [
 
 const HomePage = () => {
   const { user, isAuthenticated } = useAuth();
-  const [searchLocation, setSearchLocation] = React.useState("");
+  const [searchLocation, setSearchLocation] = useState("");
   
   return (
-    <>
+    <AppLayout>
+      <Helmet>
+        <title>UberEscorts - Premium Web3 Adult Platform</title>
+        <meta name="description" content="UberEscorts - The ultimate Web3 adult platform with verified escorts, content creators, secure payments, and metaverse integration." />
+      </Helmet>
+      
       {isAuthenticated && user && (
         <div className="container mx-auto px-4 pt-6">
           <WelcomeAlert username={user.username || 'User'} />
@@ -130,7 +139,7 @@ const HomePage = () => {
       <TrustSection />
       <CtaSection />
       <LucieAssistant />
-    </>
+    </AppLayout>
   );
 };
 

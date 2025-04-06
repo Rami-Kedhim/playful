@@ -1,61 +1,57 @@
-import React, { useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { Loader2 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
-  allowUnauthenticated?: boolean;
+  requiredRoles?: string[];
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requiredRole,
-  allowUnauthenticated = false,
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  requiredRoles = [] 
 }) => {
-  const { user, isLoading, isAuthenticated, userRoles } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
-  useEffect(() => {
-    // Show toast if authenticated but missing required role
-    if (
-      !isLoading && 
-      isAuthenticated && 
-      requiredRole && 
-      !userRoles.includes(requiredRole)
-    ) {
-      toast({
-        title: "Access denied",
-        description: "You don't have permission to access this page.",
-        variant: "destructive",
-      });
-    }
-  }, [isLoading, isAuthenticated, requiredRole, userRoles]);
-
-  // Show loading spinner while checking authentication
+  // Show loading state while authentication is being checked
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh] w-full">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Verifying authentication...</span>
       </div>
     );
   }
 
-  // If unauthenticated access is allowed, or the user is authenticated
-  if (allowUnauthenticated || isAuthenticated) {
-    // If a role is required and user doesn't have that role, redirect to home
-    if (requiredRole && isAuthenticated && !userRoles.includes(requiredRole)) {
-      return <Navigate to="/" state={{ from: location }} replace />;
-    }
-    
-    // Otherwise, render the children
-    return <>{children}</>;
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    // Save the current path to redirect back after login
+    return <Navigate to={`/auth?from=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
-  // If not authenticated and authentication is required, redirect to login
-  return <Navigate to="/auth" state={{ from: location }} replace />;
+  // Check role-based access if roles are required
+  if (requiredRoles.length > 0) {
+    const userRoles = user?.roles || [];
+    const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
+    
+    if (!hasRequiredRole) {
+      return (
+        <div className="flex flex-col items-center justify-center h-screen">
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p className="text-muted-foreground mb-6">
+            You don't have permission to access this page.
+          </p>
+          <Navigate to="/" replace />
+        </div>
+      );
+    }
+  }
+
+  // If authenticated and has required roles (if any), render the children
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
