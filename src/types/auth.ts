@@ -16,10 +16,10 @@ export interface AuthUser {
   lucoinsBalance?: number;
   isVerified?: boolean;
   role?: UserRole;
-  // Supabase User properties
-  app_metadata: Record<string, any>; // Changed from optional to required
-  user_metadata: Record<string, any>; // Changed from optional to required
-  aud?: string;
+  // Supabase User properties - making required properties match Supabase User type
+  app_metadata: Record<string, any>;
+  user_metadata: Record<string, any>;
+  aud: string; // Changed from optional to required to match Supabase User type
   created_at?: string;
 }
 

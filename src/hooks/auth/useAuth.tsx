@@ -54,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       if (!user) throw new Error("User not logged in");
       
+      // Pass user.id as the userId parameter
       await updateProfile(user.id, userData);
       await refreshProfile();
       
@@ -81,17 +82,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       lucoinsBalance: profile?.lucoin_balance || 0,
       isVerified: profile?.is_verified || false,
       role: userRoles.length > 0 ? userRoles[0] : "user",
-      app_metadata: dbUser.app_metadata || {},
-      user_metadata: dbUser.user_metadata || {},
+      app_metadata: dbUser.app_metadata,
+      user_metadata: dbUser.user_metadata,
+      aud: dbUser.aud,
       created_at: dbUser.created_at
     };
   };
 
-  const authUser = mapUserToAuthUser(user, profile);
+  // If we have a user and we're not using the updated user object from useAuthState,
+  // map it for consistency with the rest of the app
+  const authUser = user || (session?.user ? mapUserToAuthUser(session.user, profile) : null);
 
   const value: AuthContextValue = {
     session,
-    user: authUser as any,
+    user: authUser,
     profile,
     isLoading,
     userRoles,

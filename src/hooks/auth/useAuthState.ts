@@ -34,6 +34,18 @@ export const useAuthState = (): [
     }
   };
 
+  // Helper function to convert Supabase User to AuthUser
+  const mapSupabaseUserToAuthUser = (supabaseUser: User): AuthUser => {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || "",
+      app_metadata: supabaseUser.app_metadata,
+      user_metadata: supabaseUser.user_metadata,
+      aud: supabaseUser.aud, // This is required now
+      created_at: supabaseUser.created_at
+    };
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -42,14 +54,7 @@ export const useAuthState = (): [
         
         // Convert User to AuthUser type to match our interface
         if (session?.user) {
-          const authUser: AuthUser = {
-            id: session.user.id,
-            email: session.user.email || "",
-            app_metadata: session.user.app_metadata,
-            user_metadata: session.user.user_metadata,
-            created_at: session.user.created_at,
-            aud: session.user.aud
-          };
+          const authUser = mapSupabaseUserToAuthUser(session.user);
           setUser(authUser);
         } else {
           setUser(null);
@@ -84,14 +89,7 @@ export const useAuthState = (): [
       
       // Convert User to AuthUser type to match our interface
       if (session?.user) {
-        const authUser: AuthUser = {
-          id: session.user.id,
-          email: session.user.email || "",
-          app_metadata: session.user.app_metadata,
-          user_metadata: session.user.user_metadata,
-          created_at: session.user.created_at,
-          aud: session.user.aud
-        };
+        const authUser = mapSupabaseUserToAuthUser(session.user);
         setUser(authUser);
         
         try {
