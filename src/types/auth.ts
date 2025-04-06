@@ -48,3 +48,25 @@ export interface AuthContextValue {
   // Role checking
   checkRole: (role: string) => boolean;
 }
+
+// Add missing types
+export type UserRole = string;
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  full_name?: string;
+  bio?: string;
+  avatar_url?: string;
+  location?: string;
+  gender?: DatabaseGender;
+  sexual_orientation?: string;
+  is_verified?: boolean;
+  is_escort?: boolean;
+  subscription_tier?: string;
+  lucoins_balance?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type DatabaseGender = "male" | "female" | "other";

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import FeaturedContentSection from '@/components/home/FeaturedContentSection';
@@ -9,6 +10,58 @@ import LucoinSection from '@/components/home/LucoinSection';
 import CtaSection from '@/components/home/CtaSection';
 import WelcomeAlert from '@/components/layout/WelcomeAlert';
 import { useAuth } from '@/hooks/auth/useAuth';
+
+// Sample data for featured escorts
+const featuredEscorts = [
+  {
+    id: "1",
+    name: "Sophia",
+    avatar: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    location: "New York",
+    verified: true,
+    rating: 4.9,
+    serviceType: "both",
+    isLive: false,
+    featured: true
+  },
+  {
+    id: "2",
+    name: "Emma",
+    avatar: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    location: "Los Angeles",
+    verified: true,
+    rating: 4.8,
+    serviceType: "in-person",
+    isLive: true
+  },
+  // Add more sample data as needed
+];
+
+// Sample data for featured creators
+const featuredCreators = [
+  {
+    id: "3",
+    name: "Olivia",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    location: "Miami",
+    verified: true,
+    rating: 4.7,
+    serviceType: "virtual",
+    isLive: false
+  },
+  {
+    id: "4",
+    name: "Victoria",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    location: "Las Vegas",
+    verified: true,
+    rating: 4.9,
+    serviceType: "virtual",
+    isLive: true,
+    isPremium: true
+  },
+  // Add more sample data as needed
+];
 
 const HomePage = () => {
   const { user, isAuthenticated } = useAuth();
@@ -31,7 +84,10 @@ const HomePage = () => {
       
       {/* Other sections */}
       <TrustSection />
-      <FeaturedContentSection />
+      <FeaturedContentSection 
+        featuredEscorts={featuredEscorts}
+        featuredCreators={featuredCreators}
+      />
       <HowItWorksSection />
       <FeaturesSection />
       <MetaverseSection />

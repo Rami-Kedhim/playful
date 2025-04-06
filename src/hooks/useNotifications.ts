@@ -138,7 +138,7 @@ export const useNotifications = () => {
           const newNotification = {
             ...payload.new,
             time: formatRelativeTime(payload.new.created_at)
-          };
+          } as Notification;
           
           setNotifications(prev => [newNotification, ...prev]);
           if (!newNotification.read) {
@@ -146,7 +146,8 @@ export const useNotifications = () => {
           }
         } else if (payload.eventType === 'UPDATE') {
           setNotifications(prev => 
-            prev.map(n => n.id === payload.new.id ? { ...payload.new, time: formatRelativeTime(payload.new.created_at) } : n)
+            prev.map(n => n.id === payload.new.id ? 
+              { ...payload.new, time: formatRelativeTime(payload.new.created_at) } as Notification : n)
           );
         }
       })
