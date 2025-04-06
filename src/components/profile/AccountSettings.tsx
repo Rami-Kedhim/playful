@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 import AccountItem from "./settings/AccountItem";
 import PasswordDialog from "./settings/PasswordDialog";
 import EmailDialog from "./settings/EmailDialog";
@@ -9,7 +9,7 @@ import ProfileCompleteness from "./ProfileCompleteness";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Shield, Zap } from "lucide-react";
 import WalletConnect from "@/components/solana/WalletConnect";
-import { AuthUser } from "@/types/auth"; // Import the AuthUser type
+import { AuthUser } from "@/types/auth";
 
 interface AccountSettingsProps {
   user: AuthUser;
@@ -19,7 +19,6 @@ interface AccountSettingsProps {
 const AccountSettings = ({ user, profile }: AccountSettingsProps) => {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
-  const { updatePassword } = useAuth();
   
   const getLastPasswordChange = () => {
     // This would typically come from the user metadata
@@ -137,7 +136,6 @@ const AccountSettings = ({ user, profile }: AccountSettingsProps) => {
       <PasswordDialog 
         open={passwordDialogOpen}
         onOpenChange={setPasswordDialogOpen}
-        onUpdatePassword={updatePassword}
       />
 
       <EmailDialog 

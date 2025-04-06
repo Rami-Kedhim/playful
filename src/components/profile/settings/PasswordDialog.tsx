@@ -13,23 +13,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { usePasswordManagement } from "@/hooks/auth/usePasswordManagement";
 
 interface PasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
 }
 
 const PasswordDialog = ({ 
   open, 
   onOpenChange,
-  onUpdatePassword
 }: PasswordDialogProps) => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const { updatePassword, isLoading } = usePasswordManagement();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,19 +46,11 @@ const PasswordDialog = ({
       return;
     }
     
-    setLoading(true);
-    
     try {
-      await onUpdatePassword(oldPassword, newPassword);
-      toast({
-        title: "Password updated",
-        description: "Your password has been updated successfully.",
-      });
+      await updatePassword(oldPassword, newPassword);
       handleClose();
     } catch (err: any) {
       setError(err.message || "Failed to update password");
-    } finally {
-      setLoading(false);
     }
   };
   
@@ -93,7 +85,7 @@ const PasswordDialog = ({
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
               required
-              disabled={loading}
+              disabled={isLoading}
             />
           </div>
           
@@ -105,7 +97,7 @@ const PasswordDialog = ({
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              disabled={loading}
+              disabled={isLoading}
             />
           </div>
           
@@ -117,7 +109,7 @@ const PasswordDialog = ({
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              disabled={loading}
+              disabled={isLoading}
             />
           </div>
           
@@ -126,12 +118,12 @@ const PasswordDialog = ({
               type="button" 
               variant="ghost" 
               onClick={handleClose}
-              disabled={loading}
+              disabled={isLoading}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? (
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Updating...

@@ -1,7 +1,11 @@
-import React from 'react';
-import { supabase } from "@/integrations/supabase/client";
 
-export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) => {
+import { useState } from 'react';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
+
+export const usePasswordManagement = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  
   // Reset password through email
   const resetPassword = async (email: string): Promise<void> => {
     try {
@@ -10,7 +14,19 @@ export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) 
         redirectTo: `${window.location.origin}/reset-password`,
       });
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Error resetting password",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Password reset email sent",
+        description: "Check your email for the password reset link",
+      });
     } catch (error: any) {
       console.error("Error resetting password:", error.message);
       throw error;
@@ -29,7 +45,19 @@ export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) 
         password: newPassword,
       });
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Error updating password",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully",
+      });
     } catch (error: any) {
       console.error("Error updating password:", error.message);
       throw error;
@@ -38,5 +66,5 @@ export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) 
     }
   };
   
-  return { resetPassword, updatePassword };
+  return { resetPassword, updatePassword, isLoading };
 };
