@@ -1,7 +1,7 @@
 
-import i18next from 'i18next';
 import { ReactNode } from 'react';
 
+// Type definitions for react-i18next
 declare module 'react-i18next' {
   export interface UseTranslationOptions {
     keyPrefix?: string;
@@ -10,7 +10,7 @@ declare module 'react-i18next' {
 
   export interface UseTranslationResponse {
     t: (key: string | string[], options?: any) => string;
-    i18n: i18next.i18n;
+    i18n: i18n;
     ready: boolean;
   }
 
@@ -22,7 +22,7 @@ declare module 'react-i18next' {
 
   export interface WithTranslationProps {
     t: (key: string | string[], options?: any) => string;
-    i18n: i18next.i18n;
+    i18n: i18n;
     tReady: boolean;
   }
 
@@ -35,7 +35,7 @@ declare module 'react-i18next' {
     t?: (key: string | string[], options?: any) => string;
     count?: number;
     ns?: string | string[];
-    i18n?: i18next.i18n;
+    i18n?: i18n;
     defaults?: string;
     values?: { [key: string]: any };
     components?: ReactNode[];
@@ -45,6 +45,7 @@ declare module 'react-i18next' {
   export const Trans: React.ComponentType<TransProps>;
 }
 
+// Type definitions for i18next
 declare module 'i18next' {
   export interface InitOptions {
     resources?: any;
@@ -73,6 +74,8 @@ declare module 'i18next' {
     language?: string;
     languages: string[];
     getFixedT: (lng: string, ns?: string | string[]) => TFunction;
+    use: (module: any) => i18n;
+    init: (options: InitOptions) => i18n;
     [key: string]: any;
   }
 
@@ -84,8 +87,9 @@ declare module 'i18next' {
   export default i18next;
 }
 
+// Type definitions for i18next-browser-languagedetector
 declare module 'i18next-browser-languagedetector' {
-  import i18next from 'i18next';
+  import { i18n } from 'i18next';
   
   export default class LanguageDetector {
     constructor(services?: any, options?: any);
@@ -96,6 +100,7 @@ declare module 'i18next-browser-languagedetector' {
   }
 }
 
+// Type definitions for JSON modules
 declare module '*.json' {
   const value: Record<string, any>;
   export default value;
