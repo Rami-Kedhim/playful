@@ -19,7 +19,7 @@ const placeholderConversations = [
   { 
     id: '2', 
     name: 'Emma', 
-    lastMessage: 'I'll be there at 8pm', 
+    lastMessage: 'I\'ll be there at 8pm', 
     time: '30m', 
     unread: 0, 
     avatar: '/avatars/emma.jpg' 
@@ -37,9 +37,9 @@ const placeholderConversations = [
 // Placeholder messages
 const placeholderMessages = [
   { id: '1', senderId: 'other', text: 'Hi there! How are you doing?', time: '10:30 AM' },
-  { id: '2', senderId: 'me', text: 'I'm doing great, thanks for asking!', time: '10:32 AM' },
+  { id: '2', senderId: 'me', text: 'I\'m doing great, thanks for asking!', time: '10:32 AM' },
   { id: '3', senderId: 'other', text: 'Would you be available this weekend?', time: '10:33 AM' },
-  { id: '4', senderId: 'me', text: 'Yes, I'm free on Saturday evening. What did you have in mind?', time: '10:35 AM' },
+  { id: '4', senderId: 'me', text: 'Yes, I\'m free on Saturday evening. What did you have in mind?', time: '10:35 AM' },
   { id: '5', senderId: 'other', text: 'I was thinking we could meet for dinner?', time: '10:36 AM' },
 ];
 
