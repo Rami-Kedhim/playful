@@ -14,11 +14,12 @@ export const languages = {
 
 export type Language = keyof typeof languages;
 
+// Initialize i18n instance
 i18n
   // detect language from browser
   .use(LanguageDetector)
   // pass i18n instance to react-i18next
-  .use(initReactI18next)
+  .use(initReactI18next as any)
   // init i18next
   .init({
     resources: {
