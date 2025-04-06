@@ -13,7 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requiredRoles = [] 
 }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, userRoles } = useAuth();
   const location = useLocation();
 
   // Show loading state while authentication is being checked
@@ -34,7 +34,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check role-based access if roles are required
   if (requiredRoles.length > 0) {
-    const userRoles = user?.userRoles || [];
     const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
     
     if (!hasRequiredRole) {

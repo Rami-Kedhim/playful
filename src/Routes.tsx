@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
