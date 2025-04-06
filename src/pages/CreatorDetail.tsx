@@ -62,7 +62,7 @@ const CreatorDetail = () => {
         {creator ? (
           <>
             <title>{creator.name} - Creator Profile | Premium Directory</title>
-            <meta name="description" content={`${creator.name} - Content creator from ${creator.location}. Subscribe for exclusive content.`} />
+            <meta name="description" content={`${creator.name} - Content creator${creator.region ? ` from ${creator.region}` : ''}. Subscribe for exclusive content.`} />
           </>
         ) : (
           <title>Creator Profile | Premium Directory</title>
