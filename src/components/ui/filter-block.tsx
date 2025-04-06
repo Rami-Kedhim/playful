@@ -11,6 +11,8 @@ interface FilterBlockProps extends React.HTMLAttributes<HTMLDivElement> {
   headerClassName?: string;
   contentClassName?: string;
   headerExtra?: React.ReactNode;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
 }
 
 export function FilterBlock({
@@ -21,14 +23,33 @@ export function FilterBlock({
   headerClassName,
   contentClassName,
   headerExtra,
+  collapsible = false,
+  defaultCollapsed = false,
   ...props
 }: FilterBlockProps) {
+  const [collapsed, setCollapsed] = React.useState(defaultCollapsed);
+
   return (
     <Card className={cn("h-full", className)} {...props}>
       <CardHeader className={cn("pb-2", headerClassName)}>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-lg font-medium">{title}</CardTitle>
+            <CardTitle 
+              className={cn(
+                "text-lg font-medium", 
+                collapsible && "cursor-pointer flex items-center"
+              )}
+              onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
+            >
+              {title}
+              {collapsible && (
+                <span className="ml-2 text-sm transition-transform duration-200" style={{
+                  transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)'
+                }}>
+                  ▼
+                </span>
+              )}
+            </CardTitle>
             {description && (
               <CardDescription>{description}</CardDescription>
             )}
@@ -40,7 +61,13 @@ export function FilterBlock({
           )}
         </div>
       </CardHeader>
-      <CardContent className={cn("pt-1", contentClassName)}>
+      <CardContent 
+        className={cn(
+          "pt-1 transition-all duration-300", 
+          contentClassName,
+          collapsed && collapsible && "hidden"
+        )}
+      >
         {children}
       </CardContent>
     </Card>

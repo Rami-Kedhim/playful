@@ -13,19 +13,49 @@ export const useThemeToggle = () => {
     // Apply transition classes to body for smooth theme transitions
     if (typeof document !== 'undefined' && document.body) {
       document.body.classList.add('transition-colors', 'duration-300');
+      
+      // Add a class for theme change animations
+      document.documentElement.classList.add('theme-transition');
+      
+      const transitionEndHandler = () => {
+        document.documentElement.classList.remove('theme-transition');
+      };
+      
+      document.documentElement.addEventListener('transitionend', transitionEndHandler);
+      
+      return () => {
+        document.documentElement.removeEventListener('transitionend', transitionEndHandler);
+      };
     }
     
-    // Apply the theme class to document element
-    if (resolvedTheme) {
+  }, []);
+  
+  // Apply the theme class to document element separately
+  useEffect(() => {
+    if (resolvedTheme && mounted) {
       document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+      
+      // Apply transition class for animation
+      document.documentElement.classList.add('theme-transition');
+      
+      // Remove the class after animation completes
+      const timeout = setTimeout(() => {
+        document.documentElement.classList.remove('theme-transition');
+      }, 300);
+      
+      return () => clearTimeout(timeout);
     }
-    
-  }, [theme, resolvedTheme, setTheme]);
+  }, [resolvedTheme, mounted]);
   
   const toggleTheme = () => {
     if (!mounted) return;
+    
+    // Add transition class before changing theme
+    document.documentElement.classList.add('theme-transition');
+    
     const newTheme = (resolvedTheme === "dark" || theme === "dark") ? "light" : "dark";
     setTheme(newTheme);
+    
     console.log("Theme toggled to:", newTheme);
   };
   

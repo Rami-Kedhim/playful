@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { FilterBlock, FilterSection } from "@/components/ui/filter-block";
+import { FilterBadge } from "./FilterBadge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface FilterOption {
   id: string;
@@ -21,6 +23,8 @@ interface StandardFilterProps {
   showClearButton?: boolean;
   renderExtraFields?: () => React.ReactNode;
   className?: string;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
 }
 
 export function StandardFilter({
@@ -33,6 +37,8 @@ export function StandardFilter({
   showClearButton = true,
   renderExtraFields,
   className,
+  collapsible = false,
+  defaultCollapsed = false,
 }: StandardFilterProps) {
   // Group options by their group property
   const groupedOptions = options.reduce((acc, option) => {
@@ -64,6 +70,8 @@ export function StandardFilter({
       className={className}
       headerClassName="flex flex-row items-start justify-between"
       headerExtra={headerExtra}
+      collapsible={collapsible}
+      defaultCollapsed={defaultCollapsed}
     >
       <div className="space-y-4">
         {Object.entries(groupedOptions).map(([group, groupOptions]) => (
@@ -74,14 +82,23 @@ export function StandardFilter({
           >
             <div className="flex flex-wrap gap-2 mt-2">
               {groupOptions.map((option) => (
-                <Badge
-                  key={option.id}
-                  variant={selectedOptions.includes(option.id) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => onToggleOption(option.id)}
-                >
-                  {option.label}
-                </Badge>
+                <TooltipProvider key={option.id}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        key={option.id}
+                        variant={selectedOptions.includes(option.id) ? "default" : "outline"}
+                        className="cursor-pointer transition-colors hover:bg-accent"
+                        onClick={() => onToggleOption(option.id)}
+                      >
+                        {option.label}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>{selectedOptions.includes(option.id) ? "Remove" : "Add"} {option.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               ))}
             </div>
           </FilterSection>
@@ -123,14 +140,11 @@ export function AppliedFilterBadges({
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       {selectedOptions.map(id => (
-        <Badge key={id} variant="secondary" className="flex items-center gap-1">
-          {selectedLabels[id]}
-          <X 
-            size={14} 
-            className="cursor-pointer" 
-            onClick={() => onToggleOption(id)}
-          />
-        </Badge>
+        <FilterBadge
+          key={id}
+          label={selectedLabels[id]}
+          onRemove={() => onToggleOption(id)}
+        />
       ))}
       
       {selectedOptions.length > 1 && (
@@ -138,7 +152,7 @@ export function AppliedFilterBadges({
           variant="ghost" 
           size="sm" 
           onClick={onClearAll}
-          className="h-full ml-auto text-xs"
+          className="h-8 ml-auto text-xs"
         >
           Clear all
         </Button>
