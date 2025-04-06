@@ -220,6 +220,27 @@ export const creatorReviewsService = {
       console.error('Error in getAverageRating:', error);
       throw error;
     }
+  },
+
+  /**
+   * Fetch reviews for a specific creator with pagination and formatting
+   */
+  async fetchCreatorReviews(creatorId: string, page: number = 1, limit: number = 10): Promise<{data: CreatorReview[], total: number}> {
+    try {
+      const offset = (page - 1) * limit;
+      const reviews = await this.getCreatorReviews(creatorId, limit, offset);
+      
+      // In a real implementation, we would get the total count from the database
+      const total = mockReviews.filter(review => review.creator_id === creatorId).length;
+      
+      return {
+        data: reviews,
+        total
+      };
+    } catch (error) {
+      console.error('Error in fetchCreatorReviews:', error);
+      throw error;
+    }
   }
 };
 
@@ -263,7 +284,7 @@ const mockReviews: CreatorReview[] = [
       username: 'BobJones',
       avatar_url: 'https://i.pravatar.cc/150?u=user3'
     }
-  },
+  }
 ];
 
 export default creatorReviewsService;
