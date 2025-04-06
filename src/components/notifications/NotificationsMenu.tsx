@@ -54,7 +54,7 @@ const NotificationsMenu = () => {
                 message={notification.message}
                 type={notification.type}
                 isRead={notification.read}
-                createdAt={notification.createdAt}
+                createdAt={notification.timestamp} // Use timestamp instead of createdAt
                 onMarkAsRead={markAsRead}
               />
             ))

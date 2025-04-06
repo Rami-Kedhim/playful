@@ -1,6 +1,6 @@
-
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { toast, ToastAction } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 export interface Notification {
   id: string;
@@ -9,6 +9,7 @@ export interface Notification {
   type: "info" | "success" | "warning" | "error";
   read: boolean;
   timestamp: number;
+  createdAt: Date;
   action?: {
     label: string;
     onClick: () => void;
@@ -86,6 +87,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       type,
       read: false,
       timestamp: Date.now(),
+      createdAt: new Date(),
       action
     };
     

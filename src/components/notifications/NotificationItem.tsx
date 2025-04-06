@@ -10,7 +10,7 @@ interface NotificationItemProps {
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
   isRead: boolean;
-  createdAt: Date;
+  createdAt: Date | number; // Update to accept either Date or number
   onMarkAsRead: (id: string) => void;
 }
 
@@ -61,7 +61,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
           </div>
           <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{message}</p>
           <p className="text-[10px] text-muted-foreground mt-1">
-            {format(new Date(createdAt), 'MMM d, h:mm a')}
+            {format(typeof createdAt === 'number' ? new Date(createdAt) : createdAt, 'MMM d, h:mm a')}
           </p>
         </div>
       </div>

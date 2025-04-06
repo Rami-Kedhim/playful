@@ -1,7 +1,6 @@
-
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { Escort } from "@/types/escort";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export interface FavoritesContextType {
   favorites: string[];
@@ -11,6 +10,7 @@ export interface FavoritesContextType {
   count: number;
   favoritesCount: number;
   favoriteEscorts: Escort[];
+  clearFavorites: () => void;
   clearAllFavorites: () => void;
 }
 
@@ -22,6 +22,7 @@ const defaultContext: FavoritesContextType = {
   count: 0,
   favoritesCount: 0,
   favoriteEscorts: [],
+  clearFavorites: () => {},
   clearAllFavorites: () => {}
 };
 
@@ -31,9 +32,9 @@ export const useFavorites = () => {
   return useContext(FavoritesContext);
 };
 
-export const FavoritesProvider: React.FC<{ children: React.ReactNode; escorts: Escort[] }> = ({
+export const FavoritesProvider: React.FC<{ children: React.ReactNode; escorts?: Escort[] }> = ({
   children,
-  escorts,
+  escorts = [],
 }) => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const { toast } = useToast();
@@ -75,13 +76,15 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode; escorts: E
     });
   };
 
-  const clearAllFavorites = () => {
+  const clearFavorites = () => {
     setFavorites([]);
     toast({
       title: "Favorites cleared",
       description: "All items have been removed from your favorites.",
     });
   };
+
+  const clearAllFavorites = clearFavorites;
 
   const favoriteEscorts = escorts.filter(escort => favorites.includes(escort.id));
 
@@ -93,6 +96,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode; escorts: E
     count: favorites.length,
     favoritesCount: favorites.length,
     favoriteEscorts,
+    clearFavorites,
     clearAllFavorites,
   };
 
