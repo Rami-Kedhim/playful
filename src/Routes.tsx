@@ -23,6 +23,12 @@ import AIProfiles from "./pages/AIProfiles";
 import EscortDetail from './pages/EscortDetail';
 import EscortLiveStreams from './pages/EscortLiveStreams';
 import EscortLiveStreamDetail from './pages/EscortLiveStreamDetail';
+import HomePage from './pages/HomePage';
+import AICompanionPage from './pages/ai-companion';
+import Livecams from './pages/Livecams';
+import LivecamDetail from './pages/LivecamDetail';
+import CreatorDashboard from './components/creators/dashboard/Dashboard';
+import VerificationContainer from './components/verification/VerificationContainer';
 
 // Language route wrapper to handle language parameter
 const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
@@ -62,7 +68,7 @@ const AppRoutes = () => {
         </LanguageRoute>
       }>
         {/* Public Routes */}
-        <Route index element={<Index />} />
+        <Route index element={<HomePage />} />
         <Route path="escorts" element={<Escorts />} />
         <Route path="escorts/:id" element={<EscortDetail />} />
         <Route path="escort-streams" element={<EscortLiveStreams />} />
@@ -71,7 +77,15 @@ const AppRoutes = () => {
         <Route path="creators/:username" element={<CreatorDetail />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="auth" element={<AuthPage />} />
+        <Route path="login" element={<AuthPage />} />
+        <Route path="register" element={<AuthPage />} />
         <Route path="ai-profiles" element={<AIProfiles />} />
+        <Route path="livecams" element={<Livecams />} />
+        <Route path="livecams/:id" element={<LivecamDetail />} />
+        <Route path="creator-application" element={<CreatorDashboard />} />
+        <Route path="creator-dashboard" element={<CreatorDashboard />} />
+        <Route path="verification" element={<VerificationContainer />} />
+        <Route path="ai-companion" element={<AICompanionPage />} />
         
         {/* Protected Routes - Require Authentication */}
         <Route path="favorites" element={

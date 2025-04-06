@@ -1,32 +1,28 @@
 
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import MainLayout from "@/components/layout/MainLayout";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Home } from 'lucide-react';
 
 const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
+  const { currentLanguage } = useLanguage();
+  const { t } = useTranslation();
 
   return (
-    <MainLayout containerClass="min-h-[80vh] flex flex-col items-center justify-center" showHeader={false}>
-      <h1 className="text-6xl font-bold bg-gradient-to-r from-primary to-lucoin bg-clip-text text-transparent mb-6">
-        404
-      </h1>
-      <p className="text-xl text-gray-400 mb-8">
-        Oops! The page you're looking for doesn't exist.
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+      <h1 className="text-4xl font-bold mb-4">{t('notFound.title', '404 - Page Not Found')}</h1>
+      <p className="text-lg text-muted-foreground mb-8">
+        {t('notFound.message', 'The page you are looking for does not exist or has been moved.')}
       </p>
       <Button asChild>
-        <Link to="/">Return to Home</Link>
+        <Link to={`/${currentLanguage}`} className="flex items-center">
+          <Home className="mr-2 h-4 w-4" />
+          {t('notFound.backHome', 'Back to Home')}
+        </Link>
       </Button>
-    </MainLayout>
+    </div>
   );
 };
 
