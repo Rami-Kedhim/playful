@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/auth/useAuth";
@@ -7,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import UserDropdown from "@/components/navigation/UserDropdown";
 import MobileMenu from "@/components/navigation/MobileMenu";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, userRoles = [] } = useAuth();
@@ -43,6 +45,8 @@ const Navbar = () => {
           </div>
           
           <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            
             <Button variant="ghost" size="icon" asChild>
               <Link to="/search">
                 <Search size={20} />

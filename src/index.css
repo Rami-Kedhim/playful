@@ -5,41 +5,6 @@
  
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
- 
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
- 
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
- 
-    --primary: 252 59% 48%;
-    --primary-foreground: 0 0% 98%;
- 
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
- 
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
- 
-    --accent: 301 59% 40%;
-    --accent-foreground: 0 0% 98%;
- 
-    --lucoin: 39 70% 50%;
-    --lucoin-foreground: 0 0% 3.9%;
- 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
- 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
- 
-    --radius: 0.5rem;
-  }
-  
-  .light {
     --background: 0 0% 98%;
     --foreground: 0 0% 3.9%;
  
@@ -71,6 +36,39 @@
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
   }
+  
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+ 
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+ 
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 252 59% 48%;
+    --primary-foreground: 0 0% 98%;
+ 
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+ 
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+ 
+    --accent: 301 59% 40%;
+    --accent-foreground: 0 0% 98%;
+ 
+    --lucoin: 39 70% 50%;
+    --lucoin-foreground: 0 0% 3.9%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
 }
 
 @layer components {
@@ -80,6 +78,10 @@
   
   .hero-gradient {
     @apply bg-gradient-to-br from-primary/30 via-transparent to-accent/20;
+  }
+  
+  .theme-transition {
+    @apply transition-colors duration-300;
   }
 }
 
@@ -94,6 +96,7 @@
   
   body {
     @apply bg-background text-foreground antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
