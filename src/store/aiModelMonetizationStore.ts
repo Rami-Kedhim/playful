@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +24,7 @@ interface AIModelMonetizationState {
   getContentViewCount: (contentId: string) => number;
   getProfileBoostLevel: (profileId: string) => number;
   
-  // Add the missing methods for images and videos
+  // Image and video methods
   unlockImage: (profileId: string, imageUrl: string, price: number) => Promise<boolean>;
   isImageUnlocked: (profileId: string, imageUrl: string) => boolean;
   unlockVideo: (profileId: string, videoId: string, price: number) => Promise<boolean>;
