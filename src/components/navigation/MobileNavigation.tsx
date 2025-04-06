@@ -57,7 +57,7 @@ const MobileNavigation = ({ open = false, onOpenChange }: MobileNavigationProps)
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium">{user?.displayName || user?.email}</p>
+                  <p className="font-medium">{user?.username || user?.email}</p>
                 </div>
               </div>
               

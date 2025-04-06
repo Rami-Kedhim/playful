@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import FilterActions from './filters/FilterActions';
+import FilterActions from '@/components/escorts/filters/FilterActions';
 
 interface MobileFilterDrawerProps {
   title?: string;
