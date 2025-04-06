@@ -1,83 +1,97 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
+import { DatabaseGender } from "@/types/auth";
 
 /**
- * Uploads an avatar image to Supabase storage and returns the URL
- * @param file The image file to upload
- * @param user The current user
- * @param setUploadProgress Optional callback to update upload progress
- * @returns The URL of the uploaded avatar, or null if the upload failed
+ * Validates gender input against allowed values
+ * @param gender The gender string to validate
+ * @returns Boolean indicating if gender is valid
  */
-export const uploadAvatar = async (
-  file: File,
-  user: any,
-  setUploadProgress?: (progress: number) => void
-): Promise<string | null> => {
+export const validateGender = (gender: string): boolean => {
+  const validGenders: DatabaseGender[] = ['male', 'female', 'other'];
+  return validGenders.includes(gender as DatabaseGender);
+};
+
+/**
+ * Uploads a profile image to storage
+ * @param userId User ID for the file path
+ * @param file File to upload
+ * @returns URL of the uploaded file
+ */
+export const uploadProfileImage = async (userId: string, file: File): Promise<string> => {
   try {
-    if (!user?.id) {
-      throw new Error("User is not authenticated");
-    }
-
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      throw new Error("File size must be less than 2MB");
-    }
-
-    // Generate a unique file name to prevent collisions
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}-${uuidv4()}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
-
-    // Upload the file
-    const { error: uploadError, data } = await supabase.storage
-      .from("user-content")
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+    const filePath = `profiles/${userId}/${fileName}`;
+    
+    const { error } = await supabase.storage
+      .from('avatars')
       .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-        onUploadProgress: (progress) => {
-          if (setUploadProgress) {
-            setUploadProgress(Math.round((progress.loaded / progress.total) * 100));
-          }
-        }
+        cacheControl: '3600'
       });
-
-    if (uploadError) {
-      throw uploadError;
+    
+    if (error) {
+      throw error;
     }
-
-    // Get the public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from("user-content")
+    
+    const { data } = supabase.storage
+      .from('avatars')
       .getPublicUrl(filePath);
-
-    return publicUrl;
-  } catch (error: any) {
-    console.error("Error uploading avatar:", error.message);
-    return null;
+    
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Error uploading profile image:', error);
+    throw error;
   }
 };
 
 /**
- * Creates a fallback avatar URL using the user's initials
- * @param name The name to generate initials from
- * @param bgColor Optional background color hex code (without #)
- * @param textColor Optional text color hex code (without #)
- * @returns URL for a generated avatar image
+ * Updates a user profile in the database
+ * @param userId User ID
+ * @param profileData Profile data to update
+ * @returns Updated profile data
  */
-export const getInitialsAvatar = (
-  name: string,
-  bgColor: string = "6d28d9",
-  textColor: string = "ffffff"
-): string => {
-  const initials = name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-    .substring(0, 2);
+export const updateUserProfile = async (userId: string, profileData: any): Promise<any> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(profileData)
+      .eq('user_id', userId)
+      .select()
+      .single();
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+};
 
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    initials
-  )}&background=${bgColor}&color=${textColor}&size=256`;
+/**
+ * Checks if a username is available
+ * @param username Username to check
+ * @returns Boolean indicating if username is available
+ */
+export const checkUsernameAvailability = async (username: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .maybeSingle();
+    
+    if (error) {
+      throw error;
+    }
+    
+    // If data is null, username is available
+    return data === null;
+  } catch (error) {
+    console.error('Error checking username availability:', error);
+    throw error;
+  }
 };

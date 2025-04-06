@@ -43,3 +43,52 @@ export const createClientWithSession = (accessToken: string) => {
     refresh_token: '',
   });
 };
+
+/**
+ * Checks if the user has permission to access SEO tools
+ * @param userRoles Array of user roles
+ * @returns Boolean indicating if user can access SEO tools
+ */
+export const hasPermissionToAccessSeo = (userRoles: string[]): boolean => {
+  return userRoles.includes('admin') || userRoles.includes('moderator');
+};
+
+/**
+ * Checks if the user has admin role
+ * @param userRoles Array of user roles
+ * @returns Boolean indicating if user is an admin
+ */
+export const isAdmin = (userRoles: string[]): boolean => {
+  return userRoles.includes('admin');
+};
+
+/**
+ * Checks if the user has moderator role
+ * @param userRoles Array of user roles
+ * @returns Boolean indicating if user is a moderator
+ */
+export const isModerator = (userRoles: string[]): boolean => {
+  return userRoles.includes('moderator');
+};
+
+/**
+ * Checks if the user is a verified escort with active membership
+ * @param userRoles Array of user roles
+ * @param profile User profile data
+ * @returns Boolean indicating if user is a verified escort
+ */
+export const isVerifiedEscort = (userRoles: string[], profile: any | null): boolean => {
+  // Check if user has escort role
+  const isEscort = userRoles.includes('escort');
+
+  // Check if profile exists and has isVerified flag
+  const isVerified = profile && profile.isVerified === true;
+
+  // Check if profile has active membership
+  const hasMembership = profile && 
+    profile.membership && 
+    profile.membership.status === 'active';
+
+  // User must be an escort, verified, and have active membership
+  return isEscort && isVerified && hasMembership;
+};

@@ -21,9 +21,15 @@ export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) 
     try {
       setIsLoading(true);
       
+      // Get current user email
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !user.email) {
+        throw new Error("User not found or email not available");
+      }
+      
       // First, sign in with the old password to verify it
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: supabase.auth.getUser().then(({ data }) => data.user?.email || ''),
+        email: user.email,
         password: oldPassword,
       });
       

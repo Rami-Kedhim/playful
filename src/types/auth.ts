@@ -16,6 +16,34 @@ export interface AuthUser {
   lucoinsBalance?: number;
   isVerified?: boolean;
   role?: UserRole;
+  // Supabase User properties
+  app_metadata?: Record<string, any>;
+  user_metadata?: Record<string, any>;
+  aud?: string;
+  created_at?: string;
+}
+
+// User profile data structure
+export interface UserProfile {
+  id: string;
+  userId: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  avatarUrl?: string;
+  gender?: DatabaseGender;
+  dateOfBirth?: string;
+  location?: string;
+  phone?: string;
+  isVerified?: boolean;
+  membership?: {
+    status: 'active' | 'inactive' | 'pending';
+    expiresAt?: string;
+    type?: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Auth state maintained by auth context
