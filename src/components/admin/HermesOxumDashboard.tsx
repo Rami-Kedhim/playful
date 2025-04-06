@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -17,6 +16,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import HermesSeoConnector from './dashboard/HermesSeoConnector';
 
 interface HermesParameters {
   decayConstant: number;
