@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import ResetPassword from "./pages/ResetPassword";
 import Favorites from "./pages/Favorites";
+import SEODashboard from "./pages/SEODashboard";
 
 const Routes = () => {
   return (
@@ -40,6 +41,7 @@ const Routes = () => {
         <Route path="profile" element={<Profile />} />
         <Route path="favorites" element={<Favorites />} />
         <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="seo" element={<SEODashboard />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </RouterRoutes>

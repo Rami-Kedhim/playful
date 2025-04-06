@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,12 @@ import {
   Settings, 
   Share2, 
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Brain
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import HermesSeoConnector from "./HermesSeoConnector";
+import { useHermesSeoHistory } from "@/hooks/useHermesSeoHistory";
 
 interface MetaTagsType {
   title: string;
@@ -34,6 +37,7 @@ interface SocialCardType {
 const SEOModule = () => {
   const [activeTab, setActiveTab] = useState("general");
   const [isAutoGenerateEnabled, setIsAutoGenerateEnabled] = useState(true);
+  const [isHermesEnabled, setIsHermesEnabled] = useState(true);
   const [metaTags, setMetaTags] = useState<MetaTagsType>({
     title: "UberEscorts - Next-generation Web3 adult platform",
     description: "Premium escort services and content creators with Web3 and metaverse integration.",
@@ -47,8 +51,20 @@ const SEOModule = () => {
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
+  const { history } = useHermesSeoHistory();
+  const [optimizationCount, setOptimizationCount] = useState(0);
+  
+  // Calculate average score from history
+  const averageScore = history.length > 0 
+    ? Math.round(history.reduce((acc, item) => acc + item.result.visibilityScore, 0) / history.length) 
+    : 0;
+  
+  // Get optimization count
+  useEffect(() => {
+    setOptimizationCount(history.length);
+  }, [history]);
 
-  const handleGenerateSEO = async () => {
+  const handleGenerateSeo = async () => {
     setIsGenerating(true);
     
     // Simulate API call for generating SEO content
@@ -93,7 +109,7 @@ const SEOModule = () => {
         
         <div className="flex items-center gap-2">
           <Button
-            onClick={handleGenerateSEO}
+            onClick={handleGenerateSeo}
             disabled={isGenerating}
             className="flex items-center"
           >
@@ -111,57 +127,107 @@ const SEOModule = () => {
         </div>
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Auto-generation Settings
-          </CardTitle>
-          <CardDescription>
-            Configure how the system automatically generates SEO content
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h4 className="font-medium">Enable automatic SEO generation</h4>
-              <p className="text-sm text-muted-foreground">
-                System will periodically analyze content and generate optimized SEO tags
-              </p>
-            </div>
-            <Switch 
-              checked={isAutoGenerateEnabled}
-              onCheckedChange={setIsAutoGenerateEnabled}
-            />
-          </div>
-          
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-medium">Generation Frequency</h4>
-              <div className="grid grid-cols-3 gap-2">
-                <Button variant={activeTab === "daily" ? "default" : "outline"} size="sm">Daily</Button>
-                <Button variant={activeTab === "weekly" ? "default" : "outline"} size="sm">Weekly</Button>
-                <Button variant="default" size="sm">Monthly</Button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Auto-generation Settings
+              </CardTitle>
+              <CardDescription>
+                Configure how the system automatically generates SEO content
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h4 className="font-medium">Enable automatic SEO generation</h4>
+                  <p className="text-sm text-muted-foreground">
+                    System will periodically analyze content and generate optimized SEO tags
+                  </p>
+                </div>
+                <Switch 
+                  checked={isAutoGenerateEnabled}
+                  onCheckedChange={setIsAutoGenerateEnabled}
+                />
               </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h4 className="font-medium">Content Sources</h4>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" /> Escort profiles
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" /> Creator content
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3" /> Blog posts
-                </Button>
+              
+              <div className="flex items-center justify-between mt-6">
+                <div className="space-y-1">
+                  <h4 className="font-medium flex items-center">
+                    <Brain className="h-4 w-4 mr-1 text-primary" />
+                    Enable HERMES intelligence
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Use advanced HERMES neural models to optimize content visibility
+                  </p>
+                </div>
+                <Switch 
+                  checked={isHermesEnabled}
+                  onCheckedChange={setIsHermesEnabled}
+                />
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Generation Frequency</h4>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant={activeTab === "daily" ? "default" : "outline"} size="sm">Daily</Button>
+                    <Button variant={activeTab === "weekly" ? "default" : "outline"} size="sm">Weekly</Button>
+                    <Button variant="default" size="sm">Monthly</Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="font-medium">Content Sources</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" /> Escort profiles
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" /> Creator content
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" /> Blog posts
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 rounded-lg bg-muted/50 p-4">
+                <h4 className="font-medium mb-2 flex items-center">
+                  <Brain className="h-4 w-4 mr-1 text-primary" />
+                  HERMES SEO Statistics
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-3 rounded-md bg-background">
+                    <div className="text-sm text-muted-foreground">Optimizations</div>
+                    <div className="text-2xl font-bold">{optimizationCount}</div>
+                  </div>
+                  <div className="p-3 rounded-md bg-background">
+                    <div className="text-sm text-muted-foreground">Avg. Score</div>
+                    <div className="text-2xl font-bold">{averageScore}%</div>
+                  </div>
+                  <div className="p-3 rounded-md bg-background">
+                    <div className="text-sm text-muted-foreground">Improved</div>
+                    <div className="text-2xl font-bold text-green-500">+23%</div>
+                  </div>
+                  <div className="p-3 rounded-md bg-background">
+                    <div className="text-sm text-muted-foreground">Keywords</div>
+                    <div className="text-2xl font-bold">{history.reduce((acc, item) => 
+                      acc + (item.result.priorityKeywords?.length || 0), 0)}</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div>
+          <HermesSeoConnector />
+        </div>
+      </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid grid-cols-1 md:grid-cols-3 lg:w-[400px]">

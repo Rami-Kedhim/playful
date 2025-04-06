@@ -3,6 +3,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ServiceTypeMenu from "@/components/navigation/ServiceTypeMenu";
+import { Search } from "lucide-react";
 
 const DesktopNavigation = () => {
   const location = useLocation();
@@ -41,6 +42,17 @@ const DesktopNavigation = () => {
         asChild
       >
         <Link to="/metaverse">Metaverse</Link>
+      </Button>
+      <Button
+        variant={isActive("/seo") ? "default" : "ghost"}
+        size="sm"
+        asChild
+        className="ml-auto"
+      >
+        <Link to="/seo">
+          <Search className="h-4 w-4 mr-1" />
+          SEO
+        </Link>
       </Button>
     </nav>
   );
