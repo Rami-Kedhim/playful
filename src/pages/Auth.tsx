@@ -1,16 +1,34 @@
 
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AuthForm from "@/components/auth/AuthForm";
-import { useAuth } from "@/hooks/auth/useAuth";
-import AppLayout from "@/components/layout/AppLayout";
-import { logContentAction } from "@/utils/debugUtils";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import EnhancedAppLayout from "@/components/layout/EnhancedAppLayout";
 
 const Auth = () => {
   const { login, register, resetPassword, isAuthenticated, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
+  
+  // Determine which tab to show based on URL
+  const initialTab = location.pathname.includes("register") ? "register" : "login";
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  
+  // Form states
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
   
   // Get the return URL from location state or default to homepage
   const from = location.state?.from?.pathname || "/";
@@ -18,7 +36,6 @@ const Auth = () => {
   // If user is already authenticated, redirect to the return URL
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      logContentAction('User already authenticated, redirecting', { from });
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate, from]);
@@ -27,46 +44,312 @@ const Auth = () => {
   useEffect(() => {
     return () => {
       clearError();
+      setFormError(null);
     };
   }, [clearError]);
   
-  const handleLogin = async (email: string, password: string) => {
-    logContentAction('Login attempt', { email });
-    await login(email, password);
-    // After login completes, let the useEffect handle redirect if authenticated
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      setFormError("Please fill in all fields");
+      return;
+    }
+    
+    try {
+      await login(email, password);
+      // After login completes, let the useEffect handle redirect if authenticated
+    } catch (error) {
+      // Error handled in useAuth
+    }
   };
   
-  const handleRegister = async (email: string, password: string, username: string) => {
-    logContentAction('Registration attempt', { email, username });
-    await register(email, password, username);
-    // After registration completes, let the useEffect handle redirect if authenticated
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      setFormError("Please fill in all required fields");
+      return;
+    }
+    
+    if (password.length < 6) {
+      setFormError("Password must be at least 6 characters");
+      return;
+    }
+    
+    try {
+      await register(email, password, username);
+      // After registration completes, let the useEffect handle redirect if authenticated
+    } catch (error) {
+      // Error handled in useAuth
+    }
   };
   
-  const handleForgotPassword = async (email: string) => {
-    logContentAction('Password reset attempt', { email });
-    await resetPassword(email);
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetEmail) {
+      setFormError("Please enter your email address");
+      return;
+    }
+    
+    try {
+      await resetPassword(resetEmail);
+      setShowForgotPassword(false);
+      setFormError(null);
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for further instructions.",
+      });
+    } catch (error) {
+      // Error handled in useAuth
+    }
   };
+  
+  // Render forgot password form
+  if (showForgotPassword) {
+    return (
+      <EnhancedAppLayout>
+        <div className="container mx-auto py-16 px-4">
+          <div className="max-w-md mx-auto">
+            <Card>
+              <CardHeader>
+                <CardTitle>Reset Password</CardTitle>
+                <CardDescription>
+                  Enter your email address and we'll send you a password reset link.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {(error || formError) && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertDescription>{error || formError}</AlertDescription>
+                  </Alert>
+                )}
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-between">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowForgotPassword(false)}
+                      disabled={isLoading}
+                    >
+                      Back to Login
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        "Send Reset Link"
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </EnhancedAppLayout>
+    );
+  }
   
   return (
-    <AppLayout>
+    <EnhancedAppLayout>
       <div className="container mx-auto py-16 px-4">
         <div className="max-w-md mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-8">Account Access</h1>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <AuthForm
-            onLogin={handleLogin}
-            onRegister={handleRegister}
-            onForgotPassword={handleForgotPassword}
-            isLoading={isLoading}
-            error={error}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">
+                {activeTab === "login" ? "Welcome Back" : "Create an Account"}
+              </CardTitle>
+              <CardDescription>
+                {activeTab === "login"
+                  ? "Enter your credentials to access your account"
+                  : "Fill out the form below to create your account"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {(error || formError) && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error || formError}</AlertDescription>
+                </Alert>
+              )}
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) => {
+                  setActiveTab(value);
+                  setFormError(null);
+                  clearError();
+                }}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsTrigger value="login">Login</TabsTrigger>
+                  <TabsTrigger value="register">Register</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="login">
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password</Label>
+                        <Button
+                          type="button"
+                          variant="link"
+                          size="sm"
+                          className="p-0 h-auto font-normal"
+                          onClick={() => setShowForgotPassword(true)}
+                        >
+                          Forgot password?
+                        </Button>
+                      </div>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        "Sign In"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+
+                <TabsContent value="register">
+                  <form onSubmit={handleRegister} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="register-email">Email</Label>
+                      <Input
+                        id="register-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Username (optional)</Label>
+                      <Input
+                        id="username"
+                        type="text"
+                        placeholder="Choose a username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="register-password">Password</Label>
+                      <Input
+                        id="register-password"
+                        type="password"
+                        placeholder="Create a password (min. 6 characters)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Password must be at least 6 characters long
+                      </p>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating account...
+                        </>
+                      ) : (
+                        "Create Account"
+                      )}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+
+              <div className="mt-6 text-center text-sm">
+                By continuing, you agree to our{" "}
+                <a href="#" className="text-primary hover:underline">
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a href="#" className="text-primary hover:underline">
+                  Privacy Policy
+                </a>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-center border-t pt-6">
+              <div className="text-sm text-muted-foreground">
+                {activeTab === "login" ? (
+                  <>
+                    Don't have an account?{" "}
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto"
+                      onClick={() => {
+                        setActiveTab("register");
+                        setFormError(null);
+                        clearError();
+                      }}
+                    >
+                      Sign up now
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{" "}
+                    <Button
+                      variant="link"
+                      className="p-0 h-auto"
+                      onClick={() => {
+                        setActiveTab("login");
+                        setFormError(null);
+                        clearError();
+                      }}
+                    >
+                      Sign in
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardFooter>
+          </Card>
         </div>
       </div>
-    </AppLayout>
+    </EnhancedAppLayout>
   );
 };
 

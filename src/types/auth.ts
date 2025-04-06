@@ -27,10 +27,11 @@ export interface AuthUser {
 // User profile data structure
 export interface UserProfile {
   id: string;
-  userId: string;
+  user_id?: string;
   username?: string;
-  firstName?: string;
-  lastName?: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
   bio?: string;
   avatarUrl?: string;
   avatar_url?: string;  // Adding this to support both naming conventions
@@ -45,12 +46,14 @@ export interface UserProfile {
   };
   createdAt?: string;
   updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Auth state maintained by auth context
 export interface AuthState {
   user: AuthUser | null;
-  profile: any | null;
+  profile: UserProfile | null;
   isLoading: boolean;
   userRoles: string[];
 }

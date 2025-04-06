@@ -1,16 +1,36 @@
 
-import React from 'react';
-import AppRoutes from './Routes';
-import { LanguageProvider } from "./contexts/LanguageContext";
-import { ThemeProvider } from "@/components/theme-provider";
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/hooks/useAuth';
+import Routes from '@/Routes';
+import ErrorBoundary from '@/components/ErrorBoundary';
+
+// Create a client for React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="theme">
-      <LanguageProvider>
-        <AppRoutes />
-      </LanguageProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <AuthProvider>
+              <Routes />
+              <Toaster />
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </BrowserRouter>
   );
 }
 
