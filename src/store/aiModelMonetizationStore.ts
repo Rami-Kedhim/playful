@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +7,7 @@ interface AIModelMonetizationState {
   unlockedContent: string[];
   activeBoosts: AIBoost[];
   sentGifts: AIGift[];
+  premiumContentViews: Record<string, number>;
   loading: boolean;
   error: string | null;
   
@@ -17,12 +19,16 @@ interface AIModelMonetizationState {
   fetchActiveBoosts: (userId?: string) => Promise<void>;
   fetchSentGifts: (userId: string) => Promise<void>;
   checkContentAccess: (contentId: string) => boolean;
+  trackContentView: (contentId: string) => void;
+  getContentViewCount: (contentId: string) => number;
+  getProfileBoostLevel: (profileId: string) => number;
 }
 
 const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) => ({
   unlockedContent: [],
   activeBoosts: [],
   sentGifts: [],
+  premiumContentViews: {},
   loading: false,
   error: null,
   
@@ -167,6 +173,32 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   
   checkContentAccess: (contentId) => {
     return get().unlockedContent.includes(contentId);
+  },
+  
+  // New methods for Phase 2 automated monetization
+  trackContentView: (contentId) => {
+    set(state => ({
+      premiumContentViews: {
+        ...state.premiumContentViews,
+        [contentId]: (state.premiumContentViews[contentId] || 0) + 1
+      }
+    }));
+    
+    // In a real implementation, this would also send analytics to the backend
+  },
+  
+  getContentViewCount: (contentId) => {
+    return get().premiumContentViews[contentId] || 0;
+  },
+  
+  getProfileBoostLevel: (profileId) => {
+    const now = new Date();
+    const activeBoost = get().activeBoosts.find(
+      boost => boost.profile_id === profileId && 
+              new Date(boost.end_time) > now
+    );
+    
+    return activeBoost ? activeBoost.boost_level : 0;
   }
 }));
 
