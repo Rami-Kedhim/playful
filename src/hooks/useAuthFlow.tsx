@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -19,7 +18,7 @@ export function useAuthFlow(redirectTo: string = '/') {
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, login, register, logout } = useAuth();
+  const { isAuthenticated, login, register, logout, error } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -31,13 +30,28 @@ export function useAuthFlow(redirectTo: string = '/') {
     }
   }, [isAuthenticated, navigate, location.search, redirectTo]);
 
+  // Keep local error state synchronized with auth context error
+  useEffect(() => {
+    if (error) {
+      setAuthError(error);
+    }
+  }, [error]);
+
   const handleLogin = async (credentials: LoginCredentials) => {
     setIsLoading(true);
     setAuthError(null);
     
     try {
-      await login(credentials.email, credentials.password);
+      const result = await login(credentials.email, credentials.password);
       // Success is determined by the isAuthenticated state changing
+      if (!result.success) {
+        setAuthError(result.error || 'An unexpected error occurred');
+        toast({
+          title: 'Login Error',
+          description: result.error || 'An unexpected error occurred',
+          variant: 'destructive',
+        });
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       setAuthError(error.message || 'An unexpected error occurred');
@@ -56,8 +70,16 @@ export function useAuthFlow(redirectTo: string = '/') {
     setAuthError(null);
     
     try {
-      await register(credentials.email, credentials.password, credentials.username);
+      const result = await register(credentials.email, credentials.password, credentials.username);
       // Success is determined by the isAuthenticated state changing
+      if (!result.success) {
+        setAuthError(result.error || 'An unexpected error occurred');
+        toast({
+          title: 'Registration Error',
+          description: result.error || 'An unexpected error occurred',
+          variant: 'destructive',
+        });
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       setAuthError(error.message || 'An unexpected error occurred');

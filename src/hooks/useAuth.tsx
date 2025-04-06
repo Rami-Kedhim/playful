@@ -4,4 +4,4 @@
 import { useAuth, AuthProvider } from '@/hooks/auth/useAuth';
 
 export { useAuth, AuthProvider };
-export default { useAuth, AuthProvider };
+export default useAuth;

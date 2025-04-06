@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
@@ -118,13 +117,7 @@ const AppRoutes = () => {
         } />
         
         {/* Protected Routes - Require Authentication */}
-        <Route path="profile" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <ProfilePage />
-            </Suspense>
-          </ProtectedRoute>
-        } />
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         
         <Route path="favorites" element={
           <ProtectedRoute>
