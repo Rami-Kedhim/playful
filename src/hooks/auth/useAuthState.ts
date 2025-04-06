@@ -1,117 +1,71 @@
 
 import { useState, useEffect } from "react";
-import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-import { AuthState, AuthUser } from "@/types/auth";
-import { fetchUserRoles } from "@/utils/authStateUtils";
-import { useProfileManagement } from "./useProfileManagement";
+import { AuthUser } from "@/types/auth";
+
+export type AuthState = {
+  user: AuthUser | null;
+  profile: any | null;
+  isLoading: boolean;
+  userRoles: string[];
+};
 
 export function useAuthState(): [
   AuthState,
   (loading: boolean) => void,
   () => Promise<void>
 ] {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
-  const { fetchProfile } = useProfileManagement();
 
   const refreshProfile = async () => {
     if (!user) return;
     
     try {
-      const profileData = await fetchProfile(user.id);
-      setProfile(profileData);
+      // In a real app, fetch profile data here
+      console.log("Refreshing profile for user:", user.id);
       
-      // Fetch user roles
-      const roles = await fetchUserRoles(user.id);
+      // Mock profile data
+      setProfile({
+        id: user.id,
+        username: user.username || user.email?.split('@')[0],
+        avatar_url: user.profileImageUrl,
+      });
+      
+      // Set roles based on user.role
+      const roles = user.role ? [user.role] : ['user'];
       setUserRoles(roles);
     } catch (error) {
       console.error("Error refreshing profile:", error);
     }
   };
 
-  // Helper function to convert Supabase User to AuthUser
-  const mapSupabaseUserToAuthUser = (supabaseUser: User): AuthUser => {
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email || "",
-      app_metadata: supabaseUser.app_metadata,
-      user_metadata: supabaseUser.user_metadata,
-      aud: supabaseUser.aud, 
-      created_at: supabaseUser.created_at
-    };
-  };
-
+  // Load user from localStorage on mount
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
+    const storedUser = localStorage.getItem('uberEscortsUser');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
         
-        // Convert User to AuthUser type to match our interface
-        if (session?.user) {
-          const authUser = mapSupabaseUserToAuthUser(session.user);
-          setUser(authUser);
-        } else {
-          setUser(null);
-        }
+        // Set default profile
+        setProfile({
+          id: parsedUser.id,
+          username: parsedUser.username || parsedUser.email?.split('@')[0],
+          avatar_url: parsedUser.profileImageUrl,
+        });
         
-        // Don't load profile data within the callback to avoid deadlock
-        if (session?.user) {
-          setTimeout(async () => {
-            try {
-              const profileData = await fetchProfile(session.user.id);
-              setProfile(profileData);
-              
-              const rolesData = await fetchUserRoles(session.user.id);
-              setUserRoles(rolesData);
-            } catch (error) {
-              console.error("Error loading profile data:", error);
-            } finally {
-              setIsLoading(false);
-            }
-          }, 0);
-        } else {
-          setProfile(null);
-          setUserRoles([]);
-          setIsLoading(false);
-        }
+        // Set roles based on user.role
+        const roles = parsedUser.role ? [parsedUser.role] : ['user'];
+        setUserRoles(roles);
+      } catch (error) {
+        console.error("Error loading user from localStorage:", error);
       }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      
-      // Convert User to AuthUser type to match our interface
-      if (session?.user) {
-        const authUser = mapSupabaseUserToAuthUser(session.user);
-        setUser(authUser);
-        
-        try {
-          const profileData = await fetchProfile(session.user.id);
-          setProfile(profileData);
-          
-          const rolesData = await fetchUserRoles(session.user.id);
-          setUserRoles(rolesData);
-        } catch (error) {
-          console.error("Error loading initial profile:", error);
-        }
-      } else {
-        setUser(null);
-      }
-      
-      setIsLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    }
+    
+    setIsLoading(false);
   }, []);
 
-  return [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile];
+  return [{ user, profile, isLoading, userRoles }, setIsLoading, refreshProfile];
 }

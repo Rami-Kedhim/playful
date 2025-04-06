@@ -16,10 +16,10 @@ export interface AuthUser {
   lucoinsBalance?: number;
   isVerified?: boolean;
   role?: UserRole;
-  // Supabase User properties - making required properties match Supabase User type
+  // Supabase User properties
   app_metadata: Record<string, any>;
   user_metadata: Record<string, any>;
-  aud: string; // Changed from optional to required to match Supabase User type
+  aud: string;
   created_at?: string;
 }
 
@@ -31,11 +31,10 @@ export interface UserProfile {
   firstName?: string;
   lastName?: string;
   bio?: string;
-  avatarUrl?: string; // This is the correct property name
+  avatarUrl?: string;
   gender?: DatabaseGender;
   dateOfBirth?: string;
   location?: string;
-  phone?: string;
   isVerified?: boolean;
   membership?: {
     status: 'active' | 'inactive' | 'pending';
@@ -48,7 +47,6 @@ export interface UserProfile {
 
 // Auth state maintained by auth context
 export interface AuthState {
-  session: any | null;
   user: AuthUser | null;
   profile: any | null;
   isLoading: boolean;
@@ -57,20 +55,15 @@ export interface AuthState {
 
 // Auth context value interface
 export interface AuthContextValue extends AuthState {
-  signUp: (email: string, password: string, metadata?: {}) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
-  refreshProfile: () => Promise<void>;
-  checkRole: (role: string) => boolean;
-  
-  // Additional methods for components
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, username?: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, password: string, username: string) => Promise<void>;
-  updateUserProfile: (userData: Partial<any>) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<void>;
   error: string | null;
   clearError: () => void;
+  refreshProfile: () => Promise<void>;
+  checkRole: (role: string) => boolean;
 }

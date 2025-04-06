@@ -1,103 +1,83 @@
 
-import { AuthUser } from "@/types/authTypes";
-import { toast } from "@/components/ui/use-toast";
+import { AuthUser } from '@/types/authTypes';
 
-// Mock successful login with a delay
-export const mockLoginRequest = async (
-  email: string, 
-  password: string
-): Promise<AuthUser> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+// Mock login request function for development
+export const mockLoginRequest = async (email: string, password: string): Promise<AuthUser> => {
+  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
   
-  // Validate input
-  if (!email || !password) {
-    throw new Error("Email and password are required");
+  if (password.length < 6) {
+    throw new Error('Invalid password. Must be at least 6 characters.');
   }
   
-  // Mock successful login
+  // Return mock user
   return {
-    id: "user-1",
-    username: "johndoe",
-    email: email,
-    profileImageUrl: "https://github.com/shadcn.png",
-    lucoinsBalance: 120,
-    role: "user",
-    isVerified: true
+    id: '1',
+    email,
+    username: email.split('@')[0],
+    role: 'user',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
   };
 };
 
-// Mock registration with a delay
+// Mock register request function for development
 export const mockRegisterRequest = async (
   email: string, 
   password: string, 
   username: string
 ): Promise<AuthUser> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Validate input
-  if (!email || !password || !username) {
-    throw new Error("All fields are required");
-  }
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
   
   if (password.length < 6) {
-    throw new Error("Password must be at least 6 characters");
+    throw new Error('Invalid password. Must be at least 6 characters.');
   }
   
-  // Mock successful registration
+  // Return mock user
   return {
-    id: "user-" + Math.random().toString(36).substr(2, 9),
-    username: username,
-    email: email,
-    lucoinsBalance: 10, // Starting balance
-    role: "user",
-    isVerified: false
+    id: String(Date.now()),
+    email,
+    username: username || email.split('@')[0],
+    role: 'user',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
   };
 };
 
-// Mock password reset request
+// Mock reset password request function for development
 export const mockResetPasswordRequest = async (email: string): Promise<void> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Validate input
-  if (!email) {
-    throw new Error("Email is required");
-  }
+  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
   
   // In a real app, this would send a password reset email
-  console.log(`Password reset requested for ${email}`);
+  console.log(`Password reset email sent to ${email}`);
 };
 
-// Mock profile update request
+// Mock update profile request function for development
 export const mockUpdateProfileRequest = async (
   user: AuthUser, 
   userData: Partial<AuthUser>
 ): Promise<AuthUser> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 600)); // Simulate network delay
   
-  // Update the user with the new data
-  return { ...user, ...userData };
+  // Return updated user
+  return {
+    ...user,
+    ...userData,
+  };
 };
 
-// Handle auth errors with toast notifications
-export const handleAuthError = (error: unknown): string => {
-  const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-  
-  toast({
-    title: "Authentication Error",
-    description: errorMessage,
-    variant: "destructive",
-  });
-  
-  console.error(error);
-  return errorMessage;
+// Get user roles from a user object
+export const getUserRoles = (user: AuthUser): string[] => {
+  return user.role ? [user.role] : ['user'];
 };
 
-// Get user roles from user object
-export const getUserRoles = (user: AuthUser | null): string[] => {
-  if (!user) return [];
-  return user.role ? [user.role] : ['user']; // Default role if none specified
+// Handle authentication errors
+export const handleAuthError = (error: any): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unknown error occurred';
 };
