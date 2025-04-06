@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
@@ -11,8 +10,10 @@ import {
   Flag, 
   Settings, 
   ShieldAlert, 
-  BarChart4
+  BarChart4,
+  Search
 } from "lucide-react";
+import SEOModule from "@/components/admin/dashboard/SEOModule";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -26,13 +27,17 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-2 md:grid-cols-7 w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-8 w-full">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="creators">Creators</TabsTrigger>
             <TabsTrigger value="escorts">Escorts</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="seo">
+              <Search className="h-4 w-4 mr-2" />
+              SEO
+            </TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
           
@@ -170,6 +175,10 @@ const AdminDashboard = () => {
                 <p>Reports interface will be implemented soon.</p>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="seo" className="space-y-4">
+            <SEOModule />
           </TabsContent>
           
           <TabsContent value="settings" className="space-y-4">
