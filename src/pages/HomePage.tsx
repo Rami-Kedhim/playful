@@ -20,7 +20,7 @@ const featuredEscorts = [
     location: "New York",
     verified: true,
     rating: 4.9,
-    serviceType: "both",
+    serviceType: "both" as const,
     isLive: false,
     featured: true
   },
@@ -31,7 +31,7 @@ const featuredEscorts = [
     location: "Los Angeles",
     verified: true,
     rating: 4.8,
-    serviceType: "in-person",
+    serviceType: "in-person" as const,
     isLive: true
   },
   // Add more sample data as needed
@@ -46,7 +46,7 @@ const featuredCreators = [
     location: "Miami",
     verified: true,
     rating: 4.7,
-    serviceType: "virtual",
+    serviceType: "virtual" as const,
     isLive: false
   },
   {
@@ -56,7 +56,7 @@ const featuredCreators = [
     location: "Las Vegas",
     verified: true,
     rating: 4.9,
-    serviceType: "virtual",
+    serviceType: "virtual" as const,
     isLive: true,
     isPremium: true
   },
