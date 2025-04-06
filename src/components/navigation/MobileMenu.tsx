@@ -1,13 +1,12 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "react-i18next";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MobileMenuProps {
   user: any;
@@ -24,9 +23,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   handleLogout,
   hasAdminAccess,
 }) => {
-  const { isAuthenticated } = useAuth();
-  const { currentLanguage } = useLanguage();
   const { t } = useTranslation();
+  const { currentLanguage } = useLanguage();
+  const isAuthenticated = !!user;
 
   const closeMenu = () => setIsOpen(false);
 
@@ -35,6 +34,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
     { name: t('nav.escorts'), path: `/${currentLanguage}/escorts`, auth: false },
     { name: t('nav.creators'), path: `/${currentLanguage}/creators`, auth: false },
     { name: t('nav.search'), path: `/${currentLanguage}/search`, auth: false },
+    { name: t('nav.metaverse'), path: `/${currentLanguage}/metaverse`, auth: true },
     { name: t('nav.favorites'), path: `/${currentLanguage}/favorites`, auth: true },
     { name: t('nav.messages'), path: `/${currentLanguage}/messages`, auth: true },
     { name: t('nav.profile'), path: `/${currentLanguage}/profile`, auth: true },
@@ -50,7 +50,22 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
-            <Menu size={24} />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-menu"
+            >
+              <line x1="4" x2="20" y1="12" y2="12"></line>
+              <line x1="4" x2="20" y1="6" y2="6"></line>
+              <line x1="4" x2="20" y1="18" y2="18"></line>
+            </svg>
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>

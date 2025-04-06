@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -31,6 +32,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   
   // When the language changes, update routes and localStorage
   const changeLanguage = (lang: string) => {
+    if (lang === currentLanguage) return; // Prevent unnecessary updates
+    
     i18n.changeLanguage(lang);
     setCurrentLanguage(lang);
     
@@ -47,23 +50,22 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     }
   };
   
-  // Effect to sync language with URL on initial load and changes
+  // Effect to sync language with URL on initial load only
   useEffect(() => {
     const pathParts = location.pathname.split('/');
     const langInUrl = pathParts[1];
     
-    if (Object.keys(languages).includes(langInUrl)) {
+    if (Object.keys(languages).includes(langInUrl) && langInUrl !== currentLanguage) {
       // If URL has valid language code that's different from current
-      if (langInUrl !== currentLanguage) {
-        i18n.changeLanguage(langInUrl);
-        setCurrentLanguage(langInUrl);
-      }
-    } else {
+      i18n.changeLanguage(langInUrl);
+      setCurrentLanguage(langInUrl);
+    } else if (!Object.keys(languages).includes(langInUrl)) {
       // If URL has no language code, redirect to include it
       navigate(`/${currentLanguage}${location.pathname}${location.search}`, {
         replace: true
       });
     }
+    // Include location.pathname in deps to avoid infinite loops
   }, [location.pathname, i18n, navigate, currentLanguage]);
   
   return (

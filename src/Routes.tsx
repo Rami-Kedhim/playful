@@ -16,9 +16,13 @@ import FavoritesPage from './pages/FavoritesPage';
 import MessagesPage from './pages/MessagesPage';
 import MetaversePage from './pages/MetaversePage';
 import SearchPage from './pages/SearchPage';
+import NotFound from './pages/NotFound';
 import { useLanguage } from './contexts/LanguageContext';
 import { languages } from './i18n/i18n';
-import AIProfiles from "@/pages/AIProfiles";
+import AIProfiles from "./pages/AIProfiles";
+import EscortDetail from './pages/EscortDetail';
+import EscortLiveStreams from './pages/EscortLiveStreams';
+import EscortLiveStreamDetail from './pages/EscortLiveStreamDetail';
 
 // Language route wrapper to handle language parameter
 const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
@@ -60,6 +64,9 @@ const AppRoutes = () => {
         {/* Public Routes */}
         <Route index element={<Index />} />
         <Route path="escorts" element={<Escorts />} />
+        <Route path="escorts/:id" element={<EscortDetail />} />
+        <Route path="escort-streams" element={<EscortLiveStreams />} />
+        <Route path="escort/:id/live" element={<EscortLiveStreamDetail />} />
         <Route path="creators" element={<Creators />} />
         <Route path="creators/:username" element={<CreatorDetail />} />
         <Route path="search" element={<SearchPage />} />
@@ -98,7 +105,7 @@ const AppRoutes = () => {
         } />
 
         {/* Add a 404 catch-all route */}
-        <Route path="*" element={<div className="container mx-auto px-4 py-8"><h1 className="text-2xl font-bold">Page Not Found</h1></div>} />
+        <Route path="*" element={<NotFound />} />
       </Route>
       
       {/* Catch-all redirect to language route */}

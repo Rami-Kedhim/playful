@@ -126,7 +126,7 @@ const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
           {items.map((thumb, idx) => (
             <div 
               key={thumb.id}
-              className={`w-16 h-16 rounded-md overflow-hidden cursor-pointer transition-all ${activeIndex === idx ? 'ring-2 ring-primary' : 'opacity-60'}`}
+              className={`w-16 h-16 rounded-md overflow-hidden cursor-pointer transition-all relative ${activeIndex === idx ? 'ring-2 ring-primary' : 'opacity-60'}`}
               onClick={() => setActiveIndex(idx)}
             >
               <img 

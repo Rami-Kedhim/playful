@@ -1,10 +1,9 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { Button } from "@/components/ui/button";
 import { Search, Heart } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import DesktopNavigation from "@/components/navigation/DesktopNavigation";
 import UserDropdown from "@/components/navigation/UserDropdown";
 import MobileMenu from "@/components/navigation/MobileMenu";
@@ -15,7 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated, userRoles = [] } = useAuth();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const { t } = useTranslation();
   const { currentLanguage } = useLanguage();
   
@@ -24,15 +23,6 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
   
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
   const hasAdminAccess = userRoles.some(role => ['admin', 'moderator'].includes(role));
   
   return (
