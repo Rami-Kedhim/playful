@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { fetchCreatorReviews } from "@/services/creator/creatorReviewsService";
-import { CreatorReview } from "@/types/creator";
+import { creatorReviewsService } from "@/services/creator/reviews";
+import { CreatorReview } from "@/services/creator/reviews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -18,7 +18,7 @@ const CreatorReviews = ({ creatorId }: CreatorReviewsProps) => {
     const loadReviews = async () => {
       setLoading(true);
       try {
-        const result = await fetchCreatorReviews(creatorId);
+        const result = await creatorReviewsService.fetchCreatorReviews(creatorId);
         setReviews(result.data);
       } catch (err: any) {
         setError(err.message || "Failed to load reviews");
