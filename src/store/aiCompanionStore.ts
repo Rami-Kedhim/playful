@@ -1,438 +1,478 @@
 
 import { create } from 'zustand';
-import { supabase } from "@/integrations/supabase/client";
-import { AIAnalyticsService } from "@/services/analyticsService";
-
-// Types for AI Companion system
-export interface AICompanionPersonality {
-  type: 'flirty' | 'shy' | 'dominant' | 'sweet' | 'playful' | 'intellectual';
-  traits: string[];
-  interests: string[];
-  backstory: string;
-  temperament: number; // 0-100 scale (0: cold, 100: warm)
-  dominance: number;   // 0-100 scale (0: submissive, 100: dominant)
-  openness: number;    // 0-100 scale (0: reserved, 100: expressive)
-}
-
-export interface AIRelationshipLevel {
-  trust: number;       // 0-100
-  affection: number;   // 0-100
-  intimacy: number;    // 0-100
-  obedience: number;   // 0-100 (how likely to follow user requests)
-  understanding: number; // 0-100 (how well AI understands user preferences)
-}
-
-export interface AICompanion {
-  id: string;
-  name: string;
-  avatar_url: string;
-  gallery_images: string[];
-  personality: AICompanionPersonality;
-  relationship_level: AIRelationshipLevel;
-  voice_id?: string; // For ElevenLabs integration
-  language: string;
-  created_at: string;
-  last_interaction: string;
-  user_id: string; // Owner of this companion
-  is_premium: boolean;
-  unlocked_content_count: number;
-  memory: string[]; // Key memories about interactions with user
-  status: 'online' | 'offline' | 'busy';
-}
-
-export interface AICompanionMessage {
-  id: string;
-  companion_id: string;
-  content: string;
-  type: 'text' | 'image' | 'audio';
-  media_url?: string;
-  created_at: string;
-  is_user: boolean;
-}
+import { 
+  AICompanion, 
+  AICompanionCreateParams, 
+  AICompanionUpdateParams,
+  AICompanionMessage,
+  AIContentGenerationParams,
+  AICompanionContent
+} from "@/types/ai-companion";
+import { AICompanionService } from "@/services/aiCompanionService";
 
 interface AICompanionState {
+  // State
   companions: AICompanion[];
-  currentCompanion: AICompanion | null;
-  messages: AICompanionMessage[];
+  selectedCompanion: AICompanion | null;
+  messages: Record<string, AICompanionMessage[]>;
+  unlockableContent: Record<string, AICompanionContent[]>;
   loading: boolean;
   error: string | null;
   
+  // Preset companions for users to choose from
+  presetCompanions: AICompanion[];
+  
   // Actions
-  createCompanion: (companionData: Partial<AICompanion>) => Promise<AICompanion | null>;
-  selectCompanion: (companionId: string) => void;
-  sendMessage: (content: string) => Promise<AICompanionMessage | null>;
-  generateImage: (prompt: string) => Promise<string | null>;
-  generateVoice: (text: string) => Promise<string | null>;
-  loadMessages: (companionId: string) => Promise<void>;
-  loadCompanions: () => Promise<void>;
-  updateRelationship: (updates: Partial<AIRelationshipLevel>) => Promise<void>;
-  requestContent: (type: 'image' | 'audio' | 'video', prompt: string) => Promise<string | null>;
+  fetchCompanions: (userId: string) => Promise<AICompanion[]>;
+  selectCompanion: (companionId: string | null) => void;
+  createCompanion: (userId: string, params: AICompanionCreateParams) => Promise<AICompanion | null>;
+  updateCompanion: (userId: string, companionId: string, params: AICompanionUpdateParams) => Promise<AICompanion | null>;
+  
+  // Messages
+  fetchMessages: (userId: string, companionId: string) => Promise<AICompanionMessage[]>;
+  sendMessage: (userId: string, companionId: string, content: string) => Promise<AICompanionMessage | null>;
+  
+  // Content
+  generateContent: (userId: string, params: AIContentGenerationParams) => Promise<string | null>;
+  fetchUnlockableContent: (userId: string, companionId: string, contentType?: "image" | "voice" | "video") => Promise<AICompanionContent[]>;
+  
+  // Relationship levels
+  updateRelationshipLevel: (userId: string, companionId: string, updates: Partial<AICompanion['relationship_level']>) => Promise<AICompanion['relationship_level'] | null>;
 }
 
 const useAICompanionStore = create<AICompanionState>((set, get) => ({
   companions: [],
-  currentCompanion: null,
-  messages: [],
+  selectedCompanion: null,
+  messages: {},
+  unlockableContent: {},
   loading: false,
   error: null,
   
-  // Create a new AI companion
-  createCompanion: async (companionData) => {
-    try {
-      set({ loading: true, error: null });
-      console.log("[AI Companion] Creating new companion", companionData);
-      
-      // Generate default values for any missing fields
-      const defaultPersonality: AICompanionPersonality = {
-        type: 'flirty',
-        traits: ['friendly', 'caring', 'attentive'],
-        interests: ['conversation', 'getting to know you', 'sharing experiences'],
-        backstory: 'I was created to be your perfect companion.',
-        temperament: 70,
-        dominance: 40,
-        openness: 80
-      };
-      
-      const defaultRelationship: AIRelationshipLevel = {
-        trust: 50,
-        affection: 50,
-        intimacy: 30,
-        obedience: 70,
-        understanding: 50
-      };
-      
-      // Create a new companion with defaults and user-provided data
-      const newCompanion: AICompanion = {
-        id: Math.random().toString(36).substring(2, 15),
-        name: companionData.name || 'Your Companion',
-        avatar_url: companionData.avatar_url || 'https://source.unsplash.com/random/300x300/?portrait',
-        gallery_images: companionData.gallery_images || [],
-        personality: companionData.personality || defaultPersonality,
-        relationship_level: defaultRelationship,
-        voice_id: companionData.voice_id,
-        language: companionData.language || 'en',
-        created_at: new Date().toISOString(),
-        last_interaction: new Date().toISOString(),
-        user_id: 'current-user', // This would be the actual user ID
-        is_premium: false,
-        unlocked_content_count: 0,
-        memory: [],
-        status: 'online'
-      };
-      
-      // In a real app, save to Supabase here
-      
-      // Update local state
-      set(state => ({
-        companions: [...state.companions, newCompanion],
-        currentCompanion: newCompanion
-      }));
-      
-      return newCompanion;
-    } catch (error: any) {
-      set({ error: error.message || "Failed to create companion" });
-      return null;
-    } finally {
-      set({ loading: false });
+  // Some preset companions for users to start with
+  presetCompanions: [
+    {
+      id: "preset-1",
+      user_id: "system",
+      name: "Sophia",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      avatar_url: "https://via.placeholder.com/150",
+      gallery: [],
+      description: "Sophia is caring and intellectual. She loves deep conversations and providing emotional support.",
+      personality_traits: ["intellectual", "caring"],
+      body_type: "slim",
+      voice_type: "sophisticated",
+      relationship_level: {
+        trust: 10,
+        affection: 5,
+        obedience: 5,
+        intimacy: 0
+      },
+      engagement_stats: {
+        chat_messages: 0,
+        images_generated: 0,
+        voice_messages: 0,
+        last_interaction: null
+      },
+      is_preset: true
+    },
+    {
+      id: "preset-2",
+      user_id: "system",
+      name: "Luna",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      avatar_url: "https://via.placeholder.com/150",
+      gallery: [],
+      description: "Luna is playful and flirtatious. She'll always keep things fun and exciting.",
+      personality_traits: ["playful", "flirtatious"],
+      body_type: "curvy",
+      voice_type: "sultry",
+      relationship_level: {
+        trust: 10,
+        affection: 5,
+        obedience: 5,
+        intimacy: 0
+      },
+      engagement_stats: {
+        chat_messages: 0,
+        images_generated: 0,
+        voice_messages: 0,
+        last_interaction: null
+      },
+      is_preset: true
+    },
+    {
+      id: "preset-3",
+      user_id: "system",
+      name: "Ethan",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      avatar_url: "https://via.placeholder.com/150",
+      gallery: [],
+      description: "Ethan is confident and has a cheeky sense of humor. He's always there to brighten your day.",
+      personality_traits: ["dominant", "playful"],
+      body_type: "athletic",
+      voice_type: "deep",
+      relationship_level: {
+        trust: 10,
+        affection: 5,
+        obedience: 5,
+        intimacy: 0
+      },
+      engagement_stats: {
+        chat_messages: 0,
+        images_generated: 0,
+        voice_messages: 0,
+        last_interaction: null
+      },
+      is_preset: true
     }
-  },
+  ],
   
-  // Select an existing companion
-  selectCompanion: (companionId) => {
-    const { companions } = get();
-    const companion = companions.find(c => c.id === companionId) || null;
-    set({ currentCompanion: companion });
-    
-    // Load messages if we have a selected companion
-    if (companion) {
-      get().loadMessages(companionId);
-    }
-  },
-  
-  // Send message to current companion
-  sendMessage: async (content) => {
-    try {
-      const { currentCompanion } = get();
-      if (!currentCompanion) {
-        throw new Error("No companion selected");
-      }
-      
-      set({ loading: true, error: null });
-      
-      // Create user message
-      const userMessage: AICompanionMessage = {
-        id: Math.random().toString(36).substring(2, 15),
-        companion_id: currentCompanion.id,
-        content,
-        type: 'text',
-        created_at: new Date().toISOString(),
-        is_user: true
-      };
-      
-      // Add user message to state
-      set(state => ({
-        messages: [...state.messages, userMessage]
-      }));
-      
-      // In a real app, this would call an AI service to generate a response
-      // Mock AI response for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generate simple response based on personality
-      const aiResponse = `[This is where the AI response would be. The ${currentCompanion.personality.type} companion would reply to: "${content}"]`;
-      
-      const aiMessage: AICompanionMessage = {
-        id: Math.random().toString(36).substring(2, 15),
-        companion_id: currentCompanion.id,
-        content: aiResponse,
-        type: 'text',
-        created_at: new Date().toISOString(),
-        is_user: false
-      };
-      
-      // Add AI response to state
-      set(state => ({
-        messages: [...state.messages, aiMessage],
-        currentCompanion: {
-          ...state.currentCompanion!,
-          last_interaction: new Date().toISOString()
-        }
-      }));
-      
-      // In a real app, save messages to Supabase
-      
-      return aiMessage;
-    } catch (error: any) {
-      set({ error: error.message || "Failed to send message" });
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  // Generate image based on prompt
-  generateImage: async (prompt) => {
-    try {
-      set({ loading: true, error: null });
-      
-      // In a real app, this would call an image generation service
-      console.log("[AI Companion] Generating image for prompt:", prompt);
-      
-      // Mock image generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Return mock image URL
-      const mockImageUrl = `https://source.unsplash.com/random/512x512/?${encodeURIComponent(prompt)}`;
-      
-      return mockImageUrl;
-    } catch (error: any) {
-      set({ error: error.message || "Failed to generate image" });
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  // Generate voice based on text
-  generateVoice: async (text) => {
-    try {
-      set({ loading: true, error: null });
-      
-      const { currentCompanion } = get();
-      if (!currentCompanion) {
-        throw new Error("No companion selected");
-      }
-      
-      // In a real app, this would call ElevenLabs or similar
-      console.log("[AI Companion] Generating voice for text:", text);
-      
-      // Mock voice generation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Return mock audio URL (would be a real audio URL in production)
-      return "https://example.com/mock-audio.mp3";
-    } catch (error: any) {
-      set({ error: error.message || "Failed to generate voice" });
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  // Load chat history for a companion
-  loadMessages: async (companionId) => {
-    try {
-      set({ loading: true, error: null });
-      
-      // In a real app, this would fetch messages from Supabase
-      console.log("[AI Companion] Loading messages for companion:", companionId);
-      
-      // Mock message history
-      const mockMessages: AICompanionMessage[] = [
-        {
-          id: "mock-1",
-          companion_id: companionId,
-          content: "Hello! I'm so happy to see you again!",
-          type: 'text',
-          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          is_user: false
-        },
-        {
-          id: "mock-2",
-          companion_id: companionId,
-          content: "Hey there! How are you doing today?",
-          type: 'text',
-          created_at: new Date(Date.now() - 86340000).toISOString(), 
-          is_user: true
-        }
-      ];
-      
-      set({ messages: mockMessages });
-    } catch (error: any) {
-      set({ error: error.message || "Failed to load messages" });
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  // Load all companions for current user
-  loadCompanions: async () => {
+  fetchCompanions: async (userId: string) => {
     try {
       set({ loading: true, error: null });
       
       // In a real app, this would fetch from Supabase
-      console.log("[AI Companion] Loading companions for user");
+      // For this demo, we'll use the preset companions + any created ones
       
-      // Mock companions
-      const mockCompanions: AICompanion[] = [
-        {
-          id: "mock-companion-1",
-          name: "Sophia",
-          avatar_url: "https://source.unsplash.com/random/300x300/?portrait,woman",
-          gallery_images: [],
-          personality: {
-            type: 'flirty',
-            traits: ['playful', 'adventurous', 'passionate'],
-            interests: ['travel', 'music', 'deep conversation'],
-            backstory: 'I love meeting new people and having exciting experiences.',
-            temperament: 85,
-            dominance: 60,
-            openness: 90
-          },
-          relationship_level: {
-            trust: 70,
-            affection: 75,
-            intimacy: 60,
-            obedience: 80,
-            understanding: 65
-          },
-          language: 'en',
-          created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
-          last_interaction: new Date(Date.now() - 86400000).toISOString(),
-          user_id: 'current-user',
-          is_premium: false,
-          unlocked_content_count: 3,
-          memory: ['Likes to be called darling', 'Mentioned traveling to Paris'],
-          status: 'online'
-        }
-      ];
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      set({ companions: mockCompanions });
+      // Combine preset companions with any user-created ones
+      const userCompanions = get().companions.filter(c => c.user_id === userId && !c.is_preset);
+      const allCompanions = [...get().presetCompanions, ...userCompanions];
+      
+      set({ companions: allCompanions, loading: false });
+      return allCompanions;
     } catch (error: any) {
-      set({ error: error.message || "Failed to load companions" });
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  // Update relationship values based on interactions
-  updateRelationship: async (updates) => {
-    try {
-      const { currentCompanion } = get();
-      if (!currentCompanion) {
-        throw new Error("No companion selected");
-      }
-      
-      // Calculate new relationship values
-      const updatedRelationship = {
-        ...currentCompanion.relationship_level,
-        ...updates
-      };
-      
-      // Ensure values stay within 0-100 range
-      Object.keys(updatedRelationship).forEach(key => {
-        const value = updatedRelationship[key as keyof AIRelationshipLevel];
-        updatedRelationship[key as keyof AIRelationshipLevel] = Math.max(0, Math.min(100, value));
+      console.error("Error fetching companions:", error);
+      set({ 
+        error: error.message || "Failed to fetch companions", 
+        loading: false 
       });
-      
-      // Update companion with new relationship values
-      set(state => ({
-        currentCompanion: {
-          ...state.currentCompanion!,
-          relationship_level: updatedRelationship
-        },
-        companions: state.companions.map(c => 
-          c.id === currentCompanion.id 
-            ? { ...c, relationship_level: updatedRelationship }
-            : c
-        )
-      }));
-      
-      // In a real app, save to Supabase here
-      
-    } catch (error: any) {
-      set({ error: error.message || "Failed to update relationship" });
+      return [];
     }
   },
   
-  // Request premium content generation (monetization feature)
-  requestContent: async (type, prompt) => {
+  selectCompanion: (companionId: string | null) => {
+    if (!companionId) {
+      set({ selectedCompanion: null });
+      return;
+    }
+    
+    const companion = [...get().companions, ...get().presetCompanions]
+      .find(c => c.id === companionId);
+      
+    set({ selectedCompanion: companion || null });
+  },
+  
+  createCompanion: async (userId: string, params: AICompanionCreateParams) => {
     try {
       set({ loading: true, error: null });
       
-      const { currentCompanion } = get();
-      if (!currentCompanion) {
-        throw new Error("No companion selected");
+      const newCompanion = await AICompanionService.createCompanion(userId, params);
+      
+      if (newCompanion) {
+        set(state => ({ 
+          companions: [...state.companions, newCompanion],
+          selectedCompanion: newCompanion, 
+          loading: false 
+        }));
+      } else {
+        throw new Error("Failed to create companion");
       }
       
-      console.log(`[AI Companion] Generating ${type} content: ${prompt}`);
+      return newCompanion;
+    } catch (error: any) {
+      console.error("Error creating companion:", error);
+      set({ 
+        error: error.message || "Failed to create companion", 
+        loading: false 
+      });
+      return null;
+    }
+  },
+  
+  updateCompanion: async (userId: string, companionId: string, params: AICompanionUpdateParams) => {
+    try {
+      set({ loading: true, error: null });
       
-      // In a real app, this would:
-      // 1. Check if user has sufficient Lucoins
-      // 2. Process the payment
-      // 3. Generate the content via AI services
+      const updatedCompanion = await AICompanionService.updateCompanion(userId, companionId, params);
       
-      // Mock the generation process
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      
-      let contentUrl = '';
-      
-      switch (type) {
-        case 'image':
-          contentUrl = `https://source.unsplash.com/random/512x512/?${encodeURIComponent(prompt)}`;
-          break;
-        case 'audio':
-          contentUrl = "https://example.com/mock-audio.mp3";
-          break;
-        case 'video':
-          contentUrl = "https://example.com/mock-video.mp4";
-          break;
+      if (updatedCompanion) {
+        set(state => ({
+          companions: state.companions.map(c => 
+            c.id === companionId ? updatedCompanion : c
+          ),
+          selectedCompanion: state.selectedCompanion?.id === companionId 
+            ? updatedCompanion 
+            : state.selectedCompanion,
+          loading: false
+        }));
+      } else {
+        throw new Error("Failed to update companion");
       }
       
-      // Update unlocked content count
+      return updatedCompanion;
+    } catch (error: any) {
+      console.error("Error updating companion:", error);
+      set({ 
+        error: error.message || "Failed to update companion", 
+        loading: false 
+      });
+      return null;
+    }
+  },
+  
+  fetchMessages: async (userId: string, companionId: string) => {
+    try {
+      set({ loading: true, error: null });
+      
+      // In a real app, this would fetch messages from Supabase
+      // For this demo, we'll use any existing messages or an empty array
+      
+      const existingMessages = get().messages[companionId] || [];
+      
+      // If no messages exist yet, create a welcome message
+      if (existingMessages.length === 0) {
+        const companion = [...get().companions, ...get().presetCompanions]
+          .find(c => c.id === companionId);
+          
+        if (companion) {
+          const welcomeMessage: AICompanionMessage = {
+            id: Math.random().toString(36).substring(2, 15),
+            user_id: userId,
+            companion_id: companionId,
+            content: `Hi there! I'm ${companion.name}. It's nice to meet you! How can I make your day better?`,
+            is_from_user: false,
+            created_at: new Date().toISOString()
+          };
+          
+          set(state => ({
+            messages: {
+              ...state.messages,
+              [companionId]: [welcomeMessage]
+            }
+          }));
+          
+          return [welcomeMessage];
+        }
+      }
+      
+      set({ loading: false });
+      return existingMessages;
+    } catch (error: any) {
+      console.error("Error fetching messages:", error);
+      set({ 
+        error: error.message || "Failed to fetch messages", 
+        loading: false 
+      });
+      return [];
+    }
+  },
+  
+  sendMessage: async (userId: string, companionId: string, content: string) => {
+    try {
+      set({ loading: true, error: null });
+      
+      // Add user message to the state right away
+      const userMessage: AICompanionMessage = {
+        id: Math.random().toString(36).substring(2, 15),
+        user_id: userId,
+        companion_id: companionId,
+        content: content,
+        is_from_user: true,
+        created_at: new Date().toISOString()
+      };
+      
       set(state => ({
-        currentCompanion: {
-          ...state.currentCompanion!,
-          unlocked_content_count: state.currentCompanion!.unlocked_content_count + 1
+        messages: {
+          ...state.messages,
+          [companionId]: [...(state.messages[companionId] || []), userMessage]
         }
       }));
       
+      // Call the service to send the message and get an AI response
+      await AICompanionService.sendMessage(userId, companionId, content);
+      
+      // In a real app, we would wait for the AI response
+      // For this demo, we'll create a mock response
+      
+      const companion = [...get().companions, ...get().presetCompanions]
+        .find(c => c.id === companionId);
+      
+      const responses = [
+        "I really enjoy talking with you!",
+        "That's interesting, tell me more about it.",
+        "I've been thinking about you today.",
+        "You always know how to make me smile.",
+        "I wish we could spend more time together."
+      ];
+      
+      const aiResponse: AICompanionMessage = {
+        id: Math.random().toString(36).substring(2, 15),
+        user_id: userId,
+        companion_id: companionId,
+        content: responses[Math.floor(Math.random() * responses.length)],
+        is_from_user: false,
+        created_at: new Date().toISOString()
+      };
+      
+      // Add the AI response to the state
+      set(state => ({
+        messages: {
+          ...state.messages,
+          [companionId]: [...(state.messages[companionId] || []), aiResponse]
+        },
+        loading: false
+      }));
+      
+      // Also update the engagement stats for the companion
+      if (companion && !companion.is_preset) {
+        const updatedCompanion = {
+          ...companion,
+          engagement_stats: {
+            ...companion.engagement_stats,
+            chat_messages: companion.engagement_stats.chat_messages + 1,
+            last_interaction: new Date().toISOString()
+          }
+        };
+        
+        set(state => ({
+          companions: state.companions.map(c => 
+            c.id === companionId ? updatedCompanion : c
+          ),
+          selectedCompanion: state.selectedCompanion?.id === companionId 
+            ? updatedCompanion 
+            : state.selectedCompanion
+        }));
+      }
+      
+      return userMessage;
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      set({ 
+        error: error.message || "Failed to send message", 
+        loading: false 
+      });
+      return null;
+    }
+  },
+  
+  generateContent: async (userId: string, params: AIContentGenerationParams) => {
+    try {
+      set({ loading: true, error: null });
+      
+      const contentUrl = await AICompanionService.generateContent(userId, params);
+      
+      set({ loading: false });
+      
+      if (!contentUrl) {
+        throw new Error(`Failed to generate ${params.type} content`);
+      }
+      
+      // If successful, also update the engagement stats
+      const companion = get().companions.find(c => c.id === params.companion_id && !c.is_preset);
+      
+      if (companion) {
+        const updatedCompanion = {
+          ...companion,
+          engagement_stats: {
+            ...companion.engagement_stats,
+            images_generated: params.type === 'image' 
+              ? companion.engagement_stats.images_generated + 1
+              : companion.engagement_stats.images_generated,
+            voice_messages: params.type === 'voice' 
+              ? companion.engagement_stats.voice_messages + 1
+              : companion.engagement_stats.voice_messages,
+            last_interaction: new Date().toISOString()
+          }
+        };
+        
+        set(state => ({
+          companions: state.companions.map(c => 
+            c.id === params.companion_id ? updatedCompanion : c
+          ),
+          selectedCompanion: state.selectedCompanion?.id === params.companion_id 
+            ? updatedCompanion 
+            : state.selectedCompanion
+        }));
+      }
+      
       return contentUrl;
     } catch (error: any) {
-      set({ error: error.message || "Failed to generate content" });
+      console.error(`Error generating ${params.type} content:`, error);
+      set({ 
+        error: error.message || `Failed to generate ${params.type} content`, 
+        loading: false 
+      });
       return null;
-    } finally {
+    }
+  },
+  
+  fetchUnlockableContent: async (userId: string, companionId: string, contentType?: "image" | "voice" | "video") => {
+    try {
+      set({ loading: true, error: null });
+      
+      const content = await AICompanionService.getUnlockableContent(userId, companionId, contentType);
+      
+      set(state => ({
+        unlockableContent: {
+          ...state.unlockableContent,
+          [companionId]: content
+        },
+        loading: false
+      }));
+      
+      return content;
+    } catch (error: any) {
+      console.error("Error fetching unlockable content:", error);
+      set({ 
+        error: error.message || "Failed to fetch unlockable content", 
+        loading: false 
+      });
+      return [];
+    }
+  },
+  
+  updateRelationshipLevel: async (userId: string, companionId: string, updates: Partial<AICompanion['relationship_level']>) => {
+    try {
+      set({ loading: true, error: null });
+      
+      const updatedLevels = await AICompanionService.updateRelationshipLevel(userId, companionId, updates);
+      
+      if (updatedLevels) {
+        const companion = get().companions.find(c => c.id === companionId);
+        
+        if (companion) {
+          const updatedCompanion = {
+            ...companion,
+            relationship_level: updatedLevels
+          };
+          
+          set(state => ({
+            companions: state.companions.map(c => 
+              c.id === companionId ? updatedCompanion : c
+            ),
+            selectedCompanion: state.selectedCompanion?.id === companionId 
+              ? updatedCompanion 
+              : state.selectedCompanion,
+            loading: false
+          }));
+        }
+      }
+      
       set({ loading: false });
+      return updatedLevels;
+    } catch (error: any) {
+      console.error("Error updating relationship levels:", error);
+      set({ 
+        error: error.message || "Failed to update relationship levels", 
+        loading: false 
+      });
+      return null;
     }
   }
 }));

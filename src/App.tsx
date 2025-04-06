@@ -1,64 +1,40 @@
-
-import React, { useEffect } from 'react';
-import AppRoutes from './Routes';
-import { Toaster } from './components/ui/toaster';
-import { useAuth } from './hooks/auth/useAuth';
-import { Loader2 } from 'lucide-react';
-import { ThemeProvider } from './components/theme-provider';
-import { ToastProvider, useToast } from './hooks/use-toast';
-import { HelmetProvider } from 'react-helmet-async';
-
-function AppContent() {
-  const { isLoading } = useAuth();
-  const { addToast, removeToast } = useToast();
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      // Set the global toast functions
-      (window as any).__TOAST_ADD_FUNCTION__ = addToast;
-      (window as any).__TOAST_REMOVE_FUNCTION__ = removeToast;
-      
-      // Add a marker to indicate that toast context is available
-      const markerElement = document.createElement('div');
-      markerElement.id = 'toast-context-element';
-      markerElement.dataset.hasToastContext = 'true';
-      markerElement.style.display = 'none';
-      document.body.appendChild(markerElement);
-      
-      return () => {
-        document.body.removeChild(markerElement);
-        (window as any).__TOAST_ADD_FUNCTION__ = null;
-        (window as any).__TOAST_REMOVE_FUNCTION__ = null;
-      };
-    }
-  }, [addToast, removeToast]);
-
-  // Show loading state while authentication is being determined
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
-      <AppRoutes />
-      <Toaster />
-    </div>
-  );
-}
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ProfilePage from './pages/ProfilePage';
+import EscortDirectoryPage from './pages/EscortDirectoryPage';
+import EscortDetailPage from './pages/EscortDetailPage';
+import LivecamsPage from './pages/LivecamsPage';
+import LivecamDetailPage from './pages/LivecamDetailPage';
+import CreatorApplicationPage from './pages/CreatorApplicationPage';
+import CreatorDashboard from './components/creators/dashboard/Dashboard';
+import VerificationContainer from './components/verification/VerificationContainer';
+import LanguageSwitcher from './components/language/LanguageSwitcher';
+import AICompanionPage from './pages/ai-companion';
 
 function App() {
   return (
-    <HelmetProvider>
-      <ThemeProvider defaultTheme="dark" attribute="class">
-        <ToastProvider>
-          <AppContent />
-        </ToastProvider>
-      </ThemeProvider>
-    </HelmetProvider>
+    <Router>
+      <div>
+        <LanguageSwitcher />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/escorts" element={<EscortDirectoryPage />} />
+          <Route path="/escorts/:id" element={<EscortDetailPage />} />
+          <Route path="/livecams" element={<LivecamsPage />} />
+          <Route path="/livecams/:id" element={<LivecamDetailPage />} />
+          <Route path="/creator-application" element={<CreatorApplicationPage />} />
+          <Route path="/creator-dashboard" element={<CreatorDashboard />} />
+          <Route path="/verification" element={<VerificationContainer />} />
+          <Route path="/ai-companion" element={<AICompanionPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
