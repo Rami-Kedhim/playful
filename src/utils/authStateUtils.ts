@@ -1,11 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
 
-/**
- * Fetches user roles from the database
- */
-export const fetchUserRoles = async (userId: string) => {
+export const fetchUserRoles = async (userId: string): Promise<string[]> => {
   try {
     const { data, error } = await supabase
       .from('user_roles')
@@ -17,39 +13,39 @@ export const fetchUserRoles = async (userId: string) => {
       return [];
     }
     
-    return data?.map(roleObj => roleObj.role) || [];
+    return data.map(roleObj => roleObj.role);
   } catch (error) {
     console.error("Error in fetchUserRoles:", error);
     return [];
   }
 };
 
-/**
- * Helper function to handle authentication errors
- */
-export const handleAuthError = (error: unknown) => {
-  const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-  console.error("Authentication error:", error);
-  
-  toast({
-    title: "Authentication Error",
-    description: errorMessage,
-    variant: "destructive",
-  });
-  
-  return errorMessage;
+export const isAdmin = (roles: string[]): boolean => {
+  return roles.includes('admin');
 };
 
-/**
- * Updates a user's last online status
- */
-export const updateLastOnline = async (userId: string) => {
-  try {
-    await supabase
-      .from('profiles')
-      .update({ last_online: new Date().toISOString() })
-      .eq('id', userId);
-  } catch (error) {
-    console.error("Error updating last online status:", error);
-  }
+export const isModerator = (roles: string[]): boolean => {
+  return roles.includes('moderator');
+};
+
+export const isEscort = (roles: string[], profile: any): boolean => {
+  return roles.includes('escort') || Boolean(profile?.is_escort);
+};
+
+export const isVerifiedEscort = (roles: string[], profile: any): boolean => {
+  return (roles.includes('escort') || Boolean(profile?.is_escort)) && 
+         (Boolean(profile?.is_verified));
+};
+
+export const isClient = (roles: string[]): boolean => {
+  return roles.includes('client') || roles.includes('user');
+};
+
+export const hasPermissionToAccessSeo = (roles: string[]): boolean => {
+  return roles.includes('admin') || roles.includes('moderator');
+};
+
+export const canBoost = (roles: string[], profile: any): boolean => {
+  return isVerifiedEscort(roles, profile) && 
+         (profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'standard');
 };

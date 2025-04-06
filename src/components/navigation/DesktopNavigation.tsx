@@ -5,17 +5,19 @@ import { Button } from "@/components/ui/button";
 import ServiceTypeMenu from "@/components/navigation/ServiceTypeMenu";
 import { Search } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
+import { hasPermissionToAccessSeo, isVerifiedEscort } from "@/utils/authStateUtils";
 
 const DesktopNavigation = () => {
   const location = useLocation();
-  const { userRoles = [] } = useAuth();
+  const { userRoles, profile } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
   };
 
   // Check if user has admin or moderator role for SEO access
-  const hasAdminAccess = userRoles.some(role => ['admin', 'moderator'].includes(role));
+  const hasAdminAccess = hasPermissionToAccessSeo(userRoles);
+  const isEscortWithMembership = isVerifiedEscort(userRoles, profile);
   
   return (
     <nav className="hidden md:flex space-x-1">
@@ -68,6 +70,17 @@ const DesktopNavigation = () => {
             <Search className="h-4 w-4 mr-1" />
             SEO
           </Link>
+        </Button>
+      )}
+      
+      {/* Show boost management for verified escorts with membership */}
+      {isEscortWithMembership && (
+        <Button
+          variant={isActive("/boost") ? "default" : "ghost"}
+          size="sm"
+          asChild
+        >
+          <Link to="/boost">Boost</Link>
         </Button>
       )}
     </nav>

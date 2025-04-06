@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import HomePage from './pages/HomePage';
 import SEODashboard from './pages/SEODashboard';
@@ -8,90 +8,66 @@ import Escorts from './pages/Escorts';
 import Creators from './pages/Creators';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleGuard from './components/auth/RoleGuard';
+import { useAuth } from './hooks/auth/useAuth';
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
+import FavoritesPage from './pages/FavoritesPage';
+import MessagesPage from './pages/MessagesPage';
+import MetaversePage from './pages/MetaversePage';
+import SearchPage from './pages/SearchPage';
 
 const AppRoutes = () => {
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <Routes>
+      {/* Public Routes */}
+      <Route path="/auth" element={<AuthPage />} />
+      
+      {/* App Layout Routes */}
       <Route element={<AppLayout />}>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/escorts" element={<Escorts />} />
         <Route path="/creators" element={<Creators />} />
+        <Route path="/search" element={<SearchPage />} />
         
-        {/* Protected SEO Routes - Require authentication and appropriate roles */}
-        <Route path="/seo" element={
+        {/* Protected Routes - Require Authentication */}
+        <Route path="/favorites" element={
           <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
+            <FavoritesPage />
           </ProtectedRoute>
         } />
-        <Route path="/seo/history" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="/seo/analytics" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="/seo/optimize/:contentId" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="/seo/new-optimization" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="/seo/optimize-profile" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="/seo/optimize-content" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="/seo/optimize-live" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="/seo/tools" element={
-          <ProtectedRoute>
-            <RoleGuard allowedRoles={['admin', 'moderator']}>
-              <SEODashboard />
-            </RoleGuard>
-          </ProtectedRoute>
-        } />
-
-        {/* Add routes for other pages */}
         <Route path="/messages" element={
           <ProtectedRoute>
-            <div>Messages Page (Coming Soon)</div>
+            <MessagesPage />
           </ProtectedRoute>
         } />
         <Route path="/metaverse" element={
           <ProtectedRoute>
-            <div>Metaverse Page (Coming Soon)</div>
+            <MetaversePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected SEO Routes - Require Admin/Moderator roles */}
+        <Route path="/seo/*" element={
+          <ProtectedRoute>
+            <RoleGuard allowedRoles={['admin', 'moderator']}>
+              <SEODashboard />
+            </RoleGuard>
           </ProtectedRoute>
         } />
 
