@@ -1,17 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { languages, Language } from '../i18n/i18n';
+import { languages } from '../i18n/i18n';
 
 interface LanguageContextType {
-  currentLanguage: Language;
-  changeLanguage: (lang: Language) => void;
+  currentLanguage: string;
+  changeLanguage: (lang: string) => void;
   languages: typeof languages;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const useLanguage = (): LanguageContextType => {
+export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (!context) {
     throw new Error('useLanguage must be used within a LanguageProvider');
@@ -19,22 +19,18 @@ export const useLanguage = (): LanguageContextType => {
   return context;
 };
 
-interface LanguageProviderProps {
-  children: ReactNode;
-}
-
-export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   
   // Initialize with the current language from i18n
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(
-    (i18n.language?.split('-')[0] as Language) || 'en'
+  const [currentLanguage, setCurrentLanguage] = useState(
+    i18n.language?.split('-')[0] || 'en'
   );
   
   // When the language changes, update routes and localStorage
-  const changeLanguage = (lang: Language) => {
+  const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
     setCurrentLanguage(lang);
     
@@ -59,12 +55,14 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     if (Object.keys(languages).includes(langInUrl)) {
       // If URL has valid language code that's different from current
       if (langInUrl !== currentLanguage) {
-        i18n.changeLanguage(langInUrl as Language);
-        setCurrentLanguage(langInUrl as Language);
+        i18n.changeLanguage(langInUrl);
+        setCurrentLanguage(langInUrl);
       }
     } else {
       // If URL has no language code, redirect to include it
-      navigate(`/${currentLanguage}${location.pathname}${location.search}`, { replace: true });
+      navigate(`/${currentLanguage}${location.pathname}${location.search}`, {
+        replace: true
+      });
     }
   }, [location.pathname, i18n, navigate, currentLanguage]);
   
