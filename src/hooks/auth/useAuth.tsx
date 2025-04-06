@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { AuthContextValue, UserRole } from "@/types/auth";
 import { useAuthState } from "@/hooks/auth/useAuthState";
@@ -12,7 +11,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile] = useAuthState();
-  const { resetPassword, updatePassword } = usePasswordManagement(setIsLoading);
+  const { resetPassword, updatePassword } = usePasswordManagement();
   const { signUp, signIn, signOut } = useAuthActions(setIsLoading, refreshProfile);
   const [error, setError] = useState<string | null>(null);
 

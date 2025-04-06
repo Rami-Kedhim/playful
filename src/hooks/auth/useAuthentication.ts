@@ -12,7 +12,7 @@ export const useAuthentication = (
   const { signUp, signIn, signOut } = useAuthActions(setIsLoading, refreshProfile);
   
   // Get password management functions
-  const { resetPassword, updatePassword } = usePasswordManagement(setIsLoading);
+  const { resetPassword, updatePassword } = usePasswordManagement();
   
   // Get profile management functions
   const { updateProfile } = useProfileManagement();
