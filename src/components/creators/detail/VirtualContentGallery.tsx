@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
+import StarRating from '@/components/ui/StarRating';
 
 interface VirtualContentGalleryProps {
   isPremium?: boolean;
@@ -12,6 +13,7 @@ interface VirtualContentGalleryProps {
     url: string;
     title: string;
     isPremium?: boolean;
+    rating?: number;
   }[];
 }
 
@@ -20,6 +22,8 @@ const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
   onSubscribe = () => {},
   items = []
 }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
   if (isPremium) {
     return (
       <Card className="p-6 flex flex-col items-center justify-center text-center">
@@ -65,6 +69,11 @@ const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
           )}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
             <p className="text-white text-sm">{item.title}</p>
+            {item.rating && (
+              <div className="mt-1">
+                <StarRating rating={item.rating} size={12} />
+              </div>
+            )}
           </div>
         </div>
       ))}
