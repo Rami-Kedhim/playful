@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState } from "react";
-import { AuthContextValue } from "@/types/auth";
+import { AuthContextValue, UserRole } from "@/types/auth";
 import { useAuthState } from "@/hooks/auth/useAuthState";
 import { useAuthentication } from "@/hooks/auth/useAuthentication";
 import { User } from "@supabase/supabase-js";
@@ -74,6 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const mapUserToAuthUser = (dbUser: User | null, profile: any | null) => {
     if (!dbUser) return null;
     
+    // Determine role - use the first role from userRoles array or default to "user"
+    // Cast it to UserRole type to match our interface
+    const roleValue: UserRole = (userRoles.length > 0 ? userRoles[0] : "user") as UserRole;
+    
     return {
       id: dbUser.id,
       email: dbUser.email || "",
@@ -81,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       profileImageUrl: profile?.avatar_url || "",
       lucoinsBalance: profile?.lucoin_balance || 0,
       isVerified: profile?.is_verified || false,
-      role: userRoles.length > 0 ? userRoles[0] : "user",
+      role: roleValue,
       app_metadata: dbUser.app_metadata,
       user_metadata: dbUser.user_metadata,
       aud: dbUser.aud,
