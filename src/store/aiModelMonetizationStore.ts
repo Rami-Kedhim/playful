@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
+import { AIAnalyticsService } from "@/services/ai/aiAnalyticsService";
 
 interface AIModelMonetizationState {
   unlockedContent: string[];
@@ -39,6 +40,13 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
       // In a real app, this would call a Supabase function to handle the transaction
       // For this demo, we'll simulate a successful purchase
       
+      // Track purchase analytics
+      await AIAnalyticsService.trackEvent(
+        profileId,
+        'content_purchase',
+        { contentId, price }
+      );
+      
       // Add to unlocked content
       set(state => ({ 
         unlockedContent: [...state.unlockedContent, contentId] 
@@ -63,13 +71,20 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
       const mockGift: AIGift = {
         id: Math.random().toString(36).substring(2, 15),
         gift_type: giftType,
-        name: giftType, // Added name property based on AIGift type
-        description: `A ${giftType} gift`, // Added description property
-        price: amount, // Using amount as price
+        name: giftType, // Property specified in AIGift type
+        description: `A ${giftType} gift`, // Property specified in AIGift type
+        price: amount, // Property specified in AIGift type
         user_id: 'current-user',
         profile_id: profileId,
         created_at: new Date().toISOString()
       };
+      
+      // Track gift analytics
+      await AIAnalyticsService.trackEvent(
+        profileId,
+        'gift',
+        { giftType, amount }
+      );
       
       set(state => ({ 
         sentGifts: [...state.sentGifts, mockGift] 
@@ -105,6 +120,13 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
         end_time: endTime.toISOString(),
         status: 'active'
       };
+      
+      // Track boost analytics
+      await AIAnalyticsService.trackEvent(
+        profileId,
+        'boost',
+        { amount, durationHours, boostLevel: mockBoost.boost_level }
+      );
       
       set(state => ({ 
         activeBoosts: [...state.activeBoosts, mockBoost] 
@@ -175,7 +197,7 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
     return get().unlockedContent.includes(contentId);
   },
   
-  // New methods for Phase 2 automated monetization
+  // Methods for Phase 2 automated monetization
   trackContentView: (contentId) => {
     set(state => ({
       premiumContentViews: {

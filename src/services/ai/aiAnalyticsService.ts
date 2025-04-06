@@ -21,13 +21,21 @@ export interface AIModelPerformanceMetrics {
   bestConversionRate: { id: string, name: string, rate: number }[];
 }
 
+export interface SEOMetrics {
+  visibilityScore: number;
+  searchImpressions: number;
+  clickThroughRate: number;
+  averageRank: number;
+  priorityKeywords: string[];
+}
+
 export class AIAnalyticsService {
   /**
    * Track an event for AI model analytics
    */
   static async trackEvent(
     profileId: string, 
-    eventType: 'view' | 'click' | 'message' | 'content_purchase' | 'gift' | 'boost',
+    eventType: 'view' | 'click' | 'message' | 'content_purchase' | 'gift' | 'boost' | 'ai_model_generated' | 'content_generated',
     metadata?: Record<string, any>
   ): Promise<boolean> {
     try {
@@ -40,6 +48,22 @@ export class AIAnalyticsService {
         timestamp: new Date().toISOString(),
         metadata
       });
+      
+      // Store analytics event in Supabase
+      // In a production app, you'd want to batch these for better performance
+      const { error } = await supabase
+        .from('ai_analytics_events')
+        .insert({
+          profile_id: profileId,
+          event_type: eventType,
+          metadata: metadata || {},
+          created_at: new Date().toISOString()
+        })
+        .single();
+      
+      if (error) {
+        console.error('Error storing analytics event:', error);
+      }
       
       return true;
     } catch (error) {
@@ -132,6 +156,69 @@ export class AIAnalyticsService {
     } catch (error) {
       console.error('Error fetching all profiles analytics:', error);
       throw new Error('Failed to fetch profiles analytics');
+    }
+  }
+  
+  /**
+   * Get SEO metrics for AI profiles
+   */
+  static async getSEOMetrics(profileId?: string): Promise<SEOMetrics> {
+    try {
+      // In a real implementation, this would fetch from a database or SEO API
+      return {
+        visibilityScore: Math.floor(Math.random() * 30) + 70, // 70-100
+        searchImpressions: Math.floor(Math.random() * 5000) + 1000,
+        clickThroughRate: Math.random() * 8 + 2, // 2-10%
+        averageRank: Math.floor(Math.random() * 10) + 1, // 1-10
+        priorityKeywords: [
+          'escort ai companion',
+          'virtual companion',
+          'ai girlfriend experience',
+          'digital escort service',
+          'premium ai chat'
+        ]
+      };
+    } catch (error) {
+      console.error('Error fetching SEO metrics:', error);
+      throw new Error('Failed to fetch SEO metrics');
+    }
+  }
+  
+  /**
+   * Get revenue forecasts based on current performance
+   */
+  static async getRevenueForecasts(timeframe: 'next_week' | 'next_month' | 'next_quarter'): Promise<{
+    estimatedRevenue: number;
+    growth: number;
+    topEarners: string[];
+  }> {
+    try {
+      // This would be a complex calculation based on historical data
+      // For this demo, we'll return simulated data
+      
+      const baseRevenue = 50000; // $50k base
+      let multiplier = 1;
+      
+      switch(timeframe) {
+        case 'next_week':
+          multiplier = 0.25;
+          break;
+        case 'next_month':
+          multiplier = 1;
+          break;
+        case 'next_quarter':
+          multiplier = 3.2;
+          break;
+      }
+      
+      return {
+        estimatedRevenue: baseRevenue * multiplier,
+        growth: Math.random() * 10 + 15, // 15-25% growth
+        topEarners: ['Sophia AI', 'Emma AI', 'Mia AI', 'Olivia AI']
+      };
+    } catch (error) {
+      console.error('Error generating revenue forecasts:', error);
+      throw new Error('Failed to generate revenue forecasts');
     }
   }
 }

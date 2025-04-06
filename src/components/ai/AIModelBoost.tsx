@@ -1,247 +1,156 @@
 
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress"; // Fixed import
-import { Badge } from "@/components/ui/badge";
-import { Zap, ZapOff, Coins } from "lucide-react";
-import { useAIModelMonetization } from "@/hooks/ai/useAIModelMonetization";
-import { useAuth } from "@/hooks/auth";
-import { supabase } from "@/integrations/supabase/client";
-
-interface BoostPackage {
-  id: string;
-  name: string;
-  hours: number;
-  price: number;
-  description: string;
-}
-
-const boostPackages: BoostPackage[] = [
-  {
-    id: "boost-1",
-    name: "Quick Boost",
-    hours: 1,
-    price: 10,
-    description: "Boost visibility for 1 hour"
-  },
-  {
-    id: "boost-2",
-    name: "Daily Boost",
-    hours: 24,
-    price: 50,
-    description: "Boost visibility for 24 hours"
-  },
-  {
-    id: "boost-3",
-    name: "Weekend Boost",
-    hours: 72,
-    price: 120,
-    description: "Boost visibility for 3 days"
-  },
-];
-
-interface BoostStatus {
-  isActive: boolean;
-  remainingTime: number; // in milliseconds
-  totalTime: number; // in milliseconds
-  progress: number; // percentage
-}
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress'; // Fixed import
+import { Flame, Zap } from 'lucide-react';
+import { AIProfile } from '@/types/ai-profile';
+import useAIModelMonetizationStore from '@/store/aiModelMonetizationStore';
 
 interface AIModelBoostProps {
-  profileId: string;
+  profile: AIProfile;
+  onBoostComplete?: () => void;
 }
 
-const AIModelBoost = ({ profileId }: AIModelBoostProps) => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<string | undefined>(boostPackages[0].id);
-  const [boostStatus, setBoostStatus] = useState<BoostStatus>({
-    isActive: false,
-    remainingTime: 0,
-    totalTime: 0,
-    progress: 0
-  });
+const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete }) => {
+  const [amount, setAmount] = useState<number>(50);
+  const [duration, setDuration] = useState<number>(24);
+  const [isBoostInProgress, setIsBoostInProgress] = useState<boolean>(false);
+  const [boostProgress, setBoostProgress] = useState<number>(0);
   
-  const { boostAIProfile, isProcessing } = useAIModelMonetization();
-  const { user } = useAuth();
+  const { boostProfile, getProfileBoostLevel } = useAIModelMonetizationStore();
   
-  useEffect(() => {
-    fetchBoostStatus();
-    const interval = setInterval(fetchBoostStatus, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
-  }, [profileId]);
+  const currentBoostLevel = getProfileBoostLevel(profile.id);
   
-  const fetchBoostStatus = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('active_boosts')
-        .select('*')
-        .eq('profile_id', profileId)
-        .eq('status', 'active')
-        .order('end_time', { ascending: false })
-        .limit(1)
-        .single();
-      
-      if (error || !data) {
-        // No active boost
-        setBoostStatus({
-          isActive: false,
-          remainingTime: 0,
-          totalTime: 0,
-          progress: 0
-        });
-        return;
-      }
-      
-      const now = new Date();
-      const endTime = new Date(data.end_time);
-      const startTime = new Date(data.start_time);
-      
-      const totalDuration = endTime.getTime() - startTime.getTime();
-      const remainingTime = Math.max(0, endTime.getTime() - now.getTime());
-      const progress = Math.floor(((totalDuration - remainingTime) / totalDuration) * 100);
-      
-      setBoostStatus({
-        isActive: remainingTime > 0,
-        remainingTime,
-        totalTime: totalDuration,
-        progress
-      });
-    } catch (error) {
-      console.error("Error fetching boost status:", error);
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 10) {
+      setAmount(value);
     }
+  };
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 1) {
+      setDuration(value);
+    }
+  };
+  
+  const calculateBoostLevel = () => {
+    return Math.ceil(amount / 20);
   };
   
   const handleBoost = async () => {
-    if (!selectedPackage || !user) return;
+    setIsBoostInProgress(true);
+    setBoostProgress(0);
     
-    const packageToUse = boostPackages.find(pkg => pkg.id === selectedPackage);
-    if (!packageToUse) return;
+    // Simulate progress animation
+    const interval = setInterval(() => {
+      setBoostProgress(prev => {
+        const newProgress = prev + 10;
+        if (newProgress >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return newProgress;
+      });
+    }, 200);
     
-    const success = await boostAIProfile(
-      profileId,
-      packageToUse.price,
-      packageToUse.hours
-    );
-    
-    if (success) {
-      setIsDialogOpen(false);
-      fetchBoostStatus(); // Refresh status
+    try {
+      const result = await boostProfile(profile.id, amount, duration);
+      
+      if (result && onBoostComplete) {
+        // Wait for progress animation to complete
+        setTimeout(() => {
+          onBoostComplete();
+        }, 500);
+      }
+    } finally {
+      setTimeout(() => {
+        setIsBoostInProgress(false);
+      }, 2200); // Wait for progress animation to complete
     }
   };
-  
-  const formatRemainingTime = (ms: number): string => {
-    if (ms <= 0) return "Expired";
-    
-    const seconds = Math.floor((ms / 1000) % 60);
-    const minutes = Math.floor((ms / (1000 * 60)) % 60);
-    const hours = Math.floor((ms / (1000 * 60 * 60)));
-    
-    return `${hours}h ${minutes}m ${seconds}s`;
-  };
-  
+
   return (
-    <>
-      {boostStatus.isActive ? (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-base flex items-center">
-                <Zap className="h-5 w-5 mr-2 text-yellow-500" />
-                Boost Active
-              </CardTitle>
-              <Badge variant="default" className="bg-yellow-500">
-                {boostStatus.progress}% Complete
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Progress value={boostStatus.progress} className="h-2" /> {/* Fixed component name */}
-              <div className="text-sm text-muted-foreground text-right">
-                Time Remaining: {formatRemainingTime(boostStatus.remainingTime)}
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={() => setIsDialogOpen(true)}
-            >
-              Extend Boost
-            </Button>
-          </CardFooter>
-        </Card>
-      ) : (
-        <Button 
-          variant="outline" 
-          className="flex items-center gap-2"
-          onClick={() => setIsDialogOpen(true)}
-        >
-          <ZapOff className="h-4 w-4" />
-          <span>Boost Profile</span>
-        </Button>
-      )}
-      
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
-              Boost AI Model Visibility
-            </DialogTitle>
-            <DialogDescription>
-              Increase visibility and ranking in search results
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <RadioGroup 
-              value={selectedPackage} 
-              onValueChange={setSelectedPackage}
-              className="space-y-3"
-            >
-              {boostPackages.map(pkg => (
-                <div 
-                  key={pkg.id} 
-                  className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-muted/50"
-                >
-                  <RadioGroupItem value={pkg.id} id={pkg.id} />
-                  <Label htmlFor={pkg.id} className="flex-1 cursor-pointer">
-                    <div className="font-medium">{pkg.name}</div>
-                    <div className="text-sm text-muted-foreground">{pkg.description}</div>
-                  </Label>
-                  <div className="flex items-center text-primary font-medium">
-                    <Coins className="h-4 w-4 mr-1" />
-                    {pkg.price}
-                  </div>
-                </div>
-              ))}
-            </RadioGroup>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center text-lg">
+          <Zap className="mr-2 h-5 w-5 text-yellow-500" />
+          Boost {profile.name}'s Profile
+        </CardTitle>
+        <CardDescription>
+          Increase visibility and prominence in search results
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {currentBoostLevel > 0 && (
+          <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 p-3 rounded-md mb-4">
+            <p className="text-sm">
+              <span className="font-medium">Current boost level:</span> {currentBoostLevel}
+            </p>
           </div>
-          
-          <DialogFooter>
-            <Button
-              onClick={handleBoost}
-              disabled={!selectedPackage || isProcessing || !user}
-            >
-              {isProcessing ? (
-                <>Processing...</>
-              ) : (
-                <>
-                  <Zap className="h-4 w-4 mr-2" />
-                  Boost Now
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+        )}
+        
+        <div className="space-y-2">
+          <Label htmlFor="boost-amount">Boost Amount (Lucoins)</Label>
+          <div className="flex items-center">
+            <Input
+              id="boost-amount"
+              type="number"
+              min={10}
+              value={amount}
+              onChange={handleAmountChange}
+              className="w-full"
+              disabled={isBoostInProgress}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Boosts profile to level {calculateBoostLevel()} for better visibility
+          </p>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="boost-duration">Duration (Hours)</Label>
+          <div className="flex items-center">
+            <Input
+              id="boost-duration"
+              type="number"
+              min={1}
+              value={duration}
+              onChange={handleDurationChange}
+              className="w-full"
+              disabled={isBoostInProgress}
+            />
+          </div>
+        </div>
+        
+        {isBoostInProgress && (
+          <div className="space-y-2 my-2">
+            <Label className="text-xs text-muted-foreground">Processing boost...</Label>
+            <Progress value={boostProgress} className="h-2" /> {/* Using Progress correctly */}
+          </div>
+        )}
+      </CardContent>
+      <CardFooter>
+        <Button
+          className="w-full"
+          onClick={handleBoost}
+          disabled={isBoostInProgress}
+        >
+          {isBoostInProgress ? (
+            <>Processing...</>
+          ) : (
+            <>
+              <Flame className="mr-2 h-4 w-4" />
+              Boost for {amount} Lucoins
+            </>
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

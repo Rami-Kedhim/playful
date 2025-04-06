@@ -3,6 +3,7 @@ import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { AIModelGeneratorService } from "@/services/ai/aiModelGeneratorService";
 import { toast } from "@/hooks/use-toast";
+import { AIAnalyticsService } from "@/services/ai/aiAnalyticsService"; // Import analytics service
 
 interface GenerationConfig {
   count: number;
@@ -16,6 +17,12 @@ interface GenerationConfig {
   targetDemographic?: string;
 }
 
+interface OptimizationMetrics {
+  conversionRate: number;
+  engagementScore: number;
+  recommendedChanges: string[];
+}
+
 export function useAIModelGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,6 +33,7 @@ export function useAIModelGenerator() {
     totalCount: 0,
     estimatedCompletionTime: 0,
   });
+  const [optimizationMetrics, setOptimizationMetrics] = useState<OptimizationMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const generateModels = async (config: GenerationConfig): Promise<AIProfile[]> => {
@@ -35,6 +43,19 @@ export function useAIModelGenerator() {
     try {
       const models = await AIModelGeneratorService.generateModels(config);
       setGeneratedModels(models);
+      
+      // Track generation event with analytics
+      models.forEach(model => {
+        AIAnalyticsService.trackEvent(
+          model.id,
+          'ai_model_generated',
+          { 
+            personality: model.personality,
+            region: model.region,
+            language: model.language
+          }
+        );
+      });
       
       toast({
         title: "Models Generated",
@@ -92,6 +113,9 @@ export function useAIModelGenerator() {
             clearInterval(interval);
             setIsProcessing(false);
             
+            // Get optimization metrics after processing
+            fetchOptimizationMetrics();
+            
             toast({
               title: "Processing Complete",
               description: `${prev.totalCount} AI models have been processed and deployed.`,
@@ -123,7 +147,21 @@ export function useAIModelGenerator() {
 
   const generateContentForModel = async (profileId: string, contentTypes: ('photo' | 'video' | 'message')[]) => {
     try {
-      return await AIModelGeneratorService.generateContent(profileId, contentTypes);
+      const result = await AIModelGeneratorService.generateContent(profileId, contentTypes);
+      
+      // Track content generation analytics
+      if (result.success) {
+        AIAnalyticsService.trackEvent(
+          profileId, 
+          'content_generated',
+          { 
+            contentTypes,
+            count: result.generatedContent.length 
+          }
+        );
+      }
+      
+      return result;
     } catch (err: any) {
       toast({
         title: "Content Generation Failed",
@@ -133,13 +171,25 @@ export function useAIModelGenerator() {
       return { success: false, generatedContent: [] };
     }
   };
+  
+  // New method to fetch optimization metrics for AI models
+  const fetchOptimizationMetrics = async () => {
+    try {
+      const metrics = await AIModelGeneratorService.getOptimizationMetrics();
+      setOptimizationMetrics(metrics);
+    } catch (err: any) {
+      console.error("Failed to fetch optimization metrics:", err);
+    }
+  };
 
   return {
     generateModels,
     processModelsWithHermesOxum,
     generateContentForModel,
+    fetchOptimizationMetrics,
     generatedModels,
     processingStatus,
+    optimizationMetrics,
     isGenerating,
     isProcessing,
     error
