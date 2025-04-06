@@ -7,6 +7,7 @@ import { serviceCategories } from "@/data/serviceCategories";
 import { getServiceById } from "@/data/serviceCategories";
 import { ScrollArea } from "./ui/scroll-area";
 import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 const FilterCriteria = () => {
   // Static sample data for demonstration
@@ -120,20 +121,24 @@ const FilterCriteria = () => {
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-semibold">{category.name}</h3>
                     {category.description && (
-                      <div className="group relative">
-                        <Info size={16} className="text-muted-foreground cursor-help" />
-                        <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-popover text-popover-foreground text-xs rounded shadow-lg z-50">
-                          {category.description}
-                        </div>
-                      </div>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info size={16} className="text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs text-xs">{category.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {category.services.map((serviceId) => {
-                      const service = getServiceById(serviceId);
+                    {category.services.map((serviceItem) => {
+                      const service = getServiceById(serviceItem.id);
                       return service ? (
                         <Badge 
-                          key={serviceId} 
+                          key={service.id} 
                           variant="secondary"
                           className="cursor-pointer hover:bg-accent" 
                           title={service.description || ""}
