@@ -34,7 +34,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="text-2xl font-bold mr-8">
               <span className="bg-gradient-to-r from-primary to-lucoin bg-clip-text text-transparent">
-                LuCent
+                UberEscorts
               </span>
             </Link>
             
