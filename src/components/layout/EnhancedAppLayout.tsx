@@ -8,6 +8,7 @@ import { useThemeToggle } from '@/hooks/useThemeToggle';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import PageTransition from './PageTransition';
+import '@/styles/reveal-animations.css';
 
 interface EnhancedAppLayoutProps {
   children?: React.ReactNode;
@@ -22,13 +23,13 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
     if (mounted) {
       document.body.classList.add('transition-colors', 'duration-300');
       
-      // Add a fade-in animation on initial load
+      // Add a fade-in animation on initial load with a slight scale effect
       const mainContent = document.querySelector('main');
       if (mainContent) {
-        mainContent.classList.add('opacity-0');
+        mainContent.classList.add('opacity-0', 'transform', 'scale-98');
         setTimeout(() => {
-          mainContent.classList.remove('opacity-0');
-          mainContent.classList.add('transition-opacity', 'duration-500', 'opacity-100');
+          mainContent.classList.remove('opacity-0', 'scale-98');
+          mainContent.classList.add('transition-all', 'duration-700', 'opacity-100', 'scale-100');
         }, 50);
       }
     }
@@ -39,6 +40,11 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
     };
   }, [mounted]);
   
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+  
   return (
     <div className={cn(
       "flex flex-col min-h-screen bg-background text-foreground",
@@ -47,7 +53,7 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
       <Navbar />
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname} className="flex-1 w-full max-w-full">
-          <main className="flex-1 w-full max-w-full transition-opacity duration-300">
+          <main className="flex-1 w-full max-w-full transition-all duration-500">
             {children || <Outlet />}
           </main>
         </PageTransition>
