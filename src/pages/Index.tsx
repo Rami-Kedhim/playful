@@ -109,7 +109,7 @@ const Index = () => {
   const [searchLocation, setSearchLocation] = useState("");
   
   return (
-    <AppLayout>
+    <>
       {/* Show welcome alert for authenticated users */}
       {isAuthenticated && user && (
         <div className="container mx-auto px-4 pt-6">
@@ -135,7 +135,7 @@ const Index = () => {
       <TrustSection />
       <CtaSection />
       <LucieAssistant />
-    </AppLayout>
+    </>
   );
 };
 

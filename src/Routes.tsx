@@ -1,6 +1,7 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
-import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
+import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
 
@@ -37,7 +38,7 @@ const PageLoader = () => (
 const AppRoutes = () => {
   return (
     <RouterRoutes>
-      <Route path="/" element={<EnhancedAppLayout />}>
+      <Route path="/" element={<AppLayout />}>
         <Route index element={
           <Suspense fallback={<PageLoader />}>
             <HomePage />
@@ -117,7 +118,13 @@ const AppRoutes = () => {
         } />
         
         {/* Protected Routes - Require Authentication */}
-        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          </ProtectedRoute>
+        } />
         
         <Route path="favorites" element={
           <ProtectedRoute>

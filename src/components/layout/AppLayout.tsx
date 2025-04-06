@@ -11,9 +11,15 @@ import PageTransition from './PageTransition';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
+const AppLayout: React.FC<AppLayoutProps> = ({ 
+  children, 
+  hideNavbar = false, 
+  hideFooter = false 
+}) => {
   const { isDark, mounted } = useThemeToggle();
   const location = useLocation();
   
@@ -49,7 +55,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       "flex flex-col min-h-screen bg-background text-foreground",
       "transition-colors duration-300"
     )}>
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname} className="flex-1 w-full max-w-full">
           <main className="flex-1 w-full max-w-full transition-all duration-500">
@@ -57,8 +63,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </main>
         </PageTransition>
       </AnimatePresence>
-      <Footer />
-      <Toaster />
+      {!hideFooter && <Footer />}
     </div>
   );
 };
