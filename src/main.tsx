@@ -9,8 +9,6 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import "./i18n/i18n"; // Import i18n configuration
 import "./index.css";
 
-// Note: We're removing the forced dark mode here since we're using the ThemeProvider
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
