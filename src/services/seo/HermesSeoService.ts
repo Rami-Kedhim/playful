@@ -1,4 +1,3 @@
-
 /**
  * HermesSeoService - Connects HERMES intelligence with SEO optimization
  * This service uses HERMES insights to dynamically enhance SEO performance
@@ -41,7 +40,7 @@ class HermesSeoService {
       }
       
       // In production, this would call the actual HERMES API
-      const response = await fetch(`${hermesApiService.getApiUrl()}/optimize-seo`, {
+      const response = await fetch("https://hermes.uberescorts.ai/api/hermes/optimize-seo", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -194,9 +193,6 @@ class HermesSeoService {
    * Enhance title for SEO using HERMES intelligence
    */
   private enhanceTitleForSeo(title: string, contentType: string): string {
-    // In a real implementation, this would use natural language processing
-    // For mock, just add SEO enhancements based on content type
-    
     if (title.length < 10) {
       switch (contentType) {
         case 'profile':
@@ -223,7 +219,6 @@ class HermesSeoService {
     contentType: string,
     keywords: string[]
   ): string {
-    // For mock purposes, just add SEO phrases if description is short
     if (description.length < 50) {
       const keywordPhrase = keywords.length > 0 ? 
         ` Featuring ${keywords.slice(0, 3).join(', ')}.` : '';
@@ -249,7 +244,6 @@ class HermesSeoService {
    * Generate priority keywords based on content type
    */
   private generatePriorityKeywords(keywords: string[], contentType: string): string[] {
-    // Combine user keywords with suggested ones based on content type
     const suggestedKeywords: Record<string, string[]> = {
       'profile': ['verified', 'authentic', 'reviewed', 'independent'],
       'content': ['exclusive', 'premium', 'original', 'high-quality'],
@@ -257,13 +251,10 @@ class HermesSeoService {
       'event': ['limited-time', 'special', 'featured', 'exclusive-access']
     };
     
-    // Get content type specific suggestions
     const typeSuggestions = suggestedKeywords[contentType] || [];
     
-    // Combine user keywords with suggestions (removing duplicates)
     const combined = [...new Set([...keywords, ...typeSuggestions])];
     
-    // Return top 8 keywords
     return combined.slice(0, 8);
   }
   
@@ -271,10 +262,8 @@ class HermesSeoService {
    * Generate recommended tags for content
    */
   private generateRecommendedTags(contentType: string, keywords: string[]): string[] {
-    // Start with some of the keywords
     const keywordTags = keywords.slice(0, 3);
     
-    // Add type-specific tags
     const typeTags: Record<string, string[]> = {
       'profile': ['verified', 'featured', 'top-rated'],
       'content': ['premium', 'trending', 'exclusive'],
@@ -282,7 +271,6 @@ class HermesSeoService {
       'event': ['limited-time', 'special-event', 'featured']
     };
     
-    // Combine and return unique tags
     return [...new Set([...keywordTags, ...(typeTags[contentType] || [])])];
   }
 }
