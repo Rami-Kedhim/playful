@@ -20,10 +20,12 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from '@/lib/utils';
-import { Heart, User, Video, Users, Search, Camera, Menu } from 'lucide-react';
+import { Heart, User, Video, Users, Search } from 'lucide-react';
 import Logo from './Logo';
 import LanguageSwitcher from '../language/LanguageSwitcher';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import MobileNavigation from '@/components/navigation/MobileNavigation';
 
 export default function Navbar() {
   const { t } = useTranslation();
@@ -32,7 +34,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
-        <div className="mr-4 hidden md:flex">
+        <div className="mr-4 flex">
           <Link to="/" className="flex items-center space-x-2">
             <Logo />
           </Link>
@@ -66,7 +68,7 @@ export default function Navbar() {
                     <ListItem href="/escort-streams" title="Live Streams">
                       Watch exclusive live streams
                     </ListItem>
-                    <ListItem href="/escort-verification" title="Verification">
+                    <ListItem href="/verification" title="Verification">
                       Learn about our verification process
                     </ListItem>
                   </ul>
@@ -130,56 +132,60 @@ export default function Navbar() {
             </Button>
           </Link>
           
+          <ThemeToggle />
+          
           <LanguageSwitcher />
           
-          {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="rounded-full h-8 w-8 bg-primary flex items-center justify-center">
-                    <span className="text-primary-foreground font-semibold">
-                      {user?.email?.charAt(0).toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user?.email}</p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="cursor-pointer">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/favorites" className="cursor-pointer">Favorites</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/messages" className="cursor-pointer">Messages</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/logout" className="cursor-pointer text-destructive">Log out</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/login">{t('login')}</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link to="/register">{t('register')}</Link>
-              </Button>
-            </div>
-          )}
+          {/* Mobile Menu */}
+          <MobileNavigation />
           
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
+          {/* Desktop Auth Menu */}
+          <div className="hidden md:block">
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="rounded-full h-8 w-8 bg-primary flex items-center justify-center">
+                      <span className="text-primary-foreground font-semibold">
+                        {user?.email?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{user?.email}</p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/favorites" className="cursor-pointer">Favorites</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/messages" className="cursor-pointer">Messages</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/logout" className="cursor-pointer text-destructive">Log out</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/login">{t('login')}</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/register">{t('register')}</Link>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

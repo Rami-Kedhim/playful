@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes as RouterRoutes, Route, Navigate, useParams } from 'react-router-dom';
+import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
@@ -32,7 +32,6 @@ const AppRoutes = () => {
 
   return (
     <RouterRoutes>
-      {/* Root redirect */}
       <Route path="/" element={<AppLayout />}>
         <Route index element={<HomePage />} />
         <Route path="escorts" element={<Escorts />} />

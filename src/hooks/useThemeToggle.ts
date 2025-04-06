@@ -10,17 +10,17 @@ export const useThemeToggle = () => {
   useEffect(() => {
     setMounted(true);
     
-    // Ensure dark mode is applied by default if no theme is set
-    if (!theme) {
-      setTheme("dark");
-    }
-    
-    // Add transition classes to body for smooth theme transitions
+    // Apply transition classes to body for smooth theme transitions
     if (typeof document !== 'undefined' && document.body) {
       document.body.classList.add('transition-colors', 'duration-300');
     }
     
-  }, [theme, setTheme]);
+    // Apply the theme class to document element
+    if (resolvedTheme) {
+      document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+    }
+    
+  }, [theme, resolvedTheme, setTheme]);
   
   const toggleTheme = () => {
     if (!mounted) return;
@@ -38,3 +38,5 @@ export const useThemeToggle = () => {
     mounted
   };
 };
+
+export default useThemeToggle;

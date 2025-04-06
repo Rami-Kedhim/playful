@@ -2,12 +2,15 @@
 import React from 'react';
 import AppRoutes from './Routes';
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { ThemeProvider } from "@/components/theme-provider";
 
 function App() {
   return (
-    <LanguageProvider>
-      <AppRoutes />
-    </LanguageProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="theme">
+      <LanguageProvider>
+        <AppRoutes />
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 
