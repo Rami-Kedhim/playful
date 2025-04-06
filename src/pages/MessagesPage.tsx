@@ -8,9 +8,30 @@ import { Send, Search } from 'lucide-react';
 
 // Placeholder conversations
 const placeholderConversations = [
-  { id: '1', name: 'Sophia', lastMessage: 'Hey, are you available tonight?', time: '5m', unread: 2, avatar: '/avatars/sophia.jpg' },
-  { id: '2', name: 'Emma', lastMessage: 'I'll be there at 8pm', time: '30m', unread: 0, avatar: '/avatars/emma.jpg' },
-  { id: '3', name: 'Isabella', lastMessage: 'Looking forward to meeting you!', time: '2h', unread: 0, avatar: '/avatars/isabella.jpg' },
+  { 
+    id: '1', 
+    name: 'Sophia', 
+    lastMessage: 'Hey, are you available tonight?', 
+    time: '5m', 
+    unread: 2, 
+    avatar: '/avatars/sophia.jpg' 
+  },
+  { 
+    id: '2', 
+    name: 'Emma', 
+    lastMessage: 'I'll be there at 8pm', 
+    time: '30m', 
+    unread: 0, 
+    avatar: '/avatars/emma.jpg' 
+  },
+  { 
+    id: '3', 
+    name: 'Isabella', 
+    lastMessage: 'Looking forward to meeting you!', 
+    time: '2h', 
+    unread: 0, 
+    avatar: '/avatars/isabella.jpg' 
+  },
 ];
 
 // Placeholder messages
