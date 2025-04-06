@@ -1,169 +1,68 @@
 
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { getNotifications } from '@/services/notificationsService';
+import React, { createContext, useContext } from 'react';
+import { toast, ToastOptions } from '@/components/ui/use-toast';
 
-export interface Notification {
-  id: string;
-  title: string;
-  content: string;
-  type: "success" | "error" | "info" | "warning";
-  is_read: boolean;
-  created_at: Date;
+interface NotificationsContextType {
+  showSuccess: (title: string, description?: string, options?: ToastOptions) => void;
+  showError: (title: string, description?: string, options?: ToastOptions) => void;
+  showInfo: (title: string, description?: string, options?: ToastOptions) => void;
+  showWarning: (title: string, description?: string, options?: ToastOptions) => void;
 }
 
-export interface NotificationsContextType {
-  notifications: Notification[];
-  unreadCount: number;
-  addNotification: (notification: Omit<Notification, "id" | "is_read" | "created_at">) => void;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  removeNotification: (id: string) => void;
-  clearNotifications: () => void;
-  // Helper methods for common toast notifications
-  showSuccess: (title: string, content: string) => void;
-  showError: (title: string, content: string) => void;
-  showInfo: (title: string, content: string) => void;
-  showWarning: (title: string, content: string) => void;
-  // Add fetchNotifications method
-  fetchNotifications: () => Promise<void>;
-}
+const NotificationsContext = createContext<NotificationsContextType>({
+  showSuccess: () => {},
+  showError: () => {},
+  showInfo: () => {},
+  showWarning: () => {},
+});
 
-const NotificationsContext = createContext<NotificationsContextType | null>(null);
+export const useNotifications = () => useContext(NotificationsContext);
 
-export const useNotifications = (): NotificationsContextType => {
-  const context = useContext(NotificationsContext);
-  if (!context) {
-    throw new Error('useNotifications must be used within a NotificationsProvider');
-  }
-  return context;
-};
-
-interface NotificationsProviderProps {
-  children: ReactNode;
-}
-
-export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ children }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { toast } = useToast();
-
-  const unreadCount = notifications.filter(n => !n.is_read).length;
-
-  const fetchNotifications = useCallback(async () => {
-    try {
-      // Mock fetching notifications
-      // In a real app, this would be an API call
-      console.log('Fetching notifications...');
-      
-      // If using the real service:
-      // const userId = user?.id;
-      // if (userId) {
-      //   const notificationData = await getNotifications(userId);
-      //   setNotifications(notificationData);
-      // }
-      
-      // For now, we'll just refresh the current state
-      setNotifications(current => [...current]);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
-  }, []);
-
-  // Fetch notifications on mount
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
-
-  const addNotification = useCallback((notification: Omit<Notification, "id" | "is_read" | "created_at">) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      is_read: false,
-      created_at: new Date()
-    };
-    setNotifications(prev => [newNotification, ...prev]);
-    
-    // Show toast notification
+export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const showSuccess = (title: string, description?: string, options?: ToastOptions) => {
     toast({
-      title: notification.title,
-      description: notification.content,
-      variant: notification.type === 'error' ? 'destructive' : 'default'
-    });
-    
-    return newNotification.id;
-  }, [toast]);
-
-  const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, is_read: true } : n)
-    );
-  }, []);
-
-  const markAllAsRead = useCallback(() => {
-    setNotifications(prev => 
-      prev.map(n => ({ ...n, is_read: true }))
-    );
-  }, []);
-
-  const removeNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  }, []);
-
-  const clearNotifications = useCallback(() => {
-    setNotifications([]);
-  }, []);
-  
-  // Helper methods for common toast notifications
-  const showSuccess = useCallback((title: string, content: string) => {
-    addNotification({
       title,
-      content,
-      type: "success"
+      description,
+      ...options,
     });
-  }, [addNotification]);
-  
-  const showError = useCallback((title: string, content: string) => {
-    addNotification({
+  };
+
+  const showError = (title: string, description?: string, options?: ToastOptions) => {
+    toast({
       title,
-      content,
-      type: "error"
+      description,
+      variant: "destructive",
+      ...options,
     });
-  }, [addNotification]);
-  
-  const showInfo = useCallback((title: string, content: string) => {
-    addNotification({
+  };
+
+  const showInfo = (title: string, description?: string, options?: ToastOptions) => {
+    toast({
       title,
-      content,
-      type: "info"
+      description,
+      ...options,
     });
-  }, [addNotification]);
-  
-  const showWarning = useCallback((title: string, content: string) => {
-    addNotification({
+  };
+
+  const showWarning = (title: string, description?: string, options?: ToastOptions) => {
+    toast({
       title,
-      content,
-      type: "warning"
+      description,
+      variant: "destructive",
+      ...options,
     });
-  }, [addNotification]);
+  };
 
   return (
-    <NotificationsContext.Provider value={{
-      notifications,
-      unreadCount,
-      addNotification,
-      markAsRead,
-      markAllAsRead,
-      removeNotification,
-      clearNotifications,
-      showSuccess,
-      showError,
-      showInfo,
-      showWarning,
-      fetchNotifications
-    }}>
+    <NotificationsContext.Provider
+      value={{
+        showSuccess,
+        showError,
+        showInfo,
+        showWarning,
+      }}
+    >
       {children}
     </NotificationsContext.Provider>
   );
 };
-
-export default NotificationsProvider;

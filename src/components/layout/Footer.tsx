@@ -1,113 +1,82 @@
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Github, Twitter, Instagram } from "lucide-react";
 
-const Footer = () => {
+import React from 'react';
+import { Link } from 'react-router-dom';
+import Logo from './Logo';
+import { useTranslation } from 'react-i18next';
+import { Facebook, Twitter, Instagram, Youtube, Twitch, Github } from 'lucide-react';
+
+const Footer: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
-    <footer className="bg-background/80 backdrop-blur-md border-t border-border mt-16">
-      <div className="container mx-auto px-4 py-8">
+    <footer className="bg-background border-t">
+      <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-1">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-lucoin bg-clip-text text-transparent mb-4">
-              UberEscorts
-            </h2>
-            <p className="text-gray-400 mb-4">
-              Next-generation Web3 adult platform with escort directories and metaverse integration.
+          <div className="space-y-4">
+            <Logo />
+            <p className="text-muted-foreground text-sm">
+              The Web3 Platform for Secure Adult Connections
             </p>
             <div className="flex space-x-4">
-              <Button variant="ghost" size="icon">
+              <a href="#" className="text-muted-foreground hover:text-primary">
+                <Facebook size={20} />
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-primary">
                 <Twitter size={20} />
-              </Button>
-              <Button variant="ghost" size="icon">
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-primary">
                 <Instagram size={20} />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Github size={20} />
-              </Button>
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-primary">
+                <Youtube size={20} />
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-primary">
+                <Twitch size={20} />
+              </a>
             </div>
           </div>
           
           <div>
-            <h3 className="font-medium text-gray-200 mb-4">Platform</h3>
+            <h3 className="font-semibold text-lg mb-4">Explore</h3>
             <ul className="space-y-2">
-              <li>
-                <Link to="/escorts" className="text-gray-400 hover:text-primary">
-                  Escorts
-                </Link>
-              </li>
-              <li>
-                <Link to="/messages" className="text-gray-400 hover:text-primary">
-                  Messages
-                </Link>
-              </li>
-              <li>
-                <Link to="/metaverse" className="text-gray-400 hover:text-primary">
-                  Metaverse
-                </Link>
-              </li>
+              <li><Link to="/escorts" className="text-muted-foreground hover:text-primary">Escorts</Link></li>
+              <li><Link to="/creators" className="text-muted-foreground hover:text-primary">Creators</Link></li>
+              <li><Link to="/livecams" className="text-muted-foreground hover:text-primary">Live Cams</Link></li>
+              <li><Link to="/ai-companion" className="text-muted-foreground hover:text-primary">AI Companions</Link></li>
+              <li><Link to="/metaverse" className="text-muted-foreground hover:text-primary">Metaverse</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="font-medium text-gray-200 mb-4">Lucoin</h3>
+            <h3 className="font-semibold text-lg mb-4">Information</h3>
             <ul className="space-y-2">
-              <li>
-                <Link to="/wallet" className="text-gray-400 hover:text-primary">
-                  Wallet
-                </Link>
-              </li>
-              <li>
-                <Link to="/buy" className="text-gray-400 hover:text-primary">
-                  Buy Tokens
-                </Link>
-              </li>
-              <li>
-                <Link to="/faucet" className="text-gray-400 hover:text-primary">
-                  Free Faucet
-                </Link>
-              </li>
-              <li>
-                <Link to="/bridge" className="text-gray-400 hover:text-primary">
-                  Fantom Bridge
-                </Link>
-              </li>
+              <li><Link to="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
+              <li><Link to="/safety" className="text-muted-foreground hover:text-primary">Safety Tips</Link></li>
+              <li><Link to="/verification" className="text-muted-foreground hover:text-primary">Verification</Link></li>
+              <li><Link to="/creator-application" className="text-muted-foreground hover:text-primary">Become a Creator</Link></li>
+              <li><Link to="/contact" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="font-medium text-gray-200 mb-4">Info</h3>
+            <h3 className="font-semibold text-lg mb-4">Legal</h3>
             <ul className="space-y-2">
-              <li>
-                <Link to="/about" className="text-gray-400 hover:text-primary">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy" className="text-gray-400 hover:text-primary">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-gray-400 hover:text-primary">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-400 hover:text-primary">
-                  Contact
-                </Link>
-              </li>
+              <li><Link to="/terms" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
+              <li><Link to="/cookies" className="text-muted-foreground hover:text-primary">Cookie Policy</Link></li>
+              <li><Link to="/dmca" className="text-muted-foreground hover:text-primary">DMCA</Link></li>
+              <li><Link to="/2257" className="text-muted-foreground hover:text-primary">2257 Statement</Link></li>
             </ul>
           </div>
         </div>
         
-        <div className="border-t border-border mt-8 pt-8 text-gray-400 text-sm">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p>© {new Date().getFullYear()} UberEscorts. All rights reserved.</p>
-            <p className="mt-2 md:mt-0">
-              Powered by Lucoin on Fantom Network
-            </p>
-          </div>
+        <div className="border-t border-muted mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-muted-foreground text-sm">
+            &copy; {new Date().getFullYear()} UberEscorts. All rights reserved.
+          </p>
+          <p className="text-muted-foreground text-xs mt-2 md:mt-0">
+            This site contains adult content and is intended for adults aged 18 or over.
+          </p>
         </div>
       </div>
     </footer>

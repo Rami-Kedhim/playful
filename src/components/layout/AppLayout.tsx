@@ -1,46 +1,15 @@
 
-import { ReactNode, useEffect } from "react";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { useNotifications } from "@/contexts/NotificationsContext";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import { isNewUser, createWelcomeNotification } from "@/services/accountService";
-import { Outlet } from "react-router-dom";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
-interface AppLayoutProps {
-  children?: ReactNode;
-}
-
-const AppLayout = ({ children }: AppLayoutProps) => {
-  const { user } = useAuth();
-  const { fetchNotifications } = useNotifications();
-  
-  // Create welcome notification for new users
-  useEffect(() => {
-    if (user?.id) {
-      const checkAndCreateWelcomeNotification = async () => {
-        try {
-          const newUser = await isNewUser(user.id);
-          
-          if (newUser) {
-            await createWelcomeNotification(user.id);
-            // Refresh notifications to show the welcome message
-            fetchNotifications();
-          }
-        } catch (error) {
-          console.error("Error checking new user status:", error);
-        }
-      };
-      
-      checkAndCreateWelcomeNotification();
-    }
-  }, [user?.id, fetchNotifications]);
-  
+const AppLayout: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow pt-16">
-        {children || <Outlet />}
+      <main className="flex-1">
+        <Outlet />
       </main>
       <Footer />
     </div>

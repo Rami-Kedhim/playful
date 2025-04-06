@@ -2,14 +2,7 @@
 import React from 'react';
 import { Routes as RouterRoutes, Route, Navigate, useParams } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
-import Index from './pages/Index';
-import SEODashboard from './pages/SEODashboard';
-import Escorts from './pages/Escorts';
-import Creators from './pages/Creators';
-import CreatorDetail from './pages/CreatorDetail';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import RoleGuard from './components/auth/RoleGuard';
-import { useAuth } from './hooks/auth/useAuth';
+import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
 import FavoritesPage from './pages/FavoritesPage';
@@ -18,56 +11,29 @@ import MetaversePage from './pages/MetaversePage';
 import SearchPage from './pages/SearchPage';
 import NotFound from './pages/NotFound';
 import { useLanguage } from './contexts/LanguageContext';
-import { languages } from './i18n/i18n';
-import AIProfiles from "./pages/AIProfiles";
+import Escorts from './pages/Escorts';
 import EscortDetail from './pages/EscortDetail';
 import EscortLiveStreams from './pages/EscortLiveStreams';
 import EscortLiveStreamDetail from './pages/EscortLiveStreamDetail';
-import HomePage from './pages/HomePage';
-import AICompanionPage from './pages/ai-companion';
+import Creators from './pages/Creators';
+import CreatorDetail from './pages/CreatorDetail';
+import AIProfiles from "./pages/AIProfiles";
 import Livecams from './pages/Livecams';
 import LivecamDetail from './pages/LivecamDetail';
 import CreatorDashboard from './components/creators/dashboard/Dashboard';
 import VerificationContainer from './components/verification/VerificationContainer';
-
-// Language route wrapper to handle language parameter
-const LanguageRoute = ({ children }: { children: React.ReactNode }) => {
-  const { lang } = useParams<{ lang: string }>();
-  const { changeLanguage } = useLanguage();
-  
-  React.useEffect(() => {
-    if (lang && Object.keys(languages).includes(lang)) {
-      changeLanguage(lang as keyof typeof languages);
-    }
-  }, [lang, changeLanguage]);
-  
-  return <>{children}</>;
-};
+import AICompanionPage from './pages/ai-companion';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RoleGuard from './components/auth/RoleGuard';
+import SEODashboard from './pages/SEODashboard';
 
 const AppRoutes = () => {
-  const { isLoading } = useAuth();
   const { currentLanguage } = useLanguage();
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <RouterRoutes>
-      {/* Language root redirect */}
-      <Route path="/" element={<Navigate to={`/${currentLanguage}`} replace />} />
-      
-      {/* Root path for each language */}
-      <Route path="/:lang" element={
-        <LanguageRoute>
-          <AppLayout />
-        </LanguageRoute>
-      }>
-        {/* Public Routes */}
+      {/* Root redirect */}
+      <Route path="/" element={<AppLayout />}>
         <Route index element={<HomePage />} />
         <Route path="escorts" element={<Escorts />} />
         <Route path="escorts/:id" element={<EscortDetail />} />
@@ -76,7 +42,6 @@ const AppRoutes = () => {
         <Route path="creators" element={<Creators />} />
         <Route path="creators/:username" element={<CreatorDetail />} />
         <Route path="search" element={<SearchPage />} />
-        <Route path="auth" element={<AuthPage />} />
         <Route path="login" element={<AuthPage />} />
         <Route path="register" element={<AuthPage />} />
         <Route path="ai-profiles" element={<AIProfiles />} />
@@ -117,13 +82,10 @@ const AppRoutes = () => {
             </RoleGuard>
           </ProtectedRoute>
         } />
-
+        
         {/* Add a 404 catch-all route */}
         <Route path="*" element={<NotFound />} />
       </Route>
-      
-      {/* Catch-all redirect to language route */}
-      <Route path="*" element={<Navigate to={`/${currentLanguage}`} replace />} />
     </RouterRoutes>
   );
 };
