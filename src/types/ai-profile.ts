@@ -28,6 +28,22 @@ export interface AIProfile {
   verification_status?: 'pending' | 'verified' | 'rejected';
   availability_status?: 'online' | 'away' | 'offline';
   last_active?: string;
+  
+  // Monetization-related fields
+  premium_content_count?: {
+    photos: number;
+    videos: number;
+    messages: number;
+  };
+  subscription_price?: number;
+  boost_status?: {
+    is_boosted: boolean;
+    boost_level: number;
+    boost_expires_at: string;
+  };
+  gift_preferences?: string[];
+  livecam_enabled?: boolean;
+  livecam_schedule?: string[];
 }
 
 export interface AIMessage {
@@ -92,4 +108,62 @@ export interface AIImageGenerationResponse {
   price?: number;
   requiresPayment: boolean;
   error?: string;
+}
+
+// New types for AI monetization
+export interface AIPremiumContent {
+  id: string;
+  profile_id: string;
+  type: 'photo' | 'video' | 'message';
+  title: string;
+  description?: string;
+  content_url: string;
+  thumbnail_url?: string;
+  price: number;
+  created_at: string;
+}
+
+export interface AIContentPurchase {
+  id: string;
+  content_id: string;
+  user_id: string;
+  profile_id: string;
+  amount: number;
+  created_at: string;
+}
+
+export interface AIGift {
+  id: string;
+  gift_type: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  price: number;
+  profile_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface AIBoost {
+  id: string;
+  profile_id: string;
+  user_id: string;
+  boost_amount: number;
+  boost_level: number;
+  start_time: string;
+  end_time: string;
+  status: 'active' | 'expired' | 'cancelled';
+}
+
+export interface AILivecamSession {
+  id: string;
+  profile_id: string;
+  status: 'scheduled' | 'live' | 'ended';
+  start_time: string;
+  end_time?: string;
+  viewer_count: number;
+  max_viewer_count: number;
+  video_url: string;
+  thumbnail_url: string;
+  created_at: string;
 }

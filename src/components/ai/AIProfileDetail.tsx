@@ -1,177 +1,211 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { AIProfile } from '@/types/ai-profile';
-import { Send, Mic, MicOff } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import useAIProfileStore from '@/store/aiProfileStore';
-import { voiceService } from '@/services/voiceService';
-import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { useState, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessageCircle, Image, HeartHandshake, VideoIcon, Zap } from "lucide-react";
+import { AIProfile } from "@/types/ai-profile";
+import { useAIModelMonetization } from "@/hooks/ai/useAIModelMonetization";
+import AIModelPremiumContent from "./AIModelPremiumContent";
+import AIModelLivecam from "./AIModelLivecam";
+import AIModelBoost from "./AIModelBoost";
+import AIModelGiftSystem from "./AIModelGiftSystem";
+import { toast } from "@/components/ui/use-toast";
+import useAIProfileStore from "@/store/aiProfileStore";
+
+const TYPING_SPEED = 30; // milliseconds per character
 
 interface AIProfileDetailProps {
   profile: AIProfile;
 }
 
-const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
-  const [messageInput, setMessageInput] = useState('');
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const { activeConversations, sendMessage } = useAIProfileStore();
-
+const AIProfileDetail = ({ profile }: AIProfileDetailProps) => {
+  const [userMessage, setUserMessage] = useState("");
+  const [activeTab, setActiveTab] = useState("chat");
+  const [isTyping, setIsTyping] = useState(false);
+  const { sendMessage, activeConversations, generateResponse } = useAIProfileStore();
+  
   const conversation = activeConversations.find(conv => conv.profileId === profile.id);
   const messages = conversation?.messages || [];
-
+  
   const handleSendMessage = async () => {
-    if (!messageInput.trim()) return;
+    if (!userMessage.trim() || isTyping) return;
     
-    await sendMessage(profile.id, messageInput);
-    setMessageInput('');
+    const message = userMessage.trim();
+    setUserMessage("");
+    
+    await sendMessage(profile.id, message);
   };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
-
-  const toggleSpeech = (text: string) => {
-    if (isSpeaking) {
-      voiceService.stop();
-      setIsSpeaking(false);
-    } else {
-      voiceService.speak(text, {
-        voice: profile.personality?.responseStyle,
-        rate: 1.0,
-        pitch: 1.0
-      });
-      setIsSpeaking(true);
+  
+  const scrollToBottom = useCallback(() => {
+    const chatContainer = document.getElementById("chat-container");
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
+  }, []);
+  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+  
+  const handleSubscribe = () => {
+    toast({
+      title: "Subscription Required",
+      description: "To access premium content, please subscribe to this profile",
+    });
+    setActiveTab("premium");
   };
-
+  
   return (
-    <div className="flex flex-col md:flex-row gap-4">
-      {/* Profile sidebar */}
-      <Card className="md:w-1/3 lg:w-1/4">
-        <CardHeader className="flex flex-col items-center text-center">
-          <Avatar className="w-24 h-24 mb-2">
-            <AvatarImage src={profile.avatar_url} alt={profile.name} />
-            <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h2 className="text-2xl font-bold">{profile.name}</h2>
-            <p className="text-muted-foreground">{profile.age} • {profile.location}</p>
-            <div className="flex justify-center mt-2">
-              <Badge className="bg-primary/20 text-primary">
-                {profile.personality?.type}
-              </Badge>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="font-medium mb-2">About me</h3>
-            <p className="text-sm">{profile.bio}</p>
-          </div>
-          
-          <div>
-            <h3 className="font-medium mb-2">Interests</h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.interests?.map((interest, i) => (
-                <Badge key={i} variant="secondary" className="text-xs">
-                  {interest}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Chat area */}
-      <Card className="flex-1 flex flex-col">
-        <CardHeader className="border-b">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={profile.avatar_url} alt={profile.name} />
-                <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="font-semibold">{profile.name}</h3>
-                <p className="text-xs text-muted-foreground">
-                  {profile.availability_status === 'online' ? 'Online now' : 'Active recently'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-grow overflow-y-auto p-4 h-[400px]">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col justify-center items-center text-center text-muted-foreground">
-              <p>No messages yet</p>
-              <p className="text-sm mt-2">Say hello to {profile.name}!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.isUserMessage ? 'justify-end' : 'justify-start'}`}
-                >
-                  {!message.isUserMessage && (
-                    <Avatar className="h-8 w-8 mr-2 mt-1 flex-shrink-0">
-                      <AvatarImage src={profile.avatar_url} alt={profile.name} />
-                      <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div className="space-y-1 max-w-[80%]">
-                    <div
-                      className={`p-3 rounded-lg ${
-                        message.isUserMessage
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      {message.content}
-                      {!message.isUserMessage && message.type === 'text' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-2 h-6 w-6 p-0 rounded-full"
-                          onClick={() => toggleSpeech(message.content)}
-                        >
-                          {isSpeaking ? <MicOff size={12} /> : <Mic size={12} />}
-                        </Button>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {format(new Date(message.timestamp), 'h:mm a')}
-                    </div>
-                  </div>
+    <div className="container mx-auto max-w-5xl py-6 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left sidebar - Profile Info */}
+        <div className="md:col-span-1 space-y-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center text-center">
+                <Avatar className="h-32 w-32 mb-4">
+                  <AvatarImage src={profile.avatar_url} alt={profile.name} />
+                  <AvatarFallback>{profile.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                
+                <h2 className="text-2xl font-bold">{profile.name}</h2>
+                <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                  <span>{profile.age}</span>
+                  <span>•</span>
+                  <span>{profile.location}</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-        <div className="p-4 border-t">
-          <div className="flex gap-2">
-            <Input
-              placeholder={`Message ${profile.name}...`}
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="flex-1"
-            />
-            <Button onClick={handleSendMessage} disabled={!messageInput.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            {profile.lucoin_chat_price} LC per message
-          </p>
+                
+                <Badge className="mt-3 bg-gradient-to-r from-pink-500 to-purple-500">
+                  AI Model
+                </Badge>
+                
+                <p className="mt-4 text-sm text-muted-foreground">
+                  {profile.bio}
+                </p>
+                
+                <div className="w-full mt-6 flex flex-col gap-3">
+                  <AIModelBoost profileId={profile.id} />
+                  
+                  <AIModelGiftSystem 
+                    profileId={profile.id} 
+                    profileName={profile.name} 
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <h3 className="text-lg font-medium">Interests</h3>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="flex flex-wrap gap-2">
+                {profile.interests.map((interest, index) => (
+                  <Badge variant="outline" key={index}>
+                    {interest}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </Card>
+        
+        {/* Right content area */}
+        <div className="md:col-span-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="chat" className="flex items-center gap-2">
+                <MessageCircle className="h-4 w-4" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="premium" className="flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Premium
+              </TabsTrigger>
+              <TabsTrigger value="livecam" className="flex items-center gap-2">
+                <VideoIcon className="h-4 w-4" />
+                Livecam
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="chat" className="space-y-4">
+              <Card className="flex flex-col h-[60vh]">
+                <CardContent className="flex-grow overflow-y-auto p-4" id="chat-container">
+                  {messages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground">
+                      <MessageCircle className="h-12 w-12 mb-4 opacity-30" />
+                      <p>No messages yet</p>
+                      <p className="text-sm">Send a message to start chatting with {profile.name}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map((msg) => (
+                        <div 
+                          key={msg.id} 
+                          className={`flex ${msg.isUserMessage ? "justify-end" : "justify-start"}`}
+                        >
+                          <div 
+                            className={`max-w-[80%] rounded-lg p-3 ${
+                              msg.isUserMessage 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-muted"
+                            }`}
+                          >
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+                
+                <CardFooter className="border-t p-4">
+                  <div className="flex w-full items-end gap-2">
+                    <Textarea 
+                      placeholder={`Send a message to ${profile.name}...`}
+                      value={userMessage}
+                      onChange={(e) => setUserMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="min-h-10"
+                      rows={2}
+                      disabled={isTyping}
+                    />
+                    <Button 
+                      onClick={handleSendMessage}
+                      disabled={!userMessage.trim() || isTyping}
+                    >
+                      Send
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="premium">
+              <AIModelPremiumContent profileId={profile.id} />
+            </TabsContent>
+            
+            <TabsContent value="livecam">
+              <AIModelLivecam 
+                profile={profile}
+                onSubscribe={handleSubscribe}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 };
