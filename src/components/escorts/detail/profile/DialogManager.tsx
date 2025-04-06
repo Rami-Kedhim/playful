@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import { BookingForm, BookingFormData } from "../booking";
 import MessageForm from "../MessageForm";
 import { ShareProfileModal } from "../share";

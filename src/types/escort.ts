@@ -14,7 +14,14 @@ export type ServiceType =
   | "domination" 
   | "submission";
 
-export type VerificationStatus = "pending" | "approved" | "rejected" | "expired";
+export type VerificationStatus = "pending" | "in_review" | "approved" | "rejected" | "expired";
+
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  url: string;
+  status: string;
+}
 
 export interface VerificationRequest {
   id: string;
@@ -22,13 +29,10 @@ export interface VerificationRequest {
   submittedAt: string;
   reviewedAt?: string;
   reviewedBy?: string;
-  documents: Array<{
-    id: string;
-    type: string;
-    url: string;
-    status: string;
-  }>;
-  requestedLevel: VerificationLevel;
+  documents: VerificationDocument[];
+  requestedLevel?: VerificationLevel;
+  escortId: string;
+  userId: string;
 }
 
 export interface EscortAvailability {
@@ -55,6 +59,13 @@ export interface Rates {
   twoHours?: number;
   overnight?: number;
   weekend?: number;
+}
+
+export interface ContentStats {
+  photos: number;
+  videos: number;
+  live: boolean;
+  streams: number;
 }
 
 export interface Escort {
@@ -100,6 +111,8 @@ export interface Escort {
   featured?: boolean;
   providesVirtualContent?: boolean;
   providesInPersonServices?: boolean;
+  contentStats?: ContentStats;
+  subscriptionPrice?: number;
 }
 
 export interface EscortFilter {

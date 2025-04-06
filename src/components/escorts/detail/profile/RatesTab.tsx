@@ -1,5 +1,5 @@
 
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
 

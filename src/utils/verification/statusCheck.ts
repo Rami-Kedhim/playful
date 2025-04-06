@@ -1,4 +1,5 @@
-import { VerificationRequest, VerificationStatus } from "@/types/escort";
+
+import { VerificationRequest, VerificationStatus, VerificationDocument } from "@/types/escort";
 
 /**
  * Check if a verification request is pending
@@ -40,14 +41,22 @@ export const createVerificationRequest = async (
 ): Promise<VerificationRequest> => {
   // In a real implementation, this would create a new verification request in the database
   
+  // Convert string URLs to document objects
+  const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
+    id: `doc-${index}`,
+    type: 'id-verification',
+    url: url,
+    status: 'pending'
+  }));
+  
   // Mock creating a verification request
   const request: VerificationRequest = {
     id: `verification-${Date.now()}`,
     userId,
     escortId: userId, // Assuming the same ID for this mock
     status: 'pending',
-    documents: documentUrls,
-    submittedAt: new Date()
+    documents: documents,
+    submittedAt: new Date().toISOString()
   };
   
   return request;

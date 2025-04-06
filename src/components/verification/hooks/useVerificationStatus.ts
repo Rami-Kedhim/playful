@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { VerificationRequest } from '@/types/escort';
@@ -25,7 +26,7 @@ export const useVerificationStatus = () => {
             escortId: user.id,
             status: status,
             documents: [],
-            submittedAt: new Date(),
+            submittedAt: new Date().toISOString(), // Convert to string
             userId: user.id
           });
         }

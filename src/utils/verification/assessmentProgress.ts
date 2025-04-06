@@ -1,4 +1,5 @@
-import { VerificationRequest } from "@/types/escort";
+
+import { VerificationRequest, VerificationStatus } from "@/types/escort";
 
 /**
  * Calculate the verification progress as a percentage
@@ -12,6 +13,8 @@ export const calculateVerificationProgress = (request: VerificationRequest): num
     case 'approved':
       return 100;
     case 'rejected':
+      return 100;
+    case 'expired':
       return 100;
     default:
       return 0;
@@ -31,6 +34,8 @@ export const getVerificationStatusMessage = (request: VerificationRequest): stri
       return 'Your verification has been approved. Your profile now shows as verified.';
     case 'rejected':
       return 'Your verification was not approved. Please check your documents and try again.';
+    case 'expired':
+      return 'Your verification has expired. Please submit a new verification request.';
     default:
       return 'Unknown verification status.';
   }

@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { Escort, VerificationRequest, VerificationStatus } from "@/types/escort";
+import { Escort, VerificationRequest, VerificationStatus, VerificationDocument } from "@/types/escort";
 import { useToast } from '@/hooks/use-toast';
 
 type UpdateVerificationFn = (id: string, updates: Partial<VerificationRequest>) => Promise<VerificationRequest | null>;
@@ -52,12 +53,20 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
     try {
       setLoading(true);
       
+      // Convert string URLs to document objects
+      const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
+        id: `doc-${index}`,
+        type: 'id-verification',
+        url: url,
+        status: 'pending'
+      }));
+      
       // Create verification request object
       const verificationRequest: Partial<VerificationRequest> = {
         escortId,
         status: 'pending',
-        documents: documentUrls,
-        submittedAt: new Date(),
+        documents: documents,
+        submittedAt: new Date().toISOString(),
       };
       
       // In a real app, this would send the data to an API
