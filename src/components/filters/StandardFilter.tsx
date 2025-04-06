@@ -46,24 +46,24 @@ export function StandardFilter({
 
   const hasSelectedOptions = selectedOptions.length > 0;
 
+  const headerExtra = showClearButton && hasSelectedOptions ? (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onClearAll}
+      className="h-8 px-2 text-xs"
+    >
+      Clear
+    </Button>
+  ) : null;
+
   return (
     <FilterBlock 
       title={title} 
       description={description}
       className={className}
       headerClassName="flex flex-row items-start justify-between"
-      headerExtra={
-        showClearButton && hasSelectedOptions ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearAll}
-            className="h-8 px-2 text-xs"
-          >
-            Clear
-          </Button>
-        ) : null
-      }
+      headerExtra={headerExtra}
     >
       <div className="space-y-4">
         {Object.entries(groupedOptions).map(([group, groupOptions]) => (

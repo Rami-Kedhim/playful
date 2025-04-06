@@ -10,6 +10,7 @@ interface FilterBlockProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
   headerClassName?: string;
   contentClassName?: string;
+  headerExtra?: React.ReactNode;
 }
 
 export function FilterBlock({
@@ -19,15 +20,25 @@ export function FilterBlock({
   className,
   headerClassName,
   contentClassName,
+  headerExtra,
   ...props
 }: FilterBlockProps) {
   return (
     <Card className={cn("h-full", className)} {...props}>
       <CardHeader className={cn("pb-2", headerClassName)}>
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
-        {description && (
-          <CardDescription>{description}</CardDescription>
-        )}
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg font-medium">{title}</CardTitle>
+            {description && (
+              <CardDescription>{description}</CardDescription>
+            )}
+          </div>
+          {headerExtra && (
+            <div className="flex-shrink-0">
+              {headerExtra}
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent className={cn("pt-1", contentClassName)}>
         {children}
