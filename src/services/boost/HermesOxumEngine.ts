@@ -64,6 +64,14 @@ export class HermesOxumEngine {
   }
   
   /**
+   * Calculate time-of-day impact on visibility
+   * This method delegates to the Hermes engine
+   */
+  public calculateTimeImpact(currentHour?: number): number {
+    return hermesEngine.calculateTimeImpact(currentHour);
+  }
+  
+  /**
    * Get the boost queue
    */
   public getBoostQueue(filters?: { region?: string, language?: string }): ProfileScoreData[] {
