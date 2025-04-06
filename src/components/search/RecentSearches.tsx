@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Clock, X } from 'lucide-react';
 
 interface RecentSearch {
@@ -65,5 +66,4 @@ const RecentSearches = ({ searches, onSelect, onClear, onClearAll }: RecentSearc
   );
 };
 
-import { Badge } from '@/components/ui/badge';
 export default RecentSearches;
