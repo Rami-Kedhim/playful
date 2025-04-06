@@ -50,7 +50,7 @@ export function useAIModelGenerator() {
           model.id,
           'ai_model_generated',
           { 
-            personality: model.personality,
+            personality: model.personality.type,
             region: model.region,
             language: model.language
           }
@@ -172,7 +172,7 @@ export function useAIModelGenerator() {
     }
   };
   
-  // New method to fetch optimization metrics for AI models
+  // Method to fetch optimization metrics for AI models
   const fetchOptimizationMetrics = async () => {
     try {
       const metrics = await AIModelGeneratorService.getOptimizationMetrics();

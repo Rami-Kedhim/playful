@@ -1,210 +1,193 @@
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageCircle, Image, HeartHandshake, VideoIcon, Zap } from "lucide-react";
-import { AIProfile } from "@/types/ai-profile";
-import { useAIModelMonetization } from "@/hooks/ai/useAIModelMonetization";
-import AIModelPremiumContent from "./AIModelPremiumContent";
-import AIModelLivecam from "./AIModelLivecam";
-import AIModelBoost from "./AIModelBoost";
-import AIModelGiftSystem from "./AIModelGiftSystem";
-import { toast } from "@/components/ui/use-toast";
-import useAIProfileStore from "@/store/aiProfileStore";
-
-const TYPING_SPEED = 30; // milliseconds per character
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { AIProfile } from '@/types/ai-profile';
+import { MessageSquare, Gift, Image, Video, CreditCard, Lock, Star } from 'lucide-react';
+import AIModelBoost from './AIModelBoost';
+import AIProfileConversation from './AIProfileConversation';
+import AIProfileGallery from './AIProfileGallery';
+import AIProfileGiftSection from './AIProfileGiftSection';
+import AIProfileVideoSection from './AIProfileVideoSection';
+import AIProfileSubscription from './AIProfileSubscription';
 
 interface AIProfileDetailProps {
   profile: AIProfile;
 }
 
-const AIProfileDetail = ({ profile }: AIProfileDetailProps) => {
-  const [userMessage, setUserMessage] = useState("");
-  const [activeTab, setActiveTab] = useState("chat");
-  const [isTyping, setIsTyping] = useState(false);
-  const { sendMessage, activeConversations, generateResponse } = useAIProfileStore();
+const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
+  const [activeTab, setActiveTab] = React.useState('chat');
   
-  const conversation = activeConversations.find(conv => conv.profileId === profile.id);
-  const messages = conversation?.messages || [];
-  
-  const handleSendMessage = async () => {
-    if (!userMessage.trim() || isTyping) return;
-    
-    const message = userMessage.trim();
-    setUserMessage("");
-    
-    await sendMessage(profile.id, message);
+  // Function to handle profile boost completion
+  const handleBoostComplete = () => {
+    // In a real application, we might refresh the profile data 
+    // or update the UI to show the boosted status
+    console.log("Profile boost completed for:", profile.id);
   };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-  
-  const scrollToBottom = useCallback(() => {
-    const chatContainer = document.getElementById("chat-container");
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-  }, []);
-  
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
-  
-  const handleSubscribe = () => {
-    toast({
-      title: "Subscription Required",
-      description: "To access premium content, please subscribe to this profile",
-    });
-    setActiveTab("premium");
-  };
-  
+
   return (
-    <div className="container mx-auto max-w-5xl py-6 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left sidebar - Profile Info */}
-        <div className="md:col-span-1 space-y-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex flex-col items-center text-center">
-                <Avatar className="h-32 w-32 mb-4">
-                  <AvatarImage src={profile.avatar_url} alt={profile.name} />
-                  <AvatarFallback>{profile.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                
-                <h2 className="text-2xl font-bold">{profile.name}</h2>
-                <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                  <span>{profile.age}</span>
-                  <span>•</span>
-                  <span>{profile.location}</span>
-                </div>
-                
-                <Badge className="mt-3 bg-gradient-to-r from-pink-500 to-purple-500">
-                  AI Model
-                </Badge>
-                
-                <p className="mt-4 text-sm text-muted-foreground">
-                  {profile.bio}
-                </p>
-                
-                <div className="w-full mt-6 flex flex-col gap-3">
-                  <AIModelBoost profileId={profile.id} />
-                  
-                  <AIModelGiftSystem 
-                    profileId={profile.id} 
-                    profileName={profile.name} 
-                  />
-                </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Left column: Profile info & monetization options */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle>{profile.name}, {profile.age}</CardTitle>
+                <CardDescription>{profile.location}</CardDescription>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <h3 className="text-lg font-medium">Interests</h3>
-            </CardHeader>
-            <CardContent className="pb-4">
-              <div className="flex flex-wrap gap-2">
-                {profile.interests.map((interest, index) => (
-                  <Badge variant="outline" key={index}>
-                    {interest}
-                  </Badge>
+              <Badge variant={profile.availability_status === 'online' ? 'default' : 'secondary'}>
+                {profile.availability_status || 'offline'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full aspect-square rounded-md overflow-hidden mb-4">
+              <img 
+                src={profile.avatar_url} 
+                alt={profile.name} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-1">
+                {profile.personality.traits.map((trait, i) => (
+                  <Badge key={i} variant="outline">{trait}</Badge>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              
+              <div>
+                <h3 className="text-sm font-medium">About</h3>
+                <p className="text-sm text-muted-foreground">{profile.bio}</p>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium">Interests</h3>
+                <p className="text-sm text-muted-foreground">{profile.interests.join(', ')}</p>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="border-t pt-4 flex flex-col items-stretch">
+            <div className="grid grid-cols-2 gap-2 w-full mb-2">
+              <Button variant="outline" className="w-full">
+                <Gift className="mr-2 h-4 w-4" />
+                Send Gift
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Star className="mr-2 h-4 w-4" />
+                Favorite
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
         
-        {/* Right content area */}
-        <div className="md:col-span-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="chat" className="flex items-center gap-2">
-                <MessageCircle className="h-4 w-4" />
-                Chat
-              </TabsTrigger>
-              <TabsTrigger value="premium" className="flex items-center gap-2">
-                <Image className="h-4 w-4" />
-                Premium
-              </TabsTrigger>
-              <TabsTrigger value="livecam" className="flex items-center gap-2">
-                <VideoIcon className="h-4 w-4" />
-                Livecam
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="chat" className="space-y-4">
-              <Card className="flex flex-col h-[60vh]">
-                <CardContent className="flex-grow overflow-y-auto p-4" id="chat-container">
-                  {messages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground">
-                      <MessageCircle className="h-12 w-12 mb-4 opacity-30" />
-                      <p>No messages yet</p>
-                      <p className="text-sm">Send a message to start chatting with {profile.name}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {messages.map((msg) => (
-                        <div 
-                          key={msg.id} 
-                          className={`flex ${msg.isUserMessage ? "justify-end" : "justify-start"}`}
-                        >
-                          <div 
-                            className={`max-w-[80%] rounded-lg p-3 ${
-                              msg.isUserMessage 
-                                ? "bg-primary text-primary-foreground" 
-                                : "bg-muted"
-                            }`}
-                          >
-                            {msg.content}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-                
-                <CardFooter className="border-t p-4">
-                  <div className="flex w-full items-end gap-2">
-                    <Textarea 
-                      placeholder={`Send a message to ${profile.name}...`}
-                      value={userMessage}
-                      onChange={(e) => setUserMessage(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      className="min-h-10"
-                      rows={2}
-                      disabled={isTyping}
-                    />
-                    <Button 
-                      onClick={handleSendMessage}
-                      disabled={!userMessage.trim() || isTyping}
-                    >
-                      Send
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
+        {/* AIProfileBoost component with correct props */}
+        <AIModelBoost 
+          profile={profile} 
+          onBoostComplete={handleBoostComplete}
+        />
+        
+        {/* AIProfileSubscription component (stub) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center">
+              <CreditCard className="mr-2 h-5 w-5" />
+              Premium Subscription
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-sm">Monthly</span>
+              <span className="text-sm font-medium">{profile.subscription_price || 50} Lucoins</span>
+            </div>
+            <ul className="text-sm space-y-1">
+              <li className="flex items-center">
+                <Lock className="h-3 w-3 mr-2 text-muted-foreground" />
+                Unlock all premium photos
+              </li>
+              <li className="flex items-center">
+                <Lock className="h-3 w-3 mr-2 text-muted-foreground" />
+                Unlock all premium videos
+              </li>
+              <li className="flex items-center">
+                <Lock className="h-3 w-3 mr-2 text-muted-foreground" />
+                Priority messaging
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full">
+              Subscribe
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+      
+      {/* Right column: Interaction tabs */}
+      <div className="md:col-span-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid grid-cols-4 w-full">
+                <TabsTrigger value="chat" className="flex items-center">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Chat
+                </TabsTrigger>
+                <TabsTrigger value="photos" className="flex items-center">
+                  <Image className="h-4 w-4 mr-2" />
+                  Photos
+                </TabsTrigger>
+                <TabsTrigger value="videos" className="flex items-center">
+                  <Video className="h-4 w-4 mr-2" />
+                  Videos
+                </TabsTrigger>
+                <TabsTrigger value="gifts" className="flex items-center">
+                  <Gift className="h-4 w-4 mr-2" />
+                  Gifts
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          
+          <CardContent className="pt-4">
+            <TabsContent value="chat" className="mt-0">
+              {/* This would be the chat interface component */}
+              <div className="h-[600px] flex flex-col">
+                <AIProfileConversation profileId={profile.id} />
+              </div>
             </TabsContent>
             
-            <TabsContent value="premium">
-              <AIModelPremiumContent profileId={profile.id} />
+            <TabsContent value="photos" className="mt-0">
+              {/* Gallery component */}
+              <div className="h-[600px] flex flex-col">
+                <AIProfileGallery 
+                  profileId={profile.id} 
+                  images={profile.gallery_images} 
+                />
+              </div>
             </TabsContent>
             
-            <TabsContent value="livecam">
-              <AIModelLivecam 
-                profile={profile}
-                onSubscribe={handleSubscribe}
-              />
+            <TabsContent value="videos" className="mt-0">
+              {/* Videos component */}
+              <div className="h-[600px] flex flex-col">
+                <AIProfileVideoSection profileId={profile.id} />
+              </div>
             </TabsContent>
-          </Tabs>
-        </div>
+            
+            <TabsContent value="gifts" className="mt-0">
+              {/* Gifts component */}
+              <div className="h-[600px] flex flex-col">
+                <AIProfileGiftSection 
+                  profileId={profile.id}
+                  giftPreferences={profile.gift_preferences || []}
+                />
+              </div>
+            </TabsContent>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

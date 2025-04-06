@@ -14,6 +14,12 @@ interface AIModelGenerationConfig {
   targetDemographic?: string;
 }
 
+interface OptimizationMetrics {
+  conversionRate: number;
+  engagementScore: number;
+  recommendedChanges: string[];
+}
+
 const personalityTemplates: Record<string, AIProfilePersonality> = {
   flirty: {
     type: 'flirty',
@@ -77,11 +83,17 @@ export class AIModelGeneratorService {
         const maxAge = config.ageRange?.max || 35;
         const age = Math.floor(Math.random() * (maxAge - minAge + 1) + minAge);
         
+        // Generate random languages based on region or use default English
+        const languages = config.languages || ['English'];
+        const selectedLanguage = languages[Math.floor(Math.random() * languages.length)];
+        
         const model: AIProfile = {
           id: `ai-model-${Date.now()}-${i}`,
           name: `AI Model ${i+1}`,
           age: age,
           location: location,
+          region: randomCountry, // Added for tracking
+          language: selectedLanguage, // Added for tracking
           bio: `I'm an AI companion with a ${personality.type} personality. Let's connect!`,
           avatar_url: `https://example.com/avatar-${i}.jpg`, // Placeholder
           gallery_images: [],
@@ -133,29 +145,33 @@ export class AIModelGeneratorService {
       
       return {
         success: true,
-        processedCount: models.length,
-        estimatedCompletionTime: models.length * 2 // 2 minutes per model
+        processedCount: 0,
+        estimatedCompletionTime: models.length * 30, // Estimate 30 seconds per model
       };
     } catch (error) {
-      console.error("Error submitting to Hermes+Oxum:", error);
-      throw new Error("Failed to submit models to processing");
+      console.error("Error submitting models to Hermes+Oxum:", error);
+      throw new Error("Failed to submit models for processing");
     }
   }
   
   /**
-   * Generate content for AI models (images, videos, messages)
+   * Generate content for an AI model (photos, videos, messages)
    */
-  static async generateContent(profileId: string, contentTypes: ('photo' | 'video' | 'message')[]): Promise<{
-    success: boolean;
-    generatedContent: { type: string, count: number }[];
+  static async generateContent(
+    profileId: string, 
+    contentTypes: ('photo' | 'video' | 'message')[]
+  ): Promise<{ 
+    success: boolean; 
+    generatedContent: Array<{ type: string; url: string; id: string }> 
   }> {
     try {
-      // In a real implementation, this would generate content using AI
-      // For this demo, we're simulating success
+      // In a real implementation, this would call a generative AI service
+      // For this demo, we're simulating success with mock data
       
       const generatedContent = contentTypes.map(type => ({
         type,
-        count: type === 'photo' ? 10 : (type === 'video' ? 5 : 15)
+        url: `https://example.com/${type}-${Date.now()}.jpg`,
+        id: `content-${type}-${Date.now()}`
       }));
       
       return {
@@ -168,7 +184,31 @@ export class AIModelGeneratorService {
     }
   }
   
+  /**
+   * Get optimization metrics for AI models
+   */
+  static async getOptimizationMetrics(): Promise<OptimizationMetrics> {
+    try {
+      // In a real implementation, this would calculate metrics based on real data
+      // For this demo, we're returning mock data
+      
+      return {
+        conversionRate: Math.random() * 0.3, // 0-30% conversion rate
+        engagementScore: Math.random() * 100, // 0-100 engagement score
+        recommendedChanges: [
+          "Increase flirty personality types to improve engagement",
+          "Add more diverse interests to appeal to broader audience",
+          "Focus on creating more video content for premium profiles"
+        ]
+      };
+    } catch (error) {
+      console.error("Error getting optimization metrics:", error);
+      throw new Error("Failed to retrieve optimization metrics");
+    }
+  }
+  
   // Helper methods
+  
   private static getRandomPersonality(types?: ('flirty' | 'shy' | 'dominant' | 'playful' | 'professional')[]): AIProfilePersonality {
     const availableTypes = types || Object.keys(personalityTemplates) as ('flirty' | 'shy' | 'dominant' | 'playful' | 'professional')[];
     const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
@@ -177,15 +217,21 @@ export class AIModelGeneratorService {
   
   private static generateRandomInterests(): string[] {
     const allInterests = [
-      "reading", "cooking", "hiking", "dancing", "photography",
-      "traveling", "yoga", "music", "art", "fashion",
-      "fitness", "movies", "gaming", "swimming", "cycling",
-      "writing", "skiing", "tennis", "history", "technology"
+      "Travel", "Cooking", "Music", "Art", "Reading", "Dancing", 
+      "Photography", "Fashion", "Fitness", "Movies", "Technology", 
+      "Philosophy", "Hiking", "Gaming", "Wine tasting", "Yoga"
     ];
     
-    const interestCount = Math.floor(Math.random() * 6) + 3; // 3-8 interests
-    const shuffled = [...allInterests].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, interestCount);
+    const count = Math.floor(Math.random() * 5) + 3; // 3-7 interests
+    const interests = [];
+    
+    for (let i = 0; i < count; i++) {
+      const randomIndex = Math.floor(Math.random() * allInterests.length);
+      interests.push(allInterests[randomIndex]);
+      allInterests.splice(randomIndex, 1); // Remove to avoid duplicates
+    }
+    
+    return interests;
   }
   
   private static getRandomPrice(min: number, max: number): number {

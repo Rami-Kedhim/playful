@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress'; // Fixed import
+import { Progress } from '@/components/ui/progress'; 
 import { Flame, Zap } from 'lucide-react';
 import { AIProfile } from '@/types/ai-profile';
 import useAIModelMonetizationStore from '@/store/aiModelMonetizationStore';
@@ -130,7 +130,7 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
         {isBoostInProgress && (
           <div className="space-y-2 my-2">
             <Label className="text-xs text-muted-foreground">Processing boost...</Label>
-            <Progress value={boostProgress} className="h-2" /> {/* Using Progress correctly */}
+            <Progress value={boostProgress} className="h-2" />
           </div>
         )}
       </CardContent>

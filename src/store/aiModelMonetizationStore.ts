@@ -71,9 +71,9 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
       const mockGift: AIGift = {
         id: Math.random().toString(36).substring(2, 15),
         gift_type: giftType,
-        name: giftType, // Property specified in AIGift type
-        description: `A ${giftType} gift`, // Property specified in AIGift type
-        price: amount, // Property specified in AIGift type
+        name: giftType, // Required property
+        description: `A ${giftType} gift`, // Required property
+        price: amount, // Required property
         user_id: 'current-user',
         profile_id: profileId,
         created_at: new Date().toISOString()
@@ -197,7 +197,7 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
     return get().unlockedContent.includes(contentId);
   },
   
-  // Methods for Phase 2 automated monetization
+  // Methods for automated monetization
   trackContentView: (contentId) => {
     set(state => ({
       premiumContentViews: {

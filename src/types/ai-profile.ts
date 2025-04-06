@@ -1,4 +1,3 @@
-
 export interface AIProfilePersonality {
   type: 'flirty' | 'shy' | 'dominant' | 'playful' | 'professional';
   traits: string[];
@@ -28,6 +27,10 @@ export interface AIProfile {
   verification_status?: 'pending' | 'verified' | 'rejected';
   availability_status?: 'online' | 'away' | 'offline';
   last_active?: string;
+  
+  // Additional fields needed for analytics tracking
+  region?: string;
+  language?: string;
   
   // Monetization-related fields
   premium_content_count?: {
@@ -77,7 +80,6 @@ export interface AIConversation {
   free_messages_remaining?: number;
 }
 
-// New types for AI message generation
 export interface AIChatRequest {
   conversation_id: string;
   user_id: string;
@@ -93,7 +95,6 @@ export interface AIChatResponse {
   error?: string;
 }
 
-// AI image generation types
 export interface AIImageGenerationRequest {
   prompt: string;
   user_id: string;
@@ -110,7 +111,6 @@ export interface AIImageGenerationResponse {
   error?: string;
 }
 
-// New types for AI monetization
 export interface AIPremiumContent {
   id: string;
   profile_id: string;
