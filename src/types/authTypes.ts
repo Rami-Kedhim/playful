@@ -7,6 +7,8 @@ export interface AuthUser {
   lucoinsBalance?: number;
   role?: string;
   isVerified?: boolean;
+  // User profile data
+  avatarUrl?: string;
   // Supabase User properties
   app_metadata: Record<string, any>;
   user_metadata: Record<string, any>;

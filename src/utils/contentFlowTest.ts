@@ -53,4 +53,3 @@ export const testContentGallery = (): void => {
     gridsFound: contentGrids.length 
   });
 };
-

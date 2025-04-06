@@ -44,10 +44,10 @@ const ProfilePage = () => {
       setLoading(true);
       
       // If there's a new avatar file, upload it
-      let avatar_url = profile?.avatar_url;
+      let profileImageUrl = profile?.avatar_url;
       if (avatarFile) {
-        avatar_url = await uploadAvatar(avatarFile, user, setUploadProgress);
-        if (!avatar_url) {
+        profileImageUrl = await uploadAvatar(avatarFile, user, setUploadProgress);
+        if (!profileImageUrl) {
           toast({
             title: "Avatar upload failed",
             description: "We couldn't upload your avatar. Please try again.",
@@ -60,7 +60,7 @@ const ProfilePage = () => {
       // Update profile with new data
       await updateUserProfile({
         ...data,
-        avatar_url
+        profileImageUrl
       });
       
       toast({

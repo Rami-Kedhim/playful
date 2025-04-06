@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLucoins } from "@/hooks/useLucoins";
@@ -20,7 +19,6 @@ export const useVirtualContent = () => {
   const { toast } = useToast();
   const { processLucoinTransaction } = useLucoins();
   
-  // In a real application, we'd fetch this from the server
   useEffect(() => {
     setError(null);
     const storedUnlockedContent = localStorage.getItem('unlockedContent');
@@ -72,7 +70,6 @@ export const useVirtualContent = () => {
     
     try {
       logContentFlow('Processing payment', contentId, { price });
-      // Process payment with Lucoins
       const transactionResult = await processLucoinTransaction({
         amount: price,
         transactionType: 'purchase',
@@ -86,7 +83,6 @@ export const useVirtualContent = () => {
       
       if (transactionResult) {
         logContentFlow('Payment successful', contentId);
-        // Add to unlocked content
         const updatedUnlockedContent = [...unlockedContent, contentId];
         saveUnlockedContent(updatedUnlockedContent);
         

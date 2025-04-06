@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { ContentType } from "./useVirtualContent";
 import { logContentAction, logContentError } from "@/utils/debugUtils";

@@ -2,7 +2,7 @@
 // Auth types for the application
 
 // Type for user roles in the application
-export type UserRole = 'user' | 'moderator' | 'admin' | 'escort' | 'creator';
+export type UserRole = 'user' | 'moderator' | 'admin' | 'escort' | 'creator' | string;
 
 // Type for gender in the database
 export type DatabaseGender = 'male' | 'female' | 'other';
@@ -16,6 +16,7 @@ export interface AuthUser {
   lucoinsBalance?: number;
   isVerified?: boolean;
   role?: UserRole;
+  avatarUrl?: string;
   // Supabase User properties
   app_metadata: Record<string, any>;
   user_metadata: Record<string, any>;
@@ -32,6 +33,7 @@ export interface UserProfile {
   lastName?: string;
   bio?: string;
   avatarUrl?: string;
+  avatar_url?: string;  // Adding this to support both naming conventions
   gender?: DatabaseGender;
   dateOfBirth?: string;
   location?: string;

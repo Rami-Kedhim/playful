@@ -14,6 +14,20 @@ export function logAuthAction(action: string, metadata?: Record<string, any>) {
 }
 
 /**
+ * Logs content-flow actions with optional metadata
+ */
+export function logContentFlow(action: string, contentId: string, metadata?: Record<string, any>) {
+  console.log(`[Content Flow] ${action} | ID: ${contentId}`, metadata || '');
+}
+
+/**
+ * Logs content-related errors with optional context information
+ */
+export function logContentError(context: string, error: Error | any) {
+  console.error(`[Content Error] ${context}:`, error instanceof Error ? error.message : error);
+}
+
+/**
  * Logs errors with optional context information
  */
 export function logError(error: Error | string, context?: Record<string, any>) {

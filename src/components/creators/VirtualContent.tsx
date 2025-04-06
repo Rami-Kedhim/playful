@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { LockIcon, UnlockIcon, Image as ImageIcon, Film, MessageSquare, AlertCircle } from "lucide-react";
@@ -6,7 +5,7 @@ import { useVirtualContent, ContentType } from "@/hooks/useVirtualContent";
 import { useAuth } from "@/contexts/AuthContext";
 import AICreatorBadge from "./AICreatorBadge";
 import { Card, CardContent } from "@/components/ui/card";
-import { logContentFlow } from "@/utils/debugUtils";
+import { logContentAction, logContentFlow } from "@/utils/debugUtils";
 
 interface VirtualContentProps {
   creatorId: string;
@@ -32,7 +31,6 @@ const VirtualContent: React.FC<VirtualContentProps> = ({
   
   const handleUnlock = async () => {
     if (!user) {
-      // Redirect to auth page if not logged in
       logContentFlow('Redirect to auth', contentId, { reason: 'User not logged in' });
       window.location.href = "/auth";
       return;
