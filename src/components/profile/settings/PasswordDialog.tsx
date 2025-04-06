@@ -1,139 +1,133 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 interface PasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdatePassword: (password: string) => Promise<void>;
+  onUpdatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
 }
 
-const PasswordDialog = ({ open, onOpenChange, onUpdatePassword }: PasswordDialogProps) => {
-  const [currentPassword, setCurrentPassword] = useState("");
+const PasswordDialog = ({ 
+  open, 
+  onOpenChange,
+  onUpdatePassword
+}: PasswordDialogProps) => {
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const resetForm = () => {
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-  };
-
+  const [error, setError] = useState<string | null>(null);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Validate passwords
     if (newPassword.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
+      setError("New password must be at least 6 characters");
       return;
     }
-
+    
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive",
-      });
+      setError("Passwords do not match");
       return;
     }
-
+    
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      // In a real app, you'd verify the current password first
-      await onUpdatePassword(newPassword);
-      onOpenChange(false);
-      resetForm();
-    } catch (error) {
-      console.error("Error changing password:", error);
+      await onUpdatePassword(oldPassword, newPassword);
+      toast({
+        title: "Password updated",
+        description: "Your password has been updated successfully.",
+      });
+      handleClose();
+    } catch (err: any) {
+      setError(err.message || "Failed to update password");
     } finally {
       setLoading(false);
     }
   };
-
-  const handleCancel = () => {
+  
+  const handleClose = () => {
+    setOldPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError(null);
     onOpenChange(false);
-    resetForm();
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
-              Enter your current password and a new password.
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Change Password</DialogTitle>
+          <DialogDescription>
+            Update your account password. You'll need your current password to confirm.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4 py-2">
+          {error && (
+            <div className="text-sm font-medium text-destructive">{error}</div>
+          )}
           
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="current-password">Current Password</Label>
-              <Input
-                id="current-password"
-                type="password"
-                placeholder="Enter your current password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
-              <Input
-                id="new-password"
-                type="password"
-                placeholder="Enter your new password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                placeholder="Confirm your new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Password must be at least 6 characters long
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="current-password">Current Password</Label>
+            <Input 
+              id="current-password" 
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
           </div>
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleCancel}>
+          <div className="space-y-2">
+            <Label htmlFor="new-password">New Password</Label>
+            <Input 
+              id="new-password" 
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm New Password</Label>
+            <Input 
+              id="confirm-password" 
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          <DialogFooter className="pt-4">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={handleClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>

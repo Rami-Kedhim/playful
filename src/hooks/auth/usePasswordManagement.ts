@@ -1,53 +1,44 @@
 
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
-import { handleAuthError } from "@/utils/authStateUtils";
 
-export const usePasswordManagement = (setIsLoading: (value: boolean) => void) => {
-  // Reset password function
+export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) => {
   const resetPassword = async (email: string) => {
     try {
       setIsLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth/reset-password`,
       });
       
       if (error) {
-        handleAuthError(error);
         throw error;
       }
-      
-      toast({
-        title: "Password reset email sent",
-        description: "Please check your email for the password reset link",
-      });
-    } catch (error) {
-      console.error("Error resetting password:", error);
-      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Update password function
-  const updatePassword = async (newPassword: string) => {
+  const updatePassword = async (oldPassword: string, newPassword: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
       
-      if (error) {
-        handleAuthError(error);
-        throw error;
+      // First, sign in with the old password to verify it
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: supabase.auth.getUser().then(({ data }) => data.user?.email || ''),
+        password: oldPassword,
+      });
+      
+      if (signInError) {
+        throw new Error("Current password is incorrect");
       }
       
-      toast({
-        title: "Password updated",
-        description: "Your password has been updated successfully",
+      // Then update the password
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
       });
-    } catch (error) {
-      console.error("Error updating password:", error);
-      throw error;
+      
+      if (error) {
+        throw error;
+      }
     } finally {
       setIsLoading(false);
     }

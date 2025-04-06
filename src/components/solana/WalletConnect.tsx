@@ -1,70 +1,69 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Wallet, RefreshCw } from "lucide-react";
-import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { truncateMiddle } from "@/utils/stringUtils";
+import { Loader2 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
-interface WalletConnectProps {
-  className?: string;
-  size?: "sm" | "default";
-}
-
-const WalletConnect = ({ className, size = "default" }: WalletConnectProps) => {
-  const { 
-    walletAddress, 
-    connecting, 
-    disconnecting, 
-    connectWallet, 
-    disconnectWallet, 
-    hasWallet 
-  } = useSolanaWallet();
-
-  if (!hasWallet) {
-    return (
-      <Button
-        variant="outline"
-        onClick={() => window.open('https://chainstack.com/build-better-with-solana/', '_blank')}
-        className={className}
-        size={size}
-      >
-        <Wallet className="mr-2 h-4 w-4" />
-        Connect with Chainstack
-      </Button>
-    );
-  }
-
-  if (connecting || disconnecting) {
-    return (
-      <Button disabled className={className} size={size}>
-        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-        {connecting ? "Connecting..." : "Disconnecting..."}
-      </Button>
-    );
-  }
-
-  if (walletAddress) {
-    return (
-      <Button
-        variant="outline"
-        onClick={disconnectWallet}
-        className={className}
-        size={size}
-      >
-        <Wallet className="mr-2 h-4 w-4" />
-        {truncateMiddle(walletAddress, 4, 4)}
-      </Button>
-    );
-  }
-
+const WalletConnect = () => {
+  const [connecting, setConnecting] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  
+  const connectWallet = async () => {
+    try {
+      setConnecting(true);
+      
+      // This would integrate with Solana wallet adapter in a real app
+      // For now, simulate a wallet connection after a delay
+      setTimeout(() => {
+        // Generate a mock wallet address
+        const mockAddress = "8xJBr..." + Math.random().toString(16).slice(2, 6);
+        setWalletAddress(mockAddress);
+        setConnected(true);
+        setConnecting(false);
+        
+        toast({
+          title: "Wallet connected",
+          description: `Connected to ${mockAddress}`,
+        });
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error connecting wallet:", error);
+      toast({
+        title: "Connection failed",
+        description: error.message || "Could not connect to wallet",
+        variant: "destructive",
+      });
+      setConnecting(false);
+    }
+  };
+  
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    setConnected(false);
+    
+    toast({
+      title: "Wallet disconnected",
+      description: "Your wallet has been disconnected",
+    });
+  };
+  
   return (
     <Button
-      variant="outline"
-      onClick={connectWallet}
-      className={className}
-      size={size}
+      variant={connected ? "outline" : "default"}
+      onClick={connected ? disconnectWallet : connectWallet}
+      disabled={connecting}
     >
-      <Wallet className="mr-2 h-4 w-4" />
-      Connect Wallet
+      {connecting ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Connecting...
+        </>
+      ) : connected ? (
+        "Disconnect"
+      ) : (
+        "Connect"
+      )}
     </Button>
   );
 };

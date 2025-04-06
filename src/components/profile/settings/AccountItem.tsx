@@ -1,27 +1,37 @@
 
-import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AccountItemProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
+  description?: string;
   actionLabel: string;
   onAction: () => void;
+  disabled?: boolean;
 }
 
-const AccountItem = ({ title, subtitle, actionLabel, onAction }: AccountItemProps) => {
+const AccountItem = ({
+  title,
+  subtitle,
+  description,
+  actionLabel,
+  onAction,
+  disabled = false
+}: AccountItemProps) => {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-medium">{title}</h3>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={onAction}>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl">{title}</CardTitle>
+        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
+      <CardContent className="flex justify-end">
+        <Button onClick={onAction} disabled={disabled}>
           {actionLabel}
         </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

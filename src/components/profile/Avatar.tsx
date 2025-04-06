@@ -1,73 +1,63 @@
 
-import { Avatar as UIAvatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React from "react";
+import { Avatar as UIAvatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { getInitialsAvatar } from "@/utils/profileUtils";
 
 interface AvatarProps {
-  src: string;
-  username?: string;
-  email?: string;
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  src?: string | null;
+  username?: string | null;
+  email?: string | null;
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
-  fallbackClassName?: string;
-  status?: "online" | "offline" | "away" | "busy";
   border?: boolean;
 }
 
-const Avatar = ({ 
-  src, 
-  username, 
-  email, 
-  size = "md", 
+const Avatar = ({
+  src,
+  username,
+  email,
+  size = "md",
   className,
-  fallbackClassName,
-  status,
-  border = false
+  border = false,
 }: AvatarProps) => {
-  // Get the first character for the fallback
-  const fallbackText = username?.[0] || email?.[0] || "U";
+  // Determine the display name for fallback
+  const displayName = username || email?.split("@")[0] || "User";
   
-  // Define size classes based on the size prop
+  // Generate initials for fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+  
+  // Determine size classes
   const sizeClasses = {
-    xs: "h-8 w-8",
-    sm: "h-10 w-10",
-    md: "h-16 w-16",
-    lg: "h-24 w-24",
-    xl: "h-32 w-32"
+    sm: "h-8 w-8",
+    md: "h-10 w-10",
+    lg: "h-20 w-20",
+    xl: "h-28 w-28",
   };
-
-  // Define status indicator colors
-  const statusColors = {
-    online: "bg-green-500",
-    offline: "bg-gray-500",
-    away: "bg-amber-500",
-    busy: "bg-red-500"
-  };
+  
+  // Generate fallback avatar URL if no src is provided
+  const fallbackUrl = src || getInitialsAvatar(displayName);
   
   return (
-    <div className="relative inline-block">
-      <UIAvatar className={cn(
-        sizeClasses[size], 
-        border && "ring-2 ring-background",
+    <UIAvatar
+      className={cn(
+        sizeClasses[size],
+        border && "border-2 border-white/20",
         className
-      )}>
-        <AvatarImage src={src} alt={username || "Avatar"} />
-        <AvatarFallback className={cn(
-          "bg-gray-800",
-          fallbackClassName
-        )}>
-          {fallbackText.toUpperCase()}
-        </AvatarFallback>
-      </UIAvatar>
-      
-      {status && (
-        <span className={cn(
-          "absolute bottom-0 right-0 rounded-full border-2 border-background",
-          statusColors[status],
-          size === "xs" ? "h-2 w-2" : "h-3 w-3",
-          size === "lg" || size === "xl" ? "h-4 w-4" : ""
-        )} />
       )}
-    </div>
+    >
+      <AvatarImage src={fallbackUrl} alt={displayName} />
+      <AvatarFallback className="bg-primary/20 text-primary-foreground">
+        {getInitials(displayName)}
+      </AvatarFallback>
+    </UIAvatar>
   );
 };
 

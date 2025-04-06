@@ -1,150 +1,184 @@
 
-import React from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Link } from 'react-router-dom';
-import { Star, Shield, User, MessageCircle, CreditCard, Settings, Calendar } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { useNotifications } from '@/hooks/useNotifications';
-
-interface StatsCardProps {
-  title: string;
-  value: string | number;
-  description?: string;
-  icon: React.ReactNode;
-  linkTo?: string;
-}
-
-const StatsCard = ({ title, value, description, icon, linkTo }: StatsCardProps) => {
-  const CardWrapper = ({ children }: { children: React.ReactNode }) => {
-    return linkTo ? (
-      <Link to={linkTo} className="block hover:scale-105 transition-transform duration-200">
-        {children}
-      </Link>
-    ) : <>{children}</>;
-  };
-
-  return (
-    <CardWrapper>
-      <Card className="bg-background/50 backdrop-blur-sm border-white/5 hover:border-primary/20 transition-colors">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
-          <div className="bg-primary/10 p-2 rounded-full">
-            {icon}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{value}</div>
-          {description && <p className="text-xs text-muted-foreground pt-1">{description}</p>}
-        </CardContent>
-      </Card>
-    </CardWrapper>
-  );
-};
+import React from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { Heart, MessageSquare, Star, Users, Calendar, Award } from "lucide-react";
+import { featuredEscorts, featuredCreators } from "@/data/mockData";
 
 const UserDashboardOverview = () => {
   const { user, profile } = useAuth();
-  const { unreadCount } = useNotifications();
   
-  // Calculate profile completeness - this would be better coming from a dedicated hook
-  const profileCompleteness = profile ? 
-    (Object.keys(profile).filter(key => !!profile[key]).length / 8) * 100 : 0;
+  // Mock activity data - in a real app this would come from an API
+  const userActivity = {
+    favorites: 7,
+    messages: 3,
+    reviews: 2,
+    upcomingAppointments: 1,
+    lucoinBalance: profile?.lucoin_balance || 0,
+    memberSince: new Date(profile?.created_at || new Date()).toLocaleDateString(),
+  };
   
   return (
     <div className="space-y-6">
-      {/* User Profile Summary */}
-      <Card className="bg-gradient-to-br from-background/80 to-background/40 backdrop-blur-sm border-white/5">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-            <Avatar className="w-24 h-24 border-2 border-primary">
-              <AvatarImage src={profile?.avatar_url || ''} alt={user?.username || 'User'} />
-              <AvatarFallback className="bg-primary/20 text-xl">
-                {(user?.username || 'U')[0].toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 space-y-4 text-center md:text-left">
-              <div>
-                <h2 className="text-2xl font-bold flex items-center justify-center md:justify-start gap-2">
-                  {user?.username || 'User'}
-                  {profile?.is_verified && (
-                    <Badge variant="outline" className="bg-primary/10 flex items-center gap-1 ml-2">
-                      <Shield className="h-3 w-3" />
-                      Verified
-                    </Badge>
-                  )}
-                </h2>
-                <p className="text-gray-400">{user?.email}</p>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Favorites</CardTitle>
+            <Heart className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userActivity.favorites}</div>
+            <p className="text-xs text-muted-foreground">
+              Profiles you've added to favorites
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Messages</CardTitle>
+            <MessageSquare className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userActivity.messages}</div>
+            <p className="text-xs text-muted-foreground">
+              Unread messages in your inbox
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Reviews</CardTitle>
+            <Star className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userActivity.reviews}</div>
+            <p className="text-xs text-muted-foreground">
+              Reviews you've submitted
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Appointments</CardTitle>
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{userActivity.upcomingAppointments}</div>
+            <p className="text-xs text-muted-foreground">
+              Upcoming appointments
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Recent Favorites</CardTitle>
+            <CardDescription>
+              Profiles you've recently added to favorites
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {featuredEscorts.slice(0, 2).map((escort) => (
+                <div key={escort.id} className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full overflow-hidden">
+                    <img
+                      src={escort.avatar}
+                      alt={escort.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{escort.name}</h4>
+                    <p className="text-sm text-muted-foreground">{escort.location}</p>
+                  </div>
+                  <Button variant="ghost" size="icon">
+                    <Heart className="h-4 w-4" fill="currentColor" />
+                  </Button>
+                </div>
+              ))}
+              {featuredCreators.slice(0, 1).map((creator) => (
+                <div key={creator.id} className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full overflow-hidden">
+                    <img
+                      src={creator.avatar}
+                      alt={creator.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{creator.name}</h4>
+                    <p className="text-sm text-muted-foreground">{creator.location}</p>
+                  </div>
+                  <Button variant="ghost" size="icon">
+                    <Heart className="h-4 w-4" fill="currentColor" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full">
+              View All Favorites
+            </Button>
+          </CardFooter>
+        </Card>
+        
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Account Summary</CardTitle>
+            <CardDescription>
+              Your account details and membership status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Member Since</div>
+                  <div className="text-xl font-bold">{userActivity.memberSince}</div>
+                </div>
               </div>
               
-              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                <Badge variant="outline" className="bg-background/50">
-                  {profile?.lucoins_balance || 0} Lucoins
-                </Badge>
-                <Badge variant="outline" className="bg-background/50">
-                  {profile?.subscription_tier || 'Free'} Account
-                </Badge>
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-lucoin/20 flex items-center justify-center">
+                  <Award className="h-6 w-6 text-lucoin" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Lucoin Balance</div>
+                  <div className="text-xl font-bold">{userActivity.lucoinBalance} LC</div>
+                </div>
               </div>
               
               <div className="pt-2">
-                <p className="text-sm mb-1">Profile Completeness</p>
-                <div className="flex items-center gap-2">
-                  <Progress value={profileCompleteness} className="h-2" />
-                  <span className="text-xs">{Math.round(profileCompleteness)}%</span>
+                <div className="text-sm mb-1.5">Profile Completion</div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-primary to-accent" 
+                    style={{ width: `${profile?.profile_completeness || 65}%` }}
+                  />
+                </div>
+                <div className="flex justify-end mt-1 text-xs text-muted-foreground">
+                  {profile?.profile_completeness || 65}% complete
                 </div>
               </div>
             </div>
-            
-            <div className="flex flex-col md:flex-row gap-2">
-              <Button size="sm" variant="outline" asChild>
-                <Link to="/profile">
-                  Edit Profile
-                </Link>
-              </Button>
-              
-              <Button size="sm" asChild>
-                <Link to="/wallet">
-                  Buy Lucoins
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard 
-          title="Favorites" 
-          value="12" 
-          icon={<Star className="h-4 w-4 text-yellow-500" />} 
-          linkTo="/favorites"
-          description="Saved profiles"
-        />
-        <StatsCard 
-          title="Messages" 
-          value={unreadCount > 0 ? `${unreadCount} new` : "All read"} 
-          icon={<MessageCircle className="h-4 w-4 text-blue-500" />} 
-          linkTo="/messages"
-          description="Chat conversations"
-        />
-        <StatsCard 
-          title="Bookings" 
-          value="3" 
-          icon={<Calendar className="h-4 w-4 text-green-500" />} 
-          linkTo="/bookings"
-          description="Upcoming appointments"
-        />
-        <StatsCard 
-          title="Settings" 
-          value="Account" 
-          icon={<Settings className="h-4 w-4 text-gray-400" />} 
-          linkTo="/settings"
-          description="Manage your account"
-        />
+          </CardContent>
+          <CardFooter>
+            <Button variant="default" className="w-full">
+              Upgrade to Premium
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );
