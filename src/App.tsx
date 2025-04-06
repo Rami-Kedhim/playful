@@ -4,6 +4,7 @@ import AppRoutes from './Routes';
 import { Toaster } from './components/ui/toaster';
 import { useAuth } from './hooks/auth/useAuth';
 import { Loader2 } from 'lucide-react';
+import { ThemeProvider } from './components/theme-provider';
 import { ToastProvider, useToast } from './hooks/use-toast';
 
 function AppContent() {
@@ -50,9 +51,11 @@ function AppContent() {
 
 function App() {
   return (
-    <ToastProvider>
-      <AppContent />
-    </ToastProvider>
+    <ThemeProvider defaultTheme="dark" attribute="class">
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 
