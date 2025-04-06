@@ -71,17 +71,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearError = () => setError(null);
 
   // Convert database user to AuthUser type for components
-  const mapUserToAuthUser = (user: User | null, profile: any | null) => {
-    if (!user) return null;
+  const mapUserToAuthUser = (dbUser: User | null, profile: any | null) => {
+    if (!dbUser) return null;
     
     return {
-      id: user.id,
-      email: user.email || "",
-      username: profile?.username || user.email?.split('@')[0] || "",
+      id: dbUser.id,
+      email: dbUser.email || "",
+      username: profile?.username || dbUser.email?.split('@')[0] || "",
       profileImageUrl: profile?.avatar_url || "",
       lucoinsBalance: profile?.lucoin_balance || 0,
       isVerified: profile?.is_verified || false,
-      role: userRoles.length > 0 ? userRoles[0] : "user"
+      role: userRoles.length > 0 ? userRoles[0] : "user",
+      app_metadata: dbUser.app_metadata || {},
+      user_metadata: dbUser.user_metadata || {},
+      created_at: dbUser.created_at
     };
   };
 

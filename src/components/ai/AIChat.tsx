@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useAIMessaging } from '@/hooks/useAIMessaging';
 import { Button } from '@/components/ui/button';
@@ -237,7 +236,7 @@ const AIChat: React.FC<AIChatProps> = ({
                   
                   {isUser && (
                     <Avatar className="h-8 w-8 ml-2 mt-1">
-                      <AvatarImage src={userProfile?.avatar_url} alt={userProfile?.username || 'User'} />
+                      <AvatarImage src={userProfile?.avatarUrl} alt={userProfile?.username || 'User'} />
                       <AvatarFallback>{userProfile?.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                     </Avatar>
                   )}

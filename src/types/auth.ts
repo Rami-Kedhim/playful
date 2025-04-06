@@ -17,8 +17,8 @@ export interface AuthUser {
   isVerified?: boolean;
   role?: UserRole;
   // Supabase User properties
-  app_metadata?: Record<string, any>;
-  user_metadata?: Record<string, any>;
+  app_metadata: Record<string, any>; // Changed from optional to required
+  user_metadata: Record<string, any>; // Changed from optional to required
   aud?: string;
   created_at?: string;
 }
@@ -31,7 +31,7 @@ export interface UserProfile {
   firstName?: string;
   lastName?: string;
   bio?: string;
-  avatarUrl?: string;
+  avatarUrl?: string; // This is the correct property name
   gender?: DatabaseGender;
   dateOfBirth?: string;
   location?: string;

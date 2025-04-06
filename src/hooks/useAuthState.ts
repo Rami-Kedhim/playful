@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "./useProfile";
-import { AuthState } from "@/types/auth";
+import { AuthState, AuthUser } from "@/types/auth";
 
 export const useAuthState = (): [
   AuthState,
@@ -10,7 +11,7 @@ export const useAuthState = (): [
   () => Promise<void>
 ] => {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +57,21 @@ export const useAuthState = (): [
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
-        setUser(session?.user || null);
+        
+        // Convert User to AuthUser type to match our interface
+        if (session?.user) {
+          const authUser: AuthUser = {
+            id: session.user.id,
+            email: session.user.email || "",
+            app_metadata: session.user.app_metadata,
+            user_metadata: session.user.user_metadata,
+            created_at: session.user.created_at,
+            aud: session.user.aud
+          };
+          setUser(authUser);
+        } else {
+          setUser(null);
+        }
         
         // Don't load profile data within the callback to avoid deadlock
         if (session?.user) {
@@ -80,14 +95,26 @@ export const useAuthState = (): [
     // Check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user || null);
       
+      // Convert User to AuthUser type to match our interface
       if (session?.user) {
+        const authUser: AuthUser = {
+          id: session.user.id,
+          email: session.user.email || "",
+          app_metadata: session.user.app_metadata,
+          user_metadata: session.user.user_metadata,
+          created_at: session.user.created_at,
+          aud: session.user.aud
+        };
+        setUser(authUser);
+        
         const profileData = await fetchProfile(session.user.id);
         setProfile(profileData);
         
         const rolesData = await fetchUserRoles(session.user.id);
         setUserRoles(rolesData);
+      } else {
+        setUser(null);
       }
       
       setIsLoading(false);

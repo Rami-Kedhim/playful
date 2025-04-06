@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) => {
@@ -21,6 +20,19 @@ export const usePasswordManagement = (setIsLoading: (loading: boolean) => void) 
     try {
       setIsLoading(true);
       
+      // If oldPassword is empty, we're in a password reset flow (not an update flow)
+      if (!oldPassword) {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+        
+        if (error) {
+          throw error;
+        }
+        return;
+      }
+      
+      // Otherwise, we're in a password update flow (user knows current password)
       // Get current user email
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !user.email) {

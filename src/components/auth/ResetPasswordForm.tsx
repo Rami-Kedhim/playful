@@ -52,8 +52,8 @@ const ResetPasswordForm = () => {
 
     try {
       setLoading(true);
-      // The updatePassword function will use the token from the URL automatically
-      await updatePassword(password);
+      // Fix: provide a dummy value for oldPassword since we're resetting
+      await updatePassword("", password);
       
       toast({
         title: "Password reset successful",
