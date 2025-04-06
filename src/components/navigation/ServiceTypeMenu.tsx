@@ -8,62 +8,52 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/navigation-menu";
+import { Users, Video, Star } from 'lucide-react';
 
-const ServiceTypeMenu = () => {
+const ServiceTypeMenu: React.FC = () => {
   return (
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger>Services</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid gap-3 p-4 w-[400px] md:w-[500px] grid-cols-2">
-              <ListItem href="/escorts" title="In-Person">
-                Traditional escort services with in-person meetings
-              </ListItem>
-              <ListItem href="/creators" title="Virtual">
-                Online content creators offering photos, videos, and live shows
-              </ListItem>
-              <ListItem href="/metaverse" title="Metaverse">
-                Virtual reality experiences and interactive digital environments
-              </ListItem>
-              <ListItem href="/livecams" title="Live Cams">
-                Real-time interactive webcam performances
-              </ListItem>
-            </ul>
+            <div className="p-4 w-[400px] grid gap-3">
+              <Link to="/escorts" className="group block p-3 space-y-1 rounded-md hover:bg-accent">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Escorts</span>
+                </div>
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  Connect with verified escorts for in-person meetings
+                </p>
+              </Link>
+              
+              <Link to="/creators" className="group block p-3 space-y-1 rounded-md hover:bg-accent">
+                <div className="flex items-center space-x-2">
+                  <Star className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Content Creators</span>
+                </div>
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  Access exclusive content from premium creators
+                </p>
+              </Link>
+              
+              <Link to="/livecams" className="group block p-3 space-y-1 rounded-md hover:bg-accent">
+                <div className="flex items-center space-x-2">
+                  <Video className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Live Cams</span>
+                </div>
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  Engage with live streaming performers in real-time
+                </p>
+              </Link>
+            </div>
           </NavigationMenuContent>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   );
 };
-
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { title: string; href: string }
->(({ className, title, children, href, ...props }, ref) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <Link
-          ref={ref as any}
-          to={href}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-});
-ListItem.displayName = "ListItem";
 
 export default ServiceTypeMenu;

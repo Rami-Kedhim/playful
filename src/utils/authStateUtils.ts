@@ -51,7 +51,7 @@ export const canBoost = (roles: string[], profile: any): boolean => {
          (profile?.subscription_tier === 'premium' || profile?.subscription_tier === 'standard');
 };
 
-// Adding the missing functions
+// Adding the missing handleAuthError and updateLastOnline functions
 export const handleAuthError = (error: unknown): string => {
   const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
   
