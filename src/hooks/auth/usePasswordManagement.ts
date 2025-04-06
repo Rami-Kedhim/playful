@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -7,7 +6,7 @@ export function usePasswordManagement() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
   // Reset password through email
-  const resetPassword = async (email: string): Promise<void> => {
+  const resetPassword = async (email: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -27,6 +26,8 @@ export function usePasswordManagement() {
         title: "Password reset email sent",
         description: "Check your email for the password reset link",
       });
+      
+      return true;
     } catch (error: any) {
       console.error("Error resetting password:", error.message);
       throw error;
@@ -36,7 +37,7 @@ export function usePasswordManagement() {
   };
   
   // Update user's password (requires user to be authenticated)
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<void> => {
+  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       // Note: Supabase doesn't require the old password to update, but we're keeping
@@ -58,6 +59,7 @@ export function usePasswordManagement() {
         title: "Password updated",
         description: "Your password has been updated successfully",
       });
+      return true;
     } catch (error: any) {
       console.error("Error updating password:", error.message);
       throw error;

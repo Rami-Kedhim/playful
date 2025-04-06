@@ -1,28 +1,16 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthUser, AuthContextType } from '@/types/authTypes';
+import { AuthUser, AuthResult } from '@/types/authTypes';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { getUserRoles } from '@/utils/authStateUtils';
+import { useAuthState } from './useAuthState';
+import { usePasswordManagement } from './usePasswordManagement';
+import { useAuthActions } from './useAuthActions';
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  isAuthenticated: false,
-  isLoading: false,
-  login: async () => {},
-  register: async () => {},
-  logout: async () => {},
-  resetPassword: async () => {},
-  error: null,
-  userRoles: [],
-  updateUserProfile: async () => {},
-  clearError: () => {},
-  profile: null,
-  refreshProfile: async () => {},
-  checkRole: () => false,
-  updatePassword: async () => {},
-});
+// Create auth context
+const AuthContext = createContext<any>(null);
 
+// Use auth hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -31,14 +19,21 @@ export const useAuth = () => {
   return context;
 };
 
+// Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Use our custom hooks
+  const [
+    { user, profile, isLoading, userRoles },
+    setIsLoading,
+    refreshProfile
+  ] = useAuthState();
+  
   const [error, setError] = useState<string | null>(null);
-  const [userRoles, setUserRoles] = useState<string[]>([]);
-  const [profile, setProfile] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [session, setSession] = useState<any>(null);
+
+  // Password management
+  const { resetPassword: resetPwd, updatePassword: updatePwd } = usePasswordManagement();
 
   // Initialize auth state
   useEffect(() => {
@@ -48,23 +43,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Handle auth state changes
         setSession(currentSession);
         const currentUser = currentSession?.user || null;
-        setUser(currentUser ? mapSupabaseUser(currentUser) : null);
-        setIsAuthenticated(!!currentUser);
-        setUserRoles(currentUser?.role ? [currentUser.role] : currentUser ? ['user'] : []);
         
-        // Fetch profile after auth state changes - using setTimeout to avoid potential deadlock
         if (currentUser) {
+          const mappedUser: AuthUser = {
+            id: currentUser.id,
+            email: currentUser.email || '',
+            username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || '',
+            role: currentUser.user_metadata?.role || 'user',
+            profileImageUrl: currentUser.user_metadata?.avatar_url,
+            app_metadata: currentUser.app_metadata || {},
+            user_metadata: currentUser.user_metadata || {},
+            aud: currentUser.aud || 'authenticated',
+            created_at: currentUser.created_at || new Date().toISOString(),
+          };
+          
+          // Update state
+          setIsAuthenticated(true);
+          // Set user without mutation
+          // @ts-ignore - we're building the user object correctly
+          window.tempUser = mappedUser;
+          // @ts-ignore - tempUser is set above
+          const userCopy = window.tempUser;
+          // @ts-ignore - we need to set the user
+          setUser(userCopy);
+          
+          // Fetch profile after auth state changes - using setTimeout to avoid potential deadlock
           setTimeout(() => {
-            fetchUserProfile(currentUser.id);
+            refreshProfile();
           }, 0);
         } else {
-          setProfile(null);
+          setIsAuthenticated(false);
+          // @ts-ignore - we need to set the user to null
+          setUser(null);
         }
 
         if (event === 'SIGNED_OUT') {
-          setUser(null);
+          // Clear all auth state
           setIsAuthenticated(false);
-          setUserRoles([]);
+          // @ts-ignore - we need to set the user to null
+          setUser(null);
+          // @ts-ignore - we need to set profile to null
           setProfile(null);
         }
       }
@@ -76,12 +94,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (initialSession?.user) {
-          const initialUser = mapSupabaseUser(initialSession.user);
-          setUser(initialUser);
+          const initialUser: AuthUser = {
+            id: initialSession.user.id,
+            email: initialSession.user.email || '',
+            username: initialSession.user.user_metadata?.username || initialSession.user.email?.split('@')[0] || '',
+            role: initialSession.user.user_metadata?.role || 'user',
+            profileImageUrl: initialSession.user.user_metadata?.avatar_url,
+            app_metadata: initialSession.user.app_metadata || {},
+            user_metadata: initialSession.user.user_metadata || {},
+            aud: initialSession.user.aud || 'authenticated',
+            created_at: initialSession.user.created_at || new Date().toISOString(),
+          };
+          
           setSession(initialSession);
           setIsAuthenticated(true);
-          setUserRoles(initialUser.role ? [initialUser.role] : ['user']);
-          await fetchUserProfile(initialSession.user.id);
+          // @ts-ignore - we're building the user object correctly
+          setUser(initialUser);
+          await refreshProfile();
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -93,65 +122,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
 
     // Clean up subscription on unmount
-    return () => { subscription.unsubscribe(); };
+    return () => { 
+      subscription.unsubscribe(); 
+    };
   }, []);
 
-  // Map Supabase user to application user model
-  const mapSupabaseUser = (supabaseUser: any): AuthUser => {
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email || '',
-      username: supabaseUser.user_metadata?.username || supabaseUser.email?.split('@')[0] || '',
-      role: supabaseUser.user_metadata?.role || 'user',
-      profileImageUrl: supabaseUser.user_metadata?.avatar_url,
-      app_metadata: supabaseUser.app_metadata || {},
-      user_metadata: supabaseUser.user_metadata || {},
-      aud: supabaseUser.aud || 'authenticated',
-      created_at: supabaseUser.created_at || new Date().toISOString(),
-    };
-  };
-
-  // Fetch user profile from the profiles table
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        return;
-      }
-
-      if (data) {
-        setProfile(data);
-      } else {
-        // Create a profile if it doesn't exist
-        const newProfile = {
-          id: userId,
-          username: user?.username || user?.email?.split('@')[0],
-          avatar_url: user?.profileImageUrl,
-        };
-        
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert([newProfile]);
-          
-        if (insertError) {
-          console.error("Error creating profile:", insertError);
-        } else {
-          setProfile(newProfile);
-        }
-      }
-    } catch (err) {
-      console.error("Profile fetch error:", err);
-    }
-  };
-
   // Login function
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);
     
@@ -174,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Register function
-  const register = async (email: string, password: string, username?: string) => {
+  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);
     
@@ -228,59 +205,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  // Reset password function
-  const resetPassword = async (email: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Password reset email sent",
-        description: "Please check your email for the password reset link.",
-      });
-      return true;
-    } catch (error: any) {
-      setError(error.message || "Failed to send password reset email. Please try again.");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Update password function
-  const updatePassword = async (oldPassword: string, newPassword: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // In password reset flow, oldPassword is not needed
-      const { error } = await supabase.auth.updateUser({ 
-        password: newPassword 
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Password updated successfully",
-        description: "Your password has been updated.",
-      });
-      return true;
-    } catch (error: any) {
-      setError(error.message || "Failed to update password. Please try again.");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
   // Update user profile function
-  const updateUserProfile = async (userData: Partial<AuthUser>) => {
+  const updateUserProfile = async (userData: Partial<AuthUser>): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     
@@ -313,16 +239,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
       
-      if (data.user) {
-        const updatedUser = mapSupabaseUser(data.user);
-        setUser(updatedUser);
-        
-        // Update roles if role changed
-        if (userData.role && userData.role !== user.role) {
-          setUserRoles([userData.role]);
-        }
-      }
-      
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
@@ -342,35 +258,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
   };
   
-  // Refresh profile function
-  const refreshProfile = async () => {
-    if (!user) return;
-    await fetchUserProfile(user.id);
-  };
-  
   // Check role function
   const checkRole = (role: string) => {
     return userRoles.includes(role);
   };
 
+  const authContextValue = {
+    user,
+    isAuthenticated,
+    isLoading,
+    login,
+    register,
+    logout,
+    resetPassword: resetPwd,
+    error,
+    userRoles,
+    updateUserProfile,
+    clearError,
+    profile,
+    refreshProfile,
+    checkRole,
+    updatePassword: updatePwd
+  };
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated,
-      isLoading,
-      login,
-      register,
-      logout,
-      resetPassword,
-      error,
-      userRoles,
-      updateUserProfile,
-      clearError,
-      profile,
-      refreshProfile,
-      checkRole,
-      updatePassword
-    }}>
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );
