@@ -1,122 +1,134 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { useTranslation } from "react-i18next";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Home, Heart, Video, MessageCircle, User, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { AnimatedContainer } from '@/components/ui/animated-container';
 
 interface MobileMenuProps {
-  user: any;
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  handleLogout: () => void;
-  hasAdminAccess: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({
-  user,
-  isOpen,
-  setIsOpen,
-  handleLogout,
-  hasAdminAccess,
-}) => {
+const MobileMenu = ({ open = false, onOpenChange }: MobileMenuProps) => {
   const { t } = useTranslation();
-  const { currentLanguage } = useLanguage();
-  const isAuthenticated = !!user;
-
-  const closeMenu = () => setIsOpen(false);
-
+  const { user, isAuthenticated, logout } = useAuth();
+  
   const navItems = [
-    { name: t('nav.home'), path: `/${currentLanguage}`, auth: false },
-    { name: t('nav.escorts'), path: `/${currentLanguage}/escorts`, auth: false },
-    { name: t('nav.creators'), path: `/${currentLanguage}/creators`, auth: false },
-    { name: t('nav.search'), path: `/${currentLanguage}/search`, auth: false },
-    { name: t('nav.metaverse'), path: `/${currentLanguage}/metaverse`, auth: true },
-    { name: t('nav.favorites'), path: `/${currentLanguage}/favorites`, auth: true },
-    { name: t('nav.messages'), path: `/${currentLanguage}/messages`, auth: true },
-    { name: t('nav.profile'), path: `/${currentLanguage}/profile`, auth: true },
+    { icon: Home, label: t('home'), href: '/' },
+    { icon: Heart, label: t('favorites'), href: '/favorites' },
+    { icon: Video, label: t('livecams'), href: '/livecams' },
+    { icon: MessageCircle, label: t('messages'), href: '/messages' },
   ];
-
-  // Add admin routes if user has admin access
-  if (hasAdminAccess) {
-    navItems.push({ name: 'SEO', path: `/${currentLanguage}/seo`, auth: true });
-  }
-
+  
   return (
-    <div className="md:hidden">
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-menu"
-            >
-              <line x1="4" x2="20" y1="12" y2="12"></line>
-              <line x1="4" x2="20" y1="6" y2="6"></line>
-              <line x1="4" x2="20" y1="18" y2="18"></line>
-            </svg>
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right" className="w-[300px]">
-          <SheetHeader>
-            <SheetTitle className="text-left">Menu</SheetTitle>
-          </SheetHeader>
-          <Separator className="my-4" />
-          <nav>
-            <ul className="space-y-3 mt-6">
-              {navItems.map((item) => {
-                // Skip auth-required items if not authenticated
-                if (item.auth && !isAuthenticated) return null;
-                
-                return (
-                  <li key={item.path}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start"
-                      asChild
-                      onClick={closeMenu}
-                    >
-                      <Link to={item.path} className="flex items-center">
-                        <span className="flex-grow text-left">{item.name}</span>
-                        <ChevronRight size={16} />
-                      </Link>
-                    </Button>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-          <Separator className="my-6" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-[85%] sm:w-[350px] pt-10">
+        <SheetHeader className="mb-6">
+          <SheetTitle>{t('menu')}</SheetTitle>
+        </SheetHeader>
+        
+        <div className="flex flex-col gap-3">
+          {navItems.map((item, index) => (
+            <AnimatedContainer key={item.href} delay={0.05 * index} animation="slide-right">
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2 text-lg"
+                asChild
+                onClick={() => onOpenChange && onOpenChange(false)}
+              >
+                <Link to={item.href}>
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              </Button>
+            </AnimatedContainer>
+          ))}
+        </div>
+        
+        <div className="border-t mt-6 pt-6">
           {isAuthenticated ? (
-            <div className="flex flex-col gap-2">
-              <div className="text-sm text-muted-foreground">
-                {t('common.welcomeBack')}, {user?.username || 'User'}
+            <>
+              <div className="flex items-center gap-3 mb-4 px-2">
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground font-medium text-lg">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-medium">{user?.username || user?.email}</p>
+                </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => { handleLogout(); closeMenu(); }}>
-                {t('profile.logout')}
+              
+              <div className="flex flex-col gap-2">
+                <AnimatedContainer delay={0.1} animation="fade">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                    asChild
+                    onClick={() => onOpenChange && onOpenChange(false)}
+                  >
+                    <Link to="/profile">
+                      <User className="h-5 w-5" />
+                      {t('profile')}
+                    </Link>
+                  </Button>
+                </AnimatedContainer>
+                
+                <AnimatedContainer delay={0.15} animation="fade">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                    asChild
+                    onClick={() => onOpenChange && onOpenChange(false)}
+                  >
+                    <Link to="/settings">
+                      <Settings className="h-5 w-5" />
+                      {t('settings')}
+                    </Link>
+                  </Button>
+                </AnimatedContainer>
+                
+                <AnimatedContainer delay={0.2} animation="fade">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start gap-2 text-destructive"
+                    onClick={() => {
+                      if (logout) logout();
+                      onOpenChange && onOpenChange(false);
+                    }}
+                  >
+                    <LogOut className="h-5 w-5" />
+                    {t('logout')}
+                  </Button>
+                </AnimatedContainer>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <Button 
+                className="w-full" 
+                asChild
+                onClick={() => onOpenChange && onOpenChange(false)}
+              >
+                <Link to="/login">{t('login')}</Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                asChild
+                onClick={() => onOpenChange && onOpenChange(false)}
+              >
+                <Link to="/register">{t('register')}</Link>
               </Button>
             </div>
-          ) : (
-            <Button className="w-full" asChild onClick={closeMenu}>
-              <Link to={`/${currentLanguage}/auth`}>{t('nav.signIn')}</Link>
-            </Button>
           )}
-        </SheetContent>
-      </Sheet>
-    </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 
