@@ -36,15 +36,8 @@ export function useAuthFlow(redirectTo: string = '/') {
     setAuthError(null);
     
     try {
-      const result = await login(credentials);
-      if (!result.success) {
-        setAuthError(result.error || 'Failed to login');
-        toast({
-          title: 'Login Failed',
-          description: result.error || 'Please check your credentials and try again',
-          variant: 'destructive',
-        });
-      }
+      await login(credentials.email, credentials.password);
+      // Success is determined by the isAuthenticated state changing
     } catch (error: any) {
       console.error('Login error:', error);
       setAuthError(error.message || 'An unexpected error occurred');
@@ -63,20 +56,8 @@ export function useAuthFlow(redirectTo: string = '/') {
     setAuthError(null);
     
     try {
-      const result = await register(credentials);
-      if (!result.success) {
-        setAuthError(result.error || 'Failed to register');
-        toast({
-          title: 'Registration Failed',
-          description: result.error || 'Please check your information and try again',
-          variant: 'destructive',
-        });
-      } else {
-        toast({
-          title: 'Registration Successful',
-          description: 'Your account has been created successfully',
-        });
-      }
+      await register(credentials.email, credentials.password, credentials.username);
+      // Success is determined by the isAuthenticated state changing
     } catch (error: any) {
       console.error('Registration error:', error);
       setAuthError(error.message || 'An unexpected error occurred');

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { CreatorContent } from "@/types/creator";
@@ -11,10 +10,11 @@ interface ContentManagerContextType {
   totalItems: number;
   currentPage: number;
   itemsPerPage: number;
+  creatorId: string;
   setCurrentPage: (page: number) => void;
   setFilters: (filters: any) => void;
-  saveContent: (data: Partial<CreatorContent>) => Promise<void>;
-  updateContent: (id: string, data: Partial<any>) => Promise<void>;
+  saveContent: (data: Partial<CreatorContent>) => Promise<CreatorContent | null>;
+  updateContent: (id: string, data: Partial<any>) => Promise<CreatorContent | null>;
   refreshContent: () => void;
   isFormOpen: boolean;
   setIsFormOpen: (state: boolean) => void;
@@ -167,13 +167,14 @@ export const ContentManagerProvider: React.FC<{
     }
   };
 
-  const value = {
+  const value: ContentManagerContextType = {
     content,
     loading,
     error,
     totalItems,
     currentPage,
     itemsPerPage,
+    creatorId,
     setCurrentPage,
     setFilters,
     saveContent,

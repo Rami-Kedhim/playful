@@ -39,7 +39,6 @@ const ContentManagerContent = () => {
     isUploaderOpen,
     setIsUploaderOpen,
     handleUploadSuccess,
-    creatorId,
     uploadType,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
@@ -85,7 +84,7 @@ const ContentManagerContent = () => {
       />
 
       <ContentUploader
-        creatorId={creatorId}
+        creatorId={uploadType === 'image' ? 'images' : 'videos'} // Use a generic ID based on the upload type
         isOpen={isUploaderOpen}
         onCancel={() => setIsUploaderOpen(false)}
         onSuccess={handleUploadSuccess}

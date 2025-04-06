@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
@@ -159,7 +158,7 @@ const AppRoutes = () => {
         } />
         
         <Route path="creator-dashboard" element={
-          <ProtectedRoute requiredRole="creator">
+          <ProtectedRoute requiredRoles={["creator"]}>
             <Suspense fallback={<PageLoader />}>
               <CreatorDashboard />
             </Suspense>
@@ -176,7 +175,7 @@ const AppRoutes = () => {
         
         {/* Protected SEO Routes - Require Admin/Moderator roles */}
         <Route path="seo/*" element={
-          <ProtectedRoute requiredRole="admin">
+          <ProtectedRoute requiredRoles={["admin"]}>
             <Suspense fallback={<PageLoader />}>
               <SEODashboard />
             </Suspense>

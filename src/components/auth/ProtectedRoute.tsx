@@ -34,7 +34,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check role-based access if roles are required
   if (requiredRoles.length > 0) {
-    const userRoles = user?.roles || [];
+    const userRoles = user?.userRoles || [];
     const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
     
     if (!hasRequiredRole) {
