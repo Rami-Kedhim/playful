@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -8,7 +8,6 @@ import { useThemeToggle } from '@/hooks/useThemeToggle';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import PageTransition from './PageTransition';
-import { useLocation } from 'react-router-dom';
 
 interface EnhancedAppLayoutProps {
   children?: React.ReactNode;
