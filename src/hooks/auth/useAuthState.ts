@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthState } from "@/types/auth";
@@ -44,13 +44,17 @@ export const useAuthState = (): [
         // Don't load profile data within the callback to avoid deadlock
         if (session?.user) {
           setTimeout(async () => {
-            const profileData = await fetchProfile(session.user.id);
-            setProfile(profileData);
-            
-            const rolesData = await fetchUserRoles(session.user.id);
-            setUserRoles(rolesData);
-            
-            setIsLoading(false);
+            try {
+              const profileData = await fetchProfile(session.user.id);
+              setProfile(profileData);
+              
+              const rolesData = await fetchUserRoles(session.user.id);
+              setUserRoles(rolesData);
+            } catch (error) {
+              console.error("Error loading profile data:", error);
+            } finally {
+              setIsLoading(false);
+            }
           }, 0);
         } else {
           setProfile(null);
@@ -66,11 +70,15 @@ export const useAuthState = (): [
       setUser(session?.user || null);
       
       if (session?.user) {
-        const profileData = await fetchProfile(session.user.id);
-        setProfile(profileData);
-        
-        const rolesData = await fetchUserRoles(session.user.id);
-        setUserRoles(rolesData);
+        try {
+          const profileData = await fetchProfile(session.user.id);
+          setProfile(profileData);
+          
+          const rolesData = await fetchUserRoles(session.user.id);
+          setUserRoles(rolesData);
+        } catch (error) {
+          console.error("Error loading initial profile:", error);
+        }
       }
       
       setIsLoading(false);

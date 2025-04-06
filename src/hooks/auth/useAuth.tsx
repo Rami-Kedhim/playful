@@ -1,9 +1,8 @@
 
-import { createContext, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 import { AuthContextValue } from "@/types/auth";
 import { useAuthState } from "@/hooks/auth/useAuthState";
 import { useAuthentication } from "@/hooks/auth/useAuthentication";
-import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/use-toast";
 
