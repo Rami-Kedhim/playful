@@ -13,6 +13,7 @@ import { Loader2, CheckCircle, Brain, AlertTriangle, History } from 'lucide-reac
 import { SeoOptimizationResult } from '@/services/seo/HermesSeoService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import HermesSeoMetrics from './HermesSeoMetrics';
+import HermesSeoRecommendations from './HermesSeoRecommendations';
 import { toast } from '@/components/ui/use-toast';
 
 interface HermesSeoOptimizerProps {
@@ -99,6 +100,13 @@ const HermesSeoOptimizer: React.FC<HermesSeoOptimizerProps> = ({
       }
     }
   };
+
+  // Parse keywords string into array
+  const getKeywordsArray = () => {
+    return keywords.split(',')
+      .map(kw => kw.trim())
+      .filter(kw => kw.length > 0);
+  };
   
   return (
     <Card className="w-full">
@@ -123,8 +131,11 @@ const HermesSeoOptimizer: React.FC<HermesSeoOptimizerProps> = ({
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="px-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="edit">Edit Content</TabsTrigger>
+            <TabsTrigger value="recommendations">
+              Recommendations
+            </TabsTrigger>
             <TabsTrigger value="metrics">
               Metrics
               {optimizationResult && <Badge variant="outline" className="ml-2">{optimizationResult.visibilityScore}%</Badge>}
@@ -218,6 +229,17 @@ const HermesSeoOptimizer: React.FC<HermesSeoOptimizerProps> = ({
                 </div>
               </div>
             )}
+          </CardContent>
+        </TabsContent>
+
+        <TabsContent value="recommendations" className="p-0">
+          <CardContent className="pt-4">
+            <HermesSeoRecommendations
+              title={title}
+              description={description}
+              keywords={getKeywordsArray()}
+              contentType={selectedContentType}
+            />
           </CardContent>
         </TabsContent>
 
