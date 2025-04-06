@@ -7,6 +7,12 @@ export type UserRole = 'user' | 'moderator' | 'admin' | 'escort' | 'creator' | s
 // Type for gender in the database
 export type DatabaseGender = 'male' | 'female' | 'other';
 
+// Type for the authentication result
+export interface AuthResult {
+  success: boolean;
+  error?: string | null;
+}
+
 // Type for the authentication user
 export interface AuthUser {
   id: string;
@@ -61,12 +67,12 @@ export interface AuthState {
 // Auth context value interface
 export interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, username?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (email: string, password: string, username?: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
-  updateUserProfile: (userData: Partial<AuthUser>) => Promise<void>;
+  resetPassword: (email: string) => Promise<boolean>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
   error: string | null;
   clearError: () => void;
   refreshProfile: () => Promise<void>;

@@ -1,3 +1,4 @@
+
 export interface AuthUser {
   id: string;
   username?: string;
@@ -20,20 +21,25 @@ export interface AuthUser {
   created_at?: string;
 }
 
+export interface AuthResult {
+  success: boolean;
+  error?: string | null;
+}
+
 export interface AuthContextType {
   user: AuthUser | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
   userRoles: string[];
-  register: (email: string, password: string, username?: string) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updateUserProfile: (userData: Partial<AuthUser>) => Promise<void>;
+  register: (email: string, password: string, username?: string) => Promise<AuthResult>;
+  resetPassword: (email: string) => Promise<boolean>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
   clearError: () => void;
   profile: any;
   refreshProfile: () => Promise<void>;
   checkRole: (role: string) => boolean;
-  updatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
 }

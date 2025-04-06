@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeProvider } from '@/components/theme-provider'; // Corrected import path
 import { AuthProvider } from '@/hooks/auth/useAuth';
 import AppRoutes from './Routes';
 
