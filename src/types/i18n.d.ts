@@ -28,7 +28,7 @@ declare module 'react-i18next' {
 
   export function withTranslation(ns?: string | string[]): <P extends WithTranslationProps>(
     component: React.ComponentType<P>
-  ) => React.ComponentType<Omit<P, keyof WithTranslationProps>>;
+  ) => React.ComponentClass<Omit<P, keyof WithTranslationProps>>;
 
   export interface TransProps {
     i18nKey?: string | string[];
@@ -48,7 +48,7 @@ declare module 'react-i18next' {
 // Type definitions for i18next
 declare module 'i18next' {
   export interface InitOptions {
-    resources?: any;
+    resources?: Record<string, Record<string, Record<string, string>>>;
     lng?: string;
     fallbackLng?: string | string[];
     ns?: string | string[];
@@ -98,10 +98,4 @@ declare module 'i18next-browser-languagedetector' {
     cacheUserLanguage(lng: string): void;
     type: 'languageDetector';
   }
-}
-
-// Type definitions for JSON modules
-declare module '*.json' {
-  const value: Record<string, any>;
-  export default value;
 }
