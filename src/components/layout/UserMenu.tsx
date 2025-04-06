@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { LogOut, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 import {
   DropdownMenu,
   DropdownMenuContent,
