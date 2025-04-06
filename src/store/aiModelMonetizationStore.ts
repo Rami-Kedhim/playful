@@ -2,7 +2,10 @@
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
-import { AIAnalyticsService } from "@/services/ai/aiAnalyticsService";
+import { ContentService } from "@/services/contentService";
+import { BoostService } from "@/services/boostService";
+import { GiftService } from "@/services/giftService";
+import { AIAnalyticsService } from "@/services/analyticsService";
 
 interface AIModelMonetizationState {
   unlockedContent: string[];
@@ -42,23 +45,15 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   purchaseContent: async (contentId, profileId, price) => {
     try {
       set({ loading: true, error: null });
+      const success = await ContentService.purchaseContent(contentId, profileId, price);
       
-      // In a real app, this would call a Supabase function to handle the transaction
-      // For this demo, we'll simulate a successful purchase
+      if (success) {
+        set(state => ({ 
+          unlockedContent: [...state.unlockedContent, contentId] 
+        }));
+      }
       
-      // Track purchase analytics
-      await AIAnalyticsService.trackEvent(
-        profileId,
-        'content_purchase',
-        { contentId, price }
-      );
-      
-      // Add to unlocked content
-      set(state => ({ 
-        unlockedContent: [...state.unlockedContent, contentId] 
-      }));
-      
-      return true;
+      return success;
     } catch (error: any) {
       set({ error: error.message || "Failed to purchase content" });
       return false;
@@ -70,33 +65,27 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   sendGift: async (profileId, giftType, amount) => {
     try {
       set({ loading: true, error: null });
+      const success = await GiftService.sendGift({ profileId, giftType, amount });
       
-      // In a real app, this would call a Supabase function to handle the transaction
-      // For this demo, we'll simulate a successful gift
+      if (success) {
+        // Mock gift for the UI
+        const mockGift: AIGift = {
+          id: Math.random().toString(36).substring(2, 15),
+          gift_type: giftType,
+          name: giftType,
+          description: `A ${giftType} gift`,
+          price: amount,
+          user_id: 'current-user',
+          profile_id: profileId,
+          created_at: new Date().toISOString()
+        };
+        
+        set(state => ({ 
+          sentGifts: [...state.sentGifts, mockGift] 
+        }));
+      }
       
-      const mockGift: AIGift = {
-        id: Math.random().toString(36).substring(2, 15),
-        gift_type: giftType,
-        name: giftType, // Required property
-        description: `A ${giftType} gift`, // Required property
-        price: amount, // Required property
-        user_id: 'current-user',
-        profile_id: profileId,
-        created_at: new Date().toISOString()
-      };
-      
-      // Track gift analytics
-      await AIAnalyticsService.trackEvent(
-        profileId,
-        'gift',
-        { giftType, amount }
-      );
-      
-      set(state => ({ 
-        sentGifts: [...state.sentGifts, mockGift] 
-      }));
-      
-      return true;
+      return success;
     } catch (error: any) {
       set({ error: error.message || "Failed to send gift" });
       return false;
@@ -108,37 +97,31 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   boostProfile: async (profileId, amount, durationHours) => {
     try {
       set({ loading: true, error: null });
+      const success = await BoostService.boostProfile({ profileId, amount, durationHours });
       
-      // In a real app, this would call a Supabase function to handle the transaction
-      // For this demo, we'll simulate a successful boost
+      if (success) {
+        // Mock boost for the UI
+        const now = new Date();
+        const endTime = new Date();
+        endTime.setHours(now.getHours() + durationHours);
+        
+        const mockBoost: AIBoost = {
+          id: Math.random().toString(36).substring(2, 15),
+          profile_id: profileId,
+          user_id: 'current-user',
+          boost_amount: amount,
+          boost_level: Math.ceil(amount / 20),
+          start_time: now.toISOString(),
+          end_time: endTime.toISOString(),
+          status: 'active'
+        };
+        
+        set(state => ({ 
+          activeBoosts: [...state.activeBoosts, mockBoost] 
+        }));
+      }
       
-      const now = new Date();
-      const endTime = new Date();
-      endTime.setHours(now.getHours() + durationHours);
-      
-      const mockBoost: AIBoost = {
-        id: Math.random().toString(36).substring(2, 15),
-        profile_id: profileId,
-        user_id: 'current-user',
-        boost_amount: amount,
-        boost_level: Math.ceil(amount / 20), // Simple formula for boost level
-        start_time: now.toISOString(),
-        end_time: endTime.toISOString(),
-        status: 'active'
-      };
-      
-      // Track boost analytics
-      await AIAnalyticsService.trackEvent(
-        profileId,
-        'boost',
-        { amount, durationHours, boostLevel: mockBoost.boost_level }
-      );
-      
-      set(state => ({ 
-        activeBoosts: [...state.activeBoosts, mockBoost] 
-      }));
-      
-      return true;
+      return success;
     } catch (error: any) {
       set({ error: error.message || "Failed to boost profile" });
       return false;
@@ -203,7 +186,6 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
     return get().unlockedContent.includes(contentId);
   },
   
-  // Methods for automated monetization
   trackContentView: (contentId) => {
     set(state => ({
       premiumContentViews: {
@@ -220,32 +202,18 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   },
   
   getProfileBoostLevel: (profileId) => {
-    const now = new Date();
-    const activeBoost = get().activeBoosts.find(
-      boost => boost.profile_id === profileId && 
-              new Date(boost.end_time) > now
-    );
-    
-    return activeBoost ? activeBoost.boost_level : 0;
+    return BoostService.getProfileBoostLevel(get().activeBoosts, profileId);
   },
   
   unlockImage: async (profileId, imageUrl, price) => {
     try {
       set({ loading: true, error: null });
       
-      // Generate a unique content ID for the image
-      const imageId = `image-${profileId}-${imageUrl.split('/').pop()}`;
-      
-      // Use the existing purchaseContent function
-      const success = await get().purchaseContent(imageId, profileId, price);
+      const success = await ContentService.unlockImage({ profileId, imageUrl, price });
       
       if (success) {
-        // Track analytics for image unlocking
-        await AIAnalyticsService.trackEvent(
-          profileId,
-          'image_unlock',
-          { imageUrl, price }
-        );
+        // Generate a unique content ID for the image (same as in service)
+        const imageId = `image-${profileId}-${imageUrl.split('/').pop()}`;
         
         // Add to unlocked content
         set(state => ({
@@ -263,27 +231,18 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   },
   
   isImageUnlocked: (profileId, imageUrl) => {
-    const imageId = `image-${profileId}-${imageUrl.split('/').pop()}`;
-    return get().unlockedContent.includes(imageId);
+    return ContentService.isImageUnlocked(get().unlockedContent, profileId, imageUrl);
   },
   
   unlockVideo: async (profileId, videoId, price) => {
     try {
       set({ loading: true, error: null });
       
-      // Generate a unique content ID for the video
-      const contentId = `video-${profileId}-${videoId}`;
-      
-      // Use the existing purchaseContent function
-      const success = await get().purchaseContent(contentId, profileId, price);
+      const success = await ContentService.unlockVideo({ profileId, videoId, price });
       
       if (success) {
-        // Track analytics for video unlocking
-        await AIAnalyticsService.trackEvent(
-          profileId,
-          'video_unlock',
-          { videoId, price }
-        );
+        // Generate a unique content ID for the video (same as in service)
+        const contentId = `video-${profileId}-${videoId}`;
         
         // Add to unlocked content
         set(state => ({
@@ -301,8 +260,7 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   },
   
   isVideoUnlocked: (profileId, videoId) => {
-    const contentId = `video-${profileId}-${videoId}`;
-    return get().unlockedContent.includes(contentId);
+    return ContentService.isVideoUnlocked(get().unlockedContent, profileId, videoId);
   }
 }));
 
