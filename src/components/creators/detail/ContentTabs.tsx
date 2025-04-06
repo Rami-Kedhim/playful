@@ -1,13 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Globe, Clock, Tv, Lock, Image as ImageIcon, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import StarRating from "@/components/ui/StarRating";
-import VirtualContentGallery from "@/components/creators/detail/VirtualContentGallery";
+import { Card, CardContent } from "@/components/ui/card";
+import { Lock, Image as ImageIcon, Video, Clock } from "lucide-react";
 import { Creator } from "@/hooks/useCreators";
+import { Badge } from "@/components/ui/badge";
 
 interface ContentTabsProps {
   creator: Creator;
@@ -15,8 +13,26 @@ interface ContentTabsProps {
 }
 
 const ContentTabs: React.FC<ContentTabsProps> = ({ creator, handleSubscribe }) => {
+  const [activeTab, setActiveTab] = useState("about");
+
+  // Placeholder for when we don't have actual content
+  const dummyImages = Array(6).fill(null).map((_, i) => ({
+    id: `img-${i}`,
+    url: `https://source.unsplash.com/random/300x300?sig=${i}`,
+    title: `Image ${i+1}`,
+    isPremium: i % 3 === 0
+  }));
+
+  const dummyVideos = Array(4).fill(null).map((_, i) => ({
+    id: `vid-${i}`,
+    thumbnailUrl: `https://source.unsplash.com/random/300x200?sig=${i+10}`,
+    title: `Video ${i+1}`,
+    duration: Math.floor(Math.random() * 10) + 1,
+    isPremium: i % 2 === 0
+  }));
+
   return (
-    <Tabs defaultValue="about" className="w-full">
+    <Tabs defaultValue="about" value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid grid-cols-5 w-full">
         <TabsTrigger value="about">About</TabsTrigger>
         <TabsTrigger value="photos">Photos</TabsTrigger>
@@ -28,40 +44,16 @@ const ContentTabs: React.FC<ContentTabsProps> = ({ creator, handleSubscribe }) =
       <TabsContent value="about" className="mt-4">
         <Card>
           <CardContent className="pt-6">
-            <h3 className="text-xl font-semibold mb-2">About Me</h3>
-            <p className="mb-6 text-gray-600 dark:text-gray-400">{creator.bio || "This creator hasn't added a bio yet."}</p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-              <div className="flex flex-col items-center p-3 bg-muted rounded-md">
-                <div className="mb-1">
-                  <StarRating rating={creator.rating || 0} size={18} />
-                </div>
-                <span className="font-semibold">{creator.rating?.toFixed(1) || "0.0"}/5</span>
-                <span className="text-xs text-gray-500">Rating</span>
-              </div>
-              <div className="flex flex-col items-center p-3 bg-muted rounded-md">
-                <ImageIcon className="mb-1 text-blue-500" size={20} />
-                <span className="font-semibold">{creator.contentCount.photos}</span>
-                <span className="text-xs text-gray-500">Photos</span>
-              </div>
-              <div className="flex flex-col items-center p-3 bg-muted rounded-md">
-                <Video className="mb-1 text-red-500" size={20} />
-                <span className="font-semibold">{creator.contentCount.videos}</span>
-                <span className="text-xs text-gray-500">Videos</span>
-              </div>
-              <div className="flex flex-col items-center p-3 bg-muted rounded-md">
-                <Globe className="mb-1 text-green-500" size={20} />
-                <span className="font-semibold">Virtual</span>
-                <span className="text-xs text-gray-500">Experience</span>
-              </div>
-            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              {creator.bio || "This creator hasn't added a bio yet."}
+            </p>
             
             {creator.tags && creator.tags.length > 0 && (
-              <div className="mb-4">
-                <h4 className="text-sm font-semibold mb-2">Categories</h4>
+              <div className="mt-6">
+                <h3 className="text-sm font-medium mb-2">Tags</h3>
                 <div className="flex flex-wrap gap-2">
                   {creator.tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="capitalize">
+                    <Badge key={tag} variant="secondary">
                       {tag}
                     </Badge>
                   ))}
@@ -73,72 +65,107 @@ const ContentTabs: React.FC<ContentTabsProps> = ({ creator, handleSubscribe }) =
       </TabsContent>
       
       <TabsContent value="photos" className="mt-4">
-        <VirtualContentGallery 
-          creatorId={creator.id}
-          username={creator.name}
-        />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {dummyImages.map(image => (
+            <div key={image.id} className="relative rounded-lg overflow-hidden aspect-square">
+              <img 
+                src={image.url} 
+                alt={image.title}
+                className="w-full h-full object-cover"
+              />
+              {image.isPremium && (
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                  <Lock className="h-8 w-8 text-white mb-2" />
+                  <p className="text-white text-sm">Premium Content</p>
+                  <Button 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={handleSubscribe}
+                  >
+                    Subscribe to View
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </TabsContent>
       
       <TabsContent value="videos" className="mt-4">
-        <VirtualContentGallery 
-          creatorId={creator.id}
-          username={creator.name}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {dummyVideos.map(video => (
+            <div key={video.id} className="relative rounded-lg overflow-hidden">
+              <div className="aspect-video relative">
+                <img 
+                  src={video.thumbnailUrl} 
+                  alt={video.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  {video.duration}:00
+                </div>
+              </div>
+              <p className="mt-2 font-medium">{video.title}</p>
+              
+              {video.isPremium && (
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                  <Lock className="h-8 w-8 text-white mb-2" />
+                  <p className="text-white text-sm">Premium Content</p>
+                  <Button 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={handleSubscribe}
+                  >
+                    Subscribe to View
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </TabsContent>
       
       <TabsContent value="live" className="mt-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 flex flex-col items-center justify-center py-12">
             {creator.isLive ? (
-              <div>
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-black mb-4">
-                  <img 
-                    src={`https://picsum.photos/1280/720?random=${creator.id}`} 
-                    alt={`${creator.name} livestream`}
-                    className="object-cover w-full h-full opacity-60"
-                  />
-                  <div className="absolute top-4 left-4 flex items-center">
-                    <Badge className="bg-red-500 animate-pulse mr-2">LIVE</Badge>
-                    <span className="text-white text-sm flex items-center">
-                      <Clock size={14} className="mr-1" /> 1:32:45
-                    </span>
+              <div className="text-center">
+                <div className="w-full max-w-2xl aspect-video bg-gray-800 rounded-lg mb-6 flex items-center justify-center relative">
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-red-500 animate-pulse">LIVE</Badge>
                   </div>
-                  <div className="absolute bottom-4 left-0 right-0 text-center">
-                    <Button className="bg-red-500 hover:bg-red-600">Join Livestream</Button>
-                  </div>
+                  <Button onClick={handleSubscribe}>Join Live Stream</Button>
                 </div>
-                
-                <h3 className="text-xl font-semibold mb-2">Current Livestream</h3>
-                <p className="text-gray-500 mb-4">Join {creator.name} for an exclusive Q&A session!</p>
+                <h3 className="font-bold text-xl">Live Stream in Progress!</h3>
+                <p className="text-gray-500 mt-2">Subscribe now to join the live stream</p>
               </div>
             ) : (
-              <div className="text-center py-12">
-                <Tv className="mx-auto mb-2 text-gray-400" size={48} />
-                <h3 className="font-medium text-xl mb-2">Not Currently Live</h3>
-                <p className="text-gray-500 mb-4">
-                  {creator.name} isn't streaming right now. Subscribe to get notified when they go live!
+              <div className="text-center">
+                <Clock className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="font-bold text-xl">No Live Stream</h3>
+                <p className="text-gray-500 mt-2">
+                  {creator.name} is not currently streaming. Subscribe to get notified of upcoming streams.
                 </p>
-                <Button variant="outline">Get Notified</Button>
+                <Button className="mt-6" onClick={handleSubscribe}>
+                  Subscribe for Notifications
+                </Button>
               </div>
             )}
           </CardContent>
         </Card>
       </TabsContent>
-
+      
       <TabsContent value="exclusives" className="mt-4">
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <Lock className="mx-auto mb-4 text-primary" size={36} />
-              <h3 className="font-medium text-xl mb-3">Premium Exclusive Content</h3>
-              <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                Subscribe to unlock exclusive content including private photos, 
-                personal video calls, and custom content.
-              </p>
-              <Button onClick={handleSubscribe} className="bg-gradient-to-r from-purple-500 to-pink-500">
-                Subscribe Now
-              </Button>
-            </div>
+          <CardContent className="pt-6 flex flex-col items-center justify-center py-12">
+            <Lock className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="font-bold text-xl">Premium Content</h3>
+            <p className="text-gray-500 mt-2 text-center max-w-md mx-auto">
+              Subscribe to {creator.name}'s channel to unlock exclusive content, private messaging, and special perks.
+            </p>
+            <Button className="mt-6" onClick={handleSubscribe}>
+              Subscribe Now
+            </Button>
           </CardContent>
         </Card>
       </TabsContent>

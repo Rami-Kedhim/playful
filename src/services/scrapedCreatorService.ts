@@ -1,102 +1,107 @@
 
-import { ContentCreator } from "@/types/creator";
-import { toast } from "@/components/ui/use-toast";
+import { Creator } from "@/hooks/useCreators";
 
-interface ScrapedCreatorData {
-  username: string;
-  name: string;
-  bio?: string;
-  imageUrl: string;
-  tags?: string[];
-  previewImages: string[];
-  previewVideos: string[];
-}
-
-// This would typically be fetched from a backend API that handles the scraping
-// For now, it returns mock data to simulate scraped profiles
-export async function fetchScrapedCreators(): Promise<ContentCreator[]> {
-  try {
-    // In a real implementation, this would be an API call to the scraper service
-    // For example: const response = await fetch('/api/scraped-creators');
-    
-    // Mock data to simulate scraped profiles
-    const scrapedData: ScrapedCreatorData[] = [
-      {
-        username: "sophia_dream",
-        name: "Sophia",
-        bio: "Virtual creator bringing your fantasies to life. Premium content updated daily.",
-        imageUrl: "https://picsum.photos/seed/sophia/400/600",
-        tags: ["glamour", "cosplay", "virtual"],
-        previewImages: [
-          "https://picsum.photos/seed/sophia1/800/600",
-          "https://picsum.photos/seed/sophia2/800/600",
-        ],
-        previewVideos: ["https://example.com/video1.mp4"]
-      },
-      {
-        username: "aria_nights",
-        name: "Aria",
-        bio: "Digital fantasy creator. Exclusive content for my subscribers.",
-        imageUrl: "https://picsum.photos/seed/aria/400/600",
-        tags: ["fantasy", "roleplay", "virtual"],
-        previewImages: [
-          "https://picsum.photos/seed/aria1/800/600",
-          "https://picsum.photos/seed/aria2/800/600",
-        ],
-        previewVideos: []
-      },
-      {
-        username: "jade_virtual",
-        name: "Jade",
-        bio: "Your virtual companion. New content every week.",
-        imageUrl: "https://picsum.photos/seed/jade/400/600",
-        tags: ["casual", "lifestyle", "virtual"],
-        previewImages: [
-          "https://picsum.photos/seed/jade1/800/600",
-          "https://picsum.photos/seed/jade2/800/600",
-        ],
-        previewVideos: ["https://example.com/video2.mp4"]
-      }
-    ];
-    
-    // Transform scraped data to match ContentCreator interface
-    return scrapedData.map(profile => ({
-      id: `scraped-${profile.username}`,
-      name: profile.name,
-      username: profile.username,
-      imageUrl: profile.imageUrl,
-      bio: profile.bio,
-      isPremium: true,
-      isLive: false,
-      isAI: true,
-      subscriberCount: Math.floor(Math.random() * 5000) + 1000,
-      contentCount: {
-        photos: profile.previewImages.length + Math.floor(Math.random() * 20) + 10,
-        videos: profile.previewVideos.length + Math.floor(Math.random() * 5) + 1
-      },
-      price: Math.floor(Math.random() * 10) + 5, // Random price between 5-15
-      tags: profile.tags,
-      rating: (Math.random() * 1) + 4, // Random rating between 4-5
-      createdAt: new Date().toISOString()
-    }));
-  } catch (error: any) {
-    console.error("Error fetching scraped creators:", error);
-    toast({
-      title: "Error",
-      description: "Failed to load virtual creators",
-      variant: "destructive",
-    });
-    return [];
+// Mock scraped creators - in a real app this would be fetched from an API
+const scrapedCreators: Creator[] = [
+  {
+    id: "scraped-glow_goddess",
+    name: "Glow Goddess",
+    username: "glow_goddess",
+    imageUrl: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    bio: "Model, influencer, and travel enthusiast. I share my journeys and exclusive content with my subscribers.",
+    isPremium: true,
+    isLive: false,
+    isAI: false,
+    subscriberCount: 5430,
+    contentCount: {
+      photos: 214,
+      videos: 18
+    },
+    price: 14.99,
+    tags: ["fashion", "travel", "lifestyle"],
+    rating: 4.6,
+    region: "UK",
+    language: "en"
+  },
+  {
+    id: "scraped-virtual_muse",
+    name: "Virtual Muse",
+    username: "virtual_muse",
+    imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    bio: "AI-generated art and fashion. A digital persona bringing you creative content from the virtual realm.",
+    isPremium: true,
+    isLive: false,
+    isAI: true,
+    subscriberCount: 3280,
+    contentCount: {
+      photos: 145,
+      videos: 7
+    },
+    price: 9.99,
+    tags: ["ai", "digital-art", "fashion"],
+    rating: 4.4,
+    region: "Digital",
+    language: "en"
+  },
+  {
+    id: "scraped-fitness_fox",
+    name: "Fitness Fox",
+    username: "fitness_fox",
+    imageUrl: "https://images.unsplash.com/photo-1550259979-ed79b48d2a30?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    bio: "Personal trainer and nutrition expert. Sharing workout routines, meal plans, and fitness tips.",
+    isPremium: false,
+    isLive: true,
+    isAI: false,
+    subscriberCount: 7820,
+    contentCount: {
+      photos: 89,
+      videos: 34
+    },
+    price: 19.99,
+    tags: ["fitness", "health", "nutrition"],
+    rating: 4.9,
+    region: "Canada",
+    language: "en"
   }
-}
+];
 
-// Get a specific scraped creator by username
-export async function getScrapedCreatorByUsername(username: string): Promise<ContentCreator | null> {
-  try {
-    const creators = await fetchScrapedCreators();
-    return creators.find(creator => creator.username === username) || null;
-  } catch (error) {
-    console.error("Error fetching scraped creator:", error);
-    return null;
-  }
-}
+/**
+ * Fetch all scraped creators
+ */
+export const fetchScrapedCreators = async (): Promise<Creator[]> => {
+  // In a real app, this would be an API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(scrapedCreators);
+    }, 300);
+  });
+};
+
+/**
+ * Fetch a specific creator by username
+ */
+export const getScrapedCreatorByUsername = async (username: string): Promise<Creator | null> => {
+  // In a real app, this would be an API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const creator = scrapedCreators.find(c => c.username === username);
+      resolve(creator || null);
+    }, 200);
+  });
+};
+
+/**
+ * Fetch related creators
+ */
+export const fetchRelatedCreators = async (creatorId: string, limit = 3): Promise<Creator[]> => {
+  // In a real app, this would use some kind of recommendation algorithm
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Filter out the current creator and return others
+      const otherCreators = scrapedCreators.filter(c => c.id !== creatorId);
+      // Randomly pick a subset
+      const shuffled = [...otherCreators].sort(() => 0.5 - Math.random());
+      resolve(shuffled.slice(0, limit));
+    }, 300);
+  });
+};

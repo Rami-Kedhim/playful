@@ -1,185 +1,74 @@
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Image, Film, MessageSquare, Loader2, AlertCircle } from "lucide-react";
-import VirtualContentGrid from "@/components/creators/VirtualContentGrid";
-import useVirtualCreatorContent from "@/hooks/useVirtualCreatorContent";
-import { ContentType } from "@/hooks/useVirtualContent";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { logContentAction } from "@/utils/debugUtils";
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Lock } from 'lucide-react';
 
-export interface VirtualContentGalleryProps {
-  creatorId: string;
-  username: string;
+interface VirtualContentGalleryProps {
+  isPremium?: boolean;
+  onSubscribe?: () => void;
+  items: {
+    id: string;
+    url: string;
+    title: string;
+    isPremium?: boolean;
+  }[];
 }
 
 const VirtualContentGallery: React.FC<VirtualContentGalleryProps> = ({
-  creatorId,
-  username
+  isPremium = false,
+  onSubscribe = () => {},
+  items = []
 }) => {
-  const [activeTab, setActiveTab] = useState<ContentType>("photo");
-  const { content, loading, error, hasMore, loadMore } = useVirtualCreatorContent(creatorId);
-  const [isEmpty, setIsEmpty] = useState<boolean>(false);
+  if (isPremium) {
+    return (
+      <Card className="p-6 flex flex-col items-center justify-center text-center">
+        <Lock className="h-12 w-12 text-primary/50 mb-4" />
+        <h3 className="text-xl font-semibold mb-2">Premium Content</h3>
+        <p className="text-muted-foreground mb-4">
+          This content is only available to premium subscribers.
+        </p>
+        <Button onClick={onSubscribe}>Subscribe to View</Button>
+      </Card>
+    );
+  }
 
-  useEffect(() => {
-    logContentAction('Content gallery rendered', { 
-      creatorId, 
-      username, 
-      activeTab 
-    });
-    
-    // Check if there's content for the active tab
-    if (!loading && !error) {
-      const hasContent = content.some(item => item.type === activeTab);
-      setIsEmpty(!hasContent);
-      logContentAction('Content tab check', { 
-        activeTab, 
-        hasContent, 
-        totalItems: content.length 
-      });
-    }
-  }, [activeTab, content, loading, error, creatorId, username]);
+  if (items.length === 0) {
+    return (
+      <Card className="p-6 text-center">
+        <p className="text-muted-foreground">No content available yet.</p>
+      </Card>
+    );
+  }
 
-  const handleTabChange = useCallback((value: string) => {
-    logContentAction('Tab changed', { from: activeTab, to: value });
-    setActiveTab(value as ContentType);
-  }, [activeTab]);
-  
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-xl">Exclusive Content</CardTitle>
-        <CardDescription>
-          Unlock exclusive content from {username}
-        </CardDescription>
-      </CardHeader>
-      
-      <Tabs 
-        defaultValue="photo" 
-        onValueChange={handleTabChange}
-        data-testid="content-tabs"
-      >
-        <div className="px-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="photo" className="flex items-center gap-2" data-testid="photo-tab">
-              <Image className="h-4 w-4" />
-              <span className="hidden sm:inline">Photos</span>
-            </TabsTrigger>
-            <TabsTrigger value="video" className="flex items-center gap-2" data-testid="video-tab">
-              <Film className="h-4 w-4" />
-              <span className="hidden sm:inline">Videos</span>
-            </TabsTrigger>
-            <TabsTrigger value="message" className="flex items-center gap-2" data-testid="message-tab">
-              <MessageSquare className="h-4 w-4" />
-              <span className="hidden sm:inline">Messages</span>
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <CardContent className="pt-6">
-          {loading ? (
-            <div className="text-center p-8" data-testid="content-loading">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-              <p className="text-muted-foreground">Loading content...</p>
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {items.map(item => (
+        <div key={item.id} className="relative group rounded-md overflow-hidden">
+          <img 
+            src={item.url} 
+            alt={item.title}
+            className="w-full aspect-square object-cover transition-transform group-hover:scale-105"
+          />
+          {item.isPremium && (
+            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+              <Lock className="h-8 w-8 text-white mb-2" />
+              <p className="text-white text-sm">Premium Content</p>
+              <Button 
+                size="sm" 
+                className="mt-2"
+                onClick={onSubscribe}
+              >
+                Subscribe to View
+              </Button>
             </div>
-          ) : error ? (
-            <Alert variant="destructive" className="mb-4" data-testid="content-error">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>
-                {error}
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <>
-              <TabsContent value="photo" data-testid="photo-content">
-                {isEmpty ? (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <Image className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No photos available yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <VirtualContentGrid 
-                      items={content.filter(item => item.type === "photo")} 
-                      columns={2}
-                    />
-                    
-                    {hasMore && (
-                      <div className="text-center pt-4">
-                        <Button 
-                          variant="outline" 
-                          onClick={loadMore}
-                          data-testid="load-more-button"
-                        >
-                          Load More
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="video" data-testid="video-content">
-                {isEmpty ? (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <Film className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No videos available yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <VirtualContentGrid 
-                      items={content.filter(item => item.type === "video")} 
-                      columns={2}
-                    />
-                    
-                    {hasMore && (
-                      <div className="text-center pt-4">
-                        <Button 
-                          variant="outline" 
-                          onClick={loadMore}
-                          data-testid="load-more-button"
-                        >
-                          Load More
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="message" data-testid="message-content">
-                {isEmpty ? (
-                  <div className="text-center p-8 text-muted-foreground">
-                    <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No messages available yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <VirtualContentGrid 
-                      items={content.filter(item => item.type === "message")} 
-                      columns={2}
-                    />
-                    
-                    {hasMore && (
-                      <div className="text-center pt-4">
-                        <Button 
-                          variant="outline" 
-                          onClick={loadMore}
-                          data-testid="load-more-button"
-                        >
-                          Load More
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </TabsContent>
-            </>
           )}
-        </CardContent>
-      </Tabs>
-    </Card>
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+            <p className="text-white text-sm">{item.title}</p>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 

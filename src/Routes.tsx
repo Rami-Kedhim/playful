@@ -6,6 +6,7 @@ import Index from './pages/Index';
 import SEODashboard from './pages/SEODashboard';
 import Escorts from './pages/Escorts';
 import Creators from './pages/Creators';
+import CreatorDetail from './pages/CreatorDetail';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RoleGuard from './components/auth/RoleGuard';
 import { useAuth } from './hooks/auth/useAuth';
@@ -60,6 +61,7 @@ const AppRoutes = () => {
         <Route index element={<Index />} />
         <Route path="escorts" element={<Escorts />} />
         <Route path="creators" element={<Creators />} />
+        <Route path="creators/:username" element={<CreatorDetail />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="auth" element={<AuthPage />} />
         <Route path="ai-profiles" element={<AIProfiles />} />
