@@ -26,7 +26,7 @@ export function ThemeToggle() {
             size="icon"
             onClick={toggleTheme}
             className="rounded-full h-9 w-9 transition-all hover:bg-accent relative"
-            aria-label="Toggle theme"
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
           >
             <div className="relative w-5 h-5 overflow-hidden">
               <motion.div

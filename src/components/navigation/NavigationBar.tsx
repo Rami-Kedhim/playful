@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Heart, User, Video, Search } from 'lucide-react';
+import { Heart, User, Video, Search, Menu as MenuIcon } from 'lucide-react';
 import Logo from '../layout/Logo';
 import LanguageSwitcher from '../language/LanguageSwitcher';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -27,14 +27,15 @@ interface NavigationBarProps {
 export default function NavigationBar({ className, containerClassName }: NavigationBarProps) {
   const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-colors duration-300",
       className
     )}>
       <div className={cn("container flex h-16 items-center", containerClassName)}>
-        <div className="mr-4 flex">
+        <div className="mr-4 flex items-center">
           <Link to="/" className="flex items-center space-x-2">
             <Logo />
           </Link>
@@ -43,7 +44,7 @@ export default function NavigationBar({ className, containerClassName }: Navigat
         <DesktopNavigation />
         
         <div className="flex flex-1 items-center justify-end space-x-2">
-          <Link to="/search">
+          <Link to="/search" aria-label={t('search')}>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Search className="h-5 w-5" />
               <span className="sr-only">{t('search')}</span>
@@ -54,8 +55,19 @@ export default function NavigationBar({ className, containerClassName }: Navigat
           
           <LanguageSwitcher />
           
-          {/* Mobile Menu */}
-          <MobileNavigation />
+          {/* Mobile Menu Trigger */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden rounded-full"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <MenuIcon className="h-5 w-5" />
+          </Button>
+          
+          {/* Mobile Navigation */}
+          <MobileNavigation open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} />
           
           {/* Desktop Auth Menu */}
           <div className="hidden md:block">

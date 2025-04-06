@@ -1,133 +1,124 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { 
-  Home, 
-  User, 
-  Users, 
-  Heart, 
-  Video, 
-  MessageSquare, 
-  Search, 
-  Menu, 
-  LogIn, 
-  UserPlus
-} from "lucide-react";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { useTranslation } from "react-i18next";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import Logo from "@/components/layout/Logo";
+import { Home, Heart, Video, MessageCircle, User, Settings, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/auth/useAuth';
 
-const MobileNavigation: React.FC = () => {
-  const [open, setOpen] = useState(false);
-  const { isAuthenticated, user } = useAuth();
+interface MobileNavigationProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const MobileNavigation = ({ open = false, onOpenChange }: MobileNavigationProps) => {
   const { t } = useTranslation();
+  const { user, isAuthenticated, logout } = useAuth();
   
-  const menuItems = [
-    { icon: Home, label: t('home'), path: "/" },
-    { icon: Users, label: t('escorts'), path: "/escorts" },
-    { icon: User, label: t('creators'), path: "/creators" },
-    { icon: Video, label: t('livecams'), path: "/livecams" },
-    { icon: Heart, label: t('ai_companions'), path: "/ai-companion" },
+  const navItems = [
+    { icon: Home, label: t('home'), href: '/' },
+    { icon: Heart, label: t('favorites'), href: '/favorites' },
+    { icon: Video, label: t('livecams'), href: '/livecams' },
+    { icon: MessageCircle, label: t('messages'), href: '/messages' },
   ];
   
-  const authenticatedItems = [
-    { icon: MessageSquare, label: t('messages'), path: "/messages" },
-    { icon: Heart, label: t('favorites'), path: "/favorites" },
-    { icon: User, label: t('profile'), path: "/profile" },
-  ];
-
   return (
-    <div className="md:hidden">
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[280px]">
-          <SheetHeader className="border-b pb-4 mb-4">
-            <SheetTitle className="flex items-center justify-center">
-              <Logo />
-            </SheetTitle>
-          </SheetHeader>
-          
-          <div className="flex flex-col space-y-1">
-            {menuItems.map((item) => (
-              <SheetClose asChild key={item.path}>
-                <Link 
-                  to={item.path} 
-                  className="flex items-center p-3 rounded-md hover:bg-accent text-foreground"
-                  onClick={() => setOpen(false)}
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-[80%] sm:w-[350px] pt-10">
+        <SheetHeader className="mb-6">
+          <SheetTitle>{t('menu')}</SheetTitle>
+        </SheetHeader>
+        
+        <div className="flex flex-col gap-2">
+          {navItems.map((item) => (
+            <Button
+              key={item.href}
+              variant="ghost"
+              className="w-full justify-start gap-2 text-lg"
+              asChild
+              onClick={() => onOpenChange && onOpenChange(false)}
+            >
+              <Link to={item.href}>
+                <item.icon className="h-5 w-5" />
+                {item.label}
+              </Link>
+            </Button>
+          ))}
+        </div>
+        
+        <div className="border-t mt-6 pt-6">
+          {isAuthenticated ? (
+            <>
+              <div className="flex items-center gap-3 mb-4 px-2">
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground font-medium text-lg">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-medium">{user?.displayName || user?.email}</p>
+                </div>
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2"
+                  asChild
+                  onClick={() => onOpenChange && onOpenChange(false)}
                 >
-                  <item.icon className="h-5 w-5 mr-3" />
-                  {item.label}
-                </Link>
-              </SheetClose>
-            ))}
-            
-            {isAuthenticated ? (
-              <>
-                <div className="border-t my-2 pt-2"></div>
-                {authenticatedItems.map((item) => (
-                  <SheetClose asChild key={item.path}>
-                    <Link 
-                      to={item.path} 
-                      className="flex items-center p-3 rounded-md hover:bg-accent text-foreground"
-                      onClick={() => setOpen(false)}
-                    >
-                      <item.icon className="h-5 w-5 mr-3" />
-                      {item.label}
-                    </Link>
-                  </SheetClose>
-                ))}
-              </>
-            ) : (
-              <>
-                <div className="border-t my-2 pt-2"></div>
-                <SheetClose asChild>
-                  <Link 
-                    to="/login" 
-                    className="flex items-center p-3 rounded-md hover:bg-accent text-foreground"
-                    onClick={() => setOpen(false)}
-                  >
-                    <LogIn className="h-5 w-5 mr-3" />
-                    {t('login')}
+                  <Link to="/profile">
+                    <User className="h-5 w-5" />
+                    {t('profile')}
                   </Link>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Link 
-                    to="/register" 
-                    className="flex items-center p-3 rounded-md hover:bg-accent text-foreground"
-                    onClick={() => setOpen(false)}
-                  >
-                    <UserPlus className="h-5 w-5 mr-3" />
-                    {t('register')}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2"
+                  asChild
+                  onClick={() => onOpenChange && onOpenChange(false)}
+                >
+                  <Link to="/settings">
+                    <Settings className="h-5 w-5" />
+                    {t('settings')}
                   </Link>
-                </SheetClose>
-              </>
-            )}
-          </div>
-          
-          <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-            <div className="text-xs text-muted-foreground">
-              {isAuthenticated && user ? `${t('logged_in_as')}: ${user.email}` : t('guest')}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2 text-destructive"
+                  onClick={() => {
+                    if (logout) logout();
+                    onOpenChange && onOpenChange(false);
+                  }}
+                >
+                  <LogOut className="h-5 w-5" />
+                  {t('logout')}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <Button 
+                className="w-full" 
+                asChild
+                onClick={() => onOpenChange && onOpenChange(false)}
+              >
+                <Link to="/login">{t('login')}</Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                asChild
+                onClick={() => onOpenChange && onOpenChange(false)}
+              >
+                <Link to="/register">{t('register')}</Link>
+              </Button>
             </div>
-            <ThemeToggle />
-          </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

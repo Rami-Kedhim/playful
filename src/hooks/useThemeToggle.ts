@@ -27,7 +27,6 @@ export const useThemeToggle = () => {
         document.documentElement.removeEventListener('transitionend', transitionEndHandler);
       };
     }
-    
   }, []);
   
   // Apply the theme class to document element separately
@@ -55,8 +54,6 @@ export const useThemeToggle = () => {
     
     const newTheme = (resolvedTheme === "dark" || theme === "dark") ? "light" : "dark";
     setTheme(newTheme);
-    
-    console.log("Theme toggled to:", newTheme);
   };
   
   return {

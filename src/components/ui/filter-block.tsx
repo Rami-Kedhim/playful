@@ -1,9 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
-interface FilterBlockProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface FilterBlockProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   description?: string;
   children: React.ReactNode;
@@ -27,31 +29,34 @@ export function FilterBlock({
   defaultCollapsed = false,
   ...props
 }: FilterBlockProps) {
-  const [collapsed, setCollapsed] = React.useState(defaultCollapsed);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
   return (
-    <Card className={cn("h-full", className)} {...props}>
+    <Card className={cn("h-full shadow-sm border", className)} {...props}>
       <CardHeader className={cn("pb-2", headerClassName)}>
         <div className="flex justify-between items-start">
-          <div>
-            <CardTitle 
+          <div className="flex-1">
+            <div
               className={cn(
-                "text-lg font-medium", 
-                collapsible && "cursor-pointer flex items-center"
+                "flex items-center", 
+                collapsible && "cursor-pointer"
               )}
               onClick={collapsible ? () => setCollapsed(!collapsed) : undefined}
             >
-              {title}
+              <CardTitle className="text-lg font-medium">
+                {title}
+              </CardTitle>
               {collapsible && (
-                <span className="ml-2 text-sm transition-transform duration-200" style={{
-                  transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)'
-                }}>
-                  ▼
-                </span>
+                <div className="ml-2">
+                  {collapsed ? 
+                    <ChevronDown className="h-4 w-4" /> : 
+                    <ChevronUp className="h-4 w-4" />
+                  }
+                </div>
               )}
-            </CardTitle>
+            </div>
             {description && (
-              <CardDescription>{description}</CardDescription>
+              <CardDescription className="mt-1">{description}</CardDescription>
             )}
           </div>
           {headerExtra && (
@@ -61,15 +66,26 @@ export function FilterBlock({
           )}
         </div>
       </CardHeader>
-      <CardContent 
-        className={cn(
-          "pt-1 transition-all duration-300", 
-          contentClassName,
-          collapsed && collapsible && "hidden"
+      
+      <AnimatePresence initial={false}>
+        {(!collapsed || !collapsible) && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CardContent 
+              className={cn(
+                "pt-1", 
+                contentClassName
+              )}
+            >
+              {children}
+            </CardContent>
+          </motion.div>
         )}
-      >
-        {children}
-      </CardContent>
+      </AnimatePresence>
     </Card>
   );
 }

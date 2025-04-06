@@ -23,7 +23,11 @@ export function FilterBadge({
   const badge = (
     <Badge 
       variant={variant} 
-      className={cn("flex items-center gap-1 transition-all", className)}
+      className={cn(
+        "flex items-center gap-1 transition-all py-1 px-2",
+        "hover:shadow-sm cursor-default",
+        className
+      )}
     >
       {label}
       <X 
@@ -33,6 +37,7 @@ export function FilterBadge({
           e.stopPropagation();
           onRemove();
         }}
+        aria-label={`Remove filter: ${label}`}
       />
     </Badge>
   );
