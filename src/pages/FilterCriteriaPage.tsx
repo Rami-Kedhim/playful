@@ -2,8 +2,9 @@
 import MainLayout from "@/components/layout/MainLayout";
 import FilterCriteria from "@/components/FilterCriteria";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 const FilterCriteriaPage = () => {
   return (
@@ -16,23 +17,38 @@ const FilterCriteriaPage = () => {
               Browse all available filtering options and service categories
             </p>
           </div>
-          <Button asChild>
-            <Link to="/escorts">
-              <Search size={18} className="mr-2" />
-              Start Searching
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Badge variant="outline" className="h-9 px-4 gap-2 text-sm font-normal">
+              <Filter size={16} />
+              <span className="hidden sm:inline">Selected Filters:</span> 0
+            </Badge>
+            <Button asChild>
+              <Link to="/escorts">
+                <Search size={18} className="mr-2" />
+                Start Searching
+              </Link>
+            </Button>
+          </div>
         </div>
         
         <div className="bg-card border rounded-lg p-6 mb-8">
           <p className="text-base">
             This page provides a comprehensive guide to all the filtering criteria available in our escort directory.
             Use these options to create more targeted searches and find the perfect escort for your preferences.
-            Click on any filter to see escorts matching that criteria.
+            Click on any filter to select it, and then start searching to view escorts matching your criteria.
           </p>
         </div>
         
         <FilterCriteria />
+
+        <div className="mt-8 flex justify-center">
+          <Button size="lg" className="px-12" asChild>
+            <Link to="/escorts">
+              <Search size={18} className="mr-2" />
+              Apply Filters & Search
+            </Link>
+          </Button>
+        </div>
       </div>
     </MainLayout>
   );
