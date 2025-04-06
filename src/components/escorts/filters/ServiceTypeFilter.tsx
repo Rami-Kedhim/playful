@@ -1,7 +1,6 @@
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
-import { getServiceTypeName } from "./ServiceTypeBadgeLabel";
 
 interface ServiceTypeFilterProps {
   serviceTypeFilter: "in-person" | "virtual" | "both" | "";

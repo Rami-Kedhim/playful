@@ -80,11 +80,18 @@ export const useFilterResults = (
         filtered = filtered.filter(escort => escort.verified);
       }
       
-      // Filter by services
+      // Filter by services - safely handle missing services
       if (selectedServices.length > 0) {
-        filtered = filtered.filter(escort => 
-          escort.services && selectedServices.some(service => escort.services?.includes(service))
-        );
+        filtered = filtered.filter(escort => {
+          // Handle case where escort has no services
+          if (!escort.services || escort.services.length === 0) {
+            // Consider no services as a mismatch
+            return false;
+          }
+          
+          // Check if any selected service is included in escort's services
+          return selectedServices.some(service => escort.services?.includes(service));
+        });
       }
       
       // Filter by gender
@@ -118,7 +125,7 @@ export const useFilterResults = (
         );
       }
       
-      // Filter by service type
+      // Filter by service type - safely handle missing serviceTypes
       if (serviceTypeFilter === 'in-person') {
         filtered = filtered.filter(escort => 
           escort.serviceTypes?.includes('in-person') || 

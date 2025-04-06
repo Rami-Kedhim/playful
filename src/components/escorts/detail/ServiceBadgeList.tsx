@@ -1,37 +1,58 @@
 
-import React from "react";
 import { Badge } from "@/components/ui/badge";
-import ServiceCategoryBadge from "./ServiceCategoryBadge";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { getServiceById, mapLegacyServiceToId } from "@/data/serviceCategories";
 
 interface ServiceBadgeListProps {
   services: string[];
-  className?: string;
   limit?: number;
+  className?: string;
 }
 
-const ServiceBadgeList = ({ 
-  services,
-  className = "",
-  limit = 5
-}: ServiceBadgeListProps) => {
-  if (!services.length) return null;
-
-  const displayServices = services.slice(0, limit);
-  const hasMore = services.length > limit;
-
+const ServiceBadgeList = ({ services = [], limit, className = "" }: ServiceBadgeListProps) => {
+  const [showAll, setShowAll] = useState(false);
+  
+  // Handle empty services array
+  if (!services || services.length === 0) {
+    return (
+      <div className={`text-sm text-muted-foreground ${className}`}>
+        No services listed
+      </div>
+    );
+  }
+  
+  const displayServices = showAll || !limit ? services : services.slice(0, limit);
+  const hasMore = limit && services.length > limit;
+  
   return (
-    <div className={`flex flex-wrap gap-1.5 ${className}`}>
-      {displayServices.map((service) => (
-        <ServiceCategoryBadge 
-          key={service} 
-          serviceName={service} 
-          className="text-xs"
-        />
-      ))}
+    <div className={className}>
+      <div className="flex flex-wrap gap-1 mb-2">
+        {displayServices.map((service, index) => {
+          const serviceId = mapLegacyServiceToId(service);
+          const serviceDetails = getServiceById(serviceId);
+          
+          return (
+            <Badge 
+              key={index} 
+              variant="secondary"
+              className="text-xs"
+              title={serviceDetails?.description || ""}
+            >
+              {serviceDetails?.name || service}
+            </Badge>
+          );
+        })}
+      </div>
+      
       {hasMore && (
-        <Badge variant="secondary" className="text-xs">
-          +{services.length - limit} more
-        </Badge>
+        <Button 
+          variant="link" 
+          className="text-xs p-0 h-auto" 
+          onClick={() => setShowAll(!showAll)}
+        >
+          {showAll ? "Show less" : `+${services.length - limit} more`}
+        </Button>
       )}
     </div>
   );

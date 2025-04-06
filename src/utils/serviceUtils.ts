@@ -6,13 +6,18 @@ import { mapLegacyServiceToId, serviceCategories, getCategoryById, getServiceByI
  * @param services Array of service names
  * @returns Object with category IDs as keys and arrays of service IDs as values
  */
-export const groupServicesByCategory = (services: string[]) => {
+export const groupServicesByCategory = (services: string[] = []) => {
   const result: Record<string, string[]> = {};
   
   // Initialize categories
   serviceCategories.forEach(category => {
     result[category.id] = [];
   });
+  
+  // Handle undefined services or empty array
+  if (!services || services.length === 0) {
+    return result;
+  }
   
   // Map services to categories
   services.forEach(service => {
@@ -40,11 +45,11 @@ export const groupServicesByCategory = (services: string[]) => {
  * @returns Boolean indicating if the escort's services match the filter
  */
 export const matchesServiceFilters = (
-  escortServices: string[], 
+  escortServices: string[] = [], 
   selectedCategories: string[]
 ): boolean => {
   if (!selectedCategories.length) return true; // No filter active
-  if (!escortServices.length) return false; // No services to match
+  if (!escortServices || !escortServices.length) return false; // No services to match
   
   const servicesByCategory = groupServicesByCategory(escortServices);
   
@@ -59,7 +64,7 @@ export const matchesServiceFilters = (
  * @param services Array of service names
  * @returns Array of unique category names
  */
-export const getServiceCategoryNames = (services: string[]): string[] => {
+export const getServiceCategoryNames = (services: string[] = []): string[] => {
   const servicesByCategory = groupServicesByCategory(services);
   
   // Get category names for non-empty categories

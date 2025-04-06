@@ -1,5 +1,4 @@
 
-import React from "react";
 import { Badge } from "@/components/ui/badge";
 
 interface ServiceCategoryListProps {
@@ -7,24 +6,23 @@ interface ServiceCategoryListProps {
   className?: string;
 }
 
-const ServiceCategoryList = ({ 
-  categoryNames,
-  className = ""
-}: ServiceCategoryListProps) => {
-  if (!categoryNames.length) return null;
+const ServiceCategoryList = ({ categoryNames, className = "" }: ServiceCategoryListProps) => {
+  // Handle the case when no categories are available
+  if (!categoryNames || categoryNames.length === 0) {
+    return (
+      <div className={`text-sm text-muted-foreground ${className}`}>
+        No service categories available
+      </div>
+    );
+  }
 
   return (
-    <div className={`flex flex-wrap gap-1.5 ${className}`}>
-      {categoryNames.slice(0, 3).map((category) => (
-        <Badge key={category} variant="outline" className="text-xs">
+    <div className={`flex flex-wrap gap-1 ${className}`}>
+      {categoryNames.map((category, index) => (
+        <Badge key={index} variant="outline" className="text-xs">
           {category}
         </Badge>
       ))}
-      {categoryNames.length > 3 && (
-        <Badge variant="outline" className="text-xs">
-          +{categoryNames.length - 3} more
-        </Badge>
-      )}
     </div>
   );
 };
