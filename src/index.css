@@ -2,127 +2,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
-    
-    --card: 240 10% 3.9%;
+ 
+    --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
-    
-    --popover: 240 10% 3.9%;
+ 
+    --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    
-    --primary: 255 70% 74%;
-    --primary-foreground: 240 5.9% 10%;
-    
-    --secondary: 240 3.7% 15.9%;
+ 
+    --primary: 252 59% 48%;
+    --primary-foreground: 0 0% 98%;
+ 
+    --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
-    
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    
-    --accent: 260 57% 75%;
+ 
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+ 
+    --accent: 301 59% 40%;
     --accent-foreground: 0 0% 98%;
-    
+ 
+    --lucoin: 39 70% 50%;
+    --lucoin-foreground: 0 0% 3.9%;
+ 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 255 70% 74%;
-    
-    --radius: 0.75rem;
-
-    /* New custom colors */
-    --lucoin: 45 100% 50%;
-    --favorite: 0 100% 67%;
-    --success: 142 70% 45%;
-    --warning: 35 100% 50%;
+ 
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+ 
+    --radius: 0.5rem;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border selection:bg-primary/10 selection:text-primary;
-  }
-  
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
-  }
-
-  html {
-    @apply scroll-smooth;
-  }
-
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    @apply w-1.5;
-  }
-  
-  ::-webkit-scrollbar-track {
-    @apply bg-background;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted rounded-full;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary/50;
-  }
-}
-
-@layer utilities {
+@layer components {
   .glass-card {
-    @apply backdrop-blur-md bg-white/5 border border-white/10 shadow-xl;
+    @apply border border-white/10 bg-white/5 backdrop-blur-sm;
   }
   
-  .text-glow {
-    text-shadow: 0 0 10px rgba(155, 135, 245, 0.7);
+  .hero-gradient {
+    @apply bg-gradient-to-br from-primary/30 via-transparent to-accent/20;
   }
-  
-  .shimmer {
-    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent;
-  }
-  
-  .scale-200 {
-    transform: scale(2);
-  }
+}
 
-  /* Touch swipe related utilities */
-  .swipe-container {
-    @apply touch-pan-y;
-  }
+* {
+  @apply border-border;
+}
 
-  /* Animation classes */
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  .animate-pulse-slow {
-    animation: pulse 4s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-  
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 0.3;
-      transform: scale(1);
-    }
-    50% {
-      opacity: 0.5;
-      transform: scale(1.05);
-    }
-  }
+body {
+  @apply bg-background text-foreground;
 }

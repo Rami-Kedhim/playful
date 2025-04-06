@@ -5,20 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Lock, Play, Star, ArrowRight, Coins, VideoIcon, UserIcon } from "lucide-react";
-
-interface ProfileProps {
-  id: string;
-  name: string;
-  avatar: string;
-  location: string;
-  verified: boolean;
-  featured?: boolean;
-  rating?: number;
-  isPremium?: boolean;
-  serviceType: "in-person" | "virtual" | "both";
-  isLive?: boolean;
-}
+import { Lock, Play, Star, ArrowRight, Coins, VideoIcon, UserIcon, Shield } from "lucide-react";
+import { ProfileProps } from "@/data/mockData";
 
 interface FeaturedContentSectionProps {
   featuredEscorts: ProfileProps[];
@@ -136,24 +124,6 @@ const FeaturedContentSection = ({ featuredEscorts, featuredCreators = [] }: Feat
         </Button>
       </div>
     </section>
-  );
-};
-
-// Adding the Shield icon that was missing
-const Shield = ({ className }: { className?: string }) => {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-    </svg>
   );
 };
 

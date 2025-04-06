@@ -2,7 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
-import HomePage from './pages/HomePage';
+import Index from './pages/Index';
 import SEODashboard from './pages/SEODashboard';
 import Escorts from './pages/Escorts';
 import Creators from './pages/Creators';
@@ -35,7 +35,7 @@ const AppRoutes = () => {
       {/* App Layout Routes */}
       <Route element={<AppLayout />}>
         {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Index />} />
         <Route path="/escorts" element={<Escorts />} />
         <Route path="/creators" element={<Creators />} />
         <Route path="/search" element={<SearchPage />} />

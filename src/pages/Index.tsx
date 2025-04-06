@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import HeroSection from "@/components/home/HeroSection";
@@ -10,9 +9,11 @@ import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
 import LucieAssistant from "@/components/home/LucieAssistant";
 import MetaverseSection from "@/components/home/MetaverseSection";
+import WelcomeAlert from "@/components/layout/WelcomeAlert";
+import { useAuth } from "@/hooks/auth/useAuth";
 
-// Transform existing escort data to match ProfileProps
-const transformedEscorts = [
+// Sample data for featured profiles
+const featuredEscorts = [
   {
     id: "escort-1",
     name: "Sophia",
@@ -57,8 +58,8 @@ const transformedEscorts = [
   }
 ];
 
-// Transform existing creator data to match ProfileProps
-const transformedCreators = [
+// Sample data for featured creators
+const featuredCreators = [
   {
     id: "creator-1",
     name: "Victoria",
@@ -104,19 +105,30 @@ const transformedCreators = [
 ];
 
 const Index = () => {
+  const { user, isAuthenticated } = useAuth();
   const [searchLocation, setSearchLocation] = useState("");
-
+  
   return (
     <AppLayout>
+      {/* Show welcome alert for authenticated users */}
+      {isAuthenticated && user && (
+        <div className="container mx-auto px-4 pt-6">
+          <WelcomeAlert username={user.username || 'User'} />
+        </div>
+      )}
+      
+      {/* Hero section */}
       <HeroSection 
         searchLocation={searchLocation} 
         setSearchLocation={setSearchLocation} 
       />
+      
+      {/* Other sections */}
       <FeaturesSection />
       <HowItWorksSection />
       <FeaturedContentSection 
-        featuredEscorts={transformedEscorts}
-        featuredCreators={transformedCreators}
+        featuredEscorts={featuredEscorts}
+        featuredCreators={featuredCreators}
       />
       <LucoinSection />
       <MetaverseSection />
