@@ -19,7 +19,6 @@ const AppRoutes = () => {
         <Route path="/seo/optimize-content" element={<SEODashboard />} />
         <Route path="/seo/optimize-live" element={<SEODashboard />} />
         <Route path="/seo/tools" element={<SEODashboard />} />
-        {/* Add more routes as needed */}
       </Route>
     </Routes>
   );

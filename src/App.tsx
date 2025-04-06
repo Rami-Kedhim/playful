@@ -1,7 +1,7 @@
 
 import React from "react";
 import { ThemeProvider } from "next-themes";
-import Routes from "./Routes";
+import AppRoutes from "./Routes";
 import { Toaster } from "./components/ui/toaster";
 import { FavoritesProvider } from "./contexts/FavoritesContext";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
@@ -13,7 +13,7 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="oxum-theme">
       <NotificationsProvider>
         <FavoritesProvider>
-          <Routes />
+          <AppRoutes />
           <Toaster />
           <LucieHermesIntegration />
           <HermesBoostOffer />
