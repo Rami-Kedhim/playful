@@ -11,13 +11,18 @@ interface Message {
   content: string;
 }
 
-const LucieAssistant = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface LucieAssistantProps {
+  initiallyOpen?: boolean;
+  customInitialMessage?: string;
+}
+
+const LucieAssistant = ({ initiallyOpen = false, customInitialMessage }: LucieAssistantProps) => {
+  const [isOpen, setIsOpen] = useState(initiallyOpen);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
-      content: 'Hi there! I\'m Lucie, your personal UberEscorts assistant. How can I help you today?'
+      content: customInitialMessage || 'Hi there! I\'m Lucie, your personal UberEscorts assistant. How can I help you today?'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
