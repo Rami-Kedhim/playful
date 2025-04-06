@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -112,7 +111,7 @@ const EscortDetail: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <EscortImageGallery 
-                images={escort.gallery_images || [escort.imageUrl || escort.avatar_url || '']} 
+                images={escort.gallery || escort.gallery_images || [escort.imageUrl || escort.avatar_url || '']} 
                 name={escort.name}
               />
               

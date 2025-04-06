@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { VerificationRequest, VerificationStatus } from '@/types/escort';
+import { Escort, VerificationRequest, VerificationStatus } from "@/types/escort";
 import { useToast } from '@/hooks/use-toast';
 
 type UpdateVerificationFn = (id: string, updates: Partial<VerificationRequest>) => Promise<VerificationRequest | null>;

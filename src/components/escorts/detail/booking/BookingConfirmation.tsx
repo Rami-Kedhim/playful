@@ -2,7 +2,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { BookingFormValues } from "./types";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 

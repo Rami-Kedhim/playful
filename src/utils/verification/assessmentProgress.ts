@@ -1,5 +1,4 @@
-
-import { VerificationRequest } from '@/types/escort';
+import { VerificationRequest } from "@/types/escort";
 
 /**
  * Calculate the verification progress as a percentage

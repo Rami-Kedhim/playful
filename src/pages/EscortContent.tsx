@@ -1,11 +1,10 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { escorts, getEscortById } from "@/data/escortData";
+import { getEscortById } from "@/data/escortData";
 import VirtualContentGrid from "@/components/creators/VirtualContentGrid";
 import useVirtualCreatorContent from "@/hooks/useVirtualCreatorContent";
 

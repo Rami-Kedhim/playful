@@ -1,10 +1,9 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 import { 
   Facebook, 
   Twitter, 
@@ -32,7 +31,6 @@ const ShareProfileModal = ({ escort, isOpen, onClose }: ShareProfileModalProps) 
   const shareUrl = window.location.href;
   const [activeTab, setActiveTab] = useState<string>("social");
 
-  // Reset copied state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setCopied(false);
@@ -50,7 +48,6 @@ const ShareProfileModal = ({ escort, isOpen, onClose }: ShareProfileModalProps) 
         description: "Profile link has been copied to clipboard",
       });
       
-      // Reset copied state after 2 seconds
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -73,7 +70,6 @@ const ShareProfileModal = ({ escort, isOpen, onClose }: ShareProfileModalProps) 
         shareLink = `mailto:?subject=${encodeURIComponent(`${escort.name}'s Profile`)}&body=${encodeURIComponent(`Check out ${escort.name}'s profile: ${shareUrl}`)}`;
         break;
       case "instagram":
-        // Instagram doesn't support direct sharing via URL, show instructions instead
         toast({
           title: "Instagram Sharing",
           description: "Copy the link and paste it into your Instagram story or post",
@@ -106,8 +102,6 @@ const ShareProfileModal = ({ escort, isOpen, onClose }: ShareProfileModalProps) 
       return;
     }
     
-    // In a real app, this would send a message via SMS API
-    // For demo purposes, show a success toast
     toast({
       title: "Message sent",
       description: `Profile link has been sent to ${phone}`,

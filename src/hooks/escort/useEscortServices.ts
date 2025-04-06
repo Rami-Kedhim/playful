@@ -1,4 +1,4 @@
-
+import { useState, useCallback } from "react";
 import { Escort, ServiceType } from "@/types/escort";
 import { toast } from "@/components/ui/use-toast";
 
@@ -9,141 +9,110 @@ export const useEscortServices = (
   updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
 ) => {
   /**
-   * Add a service to an escort profile
+   * Adds a service to the escort's profile
    */
-  const addService = async (id: string, service: ServiceType, escort: Escort | null) => {
+  const addService = useCallback(async (id: string, service: ServiceType, escort?: Escort | null) => {
+    if (!id) {
+      toast({
+        title: "Error adding service",
+        description: "Profile ID is required",
+        variant: "destructive",
+      });
+      return null;
+    }
+    
     if (!escort) {
       toast({
         title: "Error adding service",
-        description: "Profile not found",
+        description: "Escort profile is required",
         variant: "destructive",
       });
       return null;
     }
     
-    const services = escort.services || [];
-    
-    // Check if service already exists
-    if (services.includes(service)) {
-      toast({
-        title: "Service exists",
-        description: `${service} is already in your services list`,
-      });
-      return escort;
-    }
+    const updatedServices = [...(escort.services || []), service];
     
     try {
-      const updatedEscort = await updateEscortProfile(id, {
-        services: [...services, service]
-      });
-      
-      if (updatedEscort) {
-        toast({
-          title: "Service added",
-          description: `${service} has been added to your services`,
-        });
-      }
-      
-      return updatedEscort;
-    } catch (error) {
-      console.error("Error adding service:", error);
+      return await updateEscortProfile(id, { services: updatedServices });
+    } catch (err) {
+      console.error("Error adding service:", err);
       return null;
     }
-  };
-
+  }, [updateEscortProfile]);
+  
   /**
-   * Remove a service from an escort profile
+   * Removes a service from the escort's profile
    */
-  const removeService = async (id: string, service: ServiceType, escort: Escort | null) => {
+  const removeService = useCallback(async (id: string, service: ServiceType, escort?: Escort | null) => {
+    if (!id) {
+      toast({
+        title: "Error removing service",
+        description: "Profile ID is required",
+        variant: "destructive",
+      });
+      return null;
+    }
+    
     if (!escort) {
       toast({
         title: "Error removing service",
-        description: "Profile not found",
+        description: "Escort profile is required",
         variant: "destructive",
       });
       return null;
     }
     
-    const services = escort.services || [];
-    
-    if (!services.includes(service)) {
-      toast({
-        title: "Service not found",
-        description: `${service} is not in your services list`,
-      });
-      return escort;
-    }
+    const updatedServices = (escort.services || []).filter(s => s !== service);
     
     try {
-      const updatedEscort = await updateEscortProfile(id, {
-        services: services.filter(s => s !== service)
-      });
-      
-      if (updatedEscort) {
-        toast({
-          title: "Service removed",
-          description: `${service} has been removed from your services`,
-        });
-      }
-      
-      return updatedEscort;
-    } catch (error) {
-      console.error("Error removing service:", error);
+      return await updateEscortProfile(id, { services: updatedServices });
+    } catch (err) {
+      console.error("Error removing service:", err);
       return null;
     }
-  };
+  }, [updateEscortProfile]);
 
   /**
-   * Update rates for an escort profile
+   * Updates the rates for the escort
    */
-  const updateRates = async (id: string, rates: Escort['rates']) => {
-    try {
-      const updatedEscort = await updateEscortProfile(id, { rates });
-      
-      if (updatedEscort) {
-        toast({
-          title: "Rates updated",
-          description: "Your rates have been updated successfully",
-        });
-      }
-      
-      return updatedEscort;
-    } catch (error) {
-      console.error("Error updating rates:", error);
+  const updateRates = useCallback(async (id: string, rates: Escort['rates']) => {
+    if (!id) {
       toast({
         title: "Error updating rates",
-        description: "Failed to update rates",
+        description: "Profile ID is required",
         variant: "destructive",
       });
       return null;
     }
-  };
+
+    try {
+      return await updateEscortProfile(id, { rates });
+    } catch (err) {
+      console.error("Error updating rates:", err);
+      return null;
+    }
+  }, [updateEscortProfile]);
 
   /**
-   * Update availability for an escort profile
+   * Updates the availability for the escort
    */
-  const updateAvailability = async (id: string, availability: Escort['availability']) => {
-    try {
-      const updatedEscort = await updateEscortProfile(id, { availability });
-      
-      if (updatedEscort) {
-        toast({
-          title: "Availability updated",
-          description: "Your availability has been updated successfully",
-        });
-      }
-      
-      return updatedEscort;
-    } catch (error) {
-      console.error("Error updating availability:", error);
+  const updateAvailability = useCallback(async (id: string, availability: Escort['availability']) => {
+    if (!id) {
       toast({
         title: "Error updating availability",
-        description: "Failed to update availability",
+        description: "Profile ID is required",
         variant: "destructive",
       });
       return null;
     }
-  };
+
+    try {
+      return await updateEscortProfile(id, { availability });
+    } catch (err) {
+      console.error("Error updating availability:", err);
+      return null;
+    }
+  }, [updateEscortProfile]);
 
   return {
     addService,

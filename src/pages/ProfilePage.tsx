@@ -1,134 +1,379 @@
-
 import React, { useState, useEffect } from 'react';
-import ProfileLayout from '@/components/layout/ProfileLayout';
-import UserDashboardOverview from '@/components/dashboard/UserDashboardOverview';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { Shield, User, CreditCard, Settings } from 'lucide-react';
-import PersonalInfoForm from '@/components/profile/PersonalInfoForm';
-import AccountSettings from '@/components/profile/AccountSettings';
+import { useRouter } from 'next/router';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/use-toast';
-import { uploadAvatar } from '@/utils/profileUtils';
-import { ProfileFormData } from '@/components/profile/ProfileFormSchema';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Edit, Check, User, Mail, Lock, ImagePlus } from 'lucide-react';
+import { Separator } from "@/components/ui/separator"
+import { useForm } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Switch } from "@/components/ui/switch"
+import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useTheme } from 'next-themes'
+import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { VerificationContainer } from '@/components/verification';
 
-const ProfilePage = () => {
-  const { user, profile, updateUserProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
+const profileFormSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email.",
+  }),
+  bio: z.string().max(160, {
+    message: "Bio must be less than 160 characters."
+  }).optional(),
+  avatar_url: z.string().url({
+    message: "Please enter a valid URL."
+  }).optional(),
+})
+
+const ProfilePage: React.FC = () => {
+  const { user, logout, updateUserProfile, updatePassword, error, clearError, profile, refreshProfile } = useAuth();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isPasswordEditMode, setIsPasswordEditMode] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string>(profile?.avatar_url || '');
-  const [uploadProgress, setUploadProgress] = useState(0);
-  
-  // Reset avatar preview when profile changes
+  const { toast } = useToast();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const { preferences, updatePreferences } = useUserPreferences();
+  const [isVerificationVisible, setIsVerificationVisible] = useState(false);
+
+  const form = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      username: profile?.username || "",
+      email: user?.email || "",
+      bio: profile?.bio || "",
+      avatar_url: profile?.avatar_url || ""
+    },
+    mode: "onChange"
+  })
+
   useEffect(() => {
-    if (profile?.avatar_url) {
-      setAvatarPreview(profile.avatar_url);
+    if (profile) {
+      form.reset({
+        username: profile.username || "",
+        email: user?.email || "",
+        bio: profile.bio || "",
+        avatar_url: profile.avatar_url || ""
+      });
+      setAvatarUrl(profile.avatar_url || user?.profileImageUrl || null);
     }
-  }, [profile?.avatar_url]);
-  
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
+  }, [profile, user, form]);
+
+  useEffect(() => {
+    setIsDarkTheme(theme === 'dark');
+  }, [theme]);
+
+  useEffect(() => {
+    if (user?.profileImageUrl) {
+      setAvatarUrl(user.profileImageUrl);
     }
+  }, [user?.profileImageUrl]);
+
+  const handleThemeToggle = (value: boolean) => {
+    const newTheme = value ? 'dark' : 'light';
+    setTheme(newTheme);
+    setIsDarkTheme(value);
+    updatePreferences({ theme: newTheme });
   };
 
-  const handleAvatarRemove = () => {
-    setAvatarFile(null);
-    setAvatarPreview(profile?.avatar_url || '');
-  };
-
-  const handleSubmit = async (data: ProfileFormData) => {
+  const handleSaveProfile = async (data: any) => {
     try {
-      setLoading(true);
-      
-      // If there's a new avatar file, upload it
-      let profileImageUrl = profile?.avatar_url;
-      if (avatarFile) {
-        profileImageUrl = await uploadAvatar(avatarFile, user, setUploadProgress);
-        if (!profileImageUrl) {
-          toast({
-            title: "Avatar upload failed",
-            description: "We couldn't upload your avatar. Please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
-      
-      // Update profile with new data
+      // Change avatar_url to profileImageUrl
       await updateUserProfile({
         ...data,
-        profileImageUrl
+        profileImageUrl: data.avatar_url // Map the avatar_url to profileImageUrl
       });
-      
+      setIsEditMode(false);
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
+        title: "Profile updated successfully!",
+        description: "Your profile has been updated.",
+      })
+      refreshProfile();
     } catch (error: any) {
       toast({
-        title: "Update failed",
-        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
-      });
+        title: "Uh oh! Something went wrong.",
+        description: error?.message || "Failed to update profile. Please try again.",
+      })
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    setLoading(true);
+    try {
+      await updatePassword(oldPassword, newPassword);
+      toast({
+        title: "Password updated successfully!",
+        description: "Your password has been changed.",
+      })
+      setIsPasswordEditMode(false);
+      setOldPassword('');
+      setNewPassword('');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error?.message || "Failed to update password. Please try again.",
+      })
     } finally {
       setLoading(false);
     }
   };
-  
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // useRouter().push('/login');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error?.message || "Logout failed. Please try again.",
+      })
+    }
+  };
+
+  if (!user || !profile) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Loading Profile...</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-6 w-64" />
+            <Skeleton className="h-6 w-64" />
+            <Skeleton className="h-6 w-64" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <ProfileLayout
-      title="My Profile"
-      subtitle={`Welcome back, ${user?.username || 'User'}`}
-      backLink="/"
-    >
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-8"
-      >
-        <TabsList className="bg-background/50 border border-white/10 p-1">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="personal" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Personal Information
-          </TabsTrigger>
-          <TabsTrigger value="account" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Account Settings
-          </TabsTrigger>
-        </TabsList>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8 flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Profile Settings</h2>
+        <Button variant="destructive" onClick={handleLogout}>Logout</Button>
+      </div>
 
-        <TabsContent value="overview" className="space-y-6">
-          <UserDashboardOverview />
-        </TabsContent>
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center"><User className="mr-2 h-4 w-4" /> Personal Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="flex items-center space-x-4">
+            <Avatar>
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={user.username || "Profile"} />
+              ) : (
+                <AvatarFallback>{user.username ? user.username[0].toUpperCase() : 'U'}</AvatarFallback>
+              )}
+            </Avatar>
+            <div>
+              <h3 className="text-lg font-semibold">{user.username}</h3>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+            </div>
+          </div>
+          <Separator />
 
-        <TabsContent value="personal" className="space-y-6">
-          <PersonalInfoForm 
-            profile={profile}
-            user={user}
-            loading={loading}
-            avatarPreview={avatarPreview}
-            handleAvatarChange={handleAvatarChange}
-            handleAvatarRemove={handleAvatarRemove}
-            onSubmit={handleSubmit}
-            uploadProgress={uploadProgress}
-          />
-        </TabsContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSaveProfile)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input disabled={!isEditMode} placeholder="Enter your username" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input disabled={!isEditMode} placeholder="Enter your email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell us a little bit about yourself."
+                        className="resize-none"
+                        disabled={!isEditMode}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="avatar_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Avatar URL</FormLabel>
+                    <FormControl>
+                      <Input disabled={!isEditMode} placeholder="Enter avatar URL" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <TabsContent value="account" className="space-y-6">
-          <AccountSettings 
-            user={user}
-            profile={profile}
-          />
-        </TabsContent>
-      </Tabs>
-    </ProfileLayout>
+              <div className="flex justify-end">
+                {isEditMode ? (
+                  <div className="flex space-x-2">
+                    <Button variant="ghost" type="button" onClick={() => setIsEditMode(false)}>Cancel</Button>
+                    <Button type="submit">
+                      <Check className="mr-2 h-4 w-4" />
+                      Save
+                    </Button>
+                  </div>
+                ) : (
+                  <Button variant="outline" onClick={() => setIsEditMode(true)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Profile
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center"><Lock className="mr-2 h-4 w-4" /> Password</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="oldPassword">Old Password</Label>
+            <Input
+              type="password"
+              id="oldPassword"
+              value={oldPassword}
+              disabled={!isPasswordEditMode}
+              onChange={(e) => setOldPassword(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">New Password</Label>
+            <Input
+              type="password"
+              id="newPassword"
+              value={newPassword}
+              disabled={!isPasswordEditMode}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end">
+            {isPasswordEditMode ? (
+              <div className="flex space-x-2">
+                <Button variant="ghost" type="button" onClick={() => setIsPasswordEditMode(false)}>Cancel</Button>
+                <Button onClick={handlePasswordUpdate} disabled={loading}>
+                  {loading ? (
+                    <>
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Update Password
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <Button variant="outline" onClick={() => setIsPasswordEditMode(true)}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Password
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center"><ImagePlus className="mr-2 h-4 w-4" /> Appearance</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="theme">Dark Mode</Label>
+            <Switch
+              id="theme"
+              checked={isDarkTheme}
+              onCheckedChange={(checked) => handleThemeToggle(checked)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle className="flex items-center"><Check className="mr-2 h-4 w-4" /> Verification</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="flex items-center justify-between">
+            <Button onClick={() => setIsVerificationVisible(!isVerificationVisible)}>
+              {isVerificationVisible ? "Hide Verification" : "Show Verification"}
+            </Button>
+          </div>
+          {isVerificationVisible && (
+            <VerificationContainer />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

@@ -1,4 +1,62 @@
 
+export type VerificationLevel = "none" | "basic" | "enhanced" | "premium";
+
+export type ServiceType = 
+  | "massage" 
+  | "gfe" 
+  | "dinner_date" 
+  | "overnight" 
+  | "travel_companion" 
+  | "roleplay" 
+  | "bdsm" 
+  | "couples" 
+  | "fetish" 
+  | "domination" 
+  | "submission";
+
+export type VerificationStatus = "pending" | "approved" | "rejected" | "expired";
+
+export interface VerificationRequest {
+  id: string;
+  status: VerificationStatus;
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+  documents: Array<{
+    id: string;
+    type: string;
+    url: string;
+    status: string;
+  }>;
+  requestedLevel: VerificationLevel;
+}
+
+export interface EscortAvailability {
+  days: string[];
+  hours: string;
+}
+
+export interface Measurements {
+  bust?: number;
+  waist?: number;
+  hips?: number;
+}
+
+export interface Video {
+  id: string;
+  url: string;
+  thumbnail: string;
+  title: string;
+  isPremium?: boolean;
+}
+
+export interface Rates {
+  hourly: number;
+  twoHours?: number;
+  overnight?: number;
+  weekend?: number;
+}
+
 export interface Escort {
   id: string;
   name: string;
@@ -17,20 +75,31 @@ export interface Escort {
   lastActive?: string;
   responseRate?: number;
   bio?: string;
-  height?: string;
-  weight?: string;
+  height?: string | number;
+  weight?: string | number;
   bodyType?: string;
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
   languages?: string[];
-  videos?: {
-    id: string;
-    url: string;
-    thumbnail: string;
-    title: string;
-    isPremium?: boolean;
-  }[];
+  videos?: Video[];
+  verificationLevel?: VerificationLevel;
+  gallery?: string[];
+  gallery_images?: string[];
+  description?: string;
+  measurements?: Measurements;
+  services?: string[];
+  serviceTypes?: string[];
+  availability?: EscortAvailability;
+  rates?: Rates;
+  contactInfo?: {
+    email?: string;
+    phone?: string;
+    website?: string;
+  };
+  featured?: boolean;
+  providesVirtualContent?: boolean;
+  providesInPersonServices?: boolean;
 }
 
 export interface EscortFilter {

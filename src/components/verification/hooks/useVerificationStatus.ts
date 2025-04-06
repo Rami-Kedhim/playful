@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { VerificationRequest } from '@/types/escort';
@@ -10,7 +9,6 @@ export const useVerificationStatus = () => {
   const [error, setError] = useState<string | null>(null);
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
   
-  // Using the escort verification hook without the update function since we're only checking status
   const { checkVerificationStatus } = useEscortVerification((id, updates) => Promise.resolve(null));
   
   useEffect(() => {
@@ -21,8 +19,6 @@ export const useVerificationStatus = () => {
         setLoading(true);
         const status = await checkVerificationStatus(user.id);
         
-        // This is a simplified version - in a real app, we would fetch the actual verification request
-        // For now, we'll mock a request object based on the status
         if (status) {
           setVerificationRequest({
             id: 'mock-request-id',

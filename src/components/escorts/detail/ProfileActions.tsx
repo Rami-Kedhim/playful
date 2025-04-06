@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, Calendar, MessageSquare, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
-import { Escort } from "@/data/escortData";
+import { Escort } from "@/types/escort";
 
 interface ProfileActionsProps {
   escort: Escort;

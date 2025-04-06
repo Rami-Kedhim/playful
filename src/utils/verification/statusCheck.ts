@@ -1,5 +1,4 @@
-
-import { VerificationRequest, VerificationStatus } from '@/types/escort';
+import { VerificationRequest, VerificationStatus } from "@/types/escort";
 
 /**
  * Check if a verification request is pending
