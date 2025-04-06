@@ -2,13 +2,10 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { FilterBlock, FilterSection } from "@/components/ui/filter-block";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,9 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
 
 interface FilterSidebarProps {
   searchQuery: string;
@@ -57,112 +51,107 @@ const FilterSidebar = ({
 }: FilterSidebarProps) => {
   
   const FilterContent = () => (
-    <CardContent className="space-y-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Search</label>
-        <Input
-          placeholder="Search by name or username"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="bg-background/50"
-        />
-      </div>
-      
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Price Range</label>
-        <Select 
-          value={priceMax} 
-          onValueChange={setPriceMax}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select price range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Prices</SelectItem>
-            <SelectItem value="5">Up to 5 LC</SelectItem>
-            <SelectItem value="10">Up to 10 LC</SelectItem>
-            <SelectItem value="15">Up to 15 LC</SelectItem>
-            <SelectItem value="20">Up to 20 LC</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Content Types</label>
-        <div className="flex flex-wrap gap-2">
-          {contentTypes.map((type) => (
-            <Badge
-              key={type}
-              variant={selectedContentTypes.includes(type) ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => toggleContentType(type)}
-            >
-              {type}
-            </Badge>
-          ))}
+    <>
+      <div className="space-y-4">
+        <FilterSection title="Search">
+          <Input
+            placeholder="Search by name or username"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-background/50"
+          />
+        </FilterSection>
+        
+        <FilterSection title="Price Range">
+          <Select 
+            value={priceMax} 
+            onValueChange={setPriceMax}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select price range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Prices</SelectItem>
+              <SelectItem value="5">Up to 5 LC</SelectItem>
+              <SelectItem value="10">Up to 10 LC</SelectItem>
+              <SelectItem value="15">Up to 15 LC</SelectItem>
+              <SelectItem value="20">Up to 20 LC</SelectItem>
+            </SelectContent>
+          </Select>
+        </FilterSection>
+        
+        <FilterSection title="Content Types">
+          <div className="flex flex-wrap gap-2">
+            {contentTypes.map((type) => (
+              <Badge
+                key={type}
+                variant={selectedContentTypes.includes(type) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => toggleContentType(type)}
+              >
+                {type}
+              </Badge>
+            ))}
+          </div>
+        </FilterSection>
+        
+        <div className="space-y-3 pt-3">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="live-only"
+              checked={liveOnly}
+              onCheckedChange={setLiveOnly}
+            />
+            <Label htmlFor="live-only">Live streaming now</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="hide-ai"
+              checked={hideAI}
+              onCheckedChange={setHideAI}
+            />
+            <Label htmlFor="hide-ai">Hide AI profiles</Label>
+          </div>
         </div>
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <Switch
-          checked={liveOnly}
-          onCheckedChange={setLiveOnly}
-        />
-        <label className="text-sm font-medium">Live streaming now</label>
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <Switch
-          checked={hideAI}
-          onCheckedChange={setHideAI}
-        />
-        <label className="text-sm font-medium">Hide AI profiles</label>
-      </div>
-      
-      {isMobile ? (
-        <div className="flex gap-2">
+        
+        {isMobile ? (
+          <div className="flex gap-2 pt-4 mt-4 border-t border-border">
+            <Button 
+              variant="outline" 
+              onClick={clearFilters}
+              className="w-full"
+            >
+              Clear Filters
+            </Button>
+            <Button 
+              onClick={() => setShowFilters && setShowFilters(false)}
+              className="w-full"
+            >
+              Apply
+            </Button>
+          </div>
+        ) : (
           <Button 
             variant="outline" 
             onClick={clearFilters}
-            className="w-full"
+            className="w-full mt-4"
           >
             Clear Filters
           </Button>
-          <Button 
-            onClick={() => setShowFilters && setShowFilters(false)}
-            className="w-full"
-          >
-            Apply
-          </Button>
-        </div>
-      ) : (
-        <Button 
-          variant="outline" 
-          onClick={clearFilters}
-          className="w-full"
-        >
-          Clear Filters
-        </Button>
-      )}
-    </CardContent>
+        )}
+      </div>
+    </>
   );
 
   return isMobile ? (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>Filters</CardTitle>
-        <CardDescription>Refine your search</CardDescription>
-      </CardHeader>
+    <FilterBlock title="Filters" description="Refine your search">
       <FilterContent />
-    </Card>
+    </FilterBlock>
   ) : (
-    <Card className="h-fit sticky top-20">
-      <CardHeader>
-        <CardTitle>Filters</CardTitle>
-        <CardDescription>Refine your search</CardDescription>
-      </CardHeader>
+    <FilterBlock title="Filters" description="Refine your search" className="h-fit sticky top-20">
       <FilterContent />
-    </Card>
+    </FilterBlock>
   );
 };
 
