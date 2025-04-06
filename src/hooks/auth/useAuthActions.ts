@@ -1,11 +1,10 @@
 
-import React from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
-export const useAuthActions = (
+export function useAuthActions(
   setIsLoading: (loading: boolean) => void,
   refreshProfile: () => Promise<void>
-) => {
+) {
   const signUp = async (email: string, password: string, metadata = {}) => {
     try {
       setIsLoading(true);
@@ -55,4 +54,4 @@ export const useAuthActions = (
   };
 
   return { signUp, signIn, signOut };
-};
+}

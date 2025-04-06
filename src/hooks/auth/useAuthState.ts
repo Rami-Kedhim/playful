@@ -6,11 +6,11 @@ import { AuthState, AuthUser } from "@/types/auth";
 import { fetchUserRoles } from "@/utils/authStateUtils";
 import { useProfileManagement } from "./useProfileManagement";
 
-export const useAuthState = (): [
+export function useAuthState(): [
   AuthState,
   (loading: boolean) => void,
   () => Promise<void>
-] => {
+] {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
@@ -114,4 +114,4 @@ export const useAuthState = (): [
   }, []);
 
   return [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile];
-};
+}

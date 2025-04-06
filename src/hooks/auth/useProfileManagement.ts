@@ -1,8 +1,7 @@
 
-import React from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
-export const useProfileManagement = () => {
+export function useProfileManagement() {
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -67,4 +66,4 @@ export const useProfileManagement = () => {
     updateProfile,
     checkUsernameAvailability
   };
-};
+}

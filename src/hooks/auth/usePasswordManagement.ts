@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
-export const usePasswordManagement = () => {
+export function usePasswordManagement() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
   // Reset password through email
@@ -67,4 +67,4 @@ export const usePasswordManagement = () => {
   };
   
   return { resetPassword, updatePassword, isLoading };
-};
+}
