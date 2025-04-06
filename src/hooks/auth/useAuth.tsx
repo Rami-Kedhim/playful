@@ -1,14 +1,15 @@
 
-import React, { createContext, useContext, useState } from "react";
-import { AuthContextValue, AuthUser } from "@/types/auth";
-import { useAuthState } from "./useAuthState";
-import { useAuthentication } from "./useAuthentication";
+import { createContext, useContext } from "react";
+import { AuthContextValue } from "@/types/auth";
+import { useAuthState } from "@/hooks/auth/useAuthState";
+import { useAuthentication } from "@/hooks/auth/useAuthentication";
+import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/use-toast";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [{ session, user, profile, isLoading, userRoles }, setIsLoading, refreshProfile] = useAuthState();
   const { signUp, signIn, signOut, resetPassword, updatePassword, updateProfile } = useAuthentication(setIsLoading, refreshProfile);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearError = () => setError(null);
 
   // Convert database user to AuthUser type for components
-  const mapUserToAuthUser = (user: User | null, profile: any | null): AuthUser | null => {
+  const mapUserToAuthUser = (user: User | null, profile: any | null) => {
     if (!user) return null;
     
     return {
@@ -88,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value: AuthContextValue = {
     session,
-    user: authUser,
+    user: authUser as any,
     profile,
     isLoading,
     userRoles,
@@ -110,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+}
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -119,5 +120,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-export default useAuth;

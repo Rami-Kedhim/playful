@@ -15,6 +15,10 @@ import {
   CreditCard,
   Settings,
   MessageCircle,
+  Home,
+  Users,
+  Video,
+  Search,
 } from "lucide-react";
 import { AuthUser } from "@/types/auth";
 
@@ -23,14 +27,22 @@ interface MobileMenuProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   handleLogout: () => void;
+  hasAdminAccess?: boolean;
 }
 
-const MobileMenu = ({ user, isOpen, setIsOpen, handleLogout }: MobileMenuProps) => {
+const MobileMenu = ({ user, isOpen, setIsOpen, handleLogout, hasAdminAccess = false }: MobileMenuProps) => {
   const mainLinks = [
-    { label: "Home", path: "/" },
-    { label: "Escorts", path: "/escorts" },
+    { label: "Home", path: "/", icon: Home },
+    { label: "Escorts", path: "/escorts", icon: Users },
+    { label: "Creators", path: "/creators", icon: Users },
     { label: "Messages", path: "/messages", icon: MessageCircle },
+    { label: "Metaverse", path: "/metaverse", icon: Video },
   ];
+
+  // Add SEO link only for admin users
+  if (hasAdminAccess) {
+    mainLinks.push({ label: "SEO Dashboard", path: "/seo", icon: Search });
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -46,7 +58,7 @@ const MobileMenu = ({ user, isOpen, setIsOpen, handleLogout }: MobileMenuProps) 
               <Avatar className="h-12 w-12">
                 <AvatarImage src={user.profileImageUrl} />
                 <AvatarFallback className="bg-primary/10">
-                  {user.username.substring(0, 2).toUpperCase()}
+                  {user.username ? user.username.substring(0, 2).toUpperCase() : "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -99,7 +111,7 @@ const MobileMenu = ({ user, isOpen, setIsOpen, handleLogout }: MobileMenuProps) 
                   >
                     <Link to="/wallet">
                       <CreditCard className="mr-2 h-4 w-4" />
-                      Wallet ({user.lucoinsBalance} LC)
+                      Wallet {user.lucoinsBalance ? `(${user.lucoinsBalance} LC)` : ''}
                     </Link>
                   </Button>
                   <Button

@@ -19,12 +19,16 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   useEffect(() => {
     if (user?.id) {
       const checkAndCreateWelcomeNotification = async () => {
-        const newUser = await isNewUser(user.id);
-        
-        if (newUser) {
-          await createWelcomeNotification(user.id);
-          // Refresh notifications to show the welcome message
-          fetchNotifications();
+        try {
+          const newUser = await isNewUser(user.id);
+          
+          if (newUser) {
+            await createWelcomeNotification(user.id);
+            // Refresh notifications to show the welcome message
+            fetchNotifications();
+          }
+        } catch (error) {
+          console.error("Error checking new user status:", error);
         }
       };
       

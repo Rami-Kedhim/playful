@@ -15,7 +15,7 @@ interface RoleGuardProps {
 const RoleGuard = ({ 
   children, 
   allowedRoles, 
-  fallbackPath = "/auth" 
+  fallbackPath = "/" 
 }: RoleGuardProps) => {
   const { user, isLoading, userRoles } = useAuth();
   
@@ -30,20 +30,11 @@ const RoleGuard = ({
 
   // If no user, redirect to login
   if (!user) {
-    return <Navigate to={fallbackPath} replace />;
+    return <Navigate to="/auth" replace />;
   }
   
   // Check if user has at least one of the allowed roles
-  // Handle both implementations - either userRoles array or user.role string
-  let hasAllowedRole = false;
-  
-  if (userRoles && Array.isArray(userRoles)) {
-    // If userRoles exists and is an array, check if any allowed role is in the array
-    hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
-  } else if (user.role) {
-    // If user has a direct role property, check if it's in the allowed roles
-    hasAllowedRole = allowedRoles.includes(user.role);
-  }
+  const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
   
   // If user doesn't have required role, redirect to fallback path
   if (!hasAllowedRole) {

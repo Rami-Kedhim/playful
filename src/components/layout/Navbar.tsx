@@ -10,7 +10,7 @@ import UserDropdown from "@/components/navigation/UserDropdown";
 import MobileMenu from "@/components/navigation/MobileMenu";
 
 const Navbar = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, userRoles = [] } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const handleLogout = () => {
@@ -26,6 +26,9 @@ const Navbar = () => {
       .toUpperCase()
       .substring(0, 2);
   };
+
+  // Check if user has admin or moderator role for SEO access
+  const hasAdminAccess = userRoles.some(role => ['admin', 'moderator'].includes(role));
   
   return (
     <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm z-50 border-b border-gray-800">
@@ -72,6 +75,7 @@ const Navbar = () => {
               isOpen={isMobileMenuOpen}
               setIsOpen={setIsMobileMenuOpen}
               handleLogout={handleLogout}
+              hasAdminAccess={hasAdminAccess}
             />
           </div>
         </div>
