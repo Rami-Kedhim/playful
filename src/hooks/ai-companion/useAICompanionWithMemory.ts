@@ -180,10 +180,8 @@ export function useAICompanionWithMemory({
         let updatedState = emotionalState;
         
         if (emotionalState) {
-          // Analyze sentiment of user message
           const sentimentResult = await sentimentAnalysisService.analyzeSentiment(content);
           
-          // Update emotional state based on sentiment and personality
           updatedState = await aiPersonalityService.updateEmotionalState(
             emotionalState,
             content,
