@@ -3,9 +3,11 @@ import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
+import HomePage from './pages/HomePage';
+import Escorts from './pages/Escorts';
+import Creators from './pages/Creators';
 
-// Use lazy loading for route components
-const HomePage = lazy(() => import('./pages/HomePage'));
+// Use lazy loading for additional route components
 const Auth = lazy(() => import('./pages/Auth'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
@@ -13,11 +15,9 @@ const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const MetaversePage = lazy(() => import('./pages/MetaversePage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
-const Escorts = lazy(() => import('./pages/Escorts'));
 const EscortDetail = lazy(() => import('./pages/EscortDetail'));
 const EscortLiveStreams = lazy(() => import('./pages/EscortLiveStreams'));
 const EscortLiveStreamDetail = lazy(() => import('./pages/EscortLiveStreamDetail'));
-const Creators = lazy(() => import('./pages/Creators'));
 const CreatorDetail = lazy(() => import('./pages/CreatorDetail'));
 const AIProfiles = lazy(() => import("./pages/AIProfiles"));
 const Livecams = lazy(() => import('./pages/Livecams'));
@@ -37,32 +37,33 @@ const PageLoader = () => (
 function Routes() {
   return (
     <RouterRoutes>
-      <Route path="/" element={<AppLayout />}>
-        <Route index element={
-          <Suspense fallback={<PageLoader />}>
-            <HomePage />
-          </Suspense>
-        } />
-        
-        <Route path="auth" element={
-          <Suspense fallback={<PageLoader />}>
-            <Auth />
-          </Suspense>
-        } />
-        
-        <Route path="escorts" element={
-          <Suspense fallback={<PageLoader />}>
-            <Escorts />
-          </Suspense>
-        } />
-        
-        <Route path="escorts/:id" element={
-          <Suspense fallback={<PageLoader />}>
-            <EscortDetail />
-          </Suspense>
-        } />
-        
-        <Route path="escort-streams" element={
+      <Route path="/" element={<HomePage />} />
+      <Route path="/escorts" element={<Escorts />} />
+      <Route path="/creators" element={<Creators />} />
+      <Route path="/assessment" element={
+        <Suspense fallback={<PageLoader />}>
+          <AppLayout>
+            <div className="container mx-auto p-6">
+              <h1 className="text-2xl font-bold mb-6">Assessment Dashboard</h1>
+              {/* The HermesAssessmentIntegration component is already included in App.tsx */}
+            </div>
+          </AppLayout>
+        </Suspense>
+      } />
+      
+      <Route path="auth" element={
+        <Suspense fallback={<PageLoader />}>
+          <Auth />
+        </Suspense>
+      } />
+      
+      <Route path="escorts/:id" element={
+        <Suspense fallback={<PageLoader />}>
+          <EscortDetail />
+        </Suspense>
+      } />
+      
+      <Route path="escort-streams" element={
           <Suspense fallback={<PageLoader />}>
             <EscortLiveStreams />
           </Suspense>
@@ -71,12 +72,6 @@ function Routes() {
         <Route path="escort/:id/live" element={
           <Suspense fallback={<PageLoader />}>
             <EscortLiveStreamDetail />
-          </Suspense>
-        } />
-        
-        <Route path="creators" element={
-          <Suspense fallback={<PageLoader />}>
-            <Creators />
           </Suspense>
         } />
         
@@ -184,7 +179,6 @@ function Routes() {
             <NotFound />
           </Suspense>
         } />
-      </Route>
     </RouterRoutes>
   );
 }
