@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,6 +42,23 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
 
   // Check if profile is premium
   const isPremium = profile.subscription_price || (profile.boost_status?.is_boosted);
+
+  // Convert string[] traits to PersonalityTrait[] if needed
+  const getPersonalityTraits = () => {
+    if (!profile.personality?.traits) return [];
+    
+    // If the traits are already in the correct format, return them
+    if (typeof profile.personality.traits[0] === 'object') {
+      return profile.personality.traits;
+    }
+    
+    // Otherwise, convert string[] to PersonalityTrait[]
+    return (profile.personality.traits as string[]).map(trait => ({
+      name: trait,
+      description: '',
+      intensity: 75 // Default intensity
+    }));
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -113,7 +129,7 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
             {/* Add personality traits if available */}
             {profile.personality?.traits && profile.personality.traits.length > 0 && (
               <div className="mt-4">
-                <AIPersonalityTraits traits={profile.personality.traits} compact />
+                <AIPersonalityTraits traits={getPersonalityTraits()} compact />
               </div>
             )}
           </CardContent>

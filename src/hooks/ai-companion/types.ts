@@ -52,3 +52,42 @@ export interface AICompanionRelationshipLevel {
   lastInteraction: string; // ISO date string
   interactionCount: number; 
 }
+
+// Add missing CompanionProfile type
+export interface CompanionProfile {
+  id: string;
+  name: string;
+  avatar_url: string;
+  personality?: string;
+  description: string;
+  visualCapabilities: boolean;
+  voice_type: string;
+  speechStyle: string;
+}
+
+// Add missing UserContext type
+export interface UserContext {
+  name?: string;
+  interests?: string[];
+  relationshipStatus?: string;
+  recentInteractions?: string;
+}
+
+// Add missing UseAICompanionConversationOptions and UseAICompanionConversationResult types
+export interface UseAICompanionConversationOptions {
+  companionId: string;
+  initialMessages?: CompanionMessage[];
+}
+
+export interface UseAICompanionConversationResult {
+  messages: CompanionMessage[];
+  isTyping: boolean;
+  isLoading: boolean;
+  error: string | null;
+  companion: any; // Using any here as it's being casted in the hook
+  sendMessage: (content: string) => Promise<void>;
+  handleSuggestedActionClick: (action: string) => void;
+  generateImage: (prompt: string) => Promise<void>;
+  generatingImage: boolean;
+  creditCost: number;
+}
