@@ -96,10 +96,7 @@ export function useLucieAssistant() {
         setMessages(prev => [...prev, errorResponse]);
       } else {
         // Process any visual elements that might be requested in the response
-        const { visualElements, processedText } = await processVisualElements(
-          lucieResponse.text,
-          lucieResponse.cards
-        );
+        const { visualElements, processedText } = await processVisualElements(lucieResponse.text);
         
         // Add Lucie's normal response to the UI
         const lucieMessage: LucieMessage = {
@@ -109,7 +106,6 @@ export function useLucieAssistant() {
           timestamp: new Date(),
           suggestedActions: lucieResponse.suggestedActions || [],
           links: lucieResponse.links || [],
-          cards: lucieResponse.cards || [],
           emotion: lucieResponse.emotion || 'neutral',
           visualElements
         };
@@ -131,11 +127,6 @@ export function useLucieAssistant() {
   const handleSuggestedActionClick = useCallback((action: string) => {
     sendMessage(action);
   }, [sendMessage]);
-
-  // Handle card action click
-  const handleCardActionClick = useCallback((action: string) => {
-    sendMessage(action);
-  }, [sendMessage]);
   
   // Toggle the assistant open/closed
   const toggleChat = useCallback(() => {
@@ -148,8 +139,7 @@ export function useLucieAssistant() {
     isOpen,
     sendMessage,
     toggleChat,
-    handleSuggestedActionClick,
-    handleCardActionClick
+    handleSuggestedActionClick
   };
 }
 

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, LogIn, User, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';

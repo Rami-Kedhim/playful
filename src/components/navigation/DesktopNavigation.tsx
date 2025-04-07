@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "@/hooks/auth";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "react-i18next";
 

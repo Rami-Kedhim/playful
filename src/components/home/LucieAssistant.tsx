@@ -1,7 +1,11 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { X, MessageCircle } from 'lucide-react';
+import { X, MessageCircle, Sparkles, SendIcon, Image, ArrowRight } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useLucieAssistant, LucieMessage } from '@/hooks/useLucieAssistant';
 import LucieHeader from './lucie-assistant/LucieHeader';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
@@ -21,8 +25,7 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
     isOpen,
     sendMessage,
     toggleChat,
-    handleSuggestedActionClick,
-    handleCardActionClick
+    handleSuggestedActionClick
   } = useLucieAssistant();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -76,7 +79,6 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
             isTyping={isTyping}
             messagesEndRef={messagesEndRef}
             onSuggestedActionClick={handleSuggestedActionClick}
-            onCardActionClick={handleCardActionClick}
           />
           <LucieInputBox onSendMessage={sendMessage} />
           <LucieTypingStyles />

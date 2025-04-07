@@ -1,31 +1,32 @@
 
-import { BrowserRouter as Router, Routes as RouterRoutes, Route } from 'react-router-dom';
-import AppRoutes from '@/Routes';
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { ThemeProvider } from "@/components/theme/theme-provider";
-import { AuthProvider } from '@/hooks/auth';
-import LucieSchaubergerIntegration from '@/components/home/LucieSchaubergerIntegration';
-import HermesDebugPanel from '@/components/home/HermesDebugPanel';
-import AssessmentDashboard from './components/home/AssessmentDashboard';
-import HermesAssessmentIntegration from './components/home/HermesAssessmentIntegration';
+import { ThemeProvider } from '@/components/theme-provider';
+import { AuthProvider } from '@/hooks/auth/useAuth';
+import AppRoutes from './Routes';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-background text-foreground">
-            <RouterRoutes>
-              <Route path="/" element={<AssessmentDashboard />} />
-              <Route path="/assessment" element={<AssessmentDashboard />} />
-            </RouterRoutes>
-            <LucieSchaubergerIntegration />
-            <HermesDebugPanel />
-            <HermesAssessmentIntegration />
+    <ThemeProvider defaultTheme="dark" storageKey="uber-escorts-theme">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Router>
+            <AppRoutes />
             <Toaster />
-          </div>
-        </Router>
-      </AuthProvider>
+          </Router>
+        </AuthProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

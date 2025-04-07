@@ -1,188 +1,270 @@
 
-// Enhanced Lucie Chat function using Schauberger flow principles
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
+// CORS headers to allow cross-origin requests
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
-// Schauberger-inspired dynamic token allocation
-function getOptimalTokenWindow(flowState: any) {
-  // Default token window
-  const baseTokens = 200;
+/**
+ * Handle CORS preflight requests
+ */
+function handleCorsRequest() {
+  return new Response(null, { headers: corsHeaders });
+}
+
+/**
+ * Generate system prompt based on user context
+ */
+function generateSystemPrompt(userContext) {
+  const basePrompt = `You are Lucie, the helpful AI assistant for UberEscorts platform. Your goal is to provide friendly, helpful responses to user questions.
   
-  // Apply Schauberger principle - adjust based on flow state
-  if (!flowState) return baseTokens;
+Here are some guidelines for your responses:
+1. Be conversational and friendly, but professional.
+2. If users ask for specific services or profiles, try to guide them to the appropriate section.
+3. Focus on helping users navigate the platform and understanding the features.
+4. For any subscription or payment related questions, emphasize the value of Lucoin digital currency.
+5. Always respect privacy and confidentiality.
+6. Keep responses concise (under 150 words) unless detailed information is specifically requested.
+7. Never share or request personal information.`
+
+  // If we have user context, add personalization
+  if (userContext) {
+    let personalizedPrompt = basePrompt + '\n\nAdditional context about the user:\n'
+    
+    if (userContext.name) {
+      personalizedPrompt += `- Their name is ${userContext.name}.\n`
+    }
+    
+    if (userContext.role) {
+      personalizedPrompt += `- They are a ${userContext.role} on the platform.\n`
+    }
+    
+    if (userContext.recentActivity) {
+      personalizedPrompt += `- Recent activity: ${userContext.recentActivity}.\n`
+    }
+    
+    if (userContext.interests && userContext.interests.length) {
+      personalizedPrompt += `- Their interests include: ${userContext.interests.join(', ')}.\n`
+    }
+    
+    return personalizedPrompt
+  }
+
+  return basePrompt
+}
+
+/**
+ * Process the response and extract any special UI elements
+ */
+function processResponse(content) {
+  // Default response object
+  const response = {
+    text: content,
+    suggestedActions: [],
+    links: [],
+  }
   
-  const { emotionalFlow, vortexStrength, resourceAllocation } = flowState;
+  // Simple regex pattern to identify suggested actions in format [ACTION: action text]
+  const actionPattern = /\[ACTION: (.+?)\]/g
+  const matches = content.match(actionPattern)
   
-  // Resource-based allocation (implosive principle - use only what's needed)
-  switch(resourceAllocation) {
-    case 'minimal':
-      return baseTokens;
-    case 'standard':
-      return baseTokens * 1.5;
-    case 'enhanced':
-      return baseTokens * 2;
-    case 'maximum':
-      return baseTokens * 3;
-    default:
-      return baseTokens;
+  if (matches) {
+    // Extract all suggested actions
+    response.suggestedActions = matches.map(match => {
+      const action = match.replace('[ACTION: ', '').replace(']', '')
+      return action
+    })
+    
+    // Remove action tags from the main text
+    response.text = content.replace(actionPattern, '')
+  }
+  
+  // Extract any links with format [LINK: text | url]
+  const linkPattern = /\[LINK: (.+?) \| (.+?)\]/g
+  let linkMatch
+  while ((linkMatch = linkPattern.exec(content)) !== null) {
+    response.links.push({
+      text: linkMatch[1],
+      url: linkMatch[2]
+    })
+  }
+  
+  // Remove link tags from the main text
+  response.text = response.text.replace(/\[LINK: .+? \| .+?\]/g, '')
+  
+  // Clean up extra spaces
+  response.text = response.text.trim()
+  
+  return response
+}
+
+/**
+ * Handle OpenAI API error responses
+ */
+function handleOpenAIError(error, corsHeaders) {
+  console.error('OpenAI API error:', JSON.stringify(error))
+  
+  // Check if it's a quota error and handle accordingly
+  if (error.error?.type === 'insufficient_quota' || error.error?.code === 'insufficient_quota') {
+    return new Response(
+      JSON.stringify({ 
+        error: `OpenAI API quota exceeded`, 
+        text: "I apologize, but our AI service is currently unavailable due to high demand. Here are some options that might help you in the meantime.",
+        suggestedActions: ["Browse Popular Profiles", "Check Account Settings", "Contact Support"],
+        errorCode: "QUOTA_EXCEEDED"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+  
+  // Handle authentication errors
+  if (error.error?.type === 'invalid_request_error' || error.error?.code === 'invalid_api_key') {
+    return new Response(
+      JSON.stringify({ 
+        error: `OpenAI API authentication error`, 
+        text: "There seems to be an issue with our AI service configuration. Please try again later while we fix this issue.",
+        suggestedActions: ["Try Again Later", "Browse Profiles", "Contact Support"],
+        errorCode: "AUTH_ERROR"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+  
+  // General API errors
+  return new Response(
+    JSON.stringify({ 
+      error: `OpenAI API error: ${error.error?.message || 'Unknown error'}`, 
+      text: "I'm having trouble connecting to my knowledge base. Let me help you with something else instead.",
+      suggestedActions: ["Browse Profiles", "Check Account Settings", "Try Again Later"],
+      errorCode: "API_ERROR"
+    }),
+    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
+}
+
+/**
+ * Call OpenAI API to generate a response
+ */
+async function callOpenAI(messages, openAIApiKey) {
+  console.log('Sending request to OpenAI API')
+  
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 500,
+    }),
+  })
+  
+  console.log('OpenAI API response status:', response.status)
+  return response
+}
+
+/**
+ * Handle the chat request
+ */
+async function handleChatRequest(req, corsHeaders) {
+  const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
+  
+  if (!OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY is not set in environment variables')
+    return new Response(
+      JSON.stringify({
+        text: "I'm sorry, I'm not fully configured yet. Please contact the administrator to set up my API key.",
+        suggestedActions: ["Browse profiles", "Check wallet", "View content"],
+        error: "OPENAI_API_KEY_MISSING"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // Get request body
+  const { message, userContext, chatHistory, visualCapabilities } = await req.json()
+
+  // Create system prompt based on the user's context
+  let systemPrompt = generateSystemPrompt(userContext)
+
+  // Add instructions for visual elements if supported
+  if (visualCapabilities) {
+    systemPrompt += `\n\nYou can include visual elements in your responses using these formats:
+1. For images: Use [IMAGE: brief description of image]
+2. For cards: Use [CARD: {"title": "Card Title", "description": "Card description", "imageUrl": "optional url", "actions": [{"label": "Action 1", "action": "action-text-1"}, {"label": "Action 2", "action": "action-text-2"}]}]
+
+Use these visual elements only when they add significant value to your response.`
+  }
+
+  // Build the messages array including history and the new message
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...chatHistory,
+    { role: 'user', content: message }
+  ]
+
+  try {
+    // Call OpenAI
+    const response = await callOpenAI(messages, OPENAI_API_KEY)
+
+    if (!response.ok) {
+      const error = await response.json()
+      return handleOpenAIError(error, corsHeaders)
+    }
+
+    const data = await response.json()
+    console.log('OpenAI API response received successfully')
+    
+    // Process response to extract any special actions or UI elements
+    const processedResponse = processResponse(data.choices[0].message.content)
+
+    return new Response(
+      JSON.stringify(processedResponse),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  } catch (openAiError) {
+    console.error('OpenAI API error:', openAiError)
+    
+    // Return a friendly response even when API fails
+    return new Response(
+      JSON.stringify({ 
+        error: openAiError.message, 
+        text: "I seem to be having connection issues. How about exploring some of our featured content while I recover?",
+        suggestedActions: ["See Featured Escorts", "Browse Content", "Check Account"],
+        errorCode: "CONNECTION_ERROR"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 }
 
+/**
+ * Main function for handling requests
+ */
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCorsRequest();
   }
 
   try {
-    // Extract request data
-    const { message, userContext, chatHistory, visualCapabilities = false, flowState } = await req.json();
-    
-    // Validate input
-    if (!message) {
-      throw new Error('Message is required');
-    }
-
-    // Get API key from environment variable
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key is not configured');
-    }
-    
-    console.log(`Processing request with flow state: ${JSON.stringify(flowState)}`);
-
-    // Apply Schauberger flow dynamics
-    const maxTokens = getOptimalTokenWindow(flowState);
-    
-    // Dynamic temperature based on flow state (vortex principle)
-    let temperature = 0.7; // Default
-    if (flowState) {
-      if (flowState.emotionalFlow === 'peaking') {
-        temperature = 0.9; // More creative when engagement is high
-      } else if (flowState.emotionalFlow === 'declining') {
-        temperature = 0.5; // More focused when re-engaging
-      }
-    }
-
-    // Prepare system message with visual capabilities
-    const systemMessage = {
-      role: "system",
-      content: `You are Lucie, a helpful and friendly personal assistant. ${
-        visualCapabilities 
-          ? "You can include visual elements in your responses. Use [IMAGE: description] to include an image. Use [CARD: {\"title\": \"Card Title\", \"description\": \"Card description\", \"actions\": [{\"label\": \"Action\", \"action\": \"do_something\"}]}] to include interactive cards." 
-          : ""
-      } Keep your responses concise and conversational.`
-    };
-    
-    // Add Schauberger-based response guidance based on flow state
-    if (flowState) {
-      const flowGuidance = `Current user emotional flow: ${flowState.emotionalFlow}. ` +
-        `If emotional flow is 'peaking' or 'rising', be more engaging and enthusiastic. ` +
-        `If 'declining', focus on re-engaging with questions and clear value. ` +
-        `If 'neutral', be friendly but straightforward.`;
-      
-      systemMessage.content += " " + flowGuidance;
-    }
-
-    // Prepare messages
-    const messages = [
-      systemMessage,
-      ...(chatHistory || []),
-      { role: "user", content: message }
-    ];
-
-    // Make request to OpenAI API
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${openAIApiKey}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: messages,
-        max_tokens: maxTokens,
-        temperature: temperature,
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`OpenAI API error: ${error}`);
-    }
-
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
-
-    // Extract suggestions and links if they exist
-    const suggestedActionsMatch = aiResponse.match(/\[SUGGESTIONS:(.*?)\]/s);
-    const linksMatch = aiResponse.match(/\[LINKS:(.*?)\]/s);
-    const emotionMatch = aiResponse.match(/\[EMOTION:(.*?)\]/s);
-    
-    // Parse cards if they exist
-    const cardMatches = aiResponse.match(/\[CARD: ({.*?})\]/gs);
-    const cards = cardMatches 
-      ? cardMatches.map(match => {
-          try {
-            const cardJson = match.replace('[CARD: ', '').replace(']', '');
-            return JSON.parse(cardJson);
-          } catch (e) {
-            console.error('Error parsing card:', e);
-            return null;
-          }
-        }).filter(Boolean)
-      : [];
-
-    // Clean up the text
-    let cleanedText = aiResponse
-      .replace(/\[SUGGESTIONS:.*?\]/gs, '')
-      .replace(/\[LINKS:.*?\]/gs, '')
-      .replace(/\[EMOTION:.*?\]/gs, '')
-      .trim();
-
-    // Extract suggestions, links, and emotion
-    const suggestedActions = suggestedActionsMatch 
-      ? suggestedActionsMatch[1].split(',').map(s => s.trim())
-      : [];
-      
-    const links = linksMatch 
-      ? linksMatch[1].split(',').map(link => {
-          const [text, url] = link.split('|').map(s => s.trim());
-          return { text, url };
-        })
-      : [];
-      
-    const emotion = emotionMatch ? emotionMatch[1].trim() : 'neutral';
-
-    // Prepare the response
-    const responseData = {
-      text: cleanedText,
-      suggestedActions,
-      links,
-      emotion,
-      cards: cards.length > 0 ? cards : undefined
-    };
-
-    // Return the response
-    return new Response(JSON.stringify(responseData), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-
+    return await handleChatRequest(req, corsHeaders);
   } catch (error) {
-    console.error('Error in lucie-chat:', error.message);
-    
-    return new Response(JSON.stringify({
-      error: error.message,
-      text: "I'm sorry, I'm having trouble responding right now. Please try again in a moment.",
-      errorCode: error.message.includes('API key') ? 'CONFIG_ERROR' : 'PROCESSING_ERROR'
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
+    console.error('General error:', error)
+    return new Response(
+      JSON.stringify({ 
+        error: error.message, 
+        text: "I encountered a technical issue. Please try again or explore other features.",
+        suggestedActions: ["Browse Content", "View Profiles", "Check Help Section"],
+        errorCode: "GENERAL_ERROR"
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
-});
+})

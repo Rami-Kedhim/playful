@@ -6,22 +6,19 @@ import { Button } from '@/components/ui/button';
 import { LucieMessage } from '@/hooks/useLucieAssistant';
 import LucieTypingIndicator from './LucieTypingIndicator';
 import LucieVisualElements from './LucieVisualElements';
-import LucieInteractiveCard from './LucieInteractiveCard';
 
 interface LucieMessageListProps {
   messages: LucieMessage[];
   isTyping: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   onSuggestedActionClick: (action: string) => void;
-  onCardActionClick: (action: string) => void;
 }
 
 const LucieMessageList = ({ 
   messages, 
   isTyping, 
   messagesEndRef,
-  onSuggestedActionClick,
-  onCardActionClick
+  onSuggestedActionClick
 }: LucieMessageListProps) => {
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -43,26 +40,7 @@ const LucieMessageList = ({
             
             {/* Visual Elements */}
             {message.role === 'assistant' && message.visualElements && (
-              <LucieVisualElements 
-                elements={message.visualElements}
-                onCardActionClick={onCardActionClick}
-              />
-            )}
-            
-            {/* Interactive Cards */}
-            {message.role === 'assistant' && message.cards && message.cards.length > 0 && (
-              <div className="mt-3 space-y-3">
-                {message.cards.map((card, idx) => (
-                  <LucieInteractiveCard
-                    key={idx}
-                    title={card.title}
-                    description={card.description}
-                    imageUrl={card.imageUrl}
-                    actions={card.actions}
-                    onActionClick={onCardActionClick}
-                  />
-                ))}
-              </div>
+              <LucieVisualElements elements={message.visualElements} />
             )}
             
             {/* Suggested Actions */}

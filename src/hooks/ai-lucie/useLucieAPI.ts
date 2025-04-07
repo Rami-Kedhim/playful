@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { LucieResponse, LucieAPIOptions, VisualElementRequest, InteractiveCard } from './types';
+import { LucieResponse, LucieAPIOptions, VisualElementRequest } from './types';
 
 export const useLucieAPI = () => {
   const [apiAvailable, setApiAvailable] = useState<boolean>(true);
@@ -56,22 +56,28 @@ export const useLucieAPI = () => {
       setLastRequestTime(Date.now());
 
       // Call the Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('lucie-chat', {
+      const { data, error } = await supabase.functions.invoke('ai-companion-chat', {
         body: {
           message: content,
           userContext,
           chatHistory,
-          visualCapabilities: true // Flag to indicate we support visual elements
+          companionProfile: {
+            name: "Lucie",
+            personality: "Warm, seductive, playful, and helpful assistant",
+            speechStyle: "sultry",
+            interests: ["helping users", "escort services", "entertainment"],
+            visualCapabilities: true // Flag to indicate we support visual elements
+          }
         }
       });
       
       if (error) {
-        console.error('Error invoking lucie-chat function:', error);
+        console.error('Error invoking AI companion chat function:', error);
         throw new Error(error.message);
       }
       
       if (data.error || data.errorCode) {
-        console.log('lucie-chat function returned error:', data.error || data.errorCode);
+        console.log('AI companion chat function returned error:', data.error || data.errorCode);
         
         // Handle quota exceeded and other error types
         if (data.errorCode === 'QUOTA_EXCEEDED' || data.error?.includes('quota')) {
@@ -115,10 +121,10 @@ export const useLucieAPI = () => {
       
       return { error: error.message };
     }
-  }, [apiAvailable, shouldRetryApi, toast, apiBackoffTime, retryCount]);
+  }, [apiAvailable, shouldRetryApi, toast, apiBackoffTime, retryCount, generateVisualElement]);
 
   // Process visual elements that might be present in the response text
-  const processVisualElements = useCallback(async (responseText: string, cards?: InteractiveCard[]) => {
+  const processVisualElements = useCallback(async (responseText: string) => {
     let visualElements = [];
     let processedText = responseText;
     
@@ -159,19 +165,6 @@ export const useLucieAPI = () => {
       }
       // Remove the card tags from the text
       processedText = processedText.replace(/\[CARD: (.+?)\]/g, '');
-    }
-    
-    // Also add any interactive cards from the response
-    if (cards && cards.length > 0) {
-      for (const card of cards) {
-        visualElements.push({
-          type: 'card',
-          data: {
-            type: 'interactive',
-            ...card
-          }
-        });
-      }
     }
     
     return { 
