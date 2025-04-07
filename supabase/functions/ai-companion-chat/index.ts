@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
@@ -36,7 +35,7 @@ serve(async (req) => {
       { role: 'user', content: message }
     ]
 
-    // Call OpenRouter API with specified model
+    // Call OpenRouter API with a better NSFW-friendly model
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -46,10 +45,10 @@ serve(async (req) => {
         'X-Title': 'Lovable AI Companion Chat' // Optional title for tracking
       },
       body: JSON.stringify({
-        model: 'nous-hermes-2-mixtral', // Using the specified model
+        model: 'anthropic/claude-3-haiku', // More reliable model with good NSFW capabilities
         messages: messages,
-        temperature: 0.8,
-        max_tokens: 600,
+        temperature: 0.9, // Slightly higher for more creative and uncensored responses
+        max_tokens: 800, // Increased for more detailed responses
         frequency_penalty: 0.5,
         presence_penalty: 0.5,
         user: userContext?.name || 'anonymous',
