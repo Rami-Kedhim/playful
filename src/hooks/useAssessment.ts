@@ -24,11 +24,49 @@ export const useAssessment = () => {
         [] // Providing empty behavior events array as placeholder
       );
       
-      // Only set if we got valid assessment results
+      // Only set if we got valid assessment results and ensure it matches the required type
       if (assessment) {
-        setAssessmentResults(assessment);
+        // Transform the service result to match the expected AssessmentResult type
+        const completeAssessment: AssessmentResult = {
+          userId: user.id,
+          timestamp: new Date().toISOString(),
+          assessmentId: `assessment-${Date.now()}`,
+          insightSummary: assessment.summary || '',
+          scores: {
+            engagementPotential: assessment.engagementHealthScore || 0,
+            contentAffinity: assessment.conversionPotentialScore || 0,
+            monetizationPropensity: assessment.conversionPotentialScore || 0, // Using conversion as a proxy
+            retentionLikelihood: 100 - (assessment.retentionRiskScore || 0), // Invert risk score
+          },
+          recommendations: assessment.flags?.map(f => f.recommendedActions).flat() || [],
+          overallScore: assessment.overallScore || 0,
+          insights: assessment.insights?.map(insight => ({
+            id: `insight-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            category: insight.category as AssessmentCategory,
+            title: insight.title,
+            description: insight.description,
+            severityLevel: insight.severityLevel === 'high' ? 'critical' : 
+                          insight.severityLevel === 'medium' ? 'warning' : 
+                          insight.severityLevel === 'low' ? 'opportunity' : 'positive' as AssessmentSeverityLevel,
+            impact: insight.severityLevel === 'high' ? 80 : 
+                   insight.severityLevel === 'medium' ? 60 : 40,
+            confidenceScore: 75, // Default confidence score
+            recommendedActions: insight.recommendedActions || []
+          })) || [],
+          summary: assessment.summary || '',
+          strengthAreas: assessment.strengthAreas || [],
+          improvementAreas: assessment.improvementAreas || [],
+          engagementHealthScore: assessment.engagementHealthScore || 0,
+          conversionPotentialScore: assessment.conversionPotentialScore || 0,
+          retentionRiskScore: assessment.retentionRiskScore || 0,
+          psychographicProfile: assessment.psychographicProfile,
+          chaseHughesProfile: undefined // Will be filled in later if available
+        };
+        
+        setAssessmentResults(completeAssessment);
+        return completeAssessment;
       }
-      return assessment;
+      return null;
     } catch (error) {
       console.error('Error running assessment:', error);
       return null;
