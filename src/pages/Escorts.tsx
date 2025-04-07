@@ -1,60 +1,44 @@
 
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/auth";
+import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import MainLayout from "@/components/layout/MainLayout";
 import EscortContainer from "@/components/escorts/EscortContainer";
-import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/contexts/NotificationsContext";
-import { escorts as mockEscorts, availableServices } from "@/data/escortData";
-import { useHermesInsights } from "@/hooks/useHermesInsights";
+import { availableServices } from "@/data/escortData";
 import LucieSchaubergerIntegration from "@/components/home/LucieSchaubergerIntegration";
-import { CircleHelp } from "lucide-react";
-import { useEscorts } from "@/hooks/useEscorts";
+import { useEscortWithInsights } from "@/hooks/useEscortWithInsights";
+import { escorts as mockEscorts } from "@/data/escortData";
 
 const Escorts: React.FC = () => {
-  const { user } = useAuth();
-  const { escorts, loading, error, fetchEscorts } = useEscorts({ initialData: mockEscorts });
+  const { 
+    escorts, 
+    loading, 
+    error, 
+    fetchEscorts, 
+    recordEscortView,
+    insights 
+  } = useEscortWithInsights({ initialData: mockEscorts });
+  
   const { showInfo } = useNotifications();
   const [showFilters, setShowFilters] = useState(false);
   
-  // Connect to HERMES behavioral insights
-  const { 
-    insights, 
-    recordElementInteraction,
-    shouldEnableFeature,
-    reportUserAction,
-    recordBoostRequest 
-  } = useHermesInsights(user?.id);
-  
   // Determine if assistant should be shown based on behavioral insights
-  const showLucieAssistant = shouldEnableFeature('ai_assistant');
+  const showLucieAssistant = insights?.autoDrive?.isLucieEnabled || false;
 
   const handleRefresh = () => {
     fetchEscorts();
     if (showInfo) showInfo("Refreshing Data", "Getting the latest escort profiles");
-    
-    // Record refresh interaction
-    if (user?.id) {
-      recordElementInteraction('refresh-button', 'click');
-    }
   };
   
   // Apply UI recommendations from behavioral insights
-  const uiConfig = insights.autoDrive?.uiSuggestions || {};
+  const uiConfig = insights?.autoDrive?.uiSuggestions || {};
   
   // Get content recommendations
-  const contentRecommendations = insights.autoDrive?.contentRecommendations || [];
+  const contentRecommendations = insights?.autoDrive?.contentRecommendations || [];
   const showHighlightedContent = contentRecommendations.some(
     (rec: any) => rec.type === 'visual' && rec.content === 'image_gallery'
   );
-  
-  useEffect(() => {
-    // Check if we should show personalized content based on insights
-    if (insights.emotionalPhase?.phase === 'desire' && insights.sensoryPreferences?.primary) {
-      console.log("User is in desire phase with preference:", insights.sensoryPreferences.primary);
-    }
-  }, [insights]);
   
   return (
     <>

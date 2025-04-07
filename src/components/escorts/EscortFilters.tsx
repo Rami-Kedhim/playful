@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Escort } from "@/types/escort";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Search } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import FilterHeader from "./filters/FilterHeader";
+import FilterSearch from "./filters/FilterSearch";
+import FilterLocation from "./filters/FilterLocation";
+import FilterPrice from "./filters/FilterPrice";
+import FilterVerified from "./filters/FilterVerified";
+import FilterBadges from "./filters/FilterBadges";
 
 interface EscortFiltersProps {
   escorts: Escort[];
@@ -83,7 +84,16 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
     };
     
     applyFilters();
-  }, [searchTerm, selectedLocation, priceRange, selectedServices, verifiedOnly, selectedGenders, escorts, onApplyFilters]);
+  }, [
+    searchTerm, 
+    selectedLocation, 
+    priceRange, 
+    selectedServices, 
+    verifiedOnly, 
+    selectedGenders, 
+    escorts, 
+    onApplyFilters
+  ]);
   
   const handleClear = () => {
     setSearchTerm("");
@@ -114,93 +124,35 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name or location"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <FilterHeader clearFilters={handleClear} />
         
-        <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium">Location</label>
-          <select
-            id="location"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-            className="w-full border rounded-md p-2"
-          >
-            <option value="">All Locations</option>
-            {uniqueLocations.map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Separator className="my-4" />
         
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm font-medium">Price Range</span>
-            <span className="text-sm">
-              ${priceRange[0]} - ${priceRange[1]}
-            </span>
-          </div>
-          <Slider
-            defaultValue={[priceRange[0], priceRange[1]]}
-            max={1000}
-            step={50}
-            onValueChange={(value) => setPriceRange([value[0], value[1]])}
-            className="py-4"
-          />
-        </div>
+        <FilterSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="verified" 
-            checked={verifiedOnly} 
-            onCheckedChange={(checked) => setVerifiedOnly(checked as boolean)} 
-          />
-          <Label htmlFor="verified">Verified Only</Label>
-        </div>
+        <FilterLocation 
+          selectedLocation={selectedLocation} 
+          setSelectedLocation={setSelectedLocation} 
+          uniqueLocations={uniqueLocations} 
+        />
         
-        {services.length > 0 && (
-          <div className="space-y-2">
-            <span className="text-sm font-medium">Services</span>
-            <div className="flex flex-wrap gap-2">
-              {services.map((service) => (
-                <Badge
-                  key={service}
-                  variant={selectedServices.includes(service) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleService(service)}
-                >
-                  {service}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
+        <FilterPrice priceRange={priceRange} setPriceRange={setPriceRange} />
         
-        {uniqueGenders.length > 0 && (
-          <div className="space-y-2">
-            <span className="text-sm font-medium">Gender</span>
-            <div className="flex flex-wrap gap-2">
-              {uniqueGenders.map((gender) => (
-                <Badge
-                  key={gender}
-                  variant={selectedGenders.includes(gender) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleGender(gender)}
-                >
-                  {gender}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
+        <FilterVerified verifiedOnly={verifiedOnly} setVerifiedOnly={setVerifiedOnly} />
+        
+        <FilterBadges 
+          title="Services" 
+          items={services}
+          selectedItems={selectedServices}
+          toggleItem={toggleService}
+        />
+        
+        <FilterBadges
+          title="Gender"
+          items={uniqueGenders}
+          selectedItems={selectedGenders}
+          toggleItem={toggleGender}
+        />
       </div>
       
       <div className="flex justify-end">
