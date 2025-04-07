@@ -41,7 +41,8 @@ export const LucieHermesIntegration = ({
       } else if (insights.recommendedProfileId) {
         personalizedMessage = `Based on your interests, I think you might like to check out profile ${insights.recommendedProfileId}. They're very popular in your area!`;
       } else {
-        personalizedMessage = `Hey there${user ? ` ${user.username}` : ''}! I noticed you've been exploring our platform. Can I help you find something specific today?`;
+        const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || '';
+        personalizedMessage = `Hey there${displayName ? ` ${displayName}` : ''}! I noticed you've been exploring our platform. Can I help you find something specific today?`;
       }
       
       setCustomMessage(personalizedMessage);

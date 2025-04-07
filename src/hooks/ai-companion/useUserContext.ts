@@ -1,23 +1,34 @@
 
-import { useCallback } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { UserContext } from './types';
+import { useEffect, useState } from 'react';
 
-export function useUserContext() {
+export const useUserContext = () => {
   const { user } = useAuth();
-  
-  // Build user context based on authenticated user info
-  const getUserContext = useCallback((): UserContext => {
-    if (!user) return {};
-    
-    // In a real app, you would fetch relationship status and interaction history
-    return {
-      name: user.username,
-      interests: user.user_metadata?.interests || [],
-      relationshipStatus: "friendly", // This would come from a database
-      recentInteractions: "You discussed art and travel destinations recently" // This would be derived from chat history
-    };
+  const [userContext, setUserContext] = useState<string>('');
+
+  useEffect(() => {
+    // Generate context about the user that can be used by the AI
+    if (user) {
+      const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+      
+      let context = `The user's name is ${displayName}. `;
+      
+      if (user.email) {
+        context += `Their email is ${user.email}. `;
+      }
+      
+      // Add more user context if available
+      if (user.user_metadata) {
+        if (user.user_metadata.preferences) {
+          context += `Their preferences include: ${JSON.stringify(user.user_metadata.preferences)}. `;
+        }
+      }
+      
+      setUserContext(context);
+    } else {
+      setUserContext('This is an anonymous user.');
+    }
   }, [user]);
 
-  return { getUserContext };
-}
+  return userContext;
+};

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -15,17 +16,9 @@ import ServiceTypeMenu from '../navigation/ServiceTypeMenu';
 
 const Navbar: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { isMobileMenuOpen, setIsMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
   const navigate = useNavigate();
-  
-  const handleLogout = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-colors duration-300">
@@ -75,18 +68,7 @@ const Navbar: React.FC = () => {
           
           {/* User menu - only visible on desktop */}
           <div className="hidden md:block">
-            {isAuthenticated ? (
-              <UserMenu user={user} handleLogout={handleLogout} />
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/login">{t('login')}</Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link to="/register">{t('register')}</Link>
-                </Button>
-              </div>
-            )}
+            <UserMenu />
           </div>
         </div>
       </div>

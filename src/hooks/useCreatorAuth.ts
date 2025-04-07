@@ -11,7 +11,7 @@ interface CreatorProfile {
 }
 
 export const useCreatorAuth = () => {
-  const { user, isLoading, userRoles } = useAuth();
+  const { user, isLoading } = useAuth();
   const [isCreator, setIsCreator] = useState(false);
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ export const useCreatorAuth = () => {
       }
 
       // Check if user has creator role
-      const hasCreatorRole = userRoles?.includes('creator') || user.role === 'creator';
+      const hasCreatorRole = user.user_metadata?.role === 'creator';
       setIsCreator(hasCreatorRole);
 
       if (hasCreatorRole) {
@@ -57,7 +57,7 @@ export const useCreatorAuth = () => {
     };
 
     checkCreatorStatus();
-  }, [user, userRoles]);
+  }, [user]);
 
   return {
     isCreator,

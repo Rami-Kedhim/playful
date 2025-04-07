@@ -1,23 +1,26 @@
 
-import { useCallback } from 'react';
 import { useAuth } from '@/hooks/auth';
-import { UserContext } from './types';
+import { useEffect, useState } from 'react';
 
 export const useUserContext = () => {
   const { user } = useAuth();
-  
-  // Build user context based on authenticated user info
-  const getUserContext = useCallback((): UserContext => {
-    if (!user) return {};
-    
-    return {
-      name: user.username,
-      role: user.role,
-      interests: user.user_metadata?.interests || []
-    };
+  const [userContext, setUserContext] = useState<string>('');
+
+  useEffect(() => {
+    if (user) {
+      const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+      
+      let context = `The user's name is ${displayName}. `;
+      
+      if (user.email) {
+        context += `Their email is ${user.email}. `;
+      }
+      
+      setUserContext(context);
+    } else {
+      setUserContext('This is an anonymous user.');
+    }
   }, [user]);
 
-  return {
-    getUserContext
-  };
+  return userContext;
 };
