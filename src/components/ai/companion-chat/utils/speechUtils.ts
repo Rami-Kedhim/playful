@@ -5,9 +5,9 @@ import { voiceService } from '../../../../services/voiceService';
  * Speak a message using ElevenLabs text-to-speech API
  * @param text - The text to speak
  * @param voiceType - Optional voice type to use (sultry, deep, soft, etc)
- * @returns True if speech started successfully, false otherwise
+ * @returns Promise that resolves to true if speech started successfully, false otherwise
  */
-export const speakMessage = (text: string, voiceType?: string): boolean => {
+export const speakMessage = async (text: string, voiceType?: string): Promise<boolean> => {
   try {
     // Remove any markdown or special formatting that might interfere with speech
     const cleanText = text
@@ -57,7 +57,7 @@ export const speakMessage = (text: string, voiceType?: string): boolean => {
     }
     
     // Use the voiceService to speak the message
-    return voiceService.speak(cleanText, settings);
+    return await voiceService.speak(cleanText, settings);
   } catch (error) {
     console.error("Speech synthesis error:", error);
     return false;

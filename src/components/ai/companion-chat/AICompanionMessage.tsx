@@ -34,7 +34,7 @@ const AICompanionMessage = ({
     setLoading(true);
     
     try {
-      const success = speakMessage(message.content, voiceType);
+      const success = await speakMessage(message.content, voiceType);
       if (success) {
         setSpeaking(true);
         setSpeechError(null);
