@@ -1,72 +1,90 @@
-import { useState } from 'react';
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
 
-export function usePasswordManagement() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  
-  // Reset password through email
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { AuthResult } from '@/types/auth';
+
+export const usePasswordManagement = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const resetPassword = async (email: string): Promise<boolean> => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/reset-password`
       });
-      
+
       if (error) {
-        toast({
-          title: "Error resetting password",
-          description: error.message,
-          variant: "destructive",
-        });
         throw error;
       }
-      
+
       toast({
         title: "Password reset email sent",
-        description: "Check your email for the password reset link",
+        description: "Check your email for the password reset link.",
       });
-      
+
       return true;
     } catch (error: any) {
-      console.error("Error resetting password:", error.message);
-      throw error;
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email",
+        variant: "destructive",
+      });
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
-  
-  // Update user's password (requires user to be authenticated)
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<AuthResult> => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      // Note: Supabase doesn't require the old password to update, but we're keeping
-      // the parameter for interface consistency and potential future validation
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
+      // First verify current password by trying to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: supabase.auth.getUser().then(res => res.data.user?.email || ''),
+        password: currentPassword,
       });
-      
+
+      if (signInError) {
+        return {
+          success: false,
+          error: "Current password is incorrect"
+        };
+      }
+
+      // Update to new password
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
       if (error) {
-        toast({
-          title: "Error updating password",
-          description: error.message,
-          variant: "destructive",
-        });
         throw error;
       }
-      
+
       toast({
         title: "Password updated",
-        description: "Your password has been updated successfully",
+        description: "Your password has been successfully updated.",
       });
-      return true;
+
+      return { success: true };
     } catch (error: any) {
-      console.error("Error updating password:", error.message);
-      throw error;
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+      return {
+        success: false,
+        error: error.message
+      };
     } finally {
       setIsLoading(false);
     }
   };
-  
-  return { resetPassword, updatePassword, isLoading };
-}
+
+  return {
+    resetPassword,
+    updatePassword,
+    isLoading
+  };
+};
+
+export default usePasswordManagement;

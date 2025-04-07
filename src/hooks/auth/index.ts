@@ -7,8 +7,8 @@ export { usePasswordManagement } from "./usePasswordManagement";
 export { useProfileManagement } from "./useProfileManagement";
 export { useRole } from "./useRole";
 
-// Export a default object with all hooks
-export default {
+// Export a default object with all hooks - fixing the missing declarations
+const authHooks = {
   useAuth,
   AuthProvider,
   useAuthState,
@@ -17,3 +17,5 @@ export default {
   useProfileManagement,
   useRole
 };
+
+export default authHooks;

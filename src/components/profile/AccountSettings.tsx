@@ -25,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Loader2, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AuthUser, UserProfile } from '@/types/auth';
 
 // Form schema for account settings
 const accountFormSchema = z.object({
@@ -58,10 +59,21 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 interface AccountSettingsProps {
   initialTab?: string;
+  user?: AuthUser;
+  profile?: UserProfile | null;
 }
 
-const AccountSettings: React.FC<AccountSettingsProps> = ({ initialTab = 'general' }) => {
-  const { user, profile, updateUserProfile, updatePassword } = useAuth();
+const AccountSettings: React.FC<AccountSettingsProps> = ({ 
+  initialTab = 'general',
+  user: propUser,
+  profile: propProfile
+}) => {
+  const auth = useAuth();
+  // Use either props or auth context
+  const user = propUser || auth.user;
+  const profile = propProfile || auth.profile;
+  const { updateUserProfile, updatePassword } = auth;
+  
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/auth/useAuth"; // Make sure to use the correct import
+import { useAuth } from "@/hooks/auth/useAuth"; 
 import AppLayout from "@/components/layout/AppLayout";
 import { 
   Card, 
@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthUser } from "@/types/auth"; // Import AuthUser
+import { AuthUser } from "@/types/auth"; 
 
 // Import custom components
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -179,7 +179,11 @@ const ProfileManagement = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <AccountSettings user={user} profile={profile} />
+                <AccountSettings 
+                  user={user} 
+                  profile={profile} 
+                  initialTab="general"
+                />
               </CardContent>
             </Card>
           </TabsContent>
