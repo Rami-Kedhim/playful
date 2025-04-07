@@ -7,6 +7,9 @@ import LucieSchaubergerIntegration from '@/components/home/LucieSchaubergerInteg
 import HermesDebugPanel from '@/components/home/HermesDebugPanel';
 import AssessmentDashboard from './components/home/AssessmentDashboard';
 import HermesAssessmentIntegration from './components/home/HermesAssessmentIntegration';
+import Index from './pages/Index';
+import Escorts from './pages/Escorts';
+import Creators from './pages/Creators';
 
 function App() {
   return (
@@ -15,7 +18,9 @@ function App() {
         <Router>
           <div className="min-h-screen bg-background text-foreground">
             <RouterRoutes>
-              <Route path="/" element={<AssessmentDashboard />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/escorts" element={<Escorts />} />
+              <Route path="/creators" element={<Creators />} />
               <Route path="/assessment" element={<AssessmentDashboard />} />
             </RouterRoutes>
             <Toaster />

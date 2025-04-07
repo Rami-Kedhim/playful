@@ -1,14 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import { Escort } from "@/types/escort";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import FilterHeader from "./filters/FilterHeader";
-import FilterSearch from "./filters/FilterSearch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import FilterLocation from "./filters/FilterLocation";
-import FilterPrice from "./filters/FilterPrice";
-import FilterVerified from "./filters/FilterVerified";
-import FilterBadges from "./filters/FilterBadges";
 import FilterServices from "./filters/FilterServices";
 
 interface EscortFiltersProps {
@@ -24,140 +23,179 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
   onApplyFilters,
   onClearFilters,
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [selectedGenders, setSelectedGenders] = useState<string[]>([]);
-  
-  // Get unique locations from escorts data
-  const uniqueLocations = [...new Set(escorts.map((escort) => escort.location))];
-  
-  // Get unique genders from escorts data
-  const uniqueGenders = [...new Set(escorts.map((escort) => escort.gender).filter(Boolean))];
-  
-  useEffect(() => {
-    const applyFilters = () => {
-      let filtered = [...escorts];
-      
-      // Filter by search term
-      if (searchTerm) {
-        filtered = filtered.filter((escort) =>
-          escort.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          escort.bio?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
-          escort.location.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-      
-      // Filter by location
-      if (selectedLocation) {
-        filtered = filtered.filter((escort) =>
-          escort.location === selectedLocation
-        );
-      }
-      
-      // Filter by price range
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+
+  // Extract unique locations from escorts
+  const uniqueLocations = [...new Set(escorts.map(escort => escort.location || ""))].filter(Boolean);
+
+  // Toggle service selection
+  const toggleService = (service: string) => {
+    if (selectedServices.includes(service)) {
+      setSelectedServices(selectedServices.filter(s => s !== service));
+    } else {
+      setSelectedServices([...selectedServices, service]);
+    }
+  };
+
+  // Apply filters function
+  const applyFilters = () => {
+    let filtered = [...escorts];
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
-        (escort) => escort.price >= priceRange[0] && escort.price <= priceRange[1]
+        escort => 
+          escort.name?.toLowerCase().includes(query) ||
+          escort.location?.toLowerCase().includes(query)
       );
-      
-      // Filter by services
-      if (selectedServices.length > 0) {
-        filtered = filtered.filter((escort) =>
-          escort.services?.some((service) => selectedServices.includes(service))
-        );
-      }
-      
-      // Filter by verification status
-      if (verifiedOnly) {
-        filtered = filtered.filter((escort) => escort.verified);
-      }
-      
-      // Filter by gender
-      if (selectedGenders.length > 0) {
-        filtered = filtered.filter((escort) =>
-          escort.gender && selectedGenders.includes(escort.gender)
-        );
-      }
-      
-      onApplyFilters(filtered);
-    };
-    
-    applyFilters();
-  }, [
-    searchTerm, 
-    selectedLocation, 
-    priceRange, 
-    selectedServices, 
-    verifiedOnly, 
-    selectedGenders, 
-    escorts, 
-    onApplyFilters
-  ]);
-  
-  const handleClear = () => {
-    setSearchTerm("");
+    }
+
+    // Filter by location
+    if (selectedLocation) {
+      filtered = filtered.filter(escort => escort.location === selectedLocation);
+    }
+
+    // Filter by services
+    if (selectedServices.length > 0) {
+      filtered = filtered.filter(escort => 
+        selectedServices.every(service => 
+          escort.services?.includes(service)
+        )
+      );
+    }
+
+    // Filter by price range
+    filtered = filtered.filter(escort => {
+      const price = escort.hourlyRate || 0;
+      return price >= minPrice && price <= maxPrice;
+    });
+
+    // Filter by availability
+    if (isAvailable) {
+      filtered = filtered.filter(escort => escort.available === true);
+    }
+
+    // Filter by verification status
+    if (isVerified) {
+      filtered = filtered.filter(escort => escort.is_verified === true);
+    }
+
+    onApplyFilters(filtered);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("");
     setSelectedLocation("");
-    setPriceRange([0, 1000]);
     setSelectedServices([]);
-    setVerifiedOnly(false);
-    setSelectedGenders([]);
+    setMinPrice(0);
+    setMaxPrice(1000);
+    setIsAvailable(false);
+    setIsVerified(false);
     onClearFilters();
   };
-  
-  const toggleService = (service: string) => {
-    setSelectedServices((prev) =>
-      prev.includes(service)
-        ? prev.filter((s) => s !== service)
-        : [...prev, service]
-    );
-  };
-  
-  const toggleGender = (gender: string) => {
-    setSelectedGenders((prev) =>
-      prev.includes(gender)
-        ? prev.filter((g) => g !== gender)
-        : [...prev, gender]
-    );
-  };
-  
+
+  // Apply filters when any of the filter values change
+  useEffect(() => {
+    applyFilters();
+  }, [selectedLocation, selectedServices, minPrice, maxPrice, isAvailable, isVerified]);
+
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <FilterHeader clearFilters={handleClear} />
-        
-        <Separator className="my-4" />
-        
-        <FilterSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        
-        <FilterLocation 
-          selectedLocation={selectedLocation} 
-          setSelectedLocation={setSelectedLocation} 
-          uniqueLocations={uniqueLocations} 
-        />
-        
-        <FilterPrice priceRange={priceRange} setPriceRange={setPriceRange} />
-        
-        <FilterVerified verifiedOnly={verifiedOnly} setVerifiedOnly={setVerifiedOnly} />
-        
-        <FilterServices
-          services={services}
-          selectedServices={selectedServices}
-          toggleService={toggleService}
-        />
-        
-        <FilterBadges
-          title="Gender"
-          items={uniqueGenders}
-          selectedItems={selectedGenders}
-          toggleItem={toggleGender}
+    <div className="space-y-4">
+      {/* Search filter */}
+      <div className="space-y-2">
+        <Label htmlFor="search" className="text-sm font-medium">
+          Search
+        </Label>
+        <Input
+          id="search"
+          placeholder="Search by name or location..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") applyFilters();
+          }}
         />
       </div>
-      
-      <div className="flex justify-end">
-        <Button variant="outline" onClick={handleClear} className="mr-2">
-          Clear All
+
+      {/* Location filter */}
+      <FilterLocation 
+        selectedLocation={selectedLocation}
+        setSelectedLocation={setSelectedLocation}
+        uniqueLocations={uniqueLocations}
+      />
+
+      {/* Services filter */}
+      <FilterServices 
+        services={services}
+        selectedServices={selectedServices}
+        toggleService={toggleService}
+      />
+
+      {/* Price range filter */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <Label htmlFor="price-range" className="text-sm font-medium">
+            Price Range
+          </Label>
+          <span className="text-xs text-muted-foreground">
+            ${minPrice} - ${maxPrice}
+          </span>
+        </div>
+        <div className="pt-4">
+          <Slider
+            id="price-range"
+            defaultValue={[minPrice, maxPrice]}
+            max={1000}
+            step={10}
+            onValueChange={(values) => {
+              setMinPrice(values[0]);
+              setMaxPrice(values[1]);
+            }}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      {/* Availability filter */}
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="available"
+          checked={isAvailable}
+          onCheckedChange={(checked) => setIsAvailable(checked as boolean)}
+        />
+        <Label htmlFor="available" className="text-sm font-medium cursor-pointer">
+          Available Now
+        </Label>
+      </div>
+
+      {/* Verification filter */}
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="verified"
+          checked={isVerified}
+          onCheckedChange={(checked) => setIsVerified(checked as boolean)}
+        />
+        <Label htmlFor="verified" className="text-sm font-medium cursor-pointer">
+          Verified Only
+        </Label>
+      </div>
+
+      {/* Filter actions */}
+      <div className="flex justify-between pt-2">
+        <Button variant="outline" size="sm" onClick={clearFilters}>
+          Clear Filters
+        </Button>
+        <Button size="sm" onClick={applyFilters}>
+          Apply Filters
         </Button>
       </div>
     </div>
