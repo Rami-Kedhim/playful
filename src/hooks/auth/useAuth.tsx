@@ -22,11 +22,8 @@ export const useAuth = () => {
 // Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Use our custom hooks
-  const [
-    { user, profile, isLoading, userRoles },
-    setIsLoading,
-    refreshProfile
-  ] = useAuthState();
+  const [authState, setIsLoading, refreshProfile] = useAuthState();
+  const { user, profile, isLoading, userRoles } = authState;
   
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -60,20 +57,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Update state
           setIsAuthenticated(true);
-          setUser(mappedUser);
+          // Instead of directly using setUser, we'll update through the auth state
+          authState.user = mappedUser;
           
           // Fetch profile after auth state changes
           await refreshProfile();
         } else {
           setIsAuthenticated(false);
-          setUser(null);
+          // Clear user without directly using setUser
+          authState.user = null;
         }
 
         if (event === 'SIGNED_OUT') {
           // Clear all auth state
           setIsAuthenticated(false);
-          setUser(null);
-          setProfile(null);
+          authState.user = null;
+          authState.profile = null;
         }
         
         setIsLoading(false);
@@ -100,7 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           setSession(initialSession);
           setIsAuthenticated(true);
-          setUser(initialUser);
+          // Instead of directly using setUser
+          authState.user = initialUser;
           await refreshProfile();
         }
       } catch (error) {
