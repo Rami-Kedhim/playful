@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,17 +54,21 @@ const BrainHubDashboard: React.FC = () => {
   
   const updateAcademicModel = <
     S extends keyof BrainHubConfig,
-    K extends keyof BrainHubConfig[S]
+    K extends keyof BrainHubConfig[S] & string
   >(
     section: S,
     key: K,
     value: boolean
   ) => {
+    // Create a copy of the current section config
     const sectionConfig = {
-      ...config[section],
-      [key]: value
+      ...(config[section] as object)
     };
     
+    // Update the specific property using type assertion
+    (sectionConfig as any)[key] = value;
+    
+    // Update the config with the modified section
     updateConfig(section, sectionConfig as any);
   };
 

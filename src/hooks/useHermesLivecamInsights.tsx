@@ -46,8 +46,8 @@ export function useHermesLivecamInsights(userId?: string) {
         setLivecamInsights({
           recommendedProfileId: response.recommended_profile,
           // Type-check and provide fallbacks for potentially missing properties
-          popularCategory: response.popular_category !== undefined ? response.popular_category : undefined,
-          trendingTag: response.trending_tag !== undefined ? response.trending_tag : undefined,
+          popularCategory: response.popular_category,
+          trendingTag: response.trending_tag,
           isLoading: false
         });
       }

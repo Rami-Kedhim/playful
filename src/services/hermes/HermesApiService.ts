@@ -1,4 +1,3 @@
-
 /**
  * HermesApiService - Integration with the external HERMES-OXUM intelligence system
  * Enhanced with AI companion recommendations and personalization
@@ -11,13 +10,11 @@ export interface HermesUserAction {
   user_id: string;
   action: string;
   category?: string;
-  location?: string;
-  session_time?: number;
   interaction_data?: Record<string, any>;
 }
 
 export interface HermesResponse {
-  trigger_luxlife: boolean;
+  trigger_luxlife?: boolean;
   recommended_profile?: string;
   recommended_companion_id?: string;
   boost_offer?: {
@@ -29,6 +26,8 @@ export interface HermesResponse {
     message: string;
     confidence: number;
   };
+  popular_category?: string;
+  trending_tag?: string;
 }
 
 export interface CompanionRecommendation {
