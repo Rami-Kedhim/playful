@@ -152,7 +152,8 @@ export const useMonetizationSystem = ({
         role: 'system',
         content: `Insufficient balance: You need ${cost} Lucoins to unlock this content. Current balance: ${lucoinBalance}`,
         timestamp: new Date(),
-        isError: true
+        // Replace isError with a valid property
+        emotion: 'sadness'
       });
       return false;
     }
@@ -225,7 +226,8 @@ export const useMonetizationSystem = ({
         role: 'system',
         content: 'There was an error processing your payment.',
         timestamp: new Date(),
-        isError: true
+        // Replace isError with a valid property
+        emotion: 'sadness'
       });
       
       return false;

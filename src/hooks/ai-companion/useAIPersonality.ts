@@ -78,9 +78,9 @@ export const useAIPersonality = ({
         { name: 'fear', value: updatedState.fear },
         { name: 'surprise', value: updatedState.surprise },
         { name: 'sadness', value: updatedState.sadness },
-        { name: 'disgust', value: updatedState.disgust },
         { name: 'anger', value: updatedState.anger },
-        { name: 'anticipation', value: updatedState.anticipation }
+        { name: 'anticipation', value: updatedState.anticipation },
+        { name: 'interest', value: updatedState.interest }
       ];
       
       const dominant = emotions.reduce((max, emotion) => 
