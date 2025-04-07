@@ -1,9 +1,9 @@
-
 import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
 import BehavioralAssessmentService from '@/services/assessment/BehavioralAssessmentService';
 import { AssessmentResult, AssessmentInsight, AssessmentCategory, AssessmentSeverityLevel } from '@/types/assessment';
+import { BrandResonanceStage, BehavioralLoop, ValueOrientation, ConsumerDecisionStage } from '@/types/enhancedBehavioral';
 
 export const useAssessment = () => {
   const { user } = useAuth();
@@ -59,7 +59,20 @@ export const useAssessment = () => {
           engagementHealthScore: assessment.engagementHealthScore || 0,
           conversionPotentialScore: assessment.conversionPotentialScore || 0,
           retentionRiskScore: assessment.retentionRiskScore || 0,
-          psychographicProfile: assessment.psychographicProfile,
+          psychographicProfile: assessment.psychographicProfile ? {
+            personalityTraits: assessment.psychographicProfile.personalityTraits || [],
+            interests: assessment.psychographicProfile.interests || [],
+            values: assessment.psychographicProfile.values || [],
+            motivations: assessment.psychographicProfile.motivations || [],
+            decisionMakingStyle: assessment.psychographicProfile.decisionMakingStyle || 'analytical',
+            trustLevel: assessment.psychographicProfile.trustLevel || 50,
+            priceSensitivity: assessment.psychographicProfile.priceSensitivity || 50,
+            behavioralLoop: assessment.psychographicProfile.behavioralLoop || BehavioralLoop.Discovery,
+            decisionStage: assessment.psychographicProfile.decisionStage || ConsumerDecisionStage.InformationSearch,
+            valueOrientation: assessment.psychographicProfile.valueOrientation || ValueOrientation.Practical,
+            brandResonance: assessment.psychographicProfile.brandResonance || BrandResonanceStage.Awareness,
+            identifiedSignals: assessment.psychographicProfile.identifiedSignals || []
+          } : undefined,
           chaseHughesProfile: undefined // Will be filled in later if available
         };
         
