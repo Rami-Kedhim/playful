@@ -2,10 +2,12 @@
 import React, { ReactNode } from "react";
 import MainLayout from "./MainLayout";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 interface StandardPageLayoutProps {
   children: ReactNode;
   title?: string;
+  description?: string;
   showHeader?: boolean;
   fullWidth?: boolean;
   className?: string;
@@ -14,6 +16,10 @@ interface StandardPageLayoutProps {
   sidebar?: ReactNode;
   sidebarPosition?: 'left' | 'right';
   containerClass?: string;
+  footerContent?: ReactNode;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
+  dividers?: boolean;
 }
 
 /**
@@ -23,6 +29,7 @@ interface StandardPageLayoutProps {
 const StandardPageLayout: React.FC<StandardPageLayoutProps> = ({
   children,
   title,
+  description,
   showHeader = true,
   fullWidth = false,
   className,
@@ -30,30 +37,42 @@ const StandardPageLayout: React.FC<StandardPageLayoutProps> = ({
   headerContent,
   sidebar,
   sidebarPosition = 'right',
-  containerClass
+  containerClass,
+  footerContent,
+  hideNavbar = false,
+  hideFooter = false,
+  dividers = false
 }) => {
   return (
     <MainLayout 
       title={showHeader ? title : undefined} 
       showHeader={showHeader}
       containerClass={containerClass}
+      hideNavbar={hideNavbar}
+      hideFooter={hideFooter}
     >
       {/* Title and header content area */}
-      {(title || headerContent) && (
-        <div className={cn(
-          "mb-6 flex items-start justify-between",
-          headerAction ? "flex-row" : "flex-col"
-        )}>
-          <div className="space-y-1">
-            {title && showHeader && (
-              <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+      {(title || description || headerContent) && (
+        <>
+          <div className={cn(
+            "mb-6 flex items-start",
+            headerAction ? "justify-between" : "flex-col"
+          )}>
+            <div className="space-y-1">
+              {title && showHeader && (
+                <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+              )}
+              {description && (
+                <p className="text-muted-foreground">{description}</p>
+              )}
+              {headerContent}
+            </div>
+            {headerAction && (
+              <div>{headerAction}</div>
             )}
-            {headerContent}
           </div>
-          {headerAction && (
-            <div>{headerAction}</div>
-          )}
-        </div>
+          {dividers && <Separator className="mb-6" />}
+        </>
       )}
       
       {/* Main content with optional sidebar */}
@@ -85,6 +104,16 @@ const StandardPageLayout: React.FC<StandardPageLayoutProps> = ({
           </aside>
         )}
       </div>
+      
+      {/* Optional footer content */}
+      {footerContent && (
+        <>
+          {dividers && <Separator className="my-6" />}
+          <div className="mt-6">
+            {footerContent}
+          </div>
+        </>
+      )}
     </MainLayout>
   );
 };

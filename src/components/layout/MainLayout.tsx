@@ -5,6 +5,7 @@ import AppLayout from "./AppLayout";
 interface MainLayoutProps {
   children: ReactNode;
   title?: string;
+  description?: string;
   showHeader?: boolean;
   containerClass?: string;
   hideNavbar?: boolean;
@@ -18,6 +19,7 @@ interface MainLayoutProps {
 const MainLayout = ({ 
   children, 
   title, 
+  description,
   showHeader = true, 
   containerClass = "container mx-auto px-4 py-8",
   hideNavbar = false,
@@ -27,7 +29,12 @@ const MainLayout = ({
     <AppLayout hideNavbar={hideNavbar} hideFooter={hideFooter}>
       <div className={containerClass}>
         {showHeader && title && (
-          <h1 className="text-3xl font-bold mb-6">{title}</h1>
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">{title}</h1>
+            {description && (
+              <p className="text-muted-foreground mt-2">{description}</p>
+            )}
+          </div>
         )}
         {children}
       </div>

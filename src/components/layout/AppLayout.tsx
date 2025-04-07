@@ -23,24 +23,25 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   const { isDark, mounted } = useThemeToggle();
   const location = useLocation();
   
-  // Add a class to the body for smoother theme transitions
+  // Add classes for smoother theme transitions
   useEffect(() => {
     if (mounted) {
+      document.documentElement.classList.add('theme-transition');
       document.body.classList.add('transition-colors', 'duration-300');
       
-      // Add a fade-in animation on initial load with a slight scale effect
+      // Add fade-in animation for main content
       const mainContent = document.querySelector('main');
       if (mainContent) {
-        mainContent.classList.add('opacity-0', 'transform', 'scale-98');
+        mainContent.classList.add('opacity-0', 'scale-98');
         setTimeout(() => {
           mainContent.classList.remove('opacity-0', 'scale-98');
-          mainContent.classList.add('transition-all', 'duration-700', 'opacity-100', 'scale-100');
+          mainContent.classList.add('opacity-100', 'scale-100', 'transition-all', 'duration-300');
         }, 50);
       }
     }
     
     return () => {
-      // Clean up classes on unmount
+      document.documentElement.classList.remove('theme-transition');
       document.body.classList.remove('transition-colors', 'duration-300');
     };
   }, [mounted]);
@@ -58,12 +59,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       {!hideNavbar && <Navbar />}
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname} className="flex-1 w-full max-w-full">
-          <main className="flex-1 w-full max-w-full transition-all duration-500">
+          <main className="flex-1 w-full max-w-full transition-all duration-300">
             {children || <Outlet />}
           </main>
         </PageTransition>
       </AnimatePresence>
       {!hideFooter && <Footer />}
+      <Toaster />
     </div>
   );
 };

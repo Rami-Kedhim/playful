@@ -11,6 +11,8 @@ export interface LivecamDetailLayoutProps {
   title?: ReactNode;
   fullWidth?: boolean;
   containerClass?: string;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
 }
 
 /**
@@ -24,14 +26,16 @@ const LivecamDetailLayout = ({
   chatContent, 
   title,
   fullWidth = false,
-  containerClass = "container mx-auto px-4 py-8"
+  containerClass = "container mx-auto px-4 py-8",
+  hideNavbar = false,
+  hideFooter = false
 }: LivecamDetailLayoutProps) => {
   return (
     <MainLayout 
       showHeader={false} 
       containerClass={containerClass}
-      hideNavbar={false}
-      hideFooter={false}
+      hideNavbar={hideNavbar}
+      hideFooter={hideFooter}
     >
       {title && <div className="mb-6">{title}</div>}
       

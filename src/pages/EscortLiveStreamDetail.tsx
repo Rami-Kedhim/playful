@@ -6,8 +6,10 @@ import { ArrowLeft } from "lucide-react";
 import { getEscortById } from "@/data/escortData";
 import { LivecamDetailLayout } from "@/components/livecams/detail";
 import StandardPageLayout from "@/components/layout/StandardPageLayout";
+import { useTranslation } from "react-i18next";
 
 const EscortLiveStreamDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const escort = id ? getEscortById(id) : null;
@@ -18,17 +20,17 @@ const EscortLiveStreamDetail: React.FC = () => {
   
   if (!escort) {
     return (
-      <StandardPageLayout title="Escort not found">
+      <StandardPageLayout 
+        title={t('escort_not_found', 'Escort not found')}
+        description={t('escort_not_found_description', "We couldn't find the escort or live stream you're looking for")}
+      >
         <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-muted-foreground mb-4">
-            We couldn't find the escort or live stream you're looking for.
-          </p>
           <Button 
             onClick={handleGoBack}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Go Back
+            {t('go_back', 'Go Back')}
           </Button>
         </div>
       </StandardPageLayout>
