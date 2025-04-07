@@ -1,259 +1,179 @@
 
-/**
- * A service for handling speech synthesis (text-to-speech)
- */
+import { supabase } from "@/integrations/supabase/client";
 
 interface VoiceSettings {
+  stability?: number;
+  similarity_boost?: number;
+  style?: number;
+  use_speaker_boost?: boolean;
+}
+
+interface SpeechOptions {
   voice?: string;
-  rate?: number;
+  model?: string;
   pitch?: number;
-  volume?: number;
+  rate?: number;
+  voiceSettings?: VoiceSettings;
 }
 
 class VoiceService {
-  private synth: SpeechSynthesis | null = null;
-  private speaking: boolean = false;
-  private utterance: SpeechSynthesisUtterance | null = null;
-  private voices: SpeechSynthesisVoice[] = [];
-  private initialized: boolean = false;
-  private initPromise: Promise<void> | null = null;
+  private audio: HTMLAudioElement | null = null;
+  private isSpeakingState: boolean = false;
+  private audioCache: Map<string, string> = new Map();
+  private maxCacheSize: number = 20;
 
   constructor() {
-    this.initPromise = this.initialize();
-  }
-  
-  private async initialize(): Promise<void> {
-    try {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        this.synth = window.speechSynthesis;
-        
-        // Load available voices
-        await this.loadVoices();
-        
-        this.initialized = true;
-        console.log(`VoiceService initialized with ${this.voices.length} voices`);
-      } else {
-        console.warn('Speech synthesis is not available in this browser');
-      }
-    } catch (error) {
-      console.error('Error initializing VoiceService:', error);
+    if (typeof window !== 'undefined') {
+      this.audio = new Audio();
+      
+      this.audio.onended = () => {
+        this.isSpeakingState = false;
+      };
+      
+      this.audio.onerror = () => {
+        console.error("Audio playback error");
+        this.isSpeakingState = false;
+      };
     }
   }
   
-  private async loadVoices(): Promise<void> {
-    if (!this.synth) return;
+  public async speak(text: string, options: SpeechOptions = {}): Promise<boolean> {
+    if (!this.audio) return false;
     
-    // Some browsers load voices asynchronously
-    if (this.synth.getVoices().length > 0) {
-      this.voices = this.synth.getVoices();
-      console.log(`Loaded ${this.voices.length} voices`);
-    } else {
-      // Wait for voices to be loaded
-      return new Promise((resolve) => {
-        if (this.synth && 'onvoiceschanged' in this.synth) {
-          this.synth.onvoiceschanged = () => {
-            if (this.synth) {
-              this.voices = this.synth.getVoices();
-              console.log(`Loaded ${this.voices.length} voices (async)`);
-              resolve();
-            }
-          };
-        } else {
-          // If the event is not supported, resolve anyway
-          resolve();
-        }
-      });
-    }
-  }
-
-  /**
-   * Speaks the provided text with the given settings
-   */
-  async speak(text: string, settings: VoiceSettings = {}): Promise<void> {
-    // Ensure service is initialized
-    if (!this.initialized && this.initPromise) {
-      await this.initPromise;
-    }
-    
-    if (!this.synth) {
-      console.error('Speech synthesis is not available');
-      throw new Error('Speech synthesis not available');
-    }
-
     try {
-      // Cancel any ongoing speech
+      // Stop any current speech
       this.stop();
-
-      // Create a new utterance
-      this.utterance = new SpeechSynthesisUtterance(text);
       
-      // Set default settings
-      this.utterance.rate = settings.rate || 1.0;
-      this.utterance.pitch = settings.pitch || 1.0;
-      this.utterance.volume = settings.volume || 1.0;
+      // Generate a cache key based on the text and voice options
+      const cacheKey = this.generateCacheKey(text, options);
       
-      // Select voice based on settings
-      if (settings.voice && this.voices.length > 0) {      
-        // Try to match requested voice type
-        const selectedVoice = this.getVoiceByType(settings.voice);
+      // Check if we have this audio cached
+      let base64Audio = this.audioCache.get(cacheKey);
+      
+      if (!base64Audio) {
+        // Map voice type to ElevenLabs voice ID if needed
+        const voiceId = this.mapVoiceTypeToId(options.voice);
         
-        // Use the selected voice or fall back to the default
-        if (selectedVoice) {
-          console.log(`Using voice: ${selectedVoice.name} for type: ${settings.voice}`);
-          this.utterance.voice = selectedVoice;
+        // Call the Supabase Edge Function for text-to-speech
+        const { data, error } = await supabase.functions.invoke('elevenlabs-tts', {
+          body: {
+            text: text,
+            voiceId: voiceId,
+            modelId: options.model,
+            voiceSettings: options.voiceSettings
+          }
+        });
+        
+        if (error) {
+          console.error('Error calling ElevenLabs TTS:', error);
+          return false;
         }
+        
+        if (!data || !data.audio) {
+          console.error('No audio data returned from ElevenLabs TTS');
+          return false;
+        }
+        
+        base64Audio = data.audio;
+        
+        // Add to cache
+        this.addToCache(cacheKey, base64Audio);
       }
       
-      // Add event listeners
-      this.utterance.onstart = () => {
-        this.speaking = true;
-        console.log('Started speaking');
-      };
+      // Convert base64 to Blob
+      const audioBlob = this.base64ToBlob(base64Audio, 'audio/mpeg');
       
-      this.utterance.onend = () => {
-        this.speaking = false;
-        this.utterance = null;
-        console.log('Finished speaking');
-      };
+      // Create object URL from Blob
+      const audioUrl = URL.createObjectURL(audioBlob);
       
-      this.utterance.onerror = (event) => {
-        console.error('Speech synthesis error:', event);
-        this.speaking = false;
-        this.utterance = null;
-      };
+      // Set the audio source and play
+      this.audio.src = audioUrl;
+      this.audio.playbackRate = options.rate || 1.0;
       
-      // Start speaking
-      this.synth.speak(this.utterance);
+      // Play the audio
+      const playPromise = this.audio.play();
+      this.isSpeakingState = true;
+      
+      // Handle the play promise
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error("Audio play failed:", error);
+          this.isSpeakingState = false;
+        });
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Error in VoiceService.speak:', error);
-      this.speaking = false;
-      this.utterance = null;
-      throw error;
+      console.error("Speech synthesis error:", error);
+      return false;
     }
   }
   
-  /**
-   * Gets a voice that matches the requested type
-   */
-  private getVoiceByType(voiceType: string): SpeechSynthesisVoice | null {
-    // Ensure voices are loaded
-    if (this.voices.length === 0 && this.synth) {
-      this.voices = this.synth.getVoices();
+  public stop(): void {
+    if (this.audio && !this.audio.paused) {
+      this.audio.pause();
+      this.audio.currentTime = 0;
+      this.isSpeakingState = false;
+    }
+  }
+  
+  public isSpeaking(): boolean {
+    return this.isSpeakingState;
+  }
+  
+  private generateCacheKey(text: string, options: SpeechOptions): string {
+    return `${text}-${options.voice || 'default'}-${options.rate || 1.0}`;
+  }
+  
+  private addToCache(key: string, value: string): void {
+    // If cache is full, remove the oldest item
+    if (this.audioCache.size >= this.maxCacheSize) {
+      const oldestKey = this.audioCache.keys().next().value;
+      this.audioCache.delete(oldestKey);
     }
     
-    // If still no voices, return null
-    if (this.voices.length === 0) {
-      console.warn('No voices available');
-      return null;
-    }
+    this.audioCache.set(key, value);
+  }
+  
+  private base64ToBlob(base64: string, mimeType: string): Blob {
+    const byteCharacters = atob(base64);
+    const byteArrays = [];
     
-    let selectedVoice = null;
-    const voiceTypeLower = voiceType.toLowerCase();
-    
-    // Match based on voice type
-    switch (voiceTypeLower) {
-      case 'male':
-      case 'deep':
-        selectedVoice = this.voices.find(voice => 
-          voice.name.toLowerCase().includes('male') ||
-          voice.name.toLowerCase().includes('guy') ||
-          voice.name.toLowerCase().includes('david') ||
-          voice.name.toLowerCase().includes('thomas') ||
-          voice.name.toLowerCase().includes('paul')
-        );
-        break;
-        
-      case 'female':
-      case 'soft':
-        selectedVoice = this.voices.find(voice => 
-          voice.name.toLowerCase().includes('female') ||
-          voice.name.toLowerCase().includes('woman') ||
-          voice.name.toLowerCase().includes('girl') ||
-          voice.name.toLowerCase().includes('samantha') ||
-          voice.name.toLowerCase().includes('karen')
-        );
-        break;
-        
-      case 'sultry':
-      case 'breathy':
-        selectedVoice = this.voices.find(voice => 
-          voice.name.toLowerCase().includes('samantha') ||
-          voice.name.toLowerCase().includes('karen') ||
-          voice.name.toLowerCase().includes('victoria')
-        );
-        break;
-        
-      case 'sophisticated':
-      case 'british':
-        selectedVoice = this.voices.find(voice => 
-          voice.name.toLowerCase().includes('british') ||
-          voice.name.toLowerCase().includes('uk') ||
-          voice.name.toLowerCase().includes('queen')
-        );
-        break;
-        
-      case 'bubbly':
-      case 'cheerful':
-        selectedVoice = this.voices.find(voice => 
-          voice.name.toLowerCase().includes('samantha') ||
-          voice.name.toLowerCase().includes('tessa')
-        );
-        break;
-        
-      case 'authoritative':
-        selectedVoice = this.voices.find(voice => 
-          voice.name.toLowerCase().includes('daniel') ||
-          voice.name.toLowerCase().includes('george') ||
-          voice.name.toLowerCase().includes('alex')
-        );
-        break;
-    }
-    
-    // If no matching voice found, fallback to a default
-    if (!selectedVoice) {
-      // Try to find a voice in the user's language
-      const userLang = navigator.language || 'en-US';
-      selectedVoice = this.voices.find(voice => voice.lang === userLang);
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
       
-      // If still no match, use the first available voice
-      if (!selectedVoice && this.voices.length > 0) {
-        selectedVoice = this.voices[0];
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
       }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
     }
     
-    return selectedVoice;
+    return new Blob(byteArrays, { type: mimeType });
   }
   
-  /**
-   * Stops any ongoing speech
-   */
-  stop(): void {
-    if (this.synth && (this.speaking || this.synth.speaking)) {
-      this.synth.cancel();
-      this.speaking = false;
-      this.utterance = null;
-    }
-  }
-  
-  /**
-   * Checks if speech is currently in progress
-   */
-  isSpeaking(): boolean {
-    return this.speaking || (this.synth ? this.synth.speaking : false);
-  }
-  
-  /**
-   * Gets all available voices
-   */
-  getVoices(): SpeechSynthesisVoice[] {
-    return this.voices.length > 0 ? this.voices : (this.synth ? this.synth.getVoices() : []);
-  }
-  
-  /**
-   * Checks if speech synthesis is supported
-   */
-  isSupported(): boolean {
-    return this.initialized && !!this.synth;
+  private mapVoiceTypeToId(voiceType?: string): string | undefined {
+    if (!voiceType) return undefined;
+    
+    // Map voice types to ElevenLabs voice IDs
+    const voiceMap: Record<string, string> = {
+      'sultry': '21m00Tcm4TlvDq8ikWAM', // Rachel
+      'deep': 'pNInz6obpgDQGcFmaJgB', // Adam
+      'soft': 'EXAVITQu4vr4xnSDxMaL', // Sarah
+      'sophisticated': 'jBpfuIE2acCO8z3wKNLl', // Thomas
+      'bubbly': 'piTKgcLEGmPE4e6mEKli', // Nicole
+      'breathy': 'MF3mGyEYCl7XYWbV9V6O', // Elli
+      'cheerful': 'IKne3meq5aSn9XLyUdCD', // Charlie
+      'serious': 'g9GH2KyGDXGhhJK9UnLV', // Matthew
+      'authoritative': 'iP95p4xoKVk53GoZ742B', // Eric
+      'friendly': '29vD33N1CtxCmqQRPOHJ', // Daniel
+      'neutral': 'd3zjMOOxd2H5SYMhOVVp', // Dorothy
+      // Add more mappings as needed
+    };
+    
+    return voiceMap[voiceType.toLowerCase()] || '21m00Tcm4TlvDq8ikWAM'; // Default to Rachel if not found
   }
 }
 

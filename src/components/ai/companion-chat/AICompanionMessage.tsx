@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { getEmotionClass } from './utils/emotionUtils';
 import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
-import { Volume2, VolumeX, VolumeOff } from 'lucide-react';
+import { Volume2, VolumeX, VolumeOff, Loader } from 'lucide-react';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
@@ -19,24 +19,35 @@ const AICompanionMessage = ({
 }: AICompanionMessageProps) => {
   const isAI = message.role === 'assistant';
   const [speaking, setSpeaking] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
 
   // Handle speech playback
-  const handleSpeakMessage = () => {
+  const handleSpeakMessage = async () => {
     if (speaking) {
       stopSpeaking();
       setSpeaking(false);
       setSpeechError(null);
-    } else {
-      try {
-        speakMessage(message.content, voiceType);
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const success = speakMessage(message.content, voiceType);
+      if (success) {
         setSpeaking(true);
         setSpeechError(null);
-      } catch (error) {
-        console.error("Speech synthesis error:", error);
+      } else {
         setSpeechError("Couldn't start speech");
         setTimeout(() => setSpeechError(null), 3000);
       }
+    } catch (error) {
+      console.error("Speech synthesis error:", error);
+      setSpeechError("Couldn't start speech");
+      setTimeout(() => setSpeechError(null), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,16 +111,18 @@ const AICompanionMessage = ({
                 size="sm"
                 onClick={handleSpeakMessage}
                 className="h-6 px-2 flex items-center gap-1"
-                disabled={!!speechError}
+                disabled={!!speechError || loading}
               >
-                {speaking ? (
+                {loading ? (
+                  <Loader className="h-3 w-3 animate-spin" />
+                ) : speaking ? (
                   <VolumeX className="h-3 w-3" />
                 ) : speechError ? (
                   <VolumeOff className="h-3 w-3" />
                 ) : (
                   <Volume2 className="h-3 w-3" />
                 )}
-                <span>{speaking ? 'Stop' : 'Speak'}</span>
+                <span>{speaking ? 'Stop' : loading ? 'Loading...' : 'Speak'}</span>
               </Button>
             </div>
           )}
