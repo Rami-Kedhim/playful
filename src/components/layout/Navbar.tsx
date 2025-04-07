@@ -81,10 +81,10 @@ const Navbar: React.FC = () => {
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/login">{t('login')}</Link>
+                  <Link to="/auth">{t('login')}</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/register">{t('register')}</Link>
+                  <Link to="/auth">{t('register')}</Link>
                 </Button>
               </div>
             )}

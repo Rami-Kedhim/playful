@@ -1,17 +1,15 @@
 
-// Re-export components from the auth folder
-import { useAuth, AuthProvider } from './useAuth';
-import { useRole } from './useRole';
-import { useBehavioralProfile } from './useBehavioralProfile';
-import { useGouldianFilters } from './useGouldianFilters';
-import { useHermesMode } from './useHermesMode';
+import { useAuth } from './useAuth';
+import { AuthProvider } from './AuthProvider';
 
-export { 
-  useAuth, 
-  AuthProvider, 
-  useRole, 
-  useBehavioralProfile,
-  useGouldianFilters,
-  useHermesMode
-};
-export default useAuth;
+// Export our hooks
+export { useAuth, AuthProvider };
+
+// Re-export types from auth types for convenience
+export type { AuthUser, UserProfile, AuthResult, AuthContextType } from '@/types/auth';
+
+// Properly export the actual hook implementations
+export { useRole } from './useRole';
+export { useBehavioralProfile } from './useBehavioralProfile';
+export { useGouldianFilters } from './useGouldianFilters';
+export { useHermesMode } from './useHermesMode';

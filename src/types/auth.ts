@@ -1,72 +1,53 @@
 
-// Auth types for the application
+export interface AuthUser {
+  id: string;
+  email: string;
+  username?: string;
+  role?: string;
+  profileImageUrl?: string;
+  app_metadata?: Record<string, any>;
+  user_metadata?: Record<string, any>;
+  aud?: string;
+  created_at?: string;
+  lucoinsBalance?: number;
+}
 
-// Type for user roles in the application
-export type UserRole = 'user' | 'moderator' | 'admin' | 'escort' | 'creator' | string;
+export type UserRole = 'admin' | 'moderator' | 'escort' | 'creator' | 'user';
 
-// Type for gender in the database
 export type DatabaseGender = 'male' | 'female' | 'other';
 
-// Type for the authentication result
+export interface UserProfile {
+  id: string;
+  username?: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
+  bio?: string;
+  gender?: DatabaseGender;
+  sexual_orientation?: string;
+  location?: string;
+  languages?: string[];
+  birth_date?: string;
+  updated_at?: string;
+  created_at?: string;
+  
+  // Additional fields needed by components
+  lucoin_balance?: number;
+  profile_completeness?: number;
+  is_verified?: boolean;
+  is_boosted?: boolean;
+}
+
 export interface AuthResult {
   success: boolean;
   error?: string | null;
 }
 
-// Type for the authentication user
-export interface AuthUser {
-  id: string;
-  email: string;
-  username?: string;
-  profileImageUrl?: string;
-  lucoinsBalance?: number;
-  isVerified?: boolean;
-  role?: UserRole;
-  avatarUrl?: string;
-  // Supabase User properties
-  app_metadata: Record<string, any>;
-  user_metadata: Record<string, any>;
-  aud: string;
-  created_at?: string;
-}
-
-// User profile data structure
-export interface UserProfile {
-  id: string;
-  user_id?: string;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-  full_name?: string;
-  bio?: string;
-  avatarUrl?: string;
-  avatar_url?: string;  // Adding this to support both naming conventions
-  gender?: DatabaseGender;
-  dateOfBirth?: string;
-  location?: string;
-  isVerified?: boolean;
-  membership?: {
-    status: 'active' | 'inactive' | 'pending';
-    expiresAt?: string;
-    type?: string;
-  };
-  createdAt?: string;
-  updatedAt?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-// Auth state maintained by auth context
-export interface AuthState {
+export interface AuthContextType {
   user: AuthUser | null;
   profile: UserProfile | null;
-  isLoading: boolean;
-  userRoles: string[];
-}
-
-// Auth context value interface
-export interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (email: string, password: string, username?: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
@@ -75,6 +56,7 @@ export interface AuthContextValue extends AuthState {
   updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
   error: string | null;
   clearError: () => void;
+  userRoles: string[];
   refreshProfile: () => Promise<void>;
   checkRole: (role: string) => boolean;
 }

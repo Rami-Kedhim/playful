@@ -58,7 +58,7 @@ export interface AIMessage {
   is_ai: boolean;
   requires_payment?: boolean;
   price?: number;
-  payment_status?: 'pending' | 'completed';
+  payment_status?: 'pending' | 'completed' | 'failed';
   personality_type?: string;
   generated_by?: 'basic' | 'premium' | 'gpt4' | 'gpt3.5';
   media_urls?: string[];

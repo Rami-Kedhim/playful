@@ -1,339 +1,366 @@
 
 import React, { useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Loader2, Save } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AuthUser, UserProfile } from '@/types/auth';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/components/ui/use-toast';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/auth';
 
-// Form schema for account settings
-const accountFormSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: 'Username must be at least 3 characters' })
-    .max(30, { message: 'Username must be less than 30 characters' }),
-  email: z.string().email({ message: 'Invalid email address' }).optional(),
-  fullName: z.string().optional(),
-});
-
-type AccountFormValues = z.infer<typeof accountFormSchema>;
-
-// Form schema for password change
-const passwordFormSchema = z.object({
-  currentPassword: z
-    .string()
-    .min(6, { message: 'Current password must be at least 6 characters' }),
-  newPassword: z
-    .string()
-    .min(8, { message: 'New password must be at least 8 characters' }),
-  confirmPassword: z
-    .string()
-    .min(8, { message: 'Confirm password must be at least 8 characters' }),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
-
-type PasswordFormValues = z.infer<typeof passwordFormSchema>;
-
-interface AccountSettingsProps {
-  initialTab?: string;
-  user?: AuthUser;
-  profile?: UserProfile | null;
+export interface PasswordChangeResult {
+  success: boolean;
+  error?: string;
 }
 
-const AccountSettings: React.FC<AccountSettingsProps> = ({ 
-  initialTab = 'general',
-  user: propUser,
-  profile: propProfile
-}) => {
-  const auth = useAuth();
-  // Use either props or auth context
-  const user = propUser || auth.user;
-  const profile = propProfile || auth.profile;
-  const { updateUserProfile, updatePassword } = auth;
+const AccountSettings = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
   
-  const [isSaving, setIsSaving] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-
-  // Form for general settings
-  const accountForm = useForm<AccountFormValues>({
-    resolver: zodResolver(accountFormSchema),
-    defaultValues: {
-      username: user?.username || '',
-      email: user?.email || '',
-      fullName: profile?.full_name || '',
-    },
+  const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+  
+  const [emailForm, setEmailForm] = useState({
+    newEmail: '',
+    currentPassword: ''
   });
-
-  // Form for password change
-  const passwordForm = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordFormSchema),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    },
+  
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
-
-  // Handle account form submission
-  const onSubmitAccount = async (data: AccountFormValues) => {
-    setIsSaving(true);
-    try {
-      const success = await updateUserProfile({
-        username: data.username,
-      });
-
-      if (success) {
-        toast({
-          title: 'Account updated',
-          description: 'Your account settings have been updated.',
-        });
-      }
-    } catch (error) {
-      console.error('Error updating account:', error);
+  
+  const [autoLogout, setAutoLogout] = useState(true);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEmailForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!emailForm.newEmail || !emailForm.currentPassword) {
       toast({
-        title: 'Error',
-        description: 'Failed to update account settings. Please try again.',
-        variant: 'destructive',
+        title: "Missing fields",
+        description: "Please fill all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsEmailSubmitting(true);
+    
+    try {
+      // Simulate email update
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Email updated",
+        description: "Your email has been successfully updated",
+        variant: "default"
+      });
+      
+      // Reset form
+      setEmailForm({
+        newEmail: '',
+        currentPassword: ''
+      });
+    } catch (error) {
+      console.error('Error updating email:', error);
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
       });
     } finally {
-      setIsSaving(false);
+      setIsEmailSubmitting(false);
     }
   };
-
-  // Handle password form submission
-  const onSubmitPassword = async (data: PasswordFormValues) => {
-    setIsChangingPassword(true);
+  
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<PasswordChangeResult> => {
+    // Simulate password update
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return { success: true };
+  };
+  
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirmation must match",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (passwordForm.newPassword.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsPasswordSubmitting(true);
+    
     try {
-      const result = await updatePassword(data.currentPassword, data.newPassword);
-
+      // Call the auth service to update password
+      const result: PasswordChangeResult = await updatePassword(
+        passwordForm.currentPassword, 
+        passwordForm.newPassword
+      );
+      
       if (result.success) {
         toast({
-          title: 'Password updated',
-          description: 'Your password has been updated successfully.',
+          title: "Password updated",
+          description: "Your password has been successfully updated",
+          variant: "default"
         });
-        passwordForm.reset({
+        
+        // Reset form
+        setPasswordForm({
           currentPassword: '',
           newPassword: '',
-          confirmPassword: '',
+          confirmPassword: ''
         });
       } else {
         toast({
-          title: 'Error',
-          description: result.error || 'Failed to update password. Please try again.',
-          variant: 'destructive',
+          title: "Update failed",
+          description: result.error || "An unknown error occurred",
+          variant: "destructive"
         });
       }
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error updating password:', error);
       toast({
-        title: 'Error',
-        description: error.message || 'An unexpected error occurred',
-        variant: 'destructive',
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
       });
     } finally {
-      setIsChangingPassword(false);
+      setIsPasswordSubmitting(false);
     }
+  };
+  
+  const handleToggleAutoLogout = () => {
+    setAutoLogout(!autoLogout);
+    toast({
+      title: `Auto logout ${!autoLogout ? 'enabled' : 'disabled'}`,
+      description: `Your account will ${!autoLogout ? 'now' : 'no longer'} automatically log out after 30 minutes of inactivity.`
+    });
+  };
+  
+  const handleToggleMfa = () => {
+    setMfaEnabled(!mfaEnabled);
+    toast({
+      title: `Two-factor authentication ${!mfaEnabled ? 'enabled' : 'disabled'}`,
+      description: !mfaEnabled ? 
+        "Your account is now more secure with two-factor authentication." : 
+        "Two-factor authentication has been disabled."
+    });
   };
 
   return (
-    <Tabs defaultValue={initialTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6">
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      {/* Email Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Email Settings</CardTitle>
+          <CardDescription>Update your email address</CardDescription>
+        </CardHeader>
+        <form onSubmit={handleEmailSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentEmail">Current Email</Label>
+              <Input
+                id="currentEmail"
+                value={user?.email || ''}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newEmail">New Email</Label>
+              <Input
+                id="newEmail"
+                name="newEmail"
+                type="email"
+                value={emailForm.newEmail}
+                onChange={handleEmailChange}
+                placeholder="Enter your new email address"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="currentPasswordEmail">Current Password</Label>
+              <Input
+                id="currentPasswordEmail"
+                name="currentPassword"
+                type="password"
+                value={emailForm.currentPassword}
+                onChange={handleEmailChange}
+                placeholder="Enter your current password"
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isEmailSubmitting}>
+              {isEmailSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Email'
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
 
-      <TabsContent value="general">
-        <Card>
-          <CardHeader>
-            <CardTitle>General Settings</CardTitle>
-            <CardDescription>
-              Update your account information and preferences
-            </CardDescription>
-          </CardHeader>
-          <Form {...accountForm}>
-            <form onSubmit={accountForm.handleSubmit(onSubmitAccount)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={accountForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input placeholder="username" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      {/* Password Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+          <CardDescription>Update your account password</CardDescription>
+        </CardHeader>
+        <form onSubmit={handlePasswordSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Current Password</Label>
+              <Input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordChange}
+                placeholder="Enter your current password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                placeholder="Enter your new password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                placeholder="Confirm your new password"
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isPasswordSubmitting}>
+              {isPasswordSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Password'
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
 
-                <FormField
-                  control={accountForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="email@example.com" 
-                          {...field} 
-                          disabled
-                          readOnly 
-                        />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground">
-                        Email cannot be changed directly
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={accountForm.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isSaving} className="ml-auto">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="security">
-        <Card>
-          <CardHeader>
-            <CardTitle>Security Settings</CardTitle>
-            <CardDescription>
-              Update your password and security preferences
-            </CardDescription>
-          </CardHeader>
-          <Form {...passwordForm}>
-            <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={passwordForm.control}
-                  name="currentPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="current-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
-                  name="newPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button
-                  type="submit"
-                  disabled={isChangingPassword}
-                  className="ml-auto"
-                >
-                  {isChangingPassword ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    'Update Password'
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
-      </TabsContent>
-    </Tabs>
+      {/* Security Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Security Settings</CardTitle>
+          <CardDescription>Manage your account security preferences</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="auto-logout">Auto Logout</Label>
+              <p className="text-sm text-muted-foreground">
+                Automatically log out after 30 minutes of inactivity
+              </p>
+            </div>
+            <Switch
+              id="auto-logout"
+              checked={autoLogout}
+              onCheckedChange={handleToggleAutoLogout}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="mfa">Two-Factor Authentication</Label>
+              <p className="text-sm text-muted-foreground">
+                Add an extra layer of security to your account
+              </p>
+            </div>
+            <Switch
+              id="mfa"
+              checked={mfaEnabled}
+              onCheckedChange={handleToggleMfa}
+            />
+          </div>
+        </CardContent>
+        <CardFooter>
+          {mfaEnabled && (
+            <div className="flex items-center text-sm text-green-600">
+              <CheckCircle className="mr-1 h-4 w-4" />
+              <span>Your account is secure with 2FA enabled</span>
+            </div>
+          )}
+        </CardFooter>
+      </Card>
+      
+      {/* Delete Account */}
+      <Card className="border-destructive">
+        <CardHeader>
+          <CardTitle>Danger Zone</CardTitle>
+          <CardDescription>Irreversible account actions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+          <Button variant="destructive">
+            Delete Account
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

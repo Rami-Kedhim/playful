@@ -1,195 +1,81 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/auth/useAuth"; 
-import AppLayout from "@/components/layout/AppLayout";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { AuthUser } from "@/types/auth"; 
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from '@/hooks/auth/useAuth';
+import AccountSettings from '@/components/profile/AccountSettings';
+import ProfileSettings from '@/components/profile/ProfileSettings';
+import NotificationSettings from '@/components/profile/NotificationSettings';
 
-// Import custom components
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import PersonalInfoForm from "@/components/profile/PersonalInfoForm";
-import AccountSettings from "@/components/profile/AccountSettings";
-import { uploadAvatar, validateGender } from "@/utils/profileUtils";
-import { useAvatarUpload } from "@/hooks/useAvatarUpload";
-import { profileFormSchema, ProfileFormData } from "@/components/profile/ProfileFormSchema";
+interface ProfileManagementProps {
+  initialTab?: string;
+}
 
-const ProfileManagement = () => {
-  const { user, profile, refreshProfile } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  
-  const {
-    avatarFile,
-    avatarPreview,
-    handleAvatarChange,
-    handleAvatarRemove,
-    isDefault,
-    uploadProgress,
-    setUploadProgress
-  } = useAvatarUpload(profile?.avatar_url || "");
+const ProfileManagement: React.FC<ProfileManagementProps> = ({ initialTab = 'profile' }) => {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState(initialTab);
 
-  const onSubmit = async (data: ProfileFormData) => {
-    if (!user) return;
-    setLoading(true);
-
-    try {
-      let avatarUrl = profile?.avatar_url || null;
-      
-      // Handle avatar changes
-      if (avatarFile) {
-        // Set initial progress
-        setUploadProgress(10);
-        
-        // Create a function to track upload progress
-        const trackProgress = (progress: number) => {
-          setUploadProgress(Math.min(Math.floor(10 + progress * 0.8), 90)); // Scale between 10% and 90%
-        };
-        
-        // Here we need to adapt for the AuthUser type - use user.id instead of the full User object
-        const newAvatarUrl = await uploadAvatar(avatarFile, { id: user.id }, trackProgress);
-        if (newAvatarUrl) {
-          avatarUrl = newAvatarUrl;
-        }
-      } else if (!isDefault && profile?.avatar_url) {
-        // User removed the avatar
-        avatarUrl = null;
-        
-        // If there was a previous avatar, remove it from storage
-        try {
-          const filename = profile.avatar_url.split('/').pop();
-          if (filename) {
-            setUploadProgress(30);
-            await supabase
-              .storage
-              .from('profiles')
-              .remove([`avatars/${filename}`]);
-            setUploadProgress(70);
-          }
-        } catch (error) {
-          console.error("Error removing old avatar:", error);
-          // Non-critical error, continue with profile update
-        }
-      }
-
-      // Validate and process gender to ensure it matches our database accepted values
-      const validatedGender = validateGender(data.gender);
-
-      setUploadProgress(90); // Almost done
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          username: data.username,
-          full_name: data.full_name,
-          bio: data.bio,
-          gender: validatedGender,
-          sexual_orientation: data.sexual_orientation,
-          location: data.location,
-          avatar_url: avatarUrl,
-          updated_at: new Date()
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      setUploadProgress(100); // Complete
-      
-      await refreshProfile();
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error updating profile",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  // Mock profile
+  const profile = {
+    id: user?.id || 'mock-id',
+    full_name: 'John Doe',
+    avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
+    bio: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu justo ut nisi finibus feugiat.'
   };
 
-  if (!user) {
-    return (
-      <AppLayout>
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center">Please log in to manage your profile.</p>
-          <div className="flex justify-center mt-4">
-            <button onClick={() => navigate("/auth")}>Go to Login</button>
+  const getInitials = (name: string) => {
+    return name.split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .toUpperCase();
+  };
+
+  const ProfileHeader = () => (
+    <Card className="mb-6">
+      <CardContent className="p-6">
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
+            <AvatarFallback>{profile.full_name ? getInitials(profile.full_name) : "??"}</AvatarFallback>
+          </Avatar>
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold">{profile.full_name}</h2>
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            {profile.bio && <p className="text-sm max-w-md">{profile.bio}</p>}
           </div>
         </div>
-      </AppLayout>
-    );
-  }
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <AppLayout>
-      <ProfileHeader title="Profile Management" />
+    <div className="container mx-auto py-6 max-w-4xl">
+      <h1 className="text-3xl font-bold mb-6">Profile Management</h1>
       
-      <div className="container mx-auto px-4 pb-8">
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-8">
-            <TabsTrigger value="personal">Personal Information</TabsTrigger>
-            <TabsTrigger value="account">Account Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="personal">
-            <Card>
-              <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>
-                  Update your personal details and how others see you on the platform
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent>
-                <PersonalInfoForm 
-                  profile={profile}
-                  user={user}
-                  loading={loading}
-                  avatarPreview={avatarPreview}
-                  handleAvatarChange={handleAvatarChange}
-                  handleAvatarRemove={handleAvatarRemove}
-                  onSubmit={onSubmit}
-                  uploadProgress={uploadProgress}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="account">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>
-                  Manage your account settings and preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AccountSettings 
-                  user={user} 
-                  profile={profile} 
-                  initialTab="general"
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </AppLayout>
+      <ProfileHeader />
+      
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3 w-full mb-6">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="profile">
+          <ProfileSettings />
+        </TabsContent>
+        
+        <TabsContent value="account">
+          <AccountSettings />
+        </TabsContent>
+        
+        <TabsContent value="notifications">
+          <NotificationSettings />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

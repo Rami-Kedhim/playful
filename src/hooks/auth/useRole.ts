@@ -1,79 +1,56 @@
 
-import { useCallback } from 'react';
 import { useAuth } from './useAuth';
 
-/**
- * Hook for checking user roles and permissions
- */
 export const useRole = () => {
-  const { userRoles } = useAuth();
+  const auth = useAuth();
   
   /**
-   * Check if user has at least one of the specified roles
+   * Check if the user has at least one of the provided roles
    */
-  const hasRole = useCallback((roles: string | string[]): boolean => {
-    if (Array.isArray(roles)) {
-      if (!roles.length) return true;
-      if (!userRoles.length) return false;
-      
-      return roles.some(role => userRoles.includes(role));
-    }
-    return userRoles.includes(roles);
-  }, [userRoles]);
-  
-  /**
-   * Check if user has all of the specified roles
-   */
-  const hasAllRoles = useCallback((roles: string[]): boolean => {
-    if (!roles.length) return true;
-    if (!userRoles.length) return false;
+  const hasRole = (roles: string | string[]): boolean => {
+    if (!auth.userRoles || auth.userRoles.length === 0) return false;
     
-    return roles.every(role => userRoles.includes(role));
-  }, [userRoles]);
+    const rolesToCheck = Array.isArray(roles) ? roles : [roles];
+    return rolesToCheck.some(role => auth.userRoles.includes(role));
+  };
   
   /**
-   * Check if user is an admin
+   * Check if the user has all of the provided roles
    */
-  const isAdmin = useCallback((): boolean => {
-    return userRoles.includes('admin');
-  }, [userRoles]);
+  const hasAllRoles = (roles: string[]): boolean => {
+    if (!auth.userRoles || auth.userRoles.length === 0) return false;
+    
+    return roles.every(role => auth.userRoles.includes(role));
+  };
   
   /**
-   * Check if user is a moderator
+   * Check if the user is an admin
    */
-  const isModerator = useCallback((): boolean => {
-    return userRoles.includes('moderator');
-  }, [userRoles]);
+  const isAdmin = (): boolean => {
+    return hasRole('admin');
+  };
   
   /**
-   * Check if user is a creator
+   * Check if the user is a moderator
    */
-  const isCreator = useCallback((): boolean => {
-    return userRoles.includes('creator');
-  }, [userRoles]);
+  const isModerator = (): boolean => {
+    return hasRole('moderator');
+  };
   
   /**
-   * Check if user is an escort
+   * Check if the user is a creator
    */
-  const isEscort = useCallback((): boolean => {
-    return userRoles.includes('escort');
-  }, [userRoles]);
-  
-  /**
-   * Check if user can access admin features
-   */
-  const canAccessAdminFeatures = useCallback((): boolean => {
-    return isAdmin() || isModerator();
-  }, [isAdmin, isModerator]);
+  const isCreator = (): boolean => {
+    return hasRole('creator');
+  };
   
   return {
     hasRole,
     hasAllRoles,
     isAdmin,
     isModerator,
-    isCreator,
-    isEscort,
-    canAccessAdminFeatures,
-    roles: userRoles,
+    isCreator
   };
 };
+
+export default useRole;

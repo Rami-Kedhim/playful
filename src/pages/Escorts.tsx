@@ -1,22 +1,55 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import MainLayout from "@/components/layout/MainLayout";
 import EscortContainer from "@/components/escorts/EscortContainer";
-import { useEscorts } from "@/hooks/useEscorts";
-import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/contexts/NotificationsContext";
-import { escorts as mockEscorts, availableServices } from "@/data/escortData";
+import { availableServices } from "@/data/escortData";
+import LucieSchaubergerIntegration from "@/components/home/LucieSchaubergerIntegration";
+import { useEscortWithInsights } from "@/hooks/useEscortWithInsights";
+import { escorts as mockEscorts } from "@/data/escortData";
+import { getProfessionalServices } from "@/utils/serviceCategories";
 
 const Escorts: React.FC = () => {
-  const { escorts, loading, error, fetchEscorts } = useEscorts({ initialData: mockEscorts });
+  const { 
+    escorts, 
+    loading, 
+    error, 
+    fetchEscorts, 
+    recordEscortView,
+    insights 
+  } = useEscortWithInsights({ initialData: mockEscorts });
+  
   const { showInfo } = useNotifications();
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Ensure data is loaded on initial render
+  useEffect(() => {
+    if (!escorts || escorts.length === 0) {
+      fetchEscorts();
+    }
+  }, [escorts, fetchEscorts]);
+  
+  // Filter services to only show professional ones
+  const professionalServices = getProfessionalServices(availableServices);
+  
+  // Determine if assistant should be shown based on behavioral insights
+  const showLucieAssistant = insights?.autoDrive?.isLucieEnabled || false;
 
   const handleRefresh = () => {
     fetchEscorts();
     if (showInfo) showInfo("Refreshing Data", "Getting the latest escort profiles");
   };
+  
+  // Apply UI recommendations from behavioral insights
+  const uiConfig = insights?.autoDrive?.uiSuggestions || {};
+  
+  // Get content recommendations
+  const contentRecommendations = insights?.autoDrive?.contentRecommendations || [];
+  const showHighlightedContent = contentRecommendations.some(
+    (rec: any) => rec.type === 'visual' && rec.content === 'image_gallery'
+  );
   
   return (
     <>
@@ -48,11 +81,23 @@ const Escorts: React.FC = () => {
           ) : (
             <EscortContainer 
               escorts={escorts}
-              services={availableServices}
+              services={professionalServices}
               isLoading={loading}
+              // Pass behavioral insights to allow personalization
+              highlightVisual={showHighlightedContent}
+              callToActionStyle={uiConfig.callToActionVisibility || 'standard'}
             />
           )}
         </div>
+        
+        {/* Display Lucie assistant when behavioral system suggests it */}
+        {showLucieAssistant && (
+          <LucieSchaubergerIntegration 
+            onLucieTriggered={(reason) => {
+              console.log("Lucie triggered by:", reason);
+            }}
+          />
+        )}
       </MainLayout>
     </>
   );

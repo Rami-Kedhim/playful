@@ -1,10 +1,9 @@
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import React from "react";
 import EscortCard from "@/components/cards/EscortCard";
+import { Button } from "@/components/ui/button";
 import { Escort } from "@/types/escort";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface EscortResultsProps {
   escorts: Escort[];
@@ -12,7 +11,9 @@ interface EscortResultsProps {
   currentPage: number;
   setCurrentPage: (page: number) => void;
   totalPages: number;
-  isLoading: boolean;
+  isLoading?: boolean;
+  showActionButtons?: boolean;
+  prominentCTA?: boolean;
 }
 
 const EscortResults = ({ 
@@ -21,134 +22,92 @@ const EscortResults = ({
   currentPage, 
   setCurrentPage, 
   totalPages,
-  isLoading
+  isLoading = false,
+  showActionButtons = true,
+  prominentCTA = false
 }: EscortResultsProps) => {
-  // Local loading state for transitions between pages
-  const [localLoading, setLocalLoading] = useState(false);
-  
-  // Set local loading briefly when page changes for better UX
-  useEffect(() => {
-    if (currentPage) {
-      setLocalLoading(true);
-      const timer = setTimeout(() => {
-        setLocalLoading(false);
-      }, 300); // Short delay for better UX
-      
-      return () => clearTimeout(timer);
-    }
-  }, [currentPage]);
-  
-  // Combined loading state (either from props or local state)
-  const loading = isLoading || localLoading;
-  
-  // This handles loading state for when filters are applied
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array(6).fill(0).map((_, i) => (
-          <div key={i} className="border rounded-lg p-6">
-            <Skeleton className="h-48 w-full rounded-md mb-4" />
-            <Skeleton className="h-6 w-3/4 mb-2" />
-            <Skeleton className="h-4 w-1/2 mb-4" />
-            <div className="flex gap-2 mb-4">
-              <Skeleton className="h-6 w-16" />
-              <Skeleton className="h-6 w-16" />
+      <div className="mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-card border rounded-lg p-4 space-y-4 animate-pulse">
+              <div className="h-48 bg-muted rounded-lg"></div>
+              <div className="h-4 bg-muted rounded w-3/4"></div>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+              <div className="h-4 bg-muted rounded w-2/3"></div>
             </div>
-            <Skeleton className="h-8 w-full" />
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
   
-  // Shows empty state when no escorts match the filters
-  if (!escorts || escorts.length === 0) {
+  if (escorts.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium mb-2">No escorts found</h3>
-        <p className="text-gray-500 mb-6">
-          We couldn't find any escorts matching your filters.
-        </p>
-        <Button onClick={clearFilters}>
-          Clear all filters
-        </Button>
+      <div className="mt-8 text-center p-8 border rounded-lg bg-muted/20">
+        <h3 className="text-lg font-medium mb-2">No escorts match your filters</h3>
+        <p className="text-muted-foreground mb-4">Try adjusting your filters to see more results</p>
+        <Button onClick={clearFilters}>Clear All Filters</Button>
       </div>
     );
   }
   
   return (
-    <>
-      {/* Results count */}
-      <div className="mb-6">
-        <p className="text-sm text-gray-500">
-          Showing {escorts.length} {escorts.length === 1 ? 'escort' : 'escorts'}
-        </p>
-      </div>
-      
-      {/* Results grid */}
+    <div className="mt-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {escorts.map((escort) => (
-          <EscortCard
-            key={escort.id}
+          <EscortCard 
+            key={escort.id} 
             id={escort.id}
-            name={escort.name || "Unknown"}
-            age={escort.age || 0}
-            location={escort.location || "Unknown location"}
-            rating={escort.rating || 0}
-            reviews={escort.reviews || 0}
+            name={escort.name}
+            location={escort.location}
+            age={escort.age}
+            rating={escort.rating}
+            reviews={escort.reviews}
             tags={escort.tags || []}
-            imageUrl={escort.imageUrl || escort.avatar_url || "https://via.placeholder.com/300x400"}
-            price={escort.price || 0}
-            verified={escort.verified || false}
+            imageUrl={escort.imageUrl || ''}
+            price={escort.price}
+            verified={escort.verified}
             gender={escort.gender}
             sexualOrientation={escort.sexualOrientation}
-            availableNow={escort.availableNow || false}
-            // Convert string lastActive to a Date object if it exists
+            availableNow={escort.availableNow}
             lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
             responseRate={escort.responseRate}
+            showActionButtons={showActionButtons}
+            prominentCTA={prominentCTA}
           />
         ))}
       </div>
       
-      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-8 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              {currentPage > 1 && (
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    aria-label="Go to previous page" 
-                  />
-                </PaginationItem>
-              )}
-              
-              {Array.from({length: totalPages}, (_, i) => i + 1).map((pageNum) => (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink 
-                    onClick={() => setCurrentPage(pageNum)}
-                    isActive={currentPage === pageNum}
-                    aria-label={`Page ${pageNum}`}
-                  >
-                    {pageNum}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
-              {currentPage < totalPages && (
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    aria-label="Go to next page" 
-                  />
-                </PaginationItem>
-              )}
-            </PaginationContent>
-          </Pagination>
+        <div className="flex justify-center mt-8">
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            
+            <span className="text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+            
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

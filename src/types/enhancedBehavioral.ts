@@ -1,116 +1,142 @@
+// Enhanced behavioral profiling system types
+// Implements HERMES, OXUM, Gould, and Chase Hughes frameworks
 
-/**
- * Types for the enhanced behavioral analysis module
- * Integrating Hughes behavioral frameworks with Kotler marketing principles
- */
-
-// Decision-making stages in consumer behavior (Kotler framework)
-export enum ConsumerDecisionStage {
-  ProblemRecognition = 'problem_recognition',
-  InformationSearch = 'information_search',
-  Evaluation = 'evaluation',
-  PurchaseDecision = 'purchase_decision',
-  PostPurchaseBehavior = 'post_purchase',
-  Loyalty = 'loyalty'
+export enum TrustLevel {
+  Low = 30,
+  Moderate = 50,
+  High = 80
 }
 
-// Value orientation categories (Based on Chernev's value framework)
-export enum ValueOrientation {
-  Economic = 'economic', // Price-focused
-  Functional = 'functional', // Feature/utility focused
-  Emotional = 'emotional', // Feeling/experience focused
-  Symbolic = 'symbolic', // Status/identity focused
-  Practical = 'practical' // Default practical orientation
+export enum PriceSensitivity {
+  Low = 20,
+  Moderate = 50, 
+  High = 80
 }
 
-// Behavioral loop stages (Based on Nir Eyal's Hook model, adapted)
 export enum BehavioralLoop {
-  Discovery = 'discovery',
-  Engagement = 'engagement',
-  Investment = 'investment',
-  Action = 'action',
-  Reward = 'reward',
-  Reengagement = 'reengagement'
+  Discovery = "discovery",
+  Engagement = "engagement",
+  Conversion = "conversion",
+  Retention = "retention",
+  Advocacy = "advocacy",
+  Investment = "investment", // Added for compatibility
+  Identity = "identity" // Added for compatibility
 }
 
-// Brand resonance levels (Based on Keller's brand resonance pyramid)
 export enum BrandResonanceStage {
-  Awareness = 'awareness',
-  Performance = 'performance',
-  Imagery = 'imagery',
-  Judgments = 'judgments',
-  Feelings = 'feelings',
-  Resonance = 'resonance'
+  Awareness = "awareness",
+  Consideration = "consideration",
+  Preference = "preference",
+  Purchase = "purchase",
+  Loyalty = "loyalty",
+  Performance = "performance", // Added for compatibility
+  Imagery = "imagery", // Added for compatibility
+  Judgments = "judgments", // Added for compatibility
+  Feelings = "feelings", // Added for compatibility
+  Resonance = "resonance" // Added for compatibility
 }
 
-// Psychographic profile combining multiple behavioral frameworks
+export enum ConsumerDecisionStage {
+  ProblemRecognition = "problem_recognition",
+  InformationSearch = "information_search",
+  AlternativeEvaluation = "alternative_evaluation",
+  PurchaseDecision = "purchase_decision",
+  PostPurchaseEvaluation = "post_purchase_evaluation",
+  Evaluation = "evaluation", // Added for compatibility
+  PostPurchase = "post_purchase" // Added for compatibility
+}
+
+export enum ValueOrientation {
+  Practical = "practical",
+  Emotional = "emotional",
+  Social = "social",
+  Spiritual = "spiritual",
+  Intellectual = "intellectual"
+}
+
+export type MicroexpressionSignal = 
+  | "interest"
+  | "confusion"
+  | "doubt"
+  | "excitement"
+  | "hesitation"
+  | "conviction"
+  | "objection"
+  | "consideration";
+
+// Psychographic profile extension with behavioral insights
 export interface PsychographicProfile {
-  // Core elements from traditional psychographic analysis
   personalityTraits: string[];
   interests: string[];
   values: string[];
   motivations: string[];
+  decisionMakingStyle: string;
   
-  // Advanced behavioral elements (Hughes framework)
-  decisionMakingStyle: 'analytical' | 'intuitive' | 'collaborative' | 'procedural';
-  trustLevel: number; // 0-100
-  priceSensitivity: number; // 0-100
-  
-  // Loop stage in engagement (Eyal/Hughes adaptation)
+  // Enhanced behavioral analysis fields
+  trustLevel: TrustLevel;
+  priceSensitivity: PriceSensitivity;
   behavioralLoop: BehavioralLoop;
-  
-  // Marketing framework elements (Kotler/Chernev/Keller)
   decisionStage: ConsumerDecisionStage;
   valueOrientation: ValueOrientation;
   brandResonance: BrandResonanceStage;
+  identifiedSignals: MicroexpressionSignal[];
+  engagementPatterns?: string[];
+  contentPreferences?: string[];
+  marketingOptimizations?: any;
+}
+
+// Marketing optimizations based on behavioral analysis
+export interface MarketingOptimizations {
+  recommendedApproach: string;
+  messagingTone: string;
+  contentPreferences: string[];
+  callToActionStyle: string;
+  idealEngagementTimes: string[];
   
-  // Behavioral signals identified (Hughes FACS-based)
-  identifiedSignals: string[];
+  // Enhanced marketing insights
+  nextBestAction: string;
+  optimalOfferTiming: string;
+  suggestedPricePoints: number[];
+  retentionRisk: number;
+  lifetimeValueEstimate: number;
+  recommendedToneStyle?: string; // Added for compatibility
 }
 
-// Enhanced behavioral profile with integrated dimensions
 export interface EnhancedBehavioralProfile {
-  userId: string;
-  behaviorTags: string[];
-  interactionHistory: {
-    messagesExchanged: number;
-    totalSpent: number;
-    firstInteractionDate: string;
-    lastInteractionDate: string;
+  standardProfile: {
+    id: string;
+    userId: string;
+    demographics: {
+      ageGroup: string;
+      gender: string;
+      location: string;
+    };
+    behaviorTags?: string[];
   };
+  
   psychographicProfile: PsychographicProfile;
-  createdAt: string;
-  updatedAt: string;
-  confidenceScore: number; // 0-100 confidence in analysis
+  marketingOptimizations: MarketingOptimizations;
 }
 
-// Content recommendation based on behavioral analysis
-export interface ContentRecommendation {
-  contentType: 'educational' | 'comparison' | 'testimonials' | 'general';
-  timing: 'immediate' | 'during session' | 'prime hours' | 'anytime';
-  presentationStyle: 'helpful' | 'detailed' | 'social proof' | 'standard';
-}
-
-// Offer strategy based on psychographic profile
-export interface OfferStrategy {
-  offerType: 'discount' | 'feature upgrade' | 'experience' | 'premium' | 'standard';
-  pricingStructure: 'tiered' | 'feature-based' | 'value-based' | 'prestige' | 'fixed';
-  incentiveType: 'immediate savings' | 'extra features' | 'exclusive access' | 'status benefits' | 'none';
-  deadline: 'limited time' | 'feature limited' | 'special occasion' | 'membership-driven' | 'none';
-  presentationStyle: 'value-focused' | 'benefit-focused' | 'story-based' | 'exclusivity' | 'informational';
-}
-
-// Communication strategy based on behavioral and emotional analysis
-export interface CommunicationStrategy {
-  tone: 'neutral' | 'informative' | 'practical' | 'aspirational' | 'credible' | 'warm' | 'familiar';
-  emotionalAppeals: string[];
-  keyMessages: string[];
-  psychologicalTriggers: string[];
-}
-
-// Comprehensive engagement optimization based on enhanced behavioral profile
-export interface EngagementOptimization {
-  contentRecommendations: ContentRecommendation[];
-  offerStrategies: OfferStrategy;
-  communicationStrategy: CommunicationStrategy;
+export interface EnhancedBehavioralHookReturn {
+  enhancedProfile: EnhancedBehavioralProfile;
+  setEnhancedProfile: React.Dispatch<React.SetStateAction<EnhancedBehavioralProfile>>;
+  original: any;
+  isAnalyzing: boolean;
+  analyzeUser: () => Promise<EnhancedBehavioralProfile>;
+  generateEngagementStrategy: () => {
+    communicationStrategy: {
+      tone: string;
+      emotionalAppeals: string[];
+      keyMessages: string[];
+    };
+    offerStrategies: {
+      offerType: string;
+      pricingStructure: string;
+      incentiveType: string;
+      deadline: string;
+      presentationStyle: string;
+    };
+  };
+  lastAnalyzedAt: Date | null;
 }
