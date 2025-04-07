@@ -6,10 +6,13 @@ interface UseThemeToggleReturn {
   setIsDark: (isDark: boolean) => void;
   toggleTheme: () => void;
   mounted: boolean;
+  theme: string;
+  setTheme: (theme: string) => void;
 }
 
 export const useThemeToggle = (): UseThemeToggleReturn => {
   const [isDark, setIsDark] = useState<boolean>(false);
+  const [theme, setInternalTheme] = useState<string>("light");
   const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -22,6 +25,7 @@ export const useThemeToggle = (): UseThemeToggleReturn => {
     // Set initial theme based on saved preference or OS preference
     const initialIsDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
     setIsDark(initialIsDark);
+    setInternalTheme(initialIsDark ? 'dark' : 'light');
     
     // Apply theme to document
     document.documentElement.classList.toggle('dark', initialIsDark);
@@ -33,6 +37,7 @@ export const useThemeToggle = (): UseThemeToggleReturn => {
   const toggleTheme = () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
+    setInternalTheme(newIsDark ? 'dark' : 'light');
     
     // Apply new theme to document
     document.documentElement.classList.toggle('dark', newIsDark);
@@ -41,11 +46,25 @@ export const useThemeToggle = (): UseThemeToggleReturn => {
     localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
 
+  const setTheme = (newTheme: string) => {
+    const newIsDark = newTheme === 'dark';
+    setIsDark(newIsDark);
+    setInternalTheme(newTheme);
+    
+    // Apply new theme to document
+    document.documentElement.classList.toggle('dark', newIsDark);
+    
+    // Save preference to local storage
+    localStorage.setItem('theme', newTheme);
+  };
+
   return {
     isDark,
     setIsDark,
     toggleTheme,
-    mounted
+    mounted,
+    theme,
+    setTheme
   };
 };
 
