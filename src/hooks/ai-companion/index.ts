@@ -10,14 +10,22 @@ export function useAICompanionConversation({
   companionId, 
   initialMessages = [] 
 }: UseAICompanionConversationProps) {
-  const { messages, setMessages, isTyping, sendMessage: sendMessageToAI } = useAICompanionMessages();
+  const { 
+    messages, 
+    isTyping, 
+    addMessage, 
+    handleErrorResponse, 
+    handleSuggestedAction, 
+    setIsTyping: setIsTypingState 
+  } = useAICompanionMessages({ initialMessages });
+  
   const { companion, isLoading } = useCompanionProfile(companionId, initialMessages);
   const { getUserContext } = useUserContext();
   
   // Initialize with welcome message if no messages exist
   useState(() => {
     if (initialMessages.length > 0) {
-      setMessages(initialMessages);
+      // Messages already initialized
     } else if (messages.length === 0 && companion) {
       const welcomeMessage: CompanionMessage = {
         id: uuidv4(),
@@ -32,7 +40,7 @@ export function useAICompanionConversation({
         ]
       };
       
-      setMessages([welcomeMessage]);
+      addMessage(welcomeMessage);
     }
   });
   
@@ -40,10 +48,43 @@ export function useAICompanionConversation({
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || !companion) return;
     
-    // Get user context
-    const userContext = getUserContext();
-    await sendMessageToAI(content, companion, userContext);
-  }, [companion, getUserContext, sendMessageToAI]);
+    // Add user message
+    addMessage({
+      role: 'user',
+      content,
+      timestamp: new Date()
+    });
+    
+    // Set typing indicator
+    setIsTypingState(true);
+    
+    try {
+      // Get user context
+      const userContext = getUserContext();
+      
+      // In a real implementation, this would call an API
+      // For now, we'll simulate a response after a delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Add companion response
+      addMessage({
+        role: 'assistant',
+        content: `I appreciate your message: "${content}". How can I assist you further?`,
+        timestamp: new Date(),
+        emotion: 'friendly',
+        suggestedActions: [
+          "Tell me more",
+          "Ask a question",
+          "End conversation"
+        ]
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      handleErrorResponse("Something went wrong with the AI companion.");
+    } finally {
+      setIsTypingState(false);
+    }
+  }, [companion, getUserContext, addMessage, setIsTypingState, handleErrorResponse]);
   
   // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {

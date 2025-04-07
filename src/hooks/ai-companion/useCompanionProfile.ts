@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -32,10 +33,11 @@ export function useCompanionProfile(companionId: string, initialMessages: Compan
         const mockCompanion: CompanionProfile = {
           id: companionId,
           name: "Sophia",
-          avatarUrl: "/sophia-avatar.png",
+          avatar: "/sophia-avatar.png",
           personality: "Friendly, outgoing, empathetic",
-          background: "Virtual companion specializing in meaningful conversations",
-          interests: ["art", "psychology", "travel", "literature"],
+          description: "Virtual companion specializing in meaningful conversations",
+          visualCapabilities: true,
+          voiceType: "feminine",
           speechStyle: "Articulate with a touch of playfulness"
         };
         
