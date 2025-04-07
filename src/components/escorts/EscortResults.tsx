@@ -59,7 +59,21 @@ const EscortResults = ({
         {escorts.map((escort) => (
           <EscortCard 
             key={escort.id} 
-            escort={escort} 
+            id={escort.id}
+            name={escort.name}
+            location={escort.location}
+            age={escort.age}
+            rating={escort.rating}
+            reviews={escort.reviews}
+            tags={escort.tags || []}
+            imageUrl={escort.imageUrl || ''}
+            price={escort.price}
+            verified={escort.verified}
+            gender={escort.gender}
+            sexualOrientation={escort.sexualOrientation}
+            availableNow={escort.availableNow}
+            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
+            responseRate={escort.responseRate}
             showActionButtons={showActionButtons}
             prominentCTA={prominentCTA}
           />
