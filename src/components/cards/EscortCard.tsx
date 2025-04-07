@@ -25,6 +25,8 @@ interface EscortCardProps {
   availableNow?: boolean;
   lastActive?: Date;
   responseRate?: number;
+  showActionButtons?: boolean;
+  prominentCTA?: boolean;
 }
 
 const EscortCard: React.FC<EscortCardProps> = ({
@@ -43,6 +45,8 @@ const EscortCard: React.FC<EscortCardProps> = ({
   availableNow = false,
   lastActive,
   responseRate,
+  showActionButtons = true,
+  prominentCTA = false,
 }) => {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -106,16 +110,18 @@ const EscortCard: React.FC<EscortCardProps> = ({
             )}
           </Badge>
           
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className={`bg-black/30 backdrop-blur-sm hover:bg-black/50 text-white rounded-full ${
-              isFavorite(id) ? "text-red-500" : ""
-            }`}
-            onClick={handleFavoriteClick}
-          >
-            <Heart className={`h-5 w-5 ${isFavorite(id) ? "fill-current" : ""}`} />
-          </Button>
+          {showActionButtons && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className={`bg-black/30 backdrop-blur-sm hover:bg-black/50 text-white rounded-full ${
+                isFavorite(id) ? "text-red-500" : ""
+              }`}
+              onClick={handleFavoriteClick}
+            >
+              <Heart className={`h-5 w-5 ${isFavorite(id) ? "fill-current" : ""}`} />
+            </Button>
+          )}
         </div>
         
         {verified && (
@@ -178,13 +184,20 @@ const EscortCard: React.FC<EscortCardProps> = ({
         </div>
       </CardContent>
       
-      <CardFooter className="flex justify-between items-center p-4 pt-0 border-t border-border mt-2">
-        <div>
-          <div className="text-sm font-medium">From ${price}/hour</div>
-        </div>
-        
-        <Button size="sm">View Profile</Button>
-      </CardFooter>
+      {showActionButtons && (
+        <CardFooter className="flex justify-between items-center p-4 pt-0 border-t border-border mt-2">
+          <div>
+            <div className="text-sm font-medium">From ${price}/hour</div>
+          </div>
+          
+          <Button 
+            size="sm" 
+            className={prominentCTA ? "bg-primary hover:bg-primary/90 text-white px-6 animate-pulse-subtle" : ""}
+          >
+            View Profile
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 };
