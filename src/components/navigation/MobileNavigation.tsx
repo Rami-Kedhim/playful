@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Home, Heart, Video, Search, MessageCircle, Users, Star } from 'lucide-react';
+import { Users, Heart, Video, Search, MessageCircle, Star } from 'lucide-react';
 import { AnimatedContainer } from '@/components/ui/animated-container';
 
 interface MobileNavigationProps {
