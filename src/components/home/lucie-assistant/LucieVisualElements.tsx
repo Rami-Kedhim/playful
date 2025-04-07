@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
+import LucieInteractiveCard from './LucieInteractiveCard';
+import { CardAction } from '@/hooks/ai-lucie/types';
 
 interface VisualElement {
   type: 'image' | 'card';
@@ -9,9 +11,10 @@ interface VisualElement {
 
 interface LucieVisualElementsProps {
   elements: VisualElement[];
+  onCardActionClick?: (action: string) => void;
 }
 
-const LucieVisualElements = ({ elements }: LucieVisualElementsProps) => {
+const LucieVisualElements = ({ elements, onCardActionClick }: LucieVisualElementsProps) => {
   return (
     <div className="mt-3 space-y-3">
       {elements.map((element, index) => (
@@ -24,7 +27,17 @@ const LucieVisualElements = ({ elements }: LucieVisualElementsProps) => {
             />
           )}
           
-          {element.type === 'card' && (
+          {element.type === 'card' && element.data.type === 'interactive' && (
+            <LucieInteractiveCard
+              title={element.data.title}
+              description={element.data.description}
+              imageUrl={element.data.imageUrl}
+              actions={element.data.actions}
+              onActionClick={(action) => onCardActionClick && onCardActionClick(action)}
+            />
+          )}
+          
+          {element.type === 'card' && element.data.type !== 'interactive' && (
             <Card className="p-3 bg-white/10">
               {element.data.title && (
                 <h4 className="font-medium text-sm">{element.data.title}</h4>

@@ -11,6 +11,19 @@ export interface LucieMessage {
     type: 'image' | 'card';
     data: any;
   }[];
+  cards?: InteractiveCard[];
+}
+
+export interface InteractiveCard {
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  actions: CardAction[];
+}
+
+export interface CardAction {
+  label: string;
+  action: string;
 }
 
 export interface UserContext {
@@ -25,6 +38,7 @@ export interface LucieResponse {
   suggestedActions?: string[];
   links?: { text: string; url: string }[];
   emotion?: string;
+  cards?: InteractiveCard[];
 }
 
 export interface LucieAPIOptions {

@@ -65,6 +65,7 @@ function processResponse(content) {
     text: content,
     suggestedActions: [],
     links: [],
+    cards: []
   }
   
   // Simple regex pattern to identify suggested actions in format [ACTION: action text]
@@ -94,6 +95,21 @@ function processResponse(content) {
   
   // Remove link tags from the main text
   response.text = response.text.replace(/\[LINK: .+? \| .+?\]/g, '')
+  
+  // Extract interactive cards with format [CARD: {"title":"X", "description":"Y", "actions":[{"label":"Z", "action":"A"}]}]
+  const cardPattern = /\[CARD: ({.+?})\]/g
+  let cardMatch
+  while ((cardMatch = cardPattern.exec(content)) !== null) {
+    try {
+      const cardData = JSON.parse(cardMatch[1])
+      response.cards.push(cardData)
+    } catch (e) {
+      console.error('Failed to parse card JSON:', e)
+    }
+  }
+  
+  // Remove card tags from the main text
+  response.text = response.text.replace(/\[CARD: ({.+?})\]/g, '')
   
   // Clean up extra spaces
   response.text = response.text.trim()
@@ -170,6 +186,28 @@ async function callOpenAI(messages, openAIApiKey) {
 }
 
 /**
+ * Generate system prompt instructions for interactive elements
+ */
+function generateVisualElementsPrompt(visualCapabilities) {
+  if (!visualCapabilities) return '';
+  
+  return `
+You can include interactive elements in your responses using these formats:
+
+1. For suggested actions: Use [ACTION: action text]
+2. For links: Use [LINK: link text | url]
+3. For interactive cards: Use [CARD: {"title": "Card title", "description": "Card description", "imageUrl": "optional-image-url", "actions": [{"label": "Action button text", "action": "action to perform"}]}]
+
+Interactive cards are especially useful when you want to provide the user with a rich visual element that includes actionable buttons. When a user clicks on an action button, the action text will be treated as if the user typed it.
+
+Example of an interactive card:
+[CARD: {"title": "Popular Escorts Near You", "description": "Check out top-rated escorts in your area", "imageUrl": "https://example.com/image.jpg", "actions": [{"label": "Browse Escorts", "action": "Show me popular escorts"}, {"label": "Filter by Rating", "action": "Filter escorts by rating"}]}]
+
+Use these interactive elements wisely to enhance the user experience.
+`;
+}
+
+/**
  * Handle the chat request
  */
 async function handleChatRequest(req, corsHeaders) {
@@ -192,14 +230,10 @@ async function handleChatRequest(req, corsHeaders) {
 
   // Create system prompt based on the user's context
   let systemPrompt = generateSystemPrompt(userContext)
-
-  // Add instructions for visual elements if supported
+  
+  // Add instructions for visual and interactive elements if supported
   if (visualCapabilities) {
-    systemPrompt += `\n\nYou can include visual elements in your responses using these formats:
-1. For images: Use [IMAGE: brief description of image]
-2. For cards: Use [CARD: {"title": "Card Title", "description": "Card description", "imageUrl": "optional url", "actions": [{"label": "Action 1", "action": "action-text-1"}, {"label": "Action 2", "action": "action-text-2"}]}]
-
-Use these visual elements only when they add significant value to your response.`
+    systemPrompt += generateVisualElementsPrompt(visualCapabilities);
   }
 
   // Build the messages array including history and the new message
