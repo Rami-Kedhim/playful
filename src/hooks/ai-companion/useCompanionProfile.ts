@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,7 +18,7 @@ export function useCompanionProfile(companionId: string, initialMessages: Compan
       description: 'A helpful AI assistant',
       personality: 'Friendly and professional',
       visualCapabilities: false,
-      voiceType: 'feminine',
+      voice_type: 'feminine',
       speechStyle: 'friendly'
     };
   }, []);
@@ -37,7 +36,7 @@ export function useCompanionProfile(companionId: string, initialMessages: Compan
           personality: "Friendly, outgoing, empathetic",
           description: "Virtual companion specializing in meaningful conversations",
           visualCapabilities: true,
-          voiceType: "feminine",
+          voice_type: "feminine",
           speechStyle: "Articulate with a touch of playfulness"
         };
         

@@ -42,11 +42,12 @@ export function useHermesLivecamInsights(userId?: string) {
       });
       
       if (response) {
-        // Update insights from response
+        // Update insights from response with proper type checking
         setLivecamInsights({
           recommendedProfileId: response.recommended_profile,
-          popularCategory: response.popular_category,
-          trendingTag: response.trending_tag,
+          // Type-check and provide fallbacks for potentially missing properties
+          popularCategory: response.popular_category !== undefined ? response.popular_category : undefined,
+          trendingTag: response.trending_tag !== undefined ? response.trending_tag : undefined,
           isLoading: false
         });
       }

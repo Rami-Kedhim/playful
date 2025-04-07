@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useAICompanionMessages } from './useAICompanionMessages';
 import { useCompanionProfile } from './useCompanionProfile';
@@ -6,7 +5,7 @@ import { useUserContext } from './useUserContext';
 import { v4 as uuidv4 } from 'uuid';
 import { 
   CompanionMessage, 
-  UseAICompanionConversationProps, 
+  UseAICompanionConversationOptions, 
   UseAICompanionConversationResult 
 } from './types';
 import { AICompanion } from '@/types/ai-companion';
@@ -14,7 +13,7 @@ import { AICompanion } from '@/types/ai-companion';
 export function useAICompanionConversation({ 
   companionId, 
   initialMessages = [] 
-}: UseAICompanionConversationProps): UseAICompanionConversationResult {
+}: UseAICompanionConversationOptions): UseAICompanionConversationResult {
   const { 
     messages, 
     isTyping, 
@@ -138,7 +137,32 @@ export function useAICompanionConversation({
   
   // Cast companion to AICompanion to make TypeScript happy
   // In a real app, you would ensure the proper type conversion
-  const aiCompanion = companion as AICompanion | null;
+  const aiCompanion = companion ? {
+    id: companion.id,
+    user_id: companion.id, // Using id as a fallback
+    name: companion.name,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    avatar_url: companion.avatar_url || '',
+    gallery: [],
+    description: companion.description,
+    personality_traits: [],
+    body_type: 'slim',
+    voice_type: companion.voice_type,
+    relationship_level: {
+      trust: 50,
+      affection: 50,
+      obedience: 50,
+      intimacy: 50
+    },
+    engagement_stats: {
+      chat_messages: 0,
+      images_generated: 0,
+      voice_messages: 0,
+      last_interaction: null
+    },
+    is_preset: true
+  } as AICompanion : null;
   
   return {
     messages,

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Brain, 
   Activity, 
-  Flask, 
+  Beaker, 
   TrendingUp, 
   Cpu, 
   Zap, 
@@ -49,7 +48,7 @@ const BrainHubDashboard: React.FC = () => {
     };
     
     setConfig(newConfig);
-    brainHub.updateConfig({ [section]: value });
+    brainHub.updateConfig({ [section]: value } as Partial<BrainHubConfig>);
   };
   
   const updateAcademicModel = <
@@ -155,7 +154,7 @@ const BrainHubDashboard: React.FC = () => {
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Flask className="h-4 w-4" />
+                      <Beaker className="h-4 w-4" />
                       <Label htmlFor="neuro-emotion">NeuroEmotion Layer</Label>
                     </div>
                     <Switch

@@ -22,13 +22,11 @@ export interface CompanionMessage {
 
 export interface UseAICompanionConversationOptions {
   companionId: string;
+  initialMessages?: CompanionMessage[];
 }
 
 // Using the same interface name to match the import in index.ts
-export interface UseAICompanionConversationProps {
-  companionId: string;
-  initialMessages?: CompanionMessage[];
-}
+export type UseAICompanionConversationProps = UseAICompanionConversationOptions;
 
 export interface UseAICompanionConversationResult {
   messages: CompanionMessage[];
