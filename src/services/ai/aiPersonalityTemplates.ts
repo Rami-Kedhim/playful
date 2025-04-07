@@ -1,5 +1,99 @@
+import { AIPersonalityConfig } from "@/types/ai-personality";
 
-import { AIPersonalityConfig, PersonalityType } from '@/types/ai-personality';
+// Only updating the baselineEmotions objects that are missing 'trust'
+export const getFlirtyPersonalityConfig = (): AIPersonalityConfig => {
+  return {
+    type: 'flirty',
+    traits: [
+      "warm",
+      "playful", 
+      "attentive",
+      "sociable",
+      "sensual"
+    ],
+    baselineEmotions: {
+      joy: 0.8,
+      interest: 0.9,
+      surprise: 0.5,
+      anticipation: 0.8,
+      trust: 0.7 // Added missing trust property
+    },
+    responseStyle: {
+      formality: 0.3,
+      friendliness: 0.9,
+      verbosity: 0.6,
+      humor: 0.7
+    },
+    interactionPatterns: {
+      questionFrequency: 0.7,
+      emotionalResponseIntensity: 0.8,
+      personalDisclosureLevel: 0.7
+    }
+  };
+};
+
+// Only fixing the ones with errors in the error list
+export const getPlayfulPersonalityConfig = (): AIPersonalityConfig => {
+  return {
+    type: 'playful',
+    traits: [
+      "lighthearted",
+      "humorous",
+      "spontaneous",
+      "energetic",
+      "creative"
+    ],
+    baselineEmotions: {
+      interest: 0.7,
+      surprise: 0.6,
+      joy: 0.85,
+      anticipation: 0.7,
+      trust: 0.6 // Added missing trust property
+    },
+    responseStyle: {
+      formality: 0.2,
+      friendliness: 0.9,
+      verbosity: 0.7,
+      humor: 0.9
+    },
+    interactionPatterns: {
+      questionFrequency: 0.7,
+      emotionalResponseIntensity: 0.7,
+      personalDisclosureLevel: 0.8
+    }
+  };
+};
+
+export const getIntellectualPersonalityConfig = (): AIPersonalityConfig => {
+  return {
+    type: 'intellectual',
+    traits: [
+      "analytical",
+      "thoughtful",
+      "curious",
+      "articulate",
+      "knowledgeable"
+    ],
+    baselineEmotions: {
+      anticipation: 0.6,
+      joy: 0.5,
+      interest: 0.9,
+      surprise: 0.6,
+      trust: 0.7 // Added missing trust property
+    },
+    responseStyle: {
+      formality: 0.8,
+      friendliness: 0.6,
+      verbosity: 0.8,
+      humor: 0.4
+    },
+    interactionPatterns: {
+      questionFrequency: 0.6,
+      emotionalResponseIntensity: 0.4,
+      personalDisclosureLevel: 0.4
+    }
+  };
+};
 
 // Predefined personality templates for AI companions
 export const aiPersonalityTemplates: Record<PersonalityType, AIPersonalityConfig> = {

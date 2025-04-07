@@ -12,6 +12,8 @@ export interface Escort {
   rates: {
     hourly: number;
     overnight: number;
+    twoHours?: number;
+    weekend?: number;
   };
   availableNow: boolean;
   verified: boolean;
@@ -30,4 +32,90 @@ export interface Escort {
   };
   featured: boolean;
   price: number;
+
+  // Additional fields needed based on errors
+  avatar_url?: string;
+  gallery_images?: string[];
+  sexualOrientation?: string;
+  lastActive?: string | Date;
+  responseRate?: number;
+  description?: string;
+  height?: number;
+  weight?: number;
+  measurements?: {
+    bust: number;
+    waist: number;
+    hips: number;
+  };
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  verificationLevel?: VerificationLevel;
+  serviceTypes?: string[];
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  videos?: Video[];
+  subscriptionPrice?: number;
+  contentStats?: {
+    photos: number;
+    videos: number;
+    live: boolean;
+    streams: number;
+  };
+}
+
+export interface Video {
+  id: string;
+  url: string;
+  thumbnail: string;
+  title: string;
+}
+
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  status: VerificationStatus;
+  submittedAt: string;
+  reviewedAt?: string;
+  documents: VerificationDocument[];
+  rejectionReason?: string;
+  expiresAt?: string;
+}
+
+export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired';
+
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  fileUrl: string;
+  uploadedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export type ServiceType = 
+  | 'GFE'
+  | 'Massage'
+  | 'Dinner Date'
+  | 'Overnight'
+  | 'Travel Companion'
+  | 'BDSM'
+  | 'Role Play'
+  | 'Fetish'
+  | 'Domination'
+  | 'Submission'
+  | 'Couples'
+  | 'French Kissing'
+  | 'Lingerie Shows'
+  | 'Exotic Dancing';
+
+export interface EscortAvailability {
+  days: string[];
+  hours: string;
+  exceptions?: {
+    date: string;
+    available: boolean;
+    customHours?: string;
+  }[];
 }

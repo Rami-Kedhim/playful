@@ -59,3 +59,21 @@ export interface AIPersonalityConfig {
     [key: string]: number;
   };
 }
+
+// Add the missing types needed by other parts of the application
+export interface EmotionalMemory {
+  userId: string;
+  companionId: string;
+  emotions: {
+    currentState: EmotionalState;
+    history: EmotionalState[];
+  };
+  lastUpdated: string;
+}
+
+export interface MonetizationHook {
+  triggerPurchaseFlow: (productId: string, amount: number) => Promise<boolean>;
+  checkUserCredits: () => Promise<number>;
+  deductCredits: (amount: number, reason: string) => Promise<boolean>;
+  getSubscriptionStatus: () => Promise<{ isSubscribed: boolean; plan: string | null }>;
+}
