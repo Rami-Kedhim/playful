@@ -61,6 +61,7 @@ export interface AICompanion {
     last_interaction: string | null;
   };
   is_preset: boolean;
+  verification_status?: string;
 }
 
 // AI Companion creation parameters

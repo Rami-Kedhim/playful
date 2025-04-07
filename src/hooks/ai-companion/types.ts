@@ -18,6 +18,9 @@ export interface CompanionMessage {
   visualElements?: { data: VisualElementData }[];
   emotion?: string;
   links?: string[]; // Include links property to fix type error
+  isPremium?: boolean;
+  requiresPayment?: boolean;
+  paymentAmount?: number;
 }
 
 export interface UseAICompanionConversationOptions {
