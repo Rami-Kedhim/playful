@@ -1,141 +1,128 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { SendIcon, Image, Loader2, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Send, Image, AlertCircle } from 'lucide-react';
+import { EmotionalState } from '@/types/ai-personality';
 
 interface AICompanionChatInputProps {
-  onSendMessage: (content: string) => void;
-  onGenerateImage?: (prompt: string) => Promise<void>;
-  isLoading: boolean;
-  companionName?: string;
+  onSendMessage: (message: string) => void;
+  onGenerateImage?: (prompt: string) => void;
+  isLoading?: boolean;
   disabled?: boolean;
   disabledMessage?: string;
+  companionName?: string;
+  emotionalState?: EmotionalState | null;
 }
 
 const AICompanionChatInput: React.FC<AICompanionChatInputProps> = ({
   onSendMessage,
   onGenerateImage,
-  isLoading,
-  companionName = 'AI',
+  isLoading = false,
   disabled = false,
-  disabledMessage
+  disabledMessage,
+  companionName = 'AI',
+  emotionalState
 }) => {
-  const [message, setMessage] = useState('');
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  // Auto focus the textarea when component mounts
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, []);
-  
-  const handleSend = () => {
-    if (message.trim() && !isLoading && !disabled) {
-      onSendMessage(message);
-      setMessage('');
+  const [input, setInput] = useState('');
+  const [isImageGeneration, setIsImageGeneration] = useState(false);
+
+  const handleSendMessage = () => {
+    if (input.trim() && !isLoading && !disabled) {
+      if (isImageGeneration && onGenerateImage) {
+        onGenerateImage(input);
+        setInput('');
+        setIsImageGeneration(false);
+      } else {
+        onSendMessage(input);
+        setInput('');
+      }
     }
   };
-  
-  const handleGenerateImage = async () => {
-    if (!onGenerateImage || !message.trim() || isLoading || disabled) return;
-    
-    try {
-      setIsGeneratingImage(true);
-      await onGenerateImage(message);
-      setMessage('');
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      handleSendMessage();
     }
   };
-  
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
+
+  const toggleImageGeneration = () => {
+    if (!disabled && onGenerateImage) {
+      setIsImageGeneration(!isImageGeneration);
+    }
+  };
+
+  // Get placeholder text based on emotional state
+  const getPlaceholder = () => {
+    if (!emotionalState || !emotionalState.dominantEmotion) {
+      return `Message ${companionName}...`;
+    }
     
-    // Auto resize the textarea
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    switch (emotionalState.dominantEmotion) {
+      case 'joy':
+        return `${companionName} is feeling happy. Say something...`;
+      case 'interest':
+        return `${companionName} is interested in chatting...`;
+      case 'surprise':
+        return `${companionName} seems surprised. Continue the conversation...`;
+      case 'sadness':
+        return `${companionName} is feeling a bit down. Send a message...`;
+      case 'anger':
+        return `${companionName} seems upset. Proceed carefully...`;
+      case 'fear':
+        return `${companionName} is feeling anxious. Be gentle...`;
+      case 'trust':
+        return `${companionName} trusts you. What would you like to say?`;
+      case 'anticipation':
+        return `${companionName} is eagerly waiting your message...`;
+      default:
+        return `Message ${companionName}...`;
     }
   };
 
   return (
-    <div className="border-t p-3 bg-background/70 backdrop-blur-sm">
-      <div className="relative">
-        <Textarea
-          ref={textareaRef}
-          value={message}
-          onChange={handleTextareaChange}
+    <div className="p-3 border-t border-white/10 bg-background/90 backdrop-blur-sm">
+      {disabled && disabledMessage && (
+        <div className="mb-2 px-2 py-1 bg-muted/50 rounded-md flex items-center text-xs text-yellow-500">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {disabledMessage}
+        </div>
+      )}
+      
+      <div className="relative flex items-center space-x-2">
+        {onGenerateImage && (
+          <Button
+            type="button"
+            size="icon"
+            variant={isImageGeneration ? "default" : "ghost"}
+            className="flex-shrink-0 h-9 w-9"
+            onClick={toggleImageGeneration}
+            disabled={disabled || isLoading}
+            title={isImageGeneration ? "Switch to chat" : "Generate image"}
+          >
+            <Image className="h-4 w-4" />
+          </Button>
+        )}
+        
+        <Input
+          placeholder={isImageGeneration ? "Describe an image to generate..." : getPlaceholder()}
+          value={input}
+          onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={`Message ${companionName}...`}
-          className="min-h-[44px] pr-28 resize-none"
-          rows={1}
           disabled={isLoading || disabled}
+          className="flex-1 px-4 py-2 bg-background"
         />
         
-        <div className="absolute right-1 bottom-1 flex items-center gap-1">
-          {onGenerateImage && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleGenerateImage}
-                  disabled={isLoading || !message.trim() || disabled || isGeneratingImage}
-                  className="h-8 w-8"
-                >
-                  {isGeneratingImage ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Image className="h-4 w-4" />
-                  )}
-                  <span className="sr-only">Generate image</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                Generate image from prompt
-              </TooltipContent>
-            </Tooltip>
-          )}
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="sm"
-                onClick={handleSend}
-                disabled={isLoading || !message.trim() || disabled}
-                className="h-8 gap-1"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <SendIcon className="h-4 w-4" />
-                )}
-                <span>Send</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              {disabled && disabledMessage ? disabledMessage : "Send message"}
-            </TooltipContent>
-          </Tooltip>
-        </div>
+        <Button
+          type="button"
+          size="icon"
+          className="flex-shrink-0 h-9 w-9"
+          disabled={!input.trim() || isLoading || disabled}
+          onClick={handleSendMessage}
+        >
+          <Send className="h-4 w-4" />
+        </Button>
       </div>
-      
-      {disabled && disabledMessage && (
-        <p className="text-xs text-center mt-2 text-red-500">
-          {disabledMessage}
-        </p>
-      )}
     </div>
   );
 };

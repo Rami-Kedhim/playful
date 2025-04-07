@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import AICompanionMessage from './AICompanionMessage';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
@@ -11,6 +10,7 @@ interface AICompanionMessageListProps {
   isTyping: boolean;
   onActionClick: (action: string) => void;
   voiceType?: string;
+  onUnlockContent?: () => void;
 }
 
 const AICompanionMessageList: React.FC<AICompanionMessageListProps> = ({
@@ -18,7 +18,8 @@ const AICompanionMessageList: React.FC<AICompanionMessageListProps> = ({
   isLoading,
   isTyping,
   onActionClick,
-  voiceType
+  voiceType,
+  onUnlockContent
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -51,6 +52,7 @@ const AICompanionMessageList: React.FC<AICompanionMessageListProps> = ({
                 message={message}
                 onActionClick={onActionClick}
                 voiceType={voiceType}
+                onUnlockContent={onUnlockContent}
               />
             </motion.div>
           ))}

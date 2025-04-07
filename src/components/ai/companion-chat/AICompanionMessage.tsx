@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { getEmotionClass } from './utils/emotionUtils';
 import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
-import { Volume2, VolumeX, VolumeOff, Loader } from 'lucide-react';
+import { Volume2, VolumeX, VolumeOff, Loader, Unlock } from 'lucide-react';
 import { AIVisualElement } from './AICompanionVisualElements';
 import { cn } from '@/lib/utils';
 
@@ -12,12 +11,14 @@ interface AICompanionMessageProps {
   message: CompanionMessage;
   onActionClick: (action: string) => void;
   voiceType?: string;
+  onUnlockContent?: () => void;
 }
 
 const AICompanionMessage = ({
   message,
   onActionClick,
-  voiceType
+  voiceType,
+  onUnlockContent
 }: AICompanionMessageProps) => {
   const isAI = message.role === 'assistant';
   const [speaking, setSpeaking] = useState(false);
@@ -81,7 +82,9 @@ const AICompanionMessage = ({
       <div
         className={cn(
           'p-3 rounded-lg max-w-[80%]',
-          emotionClass
+          emotionClass,
+          message.isPremium && 'border-2 border-amber-500',
+          message.requiresPayment && 'bg-muted/80 border-dashed border-2 border-amber-500'
         )}
       >
         <div className="flex flex-col">
@@ -97,6 +100,21 @@ const AICompanionMessage = ({
                   onActionClick={onActionClick}
                 />
               ))}
+            </div>
+          )}
+
+          {/* Payment required button */}
+          {isAI && message.requiresPayment && onUnlockContent && (
+            <div className="mt-3">
+              <Button
+                variant="secondary"
+                className="w-full bg-amber-500/20 hover:bg-amber-500/40 border border-amber-500"
+                onClick={onUnlockContent}
+                size="sm"
+              >
+                <Unlock className="mr-2 h-4 w-4" />
+                Unlock for {message.paymentAmount || 10} Lucoins
+              </Button>
             </div>
           )}
 

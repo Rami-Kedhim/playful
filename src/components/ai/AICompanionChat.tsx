@@ -1,6 +1,5 @@
-
-import { useState, useEffect } from 'react';
-import { useAICompanionConversation } from '@/hooks/ai-companion';
+import React, { useState, useEffect } from 'react';
+import { useAICompanionWithMemory } from '@/hooks/ai-companion/useAICompanionWithMemory';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
 import AICompanionMessageList from './companion-chat/AICompanionMessageList';
 import AICompanionChatInput from './companion-chat/AICompanionChatInput';
@@ -14,6 +13,10 @@ interface AICompanionChatProps {
   onClose?: () => void;
   onMinimize?: () => void;
   userCredits?: number;
+  userId?: string;
+  personalityType?: string;
+  name?: string;
+  avatarUrl?: string;
 }
 
 const AICompanionChat = ({ 
@@ -21,19 +24,28 @@ const AICompanionChat = ({
   initiallyOpen = true, 
   onClose,
   onMinimize,
-  userCredits 
+  userCredits = 0,
+  userId = 'anonymous',
+  personalityType = 'flirty',
+  name = 'AI Companion',
+  avatarUrl
 }: AICompanionChatProps) => {
   const {
     messages,
     isTyping,
-    isLoading,
-    companion,
+    error,
+    emotionalState,
     sendMessage,
     handleSuggestedActionClick,
-    generateImage,
-    generatingImage,
-    creditCost = 0
-  } = useAICompanionConversation({ companionId });
+    processPremiumContent
+  } = useAICompanionWithMemory({ 
+    companionId, 
+    userId,
+    personalityType: personalityType as any,
+    name,
+    avatarUrl,
+    lucoinBalance: userCredits
+  });
   
   const [isOpen, setIsOpen] = useState(initiallyOpen);
   const [localIsTyping, setLocalIsTyping] = useState(false);
@@ -73,46 +85,61 @@ const AICompanionChat = ({
   const handleMaximize = () => {
     setIsOpen(true);
   };
+  
+  const handleUnlockContent = () => {
+    processPremiumContent();
+  };
 
   if (!isOpen) {
     return (
       <MinimizedChatButton 
         onClick={handleMaximize} 
-        companionName={companion?.name}
-        avatarUrl={companion?.avatar_url}
+        companionName={name}
+        avatarUrl={avatarUrl}
         hasUnread={messages.length > 0}
       />
     );
   }
 
-  const hasSufficientCredits = userCredits === undefined || userCredits >= creditCost;
+  const hasSufficientCredits = userCredits === undefined || userCredits >= 0;
+  
+  // Determine dominant emotion for UI customization
+  const dominantEmotion = emotionalState?.dominantEmotion || 'neutral';
 
   return (
     <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[550px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
       <AICompanionChatHeader 
-        isLoading={isLoading} 
-        companion={companion} 
+        isLoading={false} 
+        companion={{ 
+          name, 
+          avatar_url: avatarUrl, 
+          id: companionId,
+          description: `AI Companion with ${personalityType} personality`
+        } as any} 
         onClose={handleClose}
         onMinimize={handleMinimize}
         credits={userCredits}
-        creditCost={creditCost}
+        creditCost={0}
+        emotionalState={emotionalState}
       />
 
       <AICompanionMessageList 
         messages={messages}
-        isLoading={isLoading}
+        isLoading={false}
         isTyping={localIsTyping}
         onActionClick={handleSuggestedActionClick}
-        voiceType={companion?.voice_type}
+        voiceType="feminine"
+        onUnlockContent={handleUnlockContent}
       />
 
       <AICompanionChatInput 
-        isLoading={isLoading || generatingImage}
+        isLoading={isTyping}
         onSendMessage={handleSendMessage}
-        onGenerateImage={generateImage}
-        companionName={companion?.name}
+        onGenerateImage={() => {}}
+        companionName={name}
         disabled={!hasSufficientCredits}
         disabledMessage={!hasSufficientCredits ? "Insufficient credits" : undefined}
+        emotionalState={emotionalState}
       />
 
       <AICompanionChatStyles />
