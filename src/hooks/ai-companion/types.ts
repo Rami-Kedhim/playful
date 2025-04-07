@@ -1,23 +1,24 @@
-
 export interface CompanionProfile {
   id: string;
   name: string;
-  avatarUrl: string;
-  personality: string;
-  background: string;
-  interests: string[];
-  speechStyle: string;
-  emotion?: string;
+  avatar?: string;
+  description?: string;
+  personality?: string;
+  visualCapabilities?: boolean;
+  voiceType?: string;
 }
 
 export interface CompanionMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp: Date;
-  emotion?: string | null;
+  timestamp?: Date;
   suggestedActions?: string[];
-  links?: { text: string; url: string }[];
+  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprise' | 'fear' | 'disgust' | 'friendly' | 'professional' | 'supportive' | 'apologetic' | 'helpful';
+  visualElements?: {
+    type: string;
+    data: any;
+  }[];
 }
 
 export interface UserContext {

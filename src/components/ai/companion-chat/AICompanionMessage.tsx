@@ -5,6 +5,7 @@ import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { getEmotionClass } from './utils/emotionUtils';
 import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
 import { Volume2, VolumeX, VolumeOff, Loader } from 'lucide-react';
+import { AIVisualElement } from './AICompanionVisualElements';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
@@ -82,6 +83,19 @@ const AICompanionMessage = ({
       >
         <div className="flex flex-col">
           <p className="whitespace-pre-wrap">{message.content}</p>
+
+          {/* Visual elements */}
+          {isAI && message.visualElements && message.visualElements.length > 0 && (
+            <div className="mt-3 space-y-3">
+              {message.visualElements.map((element, index) => (
+                <AIVisualElement
+                  key={index}
+                  element={element.data}
+                  onActionClick={onActionClick}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Suggested actions */}
           {isAI && message.suggestedActions && message.suggestedActions.length > 0 && (

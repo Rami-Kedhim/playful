@@ -29,10 +29,19 @@ serve(async (req) => {
     }
 
     // Get request body
-    const { message, userContext, chatHistory } = await req.json()
+    const { message, userContext, chatHistory, visualCapabilities } = await req.json()
 
     // Create system prompt based on the user's context
-    const systemPrompt = generateSystemPrompt(userContext)
+    let systemPrompt = generateSystemPrompt(userContext)
+
+    // Add instructions for visual elements if supported
+    if (visualCapabilities) {
+      systemPrompt += `\n\nYou can include visual elements in your responses using these formats:
+1. For images: Use [IMAGE: brief description of image]
+2. For cards: Use [CARD: {"title": "Card Title", "description": "Card description", "imageUrl": "optional url", "actions": [{"label": "Action 1", "action": "action-text-1"}, {"label": "Action 2", "action": "action-text-2"}]}]
+
+Use these visual elements only when they add significant value to your response.`
+    }
 
     // Build the messages array including history and the new message
     const messages = [

@@ -12,6 +12,10 @@ export interface LucieMessage {
   suggestedActions?: string[];
   links?: { text: string; url: string }[];
   emotion?: string;
+  visualElements?: {
+    type: 'image' | 'card';
+    data: any;
+  }[];
 }
 
 export interface UserContext {
@@ -70,6 +74,25 @@ export function useLucieAssistant() {
       content: msg.content
     }));
   }, [messages]);
+
+  // Process visual elements request
+  const generateVisualElement = useCallback(async (type: string, content: any) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('lucie-visual-response', {
+        body: { type, content }
+      });
+      
+      if (error) {
+        console.error('Error generating visual element:', error);
+        return null;
+      }
+      
+      return data.data;
+    } catch (error) {
+      console.error('Error generating visual element:', error);
+      return null;
+    }
+  }, []);
 
   // Get a fallback response when the API is unavailable
   const getFallbackResponse = useCallback((userMessage: string): LucieMessage => {
@@ -191,7 +214,8 @@ export function useLucieAssistant() {
             name: "Lucie",
             personality: "Warm, seductive, playful, and helpful assistant",
             speechStyle: "sultry",
-            interests: ["helping users", "escort services", "entertainment"]
+            interests: ["helping users", "escort services", "entertainment"],
+            visualCapabilities: true // New flag to indicate we support visual elements
           }
         }
       });
@@ -224,6 +248,47 @@ export function useLucieAssistant() {
         
         setMessages(prev => [...prev, errorResponse]);
       } else if (data) {
+        // Process any visual elements that might be requested in the response
+        let visualElements = [];
+        
+        // Check for image request patterns like [IMAGE: description]
+        const imageMatches = data.text.match(/\[IMAGE: (.+?)\]/g);
+        if (imageMatches) {
+          for (const match of imageMatches) {
+            const description = match.replace('[IMAGE: ', '').replace(']', '');
+            const imageElement = await generateVisualElement('image', description);
+            if (imageElement) {
+              visualElements.push({
+                type: 'image',
+                data: imageElement
+              });
+            }
+          }
+          // Remove the image tags from the text
+          data.text = data.text.replace(/\[IMAGE: (.+?)\]/g, '');
+        }
+        
+        // Check for card request patterns like [CARD: {...json...}]
+        const cardMatches = data.text.match(/\[CARD: (.+?)\]/g);
+        if (cardMatches) {
+          for (const match of cardMatches) {
+            try {
+              const cardContent = JSON.parse(match.replace('[CARD: ', '').replace(']', ''));
+              const cardElement = await generateVisualElement('card', cardContent);
+              if (cardElement) {
+                visualElements.push({
+                  type: 'card',
+                  data: cardElement
+                });
+              }
+            } catch (e) {
+              console.error('Error parsing card content:', e);
+            }
+          }
+          // Remove the card tags from the text
+          data.text = data.text.replace(/\[CARD: (.+?)\]/g, '');
+        }
+        
         // Add Lucie's normal response to the UI
         const lucieResponse: LucieMessage = {
           id: Date.now().toString(),
@@ -232,7 +297,8 @@ export function useLucieAssistant() {
           timestamp: new Date(),
           suggestedActions: data.suggestedActions || [],
           links: data.links || [],
-          emotion: data.emotion || 'neutral'
+          emotion: data.emotion || 'neutral',
+          visualElements: visualElements.length > 0 ? visualElements : undefined
         };
         
         setMessages(prev => [...prev, lucieResponse]);
@@ -266,7 +332,7 @@ export function useLucieAssistant() {
     } finally {
       setIsTyping(false);
     }
-  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, getUserContext, retryCount, toast, apiBackoffTime, lastRequestTime]);
+  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, getUserContext, retryCount, toast, apiBackoffTime, lastRequestTime, generateVisualElement]);
   
   // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {
