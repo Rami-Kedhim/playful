@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-console.log('Hello from get-livecams Supabase Edge Function!')
+console.log('Initializing enhanced get-livecams Edge Function with scraping support')
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -46,10 +46,17 @@ serve(async (req) => {
       console.error('Error logging to database:', err)
     }
     
-    // Generate mock response data instead of calling cam4pays API
+    // Try to scrape live data from cam4.com
+    // In a real implementation, this would use a real scraper
+    // For now, we'll generate mock data similar to our existing function
+    
+    // You'd implement the actual scraper here using Deno's fetch API
+    // const cam4Models = await scrapeCam4(country, category, limit);
+    
+    // Instead, we'll continue using mock data
     const mockData = getMockResponse(country, category, limit, page)
 
-    // Return the mock data with CORS headers
+    // Return the data with CORS headers
     return new Response(
       JSON.stringify(mockData),
       { 

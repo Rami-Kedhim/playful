@@ -1,9 +1,12 @@
-
+/**
+ * Enhanced useCreators hook that integrates with the CreatorScraper
+ */
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { ContentCreator } from "@/types/creator";
 import { fetchScrapedCreators, getScrapedCreatorByUsername } from "@/services/scrapedCreatorService";
+import { CreatorScraper } from "@/services/scrapers/CreatorScraper";
 
 export type Creator = ContentCreator;
 
@@ -16,14 +19,34 @@ export const useCreators = () => {
     setError(null);
 
     try {
-      // In a real implementation, this would fetch from a Supabase database
-      // For now, combine mock data with scraped profiles
+      // Get creators from multiple sources
+      const results = await Promise.all([
+        // Get from our mock data
+        fetchScrapedCreators(),
+        
+        // Get from our scraper (uviu.com)
+        (async () => {
+          try {
+            const scraper = CreatorScraper.getInstance();
+            
+            if (filters) {
+              scraper.setFilters({
+                region: filters.region,
+                categories: filters.tags,
+                limit: filters.limit || 20
+              });
+            }
+            
+            return await scraper.scrape();
+          } catch (e) {
+            console.error("Error using creator scraper:", e);
+            return [];
+          }
+        })()
+      ]);
       
-      // Get the scraped creators
-      const scrapedCreators = await fetchScrapedCreators();
-      
-      // Combine with our existing mock creators
-      const allCreators = [...mockCreators, ...scrapedCreators];
+      // Flatten and combine results
+      const allCreators = results.flat();
       
       // Apply filters if provided
       if (filters) {
@@ -78,9 +101,21 @@ export const useCreators = () => {
         return scrapedCreator;
       }
       
-      // If not scraped, use the regular mock data
-      const creator = mockCreators.find(c => c.id === id);
-      return creator || null;
+      // Otherwise, check in our mock data
+      const mockCreator = mockCreators.find(c => c.id === id);
+      
+      if (mockCreator) return mockCreator;
+      
+      // As a last resort, try to find via the scraper by username part of the ID
+      try {
+        const scraper = CreatorScraper.getInstance();
+        const creators = await scraper.scrape();
+        return creators.find(c => c.id === id) || null;
+      } catch (e) {
+        console.error("Error using creator scraper:", e);
+        return null;
+      }
+      
     } catch (err: any) {
       const errorMessage = err.message || "Failed to fetch creator";
       setError(errorMessage);
@@ -104,9 +139,20 @@ export const useCreators = () => {
       const regularCreator = mockCreators.find(c => c.username === username);
       if (regularCreator) return regularCreator;
       
-      // If not found, check in scraped creators
+      // Check in scraped creators
       const scrapedCreator = await getScrapedCreatorByUsername(username);
-      return scrapedCreator;
+      if (scrapedCreator) return scrapedCreator;
+      
+      // Try to find via the scraper
+      try {
+        const scraper = CreatorScraper.getInstance();
+        const creators = await scraper.scrape();
+        return creators.find(c => c.username === username) || null;
+      } catch (e) {
+        console.error("Error using creator scraper:", e);
+        return null;
+      }
+      
     } catch (err: any) {
       const errorMessage = err.message || "Failed to fetch creator";
       setError(errorMessage);
@@ -130,7 +176,7 @@ export const useCreators = () => {
   };
 };
 
-// Mock data for development
+// Mock data for development - kept the same as the original hook
 const mockCreators: Creator[] = [
   {
     id: "1",

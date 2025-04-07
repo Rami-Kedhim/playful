@@ -1,109 +1,156 @@
 
 /**
- * Hook to access livecams with boost capabilities
+ * Custom hook to fetch and manage livecams with boosting capabilities
+ * Uses the LivecamScraper for data fetching
  */
-import { useState, useEffect, useCallback } from 'react';
-import { LivecamModel } from '@/types/livecams';
-import { useLivecams } from './useLivecams';
-import livecamBoost from '@/services/visibility/LivecamBoostAdapter';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useEffect, useCallback } from "react";
+import { LivecamModel, LivecamsFilter } from "@/types/livecams";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import { LivecamScraper } from "@/services/scrapers/LivecamScraper";
+import { brainHub } from "@/services/neural/HermesOxumBrainHub";
 
-export function useBoostableLivecams(initialFilters = {}) {
-  // Use the base livecams hook
-  const {
-    models,
-    loading,
-    error,
-    filters,
-    hasMore,
-    totalCount,
-    loadMore,
-    updateFilters
-  } = useLivecams(initialFilters);
-  
-  const { toast } = useToast();
+export const useBoostableLivecams = () => {
+  const [livecams, setLivecams] = useState<LivecamModel[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [boostedIds, setBoostedIds] = useState<string[]>([]);
+  const [filters, setFilters] = useState<LivecamsFilter>({
+    page: 1,
+    limit: 24,
+  });
   
-  // Update boosted IDs on load
-  useEffect(() => {
-    // In a real app, we'd fetch this from an API
-    // For now, just use a mock check
-    setBoostedIds(models.filter(lc => lc.id.endsWith('1')).map(lc => lc.id));
-  }, [models]);
+  const { showSuccess, showError } = useNotifications();
   
-  // Boost a livecam
-  const boostLivecam = useCallback((livecamId: string, intensity?: number, durationHours?: number) => {
-    const livecam = models.find(lc => lc.id === livecamId);
-    if (!livecam) {
-      toast({
-        title: "Boost Error",
-        description: "Could not find the selected livecam",
-        variant: "destructive",
+  const loadLivecams = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Access the singleton instance
+      const scraper = LivecamScraper.getInstance();
+      
+      // Configure filters
+      scraper.setFilters({
+        region: filters.country,
+        categories: filters.category ? [filters.category] : [],
+        limit: filters.limit || 24
       });
+      
+      // Perform scraping
+      const models = await scraper.scrape();
+      const response = scraper.getResponse();
+      
+      setLivecams(models);
+      setTotalCount(response.totalCount);
+      setHasMore(response.hasMore);
+      
+      // Process models through Brain Hub for any boosting information
+      const boostedModelIds: string[] = [];
+      models.forEach(model => {
+        const response = brainHub.processRequest({
+          requestType: 'livecam',
+          targetId: model.id,
+          region: filters.country
+        });
+        
+        if (response.economicData && 
+            response.economicData.price && 
+            response.economicData.price > 50) {
+          boostedModelIds.push(model.id);
+        }
+      });
+      
+      setBoostedIds(boostedModelIds);
+    } catch (err: any) {
+      console.error("Error loading livecams:", err);
+      setError(err.message || "Failed to load livecams data");
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+  
+  const loadMore = useCallback(() => {
+    setFilters(prev => ({ 
+      ...prev, 
+      page: (prev.page || 1) + 1 
+    }));
+  }, []);
+  
+  const updateFilters = useCallback((newFilters: Partial<LivecamsFilter>) => {
+    setFilters(prev => ({ 
+      ...prev,
+      ...newFilters,
+      page: 1  // Reset to first page when filters change
+    }));
+  }, []);
+  
+  const boostLivecam = useCallback(async (modelId: string) => {
+    try {
+      // Process through Brain Hub boost system
+      const response = await brainHub.processRequest({
+        requestType: 'economic',
+        targetId: modelId
+      });
+      
+      if (response.isRegionAllowed) {
+        setBoostedIds(prev => [...prev, modelId]);
+        showSuccess("Boost Applied", "Livecam has been boosted successfully");
+      } else {
+        showError("Boost Failed", "This content cannot be boosted in your region");
+      }
+      
+      return true;
+    } catch (err) {
+      console.error("Error boosting livecam:", err);
+      showError("Boost Error", "Failed to apply boost to livecam");
       return false;
     }
-    
-    // Convert LivecamModel to what the boost adapter needs
-    const boostableLivecam = {
-      id: livecam.id,
-      username: livecam.username,
-      name: livecam.displayName,
-      imageUrl: livecam.imageUrl,
-      thumbnailUrl: livecam.thumbnailUrl || livecam.imageUrl,
-      isStreaming: livecam.isLive,
-      viewerCount: livecam.viewerCount || 0,
-      region: livecam.country || 'unknown',
-      language: livecam.language || 'en',
-      tags: livecam.categories || [],
-      category: livecam.categories?.[0] || 'general',
-      rating: 5 // Default high rating
-    };
-    
-    livecamBoost.boostLivecam(boostableLivecam, intensity, durationHours);
-    
-    setBoostedIds(prev => [...prev, livecamId]);
-    
-    toast({
-      title: "Boost Applied",
-      description: `${livecam.displayName || livecam.username} has been boosted!`,
-    });
-    
-    return true;
-  }, [models, toast]);
+  }, [showSuccess, showError]);
   
-  // Cancel a boost
-  const cancelBoost = useCallback((livecamId: string) => {
-    livecamBoost.removeLivecamBoost(livecamId);
-    
-    setBoostedIds(prev => prev.filter(id => id !== livecamId));
-    
-    toast({
-      title: "Boost Cancelled",
-      description: "The boost has been cancelled",
-    });
-    
-    return true;
-  }, [toast]);
+  const cancelBoost = useCallback(async (modelId: string) => {
+    try {
+      // Process through Brain Hub to cancel boost
+      await brainHub.processRequest({
+        requestType: 'economic',
+        targetId: modelId,
+        content: JSON.stringify({ action: 'cancel_boost' })
+      });
+      
+      setBoostedIds(prev => prev.filter(id => id !== modelId));
+      showSuccess("Boost Canceled", "Livecam boost has been canceled");
+      return true;
+    } catch (err) {
+      console.error("Error canceling boost:", err);
+      showError("Error", "Failed to cancel livecam boost");
+      return false;
+    }
+  }, [showSuccess, showError]);
   
-  // Check if a livecam is boosted
-  const isBoosted = useCallback((livecamId: string) => {
-    return boostedIds.includes(livecamId);
+  const isBoosted = useCallback((modelId: string) => {
+    return boostedIds.includes(modelId);
   }, [boostedIds]);
   
+  useEffect(() => {
+    loadLivecams();
+  }, [loadLivecams]);
+  
   return {
-    livecams: models, // Return the original models directly
+    livecams,
     loading,
     error,
-    filters,
     hasMore,
     totalCount,
     loadMore,
+    filters,
     updateFilters,
     boostLivecam,
     cancelBoost,
     isBoosted,
-    boostedIds
+    boostedIds,
+    refresh: loadLivecams
   };
-}
+};
 
 export default useBoostableLivecams;

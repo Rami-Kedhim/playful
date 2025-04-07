@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,6 +6,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import AIProfileConversation from "./AIProfileConversation";
 import AIProfileGallery from "./AIProfileGallery";
 import AIProfileGiftSection from "./AIProfileGiftSection";
@@ -16,6 +18,7 @@ import { Calendar, Clock, MapPin, Flame } from "lucide-react";
 import AIProfileTypeIndicator from "./AIProfileTypeIndicator";
 import AIPersonalityTraits from "./AIPersonalityTraits";
 import AIEmotionStatus from "./AIEmotionStatus";
+import { PersonalityTrait } from "@/types/ai-personality";
 
 interface AIProfileDetailProps {
   profile: AIProfile;
@@ -49,7 +52,7 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
     
     // If the traits are already in the correct format, return them
     if (typeof profile.personality.traits[0] === 'object') {
-      return profile.personality.traits;
+      return profile.personality.traits as PersonalityTrait[];
     }
     
     // Otherwise, convert string[] to PersonalityTrait[]

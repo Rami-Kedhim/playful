@@ -1,61 +1,110 @@
 
+/**
+ * Enhanced useEscorts hook that integrates with the EscortScraper
+ */
 import { useState, useEffect, useCallback } from "react";
 import { Escort } from "@/types/escort";
-import { useNotifications } from "@/contexts/NotificationsContext";
+import { EscortScraper } from "@/services/scrapers/EscortScraper";
+import { useToast } from "@/components/ui/use-toast";
 
-interface UseEscortsProps {
+interface UseEscortsOptions {
   initialData?: Escort[];
+  autoFetch?: boolean;
+  filters?: {
+    location?: string;
+    services?: string[];
+    gender?: string;
+    ageMin?: number;
+    ageMax?: number;
+  };
 }
 
-export const useEscorts = ({ initialData = [] }: UseEscortsProps = {}) => {
-  const [escorts, setEscorts] = useState<Escort[]>(initialData);
-  const [loading, setLoading] = useState(false);
+export const useEscorts = (options: UseEscortsOptions = {}) => {
+  const [escorts, setEscorts] = useState<Escort[]>(options.initialData || []);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const { showError } = useNotifications();
+  const { toast } = useToast();
   
-  // For demonstration, we'll fetch from a mock API
-  // In a real app, this would connect to your backend API
-  const fetchEscorts = useCallback(async () => {
+  const fetchEscorts = useCallback(async (filters?: {
+    location?: string;
+    services?: string[];
+    limit?: number;
+  }) => {
     setLoading(true);
     setError(null);
     
     try {
-      // In a real implementation, you'd fetch from an API endpoint
-      // const response = await fetch('/api/escorts');
-      // const data = await response.json();
+      // Get the scraper instance
+      const scraper = EscortScraper.getInstance();
       
-      // For now, we'll simulate API delay and use the initialData
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      if (initialData.length > 0) {
-        setEscorts(initialData);
-      } else {
-        // Fallback to some mock data if none provided
-        console.log("No initial data provided, would fetch from API in production");
-        // Set to empty array for now - in real app would fetch from API
-        setEscorts([]);
+      // Apply filters if provided
+      if (filters) {
+        scraper.setFilters({
+          region: filters.location,
+          categories: filters.services,
+          limit: filters.limit || 20
+        });
       }
-    } catch (err) {
+      
+      // Perform scraping
+      const scrapedEscorts = await scraper.scrape();
+      
+      // Apply additional filters
+      let filteredEscorts = [...scrapedEscorts];
+      
+      if (options.filters) {
+        // Filter by gender if provided
+        if (options.filters.gender) {
+          filteredEscorts = filteredEscorts.filter(
+            escort => escort.gender === options.filters?.gender
+          );
+        }
+        
+        // Filter by age if provided
+        if (options.filters.ageMin !== undefined || options.filters.ageMax !== undefined) {
+          filteredEscorts = filteredEscorts.filter(escort => {
+            const age = escort.age;
+            const minCondition = options.filters?.ageMin !== undefined ? 
+              age >= options.filters.ageMin : true;
+            const maxCondition = options.filters?.ageMax !== undefined ? 
+              age <= options.filters.ageMax : true;
+            
+            return minCondition && maxCondition;
+          });
+        }
+      }
+      
+      setEscorts(filteredEscorts);
+      return filteredEscorts;
+    } catch (err: any) {
       console.error("Error fetching escorts:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch escorts";
+      const errorMessage = err.message || "Failed to load escort data";
       setError(errorMessage);
-      if (showError) {
-        showError("Data Loading Error", errorMessage);
-      }
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return [];
     } finally {
       setLoading(false);
     }
-  }, [initialData, showError]);
+  }, [options.filters, toast]);
   
+  // Fetch data on component mount if autoFetch is true
   useEffect(() => {
-    fetchEscorts();
-  }, [fetchEscorts]);
+    if (options.autoFetch !== false) {
+      fetchEscorts({
+        location: options.filters?.location,
+        services: options.filters?.services
+      });
+    }
+  }, [fetchEscorts, options.autoFetch, options.filters?.location, options.filters?.services]);
   
   return {
     escorts,
     loading,
     error,
-    fetchEscorts,
-    setEscorts
+    fetchEscorts
   };
 };
