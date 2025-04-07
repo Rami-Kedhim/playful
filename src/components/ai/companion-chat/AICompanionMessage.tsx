@@ -1,18 +1,50 @@
 
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { getEmotionClass } from './utils/emotionUtils';
+import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
+import { useState, useEffect } from 'react';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
   onActionClick: (action: string) => void;
+  voiceType?: string;
 }
 
-const AICompanionMessage = ({ message, onActionClick }: AICompanionMessageProps) => {
+const AICompanionMessage = ({ message, onActionClick, voiceType }: AICompanionMessageProps) => {
   const isUser = message.role === 'user';
+  const [speaking, setSpeaking] = useState(false);
+
+  // Stop speaking when component unmounts
+  useEffect(() => {
+    return () => {
+      if (speaking) {
+        stopSpeaking();
+      }
+    };
+  }, [speaking]);
+
+  // Handle message speech
+  const handleSpeakMessage = () => {
+    if (speaking) {
+      stopSpeaking();
+      setSpeaking(false);
+    } else {
+      speakMessage(message.content, voiceType);
+      setSpeaking(true);
+      
+      // Listen for speech end event
+      const checkSpeakingInterval = setInterval(() => {
+        if (!isSpeaking()) {
+          setSpeaking(false);
+          clearInterval(checkSpeakingInterval);
+        }
+      }, 300);
+    }
+  };
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
@@ -25,7 +57,24 @@ const AICompanionMessage = ({ message, onActionClick }: AICompanionMessageProps)
               : 'bg-white/5 text-white'
         }`}
       >
-        <p className="whitespace-pre-wrap">{message.content}</p>
+        <div className="flex justify-between items-start mb-1">
+          <p className="whitespace-pre-wrap">{message.content}</p>
+          
+          {!isUser && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="ml-2 flex-shrink-0 h-6 w-6 rounded-full bg-black/20 hover:bg-black/30 -mt-1" 
+              onClick={handleSpeakMessage}
+            >
+              {speaking ? (
+                <VolumeX className="h-3.5 w-3.5" />
+              ) : (
+                <Volume2 className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          )}
+        </div>
         
         {/* Suggested Actions */}
         {!isUser && message.suggestedActions && message.suggestedActions.length > 0 && (

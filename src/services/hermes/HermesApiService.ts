@@ -1,7 +1,7 @@
 
 /**
  * HermesApiService - Integration with the external HERMES-OXUM intelligence system
- * This service handles all communication with the HERMES API and interprets responses
+ * Enhanced with AI companion recommendations and personalization
  */
 import { toast } from "@/components/ui/use-toast";
 import hermesOxumEngine from "../boost/HermesOxumEngine";
@@ -13,16 +13,32 @@ export interface HermesUserAction {
   category?: string;
   location?: string;
   session_time?: number;
+  interaction_data?: Record<string, any>;
 }
 
 export interface HermesResponse {
   trigger_luxlife: boolean;
   recommended_profile?: string;
+  recommended_companion_id?: string;
   boost_offer?: {
     value: string;
     expires: string;
   };
   vr_event?: string;
+  ai_suggestion?: {
+    message: string;
+    confidence: number;
+  };
+}
+
+export interface CompanionRecommendation {
+  companion_id: string;
+  score: number;
+  reason: string;
+}
+
+export interface CompanionRecommendationsResponse {
+  recommendations: CompanionRecommendation[];
 }
 
 class HermesApiService {
@@ -40,6 +56,7 @@ class HermesApiService {
 
   /**
    * Send user action data to HERMES for analysis
+   * Enhanced with interaction_data for AI personalization
    * 
    * @param actionData User action data to analyze
    * @returns HERMES intelligence response
@@ -77,6 +94,40 @@ class HermesApiService {
       };
     }
   }
+
+  /**
+   * Get AI companion recommendations for a user
+   * 
+   * @param userId User ID to get recommendations for
+   * @returns List of recommended companions
+   */
+  public async getCompanionRecommendations(userId: string): Promise<CompanionRecommendationsResponse> {
+    try {
+      if (this.mockMode) {
+        return this.getMockCompanionRecommendations(userId);
+      }
+      
+      const response = await fetch(`${this.apiUrl}/companion-recommendations/${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HERMES API error: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error getting companion recommendations:', error);
+      
+      // Return empty recommendations
+      return {
+        recommendations: []
+      };
+    }
+  }
   
   /**
    * Process instructions from HERMES response
@@ -106,18 +157,37 @@ class HermesApiService {
     if (response.vr_event) {
       console.log(`HERMES triggered VR event: ${response.vr_event}`);
     }
+    
+    // Handle AI suggestions
+    if (response.ai_suggestion && response.ai_suggestion.confidence > 0.8) {
+      // Only show high confidence suggestions
+      console.log(`HERMES AI suggestion: ${response.ai_suggestion.message} (${response.ai_suggestion.confidence * 100}% confidence)`);
+    }
   }
 
   /**
    * Get mock HERMES response for development
-   * This simulates the HERMES API for testing
+   * Enhanced with AI companion data
    */
   private getMockResponse(actionData: HermesUserAction): HermesResponse {
+    // AI companion interaction handling
+    if (actionData.action === 'ai_companion_interaction') {
+      return {
+        trigger_luxlife: true,
+        recommended_companion_id: 'sophia-1',
+        ai_suggestion: {
+          message: "Based on your conversation, you might enjoy our new romantic experiences feature.",
+          confidence: 0.85
+        }
+      };
+    }
+
     // Simple heuristics for development testing
     const responses: HermesResponse[] = [
       {
         trigger_luxlife: true,
         recommended_profile: "profile-123",
+        recommended_companion_id: "aria-3",
         boost_offer: {
           value: "25% off",
           expires: "10 minutes"
@@ -125,11 +195,16 @@ class HermesApiService {
       },
       {
         trigger_luxlife: false,
-        recommended_profile: "profile-456"
+        recommended_profile: "profile-456",
+        ai_suggestion: {
+          message: "Try asking our AI companion about date recommendations.",
+          confidence: 0.9
+        }
       },
       {
         trigger_luxlife: true,
-        vr_event: "Golden Halo Night"
+        vr_event: "Golden Halo Night",
+        recommended_companion_id: "max-2"
       }
     ];
     
@@ -146,6 +221,31 @@ class HermesApiService {
     
     console.log('Mock HERMES response:', responses[responseIndex]);
     return responses[responseIndex];
+  }
+  
+  /**
+   * Get mock AI companion recommendations
+   */
+  private getMockCompanionRecommendations(userId: string): CompanionRecommendationsResponse {
+    return {
+      recommendations: [
+        {
+          companion_id: "sophia-1",
+          score: 0.95,
+          reason: "Based on your interests in art and psychology"
+        },
+        {
+          companion_id: "aria-3",
+          score: 0.87,
+          reason: "Matches your creative writing interests"
+        },
+        {
+          companion_id: "max-2",
+          score: 0.72,
+          reason: "Popular with users who share your gaming interests"
+        }
+      ]
+    };
   }
 }
 

@@ -1,18 +1,46 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { CompanionMessage, CompanionProfile, UserContext, AICompanionResponse } from './types';
+
+const MAX_STORED_MESSAGES = 50;
+const MAX_CONTEXT_MESSAGES = 10;
 
 export function useAICompanionMessages() {
   const [messages, setMessages] = useState<CompanionMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
 
+  // Load stored messages from local storage on component mount
+  useEffect(() => {
+    const storedMessages = localStorage.getItem('aiCompanionMessages');
+    if (storedMessages) {
+      try {
+        const parsedMessages = JSON.parse(storedMessages);
+        setMessages(parsedMessages);
+      } catch (error) {
+        console.error('Failed to parse stored messages:', error);
+        // If parsing fails, clear the stored messages
+        localStorage.removeItem('aiCompanionMessages');
+      }
+    }
+  }, []);
+
+  // Store messages in local storage when they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Only store up to MAX_STORED_MESSAGES
+      const messagesToStore = messages.slice(-MAX_STORED_MESSAGES);
+      localStorage.setItem('aiCompanionMessages', JSON.stringify(messagesToStore));
+    }
+  }, [messages]);
+
   // Format chat history for the API
   const formatChatHistory = useCallback(() => {
-    return messages.slice(-10).map(msg => ({
+    // Send only the most recent messages for context
+    return messages.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
       role: msg.role,
       content: msg.content
     }));
@@ -91,10 +119,17 @@ export function useAICompanionMessages() {
     }
   }, [formatChatHistory, toast]);
 
+  // Clear conversation history
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+    localStorage.removeItem('aiCompanionMessages');
+  }, []);
+
   return {
     messages,
     setMessages,
     isTyping,
-    sendMessage
+    sendMessage,
+    clearMessages
   };
 }

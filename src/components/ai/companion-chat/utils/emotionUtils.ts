@@ -1,22 +1,113 @@
 
-// Helper function to get emotion avatar class based on the emotion string
-export const getEmotionClass = (emotion: string | null | undefined) => {
-  if (!emotion) return '';
+/**
+ * Get the appropriate Tailwind CSS class for an emotion
+ * 
+ * @param emotion The emotion string
+ * @returns Tailwind CSS class for the emotion
+ */
+export const getEmotionClass = (emotion: string | null): string => {
+  if (!emotion) return 'bg-slate-700';
   
   switch (emotion.toLowerCase()) {
     case 'happy':
-      return 'bg-gradient-to-br from-yellow-400 to-orange-300';
-    case 'thoughtful':
-      return 'bg-gradient-to-br from-blue-400 to-purple-300';
-    case 'concerned':
-      return 'bg-gradient-to-br from-amber-400 to-orange-400';
     case 'excited':
-      return 'bg-gradient-to-br from-pink-400 to-red-300';
+    case 'joyful':
+      return 'bg-emerald-700';
+      
+    case 'curious':
+    case 'interested':
+    case 'thoughtful':
+      return 'bg-blue-700';
+      
+    case 'sad':
+    case 'melancholy':
+    case 'disappointed':
+      return 'bg-indigo-800';
+      
+    case 'angry':
+    case 'upset':
+    case 'irritated':
+      return 'bg-red-700';
+      
+    case 'loving':
+    case 'affectionate':
+    case 'romantic':
+      return 'bg-pink-700';
+      
     case 'calm':
-      return 'bg-gradient-to-br from-green-400 to-cyan-300';
+    case 'relaxed':
+    case 'serene':
+      return 'bg-sky-700';
+      
     case 'confused':
-      return 'bg-gradient-to-br from-gray-400 to-slate-300';
+    case 'uncertain':
+    case 'perplexed':
+      return 'bg-amber-700';
+      
+    case 'amused':
+    case 'playful':
+    case 'silly':
+      return 'bg-violet-700';
+      
+    case 'neutral':
     default:
-      return 'bg-gradient-to-br from-violet-400 to-indigo-300';
+      return 'bg-slate-700';
+  }
+};
+
+/**
+ * Get a description of what an emotion looks like
+ * 
+ * @param emotion The emotion string
+ * @returns Description of the emotion
+ */
+export const getEmotionDescription = (emotion: string | null): string => {
+  if (!emotion) return 'neutral expression';
+  
+  switch (emotion.toLowerCase()) {
+    case 'happy':
+    case 'excited':
+    case 'joyful':
+      return 'smiling brightly';
+      
+    case 'curious':
+    case 'interested':
+      return 'leaning in with interest';
+      
+    case 'thoughtful':
+      return 'with a contemplative expression';
+      
+    case 'sad':
+    case 'melancholy':
+    case 'disappointed':
+      return 'with a sad expression';
+      
+    case 'angry':
+    case 'upset':
+    case 'irritated':
+      return 'with a frustrated expression';
+      
+    case 'loving':
+    case 'affectionate':
+    case 'romantic':
+      return 'with a warm smile';
+      
+    case 'calm':
+    case 'relaxed':
+    case 'serene':
+      return 'with a peaceful expression';
+      
+    case 'confused':
+    case 'uncertain':
+    case 'perplexed':
+      return 'with a puzzled look';
+      
+    case 'amused':
+    case 'playful':
+    case 'silly':
+      return 'with a playful smile';
+      
+    default:
+      return 'with a neutral expression';
   }
 };

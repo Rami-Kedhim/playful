@@ -10,13 +10,15 @@ interface AICompanionMessageListProps {
   isLoading: boolean;
   isTyping: boolean;
   onActionClick: (action: string) => void;
+  voiceType?: string;
 }
 
 const AICompanionMessageList = ({ 
   messages, 
   isLoading, 
   isTyping, 
-  onActionClick 
+  onActionClick,
+  voiceType
 }: AICompanionMessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +55,8 @@ const AICompanionMessageList = ({
         <AICompanionMessage 
           key={message.id} 
           message={message} 
-          onActionClick={onActionClick} 
+          onActionClick={onActionClick}
+          voiceType={voiceType}
         />
       ))}
       

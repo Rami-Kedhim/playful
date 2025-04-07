@@ -52,6 +52,7 @@ const AICompanionChat = ({ companionId, initiallyOpen = true, onClose }: AICompa
         isLoading={isLoading}
         isTyping={isTyping}
         onActionClick={handleSuggestedActionClick}
+        voiceType={companion?.speechStyle}
       />
 
       <AICompanionChatInput 

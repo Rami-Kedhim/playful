@@ -2,6 +2,7 @@
 /**
  * Hook for accessing HERMES intelligence in React components
  * This manages the state and interaction with the HERMES API
+ * Enhanced with AI companion recommendations
  */
 import { useState, useCallback, useEffect } from "react";
 import hermesApiService, { HermesResponse, HermesUserAction } from "@/services/hermes/HermesApiService";
@@ -9,6 +10,7 @@ import hermesApiService, { HermesResponse, HermesUserAction } from "@/services/h
 export interface HermesInsight {
   isLucieEnabled: boolean;
   recommendedProfileId?: string;
+  recommendedCompanionId?: string;
   boostOffer?: {
     value: string;
     expires: string;
@@ -16,6 +18,10 @@ export interface HermesInsight {
   vrEvent?: string;
   isLoading: boolean;
   error?: string;
+  aiSuggestion?: {
+    message: string;
+    confidence: number;
+  };
 }
 
 export function useHermesInsights(userId?: string) {
@@ -26,13 +32,15 @@ export function useHermesInsights(userId?: string) {
   
   /**
    * Report a user action to HERMES and get insights
+   * Now includes AI companion recommendations
    */
   const reportUserAction = useCallback(async (
     action: string,
     options?: {
       category?: string,
       location?: string,
-      sessionTime?: number
+      sessionTime?: number,
+      interactionData?: Record<string, any>
     }
   ) => {
     if (!userId) {
@@ -49,7 +57,8 @@ export function useHermesInsights(userId?: string) {
         action,
         category: options?.category,
         location: options?.location,
-        session_time: options?.sessionTime
+        session_time: options?.sessionTime,
+        interaction_data: options?.interactionData // New field for more context
       };
       
       // Get response from HERMES
@@ -59,8 +68,10 @@ export function useHermesInsights(userId?: string) {
       setInsights({
         isLucieEnabled: response.trigger_luxlife,
         recommendedProfileId: response.recommended_profile,
+        recommendedCompanionId: response.recommended_companion_id, // New AI companion recommendation
         boostOffer: response.boost_offer,
         vrEvent: response.vr_event,
+        aiSuggestion: response.ai_suggestion, // New AI suggestion
         isLoading: false
       });
       
@@ -97,13 +108,61 @@ export function useHermesInsights(userId?: string) {
   const recordBoostRequest = useCallback(() => {
     return reportUserAction('requested_boost');
   }, [reportUserAction]);
+  
+  /**
+   * Record AI companion interaction in HERMES
+   * New method to track AI companion interactions
+   */
+  const recordAICompanionInteraction = useCallback((companionId: string, messageCount: number, interactionData?: Record<string, any>) => {
+    return reportUserAction('ai_companion_interaction', {
+      category: 'ai_companion',
+      location: companionId,
+      sessionTime: messageCount,
+      interactionData
+    });
+  }, [reportUserAction]);
+  
+  /**
+   * Get AI companion recommendations based on user profile
+   */
+  const getAICompanionRecommendations = useCallback(async () => {
+    if (!userId) {
+      console.warn('Cannot get AI recommendations: missing userId');
+      return [];
+    }
+    
+    try {
+      setInsights(prev => ({ ...prev, isLoading: true }));
+      
+      // Get recommendations from HERMES
+      const response = await hermesApiService.getCompanionRecommendations(userId);
+      
+      setInsights(prev => ({ 
+        ...prev,
+        isLoading: false
+      }));
+      
+      return response.recommendations || [];
+    } catch (error) {
+      console.error('Error getting AI recommendations:', error);
+      setInsights(prev => ({ 
+        ...prev, 
+        isLoading: false,
+        error: 'Failed to get AI companion recommendations' 
+      }));
+      
+      return [];
+    }
+  }, [userId]);
 
   return {
     insights,
     reportUserAction,
     recordProfileView,
     recordFavorite,
-    recordBoostRequest
+    recordBoostRequest,
+    recordAICompanionInteraction, // New method
+    getAICompanionRecommendations // New method
   };
 }
 
