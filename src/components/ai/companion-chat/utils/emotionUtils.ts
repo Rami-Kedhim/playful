@@ -1,113 +1,80 @@
 
 /**
- * Get the appropriate Tailwind CSS class for an emotion
- * 
- * @param emotion The emotion string
- * @returns Tailwind CSS class for the emotion
+ * Utility functions for handling emotion-based styling
  */
-export const getEmotionClass = (emotion: string | null): string => {
-  if (!emotion) return 'bg-slate-700';
+
+type Emotion = 
+  | 'neutral' 
+  | 'happy' 
+  | 'sad' 
+  | 'angry' 
+  | 'excited' 
+  | 'flirty' 
+  | 'friendly' 
+  | 'confused'
+  | 'apologetic'
+  | string;
+
+/**
+ * Get the CSS class for a message based on its emotion
+ */
+export const getEmotionClass = (emotion?: Emotion): string => {
+  if (!emotion) return 'bg-background/80 border border-border';
   
   switch (emotion.toLowerCase()) {
     case 'happy':
-    case 'excited':
-    case 'joyful':
-      return 'bg-emerald-700';
-      
-    case 'curious':
-    case 'interested':
-    case 'thoughtful':
-      return 'bg-blue-700';
-      
+      return 'bg-green-500/20 border border-green-500/30 text-foreground';
     case 'sad':
-    case 'melancholy':
-    case 'disappointed':
-      return 'bg-indigo-800';
-      
+      return 'bg-blue-500/20 border border-blue-500/30 text-foreground';
     case 'angry':
-    case 'upset':
-    case 'irritated':
-      return 'bg-red-700';
-      
-    case 'loving':
-    case 'affectionate':
-    case 'romantic':
-      return 'bg-pink-700';
-      
-    case 'calm':
-    case 'relaxed':
-    case 'serene':
-      return 'bg-sky-700';
-      
+      return 'bg-red-500/20 border border-red-500/30 text-foreground';
+    case 'excited':
+      return 'bg-yellow-500/20 border border-yellow-500/30 text-foreground';
+    case 'flirty':
+      return 'bg-pink-500/20 border border-pink-500/30 text-foreground';
+    case 'friendly':
+      return 'bg-purple-500/20 border border-purple-500/30 text-foreground';
     case 'confused':
-    case 'uncertain':
-    case 'perplexed':
-      return 'bg-amber-700';
-      
-    case 'amused':
-    case 'playful':
-    case 'silly':
-      return 'bg-violet-700';
-      
-    case 'neutral':
+      return 'bg-orange-500/20 border border-orange-500/30 text-foreground';
+    case 'apologetic':
+      return 'bg-gray-500/20 border border-gray-500/30 text-foreground';
     default:
-      return 'bg-slate-700';
+      return 'bg-background/80 border border-border';
   }
 };
 
 /**
- * Get a description of what an emotion looks like
- * 
- * @param emotion The emotion string
- * @returns Description of the emotion
+ * Get animation class based on emotion
  */
-export const getEmotionDescription = (emotion: string | null): string => {
-  if (!emotion) return 'neutral expression';
+export const getEmotionAnimation = (emotion?: Emotion): string => {
+  if (!emotion) return '';
   
   switch (emotion.toLowerCase()) {
-    case 'happy':
     case 'excited':
-    case 'joyful':
-      return 'smiling brightly';
-      
-    case 'curious':
-    case 'interested':
-      return 'leaning in with interest';
-      
-    case 'thoughtful':
-      return 'with a contemplative expression';
-      
-    case 'sad':
-    case 'melancholy':
-    case 'disappointed':
-      return 'with a sad expression';
-      
+    case 'happy':
+      return 'animate-bounce-subtle';
     case 'angry':
-    case 'upset':
-    case 'irritated':
-      return 'with a frustrated expression';
-      
-    case 'loving':
-    case 'affectionate':
-    case 'romantic':
-      return 'with a warm smile';
-      
-    case 'calm':
-    case 'relaxed':
-    case 'serene':
-      return 'with a peaceful expression';
-      
-    case 'confused':
-    case 'uncertain':
-    case 'perplexed':
-      return 'with a puzzled look';
-      
-    case 'amused':
-    case 'playful':
-    case 'silly':
-      return 'with a playful smile';
-      
+      return 'animate-shake-subtle';
     default:
-      return 'with a neutral expression';
+      return '';
+  }
+};
+
+/**
+ * Map emotion to appropriate icon
+ */
+export const getEmotionIcon = (emotion?: Emotion): string => {
+  if (!emotion) return '😐';
+  
+  switch (emotion.toLowerCase()) {
+    case 'happy': return '😊';
+    case 'sad': return '😢';
+    case 'angry': return '😠';
+    case 'excited': return '😃';
+    case 'flirty': return '😏';
+    case 'friendly': return '🙂';
+    case 'confused': return '😕';
+    case 'apologetic': return '😔';
+    default: return '😐';
   }
 };

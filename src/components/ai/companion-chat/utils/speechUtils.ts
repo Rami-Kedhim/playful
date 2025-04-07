@@ -1,89 +1,109 @@
 
-import { voiceService } from '../../../../services/voiceService';
+/**
+ * Utilities for handling text-to-speech functionality
+ */
+
+// Track the current speech synthesis utterance
+let currentUtterance: SpeechSynthesisUtterance | null = null;
 
 /**
- * Speak a message using ElevenLabs text-to-speech API
- * @param text - The text to speak
- * @param voiceType - Optional voice type to use (sultry, deep, soft, etc)
- * @returns Promise that resolves to true if speech started successfully, false otherwise
+ * Check if speech synthesis is currently speaking
  */
-export const speakMessage = async (text: string, voiceType?: string): Promise<boolean> => {
-  try {
-    // Remove any markdown or special formatting that might interfere with speech
-    const cleanText = text
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-      .replace(/\*(.*?)\*/g, '$1')     // Remove italic markdown
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links but keep text
-      .replace(/```.*?```/gs, '')      // Remove code blocks
-      .replace(/`(.*?)`/g, '$1');      // Remove inline code
-
-    // Prepare voice settings based on voice type
-    const settings: any = { voice: voiceType || 'neutral' };
-    
-    // Adjust rate based on voice type
-    if (voiceType) {
-      switch (voiceType.toLowerCase()) {
-        case 'deep':
-          settings.rate = 0.9;
-          break;
-        case 'soft':
-          settings.rate = 0.9;
-          break;
-        case 'sultry':
-          settings.rate = 0.85;
-          break;
-        case 'sophisticated':
-          settings.rate = 0.95;
-          break;
-        case 'bubbly':
-          settings.rate = 1.1;
-          break;
-        case 'breathy':
-          settings.rate = 0.9;
-          break;
-        case 'cheerful':
-          settings.rate = 1.05;
-          break;
-        case 'serious':
-          settings.rate = 0.95;
-          break;
-        case 'authoritative':
-          settings.rate = 0.95;
-          break;
-        case 'friendly':
-          settings.rate = 1.0;
-          break;
-      }
-    }
-    
-    // Use the voiceService to speak the message
-    return await voiceService.speak(cleanText, settings);
-  } catch (error) {
-    console.error("Speech synthesis error:", error);
-    return false;
-  }
+export const isSpeaking = (): boolean => {
+  return window.speechSynthesis.speaking;
 };
 
 /**
  * Stop any ongoing speech
  */
 export const stopSpeaking = (): void => {
-  try {
-    voiceService.stop();
-  } catch (error) {
-    console.error("Error stopping speech:", error);
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
   }
+  currentUtterance = null;
 };
 
 /**
- * Check if speech is currently in progress
- * @returns true if speech is in progress, false otherwise
+ * Speak a message using the browser's speech synthesis API
+ * 
+ * @param text The text to speak
+ * @param voiceType Optional voice type to use (can be 'male', 'female', or a specific voice name)
+ * @returns Promise that resolves to true if speech started successfully
  */
-export const isSpeaking = (): boolean => {
-  try {
-    return voiceService.isSpeaking();
-  } catch (error) {
-    console.error("Error checking speech status:", error);
-    return false;
+export const speakMessage = async (text: string, voiceType?: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    // Stop any existing speech
+    stopSpeaking();
+    
+    // Create a new utterance
+    const utterance = new SpeechSynthesisUtterance(text);
+    currentUtterance = utterance;
+    
+    // Set voice based on voiceType
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      if (voiceType === 'male') {
+        // Find a male voice
+        const maleVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('male') || 
+          (!voice.name.toLowerCase().includes('female') && voice.name.includes('en-US'))
+        );
+        if (maleVoice) utterance.voice = maleVoice;
+      } else if (voiceType === 'female') {
+        // Find a female voice
+        const femaleVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('female') || 
+          voice.name.toLowerCase().includes('samantha')
+        );
+        if (femaleVoice) utterance.voice = femaleVoice;
+      } else if (voiceType) {
+        // Try to find a specific voice by name
+        const specificVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes(voiceType.toLowerCase())
+        );
+        if (specificVoice) utterance.voice = specificVoice;
+      }
+    }
+    
+    // Set rate and pitch for more natural speaking
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    
+    // Handle events
+    utterance.onend = () => {
+      currentUtterance = null;
+      resolve(true);
+    };
+    
+    utterance.onerror = () => {
+      currentUtterance = null;
+      resolve(false);
+    };
+    
+    // Start speaking
+    window.speechSynthesis.speak(utterance);
+    
+    // If speaking doesn't start within 500ms, resolve with false
+    setTimeout(() => {
+      if (!window.speechSynthesis.speaking && currentUtterance === utterance) {
+        currentUtterance = null;
+        resolve(false);
+      }
+    }, 500);
+  });
+};
+
+/**
+ * Initialize the speech synthesis API (call this early to load voices)
+ */
+export const initSpeechSynthesis = (): void => {
+  // This triggers voice loading in some browsers
+  window.speechSynthesis.getVoices();
+  
+  // In Chrome, voices might load asynchronously
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.getVoices();
+    };
   }
 };

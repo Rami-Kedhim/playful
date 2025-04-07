@@ -1,44 +1,37 @@
 
-export interface CompanionProfile {
-  id: string;
-  name: string;
-  avatar?: string;
-  description?: string;
-  personality?: string;
-  visualCapabilities?: boolean;
-  voiceType?: string;
-  speechStyle?: string;
+import { AICompanion } from '@/types/ai-companion';
+import { VisualElementData } from '@/components/ai/companion-chat/AICompanionVisualElements';
+
+export type CompanionMessageRole = 'user' | 'assistant' | 'system';
+
+export interface VisualElement {
+  type: 'image' | 'card' | 'carousel' | 'map';
+  data: VisualElementData;
 }
 
 export interface CompanionMessage {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: CompanionMessageRole;
   content: string;
   timestamp?: Date;
   suggestedActions?: string[];
-  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprise' | 'fear' | 'disgust' | 'friendly' | 'professional' | 'supportive' | 'apologetic' | 'helpful' | 'confused';
-  links?: { text: string; url: string }[];
-  visualElements?: {
-    type: string;
-    data: any;
-  }[];
+  visualElements?: { data: VisualElementData }[];
+  emotion?: string;
 }
 
-export interface UserContext {
-  name?: string;
-  interests?: string[];
-  recentInteractions?: string;
-  relationshipStatus?: string;
-}
-
-export interface UseAICompanionConversationProps {
+export interface UseAICompanionConversationOptions {
   companionId: string;
-  initialMessages?: CompanionMessage[];
 }
 
-export interface AICompanionResponse {
-  text: string;
-  emotions?: string | null;
-  suggestedActions?: string[];
-  links?: { text: string; url: string }[];
+export interface UseAICompanionConversationResult {
+  messages: CompanionMessage[];
+  isLoading: boolean;
+  isTyping: boolean;
+  error: string | null;
+  companion: AICompanion | null;
+  sendMessage: (content: string) => Promise<void>;
+  handleSuggestedActionClick: (action: string) => void;
+  generateImage?: (prompt: string) => Promise<void>;
+  generatingImage?: boolean;
+  creditCost?: number;
 }

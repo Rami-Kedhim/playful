@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/hooks/auth/useAuth';
 import AppRoutes from './Routes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { LucieHermesIntegration } from '@/components/home/LucieHermesIntegration';
 
 // Initialize a new QueryClient
 const queryClient = new QueryClient({
@@ -24,6 +25,7 @@ function App() {
         <AuthProvider>
           <Router>
             <AppRoutes />
+            <LucieHermesIntegration />
             <Toaster />
           </Router>
         </AuthProvider>

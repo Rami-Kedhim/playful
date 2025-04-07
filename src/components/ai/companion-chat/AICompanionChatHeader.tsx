@@ -1,51 +1,102 @@
 
-import { useState } from 'react';
-import { X, Sparkles } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import React from 'react';
+import { X, Minus, CreditCard, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AICompanion } from '@/types/ai-companion';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getEmotionClass } from './utils/emotionUtils';
 
 interface AICompanionChatHeaderProps {
+  companion?: AICompanion;
   isLoading: boolean;
-  companion: {
-    name?: string;
-    avatarUrl?: string;
-    emotion?: string | null;
-  } | null;
   onClose: () => void;
+  onMinimize?: () => void;
+  credits?: number;
+  creditCost?: number;
 }
 
-const AICompanionChatHeader = ({ isLoading, companion, onClose }: AICompanionChatHeaderProps) => {
-  return (
-    <div className="p-3 border-b border-white/10 bg-background/90 backdrop-blur-sm flex items-center gap-3">
-      {isLoading ? (
-        <>
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div className="flex-1">
+const AICompanionChatHeader: React.FC<AICompanionChatHeaderProps> = ({
+  companion,
+  isLoading,
+  onClose,
+  onMinimize,
+  credits,
+  creditCost = 0
+}) => {
+  // Render a default header or loading state if no companion or still loading
+  if (isLoading && !companion) {
+    return (
+      <div className="flex items-center justify-between p-3 border-b bg-background/80 backdrop-blur-sm">
+        <div className="flex items-center space-x-3">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <div>
             <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-3 w-32 mt-1" />
+            <Skeleton className="h-3 w-16 mt-1" />
           </div>
-        </>
-      ) : (
-        <>
-          <Avatar className={`${companion?.emotion ? getEmotionClass(companion.emotion) : ''} transition-all duration-500`}>
-            <AvatarImage src={companion?.avatarUrl || "/ai-avatar.png"} />
-            <AvatarFallback className="bg-primary/20 text-primary">
-              {companion?.name?.[0] || 'AI'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <h3 className="font-medium flex items-center gap-1">
-              {companion?.name || 'AI Companion'} <Sparkles className="h-3 w-3 text-primary" />
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between p-3 border-b bg-background/80 backdrop-blur-sm">
+      <div className="flex items-center space-x-3">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={companion?.avatar_url || ''} alt={companion?.name || 'AI'} />
+          <AvatarFallback>
+            <Bot className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm">
+              {companion?.name || 'AI Companion'}
             </h3>
-            <p className="text-xs text-gray-400">AI Companion</p>
+            <Badge variant="outline" className="text-xs">
+              AI
+            </Badge>
           </div>
-        </>
-      )}
-      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
-        <X className="h-4 w-4" />
-      </Button>
+          {companion?.personality_traits && companion.personality_traits.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {companion.personality_traits.join(', ')}
+            </p>
+          )}
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        {credits !== undefined && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
+                <CreditCard className="h-3 w-3" />
+                {credits}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              Your credit balance
+              {creditCost > 0 && ` (${creditCost} per message)`}
+            </TooltipContent>
+          </Tooltip>
+        )}
+        
+        {onMinimize && (
+          <Button variant="ghost" size="icon" onClick={onMinimize} className="h-8 w-8">
+            <Minus className="h-4 w-4" />
+          </Button>
+        )}
+        
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };

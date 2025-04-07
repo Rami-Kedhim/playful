@@ -6,6 +6,7 @@ import { getEmotionClass } from './utils/emotionUtils';
 import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
 import { Volume2, VolumeX, VolumeOff, Loader } from 'lucide-react';
 import { AIVisualElement } from './AICompanionVisualElements';
+import { cn } from '@/lib/utils';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
@@ -72,14 +73,16 @@ const AICompanionMessage = ({
     };
   }, [speaking]);
 
+  // Determine emotion classes for styling
+  const emotionClass = isAI ? getEmotionClass(message.emotion) : 'bg-primary text-primary-foreground';
+
   return (
-    <div className={`flex ${isAI ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex ${isAI ? 'justify-start' : 'justify-end'} mb-3`}>
       <div
-        className={`p-3 rounded-lg max-w-[80%] ${
-          isAI
-            ? getEmotionClass(message.emotion)
-            : 'bg-primary text-primary-foreground'
-        }`}
+        className={cn(
+          'p-3 rounded-lg max-w-[80%]',
+          emotionClass
+        )}
       >
         <div className="flex flex-col">
           <p className="whitespace-pre-wrap">{message.content}</p>
