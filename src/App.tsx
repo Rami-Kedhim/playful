@@ -1,6 +1,6 @@
 
 import { BrowserRouter as Router } from 'react-router-dom';
-import Routes from '@/Routes';
+import AppRoutes from '@/Routes';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthProvider } from '@/hooks/auth';
@@ -12,7 +12,7 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <AuthProvider>
         <Router>
-          <Routes />
+          <AppRoutes />
           <LucieSchaubergerIntegration />
           <HermesDebugPanel />
           <Toaster />

@@ -5956,30 +5956,19 @@ export type Database = {
     }
     Functions: {
       book_slot: {
-        Args: {
-          p_slot_id: string
-          p_client_id: string
-        }
+        Args: { p_slot_id: string; p_client_id: string }
         Returns: Json
       }
       check_metaverse_access: {
-        Args: {
-          user_id: string
-        }
+        Args: { user_id: string }
         Returns: Database["public"]["Enums"]["metaverse_access_level"]
       }
       check_slot_availability: {
-        Args: {
-          p_escort_id: string
-          p_start_time: string
-          p_end_time: string
-        }
+        Args: { p_escort_id: string; p_start_time: string; p_end_time: string }
         Returns: boolean
       }
       check_subscription: {
-        Args: {
-          creator_uuid: string
-        }
+        Args: { creator_uuid: string }
         Returns: boolean
       }
       cleanup_old_interactions: {
@@ -6003,9 +5992,7 @@ export type Database = {
         Returns: undefined
       }
       decrement_users: {
-        Args: {
-          instance_id: string
-        }
+        Args: { instance_id: string }
         Returns: number
       }
       expire_boosts: {
@@ -6013,24 +6000,15 @@ export type Database = {
         Returns: undefined
       }
       get_content_analytics: {
-        Args: {
-          start_date: string
-          end_date: string
-        }
+        Args: { start_date: string; end_date: string }
         Returns: Json
       }
       get_security_analytics: {
-        Args: {
-          start_date: string
-          end_date: string
-        }
+        Args: { start_date: string; end_date: string }
         Returns: Json
       }
       get_system_config: {
-        Args: {
-          p_category: string
-          p_key: string
-        }
+        Args: { p_category: string; p_key: string }
         Returns: Json
       }
       get_system_health: {
@@ -6038,119 +6016,75 @@ export type Database = {
         Returns: Json
       }
       get_user_analytics: {
-        Args: {
-          start_date: string
-          end_date: string
-        }
+        Args: { start_date: string; end_date: string }
         Returns: Json
       }
       get_user_roles: {
-        Args: {
-          _user_id: string
-        }
+        Args: { _user_id: string }
         Returns: string[]
       }
       gtrgm_compress: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       gtrgm_decompress: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       gtrgm_in: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
       gtrgm_options: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: undefined
       }
       gtrgm_out: {
-        Args: {
-          "": unknown
-        }
+        Args: { "": unknown }
         Returns: unknown
       }
-      has_role:
-        | {
-            Args: {
-              _user_id: string
-              _role: string
-            }
-            Returns: boolean
-          }
-        | {
-            Args: {
+      has_role: {
+        Args:
+          | { _user_id: string; _role: string }
+          | {
               user_id: string
               role_name: Database["public"]["Enums"]["user_role"]
             }
-            Returns: boolean
-          }
+        Returns: boolean
+      }
       increment_balance: {
-        Args: {
-          user_id: string
-          amount: number
-        }
+        Args: { user_id: string; amount: number }
         Returns: number
       }
       increment_space_users: {
-        Args: {
-          space_id: string
-          increment_by: number
-        }
+        Args: { space_id: string; increment_by: number }
         Returns: undefined
       }
       is_admin: {
-        Args: {
-          _user_id: string
-        }
+        Args: { _user_id: string }
         Returns: boolean
       }
-      log_admin_action:
-        | {
-            Args: {
-              action: string
-              details: Json
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
+      log_admin_action: {
+        Args:
+          | { action: string; details: Json }
+          | {
               p_action_type: string
               p_target_type: string
               p_target_id: string
               p_details: Json
             }
-            Returns: string
-          }
+        Returns: undefined
+      }
       log_content_view: {
-        Args: {
-          content_id: string
-          viewer_id: string
-        }
+        Args: { content_id: string; viewer_id: string }
         Returns: undefined
       }
       log_metaverse_entry: {
-        Args: {
-          p_user_id: string
-          p_space_id: string
-          p_session_data?: Json
-        }
+        Args: { p_user_id: string; p_space_id: string; p_session_data?: Json }
         Returns: string
       }
       log_metaverse_exit: {
-        Args: {
-          p_log_id: string
-        }
+        Args: { p_log_id: string }
         Returns: undefined
       }
       log_security_event: {
@@ -6171,25 +6105,18 @@ export type Database = {
         }
         Returns: Json
       }
-      process_lucoin_transaction:
-        | {
-            Args: {
+      process_lucoin_transaction: {
+        Args:
+          | {
               p_user_id: string
               p_amount: number
               p_transaction_type: string
               p_description?: string
               p_metadata?: Json
             }
-            Returns: string
-          }
-        | {
-            Args: {
-              sender_id: string
-              receiver_id: string
-              amount: number
-            }
-            Returns: boolean
-          }
+          | { sender_id: string; receiver_id: string; amount: number }
+        Returns: string
+      }
       process_subscription_payment: {
         Args: {
           subscriber_uuid: string
@@ -6208,9 +6135,7 @@ export type Database = {
         Returns: string
       }
       set_limit: {
-        Args: {
-          "": number
-        }
+        Args: { "": number }
         Returns: number
       }
       show_limit: {
@@ -6218,24 +6143,15 @@ export type Database = {
         Returns: number
       }
       show_trgm: {
-        Args: {
-          "": string
-        }
+        Args: { "": string }
         Returns: string[]
       }
       update_system_config: {
-        Args: {
-          p_category: string
-          p_key: string
-          p_value: Json
-        }
+        Args: { p_category: string; p_key: string; p_value: Json }
         Returns: undefined
       }
       update_viewer_count: {
-        Args: {
-          stream_id: string
-          count_change: number
-        }
+        Args: { stream_id: string; count_change: number }
         Returns: undefined
       }
     }
@@ -6303,27 +6219,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -6331,20 +6249,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -6352,20 +6272,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -6373,21 +6295,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -6396,6 +6320,73 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      access_level: ["public", "premium", "vip"],
+      ad_campaign_status: [
+        "pending",
+        "active",
+        "paused",
+        "completed",
+        "rejected",
+      ],
+      ad_campaign_type: ["banner", "featured", "sponsored"],
+      appointment_status: [
+        "pending",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
+      asset_type: ["model", "texture", "material", "animation"],
+      avatar_feature_type: ["hair", "eyes", "skin", "clothing", "accessories"],
+      booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      bot_persona: ["friendly", "professional", "casual", "formal"],
+      content_access: ["public", "subscribers_only", "ppv"],
+      content_type: ["image", "video", "stream"],
+      gender: ["male", "female", "other"],
+      message_status: ["sent", "delivered", "read", "failed"],
+      metaverse_access_level: ["basic", "premium", "admin"],
+      moderation_status: ["pending", "approved", "rejected", "flagged"],
+      notification_priority: ["low", "medium", "high", "urgent"],
+      panel_type: ["client", "escort", "creator", "admin"],
+      payment_status: ["pending", "completed", "failed", "refunded"],
+      profile_status: ["pending", "active", "suspended", "banned"],
+      report_type: ["inappropriate", "copyright", "spam", "other"],
+      service_type: ["massage", "companionship", "escort", "other"],
+      space_type: ["private_room", "public_lounge", "vip_area", "event_space"],
+      subscription_status: ["active", "cancelled", "expired"],
+      subscription_tier: ["free", "premium"],
+      transaction_status: ["pending", "completed", "failed"],
+      transaction_type: ["purchase", "spend", "refund", "bonus"],
+      user_role: [
+        "admin",
+        "client",
+        "creator",
+        "escort",
+        "verification_reviewer",
+        "moderator",
+        "premium",
+        "vip",
+        "ai_companion",
+      ],
+      user_status: ["active", "suspended", "banned"],
+      verification_level: ["none", "basic", "advanced", "premium"],
+      verification_status: ["pending", "approved", "rejected"],
+      verification_type: ["creator", "escort"],
+      video_room_status: ["waiting", "active", "ended"],
+      world_type: [
+        "social",
+        "gaming",
+        "business",
+        "education",
+        "entertainment",
+      ],
+    },
+  },
+} as const

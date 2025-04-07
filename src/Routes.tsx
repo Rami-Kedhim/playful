@@ -1,5 +1,6 @@
+
 import React, { lazy, Suspense } from 'react';
-import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
@@ -34,9 +35,9 @@ const PageLoader = () => (
   </div>
 );
 
-function Routes() {
+function AppRoutes() {
   return (
-    <RouterRoutes>
+    <Routes>
       <Route path="/" element={<AppLayout />}>
         <Route index element={
           <Suspense fallback={<PageLoader />}>
@@ -185,8 +186,8 @@ function Routes() {
           </Suspense>
         } />
       </Route>
-    </RouterRoutes>
+    </Routes>
   );
 }
 
-export default Routes;
+export default AppRoutes;
