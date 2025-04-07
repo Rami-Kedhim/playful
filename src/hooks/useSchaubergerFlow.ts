@@ -95,13 +95,20 @@ export const useSchaubergerFlow = (options: SchaubergerFlowOptions = {}) => {
   }, []);
   
   // Determine if the current time is optimal for intensive processing
+  // Fixed to not use private calculateTimeImpact method
   const calculateOptimalTiming = useCallback((): boolean => {
-    // Get current time metrics from neural hub
+    // Get current time metrics
     const currentHour = new Date().getHours();
-    const timeImpact = neuralHub.calculateTimeImpact(currentHour);
     
-    // Consider time impact from HERMES
-    return timeImpact > 75; // Time is optimal if above 75% effectiveness
+    // Simple time-based heuristic (peak hours 9-11 AM and 7-10 PM)
+    const isPeakMorning = currentHour >= 9 && currentHour <= 11;
+    const isPeakEvening = currentHour >= 19 && currentHour <= 22;
+    
+    // Get health metrics from neural hub
+    const healthMetrics = neuralHub.getHealthMetrics();
+    
+    // Consider time and system health
+    return (isPeakMorning || isPeakEvening) && healthMetrics.stability > 0.7;
   }, []);
   
   // Update the flow state when messages or system conditions change
