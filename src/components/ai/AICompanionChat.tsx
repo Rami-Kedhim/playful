@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useAICompanionConversation } from '@/hooks/useAICompanionConversation';
+import { useAICompanionConversation } from '@/hooks/ai-companion';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
 import AICompanionMessageList from './companion-chat/AICompanionMessageList';
 import AICompanionChatInput from './companion-chat/AICompanionChatInput';
