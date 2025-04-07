@@ -50,6 +50,15 @@ export interface EmotionalMemory {
     affection: number;
     intimacy: number;
   };
+  // Add the missing properties from the errors
+  emotionalHistory: Array<{
+    emotion: string;
+    trigger: string;
+    intensity: number;
+    timestamp: string;
+  }>;
+  userId?: string;
+  companionId?: string;
 }
 
 export interface AIPersonalityConfig {
@@ -75,4 +84,24 @@ export interface MonetizationHook {
   getContentPrice: (contentType: string) => number;
   getUserBalance: () => number;
   processPayment: (amount: number) => Promise<boolean>;
+  // Add the missing properties from the errors
+  type: string;
+  triggerConditions: {
+    messageCount?: number;
+    intimacyLevel?: number;
+    keywords?: string[];
+  };
+  lucoinCost: number;
+  teaser?: string;
+  fullContent?: string;
+  previewUrl?: string;
+}
+
+// Fix for AIProfileDetail.tsx getPersonalityTraits function
+export interface AIPersonalityConversation {
+  id: string;
+  personality: {
+    traits: PersonalityTrait[] | string[];
+    dominantTrait?: string;
+  };
 }

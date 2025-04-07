@@ -1,3 +1,4 @@
+
 /**
  * CreatorScraper - Service for scraping uviu.com
  * Implements the BaseScraperService abstract class
@@ -92,6 +93,11 @@ export class CreatorScraper extends BaseScraperService {
         .sort(() => 0.5 - Math.random())
         .slice(0, Math.floor(Math.random() * 3) + 1);
       
+      // Ensure price is a number by using Number()
+      const price = Number((Math.floor(Math.random() * 15) + 5) + 0.99);
+      // Ensure rating is a number by using Number()
+      const rating = Number((Math.random() * 1 + 4).toFixed(1));
+      
       creators.push({
         id,
         name: `Creator ${i}`,
@@ -106,9 +112,9 @@ export class CreatorScraper extends BaseScraperService {
           photos: Math.floor(Math.random() * 200) + 50,
           videos: Math.floor(Math.random() * 30) + 5
         },
-        price: Number((Math.floor(Math.random() * 15) + 5) + 0.99), // Converting to number explicitly
+        price, // Use the declared number variable
         tags: selectedTags,
-        rating: Number((Math.random() * 1 + 4).toFixed(1)), // Converting string to number
+        rating, // Use the declared number variable
         region: this.region || ['US', 'EU', 'Asia', 'Global'][Math.floor(Math.random() * 4)],
         language: 'en'
       });

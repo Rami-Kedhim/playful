@@ -57,10 +57,12 @@ export const useBoostableLivecams = () => {
           region: filters.country
         });
         
-        // Ensure we properly check the response after awaiting it
+        // Convert Promise to resolved value and then check properties
         if (brainHubResponse && 
+            typeof brainHubResponse === 'object' &&
+            'economicData' in brainHubResponse && 
             brainHubResponse.economicData && 
-            brainHubResponse.economicData.price && 
+            'price' in brainHubResponse.economicData && 
             brainHubResponse.economicData.price > 50) {
           boostedModelIds.push(model.id);
         }

@@ -127,11 +127,11 @@ export class EscortScraper extends BaseScraperService {
         availableNow: Math.random() > 0.4,
         verified: Math.random() > 0.5,
         rating: Math.random() * 2 + 3,
-        reviews: Math.floor(Math.random() * 50), // Changed from reviewCount to reviews
+        reviews: Math.floor(Math.random() * 50),
         tags: selectedServices,
         languages: ['English'],
-        phoneNumber: '+1234567890', // Fake number for mock data
-        email: `escort${i}@example.com`, // Fake email for mock data
+        phone: '+1234567890', // Fixed property name from phoneNumber to phone
+        email: `escort${i}@example.com`,
         website: `https://example.com/escort${i}`,
         availableTimes: {
           monday: { start: '10:00', end: '22:00' },
