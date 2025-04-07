@@ -3,7 +3,6 @@ import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -14,7 +13,10 @@ import AIProfileVideoSection from "./AIProfileVideoSection";
 import AIProfileSubscription from "./AIProfileSubscription";
 import { toast } from "@/hooks/use-toast";
 import AIModelBoost from "./AIModelBoost";
-import { Heart, Calendar, Clock, MapPin, Flame } from "lucide-react";
+import { Calendar, Clock, MapPin, Flame } from "lucide-react";
+import AIProfileTypeIndicator from "./AIProfileTypeIndicator";
+import AIPersonalityTraits from "./AIPersonalityTraits";
+import AIEmotionStatus from "./AIEmotionStatus";
 
 interface AIProfileDetailProps {
   profile: AIProfile;
@@ -39,12 +41,8 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
     });
   };
 
-  const getVerificationBadge = () => {
-    if (profile.verification_status === "verified") {
-      return <Badge className="ml-2 bg-green-500">Verified</Badge>;
-    }
-    return null;
-  };
+  // Check if profile is premium
+  const isPremium = profile.subscription_price || (profile.boost_status?.is_boosted);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -57,9 +55,12 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
                   <AvatarImage src={profile.avatar_url} alt={profile.name} />
                 </Avatar>
                 <div>
-                  <h1 className="text-2xl font-bold flex items-center">
-                    {profile.name}, {profile.age} {getVerificationBadge()}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-2xl font-bold">
+                      {profile.name}, {profile.age}
+                    </h1>
+                    <AIProfileTypeIndicator type={isPremium ? 'premium' : 'ai'} />
+                  </div>
                   <div className="flex items-center text-sm text-muted-foreground mt-1">
                     <MapPin className="h-4 w-4 mr-1" />
                     {profile.location}
@@ -89,10 +90,6 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
                 </div>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  <Heart className="h-4 w-4 mr-1" />
-                  Favorite
-                </Button>
                 {profile.boost_status?.is_boosted && (
                   <Button variant="outline" size="sm" className="text-amber-500">
                     <Flame className="h-4 w-4 mr-1 text-amber-500" />
@@ -112,6 +109,13 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
                 </Badge>
               ))}
             </div>
+
+            {/* Add personality traits if available */}
+            {profile.personality?.traits && profile.personality.traits.length > 0 && (
+              <div className="mt-4">
+                <AIPersonalityTraits traits={profile.personality.traits} compact />
+              </div>
+            )}
           </CardContent>
         </Card>
 

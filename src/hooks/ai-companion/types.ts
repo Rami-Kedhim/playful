@@ -1,64 +1,54 @@
 
-import { AICompanion } from '@/types/ai-companion';
-import { VisualElementData } from '@/components/ai/companion-chat/AICompanionVisualElements';
-
-export type CompanionMessageRole = 'user' | 'assistant' | 'system';
-
-export interface VisualElement {
-  type: 'image' | 'card' | 'carousel' | 'map';
-  data: VisualElementData;
-}
-
+// Define basic types for AI companion interactions
 export interface CompanionMessage {
   id: string;
-  role: CompanionMessageRole;
+  role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp?: Date;
-  suggestedActions?: string[];
-  visualElements?: { data: VisualElementData }[];
-  emotion?: string;
-  links?: string[]; // Include links property to fix type error
-  isPremium?: boolean;
+  timestamp: Date;
+  emotion?: string; // Added to support emotional states
+  visualElements?: Array<{
+    data: {
+      type: string;
+      [key: string]: any;
+    }
+  }>;
   requiresPayment?: boolean;
   paymentAmount?: number;
+  suggestedActions?: string[];
+  isPremium?: boolean;
 }
 
-export interface UseAICompanionConversationOptions {
-  companionId: string;
-  initialMessages?: CompanionMessage[];
-}
-
-// Using the same interface name to match the import in index.ts
-export type UseAICompanionConversationProps = UseAICompanionConversationOptions;
-
-export interface UseAICompanionConversationResult {
-  messages: CompanionMessage[];
-  isLoading: boolean;
-  isTyping: boolean;
-  error: string | null;
-  companion: AICompanion | null;
-  sendMessage: (content: string) => Promise<void>;
-  handleSuggestedActionClick: (action: string) => void;
-  generateImage?: (prompt: string) => Promise<void>;
-  generatingImage?: boolean;
-  creditCost?: number;
-}
-
-export interface CompanionProfile {
+export interface AICompanionContact {
   id: string;
   name: string;
-  avatar?: string;
-  avatar_url?: string;
-  personality: string;
-  description: string;
-  visualCapabilities: boolean;
-  voice_type: string; // Changed from voiceType to match AICompanion
-  speechStyle: string;
+  avatar: string;
+  lastActive?: string;
+  online?: boolean;
+  preview?: string;
 }
 
-export interface UserContext {
-  name?: string;
-  interests?: string[];
-  relationshipStatus?: string;
-  recentInteractions?: string;
+export interface AIContentGenerationParams {
+  companion_id: string;
+  prompt: string;
+  type: 'image' | 'voice' | 'video' | 'text';
+  settings?: Record<string, any>;
+}
+
+export interface AICompanionConversation {
+  id: string;
+  companionId: string;
+  userId: string;
+  messages: CompanionMessage[];
+  lastMessage?: string;
+  lastActivity: Date;
+}
+
+export interface AICompanionRelationshipLevel {
+  intimacy: number; // 0-100
+  trust: number; // 0-100
+  attachment: number; // 0-100
+  dominantDynamic: 'submissive' | 'equal' | 'dominant' | null;
+  stage: 'stranger' | 'acquaintance' | 'friend' | 'close' | 'intimate';
+  lastInteraction: string; // ISO date string
+  interactionCount: number; 
 }

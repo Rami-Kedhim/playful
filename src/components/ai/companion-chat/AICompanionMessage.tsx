@@ -1,166 +1,167 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
-import { getEmotionClass } from './utils/emotionUtils';
-import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
-import { Volume2, VolumeX, VolumeOff, Loader, Unlock } from 'lucide-react';
-import { AIVisualElement } from './AICompanionVisualElements';
-import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+import { Play, User, Bot } from 'lucide-react';
+import AIEmotionStatus from '../AIEmotionStatus';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
-  onActionClick: (action: string) => void;
+  onActionClick?: (action: string) => void;
   voiceType?: string;
   onUnlockContent?: () => void;
 }
 
-const AICompanionMessage = ({
+const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
   message,
   onActionClick,
   voiceType,
   onUnlockContent
-}: AICompanionMessageProps) => {
-  const isAI = message.role === 'assistant';
-  const [speaking, setSpeaking] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
-
-  // Handle speech playback
-  const handleSpeakMessage = async () => {
-    if (speaking) {
-      stopSpeaking();
-      setSpeaking(false);
-      setSpeechError(null);
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      const success = await speakMessage(message.content, voiceType);
-      if (success) {
-        setSpeaking(true);
-        setSpeechError(null);
-      } else {
-        setSpeechError("Couldn't start speech");
-        setTimeout(() => setSpeechError(null), 3000);
-      }
-    } catch (error) {
-      console.error("Speech synthesis error:", error);
-      setSpeechError("Couldn't start speech");
-      setTimeout(() => setSpeechError(null), 3000);
-    } finally {
-      setLoading(false);
-    }
+}) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  const handlePlayVoice = () => {
+    setIsPlaying(true);
+    // Implement voice playing logic
+    setTimeout(() => {
+      setIsPlaying(false);
+    }, 3000);
   };
-
-  // Update speaking state when speech ends
-  useEffect(() => {
-    const checkSpeakingInterval = setInterval(() => {
-      if (speaking && !isSpeaking()) {
-        setSpeaking(false);
-      }
-    }, 200);
-
-    return () => clearInterval(checkSpeakingInterval);
-  }, [speaking]);
-
-  // Stop speaking when component unmounts
-  useEffect(() => {
-    return () => {
-      if (speaking) {
-        stopSpeaking();
-      }
-    };
-  }, [speaking]);
-
-  // Determine emotion classes for styling
-  const emotionClass = isAI ? getEmotionClass(message.emotion) : 'bg-primary text-primary-foreground';
-
+  
+  const isUser = message.role === 'user';
+  const isSystem = message.role === 'system';
+  
   return (
-    <div className={`flex ${isAI ? 'justify-start' : 'justify-end'} mb-3`}>
-      <div
-        className={cn(
-          'p-3 rounded-lg max-w-[80%]',
-          emotionClass,
-          message.isPremium && 'border-2 border-amber-500',
-          message.requiresPayment && 'bg-muted/80 border-dashed border-2 border-amber-500'
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} max-w-[80%] items-start gap-2`}>
+        {!isUser && !isSystem && (
+          <Avatar className="h-8 w-8 mt-0.5">
+            <AvatarImage src="/ai-avatar.png" alt="AI Companion" />
+            <AvatarFallback>
+              <Bot className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
         )}
-      >
-        <div className="flex flex-col">
-          <p className="whitespace-pre-wrap">{message.content}</p>
-
-          {/* Visual elements */}
-          {isAI && message.visualElements && message.visualElements.length > 0 && (
-            <div className="mt-3 space-y-3">
-              {message.visualElements.map((element, index) => (
-                <AIVisualElement
-                  key={index}
-                  element={element.data}
-                  onActionClick={onActionClick}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Payment required button */}
-          {isAI && message.requiresPayment && onUnlockContent && (
-            <div className="mt-3">
-              <Button
-                variant="secondary"
-                className="w-full bg-amber-500/20 hover:bg-amber-500/40 border border-amber-500"
-                onClick={onUnlockContent}
-                size="sm"
-              >
-                <Unlock className="mr-2 h-4 w-4" />
-                Unlock for {message.paymentAmount || 10} Lucoins
-              </Button>
-            </div>
-          )}
-
-          {/* Suggested actions */}
-          {isAI && message.suggestedActions && message.suggestedActions.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {message.suggestedActions.map((action, index) => (
-                <Button
-                  key={index}
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => onActionClick(action)}
-                  className="text-xs"
-                >
-                  {action}
-                </Button>
-              ))}
-            </div>
-          )}
-          
-          {/* Speech button - only for AI messages */}
-          {isAI && (
-            <div className="flex items-center justify-end mt-2 gap-2">
-              {speechError && (
-                <span className="text-xs text-red-500">{speechError}</span>
+        
+        {isUser && (
+          <Avatar className="h-8 w-8 mt-0.5">
+            <AvatarImage src="/user-avatar.png" alt="User" />
+            <AvatarFallback>
+              <User className="h-4 w-4" />
+            </AvatarFallback>
+          </Avatar>
+        )}
+        
+        <div className={`space-y-1 ${isUser ? 'text-right' : ''}`}>
+          <Card className={`
+            ${isSystem ? 'bg-muted border-muted' : isUser ? 'bg-primary text-primary-foreground' : 'bg-card'}
+          `}>
+            <CardContent className="p-3 text-sm">
+              {message.content}
+              
+              {/* Premium content unlock UI */}
+              {message.requiresPayment && onUnlockContent && (
+                <div className="mt-2 flex flex-col gap-2">
+                  <div className="text-xs text-muted">
+                    {message.paymentAmount} Lucoins required to view this content
+                  </div>
+                  <Button size="sm" onClick={onUnlockContent}>
+                    Unlock Content
+                  </Button>
+                </div>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSpeakMessage}
-                className="h-6 px-2 flex items-center gap-1"
-                disabled={!!speechError || loading}
-              >
-                {loading ? (
-                  <Loader className="h-3 w-3 animate-spin" />
-                ) : speaking ? (
-                  <VolumeX className="h-3 w-3" />
-                ) : speechError ? (
-                  <VolumeOff className="h-3 w-3" />
-                ) : (
-                  <Volume2 className="h-3 w-3" />
-                )}
-                <span>{speaking ? 'Stop' : loading ? 'Loading...' : 'Speak'}</span>
-              </Button>
-            </div>
-          )}
+              
+              {/* Voice message UI */}
+              {voiceType && !message.requiresPayment && !isUser && !isSystem && (
+                <div className="mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-6 w-6" 
+                    onClick={handlePlayVoice}
+                    disabled={isPlaying}
+                  >
+                    <Play className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+              
+              {/* Suggested actions */}
+              {message.suggestedActions && message.suggestedActions.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {message.suggestedActions.map((action, index) => (
+                    <Button 
+                      key={index}
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onActionClick?.(action)}
+                    >
+                      {action}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              
+              {/* Visual elements like images */}
+              {message.visualElements && message.visualElements.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {message.visualElements.map((element, index) => (
+                    <div key={index}>
+                      {element.data.type === 'image' && (
+                        <div className="rounded-md overflow-hidden">
+                          <img 
+                            src={element.data.url} 
+                            alt={element.data.alt || 'AI generated image'} 
+                            className="w-full h-auto object-cover"
+                          />
+                          {element.data.caption && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {element.data.caption}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Message metadata */}
+          <div className="flex text-xs text-muted-foreground gap-2">
+            {message.timestamp && (
+              <time dateTime={message.timestamp.toISOString()}>
+                {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+              </time>
+            )}
+            
+            {/* Show emotion state for AI messages */}
+            {!isUser && !isSystem && message.emotion && (
+              <div className="flex items-center gap-1">
+                <AIEmotionStatus 
+                  emotionalState={{ 
+                    joy: 0, 
+                    trust: 0, 
+                    fear: 0, 
+                    surprise: 0, 
+                    sadness: 0, 
+                    anger: 0, 
+                    anticipation: 0, 
+                    interest: 0,
+                    dominantEmotion: message.emotion,
+                    intensityLevel: 75,  // Placeholder value
+                    lastUpdated: message.timestamp?.toISOString() || new Date().toISOString()
+                  }} 
+                  compact 
+                  showIntensity={false}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

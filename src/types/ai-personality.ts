@@ -79,3 +79,23 @@ export interface MonetizationHook {
   fullContent?: string;
   previewUrl?: string;
 }
+
+// Extended types for AI companion interaction
+export interface AIInteractionPreferences {
+  responseDelay: {
+    min: number;  // Minimum delay in milliseconds
+    max: number;  // Maximum delay in milliseconds
+    typing: boolean; // Whether to show typing indicator during delay
+  };
+  textStyle: {
+    emoji: number;  // 0-100 frequency
+    slang: number;  // 0-100 frequency
+    formality: number; // 0-100 (0 = very casual, 100 = very formal)
+  };
+  interactionBoundaries: {
+    explicitContent: boolean;
+    politicalDiscussions: boolean;
+    personalQuestions: boolean;
+    roleplayWillingness: number; // 0-100
+  };
+}

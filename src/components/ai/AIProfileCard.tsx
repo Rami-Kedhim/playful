@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Heart, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import AIProfileTypeIndicator from './AIProfileTypeIndicator';
+import AIEmotionStatus from './AIEmotionStatus';
 
 interface AIProfileCardProps {
   profile: AIProfile;
@@ -13,15 +15,8 @@ interface AIProfileCardProps {
 }
 
 const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) => {
-  const getPersonalityColor = (type: string) => {
-    switch(type) {
-      case 'flirty': return 'bg-pink-500 hover:bg-pink-700';
-      case 'shy': return 'bg-purple-500 hover:bg-purple-700';
-      case 'dominant': return 'bg-red-500 hover:bg-red-700';
-      case 'playful': return 'bg-blue-500 hover:bg-blue-700';
-      default: return 'bg-slate-500 hover:bg-slate-700';
-    }
-  };
+  // Determine if profile is premium
+  const isPremium = profile.lucoin_chat_price > 10 || profile.boost_status?.is_boosted;
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col">
@@ -36,26 +31,18 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
           <Badge className="bg-primary text-primary-foreground">
             {profile.age}
           </Badge>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white border-none cursor-help">
-                  <Info className="w-3 h-3 mr-1" />
-                  AI
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">This is an AI-generated profile. The conversations are powered by artificial intelligence.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <AIProfileTypeIndicator 
+            type={isPremium ? 'premium' : 'ai'} 
+            size="sm" 
+            showLabel={false} 
+          />
         </div>
         
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
           <div className="flex items-center gap-2">
             <h3 className="text-xl font-semibold">{profile.name}</h3>
             {profile.personality?.type && (
-              <Badge className={`${getPersonalityColor(profile.personality.type)} capitalize`}>
+              <Badge className="capitalize">
                 {profile.personality.type}
               </Badge>
             )}
