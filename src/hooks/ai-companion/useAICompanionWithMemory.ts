@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { 
@@ -409,7 +408,7 @@ export function useAICompanionWithMemory({
           ).catch(error => console.error('Error saving to Redis:', error));
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment processing error:', error);
       toast({
         title: 'Payment Failed',
@@ -582,4 +581,3 @@ export function useAICompanionWithMemory({
 }
 
 export default useAICompanionWithMemory;
-
