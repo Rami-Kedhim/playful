@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Gift, Loader2, Send, Info } from "lucide-react";
 import { 
@@ -143,7 +142,7 @@ const GiftDialog = ({ recipientId, recipientName, onSuccess, trigger }: GiftDial
             <div className="flex items-center">
               <Coins className="h-4 w-4 text-yellow-500 mr-2" />
               <span className="text-sm">Your balance:</span>
-              <span className="ml-2 font-medium">{profile?.lucoin_balance || 0} LC</span>
+              <span className="ml-2 font-medium">{profile?.lucoin_balance || profile?.lucoinsBalance || 0} LC</span>
             </div>
             {getSelectedGift() && (
               <div className="flex items-center">

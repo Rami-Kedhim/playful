@@ -45,6 +45,7 @@ export interface UserProfile {
   dateOfBirth?: string;
   location?: string;
   isVerified?: boolean;
+  is_verified?: boolean; // Adding this to support both naming conventions
   membership?: {
     status: 'active' | 'inactive' | 'pending';
     expiresAt?: string;
@@ -54,6 +55,11 @@ export interface UserProfile {
   updatedAt?: string;
   created_at?: string;
   updated_at?: string;
+  
+  // Adding fields to fix type errors
+  lucoin_balance?: number;
+  profile_completeness?: number;
+  is_boosted?: boolean;
 }
 
 // Auth state maintained by auth context

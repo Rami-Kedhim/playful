@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,14 +7,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
-// This will be implemented in the future
 const EscortDashboard = () => {
   const { user, profile, checkRole, isLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("bookings");
   const [verifying, setVerifying] = useState(true);
 
-  // Check if user is an escort
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
@@ -50,7 +47,7 @@ const EscortDashboard = () => {
           <Button onClick={() => navigate(`/escorts/${profile?.username}`)}>View Public Profile</Button>
         </div>
 
-        {profile?.is_verified ? (
+        {profile?.isVerified || profile?.is_verified ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList className="grid grid-cols-4 w-full md:w-auto">
               <TabsTrigger value="bookings">Bookings</TabsTrigger>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useForm } from 'react-hook-form';
@@ -101,11 +100,11 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
   const onSubmitAccount = async (data: AccountFormValues) => {
     setIsSaving(true);
     try {
-      const success = await updateUserProfile({
+      const result = await updateUserProfile({
         username: data.username,
       });
 
-      if (success) {
+      if (result) {
         toast({
           title: 'Account updated',
           description: 'Your account settings have been updated.',
@@ -129,7 +128,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
     try {
       const result = await updatePassword(data.currentPassword, data.newPassword);
 
-      if (result.success) {
+      if (result) {
         toast({
           title: 'Password updated',
           description: 'Your password has been updated successfully.',
@@ -142,7 +141,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
       } else {
         toast({
           title: 'Error',
-          description: result.error || 'Failed to update password. Please try again.',
+          description: 'Failed to update password. Please try again.',
           variant: 'destructive',
         });
       }

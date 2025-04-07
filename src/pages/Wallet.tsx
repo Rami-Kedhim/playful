@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
@@ -76,7 +75,7 @@ const Wallet = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{profile?.lucoin_balance || 0} LC</div>
+              <div className="text-3xl font-bold">{profile?.lucoin_balance || profile?.lucoinsBalance || 0} LC</div>
               <p className="text-sm text-muted-foreground mt-1">
                 Virtual credits for platform features
               </p>
@@ -136,14 +135,14 @@ const Wallet = () => {
             </CardHeader>
             <CardContent>
               <div className="text-lg font-medium">
-                {profile?.is_boosted ? (
+                {profile?.is_boosted || profile?.isBoosted ? (
                   <span className="text-green-500">Boosted</span>
                 ) : (
                   <span className="text-muted-foreground">Standard</span>
                 )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
-                {profile?.is_boosted ? "Your profile is boosted" : "Boost your profile for more visibility"}
+                {profile?.is_boosted || profile?.isBoosted ? "Your profile is boosted" : "Boost your profile for more visibility"}
               </p>
             </CardContent>
           </Card>
