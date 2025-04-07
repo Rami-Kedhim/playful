@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { BoostPackage } from '@/types/boost';
 import { useLucoins } from '@/hooks/useLucoins';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
