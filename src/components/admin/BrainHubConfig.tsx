@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { brainHub, BrainHubConfig as BrainHubConfigType, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/services/neural/HermesOxumBrainHub';
 import { useToast } from '@/components/ui/use-toast';
 
-interface AcademicModelTabProps<T> { 
+interface AcademicModelTabProps<T extends Record<string, boolean>> { 
   model: T;
   title: string;
   description: string;
@@ -64,13 +63,10 @@ const BrainHubConfig: React.FC = () => {
   const [newRegion, setNewRegion] = useState('');
   
   const handleAcademicModelToggle = (model: keyof BrainHubConfigType, key: string, value: boolean) => {
-    setConfig(prev => ({
-      ...prev,
-      [model]: {
-        ...prev[model],
-        [key]: value
-      }
-    }));
+    const updatedConfig = { ...config };
+    const modelObj = updatedConfig[model] as Record<string, boolean>;
+    modelObj[key] = value;
+    setConfig(updatedConfig);
   };
   
   const handleFeatureToggle = (key: keyof BrainHubConfigType, value: boolean) => {

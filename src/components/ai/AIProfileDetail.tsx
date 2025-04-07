@@ -1,228 +1,242 @@
 
-import React, { useState, useEffect } from "react";
-import { AIProfile } from "@/types/ai-profile";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import AIProfileConversation from "./AIProfileConversation";
-import AIProfileGallery from "./AIProfileGallery";
-import AIProfileGiftSection from "./AIProfileGiftSection";
-import AIProfileVideoSection from "./AIProfileVideoSection";
-import AIProfileSubscription from "./AIProfileSubscription";
-import { toast } from "@/hooks/use-toast";
-import AIModelBoost from "./AIModelBoost";
-import { Calendar, Clock, MapPin, Flame } from "lucide-react";
-import AIProfileTypeIndicator from "./AIProfileTypeIndicator";
-import AIPersonalityTraits from "./AIPersonalityTraits";
-import AIEmotionStatus from "./AIEmotionStatus";
-import { PersonalityTrait } from "@/types/ai-personality";
-import { brainHub } from "@/services/neural/HermesOxumBrainHub";
+// Update AIProfileDetail to use the updated Brain Hub service
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { useToast } from '@/components/ui/use-toast';
+import AIEscortSuggestions from './AIEscortSuggestions';
 
-interface AIProfileDetailProps {
-  profile: AIProfile;
-}
+// Mock AI profile data
+const mockAIProfiles = [
+  {
+    id: 'ai-profile-1',
+    name: 'Sophia AI',
+    avatar: 'https://source.unsplash.com/300x300/?avatar,woman',
+    description: 'Flirty and fun-loving AI companion',
+    tags: ['flirty', 'fun', 'outgoing'],
+    subscribers: 1204,
+    rating: 4.8,
+    personalityType: 'flirty',
+  },
+  {
+    id: 'ai-profile-2',
+    name: 'Max AI',
+    avatar: 'https://source.unsplash.com/300x300/?avatar,man',
+    description: 'Intellectual and thoughtful AI companion',
+    tags: ['intellectual', 'serious', 'deep'],
+    subscribers: 987,
+    rating: 4.6,
+    personalityType: 'intellectual',
+  }
+];
 
-const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
-  const [subscribeDialogOpen, setSubscribeDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat");
-  
-  const handleSubscribe = () => {
-    toast({
-      title: "Subscription Started",
-      description: `You are now subscribed to ${profile.name}'s premium content!`,
-    });
-    setSubscribeDialogOpen(false);
-    
-    // Track subscription action through Brain Hub
-    brainHub.processRequest({
-      requestType: 'economic',
-      content: `User subscribed to ${profile.name}`,
-      userId: 'current-user', // In a real app, use actual user ID
-      targetId: profile.id
-    });
-  };
-  
-  const handleBoostComplete = () => {
-    toast({
-      title: "Boost Complete",
-      description: `You've successfully boosted ${profile.name}'s profile!`,
-    });
-    
-    // Track boost action through Brain Hub
-    brainHub.processRequest({
-      requestType: 'economic',
-      content: `User boosted ${profile.name}'s profile`,
-      userId: 'current-user', // In a real app, use actual user ID
-      targetId: profile.id
-    });
-  };
+const AIProfileDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('chat');
+  const { toast } = useToast();
 
-  const isPremium = profile.subscription_price || (profile.boost_status?.is_boosted);
+  // Load AI profile data
+  useEffect(() => {
+    const loadProfile = async () => {
+      setLoading(true);
+      try {
+        // For a real app, this would be an API call
+        // Simulate API request and Brain Hub processing
+        const mockProfile = mockAIProfiles.find(p => p.id === id);
+        
+        if (mockProfile) {
+          // Process through Brain Hub
+          const response = await brainHub.processRequest({
+            type: 'ai_profile_view',
+            data: mockProfile
+          });
+          
+          setProfile(response.data || mockProfile);
+        }
+      } catch (error) {
+        console.error('Error loading AI profile:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load AI profile data',
+          variant: 'destructive'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getPersonalityTraits = (): PersonalityTrait[] => {
-    if (!profile.personality?.traits) return [];
-    
-    // If traits is already an array of PersonalityTrait objects
-    if (typeof profile.personality.traits[0] === 'object') {
-      // Explicitly cast to PersonalityTrait[] to satisfy TypeScript
-      return profile.personality.traits as unknown as PersonalityTrait[];
+    if (id) {
+      loadProfile();
     }
-    
-    // If traits is an array of strings, convert each string to a PersonalityTrait object
-    const traitsAsStrings = Array.isArray(profile.personality.traits) ? 
-      (profile.personality.traits as unknown as string[]) : [];
+  }, [id, toast]);
+
+  const handleSubscribe = async () => {
+    // Simulate API request with Brain Hub processing
+    try {
+      const response = await brainHub.processRequest({
+        type: 'ai_subscription',
+        data: {
+          profileId: id,
+          action: 'subscribe'
+        }
+      });
       
-    return traitsAsStrings.map(trait => ({
-      name: trait,
-      description: '',
-      intensity: 75
-    }));
-  };
-  
-  // Register profile view with Brain Hub on component mount
-  React.useEffect(() => {
-    if (profile?.id) {
-      brainHub.processRequest({
-        requestType: 'profile_view',
-        targetId: profile.id,
+      if (response.success) {
+        setProfile(prev => ({
+          ...prev,
+          isSubscribed: true
+        }));
+        
+        toast({
+          title: 'Subscribed!',
+          description: `You have successfully subscribed to ${profile?.name}.`
+        });
+      }
+    } catch (error) {
+      console.error('Error subscribing to AI profile:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process subscription',
+        variant: 'destructive'
       });
     }
-  }, [profile?.id]);
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="h-40 bg-muted animate-pulse rounded-md mb-4"></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2">
+            <div className="h-96 bg-muted animate-pulse rounded-md"></div>
+          </div>
+          <div>
+            <div className="h-64 bg-muted animate-pulse rounded-md mb-4"></div>
+            <div className="h-64 bg-muted animate-pulse rounded-md"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="container mx-auto p-6 text-center">
+        <h1 className="text-3xl font-bold mb-4">AI Profile Not Found</h1>
+        <p className="mb-6">The AI profile you're looking for doesn't exist or has been removed.</p>
+        <Button asChild>
+          <Link to="/ai-companions">Browse AI Companions</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center">
-                <Avatar className="h-16 w-16 mr-4">
-                  <AvatarImage src={profile.avatar_url} alt={profile.name} />
-                </Avatar>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold">
-                      {profile.name}, {profile.age}
-                    </h1>
-                    <AIProfileTypeIndicator type={isPremium ? 'premium' : 'ai'} />
+    <div className="container mx-auto p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardContent className="p-0">
+              <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="chat">Chat</TabsTrigger>
+                  <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="chat" className="p-6">
+                  <div className="bg-muted h-80 rounded-md flex items-center justify-center">
+                    <div className="text-center p-6">
+                      <h3 className="text-xl font-semibold mb-2">Start Chatting with {profile.name}</h3>
+                      <p className="text-muted-foreground mb-4">Subscribe to unlock unlimited conversations</p>
+                      <Button onClick={handleSubscribe}>Subscribe Now</Button>
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground mt-1">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    {profile.location}
+                </TabsContent>
+                
+                <TabsContent value="gallery" className="p-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="aspect-square bg-muted rounded-md overflow-hidden">
+                        <img 
+                          src={`https://source.unsplash.com/300x300/?model,${profile.personalityType},${i}`}
+                          alt={`${profile.name} gallery ${i + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="details" className="p-6">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">About {profile.name}</h3>
+                    <p className="mb-4">{profile.description}</p>
                     
-                    {profile.availability_status && (
-                      <span className="ml-4 flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span className={
-                          profile.availability_status === "online" 
-                            ? "text-green-500" 
-                            : profile.availability_status === "away" 
-                              ? "text-amber-500" 
-                              : "text-gray-500"
-                        }>
-                          {profile.availability_status.charAt(0).toUpperCase() + profile.availability_status.slice(1)}
+                    <h4 className="font-medium mb-2">Personality Traits</h4>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {profile.tags.map((tag: string) => (
+                        <span key={tag} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                          {tag}
                         </span>
-                      </span>
-                    )}
+                      ))}
+                    </div>
                     
-                    {profile.last_active && (
-                      <span className="ml-4 flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        Active {new Date(profile.last_active).toLocaleDateString()}
-                      </span>
-                    )}
+                    <div className="mt-6">
+                      <h4 className="font-medium mb-2">Rating & Subscribers</h4>
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <span className="text-lg font-semibold">{profile.rating}</span>
+                          <span className="text-muted-foreground"> / 5</span>
+                        </div>
+                        <div>
+                          <span className="text-lg font-semibold">{profile.subscribers.toLocaleString()}</span>
+                          <span className="text-muted-foreground"> subscribers</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center mb-4">
+                <div className="mx-auto w-24 h-24 relative mb-4">
+                  <img 
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
                 </div>
+                <h2 className="text-2xl font-bold">{profile.name}</h2>
+                <p className="text-muted-foreground">{profile.personalityType} AI Companion</p>
               </div>
-              <div className="flex space-x-2">
-                {profile.boost_status?.is_boosted && (
-                  <Button variant="outline" size="sm" className="text-amber-500">
-                    <Flame className="h-4 w-4 mr-1 text-amber-500" />
-                    Boosted
-                  </Button>
-                )}
+              
+              <div className="space-y-4">
+                <Button className="w-full" onClick={handleSubscribe}>
+                  Subscribe
+                </Button>
+                <Button variant="outline" className="w-full">
+                  Send Message
+                </Button>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">{profile.bio}</p>
-            
-            <div className="flex flex-wrap gap-2 mb-4">
-              {profile.interests?.map(interest => (
-                <Badge key={interest} variant="secondary">
-                  {interest}
-                </Badge>
-              ))}
-            </div>
-
-            {profile.personality?.traits && profile.personality.traits.length > 0 && (
-              <div className="mt-4">
-                <AIPersonalityTraits traits={getPersonalityTraits()} compact />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="chat">Chat</TabsTrigger>
-            <TabsTrigger value="gallery">Gallery</TabsTrigger>
-            <TabsTrigger value="video">Videos</TabsTrigger>
-          </TabsList>
+            </CardContent>
+          </Card>
           
-          <TabsContent value="chat" className="mt-4">
-            <AIProfileConversation profile={profile} />
-          </TabsContent>
-          
-          <TabsContent value="gallery" className="mt-4">
-            <AIProfileGallery profile={profile} />
-          </TabsContent>
-          
-          <TabsContent value="video" className="mt-4">
-            <AIProfileVideoSection profile={profile} />
-          </TabsContent>
-        </Tabs>
+          <AIEscortSuggestions aiProfileId={profile.id} />
+        </div>
       </div>
-      
-      <div className="space-y-6">
-        <AIProfileSubscription 
-          profile={profile} 
-          onSubscribe={() => setSubscribeDialogOpen(true)} 
-        />
-        
-        <AIModelBoost 
-          profile={profile} 
-          onBoostComplete={handleBoostComplete} 
-        />
-        
-        <AIProfileGiftSection profile={profile} />
-      </div>
-      
-      <Dialog open={subscribeDialogOpen} onOpenChange={setSubscribeDialogOpen}>
-        <DialogContent>
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-center">
-              Subscribe to {profile.name}
-            </h2>
-            
-            <p>
-              You're about to subscribe to {profile.name}'s premium content for {profile.subscription_price || 29} LC per month.
-            </p>
-            
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button variant="outline" onClick={() => setSubscribeDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSubscribe}>
-                Confirm Subscription
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
