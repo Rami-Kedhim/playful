@@ -136,11 +136,10 @@ export class EscortScraper extends BaseScraperService {
           phone: '+1234567890', // Use phone instead of phoneNumber
           website: `https://example.com/escort${i}`
         },
-        availableTimes: {
-          monday: { start: '10:00', end: '22:00' },
-          wednesday: { start: '10:00', end: '22:00' },
-          friday: { start: '10:00', end: '00:00' },
-          saturday: { start: '12:00', end: '00:00' },
+        // Use availability property instead of availableTimes
+        availability: {
+          days: ['monday', 'wednesday', 'friday', 'saturday'],
+          hours: '10:00-22:00'
         },
         boosted: Math.random() > 0.7,
         price: randomPrices.hourly, // Add required price field

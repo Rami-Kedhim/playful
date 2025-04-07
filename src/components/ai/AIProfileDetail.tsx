@@ -52,8 +52,8 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
       return profile.personality.traits as PersonalityTrait[];
     }
     
-    // Convert string[] to PersonalityTrait[] with proper type casting
-    return (profile.personality.traits as string[]).map(trait => ({
+    // Proper type conversion: first cast to unknown, then to PersonalityTrait[]
+    return (profile.personality.traits as unknown as string[]).map(trait => ({
       name: trait,
       description: '',
       intensity: 75
