@@ -48,19 +48,21 @@ export const useBoostableLivecams = () => {
       
       // Process models through Brain Hub for any boosting information
       const boostedModelIds: string[] = [];
-      models.forEach(model => {
-        const response = brainHub.processRequest({
+      
+      // Process each model through Brain Hub
+      for (const model of models) {
+        const brainHubResponse = await brainHub.processRequest({
           requestType: 'livecam',
           targetId: model.id,
           region: filters.country
         });
         
-        if (response.economicData && 
-            response.economicData.price && 
-            response.economicData.price > 50) {
+        if (brainHubResponse.economicData && 
+            brainHubResponse.economicData.price && 
+            brainHubResponse.economicData.price > 50) {
           boostedModelIds.push(model.id);
         }
-      });
+      }
       
       setBoostedIds(boostedModelIds);
     } catch (err: any) {
@@ -86,7 +88,7 @@ export const useBoostableLivecams = () => {
     }));
   }, []);
   
-  const boostLivecam = useCallback(async (modelId: string) => {
+  const boostLivecam = useCallback(async (modelId: string, intensity: number, durationHours: number): Promise<boolean> => {
     try {
       // Process through Brain Hub boost system
       const response = await brainHub.processRequest({
@@ -109,7 +111,7 @@ export const useBoostableLivecams = () => {
     }
   }, [showSuccess, showError]);
   
-  const cancelBoost = useCallback(async (modelId: string) => {
+  const cancelBoost = useCallback(async (modelId: string): Promise<boolean> => {
     try {
       // Process through Brain Hub to cancel boost
       await brainHub.processRequest({

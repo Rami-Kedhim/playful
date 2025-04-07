@@ -109,7 +109,7 @@ export class CreatorScraper extends BaseScraperService {
         },
         price: (Math.floor(Math.random() * 15) + 5) + 0.99,
         tags: selectedTags,
-        rating: (Math.random() * 1 + 4).toFixed(1),
+        rating: Number((Math.random() * 1 + 4).toFixed(1)), // Convert string to number
         region: this.region || ['US', 'EU', 'Asia', 'Global'][Math.floor(Math.random() * 4)],
         language: 'en'
       });

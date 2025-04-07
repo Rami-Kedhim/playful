@@ -47,7 +47,7 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
   const isPremium = profile.subscription_price || (profile.boost_status?.is_boosted);
 
   // Convert string[] traits to PersonalityTrait[] if needed
-  const getPersonalityTraits = () => {
+  const getPersonalityTraits = (): PersonalityTrait[] => {
     if (!profile.personality?.traits) return [];
     
     // If the traits are already in the correct format, return them

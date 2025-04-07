@@ -34,6 +34,17 @@ const Livecams: React.FC = () => {
     }
   }, [error, toast]);
 
+  // Adapter functions to match the expected parameter types in LivecamGrid
+  const handleBoost = (livecamId: string, intensity: number, durationHours: number): boolean => {
+    boostLivecam(livecamId, intensity, durationHours);
+    return true;
+  };
+  
+  const handleCancelBoost = (livecamId: string): boolean => {
+    cancelBoost(livecamId);
+    return true;
+  };
+
   return (
     <MainLayout title="Live Cams">
       <div className="mb-6">
@@ -64,8 +75,8 @@ const Livecams: React.FC = () => {
             onLoadMore={loadMore}
             showBoostControls={true}
             boostedIds={boostedIds}
-            onBoost={boostLivecam}
-            onCancelBoost={cancelBoost}
+            onBoost={handleBoost}
+            onCancelBoost={handleCancelBoost}
           />
         </div>
       </div>

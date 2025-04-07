@@ -124,7 +124,7 @@ export class EscortScraper extends BaseScraperService {
           hourly: randomPrices.hourly,
           overnight: randomPrices.overnight
         },
-        available: Math.random() > 0.4,
+        availableNow: Math.random() > 0.4, // Changed from available to availableNow
         verified: Math.random() > 0.5,
         rating: Math.random() * 2 + 3,
         reviewCount: Math.floor(Math.random() * 50),
