@@ -1,6 +1,5 @@
 
 import { BrowserRouter as Router, Routes as RouterRoutes, Route } from 'react-router-dom';
-import AppRoutes from '@/Routes';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { AuthProvider } from '@/hooks/auth';
@@ -19,10 +18,10 @@ function App() {
               <Route path="/" element={<AssessmentDashboard />} />
               <Route path="/assessment" element={<AssessmentDashboard />} />
             </RouterRoutes>
+            <Toaster />
             <LucieSchaubergerIntegration />
             <HermesDebugPanel />
             <HermesAssessmentIntegration />
-            <Toaster />
           </div>
         </Router>
       </AuthProvider>

@@ -14,11 +14,17 @@ export const HermesAssessmentIntegration = () => {
   const { assessment, generateAssessment } = useAssessment();
   const { getCurrentMode, shouldUseEmotionalResponses } = useHermesMode();
   const [lastMetricsUpdate, setLastMetricsUpdate] = useState<Date | null>(null);
+  const [toastMounted, setToastMounted] = useState(false);
   const [userBehavioralState, setUserBehavioralState] = useState<{
     chaseHughesProfile?: ChaseHughesBehavioralProfile;
     lastInfluencePhase?: string;
     trustScoreTrend?: 'increasing' | 'decreasing' | 'stable';
   }>({});
+
+  // Set toast as mounted after component mounts
+  useEffect(() => {
+    setToastMounted(true);
+  }, []);
 
   // Connect to neural hub metrics updates
   useEffect(() => {
@@ -61,8 +67,8 @@ export const HermesAssessmentIntegration = () => {
               });
             }
             
-            // Show a toast notification tailored to the current situation
-            if (result.chaseHughesProfile) {
+            // Show a toast notification tailored to the current situation if toast is mounted
+            if (toastMounted && result.chaseHughesProfile) {
               const influencePhase = result.chaseHughesProfile.currentInfluencePhase;
               
               // Customize notification based on influence phase
@@ -85,7 +91,7 @@ export const HermesAssessmentIntegration = () => {
                   variant: "default"
                 });
               }
-            } else {
+            } else if (toastMounted) {
               toast({
                 title: "New Assessment Available",
                 description: "The system has detected significant changes in behavior patterns",
@@ -100,10 +106,10 @@ export const HermesAssessmentIntegration = () => {
     // Register the observer with the neural hub
     neuralHub.addObserver(metricsObserver);
     
-    // Generate initial assessment if needed
-    if (!assessment) {
+    // Generate initial assessment if needed, but wait until toast is mounted
+    if (toastMounted && !assessment) {
       generateAssessment();
-    } else if (assessment.chaseHughesProfile) {
+    } else if (assessment?.chaseHughesProfile) {
       // Initialize behavioral state tracking
       setUserBehavioralState({
         chaseHughesProfile: assessment.chaseHughesProfile,
@@ -116,7 +122,7 @@ export const HermesAssessmentIntegration = () => {
     return () => {
       neuralHub.removeObserver(metricsObserver);
     };
-  }, [assessment, generateAssessment]);
+  }, [assessment, generateAssessment, toastMounted, userBehavioralState]);
 
   // This component doesn't render anything visible - it's a background service
   return null;

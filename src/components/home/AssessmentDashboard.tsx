@@ -1,12 +1,16 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, LineChart, MessagesSquare } from 'lucide-react';
+import { Brain, LineChart, MessagesSquare, UserRound } from 'lucide-react';
 import EnhancedEngagementPanel from './EnhancedEngagementPanel';
 import AssessmentPanel from '../assessment/AssessmentPanel';
 import ChaseHughesPanel from '../assessment/ChaseHughesPanel';
+import ChaseHughesInfluencePanel from '../assessment/ChaseHughesInfluencePanel';
+import { useAssessment } from '@/hooks/useAssessment';
 
 const AssessmentDashboard = () => {
+  const { assessment, isLoading } = useAssessment();
+
   return (
     <div className="container mx-auto px-4 py-6 dark:bg-background dark:text-foreground">
       <div className="flex flex-col space-y-2 mb-6">
@@ -17,7 +21,7 @@ const AssessmentDashboard = () => {
       </div>
       
       <Tabs defaultValue="assessment" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="assessment" className="flex items-center">
             <Brain className="h-4 w-4 mr-2" />
             Full Assessment
@@ -29,6 +33,10 @@ const AssessmentDashboard = () => {
           <TabsTrigger value="influence" className="flex items-center">
             <MessagesSquare className="h-4 w-4 mr-2" />
             Influence Strategy
+          </TabsTrigger>
+          <TabsTrigger value="behavioral" className="flex items-center">
+            <UserRound className="h-4 w-4 mr-2" />
+            Behavioral Flow
           </TabsTrigger>
         </TabsList>
         
@@ -42,6 +50,25 @@ const AssessmentDashboard = () => {
         
         <TabsContent value="influence" className="pt-6">
           <ChaseHughesPanel />
+        </TabsContent>
+        
+        <TabsContent value="behavioral" className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ChaseHughesInfluencePanel profile={assessment?.chaseHughesProfile} isLoading={isLoading} />
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Schauberger Flow Analysis</CardTitle>
+                <CardDescription>
+                  Natural flow dynamics and emotional implosion metrics
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm">
+                <p className="text-muted-foreground">
+                  Coming soon: Visualization of user vortex patterns and energy flows based on Schauberger principles.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
       
