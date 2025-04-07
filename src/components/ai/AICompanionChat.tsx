@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAICompanionWithMemory } from '@/hooks/ai-companion/useAICompanionWithMemory';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
 import AICompanionMessageList from './companion-chat/AICompanionMessageList';
 import AICompanionChatInput from './companion-chat/AICompanionChatInput';
 import AICompanionChatStyles from './companion-chat/AICompanionChatStyles';
 import MinimizedChatButton from './companion-chat/MinimizedChatButton';
-import { initSpeechSynthesis } from './companion-chat/utils/speechUtils';
+import { PersonalityType } from '@/types/ai-personality';
+import { toast } from '@/components/ui/use-toast';
 
 interface AICompanionChatProps {
   companionId: string;
@@ -14,7 +15,7 @@ interface AICompanionChatProps {
   onMinimize?: () => void;
   userCredits?: number;
   userId?: string;
-  personalityType?: string;
+  personalityType?: PersonalityType;
   name?: string;
   avatarUrl?: string;
 }
@@ -41,7 +42,7 @@ const AICompanionChat = ({
   } = useAICompanionWithMemory({ 
     companionId, 
     userId,
-    personalityType: personalityType as any,
+    personalityType: personalityType as PersonalityType,
     name,
     avatarUrl,
     lucoinBalance: userCredits
@@ -51,9 +52,14 @@ const AICompanionChat = ({
   const [localIsTyping, setLocalIsTyping] = useState(false);
   
   useEffect(() => {
-    // Initialize speech synthesis would be implemented in a real app
-    // initSpeechSynthesis();
-  }, []);
+    if (error) {
+      toast({
+        title: "Connection Error",
+        description: error,
+        variant: "destructive"
+      });
+    }
+  }, [error]);
   
   useEffect(() => {
     if (isTyping) {
@@ -67,28 +73,28 @@ const AICompanionChat = ({
     }
   }, [isTyping]);
   
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = useCallback((content: string) => {
     if (!content.trim()) return;
     sendMessage(content);
-  };
+  }, [sendMessage]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsOpen(false);
     if (onClose) onClose();
-  };
+  }, [onClose]);
   
-  const handleMinimize = () => {
+  const handleMinimize = useCallback(() => {
     setIsOpen(false);
     if (onMinimize) onMinimize();
-  };
+  }, [onMinimize]);
   
-  const handleMaximize = () => {
+  const handleMaximize = useCallback(() => {
     setIsOpen(true);
-  };
+  }, []);
   
-  const handleUnlockContent = () => {
+  const handleUnlockContent = useCallback(() => {
     processPremiumContent();
-  };
+  }, [processPremiumContent]);
 
   if (!isOpen) {
     return (
@@ -102,9 +108,6 @@ const AICompanionChat = ({
   }
 
   const hasSufficientCredits = userCredits === undefined || userCredits >= 0;
-  
-  // Determine dominant emotion for UI customization
-  const dominantEmotion = emotionalState?.dominantEmotion || 'neutral';
 
   return (
     <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[550px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
@@ -114,8 +117,29 @@ const AICompanionChat = ({
           name, 
           avatar_url: avatarUrl, 
           id: companionId,
-          description: `AI Companion with ${personalityType} personality`
-        } as any} 
+          description: `AI Companion with ${personalityType} personality`,
+          verification_status: 'verified',
+          user_id: 'system',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          gallery: [],
+          personality_traits: [],
+          body_type: 'athletic',
+          voice_type: 'sultry',
+          relationship_level: {
+            trust: 70,
+            affection: 70,
+            obedience: 70,
+            intimacy: 70
+          },
+          engagement_stats: {
+            chat_messages: 0,
+            images_generated: 0,
+            voice_messages: 0,
+            last_interaction: null
+          },
+          is_preset: true
+        }} 
         onClose={handleClose}
         onMinimize={handleMinimize}
         credits={userCredits}
