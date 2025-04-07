@@ -13,10 +13,9 @@ import LucieInputBox from './lucie-assistant/LucieInputBox';
 import LucieTypingIndicator from './lucie-assistant/LucieTypingIndicator';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
 import { useAuth } from '@/hooks/auth';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { neuralHub, ContentType as NeuralHubContentType } from '@/services/neural/HermesOxumNeuralHub';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ContentType } from '@/hooks/useVirtualContent';
 
 interface SchaubergerLucieAssistantProps {
   initiallyOpen?: boolean;
@@ -151,7 +150,7 @@ const SchaubergerLucieAssistant = ({
       // Update the HERMES-OXUM system with this interaction
       neuralHub.applyBoostToContent(
         'user-message',
-        'profile' as ContentType,
+        'profile' as NeuralHubContentType,
         vortexStrength / 100, // Normalized vortex strength as base score
         undefined,
         undefined
