@@ -11,6 +11,7 @@ export interface LucieMessage {
   timestamp: Date;
   suggestedActions?: string[];
   links?: { text: string; url: string }[];
+  emotion?: string;
 }
 
 export interface UserContext {
@@ -25,6 +26,7 @@ export function useLucieAssistant() {
   const [isTyping, setIsTyping] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [apiAvailable, setApiAvailable] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -40,7 +42,8 @@ export function useLucieAssistant() {
           "Find escorts near me",
           "Browse creator content",
           "Check my wallet"
-        ]
+        ],
+        emotion: "friendly"
       };
       
       setMessages([welcomeMessage]);
@@ -71,15 +74,18 @@ export function useLucieAssistant() {
     const genericResponses = [
       {
         content: "I'm sorry, I'm currently experiencing connection issues. Please try again later.",
-        suggestedActions: ["Try again", "Contact support", "Browse escort profiles"]
+        suggestedActions: ["Try again", "Contact support", "Browse escort profiles"],
+        emotion: "apologetic"
       },
       {
         content: "I apologize for the inconvenience. Our AI service is temporarily unavailable. In the meantime, you can browse our top profiles.",
-        suggestedActions: ["Show top profiles", "Send feedback", "Check my account"]
+        suggestedActions: ["Show top profiles", "Send feedback", "Check my account"],
+        emotion: "concerned"
       },
       {
         content: "Sorry about that! Our servers are a bit busy right now. Would you like to check out some of our featured content instead?",
-        suggestedActions: ["See featured content", "Browse new escorts", "Help with something else"]
+        suggestedActions: ["See featured content", "Browse new escorts", "Help with something else"],
+        emotion: "friendly"
       }
     ];
 
@@ -102,9 +108,29 @@ export function useLucieAssistant() {
       role: 'assistant',
       content: response.content,
       timestamp: new Date(),
-      suggestedActions: response.suggestedActions
+      suggestedActions: response.suggestedActions,
+      emotion: response.emotion
     };
   }, []);
+
+  // Retry mechanism for API calls
+  const resetApiStatus = useCallback(() => {
+    // After 5 minutes, try the API again
+    const timeout = setTimeout(() => {
+      console.log('Resetting API availability status');
+      setApiAvailable(true);
+      setRetryCount(0);
+    }, 5 * 60 * 1000); // 5 minutes
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Effect to reset API status periodically
+  useEffect(() => {
+    if (!apiAvailable && retryCount < 3) {
+      return resetApiStatus();
+    }
+  }, [apiAvailable, retryCount, resetApiStatus]);
 
   // Send a message to Lucie
   const sendMessage = useCallback(async (content: string) => {
@@ -144,13 +170,20 @@ export function useLucieAssistant() {
         }
       });
       
-      if (error || (data && data.error && data.error.includes('quota'))) {
-        console.error('Error sending message to Lucie:', error || data.error);
+      if (error) {
+        console.error('Error invoking Lucie chat function:', error);
+        throw new Error(error.message);
+      }
+      
+      if (data && data.error) {
+        console.error('Lucie chat function returned error:', data.error);
         
         // If there's a quota error, mark API as unavailable
-        if (data && data.error && data.error.includes('quota')) {
+        if (data.error.includes('quota') || data.error.includes('OpenAI API quota exceeded')) {
           setApiAvailable(false);
+          setRetryCount(prev => prev + 1);
           console.log('OpenAI API quota exceeded, using fallback responses');
+          resetApiStatus();
         }
         
         // Use fallback response
@@ -164,12 +197,13 @@ export function useLucieAssistant() {
           content: data.text,
           timestamp: new Date(),
           suggestedActions: data.suggestedActions || [],
-          links: data.links || []
+          links: data.links || [],
+          emotion: data.emotion || 'neutral'
         };
         
         setMessages(prev => [...prev, lucieResponse]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message to Lucie:', error);
       
       toast({
@@ -181,10 +215,18 @@ export function useLucieAssistant() {
       // Use fallback response
       const fallbackMessage = getFallbackResponse(content);
       setMessages(prev => [...prev, fallbackMessage]);
+      
+      // Mark API as potentially unavailable after consecutive errors
+      if (retryCount >= 2) {
+        setApiAvailable(false);
+        resetApiStatus();
+      } else {
+        setRetryCount(prev => prev + 1);
+      }
     } finally {
       setIsTyping(false);
     }
-  }, [apiAvailable, formatChatHistory, getFallbackResponse, getUserContext, toast]);
+  }, [apiAvailable, formatChatHistory, getFallbackResponse, getUserContext, resetApiStatus, retryCount, toast]);
   
   // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {

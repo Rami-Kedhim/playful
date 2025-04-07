@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { getEmotionClass } from './utils/emotionUtils';
 import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
+import { Volume2, VolumeX } from 'lucide-react';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
@@ -82,12 +83,13 @@ const AICompanionMessage = ({
           {/* Speech button - only for AI messages */}
           {isAI && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleSpeakMessage}
-              className="self-end mt-2 h-6 px-2"
+              className="self-end mt-2 h-6 px-2 flex items-center gap-1"
             >
-              {speaking ? 'Stop' : 'Speak'} 
+              {speaking ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
+              <span>{speaking ? 'Stop' : 'Speak'}</span>
             </Button>
           )}
         </div>

@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
@@ -17,6 +16,7 @@ serve(async (req) => {
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
     
     if (!OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY is not set in environment variables')
       // Handle missing API key gracefully
       return new Response(
         JSON.stringify({
@@ -40,6 +40,8 @@ serve(async (req) => {
       { role: 'user', content: message }
     ]
 
+    console.log('Sending request to OpenAI API with key:', OPENAI_API_KEY.substring(0, 5) + '...')
+    
     try {
       // Call OpenAI
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -56,17 +58,34 @@ serve(async (req) => {
         }),
       })
 
+      console.log('OpenAI API response status:', response.status)
+
       if (!response.ok) {
         const error = await response.json()
         console.error('OpenAI API error:', JSON.stringify(error))
         
         // Check if it's a quota error and handle accordingly
-        if (error.error?.type === 'insufficient_quota') {
+        if (error.error?.type === 'insufficient_quota' || error.error?.code === 'insufficient_quota') {
           return new Response(
             JSON.stringify({ 
-              error: `OpenAI API error: ${JSON.stringify(error)}`, 
+              error: `OpenAI API quota exceeded`, 
               text: "I'm currently experiencing high demand. Please try again later or ask for assistance from our support team.",
               suggestedActions: ["Contact Support", "Browse Profiles", "View FAQs"]
+            }),
+            { 
+              status: 500, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+        
+        // Handle authentication errors
+        if (error.error?.type === 'invalid_request_error' || error.error?.code === 'invalid_api_key') {
+          return new Response(
+            JSON.stringify({ 
+              error: `OpenAI API authentication error`, 
+              text: "I'm having trouble connecting to my knowledge base. The system administrator should check the API configuration.",
+              suggestedActions: ["Contact Support", "Browse Profiles", "Try Again Later"]
             }),
             { 
               status: 500, 
@@ -79,6 +98,7 @@ serve(async (req) => {
       }
 
       const data = await response.json()
+      console.log('OpenAI API response received successfully')
       
       // Process response to extract any special actions or UI elements
       const processedResponse = processResponse(data.choices[0].message.content)
