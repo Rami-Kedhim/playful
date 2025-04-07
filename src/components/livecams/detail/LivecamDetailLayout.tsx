@@ -1,16 +1,25 @@
 
 import { ReactNode } from "react";
 import { Separator } from "@/components/ui/separator";
+import MainLayout from "@/components/layout/MainLayout";
 
 export interface LivecamDetailLayoutProps {
   sidebar: ReactNode;
   mainContent: ReactNode;
   chatContent?: ReactNode;
+  title?: ReactNode;
 }
 
-const LivecamDetailLayout = ({ sidebar, mainContent, chatContent }: LivecamDetailLayoutProps) => {
+const LivecamDetailLayout = ({ 
+  sidebar, 
+  mainContent, 
+  chatContent, 
+  title 
+}: LivecamDetailLayoutProps) => {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <MainLayout showHeader={false} containerClass="container mx-auto px-4 py-8">
+      {title && <div className="mb-6">{title}</div>}
+      
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main content area - video stream and information */}
         <div className="lg:col-span-6 xl:col-span-7 order-2 lg:order-1">
@@ -38,7 +47,7 @@ const LivecamDetailLayout = ({ sidebar, mainContent, chatContent }: LivecamDetai
       </div>
       
       <Separator className="my-8" />
-    </div>
+    </MainLayout>
   );
 };
 
