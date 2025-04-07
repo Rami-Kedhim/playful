@@ -41,16 +41,13 @@ const AIChat: React.FC<AIChatProps> = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   
-  // Placeholder for subscription status and lucoin balance
   const subscriptionStatus = 'active';
   const lucoinBalance = 100; // Default value
   
-  // Load initial messages
   useEffect(() => {
     loadInitialMessages();
   }, [loadInitialMessages]);
   
-  // Scroll to bottom on new messages
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -149,7 +146,7 @@ const AIChat: React.FC<AIChatProps> = ({
           {messages.map((message) => (
             <AIMessageComponent 
               key={message.id} 
-              message={message as import('@/types/ai-messages').AIMessage} 
+              message={message} 
               onMessageUnlocked={handleMessageUnlocked}
             />
           ))}

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
@@ -18,7 +19,10 @@ export const useAssessment = () => {
     try {
       await analyzeUser();
       
-      const assessment = assessmentService.generateAssessment(enhancedProfile);
+      const assessment = await assessmentService.analyzeUserBehavior(
+        user.id, 
+        [] // Providing empty behavior events array as placeholder
+      );
       
       setAssessmentResults(assessment);
       return assessment;
@@ -40,14 +44,18 @@ export const useAssessment = () => {
   const getPriorityInsights = useCallback(() => {
     if (!assessment) return [];
     
-    return assessmentService.getPriorityInsights(enhancedProfile);
-  }, [assessment, assessmentService, enhancedProfile]);
+    return assessment.insights.filter(insight => 
+      insight.severityLevel === 'high' || insight.severityLevel === 'medium'
+    );
+  }, [assessment]);
   
   const filterInsightsByCategory = useCallback((category: AssessmentCategory) => {
     if (!assessment) return [];
     
-    return assessmentService.getInsightsByCategory(enhancedProfile, category);
-  }, [assessment, assessmentService, enhancedProfile]);
+    return assessment.insights.filter(insight => 
+      insight.category === category
+    );
+  }, [assessment]);
 
   return {
     runAssessment,
