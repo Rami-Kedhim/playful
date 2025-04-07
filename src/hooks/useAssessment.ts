@@ -74,7 +74,7 @@ export const useAssessment = () => {
             brandResonance: assessment.psychographicProfile.brandResonance || BrandResonanceStage.Awareness,
             identifiedSignals: assessment.psychographicProfile.identifiedSignals || []
           } : {
-            // Fix: provide all required properties for the psychographicProfile object
+            // Provide all required properties for the psychographicProfile object
             personalityTraits: [],
             interests: [],
             values: [],
