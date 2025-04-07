@@ -1,6 +1,7 @@
 
 // Central export file for all auth-related hooks and providers
-import { useAuth, AuthProvider } from './useAuth';
+import { useAuth } from './useAuth';
+import { AuthProvider } from './useAuthProvider';
 import { useRole } from './useRole';
 import { useBehavioralProfile } from './useBehavioralProfile';
 import { useGouldianFilters } from './useGouldianFilters';
