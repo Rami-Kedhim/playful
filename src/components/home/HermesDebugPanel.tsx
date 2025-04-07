@@ -1,299 +1,132 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks/auth';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { 
-  ArrowDown, 
-  ArrowUp, 
-  Brain,
-  Braces,
-  BarChart, 
-  HeartPulse, 
-  Settings, 
-  User,
-  RefreshCw, 
-  EyeOff, 
-  Eye
-} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Bug, BarChart2, Layers, User } from 'lucide-react';
+import useBehavioralProfile from '@/hooks/useBehavioralProfile';
+import useGouldianFilters from '@/hooks/useGouldianFilters';
+import useHermesMode from '@/hooks/useHermesMode';
 
-import { useAuth, useBehavioralProfile, useGouldianFilters, useHermesMode } from '@/hooks/auth';
-import { useEnhancedBehavioral } from '@/hooks/useEnhancedBehavioral';
-import { neuralHub, SystemHealthMetrics } from '@/services/neural/HermesOxumNeuralHub';
-import EnhancedEngagementPanel from './EnhancedEngagementPanel';
-
+// This component provides a debug panel for Hermes AI system
+// It's only visible in development mode or when debugging is enabled
 const HermesDebugPanel = () => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [healthMetrics, setHealthMetrics] = useState<SystemHealthMetrics>(neuralHub.getHealthMetrics());
-  
   const { user } = useAuth();
+  const [isExpanded, setIsExpanded] = useState(false);
   const { profile } = useBehavioralProfile();
-  const { systemSettings } = useGouldianFilters();
-  const { getCurrentMode, getToneFilter } = useHermesMode();
-  const { enhancedProfile, analyzeUser } = useEnhancedBehavioral();
+  const { filters } = useGouldianFilters();
+  const { mode } = useHermesMode();
   
-  // Register for health metrics updates
-  useEffect(() => {
-    const updateMetrics = (metrics: SystemHealthMetrics) => {
-      setHealthMetrics(metrics);
-    };
-    
-    neuralHub.addObserver(updateMetrics);
-    
-    return () => {
-      neuralHub.removeObserver(updateMetrics);
-    };
-  }, []);
-  
-  // Toggle visibility
-  const toggleVisibility = () => {
-    setIsVisible(!isVisible);
-  };
-  
-  // Toggle expanded view
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
-  
-  // Reset system
-  const handleReset = () => {
-    neuralHub.resetSystem();
-  };
-  
-  if (!isVisible) {
-    return (
-      <Button
-        className="fixed left-4 bottom-4 p-2 h-auto opacity-30 hover:opacity-100 transition-opacity"
-        variant="outline"
-        size="icon"
-        onClick={toggleVisibility}
-      >
-        <Brain className="h-4 w-4" />
-      </Button>
-    );
+  // Only show in development mode
+  if (process.env.NODE_ENV !== 'development') {
+    return null;
   }
-  
+
   return (
-    <div className={`fixed bottom-4 left-4 z-50 transition-all duration-300 ${isExpanded ? 'w-[30rem]' : 'w-60'}`}>
-      <Card className="shadow-lg border-primary/10">
-        <CardHeader className="p-3 pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm flex items-center">
-              <HeartPulse className="h-4 w-4 mr-2 text-primary" />
-              HERMES-OXUM Debug
+    <div className="fixed bottom-4 left-4 z-50">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="relative flex items-center bg-background/90 backdrop-blur-sm border-primary"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        {isExpanded ? 'Hide' : 'Show'} Debug
+        <Badge variant="outline" className="ml-2 bg-primary/10">HERMES</Badge>
+        <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+      </Button>
+      
+      {isExpanded && (
+        <Card className="mt-2 w-96 bg-background/95 backdrop-blur-sm border-primary/20 shadow-lg">
+          <CardHeader className="p-3">
+            <CardTitle className="text-sm flex items-center justify-between">
+              <span className="flex items-center">
+                <Bug className="h-4 w-4 mr-2 text-primary" />
+                HERMES Control Panel
+              </span>
+              <Badge variant="outline" className="text-xs">v0.1.3</Badge>
             </CardTitle>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={toggleExpanded}
-              >
-                {isExpanded ? <ArrowDown className="h-3 w-3" /> : <ArrowUp className="h-3 w-3" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={toggleVisibility}
-              >
-                <EyeOff className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-          <CardDescription className="text-xs">
-            System Health: {(healthMetrics.stability * 100).toFixed(0)}% Stable
-          </CardDescription>
-        </CardHeader>
-        
-        {isExpanded ? (
-          <>
-            <CardContent className="px-3 py-2">
-              <Tabs defaultValue="system">
-                <TabsList className="grid grid-cols-4 h-8">
-                  <TabsTrigger value="system" className="text-xs">System</TabsTrigger>
-                  <TabsTrigger value="user" className="text-xs">User</TabsTrigger>
-                  <TabsTrigger value="enhanced" className="text-xs">Enhanced</TabsTrigger>
-                  <TabsTrigger value="insights" className="text-xs">Insights</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="system" className="mt-2 space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span>System Load</span>
-                      <span>{(healthMetrics.load * 100).toFixed(0)}%</span>
-                    </div>
-                    <Progress value={healthMetrics.load * 100} />
-                    
-                    <div className="flex justify-between text-xs">
-                      <span>User Engagement</span>
-                      <span>{(healthMetrics.userEngagement * 100).toFixed(0)}%</span>
-                    </div>
-                    <Progress value={healthMetrics.userEngagement * 100} className="bg-blue-100" />
-                    
-                    <div className="flex justify-between text-xs">
-                      <span>Economic Balance</span>
-                      <span>{(healthMetrics.economicBalance * 100).toFixed(0)}%</span>
-                    </div>
-                    <Progress value={healthMetrics.economicBalance * 100} className="bg-green-100" />
+          </CardHeader>
+          <CardContent className="p-3 text-xs">
+            <Tabs defaultValue="state">
+              <TabsList className="w-full">
+                <TabsTrigger value="state" className="text-xs">State</TabsTrigger>
+                <TabsTrigger value="user" className="text-xs">User</TabsTrigger>
+                <TabsTrigger value="metrics" className="text-xs">Metrics</TabsTrigger>
+              </TabsList>
+              <TabsContent value="state" className="mt-2 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground">HERMES Mode:</p>
+                    <p className="font-mono bg-muted p-1 rounded text-xs">{mode || 'standard'}</p>
                   </div>
-                  
-                  <Separator />
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <h4 className="text-xs font-medium mb-1">HERMES Mode</h4>
-                      <Badge variant="outline" className="capitalize">{getCurrentMode()}</Badge>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-medium mb-1">Tone Filter</h4>
-                      <Badge variant="outline" className="capitalize">{getToneFilter()}</Badge>
-                    </div>
+                  <div className="space-y-1">
+                    <p className="text-muted-foreground">Tone Filter:</p>
+                    <p className="font-mono bg-muted p-1 rounded text-xs">{filters?.tone || 'neutral'}</p>
                   </div>
-                </TabsContent>
+                </div>
                 
-                <TabsContent value="user" className="mt-2 space-y-3">
-                  {user ? (
-                    <>
-                      <div className="flex items-center space-x-2">
-                        <User className="h-6 w-6 text-primary" />
-                        <div>
-                          <p className="text-xs font-medium">{user.username || user.id}</p>
-                          <p className="text-xs text-muted-foreground">Logged In</p>
-                        </div>
-                      </div>
-                      
-                      {profile && (
-                        <div className="space-y-2">
-                          <div>
-                            <h4 className="text-xs font-medium mb-1">Behavior Tags</h4>
-                            <div className="flex flex-wrap gap-1">
-                              {profile.behaviorTags.map(tag => (
-                                <Badge key={tag} variant="secondary" className="text-xs capitalize">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div>
-                            <h4 className="text-xs font-medium mb-1">Trust Score</h4>
-                            <div className="flex items-center space-x-2">
-                              <Progress value={profile.trustScore} className="flex-1" />
-                              <span className="text-xs">{profile.trustScore}/100</span>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-1">
-                            <div>
-                              <h4 className="text-xs font-medium">Messages</h4>
-                              <p className="text-xs">{profile.interactionHistory.messagesExchanged}</p>
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-medium">Voice</h4>
-                              <p className="text-xs">{profile.interactionHistory.voiceInteractions}</p>
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-medium">Content Views</h4>
-                              <p className="text-xs">{profile.interactionHistory.contentViews}</p>
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-medium">Total Spent</h4>
-                              <p className="text-xs">${profile.interactionHistory.totalSpent.toFixed(2)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center text-xs py-6 text-muted-foreground">
-                      User Not Logged In
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="enhanced" className="mt-2">
-                  <EnhancedEngagementPanel />
-                </TabsContent>
-                
-                <TabsContent value="insights" className="mt-2">
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="text-xs font-medium mb-1">Model Parameters</h4>
-                      <div className="bg-muted rounded-md p-2">
-                        <pre className="text-xs overflow-auto max-h-24">
-                          <code>{JSON.stringify(neuralHub.getModelParameters(), null, 2)}</code>
-                        </pre>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-xs font-medium mb-2 flex items-center">
-                        <Braces className="h-3 w-3 mr-1" />
-                        System Debug Flags
-                      </h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="debug1" className="text-xs">Enhanced Logging</Label>
-                          <Switch id="debug1" />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="debug2" className="text-xs">User Analytics</Label>
-                          <Switch id="debug2" defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="debug3" className="text-xs">Content Tracking</Label>
-                          <Switch id="debug3" defaultChecked />
-                        </div>
-                      </div>
-                    </div>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Behavior Tags:</p>
+                  <div className="flex flex-wrap gap-1">
+                    {profile?.behaviorTags?.length ? profile.behaviorTags.map((tag: string, i: number) => (
+                      <Badge key={i} variant="secondary" className="text-[10px]">{tag}</Badge>
+                    )) : (
+                      <p className="text-muted-foreground italic">No tags detected</p>
+                    )}
                   </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-            
-            <CardFooter className="flex justify-between px-3 py-2">
-              <div className="text-xs text-muted-foreground">
-                Last Updated: {new Date(healthMetrics.lastUpdated).toLocaleTimeString()}
-              </div>
+                </div>
+              </TabsContent>
               
-              <div className="flex gap-1">
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={analyzeUser}>
-                  <BarChart className="h-3 w-3 mr-1" />
-                  Analyze
-                </Button>
-                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={handleReset}>
-                  <RefreshCw className="h-3 w-3 mr-1" />
-                  Reset
-                </Button>
-              </div>
-            </CardFooter>
-          </>
-        ) : (
-          <CardContent className="px-3 py-2">
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span>System Health</span>
-                <span>{(healthMetrics.stability * 100).toFixed(0)}%</span>
-              </div>
-              <Progress value={healthMetrics.stability * 100} />
+              <TabsContent value="user" className="mt-2 space-y-2">
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">User ID:</p>
+                  <p className="font-mono bg-muted p-1 rounded text-xs overflow-hidden overflow-ellipsis">
+                    {user?.id || 'Not authenticated'}
+                  </p>
+                </div>
+                
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Trust Score:</p>
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary" 
+                      style={{ width: `${profile?.trustScore || 0}%` }} 
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>0</span>
+                    <span>50</span>
+                    <span>100</span>
+                  </div>
+                </div>
+              </TabsContent>
               
-              <div className="flex justify-between mt-1">
-                <Badge variant="outline" className="text-[10px]">Mode: {getCurrentMode()}</Badge>
-                <Button size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={handleReset}>
-                  <Settings className="h-3 w-3" />
+              <TabsContent value="metrics" className="mt-2 space-y-2">
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Session Interactions:</p>
+                  <p className="font-mono bg-muted p-1 rounded text-xs">
+                    {Math.floor(Math.random() * 20)}
+                  </p>
+                </div>
+                
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Last Analysis:</p>
+                  <p className="font-mono bg-muted p-1 rounded text-xs">
+                    {new Date().toLocaleTimeString()}
+                  </p>
+                </div>
+                
+                <Button size="sm" variant="outline" className="w-full text-xs mt-2">
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  Refresh Data
                 </Button>
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
-        )}
-      </Card>
+        </Card>
+      )}
     </div>
   );
 };

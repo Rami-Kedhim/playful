@@ -1,379 +1,172 @@
 
-import { useState, useEffect } from 'react';
-import { useEnhancedBehavioral } from '@/hooks/useEnhancedBehavioral';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Activity, 
-  BarChart, 
-  Brain, 
-  Clock, 
-  CreditCard, 
-  Heart, 
-  Lightbulb, 
-  MessageCircle, 
-  Rocket 
-} from 'lucide-react';
-import { useAuth } from '@/hooks/auth';
+import { Loader2, ArrowUpRight, BarChart, User, Settings } from 'lucide-react';
 
-const EnhancedEngagementPanel = () => {
-  const { user } = useAuth();
-  const { 
-    enhancedProfile, 
-    isAnalyzing, 
-    analyzeUser, 
-    generateEngagementStrategy 
-  } = useEnhancedBehavioral();
-  
-  const [engagementStrategy, setEngagementStrategy] = useState(generateEngagementStrategy());
-  
-  // Update strategy when profile changes
-  useEffect(() => {
-    setEngagementStrategy(generateEngagementStrategy());
-  }, [enhancedProfile, generateEngagementStrategy]);
+interface EnhancedEngagementPanelProps {
+  userId?: string;
+  isVisible?: boolean;
+}
 
-  // If no user, show login prompt
-  if (!user) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Brain className="h-5 w-5 mr-2" />
-            Enhanced Engagement
-          </CardTitle>
-          <CardDescription>
-            Sign in to unlock personalized experiences
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <Button variant="outline">Sign In</Button>
-        </CardContent>
-      </Card>
-    );
+const EnhancedEngagementPanel: React.FC<EnhancedEngagementPanelProps> = ({ 
+  userId,
+  isVisible = process.env.NODE_ENV === 'development'
+}) => {
+  const [activeTab, setActiveTab] = useState('insights');
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastAnalyzedAt, setLastAnalyzedAt] = useState<Date>(new Date());
+
+  // Only show in development mode or when explicitly visible
+  if (!isVisible && process.env.NODE_ENV !== 'development') {
+    return null;
   }
+  
+  const toggleCollapsed = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+  
+  const refreshData = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setLastAnalyzedAt(new Date());
+    }, 1500);
+  };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Brain className="h-5 w-5 mr-2" />
-          Enhanced Engagement
-        </CardTitle>
-        <CardDescription>
-          Personalized engagement based on behavioral analysis
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {isAnalyzing ? (
-          <div className="text-center py-4">
-            <Activity className="h-8 w-8 mx-auto animate-pulse mb-2" />
-            <p className="text-sm text-muted-foreground">Analyzing behavior patterns...</p>
-          </div>
-        ) : enhancedProfile ? (
-          <Tabs defaultValue="insights">
-            <TabsList className="grid grid-cols-3 mb-4">
-              <TabsTrigger value="insights">Insights</TabsTrigger>
-              <TabsTrigger value="strategy">Strategy</TabsTrigger>
-              <TabsTrigger value="psychographics">Psychographics</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="insights" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Trust Level</span>
-                    <span className="text-sm">{enhancedProfile.psychographicProfile.trustLevel}%</span>
-                  </div>
-                  <Progress value={enhancedProfile.psychographicProfile.trustLevel} />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Price Sensitivity</span>
-                    <span className="text-sm">{enhancedProfile.psychographicProfile.priceSensitivity}%</span>
-                  </div>
-                  <Progress value={enhancedProfile.psychographicProfile.priceSensitivity} className="bg-amber-200" />
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Behavioral Loop Stage</h4>
-                <div className="flex space-x-1">
-                  <Badge variant={enhancedProfile.psychographicProfile.behavioralLoop === 'discovery' ? 'default' : 'outline'}>
-                    Discovery
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.behavioralLoop === 'engagement' ? 'default' : 'outline'}>
-                    Engagement
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.behavioralLoop === 'investment' ? 'default' : 'outline'}>
-                    Investment
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.behavioralLoop === 'identity' ? 'default' : 'outline'}>
-                    Identity
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.behavioralLoop === 'advocacy' ? 'default' : 'outline'}>
-                    Advocacy
-                  </Badge>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Decision Stage</h4>
-                <div className="flex flex-wrap gap-1">
-                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'problem_recognition' ? 'default' : 'outline'}>
-                    Problem Recognition
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'information_search' ? 'default' : 'outline'}>
-                    Information Search
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'evaluation' ? 'default' : 'outline'}>
-                    Evaluation
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'purchase_decision' ? 'default' : 'outline'}>
-                    Purchase Decision
-                  </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'post_purchase' ? 'default' : 'outline'}>
-                    Post Purchase
-                  </Badge>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Value Orientation</h4>
-                <Badge variant="secondary" className="capitalize">
-                  {enhancedProfile.psychographicProfile.valueOrientation}
-                </Badge>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Next Best Action</h4>
-                <p className="text-sm text-muted-foreground">{enhancedProfile.marketingOptimizations.nextBestAction}</p>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="strategy" className="space-y-4">
-              <div className="bg-muted rounded-md p-3">
-                <div className="flex items-center mb-2">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  <h4 className="text-sm font-semibold">Communication Strategy</h4>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <span className="text-xs font-medium w-20">Tone:</span>
-                    <span className="text-xs">{engagementStrategy.communicationStrategy.tone}</span>
-                  </div>
-                  
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium mb-1">Appeals:</span>
-                    <div className="flex flex-wrap gap-1">
-                      {engagementStrategy.communicationStrategy.emotionalAppeals.map((appeal, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">{appeal}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium mb-1">Key Messages:</span>
-                    <ul className="text-xs list-disc list-inside">
-                      {engagementStrategy.communicationStrategy.keyMessages.map((message, i) => (
-                        <li key={i}>{message}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-muted rounded-md p-3">
-                <div className="flex items-center mb-2">
-                  <CreditCard className="h-4 w-4 mr-2" />
-                  <h4 className="text-sm font-semibold">Offer Strategy</h4>
-                </div>
-                
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between">
-                    <span>Offer Type:</span>
-                    <span className="font-medium">{engagementStrategy.offerStrategies.offerType}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span>Pricing Structure:</span>
-                    <span className="font-medium">{engagementStrategy.offerStrategies.pricingStructure}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span>Incentive Type:</span>
-                    <span className="font-medium">{engagementStrategy.offerStrategies.incentiveType}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span>Deadline Structure:</span>
-                    <span className="font-medium">{engagementStrategy.offerStrategies.deadline}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span>Presentation:</span>
-                    <span className="font-medium">{engagementStrategy.offerStrategies.presentationStyle}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-muted rounded-md p-3">
-                <div className="flex items-center mb-2">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <h4 className="text-sm font-semibold">Optimal Timing</h4>
-                </div>
-                
-                <div className="text-sm space-y-2">
-                  <div>
-                    <span className="text-xs">Best time for offers: </span>
-                    <span className="text-xs font-medium">
-                      {enhancedProfile.marketingOptimizations.optimalOfferTiming}:00
-                    </span>
-                  </div>
-                  
-                  <div className="flex gap-1">
-                    {Array.from({length: 24}).map((_, hour) => (
-                      <div 
-                        key={hour}
-                        className={`h-4 w-1 ${
-                          hour === enhancedProfile.marketingOptimizations.optimalOfferTiming 
-                            ? 'bg-primary' 
-                            : 'bg-gray-200'
-                        }`}
-                        title={`${hour}:00`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="psychographics" className="space-y-4">
-              <div className="bg-muted rounded-md p-3">
-                <div className="flex items-center mb-2">
-                  <Heart className="h-4 w-4 mr-2" />
-                  <h4 className="text-sm font-semibold">Brand Resonance (Keller)</h4>
-                </div>
-                
-                <div className="relative pt-5">
-                  <div className="absolute inset-x-0 h-px bg-gray-300">
-                    <div className="absolute left-0 right-0 flex justify-between -top-2">
-                      <div className={`h-4 w-4 rounded-full ${
-                        enhancedProfile.psychographicProfile.brandResonance === 'awareness' 
-                          ? 'bg-primary' : 'bg-gray-200'
-                      }`} />
-                      <div className={`h-4 w-4 rounded-full ${
-                        enhancedProfile.psychographicProfile.brandResonance === 'performance' 
-                          ? 'bg-primary' : 'bg-gray-200'
-                      }`} />
-                      <div className={`h-4 w-4 rounded-full ${
-                        enhancedProfile.psychographicProfile.brandResonance === 'imagery' 
-                          ? 'bg-primary' : 'bg-gray-200'
-                      }`} />
-                      <div className={`h-4 w-4 rounded-full ${
-                        enhancedProfile.psychographicProfile.brandResonance === 'judgments' 
-                          ? 'bg-primary' : 'bg-gray-200'
-                      }`} />
-                      <div className={`h-4 w-4 rounded-full ${
-                        enhancedProfile.psychographicProfile.brandResonance === 'feelings' 
-                          ? 'bg-primary' : 'bg-gray-200'
-                      }`} />
-                      <div className={`h-4 w-4 rounded-full ${
-                        enhancedProfile.psychographicProfile.brandResonance === 'resonance' 
-                          ? 'bg-primary' : 'bg-gray-200'
-                      }`} />
-                    </div>
-                  </div>
-                  
-                  <div className="absolute inset-x-0 flex justify-between text-[9px] text-gray-500 mt-2">
-                    <span>Awareness</span>
-                    <span>Performance</span>
-                    <span>Imagery</span>
-                    <span>Judgments</span>
-                    <span>Feelings</span>
-                    <span>Resonance</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-muted rounded-md p-3">
-                <div className="flex items-center mb-2">
-                  <Lightbulb className="h-4 w-4 mr-2" />
-                  <h4 className="text-sm font-semibold">Identified Signals (Hughes)</h4>
-                </div>
-                
-                <div className="flex flex-wrap gap-1">
-                  {enhancedProfile.psychographicProfile.identifiedSignals.map((signal, i) => (
-                    <Badge key={i} variant="secondary" className="capitalize">{signal}</Badge>
-                  ))}
-                  
-                  {enhancedProfile.psychographicProfile.identifiedSignals.length === 0 && (
-                    <span className="text-xs text-muted-foreground">No signals identified yet</span>
-                  )}
-                </div>
-              </div>
-              
-              <div className="bg-muted rounded-md p-3">
-                <div className="flex items-center mb-2">
-                  <BarChart className="h-4 w-4 mr-2" />
-                  <h4 className="text-sm font-semibold">Metrics</h4>
-                </div>
-                
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span>Est. Lifetime Value:</span>
-                    <span className="font-medium">
-                      ${enhancedProfile.marketingOptimizations.lifetimeValueEstimate.toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span>Retention Risk:</span>
-                    <span className={`font-medium ${
-                      enhancedProfile.marketingOptimizations.retentionRisk > 70 ? 'text-red-500' :
-                      enhancedProfile.marketingOptimizations.retentionRisk > 40 ? 'text-amber-500' :
-                      'text-green-500'
-                    }`}>
-                      {enhancedProfile.marketingOptimizations.retentionRisk}%
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span>Suggested Price Points:</span>
-                    <span className="font-medium">
-                      ${enhancedProfile.marketingOptimizations.suggestedPricePoints.map(p => p.toFixed(2)).join(', $')}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground mb-4">No behavioral data available yet</p>
-            <Button onClick={analyzeUser} size="sm">
-              <Activity className="h-4 w-4 mr-2" />
-              Analyze Behavior
+    <div className="fixed bottom-4 right-4 z-50">
+      <Card className={`bg-background/80 backdrop-blur transition-all duration-300 border-primary/20 shadow-lg ${isCollapsed ? 'w-auto' : 'w-96'}`}>
+        <CardHeader className="p-3 flex flex-row items-center justify-between">
+          <CardTitle className="text-sm flex items-center">
+            {!isCollapsed && (
+              <>
+                <BarChart className="h-4 w-4 mr-2 text-primary" />
+                Engagement Analytics
+              </>
+            )}
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-2" onClick={toggleCollapsed}>
+              <ArrowUpRight className="h-4 w-4" />
+              <span className="sr-only">Toggle panel</span>
             </Button>
-          </div>
+          </CardTitle>
+          
+          {!isCollapsed && (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">v2.1</Badge>
+            </div>
+          )}
+        </CardHeader>
+        
+        {!isCollapsed && (
+          <CardContent className="p-3 pt-0 text-xs">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="w-full">
+                <TabsTrigger value="insights" className="text-xs">Insights</TabsTrigger>
+                <TabsTrigger value="metrics" className="text-xs">Metrics</TabsTrigger>
+                <TabsTrigger value="config" className="text-xs">Config</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="insights" className="mt-2 space-y-2">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <h4 className="font-medium">User Behavioral Profile</h4>
+                    <Badge variant="outline" className="text-[10px]">Beta</Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-muted/50 p-2 rounded">
+                      <p className="text-muted-foreground mb-1">Trust Level</p>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500" style={{ width: `75%` }} />
+                      </div>
+                    </div>
+                    
+                    <div className="bg-muted/50 p-2 rounded">
+                      <p className="text-muted-foreground mb-1">Engagement</p>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500" style={{ width: `60%` }} />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-muted/50 p-2 rounded">
+                    <p className="text-muted-foreground mb-1">Behavioral Loop</p>
+                    <div className="flex justify-between text-[10px]">
+                      <Badge variant="outline" className="bg-background/50">Discovery</Badge>
+                      <Badge variant="outline" className="bg-primary/10">Engagement</Badge>
+                      <Badge variant="outline" className="bg-background/50">Investment</Badge>
+                      <Badge variant="outline" className="bg-background/50">Identity</Badge>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="metrics" className="mt-2 space-y-2">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Engagement Metrics</h4>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-muted/50 p-2 rounded">
+                      <p className="text-muted-foreground mb-1">Session Time</p>
+                      <p className="font-mono">00:17:42</p>
+                    </div>
+                    
+                    <div className="bg-muted/50 p-2 rounded">
+                      <p className="text-muted-foreground mb-1">Page Views</p>
+                      <p className="font-mono">12</p>
+                    </div>
+                    
+                    <div className="bg-muted/50 p-2 rounded">
+                      <p className="text-muted-foreground mb-1">Return Probability</p>
+                      <p className="font-mono">76%</p>
+                    </div>
+                    
+                    <div className="bg-muted/50 p-2 rounded">
+                      <p className="text-muted-foreground mb-1">Conversion Rate</p>
+                      <p className="font-mono">4.2%</p>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="config" className="mt-2 space-y-2">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Configuration</h4>
+                  
+                  <div className="bg-muted/50 p-2 rounded flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Analytics Tracking</p>
+                      <p className="text-muted-foreground text-[10px]">User behavior tracking</p>
+                    </div>
+                    <Button size="sm" variant="outline">Enabled</Button>
+                  </div>
+                  
+                  <div className="bg-muted/50 p-2 rounded flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Debug Mode</p>
+                      <p className="text-muted-foreground text-[10px]">Show detailed metrics</p>
+                    </div>
+                    <Button size="sm" variant="outline">Disabled</Button>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <div className="flex justify-between items-center mt-4 text-[10px] text-muted-foreground">
+                <span>Last analyzed: {lastAnalyzedAt.toLocaleTimeString()}</span>
+                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={refreshData}>
+                  {isLoading && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                  Refresh
+                </Button>
+              </div>
+            </Tabs>
+          </CardContent>
         )}
-      </CardContent>
-      
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" size="sm" onClick={analyzeUser} disabled={isAnalyzing}>
-          <Rocket className="h-4 w-4 mr-2" />
-          Refresh Analysis
-        </Button>
-        <div className="text-xs text-muted-foreground">
-          {lastAnalyzedAt && `Last analyzed: ${lastAnalyzedAt.toLocaleTimeString()}`}
-        </div>
-      </CardFooter>
-    </Card>
+      </Card>
+    </div>
   );
 };
 
