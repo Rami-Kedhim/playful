@@ -13,7 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requiredRoles = [] 
 }) => {
-  const { isAuthenticated, isLoading, user, userRoles } = useAuth();
+  const { isAuthenticated, isLoading, userRoles } = useAuth();
   const location = useLocation();
 
   // Show loading state while authentication is being checked
@@ -29,7 +29,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     // Save the current path to redirect back after login
-    return <Navigate to={`/auth?from=${encodeURIComponent(location.pathname)}`} replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // Check role-based access if roles are required

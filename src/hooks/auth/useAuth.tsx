@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthUser, AuthResult } from '@/types/authTypes';
+import { AuthUser, AuthResult } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { useAuthState } from './useAuthState';
@@ -39,9 +39,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // First set up listener for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
         // Handle auth state changes
         setSession(currentSession);
+        setIsLoading(true);
         const currentUser = currentSession?.user || null;
         
         if (currentUser) {
@@ -59,32 +60,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Update state
           setIsAuthenticated(true);
-          // Set user without mutation
-          // @ts-ignore - we're building the user object correctly
-          window.tempUser = mappedUser;
-          // @ts-ignore - tempUser is set above
-          const userCopy = window.tempUser;
-          // @ts-ignore - we need to set the user
-          setUser(userCopy);
+          setUser(mappedUser);
           
-          // Fetch profile after auth state changes - using setTimeout to avoid potential deadlock
-          setTimeout(() => {
-            refreshProfile();
-          }, 0);
+          // Fetch profile after auth state changes
+          await refreshProfile();
         } else {
           setIsAuthenticated(false);
-          // @ts-ignore - we need to set the user to null
           setUser(null);
         }
 
         if (event === 'SIGNED_OUT') {
           // Clear all auth state
           setIsAuthenticated(false);
-          // @ts-ignore - we need to set the user to null
           setUser(null);
-          // @ts-ignore - we need to set profile to null
           setProfile(null);
         }
+        
+        setIsLoading(false);
       }
     );
 
@@ -108,7 +100,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           setSession(initialSession);
           setIsAuthenticated(true);
-          // @ts-ignore - we're building the user object correctly
           setUser(initialUser);
           await refreshProfile();
         }
@@ -263,6 +254,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return userRoles.includes(role);
   };
 
+  // Combine our hooks into one context value
   const authContextValue = {
     user,
     isAuthenticated,
