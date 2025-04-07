@@ -15,6 +15,7 @@ const EscortLiveStreams = () => {
   // Let's filter escorts who offer livestreams
   const escortsWithLiveStreams = escorts.map(escort => ({
     id: escort.id,
+    name: escort.name,
     username: escort.name.toLowerCase().replace(/\s+/g, '_'),
     displayName: escort.name,
     imageUrl: escort.imageUrl,

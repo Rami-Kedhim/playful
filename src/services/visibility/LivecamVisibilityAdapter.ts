@@ -3,7 +3,7 @@
  * Adapter to integrate livecams with the visibility system
  */
 import { visibilitySystem } from "./VisibilitySystem";
-import type { Livecam } from "@/types/livecams";
+import { Livecam } from "@/types/livecams";
 
 export class LivecamVisibilityAdapter {
   /**

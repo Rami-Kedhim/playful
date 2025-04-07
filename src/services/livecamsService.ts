@@ -1,4 +1,3 @@
-
 /**
  * Enhanced livecamsService that uses the LivecamScraper
  */
@@ -37,11 +36,12 @@ export const fetchLivecams = async (
         throw new Error("Invalid data format received from API");
       }
       
-      // Process and validate the models - same as before
+      // Process and validate the models
       const validatedModels = data.models.map((model: any) => {
         // Ensure the model has all required fields
         const validatedModel: LivecamModel = {
           id: model.id || `id-${Math.random().toString(36).substring(2)}`,
+          name: model.name || model.username || model.displayName || 'Unknown',
           username: model.username || 'unknown',
           displayName: model.displayName || model.username || 'Unknown',
           imageUrl: model.imageUrl || `https://picsum.photos/seed/${model.id || model.username}/800/450`,
@@ -95,7 +95,7 @@ export const fetchLivecams = async (
   }
 };
 
-// Helper function to generate mock data for development - kept the same
+// Helper function to generate mock data for development
 const getMockLivecams = (filters: LivecamsFilter): LivecamsResponse => {
   const { limit = 24, page = 1 } = filters;
   const mockModels: LivecamModel[] = [];
@@ -104,9 +104,11 @@ const getMockLivecams = (filters: LivecamsFilter): LivecamsResponse => {
   for (let i = 0; i < limit; i++) {
     const id = `model-${page}-${i}`;
     const seed = id + "-" + Date.now().toString().substring(8, 13);
+    const username = `model${page}${i}`;
     mockModels.push({
       id,
-      username: `model${page}${i}`,
+      name: `Model ${page}${i}`,
+      username,
       displayName: `Model ${page}${i}`,
       imageUrl: `https://picsum.photos/seed/${seed}/800/450`,
       thumbnailUrl: `https://picsum.photos/seed/${seed}/200/200`,

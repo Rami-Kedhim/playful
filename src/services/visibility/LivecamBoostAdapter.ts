@@ -3,7 +3,7 @@
  * Adapter to integrate livecam boosts with the visibility system
  */
 import { visibilitySystem } from "./VisibilitySystem";
-import type { Livecam } from "@/types/livecams";
+import { Livecam } from "@/types/livecams";
 import { calculateLivecamBoostScore, getViewerBasedBoostIntensity } from "@/utils/boost/livecamBoostScore";
 import { calculateBoostEffect } from "@/utils/boost/boostCalculation";
 

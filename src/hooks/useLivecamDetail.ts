@@ -9,6 +9,7 @@ const fetchLivecamDetails = async (username: string): Promise<LivecamModel | nul
   
   return {
     id: `livecam-${username}`,
+    name: username.charAt(0).toUpperCase() + username.slice(1),
     username,
     displayName: username.charAt(0).toUpperCase() + username.slice(1),
     imageUrl: `https://picsum.photos/seed/${username}/800/450`,

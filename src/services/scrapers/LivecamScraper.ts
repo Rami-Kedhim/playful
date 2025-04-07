@@ -107,11 +107,15 @@ export class LivecamScraper extends BaseScraperService {
       const category = this.categories.length > 0
         ? this.categories[Math.floor(Math.random() * this.categories.length)]
         : ['chat', 'dance', 'games', 'music', 'roleplay'][Math.floor(Math.random() * 5)];
-        
+      
+      const username = `model_${i}${Math.floor(Math.random() * 1000)}`;
+      const displayName = `Cam4Model ${i}`;
+      
       models.push({
         id,
-        username: `model_${i}${Math.floor(Math.random() * 1000)}`,
-        displayName: `Cam4Model ${i}`,
+        name: displayName,
+        username,
+        displayName,
         imageUrl: `https://picsum.photos/seed/${seed}/800/450`,
         thumbnailUrl: `https://picsum.photos/seed/${seed}/200/200`,
         isLive: Math.random() > 0.3,

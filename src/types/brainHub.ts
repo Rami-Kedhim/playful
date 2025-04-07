@@ -47,6 +47,11 @@ export interface BrainHubRequest {
   type: string;
   data: any;
   options?: any;
+  filters?: {
+    region?: string | null;
+    geoRestrictions?: boolean;
+    [key: string]: any;
+  };
 }
 
 export interface BrainHubResponse {
