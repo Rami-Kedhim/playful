@@ -3,7 +3,7 @@
  * SchaubergerLucieAssistant - Enhanced Lucie AI assistant with Schauberger flow principles
  * Implements natural flow dynamics, implosive logic, and emotion-aware responses
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, MessageCircle, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLucieAssistant, LucieMessage } from '@/hooks/useLucieAssistant';
@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/auth';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { ContentType } from '@/hooks/useVirtualContent';
 
 interface SchaubergerLucieAssistantProps {
   initiallyOpen?: boolean;
@@ -150,7 +151,7 @@ const SchaubergerLucieAssistant = ({
       // Update the HERMES-OXUM system with this interaction
       neuralHub.applyBoostToContent(
         'user-message',
-        'message',
+        'profile' as ContentType,
         vortexStrength / 100, // Normalized vortex strength as base score
         undefined,
         undefined
