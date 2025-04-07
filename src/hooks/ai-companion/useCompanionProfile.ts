@@ -1,64 +1,40 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid';
-import { CompanionProfile, CompanionMessage } from './types';
+import { useState, useEffect } from 'react';
+import { CompanionProfile } from './types';
 
-export function useCompanionProfile(companionId: string, initialMessages: CompanionMessage[]) {
+export const useCompanionProfile = (companionId: string, initialMessages: any[] = []) => {
   const [companion, setCompanion] = useState<CompanionProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
 
-  // Initialize default profile if none is provided
-  const initializeDefaultProfile = useCallback(() => {
-    // Set a default companion profile if none is loaded
-    return {
-      id: 'default-companion',
-      name: 'AI Assistant',
-      avatar: '/ai-assistant-avatar.png',
-      description: 'A helpful AI assistant',
-      personality: 'Friendly and professional',
-      visualCapabilities: false,
-      voiceType: 'feminine',
-      speechStyle: 'friendly'
-    };
-  }, []);
-
-  // Fetch companion profile
   useEffect(() => {
-    const fetchCompanionProfile = async () => {
+    const fetchCompanion = async () => {
       try {
-        // In a real app, this would fetch from the database
-        // For demo purposes, we'll use a mock response
+        // In a real implementation, this would fetch from an API
+        // For now, we'll create a simple mock
         const mockCompanion: CompanionProfile = {
           id: companionId,
-          name: "Sophia",
-          avatar: "/sophia-avatar.png",
-          personality: "Friendly, outgoing, empathetic",
-          description: "Virtual companion specializing in meaningful conversations",
-          visualCapabilities: true,
-          voiceType: "feminine",
-          speechStyle: "Articulate with a touch of playfulness"
+          name: 'AI Companion',
+          description: 'An intelligent AI companion to assist you.',
+          personality_traits: ['helpful', 'friendly', 'knowledgeable'],
+          speechStyle: 'friendly',
+          voice_id: 'onwK4e9ZLuTAKqWW03F9' // Daniel voice
         };
         
         setCompanion(mockCompanion);
       } catch (error) {
-        console.error('Error fetching companion:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load companion profile',
-          variant: 'destructive'
-        });
+        console.error('Error fetching companion profile:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    fetchCompanionProfile();
-  }, [companionId, toast]);
+
+    if (companionId) {
+      fetchCompanion();
+    }
+  }, [companionId]);
 
   return {
     companion,
     isLoading
   };
-}
+};

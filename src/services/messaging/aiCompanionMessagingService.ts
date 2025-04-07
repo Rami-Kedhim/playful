@@ -1,99 +1,134 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { AICompanionMessage } from '@/types/ai-companion';
-import { v4 as uuidv4 } from 'uuid';
+import { CompanionMessage, AICompanionVoiceConfig } from '@/hooks/ai-companion/types';
+import { voiceService } from '@/services/voiceService';
+import neuralHub from '@/services/neural/HermesOxumNeuralHub';
 
 /**
- * Service for handling AI companion messaging and voice functionality
+ * AICompanionMessagingService
+ * Connects AI companions and voice services to the HERMES-OXUM neural hub
  */
 export class AICompanionMessagingService {
-  /**
-   * Send a message to an AI companion
-   * @param userId User ID sending the message
-   * @param companionId Companion ID receiving the message
-   * @param content Message content
-   * @returns The created message object
-   */
-  async sendMessage(userId: string, companionId: string, content: string): Promise<AICompanionMessage> {
-    // Create a message object
-    const messageId = uuidv4();
-    const timestamp = new Date().toISOString();
-    
-    const message: AICompanionMessage = {
-      id: messageId,
-      user_id: userId,
-      companion_id: companionId,
-      content,
-      is_from_user: true,
-      created_at: timestamp
-    };
-    
-    // In a real implementation, this would save to the database
-    // For now we just return the message object
-    return message;
+  private static instance: AICompanionMessagingService;
+  private speakingQueue: string[] = [];
+  private isProcessingSpeech = false;
+
+  private constructor() {
+    // Private constructor for singleton pattern
   }
-  
+
+  public static getInstance(): AICompanionMessagingService {
+    if (!AICompanionMessagingService.instance) {
+      AICompanionMessagingService.instance = new AICompanionMessagingService();
+    }
+    return AICompanionMessagingService.instance;
+  }
+
   /**
-   * Get a voice response from an AI companion
-   * @param message Message to convert to speech
-   * @param voiceType Voice type to use
-   * @returns URL of audio file
+   * Process a message and optionally speak it
    */
-  async getVoiceResponse(message: string, voiceType?: string): Promise<string | null> {
+  public async processMessage(
+    message: CompanionMessage, 
+    autoSpeak: boolean = false,
+    voiceConfig?: AICompanionVoiceConfig
+  ): Promise<void> {
     try {
-      // Call the Supabase Edge Function for text-to-speech
-      const { data, error } = await supabase.functions.invoke('elevenlabs-tts', {
-        body: {
-          text: message,
-          voiceId: this.mapVoiceTypeToId(voiceType)
-        }
-      });
+      // Connect to neural hub for behavioral insights
+      const healthMetrics = neuralHub.getHealthMetrics();
       
-      if (error) {
-        console.error('Error calling ElevenLabs TTS:', error);
-        return null;
+      console.log(`Processing message with ID: ${message.id}, system load: ${healthMetrics.load}`);
+      
+      // Log to neural hub for behavioral analytics
+      if (message.role === 'user') {
+        this.logUserInteraction(message);
+      } else {
+        this.logCompanionResponse(message);
       }
       
-      if (!data || !data.audio) {
-        console.error('No audio data returned from ElevenLabs TTS');
-        return null;
+      // If autoSpeak is enabled, speak the message with proper voice
+      if (autoSpeak && message.role === 'assistant' && voiceConfig) {
+        await this.speakMessage(message.content, voiceConfig);
       }
-      
-      // In a production app, you might want to save this to storage
-      // For now we'll just return the base64 audio
-      return data.audio;
     } catch (error) {
-      console.error("Error getting voice response:", error);
-      return null;
+      console.error('Error processing companion message:', error);
     }
   }
   
   /**
-   * Map voice type to ElevenLabs voice ID
-   * @param voiceType Voice type
-   * @returns ElevenLabs voice ID
+   * Speak a message with given voice configuration
    */
-  private mapVoiceTypeToId(voiceType?: string): string | undefined {
-    if (!voiceType) return undefined;
+  public async speakMessage(content: string, voiceConfig: AICompanionVoiceConfig): Promise<boolean> {
+    try {
+      // Add to queue
+      this.speakingQueue.push(content);
+      
+      // Process queue if not already processing
+      if (!this.isProcessingSpeech) {
+        await this.processQueue(voiceConfig);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error speaking message:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Process the speech queue
+   */
+  private async processQueue(voiceConfig: AICompanionVoiceConfig): Promise<void> {
+    if (this.speakingQueue.length === 0) {
+      this.isProcessingSpeech = false;
+      return;
+    }
     
-    // Map voice types to ElevenLabs voice IDs
-    const voiceMap: Record<string, string> = {
-      'sultry': '21m00Tcm4TlvDq8ikWAM', // Rachel
-      'deep': 'pNInz6obpgDQGcFmaJgB', // Adam
-      'soft': 'EXAVITQu4vr4xnSDxMaL', // Sarah
-      'sophisticated': 'jBpfuIE2acCO8z3wKNLl', // Thomas
-      'bubbly': 'piTKgcLEGmPE4e6mEKli', // Nicole
-      'breathy': 'MF3mGyEYCl7XYWbV9V6O', // Elli
-      'cheerful': 'IKne3meq5aSn9XLyUdCD', // Charlie
-      'serious': 'g9GH2KyGDXGhhJK9UnLV', // Matthew
-      'authoritative': 'iP95p4xoKVk53GoZ742B', // Eric
-      'friendly': '29vD33N1CtxCmqQRPOHJ', // Daniel
-      'neutral': 'd3zjMOOxd2H5SYMhOVVp', // Dorothy
-    };
+    this.isProcessingSpeech = true;
+    const content = this.speakingQueue.shift();
     
-    return voiceMap[voiceType.toLowerCase()] || '21m00Tcm4TlvDq8ikWAM'; // Default to Rachel if not found
+    if (content) {
+      try {
+        // Use the voiceService to speak the message
+        await voiceService.speak(content, voiceConfig);
+      } catch (error) {
+        console.error('Error in voice service:', error);
+      }
+    }
+    
+    // Process next in queue
+    await this.processQueue(voiceConfig);
+  }
+  
+  /**
+   * Log user message to neural hub for behavioral analysis
+   */
+  private logUserInteraction(message: CompanionMessage): void {
+    // In a real implementation, this would send data to a behavioral analysis system
+    console.log(`[HERMES-OXUM] User interaction: ${message.content.substring(0, 30)}...`);
+  }
+  
+  /**
+   * Log companion response to neural hub for response analysis
+   */
+  private logCompanionResponse(message: CompanionMessage): void {
+    // In a real implementation, this would send data to a behavioral analysis system
+    console.log(`[HERMES-OXUM] Companion response: ${message.content.substring(0, 30)}...`);
+  }
+  
+  /**
+   * Stop any ongoing speech
+   */
+  public stopSpeaking(): void {
+    this.speakingQueue = [];
+    voiceService.stop();
+  }
+  
+  /**
+   * Check if speech is currently in progress
+   */
+  public isSpeaking(): boolean {
+    return this.isProcessingSpeech || voiceService.isSpeaking();
   }
 }
 
-export const aiCompanionMessagingService = new AICompanionMessagingService();
+export const aiCompanionMessagingService = AICompanionMessagingService.getInstance();
 export default aiCompanionMessagingService;
