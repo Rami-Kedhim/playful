@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { AIMessage, AIConversation, AIProfile } from '@/types/ai-messages';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -43,15 +42,12 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   
-  // Load conversation on mount
   useEffect(() => {
     const loadConversation = async () => {
       setLoadingConversation(true);
       try {
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Create a mock conversation
         const mockConversation: AIConversation = {
           id: `conv-${Date.now()}`,
           profileId: profileId,
@@ -86,14 +82,11 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
     }
   }, [profileId, user?.id]);
   
-  // Load initial messages
   const loadInitialMessages = async (): Promise<AIMessage[]> => {
     setIsInitialLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 700));
       
-      // Create a welcome message
       const welcomeMessage: AIMessage = {
         id: `msg-welcome-${Date.now()}`,
         conversation_id: conversation.id,
@@ -116,13 +109,11 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
     }
   };
   
-  // Send a message
   const sendMessage = async (content: string): Promise<boolean> => {
     if (!content.trim() || !user) return false;
     
     setSendingMessage(true);
     try {
-      // Create user message
       const userMessage: AIMessage = {
         id: `msg-user-${Date.now()}`,
         conversation_id: conversation.id,
@@ -136,10 +127,8 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
       
       setMessages(prev => [...prev, userMessage]);
       
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Create AI response
       const aiResponse: AIMessage = {
         id: `msg-ai-${Date.now()}`,
         conversation_id: conversation.id,
@@ -153,7 +142,6 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
       
       setMessages(prev => [...prev, aiResponse]);
       
-      // Update conversation
       setConversation(prev => ({
         ...prev,
         lastMessageAt: new Date(),
@@ -170,11 +158,9 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
     }
   };
   
-  // Refresh conversation
   const refreshConversation = async (): Promise<AIConversation> => {
     setLoadingConversation(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 300));
       return conversation;
     } catch (err) {
@@ -186,14 +172,11 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
     }
   };
   
-  // Load companion
   const loadCompanion = async (id: string = profileId): Promise<AIProfile | null> => {
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Create mock companion
       const mockCompanion: AIProfile = {
         id,
         name: 'AI Companion',

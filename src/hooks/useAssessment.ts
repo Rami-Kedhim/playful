@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
-import { BehaviorAssessment } from '@/services/assessment/BehavioralAssessmentService';
+import BehavioralAssessmentService from '@/services/assessment/BehavioralAssessmentService';
 import { AssessmentResult, AssessmentInsight, AssessmentCategory } from '@/types/assessment';
 
 export const useAssessment = () => {
@@ -9,7 +9,7 @@ export const useAssessment = () => {
   const { analyzeUser, enhancedProfile } = useEnhancedBehavioral();
   const [assessmentResults, setAssessmentResults] = useState<AssessmentResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const assessmentService = new BehaviorAssessment();
+  const assessmentService = BehavioralAssessmentService;
   
   const runAssessment = useCallback(async () => {
     if (!user) return null;
