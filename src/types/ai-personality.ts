@@ -53,7 +53,7 @@ export interface AIPersonalityConfig {
     friendliness: number;
     verbosity: number;
     humor: number;
-    surprise?: number;
+    surprise: number;
   };
   interactionPatterns: {
     questionFrequency: number;
@@ -63,7 +63,6 @@ export interface AIPersonalityConfig {
   };
 }
 
-// Updated types needed by other parts of the application
 export interface EmotionalMemory {
   userId: string;
   companionId: string;
@@ -78,23 +77,25 @@ export interface EmotionalMemory {
   recentInteractions?: any[]; // Added for missing property
 }
 
+// Update the MonetizationHook interface to make all the properties non-optional or add index signature
 export interface MonetizationHook {
-  // Required core methods
+  // Required core methods (must be non-optional)
   triggerPurchaseFlow: (productId: string, amount: number) => Promise<boolean>;
   checkUserCredits: () => Promise<number>;
   deductCredits: (amount: number, reason: string) => Promise<boolean>;
   getSubscriptionStatus: () => Promise<{ isSubscribed: boolean; plan: string | null }>;
   
-  // Optional properties being used in the code
-  type?: string;
-  lucoinCost?: number;
-  triggerConditions?: any;
-  teaser?: string;
-  fullContent?: string;
-  previewUrl?: string;
-  shouldRestrict?: (contentType: string) => boolean;
-  processPremiumContent?: () => Promise<boolean>;
-  getContentPrice?: (contentType: string) => number;
-  getUserBalance?: () => number;
-  processPayment?: (amount: number) => Promise<boolean>;
+  // Required properties
+  type: string;
+  triggerConditions: { 
+    messageCount?: number; 
+    intimacyLevel?: number;
+    keywords?: string[];
+    [key: string]: any;
+  };
+  lucoinCost: number;
+  teaser: string;
+  
+  // Optional properties with index signature for additional properties
+  [key: string]: any;
 }

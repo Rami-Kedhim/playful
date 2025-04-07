@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { PersonalityType, MonetizationHook } from '@/types/ai-personality';
 import { CompanionMessage } from './types';
@@ -27,30 +28,47 @@ export const useMonetizationSystem = ({
 
   // Initialize monetization hooks based on personality type
   const initializeMonetizationHooks = useCallback(() => {
-    const createBaseHook = (): Partial<MonetizationHook> => ({
-      // Core required methods
-      triggerPurchaseFlow: async (productId: string, amount: number) => {
-        console.log(`Triggering purchase flow for ${productId} at ${amount} coins`);
-        return lucoinBalance >= amount;
-      },
-      checkUserCredits: async () => lucoinBalance,
-      deductCredits: async (amount: number, reason: string) => {
-        console.log(`Deducting ${amount} credits for ${reason}`);
-        return lucoinBalance >= amount;
-      },
-      getSubscriptionStatus: async () => ({ isSubscribed: false, plan: null }),
-      
-      // Helper functions
-      shouldRestrict: (contentType: string) => contentType.includes('explicit'),
-      processPremiumContent: async () => true,
-      getContentPrice: (contentType: string) => contentType === 'explicit_content' ? 25 : 15,
-      getUserBalance: () => lucoinBalance,
-      processPayment: async (amount: number) => lucoinBalance >= amount
-    });
+    // Create base hook functions first to ensure all required methods are included
+    const triggerPurchaseFlow = async (productId: string, amount: number): Promise<boolean> => {
+      console.log(`Triggering purchase flow for ${productId} at ${amount} coins`);
+      return lucoinBalance >= amount;
+    };
+    
+    const checkUserCredits = async (): Promise<number> => {
+      return lucoinBalance;
+    };
+    
+    const deductCredits = async (amount: number, reason: string): Promise<boolean> => {
+      console.log(`Deducting ${amount} credits for ${reason}`);
+      return lucoinBalance >= amount;
+    };
+    
+    const getSubscriptionStatus = async (): Promise<{ isSubscribed: boolean; plan: string | null }> => {
+      return { isSubscribed: false, plan: null };
+    };
+    
+    const processPayment = async (amount: number): Promise<boolean> => {
+      return lucoinBalance >= amount;
+    };
+    
+    const processPremiumContent = async (): Promise<boolean> => {
+      return true;
+    };
+    
+    const shouldRestrict = (contentType: string): boolean => {
+      return contentType.includes('explicit');
+    };
+    
+    const getContentPrice = (contentType: string): number => {
+      return contentType === 'explicit_content' ? 25 : 15;
+    };
+    
+    const getUserBalance = (): number => {
+      return lucoinBalance;
+    };
     
     const hooks: MonetizationHook[] = [
       {
-        ...createBaseHook(),
         type: 'image',
         triggerConditions: {
           messageCount: 5,
@@ -59,9 +77,17 @@ export const useMonetizationSystem = ({
         lucoinCost: 10,
         teaser: "I'd love to show you a special photo of me...",
         previewUrl: '/blurred-preview.jpg',
+        triggerPurchaseFlow,
+        checkUserCredits,
+        deductCredits,
+        getSubscriptionStatus,
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       },
       {
-        ...createBaseHook(),
         type: 'voice',
         triggerConditions: {
           messageCount: 8,
@@ -69,9 +95,17 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 15,
         teaser: "Would you like to hear my voice? I've recorded something just for you.",
+        triggerPurchaseFlow,
+        checkUserCredits,
+        deductCredits,
+        getSubscriptionStatus,
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       },
       {
-        ...createBaseHook(),
         type: 'explicit_content',
         triggerConditions: {
           messageCount: 15,
@@ -80,12 +114,20 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 25,
         teaser: "I can share some more intimate thoughts with you...",
+        triggerPurchaseFlow,
+        checkUserCredits,
+        deductCredits,
+        getSubscriptionStatus,
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       }
     ];
     
     if (personalityType === 'flirty') {
       hooks.push({
-        ...createBaseHook(),
         type: 'special_interaction',
         triggerConditions: {
           messageCount: 10,
@@ -93,10 +135,18 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 20,
         teaser: "I have a fun little game we could play in private...",
+        triggerPurchaseFlow,
+        checkUserCredits,
+        deductCredits,
+        getSubscriptionStatus,
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       });
     } else if (personalityType === 'dominant') {
       hooks.push({
-        ...createBaseHook(),
         type: 'special_interaction',
         triggerConditions: {
           messageCount: 12,
@@ -104,6 +154,15 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 30,
         teaser: "I could give you some special instructions to follow...",
+        triggerPurchaseFlow,
+        checkUserCredits,
+        deductCredits,
+        getSubscriptionStatus,
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       });
     }
     

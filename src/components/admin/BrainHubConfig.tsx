@@ -6,44 +6,48 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { brainHub, BrainHubConfig as BrainHubConfigType, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/services/neural/HermesOxumBrainHub';
 import { useToast } from '@/components/ui/use-toast';
 
-const AcademicModelTab = ({ 
+interface AcademicModelTabProps<T> { 
+  model: T;
+  title: string;
+  description: string;
+  onToggle: (key: string, value: boolean) => void;
+}
+
+function AcademicModelTab<T extends Record<string, boolean>>({ 
   model, 
   title, 
   description, 
   onToggle 
-}: { 
-  model: Record<string, boolean>,
-  title: string,
-  description: string,
-  onToggle: (key: string, value: boolean) => void
-}) => (
-  <div className="space-y-4">
-    <div className="mb-4">
-      <h3 className="text-lg font-medium">{title}</h3>
-      <p className="text-muted-foreground text-sm">{description}</p>
-    </div>
+}: AcademicModelTabProps<T>) {
+  return (
+    <div className="space-y-4">
+      <div className="mb-4">
+        <h3 className="text-lg font-medium">{title}</h3>
+        <p className="text-muted-foreground text-sm">{description}</p>
+      </div>
 
-    <div className="space-y-2">
-      {Object.entries(model).map(([key, enabled]) => (
-        <div key={key} className="flex items-center justify-between">
-          <div>
-            <Label htmlFor={`toggle-${key}`} className="capitalize">
-              {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-            </Label>
+      <div className="space-y-2">
+        {Object.entries(model).map(([key, enabled]) => (
+          <div key={key} className="flex items-center justify-between">
+            <div>
+              <Label htmlFor={`toggle-${key}`} className="capitalize">
+                {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+              </Label>
+            </div>
+            <Switch
+              id={`toggle-${key}`}
+              checked={enabled}
+              onCheckedChange={(checked) => onToggle(key, checked)}
+            />
           </div>
-          <Switch
-            id={`toggle-${key}`}
-            checked={enabled}
-            onCheckedChange={(checked) => onToggle(key, checked)}
-          />
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+}
 
 interface RestrictedRegion {
   id: string;
@@ -52,14 +56,14 @@ interface RestrictedRegion {
 
 const BrainHubConfig: React.FC = () => {
   const { toast } = useToast();
-  const [config, setConfig] = useState(brainHub.getConfig());
+  const [config, setConfig] = useState<BrainHubConfigType>(brainHub.getConfig());
   const [restrictedRegions, setRestrictedRegions] = useState<RestrictedRegion[]>([
     { id: '1', name: 'restricted-region-1' },
     { id: '2', name: 'restricted-region-2' }
   ]);
   const [newRegion, setNewRegion] = useState('');
   
-  const handleAcademicModelToggle = (model: keyof typeof config, key: string, value: boolean) => {
+  const handleAcademicModelToggle = (model: keyof BrainHubConfigType, key: string, value: boolean) => {
     setConfig(prev => ({
       ...prev,
       [model]: {
@@ -69,7 +73,7 @@ const BrainHubConfig: React.FC = () => {
     }));
   };
   
-  const handleFeatureToggle = (key: keyof typeof config, value: boolean) => {
+  const handleFeatureToggle = (key: keyof BrainHubConfigType, value: boolean) => {
     setConfig(prev => ({
       ...prev,
       [key]: value
@@ -126,7 +130,7 @@ const BrainHubConfig: React.FC = () => {
           </TabsList>
           
           <TabsContent value="psychology">
-            <AcademicModelTab 
+            <AcademicModelTab<PsychologyModel>
               model={config.psychology}
               title="Psychological Models"
               description="Configure the psychological models that drive AI personality and emotional responses"
@@ -135,7 +139,7 @@ const BrainHubConfig: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="physics">
-            <AcademicModelTab 
+            <AcademicModelTab<PhysicsModel>
               model={config.physics}
               title="Physics Models"
               description="Configure simulation models for physical behavior in virtual environments"
@@ -144,7 +148,7 @@ const BrainHubConfig: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="economics">
-            <AcademicModelTab 
+            <AcademicModelTab<EconomicsModel>
               model={config.economics}
               title="Economic Models"
               description="Configure economic models that drive pricing, boosts, and monetization"
@@ -153,7 +157,7 @@ const BrainHubConfig: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="robotics">
-            <AcademicModelTab 
+            <AcademicModelTab<RoboticsModel>
               model={config.robotics}
               title="Robotics Models"
               description="Configure AI control interfaces and automation behavior"

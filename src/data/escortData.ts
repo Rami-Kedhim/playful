@@ -1,6 +1,6 @@
 
 import { Escort } from "@/types/escort";
-import { escortProfiles } from "./escortProfiles";
+import escortProfiles from "./escortProfiles";
 
 // Mock data for escort services
 export const availableServices = [

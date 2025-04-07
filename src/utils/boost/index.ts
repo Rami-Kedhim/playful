@@ -4,7 +4,7 @@ export const calculateBoostScore = (base: number, multiplier: number = 1): numbe
   return Math.round(base * multiplier);
 };
 
-// We'll export stubs for the missing modules to fix the build errors
+// Export stubs for the modules that might be referenced elsewhere
 export const BoostMetrics = {
   calculate: () => 0
 };
