@@ -1,7 +1,5 @@
-
 import { useState, useCallback, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth';
-import { useBehavioralProfile } from '@/hooks/auth';
+import { useAuth, useBehavioralProfile } from '@/hooks/auth';
 import { BehaviorTag } from '@/types/behavioral';
 import { EnhancedBehavioralProfile, EngagementOptimization } from '@/types/enhancedBehavioral';
 import enhancedBehavioralAnalyzer from '@/services/behavioral/EnhancedBehavioralAnalyzer';
