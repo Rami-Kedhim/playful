@@ -26,10 +26,35 @@ export const useAssessment = () => {
       
       // Only set if we got valid assessment results
       if (assessment) {
-        // Fix: Use functional state update to ensure type compliance
-        setAssessmentResults(() => assessment);
+        // Fix: Ensure the assessment object matches the AssessmentResult type
+        // by adding any missing required properties
+        const completeAssessment: AssessmentResult = {
+          userId: assessment.userId || user.id,
+          timestamp: assessment.timestamp || new Date().toISOString(),
+          assessmentId: assessment.assessmentId || `assess-${Date.now()}`,
+          insightSummary: assessment.insightSummary || 'Behavior analysis completed',
+          recommendations: assessment.recommendations || [],
+          overallScore: assessment.overallScore || 0,
+          insights: assessment.insights || [],
+          summary: assessment.summary || '',
+          strengthAreas: assessment.strengthAreas || [],
+          improvementAreas: assessment.improvementAreas || [],
+          engagementHealthScore: assessment.engagementHealthScore || 0,
+          conversionPotentialScore: assessment.conversionPotentialScore || 0,
+          retentionRiskScore: assessment.retentionRiskScore || 0,
+          scores: assessment.scores || {
+            engagementPotential: 0,
+            contentAffinity: 0,
+            monetizationPropensity: 0,
+            retentionLikelihood: 0
+          },
+          ...assessment // Include all properties from the original assessment
+        };
+        
+        setAssessmentResults(completeAssessment);
+        return completeAssessment;
       }
-      return assessment;
+      return null;
     } catch (error) {
       console.error('Error running assessment:', error);
       return null;
