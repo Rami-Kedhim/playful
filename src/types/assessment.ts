@@ -1,5 +1,6 @@
 
 import { EnhancedBehavioralProfile } from './enhancedBehavioral';
+import { ChaseHughesBehavioralProfile } from './chaseHughes';
 
 /**
  * Assessment result severity levels
@@ -45,6 +46,7 @@ export interface AssessmentResult {
   conversionPotentialScore: number; // 0-100
   retentionRiskScore: number; // 0-100, higher is more risky
   psychographicProfile?: EnhancedBehavioralProfile['psychographicProfile']; // Added to connect with Hermes-Oxum
+  chaseHughesProfile?: ChaseHughesBehavioralProfile; // Added Chase Hughes behavioral profile
 }
 
 /**
@@ -54,4 +56,6 @@ export interface AssessmentPreferences {
   focusAreas: AssessmentCategory[];
   insightThreshold: number; // Minimum confidence score to include insights
   autoRunFrequency?: 'daily' | 'weekly' | 'monthly' | 'never';
+  includeChaseHughesAnalysis?: boolean; // Whether to include Chase Hughes behavioral analysis
+  influenceTechniquePreferences?: string[]; // Preferred influence techniques to apply
 }

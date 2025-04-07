@@ -1,13 +1,14 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, LineChart } from 'lucide-react';
+import { Brain, LineChart, MessagesSquare } from 'lucide-react';
 import EnhancedEngagementPanel from './EnhancedEngagementPanel';
 import AssessmentPanel from '../assessment/AssessmentPanel';
+import ChaseHughesPanel from '../assessment/ChaseHughesPanel';
 
 const AssessmentDashboard = () => {
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 dark:bg-background dark:text-foreground">
       <div className="flex flex-col space-y-2 mb-6">
         <h1 className="text-2xl font-bold">Behavioral Assessment Dashboard</h1>
         <p className="text-muted-foreground">
@@ -16,7 +17,7 @@ const AssessmentDashboard = () => {
       </div>
       
       <Tabs defaultValue="assessment" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="assessment" className="flex items-center">
             <Brain className="h-4 w-4 mr-2" />
             Full Assessment
@@ -24,6 +25,10 @@ const AssessmentDashboard = () => {
           <TabsTrigger value="engagement" className="flex items-center">
             <LineChart className="h-4 w-4 mr-2" />
             Engagement Analysis
+          </TabsTrigger>
+          <TabsTrigger value="influence" className="flex items-center">
+            <MessagesSquare className="h-4 w-4 mr-2" />
+            Influence Strategy
           </TabsTrigger>
         </TabsList>
         
@@ -33,6 +38,10 @@ const AssessmentDashboard = () => {
         
         <TabsContent value="engagement" className="pt-6">
           <EnhancedEngagementPanel />
+        </TabsContent>
+        
+        <TabsContent value="influence" className="pt-6">
+          <ChaseHughesPanel />
         </TabsContent>
       </Tabs>
       

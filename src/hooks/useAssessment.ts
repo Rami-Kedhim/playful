@@ -1,11 +1,11 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { useEnhancedBehavioral } from '@/hooks/useEnhancedBehavioral';
 import behavioralAssessmentService from '@/services/assessment/BehavioralAssessmentService';
 import { AssessmentResult, AssessmentCategory, AssessmentPreferences } from '@/types/assessment';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import neuralHub from '@/services/neural/HermesOxumNeuralHub';
+import chaseHughesAnalyzer from '@/services/behavioral/ChaseHughesBehavioralAnalyzer';
 
 /**
  * Hook for using the behavioral assessment service
@@ -18,7 +18,8 @@ export function useAssessment() {
   const [assessmentPreferences, setAssessmentPreferences] = useState<AssessmentPreferences>({
     focusAreas: ['engagement', 'conversion', 'retention', 'monetization', 'trust'],
     insightThreshold: 60,
-    autoRunFrequency: 'weekly'
+    autoRunFrequency: 'weekly',
+    includeChaseHughesAnalysis: true
   });
   
   /**
@@ -59,6 +60,78 @@ export function useAssessment() {
       
       // Add psychographic profile from enhanced behavioral profile
       result.psychographicProfile = enhancedProfile.psychographicProfile;
+      
+      // Apply Chase Hughes behavioral analysis if enabled in preferences
+      if (assessmentPreferences.includeChaseHughesAnalysis) {
+        // Mock interaction data for Chase Hughes analysis
+        const chaseHughesProfile = chaseHughesAnalyzer.createBehavioralProfile({
+          messageHistory: [
+            { content: "Hello, I'm interested in learning more", isUser: true },
+            { content: "What services do you offer?", isUser: true }
+          ],
+          interactionHistory: {
+            clickPatterns: [
+              { element: 'pricing-page', timeViewing: 45 },
+              { element: 'testimonials', timeViewing: 30 }
+            ],
+            pageViews: [
+              { page: '/home', timeSpent: 120 },
+              { page: '/services', timeSpent: 180 },
+              { page: '/testimonials', timeSpent: 90 }
+            ],
+            responseDelays: [2.5, 3.1, 1.8]
+          },
+          contentPreferences: enhancedProfile.psychographicProfile.engagementPatterns.contentPreferences
+        });
+        
+        // Add Chase Hughes profile to assessment result
+        result.chaseHughesProfile = chaseHughesProfile;
+        
+        // Use Chase Hughes insights to refine other scores
+        result.conversionPotentialScore = Math.round(
+          (result.conversionPotentialScore + chaseHughesProfile.desireScore) / 2
+        );
+        
+        result.engagementHealthScore = Math.round(
+          (result.engagementHealthScore + chaseHughesProfile.engagementScore) / 2
+        );
+        
+        // Add Chase Hughes specific insights
+        if (chaseHughesProfile.currentInfluencePhase === 'desire' && 
+            chaseHughesProfile.influencePhaseProgress > 75) {
+          result.insights.push({
+            id: `ch-conversion-${Date.now()}`,
+            category: 'conversion',
+            title: 'High Conversion Potential Detected',
+            description: `User is in the desire phase with ${chaseHughesProfile.influencePhaseProgress}% progress. Ready for conversion-focused messaging using ${chaseHughesProfile.suggestedApproach.technique} technique.`,
+            severityLevel: 'opportunity',
+            impact: 85,
+            confidenceScore: chaseHughesProfile.desireScore,
+            recommendedActions: [
+              `Use ${chaseHughesProfile.primarySensoryPreference} language patterns in offers`,
+              `Apply the "${chaseHughesProfile.suggestedApproach.languagePattern}" pattern`,
+              'Present limited-time offer with scarcity framing'
+            ]
+          });
+        }
+        
+        if (chaseHughesProfile.trustScore < 60) {
+          result.insights.push({
+            id: `ch-trust-${Date.now()}`,
+            category: 'trust',
+            title: 'Trust Building Required',
+            description: `Current trust score is ${chaseHughesProfile.trustScore}%. Need to establish stronger trust before advancing to conversion.`,
+            severityLevel: 'warning',
+            impact: 80,
+            confidenceScore: 85,
+            recommendedActions: [
+              'Increase social proof elements',
+              'Use interrogation encapsulation technique',
+              'Address objections before they arise'
+            ]
+          });
+        }
+      }
       
       // Adjust assessment scores based on neural hub data
       if (hermesData) {
@@ -167,6 +240,22 @@ export function useAssessment() {
       .slice(0, 3); // Return top 3 priority insights
   }, [assessment]);
   
+  /**
+   * Get influence phase insights from Chase Hughes analysis
+   */
+  const getInfluencePhaseInsights = useCallback(() => {
+    if (!assessment?.chaseHughesProfile) return null;
+    
+    const { currentInfluencePhase, influencePhaseProgress, suggestedApproach } = assessment.chaseHughesProfile;
+    
+    return {
+      phase: currentInfluencePhase,
+      progress: influencePhaseProgress,
+      suggestedTechnique: suggestedApproach.technique,
+      suggestedLanguage: suggestedApproach.languagePattern
+    };
+  }, [assessment]);
+  
   return {
     assessment,
     isGenerating,
@@ -175,7 +264,8 @@ export function useAssessment() {
     updatePreferences,
     filterInsightsByCategory,
     filterInsightsBySeverity,
-    getPriorityInsights
+    getPriorityInsights,
+    getInfluencePhaseInsights
   };
 }
 

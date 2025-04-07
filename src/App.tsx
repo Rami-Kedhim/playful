@@ -14,14 +14,16 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <AuthProvider>
         <Router>
-          <RouterRoutes>
-            <Route path="/" element={<div>Home Page</div>} />
-            <Route path="/assessment" element={<AssessmentDashboard />} />
-          </RouterRoutes>
-          <LucieSchaubergerIntegration />
-          <HermesDebugPanel />
-          <HermesAssessmentIntegration />
-          <Toaster />
+          <div className="min-h-screen bg-background text-foreground">
+            <RouterRoutes>
+              <Route path="/" element={<AssessmentDashboard />} />
+              <Route path="/assessment" element={<AssessmentDashboard />} />
+            </RouterRoutes>
+            <LucieSchaubergerIntegration />
+            <HermesDebugPanel />
+            <HermesAssessmentIntegration />
+            <Toaster />
+          </div>
         </Router>
       </AuthProvider>
     </ThemeProvider>
