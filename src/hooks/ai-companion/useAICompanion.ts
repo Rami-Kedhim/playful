@@ -101,6 +101,8 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
         content: "Hello! I'm your AI assistant. How can I help you today?",
         timestamp: new Date(),
         sender_id: profileId,
+        is_ai: true,
+        created_at: new Date().toISOString(),
       };
       
       setMessages([welcomeMessage]);
@@ -128,6 +130,8 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
         content,
         timestamp: new Date(),
         sender_id: user.id,
+        is_ai: false,
+        created_at: new Date().toISOString(),
       };
       
       setMessages(prev => [...prev, userMessage]);
@@ -143,6 +147,8 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
         content: `I received your message: "${content}". This is a simulated response.`,
         timestamp: new Date(),
         sender_id: profileId,
+        is_ai: true,
+        created_at: new Date().toISOString(),
       };
       
       setMessages(prev => [...prev, aiResponse]);

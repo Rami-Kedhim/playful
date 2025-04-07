@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -150,7 +149,7 @@ const AIChat: React.FC<AIChatProps> = ({
           {messages.map((message) => (
             <AIMessageComponent 
               key={message.id} 
-              message={message} 
+              message={message as import('@/types/ai-messages').AIMessage} 
               onMessageUnlocked={handleMessageUnlocked}
             />
           ))}

@@ -4,14 +4,14 @@ export interface AIMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp?: Date;
-  is_ai?: boolean;
+  is_ai: boolean; // Making this required
   created_at: string; // Changed from string | Date to string for compatibility
   requires_payment?: boolean;
   payment_status?: 'pending' | 'completed' | 'failed';
   price?: number;
   has_read?: boolean;
   conversation_id: string;
-  sender_id: string;
+  sender_id: string; // Making this required
   conversationId?: string;
 }
 

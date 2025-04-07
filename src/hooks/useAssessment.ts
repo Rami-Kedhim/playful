@@ -1,8 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
-import { BehavioralAssessmentService } from '@/services/assessment/BehavioralAssessmentService';
+import { BehaviorAssessment } from '@/services/assessment/BehavioralAssessmentService';
 import { AssessmentResult, AssessmentInsight, AssessmentCategory } from '@/types/assessment';
 
 export const useAssessment = () => {
@@ -10,18 +9,15 @@ export const useAssessment = () => {
   const { analyzeUser, enhancedProfile } = useEnhancedBehavioral();
   const [assessmentResults, setAssessmentResults] = useState<AssessmentResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const assessmentService = new BehavioralAssessmentService();
+  const assessmentService = new BehaviorAssessment();
   
-  // Run the main assessment process
   const runAssessment = useCallback(async () => {
     if (!user) return null;
     
     setIsProcessing(true);
     try {
-      // First, get the enhanced behavioral profile
       await analyzeUser();
       
-      // Generate an assessment based on the enhanced profile
       const assessment = assessmentService.generateAssessment(enhancedProfile);
       
       setAssessmentResults(assessment);
@@ -34,7 +30,6 @@ export const useAssessment = () => {
     }
   }, [user, analyzeUser, enhancedProfile, assessmentService]);
 
-  // Map additional methods for compatibility
   const isGenerating = isProcessing;
   const assessment = assessmentResults;
   

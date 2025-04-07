@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -217,7 +216,7 @@ const HermesDebugPanel: React.FC = () => {
                       <MessageSquare className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Messages</span>
                     </div>
-                    <span className="text-xl font-bold">{userData.interactionHistory.messagesExchanged}</span>
+                    <span className="text-xl font-bold">{userData.interactionHistory?.messagesExchanged || 0}</span>
                   </div>
                   
                   <div className="flex flex-col">
@@ -225,7 +224,7 @@ const HermesDebugPanel: React.FC = () => {
                       <Coffee className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Voice Interactions</span>
                     </div>
-                    <span className="text-xl font-bold">{userData.interactionHistory.voiceInteractions}</span>
+                    <span className="text-xl font-bold">{userData.interactionHistory?.voiceInteractions || 0}</span>
                   </div>
                   
                   <div className="flex flex-col">
@@ -233,7 +232,7 @@ const HermesDebugPanel: React.FC = () => {
                       <Eye className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Content Views</span>
                     </div>
-                    <span className="text-xl font-bold">{userData.interactionHistory.contentViews}</span>
+                    <span className="text-xl font-bold">{userData.interactionHistory?.contentViews || 0}</span>
                   </div>
                   
                   <div className="flex flex-col">
@@ -241,7 +240,7 @@ const HermesDebugPanel: React.FC = () => {
                       <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Total Spent</span>
                     </div>
-                    <span className="text-xl font-bold">${userData.interactionHistory.totalSpent.toFixed(2)}</span>
+                    <span className="text-xl font-bold">${userData.interactionHistory?.totalSpent.toFixed(2) || "0.00"}</span>
                   </div>
                   
                   <div className="flex flex-col">
@@ -249,7 +248,7 @@ const HermesDebugPanel: React.FC = () => {
                       <Repeat className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Conversion Rate</span>
                     </div>
-                    <span className="text-xl font-bold">{(userData.interactionHistory.conversionRate * 100).toFixed(1)}%</span>
+                    <span className="text-xl font-bold">{((userData.interactionHistory?.conversionRate || 0) * 100).toFixed(1)}%</span>
                   </div>
                   
                   <div className="flex flex-col">
@@ -390,7 +389,7 @@ const HermesDebugPanel: React.FC = () => {
                       <Badge variant="outline" className="justify-center py-1">Authority</Badge>
                       <Badge variant="outline" className="justify-center py-1">Consistency</Badge>
                       <Badge variant="outline" className="justify-center py-1">Liking</Badge>
-                      <Badge variant="primary" className="justify-center py-1">Scarcity</Badge>
+                      <Badge variant="secondary" className="justify-center py-1">Scarcity</Badge>
                     </div>
                   </div>
                   
