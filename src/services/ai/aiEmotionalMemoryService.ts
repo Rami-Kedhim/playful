@@ -1,3 +1,4 @@
+
 import { EmotionalMemory, EmotionalState, PersonalityType } from '@/types/ai-personality';
 import { aiPersonalityService } from './aiPersonalityService';
 import { supabase } from '@/integrations/supabase/client';
@@ -123,7 +124,7 @@ export class AIEmotionalMemoryService {
     }
     
     // Update emotional state based on message
-    const updatedState = aiPersonalityService.updateEmotionalState(
+    const updatedState = await aiPersonalityService.updateEmotionalState(
       memory.state,
       message,
       personalityType

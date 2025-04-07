@@ -13,6 +13,7 @@ import { redisEmotionalMemoryService } from '@/services/ai/redisEmotionalMemoryS
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { sentimentAnalysisService } from '@/services/ai/sentimentAnalysisService';
+import { aiEmotionalMemoryService } from '@/services/ai/aiEmotionalMemoryService';
 
 export interface UseAICompanionWithMemoryProps {
   companionId: string;
@@ -53,7 +54,11 @@ export function useAICompanionWithMemory({
         let memory: EmotionalMemory | null = null;
         
         if (userId) {
-          memory = await redisEmotionalMemoryService.getEmotionalMemory(companionId, userId);
+          memory = await aiEmotionalMemoryService.getEmotionalMemory(
+            companionId, 
+            userId, 
+            personalityType
+          );
           
           if (!memory) {
             const initialState = aiPersonalityService.createPersonalizedEmotionalState(personalityType);
@@ -185,8 +190,7 @@ export function useAICompanionWithMemory({
           updatedState = await aiPersonalityService.updateEmotionalState(
             emotionalState,
             content,
-            personalityType,
-            sentimentResult
+            personalityType
           );
           
           if (emotionalMemory) {
@@ -455,7 +459,7 @@ export function useAICompanionWithMemory({
           
         case 'submissive':
           content = "H-hi there! It's so nice to meet you. I hope I can be good company for you today...";
-          suggestedActions = ['Ask how I\'m feeling', 'Tell me what you like', 'Give me a compliment'];
+          suggestedActions = ['Ask how I'm feeling', 'Tell me what you like', 'Give me a compliment'];
           break;
           
         case 'romantic':
