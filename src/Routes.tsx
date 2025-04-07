@@ -38,6 +38,7 @@ const PageLoader = () => (
 function Routes() {
   return (
     <RouterRoutes>
+      {/* Home route - use HomePage component */}
       <Route path="/" element={<HomePage />} />
       <Route path="/escorts" element={<Escorts />} />
       <Route path="/creators" element={<Creators />} />
@@ -46,7 +47,6 @@ function Routes() {
           <AppLayout>
             <div className="container mx-auto p-6">
               <h1 className="text-2xl font-bold mb-6">Assessment Dashboard</h1>
-              {/* The HermesAssessmentIntegration component is already included in App.tsx */}
             </div>
           </AppLayout>
         </Suspense>
@@ -65,10 +65,10 @@ function Routes() {
       } />
       
       <Route path="escort-streams" element={
-          <Suspense fallback={<PageLoader />}>
-            <EscortLiveStreams />
-          </Suspense>
-        } />
+        <Suspense fallback={<PageLoader />}>
+          <EscortLiveStreams />
+        </Suspense>
+      } />
         
       <Route path="escort/:id/live" element={
         <Suspense fallback={<PageLoader />}>
@@ -106,7 +106,11 @@ function Routes() {
         </Suspense>
       } />
         
-      <Route path="ai-companions" element={<AICompanionPage />} />
+      <Route path="ai-companions" element={
+        <Suspense fallback={<PageLoader />}>
+          <AICompanionPage />
+        </Suspense>
+      } />
         
       {/* Protected Routes - Require Authentication */}
       <Route path="/profile" element={

@@ -1,66 +1,49 @@
 
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from 'react';
 
-export const useThemeToggle = () => {
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  
-  // Only enable theme switching on client-side
+interface UseThemeToggleReturn {
+  isDark: boolean;
+  setIsDark: (isDark: boolean) => void;
+  toggleTheme: () => void;
+  mounted: boolean;
+}
+
+export const useThemeToggle = (): UseThemeToggleReturn => {
+  const [isDark, setIsDark] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(false);
+
   useEffect(() => {
+    // Check if user has a preference saved in local storage
+    const savedTheme = localStorage.getItem('theme');
+    
+    // Check if user has OS preference for dark mode
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Set initial theme based on saved preference or OS preference
+    const initialIsDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    setIsDark(initialIsDark);
+    
+    // Apply theme to document
+    document.documentElement.classList.toggle('dark', initialIsDark);
+    
+    // Mark as mounted
     setMounted(true);
-    
-    // Apply transition classes to body for smooth theme transitions
-    if (typeof document !== 'undefined' && document.body) {
-      document.body.classList.add('transition-colors', 'duration-300');
-      
-      // Add a class for theme change animations
-      document.documentElement.classList.add('theme-transition');
-      
-      const transitionEndHandler = () => {
-        document.documentElement.classList.remove('theme-transition');
-      };
-      
-      document.documentElement.addEventListener('transitionend', transitionEndHandler);
-      
-      return () => {
-        document.documentElement.removeEventListener('transitionend', transitionEndHandler);
-      };
-    }
   }, []);
-  
-  // Apply the theme class to document element separately
-  useEffect(() => {
-    if (resolvedTheme && mounted) {
-      document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
-      
-      // Apply transition class for animation
-      document.documentElement.classList.add('theme-transition');
-      
-      // Remove the class after animation completes
-      const timeout = setTimeout(() => {
-        document.documentElement.classList.remove('theme-transition');
-      }, 300);
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [resolvedTheme, mounted]);
-  
+
   const toggleTheme = () => {
-    if (!mounted) return;
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
     
-    // Add transition class before changing theme
-    document.documentElement.classList.add('theme-transition');
+    // Apply new theme to document
+    document.documentElement.classList.toggle('dark', newIsDark);
     
-    const newTheme = (resolvedTheme === "dark" || theme === "dark") ? "light" : "dark";
-    setTheme(newTheme);
+    // Save preference to local storage
+    localStorage.setItem('theme', newIsDark ? 'dark' : 'light');
   };
-  
+
   return {
-    theme,
-    setTheme,
-    isDark: mounted && (resolvedTheme === "dark" || theme === "dark"),
-    isLight: mounted && (resolvedTheme === "light" || theme === "light"),
+    isDark,
+    setIsDark,
     toggleTheme,
     mounted
   };
