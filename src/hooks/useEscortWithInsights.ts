@@ -59,15 +59,21 @@ export const useEscortWithInsights = (options: UseEscortWithInsightsOptions = {}
   // Record view for analytics
   const recordEscortView = (escortId: string) => {
     if (user?.id) {
-      recordElementInteraction('escort-view', 'view', { escortId });
+      recordElementInteraction('escort-view', 'view', { 
+        escortId: escortId  // Changed from escort_id to escortId to match the expected format
+      });
     }
   };
 
   // Record interaction for analytics
   const recordEscortInteraction = (escortId: string, type: string) => {
     if (user?.id) {
-      recordElementInteraction(`escort-${type}`, type, { escortId });
-      reportUserAction(`viewed_escort_${type}`, { escort_id: escortId });
+      recordElementInteraction(`escort-${type}`, type, { 
+        escortId: escortId  // Changed from escort_id to escortId to match the expected format
+      });
+      reportUserAction(`viewed_escort_${type}`, { 
+        interactionData: { escortId: escortId }  // Moved to interactionData property
+      });
     }
   };
 
