@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { getEmotionClass } from './utils/emotionUtils';
 import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, VolumeOff } from 'lucide-react';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
@@ -19,15 +19,24 @@ const AICompanionMessage = ({
 }: AICompanionMessageProps) => {
   const isAI = message.role === 'assistant';
   const [speaking, setSpeaking] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
 
   // Handle speech playback
   const handleSpeakMessage = () => {
     if (speaking) {
       stopSpeaking();
       setSpeaking(false);
+      setSpeechError(null);
     } else {
-      speakMessage(message.content, voiceType);
-      setSpeaking(true);
+      try {
+        speakMessage(message.content, voiceType);
+        setSpeaking(true);
+        setSpeechError(null);
+      } catch (error) {
+        console.error("Speech synthesis error:", error);
+        setSpeechError("Couldn't start speech");
+        setTimeout(() => setSpeechError(null), 3000);
+      }
     }
   };
 
@@ -82,15 +91,27 @@ const AICompanionMessage = ({
           
           {/* Speech button - only for AI messages */}
           {isAI && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSpeakMessage}
-              className="self-end mt-2 h-6 px-2 flex items-center gap-1"
-            >
-              {speaking ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
-              <span>{speaking ? 'Stop' : 'Speak'}</span>
-            </Button>
+            <div className="flex items-center justify-end mt-2 gap-2">
+              {speechError && (
+                <span className="text-xs text-red-500">{speechError}</span>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSpeakMessage}
+                className="h-6 px-2 flex items-center gap-1"
+                disabled={!!speechError}
+              >
+                {speaking ? (
+                  <VolumeX className="h-3 w-3" />
+                ) : speechError ? (
+                  <VolumeOff className="h-3 w-3" />
+                ) : (
+                  <Volume2 className="h-3 w-3" />
+                )}
+                <span>{speaking ? 'Stop' : 'Speak'}</span>
+              </Button>
+            </div>
           )}
         </div>
       </div>

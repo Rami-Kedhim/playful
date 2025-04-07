@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
@@ -17,11 +18,11 @@ serve(async (req) => {
     
     if (!OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not set in environment variables')
-      // Handle missing API key gracefully
       return new Response(
         JSON.stringify({
-          text: "I'm sorry, I'm not fully configured yet. Please try again later.",
-          suggestedActions: ["Browse profiles", "Check wallet", "View content"]
+          text: "I'm sorry, I'm not fully configured yet. Please contact the administrator to set up my API key.",
+          suggestedActions: ["Browse profiles", "Check wallet", "View content"],
+          error: "OPENAI_API_KEY_MISSING"
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -40,7 +41,7 @@ serve(async (req) => {
       { role: 'user', content: message }
     ]
 
-    console.log('Sending request to OpenAI API with key:', OPENAI_API_KEY.substring(0, 5) + '...')
+    console.log('Sending request to OpenAI API')
     
     try {
       // Call OpenAI
@@ -69,11 +70,11 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({ 
               error: `OpenAI API quota exceeded`, 
-              text: "I'm currently experiencing high demand. Please try again later or ask for assistance from our support team.",
-              suggestedActions: ["Contact Support", "Browse Profiles", "View FAQs"]
+              text: "I apologize, but our AI service is currently unavailable due to high demand. Here are some options that might help you in the meantime.",
+              suggestedActions: ["Browse Popular Profiles", "Check Account Settings", "Contact Support"],
+              errorCode: "QUOTA_EXCEEDED"
             }),
             { 
-              status: 500, 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
             }
           )
@@ -84,17 +85,28 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({ 
               error: `OpenAI API authentication error`, 
-              text: "I'm having trouble connecting to my knowledge base. The system administrator should check the API configuration.",
-              suggestedActions: ["Contact Support", "Browse Profiles", "Try Again Later"]
+              text: "There seems to be an issue with our AI service configuration. Please try again later while we fix this issue.",
+              suggestedActions: ["Try Again Later", "Browse Profiles", "Contact Support"],
+              errorCode: "AUTH_ERROR"
             }),
             { 
-              status: 500, 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
             }
           )
         }
         
-        throw new Error(`OpenAI API error: ${JSON.stringify(error)}`)
+        // General API errors
+        return new Response(
+          JSON.stringify({ 
+            error: `OpenAI API error: ${error.error?.message || 'Unknown error'}`, 
+            text: "I'm having trouble connecting to my knowledge base. Let me help you with something else instead.",
+            suggestedActions: ["Browse Profiles", "Check Account Settings", "Try Again Later"],
+            errorCode: "API_ERROR"
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        )
       }
 
       const data = await response.json()
@@ -114,11 +126,11 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: openAiError.message, 
-          text: "I'm having trouble connecting to my knowledge base right now. How about browsing some of our featured content instead?",
-          suggestedActions: ["Browse Featured", "Try Again Later", "Contact Support"]
+          text: "I seem to be having connection issues. How about exploring some of our featured content while I recover?",
+          suggestedActions: ["See Featured Escorts", "Browse Content", "Check Account"],
+          errorCode: "CONNECTION_ERROR"
         }),
         { 
-          status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       )
@@ -128,11 +140,11 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: error.message, 
-        text: "Sorry, I ran into a technical issue. Please try again in a moment.",
-        suggestedActions: ["Try Again", "Browse Profiles", "Check Help Center"]
+        text: "I encountered a technical issue. Please try again or explore other features.",
+        suggestedActions: ["Browse Content", "View Profiles", "Check Help Section"],
+        errorCode: "GENERAL_ERROR"
       }),
       { 
-        status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     )

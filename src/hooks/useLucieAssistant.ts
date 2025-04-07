@@ -27,6 +27,8 @@ export function useLucieAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [apiAvailable, setApiAvailable] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [lastRequestTime, setLastRequestTime] = useState<number | null>(null);
+  const [apiBackoffTime, setApiBackoffTime] = useState(60000); // Start with 1 minute
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -71,37 +73,52 @@ export function useLucieAssistant() {
 
   // Get a fallback response when the API is unavailable
   const getFallbackResponse = useCallback((userMessage: string): LucieMessage => {
-    const genericResponses = [
-      {
-        content: "I'm sorry, I'm currently experiencing connection issues. Please try again later.",
-        suggestedActions: ["Try again", "Contact support", "Browse escort profiles"],
-        emotion: "apologetic"
-      },
-      {
-        content: "I apologize for the inconvenience. Our AI service is temporarily unavailable. In the meantime, you can browse our top profiles.",
-        suggestedActions: ["Show top profiles", "Send feedback", "Check my account"],
-        emotion: "concerned"
-      },
-      {
-        content: "Sorry about that! Our servers are a bit busy right now. Would you like to check out some of our featured content instead?",
-        suggestedActions: ["See featured content", "Browse new escorts", "Help with something else"],
-        emotion: "friendly"
-      }
-    ];
-
-    // Simple keyword detection for better fallback responses
-    let responseIndex = 0;
+    // Smart fallback responses based on keywords in the user message
     const lowercaseMsg = userMessage.toLowerCase();
     
-    if (lowercaseMsg.includes('escort') || lowercaseMsg.includes('profile') || lowercaseMsg.includes('find')) {
-      responseIndex = 0;
-    } else if (lowercaseMsg.includes('content') || lowercaseMsg.includes('video') || lowercaseMsg.includes('photo')) {
-      responseIndex = 1;
-    } else if (lowercaseMsg.includes('account') || lowercaseMsg.includes('wallet') || lowercaseMsg.includes('lucoin')) {
-      responseIndex = 2;
+    // Predefined fallback responses for different topics
+    const fallbackResponses = {
+      profile: {
+        content: "While I can't access my full capabilities right now, I can help you browse profiles. Would you like to see popular profiles or search by specific criteria?",
+        suggestedActions: ["Popular profiles", "Search by location", "Browse newest profiles"],
+        emotion: "helpful"
+      },
+      content: {
+        content: "I'm having trouble accessing my AI systems, but I can still help you find content. Would you like to see trending content or browse by category?",
+        suggestedActions: ["Trending content", "Premium content", "Creator spotlight"],
+        emotion: "friendly"
+      },
+      payment: {
+        content: "Though I'm experiencing some technical issues, I can direct you to payment and wallet information. What would you like to know about?",
+        suggestedActions: ["Check wallet balance", "Add funds", "Subscription info"],
+        emotion: "professional"
+      },
+      help: {
+        content: "I'm currently operating with limited capabilities, but I can still guide you to help resources. What kind of assistance do you need?",
+        suggestedActions: ["Contact support", "FAQs", "Account issues"],
+        emotion: "supportive"
+      },
+      default: {
+        content: "I apologize, but I'm currently operating with limited capabilities due to high demand. Can I help you with something from these options instead?",
+        suggestedActions: ["Browse profiles", "Check account", "View content"],
+        emotion: "apologetic"
+      }
+    };
+    
+    // Determine which fallback to use based on message content
+    let responseType = 'default';
+    
+    if (lowercaseMsg.match(/profile|escort|model|person|girl|woman|man|guy/i)) {
+      responseType = 'profile';
+    } else if (lowercaseMsg.match(/content|video|photo|picture|image|watch|view/i)) {
+      responseType = 'content';
+    } else if (lowercaseMsg.match(/pay|wallet|money|coin|lucoin|credit|fund|subscription/i)) {
+      responseType = 'payment';
+    } else if (lowercaseMsg.match(/help|support|issue|problem|question|how|why/i)) {
+      responseType = 'help';
     }
-
-    const response = genericResponses[responseIndex];
+    
+    const response = fallbackResponses[responseType];
     
     return {
       id: 'fallback-' + Date.now(),
@@ -113,24 +130,24 @@ export function useLucieAssistant() {
     };
   }, []);
 
-  // Retry mechanism for API calls
-  const resetApiStatus = useCallback(() => {
-    // After 5 minutes, try the API again
-    const timeout = setTimeout(() => {
-      console.log('Resetting API availability status');
+  // Check if we should retry the API based on time passed
+  const shouldRetryApi = useCallback(() => {
+    if (apiAvailable) return true;
+    
+    if (!lastRequestTime) return false;
+    
+    const timeSinceLastRequest = Date.now() - lastRequestTime;
+    return timeSinceLastRequest > apiBackoffTime;
+  }, [apiAvailable, lastRequestTime, apiBackoffTime]);
+
+  // Reset API availability after backoff time
+  useEffect(() => {
+    if (!apiAvailable && shouldRetryApi()) {
+      console.log(`Attempting to reset API availability after ${apiBackoffTime / 1000} seconds`);
       setApiAvailable(true);
       setRetryCount(0);
-    }, 5 * 60 * 1000); // 5 minutes
-    
-    return () => clearTimeout(timeout);
-  }, []);
-
-  // Effect to reset API status periodically
-  useEffect(() => {
-    if (!apiAvailable && retryCount < 3) {
-      return resetApiStatus();
     }
-  }, [apiAvailable, retryCount, resetApiStatus]);
+  }, [apiAvailable, shouldRetryApi, apiBackoffTime]);
 
   // Send a message to Lucie
   const sendMessage = useCallback(async (content: string) => {
@@ -148,14 +165,17 @@ export function useLucieAssistant() {
     setIsTyping(true);
     
     try {
-      // If API was previously marked as unavailable, delay a bit and use fallback
-      if (!apiAvailable) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      // Check if we should try the API
+      if (!apiAvailable && !shouldRetryApi()) {
+        console.log('API marked as unavailable, using fallback response');
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Brief delay for typing effect
         const fallbackMessage = getFallbackResponse(content);
         setMessages(prev => [...prev, fallbackMessage]);
         setIsTyping(false);
         return;
       }
+
+      setLastRequestTime(Date.now());
 
       // Get user context and chat history
       const userContext = getUserContext();
@@ -175,22 +195,30 @@ export function useLucieAssistant() {
         throw new Error(error.message);
       }
       
-      if (data && data.error) {
-        console.error('Lucie chat function returned error:', data.error);
+      if (data.error || data.errorCode) {
+        console.log('Lucie chat function returned error:', data.error || data.errorCode);
         
-        // If there's a quota error, mark API as unavailable
-        if (data.error.includes('quota') || data.error.includes('OpenAI API quota exceeded')) {
+        // Handle quota exceeded and other error types
+        if (data.errorCode === 'QUOTA_EXCEEDED' || data.error?.includes('quota')) {
           setApiAvailable(false);
-          setRetryCount(prev => prev + 1);
-          console.log('OpenAI API quota exceeded, using fallback responses');
-          resetApiStatus();
+          setApiBackoffTime(prev => Math.min(prev * 2, 30 * 60 * 1000)); // Exponential backoff, max 30 minutes
+          console.log(`API quota exceeded, backing off for ${apiBackoffTime / 1000} seconds`);
         }
         
-        // Use fallback response
-        const fallbackMessage = getFallbackResponse(content);
-        setMessages(prev => [...prev, fallbackMessage]);
+        // Add the error response to messages, it already contains appropriate text
+        const errorResponse: LucieMessage = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: data.text,
+          timestamp: new Date(),
+          suggestedActions: data.suggestedActions || [],
+          links: data.links || [],
+          emotion: 'apologetic'
+        };
+        
+        setMessages(prev => [...prev, errorResponse]);
       } else if (data) {
-        // Add Lucie's response to the UI
+        // Add Lucie's normal response to the UI
         const lucieResponse: LucieMessage = {
           id: Date.now().toString(),
           role: 'assistant',
@@ -202,6 +230,12 @@ export function useLucieAssistant() {
         };
         
         setMessages(prev => [...prev, lucieResponse]);
+        
+        // Reset backoff time on successful request
+        if (!apiAvailable) {
+          setApiAvailable(true);
+          setApiBackoffTime(60000); // Reset to 1 minute
+        }
       }
     } catch (error: any) {
       console.error('Error sending message to Lucie:', error);
@@ -217,16 +251,16 @@ export function useLucieAssistant() {
       setMessages(prev => [...prev, fallbackMessage]);
       
       // Mark API as potentially unavailable after consecutive errors
+      setRetryCount(prev => prev + 1);
+      
       if (retryCount >= 2) {
         setApiAvailable(false);
-        resetApiStatus();
-      } else {
-        setRetryCount(prev => prev + 1);
+        setApiBackoffTime(prev => Math.min(prev * 2, 30 * 60 * 1000)); // Exponential backoff
       }
     } finally {
       setIsTyping(false);
     }
-  }, [apiAvailable, formatChatHistory, getFallbackResponse, getUserContext, resetApiStatus, retryCount, toast]);
+  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, getUserContext, retryCount, toast, apiBackoffTime, lastRequestTime]);
   
   // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {
