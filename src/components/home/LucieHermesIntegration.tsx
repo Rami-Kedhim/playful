@@ -38,8 +38,8 @@ export const LucieHermesIntegration = ({
         personalizedMessage = `I noticed you might be interested in a boost! I can offer you ${insights.boostOffer.value} off, but it expires in ${insights.boostOffer.expires}.`;
       } else if (insights.vrEvent) {
         personalizedMessage = `Have you heard about our ${insights.vrEvent} event? It's happening soon, and I think you'd really enjoy it!`;
-      } else if (insights.recommendedProfiles?.length > 0) {
-        personalizedMessage = `Based on your interests, I think you might like to check out ${insights.recommendedProfiles[0].name}'s profile. They're very popular in your area!`;
+      } else if (insights.recommendedProfileId) {
+        personalizedMessage = `Based on your interests, I think you might like to check out profile ${insights.recommendedProfileId}. They're very popular in your area!`;
       } else {
         personalizedMessage = `Hey there${user ? ` ${user.username}` : ''}! I noticed you've been exploring our platform. Can I help you find something specific today?`;
       }
