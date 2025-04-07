@@ -74,6 +74,7 @@ export const useAssessment = () => {
             brandResonance: assessment.psychographicProfile.brandResonance || BrandResonanceStage.Awareness,
             identifiedSignals: assessment.psychographicProfile.identifiedSignals || []
           } : {
+            // Fixed the fallback object to include all required properties
             personalityTraits: [],
             interests: [],
             values: [],

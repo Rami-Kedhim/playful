@@ -97,6 +97,7 @@ export function useAICompanionConversation({
       
       // Add companion response
       const responseMessage: CompanionMessage = {
+        id: uuidv4(), // Add unique ID to fix the TypeScript error
         role: 'assistant',
         content: `I appreciate your message: "${content}". How can I assist you further?`,
         timestamp: new Date(),
