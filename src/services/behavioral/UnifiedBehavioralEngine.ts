@@ -1,5 +1,13 @@
-
-import { EnhancedBehavioralProfile } from '@/types/enhancedBehavioral';
+import { 
+  EnhancedBehavioralProfile,
+  TrustLevel,
+  PriceSensitivity, 
+  BehavioralLoop,
+  ConsumerDecisionStage,
+  ValueOrientation,
+  BrandResonanceStage,
+  MicroexpressionSignal
+} from '@/types/enhancedBehavioral';
 
 // UI Optimization settings for personalized user experience
 export interface UIOptimizationSettings {
@@ -93,13 +101,13 @@ class UnifiedBehavioralEngine {
           values: ['efficiency', 'quality', 'convenience'],
           motivations: ['discovery', 'mastery'],
           decisionMakingStyle: 'analytical',
-          trustLevel: 50,
-          priceSensitivity: 65,
-          behavioralLoop: 'discovery',
-          decisionStage: 'information_search',
-          valueOrientation: 'practical',
-          brandResonance: 'awareness',
-          identifiedSignals: ['interest', 'curiosity'],
+          trustLevel: TrustLevel.Moderate,
+          priceSensitivity: PriceSensitivity.Moderate,
+          behavioralLoop: BehavioralLoop.Discovery,
+          decisionStage: ConsumerDecisionStage.InformationSearch,
+          valueOrientation: ValueOrientation.Practical,
+          brandResonance: BrandResonanceStage.Awareness,
+          identifiedSignals: ['interest'],
           engagementPatterns: ['evening-browser', 'content-explorer']
         },
         marketingOptimizations: {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,9 +55,7 @@ const EnhancedEngagementPanel = () => {
     return new Date(lastAnalyzedAt).toLocaleTimeString();
   };
   
-  // Helper function to get trust level text and color
   const getTrustLevelInfo = (level: TrustLevel) => {
-    // Convert enum value to number for comparison
     const numericValue = Number(level);
     
     if (numericValue <= Number(TrustLevel.Low)) {
@@ -70,9 +67,7 @@ const EnhancedEngagementPanel = () => {
     }
   };
 
-  // Helper function to get price sensitivity text and color
   const getSensitivityInfo = (sensitivity: PriceSensitivity) => {
-    // Convert enum value to number for comparison
     const numericValue = Number(sensitivity);
     
     if (numericValue <= Number(PriceSensitivity.Low)) {
@@ -84,7 +79,6 @@ const EnhancedEngagementPanel = () => {
     }
   };
 
-  // Helper function to get behavioral loop stage text and icon
   const getLoopStageInfo = (stage: BehavioralLoop) => {
     switch (stage) {
       case BehavioralLoop.Discovery:
@@ -106,7 +100,6 @@ const EnhancedEngagementPanel = () => {
     }
   };
 
-  // Helper function to get decision stage text
   const getDecisionStageInfo = (stage: ConsumerDecisionStage) => {
     switch (stage) {
       case ConsumerDecisionStage.ProblemRecognition:
@@ -128,7 +121,6 @@ const EnhancedEngagementPanel = () => {
     }
   };
   
-  // Render communication strategies card
   const renderCommunicationStrategies = () => {
     if (!engagementStrategies) return null;
     
@@ -168,7 +160,6 @@ const EnhancedEngagementPanel = () => {
     );
   };
   
-  // Render offer strategies card
   const renderOfferStrategies = () => {
     if (!engagementStrategies) return null;
     
@@ -241,7 +232,6 @@ const EnhancedEngagementPanel = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Trust Level Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Trust Level</CardTitle>
@@ -262,7 +252,6 @@ const EnhancedEngagementPanel = () => {
           </CardContent>
         </Card>
         
-        {/* Price Sensitivity Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Price Sensitivity</CardTitle>
@@ -283,7 +272,6 @@ const EnhancedEngagementPanel = () => {
           </CardContent>
         </Card>
         
-        {/* Behavioral Loop Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Behavioral Loop Stage</CardTitle>
@@ -315,7 +303,6 @@ const EnhancedEngagementPanel = () => {
           </CardContent>
         </Card>
         
-        {/* Decision Stage Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Decision Making Stage</CardTitle>
@@ -344,7 +331,6 @@ const EnhancedEngagementPanel = () => {
           </CardContent>
         </Card>
         
-        {/* Brand Resonance Card */}
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Brand Resonance Stage</CardTitle>
@@ -415,7 +401,6 @@ const EnhancedEngagementPanel = () => {
         </Card>
       </div>
       
-      {/* Render AI strategy recommendations */}
       {renderCommunicationStrategies()}
       {renderOfferStrategies()}
     </div>

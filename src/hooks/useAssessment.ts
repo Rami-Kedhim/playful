@@ -26,7 +26,8 @@ export const useAssessment = () => {
       
       // Only set if we got valid assessment results
       if (assessment) {
-        setAssessmentResults(assessment);
+        // Fix: Use functional state update to ensure type compliance
+        setAssessmentResults(() => assessment);
       }
       return assessment;
     } catch (error) {

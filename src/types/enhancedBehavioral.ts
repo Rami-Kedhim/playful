@@ -1,4 +1,3 @@
-
 // Enhanced behavioral profiling system types
 // Implements HERMES, OXUM, Gould, and Chase Hughes frameworks
 
@@ -21,7 +20,10 @@ export enum BehavioralLoop {
   Retention = "retention",
   Action = "action",
   Reward = "reward",
-  Reengagement = "reengagement"
+  Reengagement = "reengagement",
+  Advocacy = "advocacy",
+  Investment = "investment",
+  Identity = "identity"
 }
 
 export enum BrandResonanceStage {
