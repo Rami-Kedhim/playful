@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AuthUser } from "@/types/auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -54,37 +54,6 @@ export function useAuthState() {
       console.error("Error fetching profile:", error);
     }
   };
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const loadInitialUser = async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (data.session?.user) {
-          const user: AuthUser = {
-            id: data.session.user.id,
-            email: data.session.user.email || '',
-            username: data.session.user.user_metadata?.username || data.session.user.email?.split('@')[0] || '',
-            role: data.session.user.user_metadata?.role || 'user',
-            profileImageUrl: data.session.user.user_metadata?.avatar_url,
-            app_metadata: data.session.user.app_metadata || {},
-            user_metadata: data.session.user.user_metadata || {},
-            aud: data.session.user.aud || 'authenticated',
-            created_at: data.session.user.created_at || new Date().toISOString(),
-          };
-          
-          setUser(user);
-          await refreshProfile();
-        }
-      } catch (error) {
-        console.error("Error loading user:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadInitialUser();
-  }, []);
 
   return {
     authState: state,

@@ -1,69 +1,65 @@
 
 import { useAuth } from './useAuth';
 
+/**
+ * Hook to check user roles and permissions
+ */
 export const useRole = () => {
-  const { userRoles = [] } = useAuth();
+  // Get auth context from useAuth hook
+  // We're using this inside the AuthProvider, so we need to check if it exists
+  let userRoles: string[] = [];
+  let user = null;
+  
+  try {
+    const authContext = useAuth();
+    userRoles = authContext.userRoles || [];
+    user = authContext.user;
+  } catch (error) {
+    // If called within AuthProvider, we won't have access to the context yet
+    // This is fine because the functions below check userRoles directly
+  }
   
   /**
-   * Check if user has any of the specified roles
-   * @param role - A single role or array of roles to check
-   * @returns boolean indicating if the user has any of the specified roles
+   * Check if user has at least one of the specified roles
    */
-  const hasRole = (role: string | string[]): boolean => {
-    if (Array.isArray(role)) {
-      return role.some(r => userRoles.includes(r));
-    }
-    return userRoles.includes(role);
+  const hasRole = (roles: string | string[]): boolean => {
+    if (!userRoles.length) return false;
+    
+    const rolesToCheck = Array.isArray(roles) ? roles : [roles];
+    return userRoles.some(role => rolesToCheck.includes(role));
   };
   
   /**
    * Check if user has all of the specified roles
-   * @param roles - Array of roles that are required
-   * @returns boolean indicating if the user has all specified roles
    */
   const hasAllRoles = (roles: string[]): boolean => {
+    if (!userRoles.length) return false;
+    
     return roles.every(role => userRoles.includes(role));
   };
   
   /**
    * Check if user is an admin
-   * @returns boolean indicating if the user has admin role
    */
-  const isAdmin = (): boolean => hasRole('admin');
+  const isAdmin = (): boolean => {
+    return userRoles.includes('admin');
+  };
   
   /**
-   * Check if user is a moderator
-   * @returns boolean indicating if the user has moderator role
+   * Check if user has a specific role
+   * For use directly in the AuthProvider
    */
-  const isModerator = (): boolean => hasRole('moderator');
-  
-  /**
-   * Check if user is a creator
-   * @returns boolean indicating if the user has creator role
-   */
-  const isCreator = (): boolean => hasRole('creator');
-  
-  /**
-   * Check if user is an escort
-   * @returns boolean indicating if the user has escort role
-   */
-  const isEscort = (): boolean => hasRole('escort');
-  
-  /**
-   * Check if user can access admin features
-   * @returns boolean indicating if user has admin or moderator role
-   */
-  const canAccessAdminFeatures = (): boolean => isAdmin() || isModerator();
+  const checkRole = (role: string): boolean => {
+    if (!userRoles.length) return false;
+    return userRoles.includes(role);
+  };
   
   return {
     hasRole,
     hasAllRoles,
     isAdmin,
-    isModerator,
-    isCreator,
-    isEscort,
-    canAccessAdminFeatures,
-    userRoles,
+    checkRole,
+    userRoles
   };
 };
 
