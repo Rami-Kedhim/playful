@@ -39,7 +39,7 @@ export const useAssessment = () => {
           insightSummary: assessment.insightSummary || 'Behavior analysis completed',
           recommendations: assessment.recommendations || [],
           overallScore: assessment.overallScore || 0,
-          insights: (assessment.insights || []).map(insight => {
+          insights: (assessment.insights || []).map((insight): AssessmentInsight => {
             // Ensure category is of type AssessmentCategory
             const category: AssessmentCategory = 
               (insight.category as AssessmentCategory) || 'engagement';
@@ -57,7 +57,7 @@ export const useAssessment = () => {
               impact: insight.impact || 50,
               confidenceScore: insight.confidenceScore || 70,
               recommendedActions: insight.recommendedActions || []
-            } as AssessmentInsight;
+            };
           }),
           summary: assessment.summary || '',
           strengthAreas: assessment.strengthAreas || [],
