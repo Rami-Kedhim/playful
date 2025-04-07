@@ -1,298 +1,360 @@
+
 import React, { useState } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { Check, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useToast } from '@/components/ui/use-toast';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/auth';
 
-// Define the password change result type
-interface PasswordChangeResult {
-  success: boolean;
-  error?: string;
-}
-
-// Define the email change result type
-interface EmailChangeResult {
+export interface PasswordChangeResult {
   success: boolean;
   error?: string;
 }
 
 const AccountSettings = () => {
-  // State for form values
-  const [email, setEmail] = useState('user@example.com');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const { toast } = useToast();
+  const { user, updateEmail, updatePassword } = useAuth();
   
-  // State for notification settings
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [marketingEmails, setMarketingEmails] = useState(false);
+  const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
+  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
   
-  // State for submission status
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [passwordChangeResult, setPasswordChangeResult] = useState<PasswordChangeResult | null>(null);
-  const [emailChangeResult, setEmailChangeResult] = useState<EmailChangeResult | null>(null);
-  const [notificationSaveResult, setNotificationSaveResult] = useState<boolean>(false);
+  const [emailForm, setEmailForm] = useState({
+    newEmail: '',
+    currentPassword: ''
+  });
   
-  // Handle password change
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  
+  const [autoLogout, setAutoLogout] = useState(true);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEmailForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
-    // Validation
-    if (newPassword !== confirmPassword) {
-      setPasswordChangeResult({
-        success: false,
-        error: "Passwords don't match"
+    if (!emailForm.newEmail || !emailForm.currentPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill all required fields",
+        variant: "destructive"
       });
-      setIsSubmitting(false);
       return;
     }
     
-    if (newPassword.length < 8) {
-      setPasswordChangeResult({
-        success: false,
-        error: "Password must be at least 8 characters"
+    setIsEmailSubmitting(true);
+    
+    try {
+      // Call the auth service to update email
+      await updateEmail(emailForm.newEmail, emailForm.currentPassword);
+      
+      toast({
+        title: "Email updated",
+        description: "Your email has been successfully updated",
+        variant: "default"
       });
-      setIsSubmitting(false);
+      
+      // Reset form
+      setEmailForm({
+        newEmail: '',
+        currentPassword: ''
+      });
+    } catch (error) {
+      console.error('Error updating email:', error);
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsEmailSubmitting(false);
+    }
+  };
+  
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill all required fields",
+        variant: "destructive"
+      });
       return;
     }
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirmation must match",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    // For demo, always succeed
-    setPasswordChangeResult({
-      success: true
+    if (passwordForm.newPassword.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsPasswordSubmitting(true);
+    
+    try {
+      // Call the auth service to update password
+      const result: PasswordChangeResult = await updatePassword(
+        passwordForm.currentPassword, 
+        passwordForm.newPassword
+      );
+      
+      if (result.success) {
+        toast({
+          title: "Password updated",
+          description: "Your password has been successfully updated",
+          variant: "default"
+        });
+        
+        // Reset form
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        toast({
+          title: "Update failed",
+          description: result.error || "An unknown error occurred",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsPasswordSubmitting(false);
+    }
+  };
+  
+  const handleToggleAutoLogout = () => {
+    setAutoLogout(!autoLogout);
+    toast({
+      title: `Auto logout ${!autoLogout ? 'enabled' : 'disabled'}`,
+      description: `Your account will ${!autoLogout ? 'now' : 'no longer'} automatically log out after 30 minutes of inactivity.`
     });
-    
-    // Reset form
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setIsSubmitting(false);
   };
   
-  // Handle email change
-  const handleEmailChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // For demo, always succeed
-    setEmailChangeResult({
-      success: true
+  const handleToggleMfa = () => {
+    setMfaEnabled(!mfaEnabled);
+    toast({
+      title: `Two-factor authentication ${!mfaEnabled ? 'enabled' : 'disabled'}`,
+      description: !mfaEnabled ? 
+        "Your account is now more secure with two-factor authentication." : 
+        "Two-factor authentication has been disabled."
     });
-    
-    setIsSubmitting(false);
-    
-    // Reset result after 3 seconds
-    setTimeout(() => setEmailChangeResult(null), 3000);
   };
-  
-  // Handle notification settings
-  const handleNotificationSave = async () => {
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // For demo, always succeed
-    setNotificationSaveResult(true);
-    
-    setIsSubmitting(false);
-    
-    // Reset result after 3 seconds
-    setTimeout(() => setNotificationSaveResult(false), 3000);
-  };
-  
+
   return (
-    <Tabs defaultValue="general" className="w-full">
-      <TabsList className="grid grid-cols-3 mb-4">
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="general">
-        <Card>
-          <CardHeader>
-            <CardTitle>General Settings</CardTitle>
-            <CardDescription>Update your email address and basic account information.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleEmailChange} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  required
-                />
-              </div>
-              
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save Email'}
-              </Button>
-              
-              {emailChangeResult && emailChangeResult.success && (
-                <Alert className="mt-4 bg-green-50 text-green-700 border-green-200">
-                  <Check className="h-4 w-4" />
-                  <AlertTitle>Success!</AlertTitle>
-                  <AlertDescription>Email address has been updated.</AlertDescription>
-                </Alert>
-              )}
-              
-              {emailChangeResult && !emailChangeResult.success && (
-                <Alert className="mt-4 bg-red-50 text-red-700 border-red-200" variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Failed</AlertTitle>
-                  <AlertDescription>{emailChangeResult.error}</AlertDescription>
-                </Alert>
-              )}
-            </form>
-          </CardContent>
-        </Card>
-      </TabsContent>
-      
-      <TabsContent value="security">
-        <Card>
-          <CardHeader>
-            <CardTitle>Security Settings</CardTitle>
-            <CardDescription>Change your password and manage security preferences.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input 
-                  id="currentPassword" 
-                  type="password" 
-                  value={currentPassword} 
-                  onChange={(e) => setCurrentPassword(e.target.value)} 
-                  required
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input 
-                  id="newPassword" 
-                  type="password" 
-                  value={newPassword} 
-                  onChange={(e) => setNewPassword(e.target.value)} 
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input 
-                  id="confirmPassword" 
-                  type="password" 
-                  value={confirmPassword} 
-                  onChange={(e) => setConfirmPassword(e.target.value)} 
-                  required
-                />
-              </div>
-              
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Updating...' : 'Update Password'}
-              </Button>
-              
-              {passwordChangeResult && passwordChangeResult.success && (
-                <Alert className="mt-4 bg-green-50 text-green-700 border-green-200">
-                  <Check className="h-4 w-4" />
-                  <AlertTitle>Success!</AlertTitle>
-                  <AlertDescription>Password has been updated successfully.</AlertDescription>
-                </Alert>
-              )}
-              
-              {passwordChangeResult && !passwordChangeResult.success && (
-                <Alert className="mt-4 bg-red-50 text-red-700 border-red-200" variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Failed</AlertTitle>
-                  <AlertDescription>{passwordChangeResult.error}</AlertDescription>
-                </Alert>
-              )}
-            </form>
-          </CardContent>
-        </Card>
-      </TabsContent>
-      
-      <TabsContent value="notifications">
-        <Card>
-          <CardHeader>
-            <CardTitle>Notification Settings</CardTitle>
-            <CardDescription>Configure how and when you want to be notified.</CardDescription>
-          </CardHeader>
+    <div className="space-y-6">
+      {/* Email Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Email Settings</CardTitle>
+          <CardDescription>Update your email address</CardDescription>
+        </CardHeader>
+        <form onSubmit={handleEmailSubmit}>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="emailNotifications" className="font-medium">Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">Receive notifications via email</p>
-              </div>
-              <Switch 
-                id="emailNotifications" 
-                checked={emailNotifications} 
-                onCheckedChange={setEmailNotifications} 
+            <div className="space-y-2">
+              <Label htmlFor="currentEmail">Current Email</Label>
+              <Input
+                id="currentEmail"
+                value={user?.email || ''}
+                disabled
+                className="bg-muted"
               />
             </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="pushNotifications" className="font-medium">Push Notifications</Label>
-                <p className="text-sm text-muted-foreground">Receive notifications on your device</p>
-              </div>
-              <Switch 
-                id="pushNotifications" 
-                checked={pushNotifications} 
-                onCheckedChange={setPushNotifications} 
+            <div className="space-y-2">
+              <Label htmlFor="newEmail">New Email</Label>
+              <Input
+                id="newEmail"
+                name="newEmail"
+                type="email"
+                value={emailForm.newEmail}
+                onChange={handleEmailChange}
+                placeholder="Enter your new email address"
               />
             </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="marketingEmails" className="font-medium">Marketing Emails</Label>
-                <p className="text-sm text-muted-foreground">Receive promotional emails and offers</p>
-              </div>
-              <Switch 
-                id="marketingEmails" 
-                checked={marketingEmails} 
-                onCheckedChange={setMarketingEmails} 
+            <div className="space-y-2">
+              <Label htmlFor="currentPasswordEmail">Current Password</Label>
+              <Input
+                id="currentPasswordEmail"
+                name="currentPassword"
+                type="password"
+                value={emailForm.currentPassword}
+                onChange={handleEmailChange}
+                placeholder="Enter your current password"
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleNotificationSave} disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Preferences'}
+            <Button type="submit" disabled={isEmailSubmitting}>
+              {isEmailSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Email'
+              )}
             </Button>
-            
-            {notificationSaveResult && (
-              <Alert className="ml-4 bg-green-50 text-green-700 border-green-200">
-                <Check className="h-4 w-4" />
-                <AlertDescription>Preferences saved</AlertDescription>
-              </Alert>
-            )}
           </CardFooter>
-        </Card>
-      </TabsContent>
-    </Tabs>
+        </form>
+      </Card>
+
+      {/* Password Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+          <CardDescription>Update your account password</CardDescription>
+        </CardHeader>
+        <form onSubmit={handlePasswordSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Current Password</Label>
+              <Input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordChange}
+                placeholder="Enter your current password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                placeholder="Enter your new password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                placeholder="Confirm your new password"
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" disabled={isPasswordSubmitting}>
+              {isPasswordSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                'Update Password'
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+
+      {/* Security Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Security Settings</CardTitle>
+          <CardDescription>Manage your account security preferences</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="auto-logout">Auto Logout</Label>
+              <p className="text-sm text-muted-foreground">
+                Automatically log out after 30 minutes of inactivity
+              </p>
+            </div>
+            <Switch
+              id="auto-logout"
+              checked={autoLogout}
+              onCheckedChange={handleToggleAutoLogout}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="mfa">Two-Factor Authentication</Label>
+              <p className="text-sm text-muted-foreground">
+                Add an extra layer of security to your account
+              </p>
+            </div>
+            <Switch
+              id="mfa"
+              checked={mfaEnabled}
+              onCheckedChange={handleToggleMfa}
+            />
+          </div>
+        </CardContent>
+        <CardFooter>
+          {mfaEnabled && (
+            <div className="flex items-center text-sm text-green-600">
+              <CheckCircle className="mr-1 h-4 w-4" />
+              <span>Your account is secure with 2FA enabled</span>
+            </div>
+          )}
+        </CardFooter>
+      </Card>
+      
+      {/* Delete Account */}
+      <Card className="border-destructive">
+        <CardHeader>
+          <CardTitle>Danger Zone</CardTitle>
+          <CardDescription>Irreversible account actions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Once you delete your account, there is no going back. Please be certain.
+          </p>
+          <Button variant="destructive">
+            Delete Account
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

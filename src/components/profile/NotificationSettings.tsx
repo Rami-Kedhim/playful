@@ -2,220 +2,247 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { Bell, Mail, MessageSquare, AlertTriangle, Heart, Check, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 const NotificationSettings = () => {
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
   const [emailSettings, setEmailSettings] = useState({
     messages: true,
-    mentions: true,
-    updates: true,
-    marketing: false,
-    security: true,
+    bookings: true,
+    payments: true,
+    system: true,
+    marketing: false
   });
   
-  const [appSettings, setAppSettings] = useState({
+  const [pushSettings, setPushSettings] = useState({
     messages: true,
-    mentions: true,
-    likes: true,
-    follows: true,
-    updates: true,
-    security: true,
+    bookings: true,
+    payments: true,
+    system: false,
+    marketing: false
   });
   
-  const handleEmailChange = (setting: keyof typeof emailSettings) => {
+  const [notificationDisplay, setNotificationDisplay] = useState('all');
+  
+  const handleEmailToggle = (key: keyof typeof emailSettings) => {
     setEmailSettings(prev => ({
       ...prev,
-      [setting]: !prev[setting],
+      [key]: !prev[key]
     }));
   };
   
-  const handleAppChange = (setting: keyof typeof appSettings) => {
-    setAppSettings(prev => ({
+  const handlePushToggle = (key: keyof typeof pushSettings) => {
+    setPushSettings(prev => ({
       ...prev,
-      [setting]: !prev[setting],
+      [key]: !prev[key]
     }));
   };
   
   const handleSave = async () => {
-    setIsSubmitting(true);
+    setIsSaving(true);
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     toast({
-      title: "Notification preferences saved",
-      description: "Your notification settings have been updated.",
+      title: "Notification settings saved",
+      description: "Your notification preferences have been updated.",
     });
     
-    setIsSubmitting(false);
+    setIsSaving(false);
   };
-  
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Notification Settings</CardTitle>
-        <CardDescription>Configure how and when you receive notifications.</CardDescription>
+        <CardDescription>Manage how you receive notifications and alerts.</CardDescription>
       </CardHeader>
       
-      <CardContent className="space-y-6">
-        <div>
-          <h3 className="text-lg font-medium flex items-center mb-4">
-            <Mail className="h-5 w-5 mr-2" />
-            Email Notifications
-          </h3>
+      <CardContent>
+        <Tabs defaultValue="email">
+          <TabsList className="mb-6">
+            <TabsTrigger value="email">Email Notifications</TabsTrigger>
+            <TabsTrigger value="push">Push Notifications</TabsTrigger>
+            <TabsTrigger value="display">Display Settings</TabsTrigger>
+          </TabsList>
           
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email-messages" className="font-medium">Messages</Label>
-                <p className="text-sm text-muted-foreground">Receive email notifications for new messages</p>
+          {/* Email Notification Settings */}
+          <TabsContent value="email" className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b">
+                <Label htmlFor="email-messages">Message Notifications</Label>
+                <Switch 
+                  id="email-messages" 
+                  checked={emailSettings.messages}
+                  onCheckedChange={() => handleEmailToggle('messages')}
+                />
               </div>
-              <Switch 
-                id="email-messages" 
-                checked={emailSettings.messages} 
-                onCheckedChange={() => handleEmailChange('messages')}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email-mentions" className="font-medium">Mentions</Label>
-                <p className="text-sm text-muted-foreground">Receive email notifications when you're mentioned</p>
+              
+              <div className="flex items-center justify-between pb-2 border-b">
+                <div>
+                  <Label htmlFor="email-bookings" className="block">Booking Notifications</Label>
+                  <p className="text-sm text-muted-foreground">Updates about your bookings and appointments</p>
+                </div>
+                <Switch 
+                  id="email-bookings" 
+                  checked={emailSettings.bookings}
+                  onCheckedChange={() => handleEmailToggle('bookings')}
+                />
               </div>
-              <Switch 
-                id="email-mentions" 
-                checked={emailSettings.mentions} 
-                onCheckedChange={() => handleEmailChange('mentions')}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email-updates" className="font-medium">Updates</Label>
-                <p className="text-sm text-muted-foreground">Receive email notifications for platform updates</p>
+              
+              <div className="flex items-center justify-between pb-2 border-b">
+                <Label htmlFor="email-payments">Payment Notifications</Label>
+                <Switch 
+                  id="email-payments" 
+                  checked={emailSettings.payments}
+                  onCheckedChange={() => handleEmailToggle('payments')}
+                />
               </div>
-              <Switch 
-                id="email-updates" 
-                checked={emailSettings.updates} 
-                onCheckedChange={() => handleEmailChange('updates')}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email-marketing" className="font-medium">Marketing</Label>
-                <p className="text-sm text-muted-foreground">Receive marketing emails and promotions</p>
+              
+              <div className="flex items-center justify-between pb-2 border-b">
+                <Label htmlFor="email-system">System Updates</Label>
+                <Switch 
+                  id="email-system" 
+                  checked={emailSettings.system}
+                  onCheckedChange={() => handleEmailToggle('system')}
+                />
               </div>
-              <Switch 
-                id="email-marketing" 
-                checked={emailSettings.marketing} 
-                onCheckedChange={() => handleEmailChange('marketing')}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email-security" className="font-medium">Security Alerts</Label>
-                <p className="text-sm text-muted-foreground">Receive email notifications for security events</p>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="email-marketing" className="block">Marketing Communications</Label>
+                  <p className="text-sm text-muted-foreground">Receive offers and updates about new features</p>
+                </div>
+                <Switch 
+                  id="email-marketing" 
+                  checked={emailSettings.marketing}
+                  onCheckedChange={() => handleEmailToggle('marketing')}
+                />
               </div>
-              <Switch 
-                id="email-security" 
-                checked={emailSettings.security} 
-                onCheckedChange={() => handleEmailChange('security')}
-              />
             </div>
-          </div>
-        </div>
-        
-        <Separator className="my-6" />
-        
-        <div>
-          <h3 className="text-lg font-medium flex items-center mb-4">
-            <Bell className="h-5 w-5 mr-2" />
-            App Notifications
-          </h3>
+          </TabsContent>
           
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="app-messages" className="font-medium">Messages</Label>
-                <p className="text-sm text-muted-foreground">Show notifications for new messages</p>
+          {/* Push Notification Settings */}
+          <TabsContent value="push" className="space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b">
+                <Label htmlFor="push-messages">Message Alerts</Label>
+                <Switch 
+                  id="push-messages" 
+                  checked={pushSettings.messages}
+                  onCheckedChange={() => handlePushToggle('messages')}
+                />
               </div>
-              <Switch 
-                id="app-messages" 
-                checked={appSettings.messages} 
-                onCheckedChange={() => handleAppChange('messages')}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="app-mentions" className="font-medium">Mentions</Label>
-                <p className="text-sm text-muted-foreground">Show notifications when you're mentioned</p>
+              
+              <div className="flex items-center justify-between pb-2 border-b">
+                <Label htmlFor="push-bookings">Booking Updates</Label>
+                <Switch 
+                  id="push-bookings" 
+                  checked={pushSettings.bookings}
+                  onCheckedChange={() => handlePushToggle('bookings')}
+                />
               </div>
-              <Switch 
-                id="app-mentions" 
-                checked={appSettings.mentions} 
-                onCheckedChange={() => handleAppChange('mentions')}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="app-likes" className="font-medium">Likes</Label>
-                <p className="text-sm text-muted-foreground">Show notifications for likes on your content</p>
+              
+              <div className="flex items-center justify-between pb-2 border-b">
+                <Label htmlFor="push-payments">Payment Alerts</Label>
+                <Switch 
+                  id="push-payments" 
+                  checked={pushSettings.payments}
+                  onCheckedChange={() => handlePushToggle('payments')}
+                />
               </div>
-              <Switch 
-                id="app-likes" 
-                checked={appSettings.likes} 
-                onCheckedChange={() => handleAppChange('likes')}
-              />
-            </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="app-follows" className="font-medium">Follows</Label>
-                <p className="text-sm text-muted-foreground">Show notifications for new followers</p>
+              
+              <div className="flex items-center justify-between pb-2 border-b">
+                <Label htmlFor="push-system">System Alerts</Label>
+                <Switch 
+                  id="push-system" 
+                  checked={pushSettings.system}
+                  onCheckedChange={() => handlePushToggle('system')}
+                />
               </div>
-              <Switch 
-                id="app-follows" 
-                checked={appSettings.follows} 
-                onCheckedChange={() => handleAppChange('follows')}
-              />
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="push-marketing">Promotional Alerts</Label>
+                <Switch 
+                  id="push-marketing" 
+                  checked={pushSettings.marketing}
+                  onCheckedChange={() => handlePushToggle('marketing')}
+                />
+              </div>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+          
+          {/* Display Settings */}
+          <TabsContent value="display" className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium mb-3">Notification Display</h3>
+                <RadioGroup 
+                  value={notificationDisplay}
+                  onValueChange={setNotificationDisplay}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="all" />
+                    <Label htmlFor="all">Show all notifications</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="important" id="important" />
+                    <Label htmlFor="important">Important notifications only</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="none" id="none" />
+                    <Label htmlFor="none">Only show when app is open</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
+              <div className="pt-2 border-t">
+                <h3 className="text-sm font-medium mb-3">Quiet Hours</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="quiet-start">Start Time</Label>
+                    <Input
+                      id="quiet-start"
+                      type="time"
+                      defaultValue="22:00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="quiet-end">End Time</Label>
+                    <Input
+                      id="quiet-end"
+                      type="time"
+                      defaultValue="08:00"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  We won't send notifications during these hours unless they're urgent.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
       
       <CardFooter>
-        <Button onClick={handleSave} disabled={isSubmitting} className="w-full">
-          {isSubmitting ? (
+        <Button onClick={handleSave} disabled={isSaving} className="w-full">
+          {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Saving...
             </>
           ) : (
-            'Save Notification Settings'
+            'Save Settings'
           )}
         </Button>
       </CardFooter>
@@ -224,3 +251,6 @@ const NotificationSettings = () => {
 };
 
 export default NotificationSettings;
+
+// Here is the Input component for completeness
+import { Input } from '@/components/ui/input';

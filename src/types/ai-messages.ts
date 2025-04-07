@@ -5,13 +5,13 @@ export interface AIMessage {
   content: string;
   timestamp?: Date;
   is_ai?: boolean;
-  created_at?: string | Date;
+  created_at: string; // Changed from string | Date to string for compatibility
   requires_payment?: boolean;
   payment_status?: 'pending' | 'completed' | 'failed';
   price?: number;
   has_read?: boolean;
   conversation_id: string;
-  sender_id: string; // Changed from optional to required
+  sender_id: string;
   conversationId?: string;
 }
 

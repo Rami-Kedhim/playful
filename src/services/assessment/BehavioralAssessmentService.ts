@@ -1,528 +1,774 @@
 
-import { EnhancedBehavioralProfile } from '@/types/enhancedBehavioral';
-import { AssessmentResult, AssessmentInsight, AssessmentCategory } from '@/types/assessment';
-import { ChaseHughesBehavioralProfile, InfluencePhase, MicroExpression, InfluenceTechnique } from '@/types/chaseHughes';
+import { 
+  TrustLevel, 
+  PriceSensitivity, 
+  ConsumerDecisionStage,
+  BehavioralLoop,
+  ValueOrientation
+} from '@/types/enhancedBehavioral';
 
-export class BehavioralAssessmentService {
+// Types for Assessment
+export type InfluencePhase = 'interest' | 'trust' | 'desire' | 'action' | 'loyalty';
+
+export type MicroExpression = 
+  | 'interest'
+  | 'confusion'
+  | 'doubt'
+  | 'excitement'
+  | 'hesitation'
+  | 'conviction'
+  | 'objection'
+  | 'consideration';
+
+export type InfluenceTechnique = 
+  | 'social_proof'
+  | 'scarcity'
+  | 'authority'
+  | 'reciprocity'
+  | 'commitment'
+  | 'liking'
+  | 'unity';
+
+export interface AssessmentInsight {
+  title: string;
+  description: string;
+  category: string;
+  severityLevel: 'low' | 'medium' | 'high';
+  recommendedActions: string[];
+}
+
+export interface AssessmentResult {
+  overallScore: number;
+  engagementHealthScore: number;
+  conversionPotentialScore: number;
+  retentionRiskScore: number;
+  summary: string;
+  strengthAreas: string[];
+  improvementAreas: string[];
+  insights: AssessmentInsight[];
+  flags: {
+    title: string;
+    description: string;
+    severityLevel: 'low' | 'medium' | 'high';
+    recommendedActions: string[];
+  }[];
+  psychographicProfile: {
+    personalityTraits: string[];
+    interests: string[];
+    values: string[];
+    motivations: string[];
+  };
+}
+
+export interface BehaviorEvent {
+  eventType: string;
+  timestamp: Date;
+  metadata: Record<string, any>;
+}
+
+export interface BehaviorAssessment {
+  userBehavior: BehaviorEvent[];
+  influencePhase: InfluencePhase;
+  microExpressions: MicroExpression[];
+  influenceTechniques: InfluenceTechnique[];
+  suggestedApproach: {
+    technique: InfluenceTechnique;
+    implementation: string;
+  };
+}
+
+class BehavioralAssessmentService {
+  // Assess price sensitivity based on behavior
+  assessPriceSensitivity(behavior: BehaviorEvent[]): PriceSensitivity {
+    // Look for price-related behaviors
+    const priceCheckCount = behavior.filter(event => 
+      event.eventType === 'price_check' || 
+      event.eventType === 'discount_search'
+    ).length;
+    
+    const abandonedCarts = behavior.filter(event => 
+      event.eventType === 'cart_abandon'
+    ).length;
+    
+    // Calculate a price sensitivity score
+    let sensitivityScore = 0;
+    
+    if (priceCheckCount > 5) sensitivityScore += 30;
+    else if (priceCheckCount > 2) sensitivityScore += 20;
+    else if (priceCheckCount > 0) sensitivityScore += 10;
+    
+    if (abandonedCarts > 2) sensitivityScore += 50;
+    else if (abandonedCarts > 0) sensitivityScore += 30;
+    
+    // Map score to enum
+    if (sensitivityScore >= 50) return PriceSensitivity.High;
+    if (sensitivityScore >= 20) return PriceSensitivity.Moderate;
+    return PriceSensitivity.Low;
+  }
   
-  // Generate a comprehensive assessment based on behavioral profile
-  generateAssessment(profile: EnhancedBehavioralProfile): AssessmentResult {
-    console.log('Generating behavioral assessment for user profile');
+  // Determine consumer decision stage
+  determineDecisionStage(behavior: BehaviorEvent[]): ConsumerDecisionStage {
+    // Count different types of behavior events
+    const researchEvents = behavior.filter(event => 
+      event.eventType === 'view_information' || 
+      event.eventType === 'read_details' ||
+      event.eventType === 'search_query'
+    ).length;
     
-    // Generate primary metrics from the profile
-    const engagementPotential = this.calculateEngagementPotential(profile);
-    const contentAffinity = this.calculateContentAffinity(profile);
-    const monetizationPropensity = this.calculateMonetizationPropensity(profile);
-    const retentionLikelihood = this.calculateRetentionLikelihood(profile);
+    const comparisonEvents = behavior.filter(event => 
+      event.eventType === 'compare_items' || 
+      event.eventType === 'toggle_features' ||
+      event.eventType === 'view_alternatives'
+    ).length;
     
-    // Generate overall score (weighted average)
+    const purchaseEvents = behavior.filter(event => 
+      event.eventType === 'add_to_cart' || 
+      event.eventType === 'view_cart' ||
+      event.eventType === 'checkout_start'
+    ).length;
+    
+    const postPurchaseEvents = behavior.filter(event => 
+      event.eventType === 'leave_review' || 
+      event.eventType === 'submit_feedback'
+    ).length;
+    
+    // Determine stage based on predominant behavior
+    if (postPurchaseEvents > 0) return ConsumerDecisionStage.PostPurchaseEvaluation;
+    if (purchaseEvents > comparisonEvents && purchaseEvents > researchEvents) return ConsumerDecisionStage.PurchaseDecision;
+    if (comparisonEvents > researchEvents) return ConsumerDecisionStage.AlternativeEvaluation;
+    if (researchEvents > 0) return ConsumerDecisionStage.InformationSearch;
+    return ConsumerDecisionStage.ProblemRecognition;
+  }
+  
+  // Assess trust level based on behavior
+  assessTrustLevel(behavior: BehaviorEvent[]): TrustLevel {
+    // Look for trust-indicating behaviors
+    const highTrustActions = behavior.filter(event => 
+      event.eventType === 'provide_personal_info' || 
+      event.eventType === 'save_payment_method' ||
+      event.eventType === 'refer_friend'
+    ).length;
+    
+    const moderateTrustActions = behavior.filter(event => 
+      event.eventType === 'subscribe_newsletter' || 
+      event.eventType === 'create_account'
+    ).length;
+    
+    const lowTrustActions = behavior.filter(event => 
+      event.eventType === 'read_reviews' || 
+      event.eventType === 'check_security' ||
+      event.eventType === 'view_privacy_policy'
+    ).length;
+    
+    // Calculate trust score
+    let trustScore = 0;
+    trustScore += highTrustActions * 20;
+    trustScore += moderateTrustActions * 10;
+    trustScore -= lowTrustActions * 5; // Checking security policies may indicate lower trust
+    
+    // Ensure score is within bounds
+    trustScore = Math.max(trustScore, 0);
+    trustScore = Math.min(trustScore, 100);
+    
+    // Map to trust level enum
+    if (trustScore >= 70) return TrustLevel.High;
+    if (trustScore >= 40) return TrustLevel.Moderate;
+    return TrustLevel.Low;
+  }
+  
+  // Create behavioral assessment based on events
+  createBehavioralAssessment(behaviorEvents: BehaviorEvent[]): BehaviorAssessment {
+    // Default assessment
+    let assessment: BehaviorAssessment = {
+      userBehavior: behaviorEvents,
+      influencePhase: 'interest' as InfluencePhase,
+      microExpressions: ['interest'],
+      influenceTechniques: ['social_proof'],
+      suggestedApproach: {
+        technique: 'social_proof',
+        implementation: 'Show number of users who have purchased this item'
+      }
+    };
+    
+    // Determine influence phase based on behavior
+    const viewCount = behaviorEvents.filter(e => e.eventType.includes('view')).length;
+    const interactionCount = behaviorEvents.filter(e => e.eventType.includes('click') || e.eventType.includes('select')).length;
+    const conversionEvents = behaviorEvents.filter(e => e.eventType.includes('purchase') || e.eventType.includes('subscribe')).length;
+    const repeatEvents = behaviorEvents.filter(e => e.eventType.includes('repeat_purchase') || e.eventType.includes('renew')).length;
+    
+    if (repeatEvents > 0) {
+      assessment.influencePhase = 'loyalty';
+    } else if (conversionEvents > 0) {
+      assessment.influencePhase = 'action';
+    } else if (interactionCount > viewCount) {
+      assessment.influencePhase = 'desire';
+    } else if (viewCount > 3) {
+      assessment.influencePhase = 'trust';
+    } else {
+      assessment.influencePhase = 'interest';
+    }
+    
+    // Identify micro-expressions based on behavior patterns
+    assessment.microExpressions = this.identifyMicroExpressions(behaviorEvents);
+    
+    // Determine effective influence techniques
+    assessment.influenceTechniques = this.determineInfluenceTechniques(behaviorEvents, assessment.influencePhase);
+    
+    // Suggest the most effective approach
+    assessment.suggestedApproach = {
+      technique: assessment.influenceTechniques[0],
+      implementation: this.getImplementationSuggestion(assessment.influenceTechniques[0], assessment.influencePhase)
+    };
+    
+    return assessment;
+  }
+  
+  // Identify micro-expressions from behavior
+  private identifyMicroExpressions(events: BehaviorEvent[]): MicroExpression[] {
+    const expressions: MicroExpression[] = [];
+    
+    // Look for patterns indicating specific micro-expressions
+    if (events.some(e => e.eventType === 'hover_time_extended')) {
+      expressions.push('interest');
+    }
+    
+    if (events.some(e => e.eventType === 'back_button')) {
+      expressions.push('confusion');
+    }
+    
+    if (events.some(e => e.eventType === 'view_reviews_multiple')) {
+      expressions.push('doubt');
+    }
+    
+    if (events.some(e => e.eventType === 'quick_clicks_multiple')) {
+      expressions.push('excitement');
+    }
+    
+    // Default if no expressions detected
+    if (expressions.length === 0) {
+      expressions.push('interest');
+    }
+    
+    return expressions;
+  }
+  
+  // Determine effective influence techniques based on behavior and phase
+  private determineInfluenceTechniques(events: BehaviorEvent[], phase: InfluencePhase): InfluenceTechnique[] {
+    const techniques: InfluenceTechnique[] = [];
+    
+    // Different techniques are effective at different phases
+    switch (phase) {
+      case 'interest':
+        techniques.push('social_proof');
+        if (events.some(e => e.eventType === 'view_limited_offer')) {
+          techniques.push('scarcity');
+        }
+        break;
+        
+      case 'trust':
+        techniques.push('authority');
+        techniques.push('social_proof');
+        break;
+        
+      case 'desire':
+        techniques.push('scarcity');
+        techniques.push('reciprocity');
+        break;
+        
+      case 'action':
+        techniques.push('commitment');
+        techniques.push('scarcity');
+        break;
+        
+      case 'loyalty':
+        techniques.push('reciprocity');
+        techniques.push('unity');
+        break;
+    }
+    
+    // If no techniques determined, default to social proof
+    if (techniques.length === 0) {
+      techniques.push('social_proof');
+    }
+    
+    return techniques;
+  }
+  
+  // Get specific implementation suggestion for influence technique
+  private getImplementationSuggestion(technique: InfluenceTechnique, phase: InfluencePhase): string {
+    switch (technique) {
+      case 'social_proof':
+        return 'Show customer testimonials and usage statistics';
+      
+      case 'scarcity':
+        return 'Display limited time offer with countdown timer';
+      
+      case 'authority':
+        return 'Highlight expert endorsements and certifications';
+      
+      case 'reciprocity':
+        return 'Offer a free gift or discount with purchase';
+      
+      case 'commitment':
+        return 'Implement a progress tracker for completion';
+      
+      case 'liking':
+        return 'Personalize communications based on user preferences';
+      
+      case 'unity':
+        return 'Create an exclusive community or membership benefit';
+      
+      default:
+        return 'Show number of people who have purchased';
+    }
+  }
+  
+  // Analyze user behavior and generate assessment report
+  public async analyzeUserBehavior(
+    userId: string, 
+    behaviorEvents: BehaviorEvent[]
+  ): Promise<AssessmentResult> {
+    // Create a detailed assessment report
+    const trustLevel = this.assessTrustLevel(behaviorEvents);
+    const priceSensitivity = this.assessPriceSensitivity(behaviorEvents);
+    const decisionStage = this.determineDecisionStage(behaviorEvents);
+    const behavioralAssessment = this.createBehavioralAssessment(behaviorEvents);
+    
+    // Calculate scores
+    const engagementScore = this.calculateEngagementScore(behaviorEvents, behavioralAssessment);
+    const conversionScore = this.calculateConversionPotential(trustLevel, priceSensitivity, behavioralAssessment);
+    const retentionRiskScore = this.calculateRetentionRisk(behaviorEvents, behavioralAssessment);
+    
+    // Overall score is weighted average
     const overallScore = Math.round(
-      (engagementPotential * 0.3) + 
-      (contentAffinity * 0.2) + 
-      (monetizationPropensity * 0.2) + 
-      (100 - profile.marketingOptimizations.retentionRisk * 100) * 0.3
+      (engagementScore * 0.3) + 
+      (conversionScore * 0.4) + 
+      ((100 - retentionRiskScore) * 0.3)
     );
     
-    // Generate insights based on the metrics and profile
-    const insights = this.generateInsights(profile);
+    // Generate insights based on scores and assessment
+    const insights = this.generateInsights(
+      trustLevel, 
+      priceSensitivity, 
+      behavioralAssessment,
+      engagementScore,
+      conversionScore,
+      retentionRiskScore
+    );
     
-    // Create summary text
-    const summary = this.generateSummaryText(profile, overallScore);
-    
-    // Extract strength and improvement areas
-    const strengthAreas = this.identifyStrengthAreas(profile, insights);
-    const improvementAreas = this.identifyImprovementAreas(profile, insights);
-    
-    // Generate supplementary metrics
-    const engagementHealthScore = engagementPotential;
-    const conversionPotentialScore = monetizationPropensity;
-    const retentionRiskScore = Math.round(profile.marketingOptimizations.retentionRisk * 100);
-    
-    // Generate recommendations
-    const recommendations = this.generateRecommendations(profile, insights);
-    
-    // Include Chase Hughes behavioral profile
-    const chaseHughesProfile = this.generateChaseHughesProfile(profile);
-    
-    return {
-      assessmentId: `assessment-${Date.now()}`,
-      userId: profile.standardProfile.userId,
-      timestamp: new Date().toISOString(),
-      scores: {
-        engagementPotential,
-        contentAffinity,
-        monetizationPropensity,
-        retentionLikelihood
-      },
-      recommendations,
-      insightSummary: summary,
+    // Generate summary
+    const summary = this.generateSummary(
       overallScore,
-      insights,
+      engagementScore,
+      conversionScore,
+      retentionRiskScore,
+      behavioralAssessment.influencePhase
+    );
+    
+    // Identify strengths and improvement areas
+    const strengthAreas = this.identifyStrengths(
+      trustLevel, 
+      priceSensitivity,
+      engagementScore,
+      conversionScore,
+      retentionRiskScore
+    );
+    
+    const improvementAreas = this.identifyImprovementAreas(
+      trustLevel,
+      priceSensitivity,
+      engagementScore,
+      conversionScore,
+      retentionRiskScore
+    );
+    
+    // Generate psychographic profile
+    const psychographicProfile = this.generatePsychographicProfile(behaviorEvents, behavioralAssessment);
+    
+    // Final assessment result
+    return {
+      overallScore,
+      engagementHealthScore: engagementScore,
+      conversionPotentialScore: conversionScore,
+      retentionRiskScore,
       summary,
       strengthAreas,
       improvementAreas,
-      engagementHealthScore,
-      conversionPotentialScore,
-      retentionRiskScore,
-      psychographicProfile: profile.psychographicProfile,
-      chaseHughesProfile
+      insights,
+      flags: insights.filter(insight => insight.severityLevel !== 'low'),
+      psychographicProfile
     };
   }
   
-  // Calculate engagement potential score (0-100)
-  private calculateEngagementPotential(profile: EnhancedBehavioralProfile): number {
-    // Complex logic would use machine learning or rule-based system
-    // Simplified for demo
+  // Calculate engagement score
+  private calculateEngagementScore(events: BehaviorEvent[], assessment: BehaviorAssessment): number {
+    // Base score
+    let score = 50;
     
-    // Base score from behavioral loop stage
-    let score = 0;
-    switch (profile.psychographicProfile.behavioralLoop) {
-      case 'discovery': score = 30; break;
-      case 'engagement': score = 60; break;
-      case 'conversion': score = 80; break;
-      case 'retention': score = 90; break;
-      case 'advocacy': score = 100; break;
-      default: score = 50;
+    // Add points based on engagement metrics
+    const viewEvents = events.filter(e => e.eventType.includes('view')).length;
+    const clickEvents = events.filter(e => e.eventType.includes('click')).length;
+    const timeSpent = events.reduce((total, e) => {
+      if (e.metadata && e.metadata.timeSpent) {
+        return total + e.metadata.timeSpent;
+      }
+      return total;
+    }, 0);
+    
+    // Engagement factors
+    if (viewEvents > 10) score += 10;
+    else if (viewEvents > 5) score += 5;
+    
+    if (clickEvents > 20) score += 20;
+    else if (clickEvents > 10) score += 10;
+    else if (clickEvents > 5) score += 5;
+    
+    if (timeSpent > 600) score += 20; // More than 10 minutes
+    else if (timeSpent > 300) score += 10; // More than 5 minutes
+    
+    // Adjust based on influence phase
+    if (assessment.influencePhase === 'desire' || assessment.influencePhase === 'action') {
+      score += 10;
     }
     
-    // Adjust based on identified signals
-    if (profile.psychographicProfile.identifiedSignals.includes('interest')) score += 5;
-    if (profile.psychographicProfile.identifiedSignals.includes('excitement')) score += 10;
-    if (profile.psychographicProfile.identifiedSignals.includes('doubt')) score -= 15;
-    if (profile.psychographicProfile.identifiedSignals.includes('hesitation')) score -= 10;
+    // Cap score at 0-100
+    return Math.max(0, Math.min(100, score));
+  }
+  
+  // Calculate conversion potential
+  private calculateConversionPotential(
+    trustLevel: TrustLevel, 
+    priceSensitivity: PriceSensitivity, 
+    assessment: BehaviorAssessment
+  ): number {
+    // Base score
+    let score = 50;
     
-    // Ensure score is within 0-100 range
-    return Math.min(100, Math.max(0, score));
-  }
-  
-  // Calculate content affinity score (0-100)
-  private calculateContentAffinity(profile: EnhancedBehavioralProfile): number {
-    // Content affinity is based on interests and content preferences
-    // Simplified for demo
-    return Math.round(Math.random() * 40) + 60; // Random score between 60-100
-  }
-  
-  // Calculate monetization propensity score (0-100)
-  private calculateMonetizationPropensity(profile: EnhancedBehavioralProfile): number {
-    // Base score from price sensitivity
-    let score = 0;
-    switch (profile.psychographicProfile.priceSensitivity) {
-      case 'low': score = 80; break;
-      case 'moderate': score = 50; break;
-      case 'high': score = 20; break;
-      default: score = 50;
+    // Trust level impact
+    if (trustLevel === TrustLevel.High) {
+      score += 20;
+    } else if (trustLevel === TrustLevel.Moderate) {
+      score += 10;
     }
     
-    // Adjust based on decision stage
-    switch (profile.psychographicProfile.decisionStage) {
-      case 'information_search': score -= 20; break;
-      case 'alternative_evaluation': score -= 10; break;
-      case 'purchase_decision': score += 30; break;
-      default: break;
+    // Price sensitivity impact (inverse relationship)
+    if (priceSensitivity === PriceSensitivity.Low) {
+      score += 20;
+    } else if (priceSensitivity === PriceSensitivity.Moderate) {
+      score += 10;
     }
     
-    // Ensure score is within 0-100 range
-    return Math.min(100, Math.max(0, score));
+    // Influence phase impact
+    if (assessment.influencePhase === 'action') {
+      score += 20;
+    } else if (assessment.influencePhase === 'desire') {
+      score += 15;
+    } else if (assessment.influencePhase === 'trust') {
+      score += 5;
+    }
+    
+    // Micro-expressions impact
+    if (assessment.microExpressions.includes('excitement')) {
+      score += 10;
+    }
+    if (assessment.microExpressions.includes('conviction')) {
+      score += 10;
+    }
+    if (assessment.microExpressions.includes('doubt')) {
+      score -= 10;
+    }
+    
+    // Cap score at 0-100
+    return Math.max(0, Math.min(100, score));
   }
   
-  // Calculate retention likelihood score (0-100)
-  private calculateRetentionLikelihood(profile: EnhancedBehavioralProfile): number {
-    // Inverse of retention risk
-    return 100 - Math.round(profile.marketingOptimizations.retentionRisk * 100);
+  // Calculate retention risk
+  private calculateRetentionRisk(events: BehaviorEvent[], assessment: BehaviorAssessment): number {
+    // Base risk score
+    let riskScore = 50;
+    
+    // Look for risk indicators
+    const abandonEvents = events.filter(e => 
+      e.eventType === 'cart_abandon' || 
+      e.eventType === 'exit_during_checkout'
+    ).length;
+    
+    const frustrationEvents = events.filter(e => 
+      e.eventType === 'error_encountered' || 
+      e.eventType === 'multiple_attempts'
+    ).length;
+    
+    const loyaltyEvents = events.filter(e => 
+      e.eventType === 'repeat_purchase' || 
+      e.eventType === 'join_loyalty'
+    ).length;
+    
+    // Adjust risk based on events
+    if (abandonEvents > 2) riskScore += 20;
+    else if (abandonEvents > 0) riskScore += 10;
+    
+    if (frustrationEvents > 3) riskScore += 25;
+    else if (frustrationEvents > 0) riskScore += 15;
+    
+    if (loyaltyEvents > 0) riskScore -= 20;
+    
+    // Influence phase impact
+    if (assessment.influencePhase === 'loyalty') {
+      riskScore -= 20;
+    } else if (assessment.influencePhase === 'action') {
+      riskScore -= 10;
+    }
+    
+    // Cap score at 0-100
+    return Math.max(0, Math.min(100, riskScore));
   }
   
-  // Generate insights based on the profile
-  private generateInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
+  // Generate insights based on assessment
+  private generateInsights(
+    trustLevel: TrustLevel,
+    priceSensitivity: PriceSensitivity,
+    assessment: BehaviorAssessment,
+    engagementScore: number,
+    conversionScore: number,
+    retentionRiskScore: number
+  ): AssessmentInsight[] {
     const insights: AssessmentInsight[] = [];
     
-    // Generate insights for each category
-    insights.push(...this.generateEngagementInsights(profile));
-    insights.push(...this.generateConversionInsights(profile));
-    insights.push(...this.generateRetentionInsights(profile));
-    insights.push(...this.generateMonetizationInsights(profile));
-    
-    return insights;
-  }
-  
-  // Generate engagement-related insights
-  private generateEngagementInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
-    const insights: AssessmentInsight[] = [];
-    
-    // Sample engagement insight based on behavioral loop
-    switch (profile.psychographicProfile.behavioralLoop) {
-      case 'discovery':
-        insights.push({
-          id: `eng-disc-${Date.now()}`,
-          category: 'engagement',
-          title: 'Early Discovery Phase Detected',
-          description: 'User is in early discovery phase and needs more educational content.',
-          severityLevel: 'opportunity',
-          impact: 70,
-          confidenceScore: 85,
-          recommendedActions: [
-            'Provide introductory content',
-            'Focus on building awareness',
-            'Avoid immediate conversion pressure'
-          ]
-        });
-        break;
-        
-      case 'engagement':
-        insights.push({
-          id: `eng-act-${Date.now()}`,
-          category: 'engagement',
-          title: 'Active Engagement Signals',
-          description: 'User shows positive engagement signals but needs deeper connection.',
-          severityLevel: 'positive',
-          impact: 60,
-          confidenceScore: 75,
-          recommendedActions: [
-            'Offer interactive experiences',
-            'Encourage profile completion',
-            'Introduce community elements'
-          ]
-        });
-        break;
-        
-      default:
-        insights.push({
-          id: `eng-def-${Date.now()}`,
-          category: 'engagement',
-          title: 'Standard Engagement Pattern',
-          description: 'User follows typical engagement patterns.',
-          severityLevel: 'opportunity',
-          impact: 50,
-          confidenceScore: 60,
-          recommendedActions: [
-            'Continue standard engagement tactics',
-            'Monitor for shifts in behavior',
-            'Test different content formats'
-          ]
-        });
-    }
-    
-    return insights;
-  }
-  
-  // Generate conversion-related insights
-  private generateConversionInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
-    const insights: AssessmentInsight[] = [];
-    
-    // Sample conversion insight based on decision stage
-    switch (profile.psychographicProfile.decisionStage) {
-      case 'information_search':
-        insights.push({
-          id: `conv-info-${Date.now()}`,
-          category: 'conversion',
-          title: 'Research-Focused Behavior',
-          description: 'User is actively researching options but not ready to convert.',
-          severityLevel: 'opportunity',
-          impact: 50,
-          confidenceScore: 80,
-          recommendedActions: [
-            'Provide detailed comparison information',
-            'Offer downloadable resources',
-            'Implement subtle remarketing'
-          ]
-        });
-        break;
-        
-      case 'purchase_decision':
-        insights.push({
-          id: `conv-purch-${Date.now()}`,
-          category: 'conversion',
-          title: 'High Purchase Intent',
-          description: 'User exhibits strong purchase intent signals.',
-          severityLevel: 'positive',
-          impact: 90,
-          confidenceScore: 85,
-          recommendedActions: [
-            'Streamline checkout process',
-            'Offer limited-time incentive',
-            'Provide social proof elements'
-          ]
-        });
-        break;
-        
-      default:
-        insights.push({
-          id: `conv-def-${Date.now()}`,
-          category: 'conversion',
-          title: 'Standard Conversion Opportunity',
-          description: 'User shows typical conversion potential.',
-          severityLevel: 'opportunity',
-          impact: 50,
-          confidenceScore: 60,
-          recommendedActions: [
-            'Apply standard conversion techniques',
-            'Test different call-to-actions',
-            'Monitor conversion funnel steps'
-          ]
-        });
-    }
-    
-    return insights;
-  }
-  
-  // Generate retention-related insights
-  private generateRetentionInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
-    const insights: AssessmentInsight[] = [];
-    
-    // Sample retention insight based on retention risk
-    const retentionRisk = profile.marketingOptimizations.retentionRisk;
-    
-    if (retentionRisk > 0.7) {
+    // Trust-based insights
+    if (Number(trustLevel) < Number(TrustLevel.Moderate)) {
       insights.push({
-        id: `ret-high-${Date.now()}`,
-        category: 'retention',
-        title: 'High Churn Risk',
-        description: 'User shows significant signals of potential churn.',
-        severityLevel: 'critical',
-        impact: 90,
-        confidenceScore: 80,
+        title: 'Low Trust Detected',
+        description: 'User exhibits caution in interactions and information sharing',
+        category: 'trust',
+        severityLevel: 'high',
         recommendedActions: [
-          'Implement immediate retention campaign',
-          'Offer loyalty incentives',
-          'Conduct exit survey if user attempts to leave'
-        ]
-      });
-    } else if (retentionRisk > 0.3) {
-      insights.push({
-        id: `ret-mod-${Date.now()}`,
-        category: 'retention',
-        title: 'Moderate Retention Concerns',
-        description: 'Some warning signs of potential disengagement detected.',
-        severityLevel: 'warning',
-        impact: 60,
-        confidenceScore: 70,
-        recommendedActions: [
-          'Increase engagement touchpoints',
-          'Highlight unused valuable features',
-          'Consider targeted re-engagement campaign'
-        ]
-      });
-    } else {
-      insights.push({
-        id: `ret-low-${Date.now()}`,
-        category: 'retention',
-        title: 'Strong Retention Indicators',
-        description: 'User shows healthy engagement patterns suggesting good retention.',
-        severityLevel: 'positive',
-        impact: 80,
-        confidenceScore: 75,
-        recommendedActions: [
-          'Continue current engagement strategy',
-          'Consider loyalty recognition',
-          'Introduce referral opportunities'
+          'Display security badges prominently',
+          'Highlight privacy guarantees',
+          'Showcase testimonials from similar users'
         ]
       });
     }
     
-    return insights;
-  }
-  
-  // Generate monetization-related insights
-  private generateMonetizationInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
-    const insights: AssessmentInsight[] = [];
+    // Price sensitivity insights
+    if (Number(priceSensitivity) > Number(PriceSensitivity.Moderate)) {
+      insights.push({
+        title: 'High Price Sensitivity',
+        description: 'User shows significant concern about pricing and value',
+        category: 'pricing',
+        severityLevel: 'medium',
+        recommendedActions: [
+          'Emphasize value proposition',
+          'Consider tiered pricing options',
+          'Highlight cost-benefit comparison'
+        ]
+      });
+    }
     
-    // Sample monetization insight based on price sensitivity
-    switch (profile.psychographicProfile.priceSensitivity) {
-      case 'low':
-        insights.push({
-          id: `mon-prem-${Date.now()}`,
-          category: 'monetization',
-          title: 'Premium Offering Opportunity',
-          description: 'User shows low price sensitivity and may respond to premium offerings.',
-          severityLevel: 'opportunity',
-          impact: 85,
-          confidenceScore: 75,
-          recommendedActions: [
-            'Highlight premium feature set',
-            'Emphasize quality and exclusivity',
-            'Test tiered pricing with premium options'
-          ]
-        });
-        break;
-        
-      case 'high':
-        insights.push({
-          id: `mon-val-${Date.now()}`,
-          category: 'monetization',
-          title: 'Value-Focused Approach Needed',
-          description: 'User exhibits high price sensitivity and needs clear value proposition.',
-          severityLevel: 'warning',
-          impact: 70,
-          confidenceScore: 85,
-          recommendedActions: [
-            'Emphasize value-for-money messaging',
-            'Consider entry-level pricing options',
-            'Highlight cost-saving benefits'
-          ]
-        });
-        break;
-        
-      default:
-        insights.push({
-          id: `mon-bal-${Date.now()}`,
-          category: 'monetization',
-          title: 'Balanced Monetization Opportunity',
-          description: 'User shows moderate price sensitivity with standard monetization potential.',
-          severityLevel: 'opportunity',
-          impact: 60,
-          confidenceScore: 70,
-          recommendedActions: [
-            'Test different price points',
-            'Offer balanced feature set',
-            'Monitor conversion at different price levels'
-          ]
-        });
+    // Engagement insights
+    if (engagementScore < 40) {
+      insights.push({
+        title: 'Low Engagement',
+        description: 'User has minimal interaction with content',
+        category: 'engagement',
+        severityLevel: 'high',
+        recommendedActions: [
+          'Introduce interactive elements',
+          'Personalize content recommendations',
+          'Implement engagement hooks'
+        ]
+      });
+    }
+    
+    // Conversion insights
+    if (conversionScore < 30) {
+      insights.push({
+        title: 'Low Conversion Potential',
+        description: 'User shows limited signals of purchase intent',
+        category: 'conversion',
+        severityLevel: 'medium',
+        recommendedActions: [
+          'Focus on trust-building content',
+          'Simplify the conversion path',
+          'Offer risk-free trials or guarantees'
+        ]
+      });
+    }
+    
+    // Retention risk insights
+    if (retentionRiskScore > 70) {
+      insights.push({
+        title: 'High Retention Risk',
+        description: 'User shows signals of potential churn',
+        category: 'retention',
+        severityLevel: 'high',
+        recommendedActions: [
+          'Implement proactive support outreach',
+          'Offer retention incentives',
+          'Address potential friction points'
+        ]
+      });
     }
     
     return insights;
   }
   
   // Generate summary text
-  private generateSummaryText(profile: EnhancedBehavioralProfile, overallScore: number): string {
-    // In production, this would use NLG techniques with templates
+  private generateSummary(
+    overallScore: number,
+    engagementScore: number,
+    conversionScore: number,
+    retentionRiskScore: number,
+    influencePhase: InfluencePhase
+  ): string {
+    let summary = '';
     
-    let summary = `Behavioral assessment indicates a `;
-    
-    if (overallScore >= 80) {
-      summary += `high-performing user profile with strong engagement potential.`;
-    } else if (overallScore >= 60) {
-      summary += `promising user profile with good engagement signals.`;
-    } else if (overallScore >= 40) {
-      summary += `moderate user profile with some areas needing attention.`;
+    // Overall assessment
+    if (overallScore >= 70) {
+      summary = 'This user exhibits excellent engagement and conversion potential with a healthy behavioral profile. ';
+    } else if (overallScore >= 50) {
+      summary = 'This user shows moderate engagement with reasonable conversion potential. ';
     } else {
-      summary += `user profile showing significant opportunity for improvement.`;
+      summary = 'This user demonstrates limited engagement with significant improvement opportunities. ';
     }
     
-    summary += ` User is in the ${profile.psychographicProfile.behavioralLoop} behavioral loop phase with ${profile.psychographicProfile.trustLevel} trust level. `;
-    summary += `Focus recommended on ${profile.marketingOptimizations.nextBestAction} with ${profile.marketingOptimizations.messagingTone} messaging tone.`;
+    // Add phase-specific insights
+    summary += `They are currently in the ${influencePhase} phase of the behavioral journey. `;
+    
+    // Add risk assessment
+    if (retentionRiskScore > 70) {
+      summary += 'There are concerning signals regarding retention that should be addressed urgently.';
+    } else if (retentionRiskScore > 50) {
+      summary += 'Some retention risk factors are present that merit attention.';
+    } else {
+      summary += 'Retention indicators are positive at this time.';
+    }
     
     return summary;
   }
   
-  // Identify strength areas based on insights and profile
-  private identifyStrengthAreas(profile: EnhancedBehavioralProfile, insights: AssessmentInsight[]): string[] {
+  // Identify strength areas
+  private identifyStrengths(
+    trustLevel: TrustLevel,
+    priceSensitivity: PriceSensitivity,
+    engagementScore: number,
+    conversionScore: number,
+    retentionRiskScore: number
+  ): string[] {
     const strengths: string[] = [];
     
-    // Extract strengths from positive insights
-    const positiveInsights = insights.filter(i => i.severityLevel === 'positive');
-    strengths.push(...positiveInsights.map(i => i.title));
-    
-    // Add strengths based on profile metrics
-    if (profile.marketingOptimizations.retentionRisk < 0.3) {
-      strengths.push('Strong retention indicators');
+    if (Number(trustLevel) >= Number(TrustLevel.Moderate)) {
+      strengths.push('Healthy trust level');
     }
     
-    if (profile.psychographicProfile.trustLevel === 'high') {
-      strengths.push('High trust relationship established');
+    if (Number(priceSensitivity) <= Number(PriceSensitivity.Moderate)) {
+      strengths.push('Favorable price sensitivity');
     }
     
-    if (profile.psychographicProfile.behavioralLoop === 'advocacy') {
-      strengths.push('Reached advocacy stage in behavioral loop');
+    if (engagementScore >= 60) {
+      strengths.push('Strong content engagement');
     }
     
-    // Ensure we have at least some strengths
+    if (conversionScore >= 60) {
+      strengths.push('High conversion potential');
+    }
+    
+    if (retentionRiskScore <= 40) {
+      strengths.push('Low retention risk');
+    }
+    
+    // Default if no strengths identified
     if (strengths.length === 0) {
-      strengths.push(
-        'Standard engagement patterns',
-        'Normal interaction behavior'
-      );
+      strengths.push('Active exploration behavior');
     }
     
     return strengths;
   }
   
-  // Identify improvement areas based on insights and profile
-  private identifyImprovementAreas(profile: EnhancedBehavioralProfile, insights: AssessmentInsight[]): string[] {
+  // Identify improvement areas
+  private identifyImprovementAreas(
+    trustLevel: TrustLevel,
+    priceSensitivity: PriceSensitivity,
+    engagementScore: number,
+    conversionScore: number,
+    retentionRiskScore: number
+  ): string[] {
     const improvements: string[] = [];
     
-    // Extract improvements from critical and warning insights
-    const criticalInsights = insights.filter(i => 
-      i.severityLevel === 'critical' || i.severityLevel === 'warning'
-    );
-    improvements.push(...criticalInsights.map(i => i.title));
-    
-    // Add improvements based on profile metrics
-    if (profile.marketingOptimizations.retentionRisk > 0.6) {
-      improvements.push('High churn risk requires attention');
-    }
-    
-    if (profile.psychographicProfile.trustLevel === 'low') {
+    if (Number(trustLevel) < Number(TrustLevel.Moderate)) {
       improvements.push('Trust building needed');
     }
     
-    // Ensure we have at least some improvement areas
+    if (Number(priceSensitivity) > Number(PriceSensitivity.Moderate)) {
+      improvements.push('Value perception requires enhancement');
+    }
+    
+    if (engagementScore < 50) {
+      improvements.push('Content engagement needs improvement');
+    }
+    
+    if (conversionScore < 40) {
+      improvements.push('Conversion funnel optimization required');
+    }
+    
+    if (retentionRiskScore > 60) {
+      improvements.push('Retention strategy needs attention');
+    }
+    
+    // Default if no improvement areas identified
     if (improvements.length === 0) {
-      improvements.push(
-        'Continue monitoring for emerging patterns',
-        'Test alternative engagement strategies'
-      );
+      improvements.push('Enhanced personalization opportunities');
     }
     
     return improvements;
   }
   
-  // Generate recommendations
-  private generateRecommendations(profile: EnhancedBehavioralProfile, insights: AssessmentInsight[]): string[] {
-    const recommendations: string[] = [];
-    
-    // Extract recommendations from highest impact insights
-    const sortedInsights = [...insights].sort((a, b) => b.impact - a.impact);
-    const topInsights = sortedInsights.slice(0, 3);
-    
-    for (const insight of topInsights) {
-      recommendations.push(...insight.recommendedActions);
-    }
-    
-    // Add general recommendations based on profile
-    recommendations.push(
-      `Use ${profile.marketingOptimizations.messagingTone} tone in communications`,
-      `Focus on ${profile.marketingOptimizations.nextBestAction} as next step`,
-      `Target engagement during ${profile.marketingOptimizations.idealEngagementTimes.join(', ')} for best results`
-    );
-    
-    return recommendations;
-  }
-  
-  // Generate Chase Hughes behavioral profile
-  private generateChaseHughesProfile(profile: EnhancedBehavioralProfile): ChaseHughesBehavioralProfile {
-    // Map our profile to Chase Hughes framework
-    const chaseHughesProfile: ChaseHughesBehavioralProfile = {
-      primarySensoryPreference: 'visual', // Default
-      currentInfluencePhase: 'interest' as InfluencePhase,
-      influencePhaseProgress: 50,
-      detectedMicroExpressions: ['happiness', 'surprise'] as MicroExpression[], 
-      responsiveToTechniques: ['social_proof', 'authority_positioning'] as InfluenceTechnique[],
-      suggestedApproach: {
-        technique: 'social_proof' as InfluenceTechnique,
-        languagePattern: 'Many of our users have found that...',
-        visualCues: ['Social proof indicators', 'Trust symbols']
-      },
-      trustScore: 65,
-      desireScore: 70,
-      engagementScore: 75
+  // Generate psychographic profile
+  private generatePsychographicProfile(
+    events: BehaviorEvent[],
+    assessment: BehaviorAssessment
+  ): {
+    personalityTraits: string[];
+    interests: string[];
+    values: string[];
+    motivations: string[];
+  } {
+    // Default profile
+    const profile = {
+      personalityTraits: ['attentive'],
+      interests: ['technology'],
+      values: ['quality'],
+      motivations: ['discovery']
     };
     
-    return chaseHughesProfile;
-  }
-  
-  // Get priority insights for user
-  getPriorityInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
-    // In production, this would filter real insights based on priority logic
-    return this.generateInsights(profile)
-      .filter(insight => insight.impact > 60)
-      .sort((a, b) => b.impact - a.impact)
-      .slice(0, 3);
-  }
-  
-  // Get insights by category
-  getInsightsByCategory(profile: EnhancedBehavioralProfile, category: AssessmentCategory): AssessmentInsight[] {
-    // Filter insights by the requested category
-    return this.generateInsights(profile)
-      .filter(insight => insight.category === category)
-      .sort((a, b) => b.impact - a.impact);
+    // Enhance based on events and assessment
+    if (assessment.influencePhase === 'desire' || assessment.influencePhase === 'action') {
+      profile.personalityTraits.push('decisive');
+      profile.motivations.push('achievement');
+    }
+    
+    if (assessment.microExpressions.includes('doubt')) {
+      profile.personalityTraits.push('cautious');
+      profile.values.push('security');
+    }
+    
+    if (assessment.microExpressions.includes('excitement')) {
+      profile.personalityTraits.push('enthusiastic');
+      profile.motivations.push('novelty');
+    }
+    
+    // Add interests based on event content
+    const contentInterests = events
+      .filter(e => e.metadata && e.metadata.contentType)
+      .map(e => e.metadata.contentType);
+      
+    if (contentInterests.length > 0) {
+      // Get unique interests
+      const uniqueInterests = [...new Set(contentInterests)];
+      profile.interests.push(...uniqueInterests.slice(0, 3)); // Add up to 3 interests
+    }
+    
+    return profile;
   }
 }
+
+export default new BehavioralAssessmentService();
