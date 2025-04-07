@@ -26,8 +26,7 @@ export const useAssessment = () => {
       
       // Only set if we got valid assessment results
       if (assessment) {
-        // Fix: Ensure the assessment object matches the AssessmentResult type
-        // by adding any missing required properties
+        // Create a correctly typed assessment result object
         const completeAssessment: AssessmentResult = {
           userId: assessment.userId || user.id,
           timestamp: assessment.timestamp || new Date().toISOString(),
@@ -35,16 +34,26 @@ export const useAssessment = () => {
           insightSummary: assessment.insightSummary || 'Behavior analysis completed',
           recommendations: assessment.recommendations || [],
           overallScore: assessment.overallScore || 0,
-          insights: (assessment.insights || []).map(insight => ({
-            id: insight.id || `insight-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            category: insight.category || 'engagement',
-            title: insight.title || '',
-            description: insight.description || '',
-            severityLevel: insight.severityLevel || 'opportunity',
-            impact: insight.impact || 50,
-            confidenceScore: insight.confidenceScore || 70,
-            recommendedActions: insight.recommendedActions || []
-          })),
+          insights: (assessment.insights || []).map(insight => {
+            // Ensure category is of type AssessmentCategory
+            const category: AssessmentCategory = 
+              (insight.category as AssessmentCategory) || 'engagement';
+            
+            // Ensure severityLevel is of type AssessmentSeverityLevel
+            const severityLevel: AssessmentSeverityLevel = 
+              (insight.severityLevel as AssessmentSeverityLevel) || 'opportunity';
+            
+            return {
+              id: insight.id || `insight-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              category: category,
+              title: insight.title || '',
+              description: insight.description || '',
+              severityLevel: severityLevel,
+              impact: insight.impact || 50,
+              confidenceScore: insight.confidenceScore || 70,
+              recommendedActions: insight.recommendedActions || []
+            } as AssessmentInsight;
+          }),
           summary: assessment.summary || '',
           strengthAreas: assessment.strengthAreas || [],
           improvementAreas: assessment.improvementAreas || [],
@@ -98,9 +107,9 @@ export const useAssessment = () => {
     runAssessment,
     assessmentResults,
     isProcessing,
-    assessment,
-    isGenerating,
-    generateAssessment,
+    assessment: assessmentResults,
+    isGenerating: isProcessing,
+    generateAssessment: runAssessment,
     getPriorityInsights,
     filterInsightsByCategory
   };
