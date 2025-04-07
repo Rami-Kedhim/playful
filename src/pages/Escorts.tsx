@@ -22,7 +22,9 @@ const Escorts: React.FC = () => {
   const { 
     insights, 
     recordElementInteraction,
-    shouldEnableFeature 
+    shouldEnableFeature,
+    reportUserAction,
+    recordBoostRequest 
   } = useHermesInsights(user?.id);
   
   // Determine if assistant should be shown based on behavioral insights
