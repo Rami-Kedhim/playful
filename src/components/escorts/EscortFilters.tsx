@@ -24,7 +24,7 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
   onClearFilters,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("all");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000);
@@ -58,7 +58,7 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
     }
 
     // Filter by location
-    if (selectedLocation) {
+    if (selectedLocation && selectedLocation !== "all") {
       filtered = filtered.filter(escort => escort.location === selectedLocation);
     }
 
@@ -93,7 +93,7 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery("");
-    setSelectedLocation("");
+    setSelectedLocation("all");
     setSelectedServices([]);
     setMinPrice(0);
     setMaxPrice(1000);

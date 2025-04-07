@@ -26,7 +26,7 @@ const FilterLocation: React.FC<FilterLocationProps> = ({
           <SelectValue placeholder="All Locations" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Locations</SelectItem>
+          <SelectItem value="all">All Locations</SelectItem>
           {uniqueLocations.map((location) => (
             <SelectItem key={location} value={location}>
               {location}
