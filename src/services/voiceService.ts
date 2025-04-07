@@ -1,88 +1,110 @@
 
-type VoiceSettings = {
+/**
+ * A service for handling speech synthesis (text-to-speech)
+ */
+
+interface VoiceSettings {
   voice?: string;
   rate?: number;
   pitch?: number;
-  volume?: number;
-};
+}
 
 class VoiceService {
   private synth: SpeechSynthesis;
-  private voices: SpeechSynthesisVoice[] = [];
-  private speaking = false;
-  private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private speaking: boolean = false;
+  private utterance: SpeechSynthesisUtterance | null = null;
 
   constructor() {
     this.synth = window.speechSynthesis;
-    this.loadVoices();
-    
-    // Some browsers need this event to load voices
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-      speechSynthesis.onvoiceschanged = this.loadVoices.bind(this);
-    }
   }
 
-  private loadVoices() {
-    this.voices = this.synth.getVoices();
-  }
-
+  /**
+   * Speaks the provided text with the given settings
+   */
   speak(text: string, settings: VoiceSettings = {}): void {
-    // Stop any current speech
+    // Cancel any ongoing speech
     this.stop();
+
+    // Create a new utterance
+    this.utterance = new SpeechSynthesisUtterance(text);
     
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Set default settings
+    this.utterance.rate = settings.rate || 1.0;
+    this.utterance.pitch = settings.pitch || 1.0;
     
-    // Apply settings
-    if (settings.voice) {
-      // Try to find a matching voice by name or subset
-      const requestedVoice = settings.voice.toLowerCase();
-      const voice = this.voices.find(v => 
-        v.name.toLowerCase().includes(requestedVoice) || 
-        requestedVoice.includes(v.name.toLowerCase())
-      );
+    // Select voice based on settings
+    if (settings.voice && this.synth.getVoices().length > 0) {
+      const voices = this.synth.getVoices();
       
-      if (voice) {
-        utterance.voice = voice;
+      // Try to match requested voice type
+      let selectedVoice = null;
+      
+      if (settings.voice === 'male') {
+        selectedVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('male') ||
+          voice.name.toLowerCase().includes('guy') ||
+          voice.name.toLowerCase().includes('david')
+        );
+      } else if (settings.voice === 'female') {
+        selectedVoice = voices.find(voice => 
+          voice.name.toLowerCase().includes('female') ||
+          voice.name.toLowerCase().includes('woman') ||
+          voice.name.toLowerCase().includes('girl') ||
+          voice.name.toLowerCase().includes('samantha')
+        );
+      }
+      
+      // Use the selected voice or fall back to the first available
+      if (selectedVoice) {
+        this.utterance.voice = selectedVoice;
       }
     }
     
-    utterance.rate = settings.rate ?? 1;
-    utterance.pitch = settings.pitch ?? 1;
-    utterance.volume = settings.volume ?? 1;
-    
-    // Set up event handlers
-    utterance.onend = () => {
-      this.speaking = false;
-      this.currentUtterance = null;
+    // Add event listeners
+    this.utterance.onstart = () => {
+      this.speaking = true;
     };
     
-    utterance.onerror = (event) => {
+    this.utterance.onend = () => {
+      this.speaking = false;
+      this.utterance = null;
+    };
+    
+    this.utterance.onerror = (event) => {
       console.error('Speech synthesis error:', event);
       this.speaking = false;
-      this.currentUtterance = null;
+      this.utterance = null;
     };
     
     // Start speaking
-    this.currentUtterance = utterance;
-    this.speaking = true;
-    this.synth.speak(utterance);
+    this.synth.speak(this.utterance);
   }
-
+  
+  /**
+   * Stops any ongoing speech
+   */
   stop(): void {
-    if (this.speaking) {
+    if (this.speaking || this.synth.speaking) {
       this.synth.cancel();
       this.speaking = false;
-      this.currentUtterance = null;
+      this.utterance = null;
     }
   }
-
+  
+  /**
+   * Checks if speech is currently in progress
+   */
   isSpeaking(): boolean {
-    return this.speaking;
+    return this.speaking || this.synth.speaking;
   }
-
-  getAvailableVoices(): SpeechSynthesisVoice[] {
-    return this.voices;
+  
+  /**
+   * Gets all available voices
+   */
+  getVoices(): SpeechSynthesisVoice[] {
+    return this.synth.getVoices();
   }
 }
 
+// Create a singleton instance
 export const voiceService = new VoiceService();

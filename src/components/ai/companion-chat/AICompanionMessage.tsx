@@ -1,12 +1,9 @@
 
-import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { getEmotionClass } from './utils/emotionUtils';
 import { speakMessage, stopSpeaking, isSpeaking } from './utils/speechUtils';
-import { useState, useEffect } from 'react';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
@@ -14,9 +11,35 @@ interface AICompanionMessageProps {
   voiceType?: string;
 }
 
-const AICompanionMessage = ({ message, onActionClick, voiceType }: AICompanionMessageProps) => {
-  const isUser = message.role === 'user';
+const AICompanionMessage = ({
+  message,
+  onActionClick,
+  voiceType
+}: AICompanionMessageProps) => {
+  const isAI = message.role === 'assistant';
   const [speaking, setSpeaking] = useState(false);
+
+  // Handle speech playback
+  const handleSpeakMessage = () => {
+    if (speaking) {
+      stopSpeaking();
+      setSpeaking(false);
+    } else {
+      speakMessage(message.content, voiceType);
+      setSpeaking(true);
+    }
+  };
+
+  // Update speaking state when speech ends
+  useEffect(() => {
+    const checkSpeakingInterval = setInterval(() => {
+      if (speaking && !isSpeaking()) {
+        setSpeaking(false);
+      }
+    }, 200);
+
+    return () => clearInterval(checkSpeakingInterval);
+  }, [speaking]);
 
   // Stop speaking when component unmounts
   useEffect(() => {
@@ -27,97 +50,47 @@ const AICompanionMessage = ({ message, onActionClick, voiceType }: AICompanionMe
     };
   }, [speaking]);
 
-  // Handle message speech
-  const handleSpeakMessage = () => {
-    if (speaking) {
-      stopSpeaking();
-      setSpeaking(false);
-    } else {
-      speakMessage(message.content, voiceType);
-      setSpeaking(true);
-      
-      // Listen for speech end event
-      const checkSpeakingInterval = setInterval(() => {
-        if (!isSpeaking()) {
-          setSpeaking(false);
-          clearInterval(checkSpeakingInterval);
-        }
-      }, 300);
-    }
-  };
-
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isAI ? 'justify-start' : 'justify-end'}`}>
       <div
-        className={`max-w-[85%] p-3 rounded-lg ${
-          isUser
-            ? 'bg-primary/20 text-white'
-            : message.emotion 
-              ? `${getEmotionClass(message.emotion)} text-white bg-opacity-80`
-              : 'bg-white/5 text-white'
+        className={`p-3 rounded-lg max-w-[80%] ${
+          isAI
+            ? getEmotionClass(message.emotion)
+            : 'bg-primary text-primary-foreground'
         }`}
       >
-        <div className="flex justify-between items-start mb-1">
+        <div className="flex flex-col">
           <p className="whitespace-pre-wrap">{message.content}</p>
+
+          {/* Suggested actions */}
+          {isAI && message.suggestedActions && message.suggestedActions.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {message.suggestedActions.map((action, index) => (
+                <Button
+                  key={index}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onActionClick(action)}
+                  className="text-xs"
+                >
+                  {action}
+                </Button>
+              ))}
+            </div>
+          )}
           
-          {!isUser && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="ml-2 flex-shrink-0 h-6 w-6 rounded-full bg-black/20 hover:bg-black/30 -mt-1" 
+          {/* Speech button - only for AI messages */}
+          {isAI && (
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleSpeakMessage}
+              className="self-end mt-2 h-6 px-2"
             >
-              {speaking ? (
-                <VolumeX className="h-3.5 w-3.5" />
-              ) : (
-                <Volume2 className="h-3.5 w-3.5" />
-              )}
+              {speaking ? 'Stop' : 'Speak'} 
             </Button>
           )}
         </div>
-        
-        {/* Suggested Actions */}
-        {!isUser && message.suggestedActions && message.suggestedActions.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {message.suggestedActions.map((action, index) => (
-              <Button 
-                key={index} 
-                variant="outline" 
-                size="sm" 
-                onClick={() => onActionClick(action)}
-                className="text-xs py-1 h-auto bg-black/30 hover:bg-black/40 border-white/20"
-              >
-                {action}
-              </Button>
-            ))}
-          </div>
-        )}
-        
-        {/* Links */}
-        {!isUser && message.links && message.links.length > 0 && (
-          <div className="mt-3 space-y-2">
-            {message.links.map((link, index) => (
-              <Card key={index} className="p-2 hover:bg-white/10 transition-colors">
-                <a 
-                  href={link.url} 
-                  className="flex items-center justify-between text-primary"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="text-sm">{link.text}</span>
-                  <ArrowRight className="h-3 w-3" />
-                </a>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {/* Display emotion as a badge */}
-        {!isUser && message.emotion && (
-          <Badge variant="outline" className="mt-2 text-xs opacity-60">
-            {message.emotion}
-          </Badge>
-        )}
       </div>
     </div>
   );

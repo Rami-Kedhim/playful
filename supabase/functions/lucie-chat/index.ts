@@ -17,7 +17,14 @@ serve(async (req) => {
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
     
     if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not set in environment variables')
+      // Handle missing API key gracefully
+      return new Response(
+        JSON.stringify({
+          text: "I'm sorry, I'm not fully configured yet. Please try again later.",
+          suggestedActions: ["Browse profiles", "Check wallet", "View content"]
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     // Get request body
@@ -33,41 +40,76 @@ serve(async (req) => {
       { role: 'user', content: message }
     ]
 
-    // Call OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
-    })
+    try {
+      // Call OpenAI
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 500,
+        }),
+      })
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(`OpenAI API error: ${JSON.stringify(error)}`)
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('OpenAI API error:', JSON.stringify(error))
+        
+        // Check if it's a quota error and handle accordingly
+        if (error.error?.type === 'insufficient_quota') {
+          return new Response(
+            JSON.stringify({ 
+              error: `OpenAI API error: ${JSON.stringify(error)}`, 
+              text: "I'm currently experiencing high demand. Please try again later or ask for assistance from our support team.",
+              suggestedActions: ["Contact Support", "Browse Profiles", "View FAQs"]
+            }),
+            { 
+              status: 500, 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+            }
+          )
+        }
+        
+        throw new Error(`OpenAI API error: ${JSON.stringify(error)}`)
+      }
+
+      const data = await response.json()
+      
+      // Process response to extract any special actions or UI elements
+      const processedResponse = processResponse(data.choices[0].message.content)
+
+      return new Response(
+        JSON.stringify(processedResponse),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    } catch (openAiError) {
+      console.error('OpenAI API error:', openAiError)
+      
+      // Return a friendly response even when API fails
+      return new Response(
+        JSON.stringify({ 
+          error: openAiError.message, 
+          text: "I'm having trouble connecting to my knowledge base right now. How about browsing some of our featured content instead?",
+          suggestedActions: ["Browse Featured", "Try Again Later", "Contact Support"]
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
-
-    const data = await response.json()
-    
-    // Process response to extract any special actions or UI elements
-    const processedResponse = processResponse(data.choices[0].message.content)
-
-    return new Response(
-      JSON.stringify(processedResponse),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
   } catch (error) {
-    console.error('Error:', error)
+    console.error('General error:', error)
     return new Response(
       JSON.stringify({ 
         error: error.message, 
-        text: "I'm sorry, I encountered an error. Please try again later." 
+        text: "Sorry, I ran into a technical issue. Please try again in a moment.",
+        suggestedActions: ["Try Again", "Browse Profiles", "Check Help Center"]
       }),
       { 
         status: 500, 
