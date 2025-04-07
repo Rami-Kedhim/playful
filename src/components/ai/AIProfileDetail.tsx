@@ -1,7 +1,7 @@
 
-// Update AIProfileDetail to use the updated Brain Hub service
+// Update AIProfileDetail to use profileId instead of profile
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -33,8 +33,11 @@ const mockAIProfiles = [
   }
 ];
 
-const AIProfileDetail = () => {
-  const { id } = useParams<{ id: string }>();
+interface AIProfileDetailProps {
+  profileId: string;
+}
+
+const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profileId }) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('chat');
@@ -47,7 +50,7 @@ const AIProfileDetail = () => {
       try {
         // For a real app, this would be an API call
         // Simulate API request and Brain Hub processing
-        const mockProfile = mockAIProfiles.find(p => p.id === id);
+        const mockProfile = mockAIProfiles.find(p => p.id === profileId);
         
         if (mockProfile) {
           // Process through Brain Hub
@@ -70,10 +73,10 @@ const AIProfileDetail = () => {
       }
     };
 
-    if (id) {
+    if (profileId) {
       loadProfile();
     }
-  }, [id, toast]);
+  }, [profileId, toast]);
 
   const handleSubscribe = async () => {
     // Simulate API request with Brain Hub processing
@@ -81,7 +84,7 @@ const AIProfileDetail = () => {
       const response = await brainHub.processRequest({
         type: 'ai_subscription',
         data: {
-          profileId: id,
+          profileId: profileId,
           action: 'subscribe'
         }
       });
@@ -152,7 +155,7 @@ const AIProfileDetail = () => {
                 <TabsContent value="chat" className="p-6">
                   <div className="bg-muted h-80 rounded-md flex items-center justify-center">
                     <div className="text-center p-6">
-                      <h3 className="text-xl font-semibold mb-2">Start Chatting with {profile.name}</h3>
+                      <h3 className="text-xl font-semibold mb-2">Start Chatting with {profile?.name}</h3>
                       <p className="text-muted-foreground mb-4">Subscribe to unlock unlimited conversations</p>
                       <Button onClick={handleSubscribe}>Subscribe Now</Button>
                     </div>
@@ -161,7 +164,7 @@ const AIProfileDetail = () => {
                 
                 <TabsContent value="gallery" className="p-6">
                   <div className="grid grid-cols-2 gap-4">
-                    {Array.from({ length: 6 }).map((_, i) => (
+                    {profile && Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="aspect-square bg-muted rounded-md overflow-hidden">
                         <img 
                           src={`https://source.unsplash.com/300x300/?model,${profile.personalityType},${i}`}
@@ -174,33 +177,35 @@ const AIProfileDetail = () => {
                 </TabsContent>
                 
                 <TabsContent value="details" className="p-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">About {profile.name}</h3>
-                    <p className="mb-4">{profile.description}</p>
-                    
-                    <h4 className="font-medium mb-2">Personality Traits</h4>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {profile.tags.map((tag: string) => (
-                        <span key={tag} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    <div className="mt-6">
-                      <h4 className="font-medium mb-2">Rating & Subscribers</h4>
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <span className="text-lg font-semibold">{profile.rating}</span>
-                          <span className="text-muted-foreground"> / 5</span>
-                        </div>
-                        <div>
-                          <span className="text-lg font-semibold">{profile.subscribers.toLocaleString()}</span>
-                          <span className="text-muted-foreground"> subscribers</span>
+                  {profile && (
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">About {profile.name}</h3>
+                      <p className="mb-4">{profile.description}</p>
+                      
+                      <h4 className="font-medium mb-2">Personality Traits</h4>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {profile.tags.map((tag: string) => (
+                          <span key={tag} className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      
+                      <div className="mt-6">
+                        <h4 className="font-medium mb-2">Rating & Subscribers</h4>
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <span className="text-lg font-semibold">{profile.rating}</span>
+                            <span className="text-muted-foreground"> / 5</span>
+                          </div>
+                          <div>
+                            <span className="text-lg font-semibold">{profile.subscribers.toLocaleString()}</span>
+                            <span className="text-muted-foreground"> subscribers</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -210,18 +215,20 @@ const AIProfileDetail = () => {
         <div className="space-y-6">
           <Card>
             <CardContent className="p-6">
-              <div className="text-center mb-4">
-                <div className="mx-auto w-24 h-24 relative mb-4">
-                  <img 
-                    src={profile.avatar}
-                    alt={profile.name}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+              {profile && (
+                <div className="text-center mb-4">
+                  <div className="mx-auto w-24 h-24 relative mb-4">
+                    <img 
+                      src={profile.avatar}
+                      alt={profile.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                    <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                  </div>
+                  <h2 className="text-2xl font-bold">{profile.name}</h2>
+                  <p className="text-muted-foreground">{profile.personalityType} AI Companion</p>
                 </div>
-                <h2 className="text-2xl font-bold">{profile.name}</h2>
-                <p className="text-muted-foreground">{profile.personalityType} AI Companion</p>
-              </div>
+              )}
               
               <div className="space-y-4">
                 <Button className="w-full" onClick={handleSubscribe}>
@@ -234,7 +241,7 @@ const AIProfileDetail = () => {
             </CardContent>
           </Card>
           
-          <AIEscortSuggestions aiProfileId={profile.id} />
+          {profile && <AIEscortSuggestions aiProfileId={profile.id} />}
         </div>
       </div>
     </div>

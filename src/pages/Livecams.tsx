@@ -5,6 +5,30 @@ import LivecamGrid from "@/components/livecams/LivecamGrid";
 import LivecamFilters from "@/components/livecams/LivecamFilters";
 import { useBoostableLivecams } from "@/hooks/useBoostableLivecams";
 import { useToast } from "@/components/ui/use-toast";
+import { LivecamModel as BoostableLivecamModel } from "@/types/livecams";
+
+// Create a type adapter to ensure compatibility between different LivecamModel types
+type AdaptedLivecamModel = {
+  id: string;
+  name?: string;
+  username: string;
+  displayName: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  isLive: boolean;
+  viewerCount?: number;
+  tags?: string[];
+  boosted?: boolean;
+  boostScore?: number;
+  boostRank?: string;
+  country?: string;
+  categories?: string[];
+  language?: string;
+  description?: string;
+  age?: number;
+  streamUrl?: string;
+  previewVideoUrl?: string;
+};
 
 const Livecams: React.FC = () => {
   const { toast } = useToast();
@@ -35,9 +59,9 @@ const Livecams: React.FC = () => {
   }, [error, toast]);
 
   // Adapter functions to match the expected parameter types in LivecamGrid
-  const handleBoost = (livecamId: string, intensity: number = 1, durationHours: number = 24): boolean => {
+  const handleBoost = (livecamId: string): boolean => {
     // Call the async function but return a synchronous result for UI feedback
-    boostLivecam(livecamId, intensity, durationHours);
+    boostLivecam(livecamId);
     return true;
   };
   
@@ -46,6 +70,23 @@ const Livecams: React.FC = () => {
     cancelBoost(livecamId);
     return true;
   };
+
+  // Adapt the livecams to match the expected type in LivecamGrid
+  const adaptedLivecams: AdaptedLivecamModel[] = livecams.map(cam => ({
+    id: cam.id,
+    username: cam.name || cam.id, // Fallback if name is missing
+    displayName: cam.name || `Model ${cam.id}`, // Fallback if name is missing
+    imageUrl: cam.thumbnailUrl || 'https://picsum.photos/300/200', // Fallback if thumbnailUrl is missing
+    thumbnailUrl: cam.thumbnailUrl,
+    isLive: cam.isLive,
+    viewerCount: cam.viewerCount,
+    tags: cam.tags,
+    boosted: cam.boosted,
+    boostScore: cam.boostScore,
+    boostRank: cam.boostRank,
+    country: "Unknown",
+    categories: cam.tags,
+  }));
 
   return (
     <MainLayout title="Live Cams">
@@ -62,16 +103,16 @@ const Livecams: React.FC = () => {
         </div>
         
         <div className="lg:col-span-3">
-          {!loading && livecams.length > 0 && (
+          {!loading && adaptedLivecams.length > 0 && (
             <div className="mb-4 flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                Showing {livecams.length} of {totalCount} models
+                Showing {adaptedLivecams.length} of {totalCount} models
               </p>
             </div>
           )}
           
           <LivecamGrid 
-            models={livecams} 
+            models={adaptedLivecams} 
             loading={loading} 
             hasMore={hasMore} 
             onLoadMore={loadMore}

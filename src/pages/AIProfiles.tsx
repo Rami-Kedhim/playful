@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIProfileDetail from "@/components/ai/AIProfileDetail";
@@ -196,7 +197,8 @@ const AIProfiles = () => {
         
         <TabsContent value="detail">
           {selectedProfile ? (
-            <AIProfileDetail profile={selectedProfile} />
+            // Use a profile ID here instead of passing the full profile
+            <AIProfileDetail profileId={selectedProfile.id} />
           ) : (
             <Card className="p-8 text-center">
               <CardDescription>

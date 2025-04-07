@@ -26,6 +26,7 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
   const [livecams, setLivecams] = useState<LivecamModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [boostedIds, setBoostedIds] = useState<string[]>([]);
   
   const fetchLivecams = useCallback(async () => {
     setLoading(true);
@@ -37,6 +38,10 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
       
       // Process through Brain Hub
       const processedLivecams = await processThroughBrainHub(mockLivecams);
+      
+      // Track which livecams are boosted
+      const boostIds = processedLivecams.filter(cam => cam.boosted).map(cam => cam.id);
+      setBoostedIds(boostIds);
       
       setLivecams(processedLivecams);
     } catch (err) {
@@ -94,6 +99,7 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
               : cam
           )
         );
+        setBoostedIds(prev => [...prev, id]);
         return true;
       }
       return false;
@@ -102,6 +108,40 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
       return false;
     }
   }, [livecams]);
+  
+  // Helper to cancel a boost for a livecam
+  const cancelBoost = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      const response = await brainHub.processRequest({
+        type: 'cancel_boost',
+        data: {
+          itemId: id,
+          itemType: 'livecam'
+        }
+      });
+      
+      if (response.success) {
+        setLivecams(prev => 
+          prev.map(cam => 
+            cam.id === id 
+              ? { ...cam, boosted: false, boostScore: undefined, boostRank: undefined } 
+              : cam
+          )
+        );
+        setBoostedIds(prev => prev.filter(itemId => itemId !== id));
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error canceling boost:', error);
+      return false;
+    }
+  }, []);
+
+  // Check if a livecam is boosted
+  const isBoosted = useCallback((id: string) => {
+    return boostedIds.includes(id);
+  }, [boostedIds]);
   
   // Helper function to generate mock data
   const generateMockLivecams = (limit: number, onlyLive = false): LivecamModel[] => {
@@ -137,9 +177,9 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
     totalCount: livecams.length,
     loadMore: () => {}, // No-op function for pagination
     updateFilters: () => {}, // No-op function for filters
-    cancelBoost: () => false, // No-op function for canceling boosts
-    isBoosted: () => false, // No-op function to check if boosted
-    boostedIds: [] // Empty array for boosted IDs
+    cancelBoost, // Function for canceling boosts
+    isBoosted, // Function to check if boosted
+    boostedIds // Array of boosted IDs
   };
 };
 
