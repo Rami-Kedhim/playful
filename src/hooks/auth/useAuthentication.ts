@@ -9,7 +9,7 @@ export const useAuthentication = (
   refreshProfile: () => Promise<void>
 ) => {
   // Get authentication actions
-  const { signUp, signIn, signOut } = useAuthActions(setIsLoading, refreshProfile);
+  const { login, register, logout } = useAuthActions();
   
   // Get password management functions
   const { resetPassword, updatePassword } = usePasswordManagement();
@@ -18,9 +18,9 @@ export const useAuthentication = (
   const { updateProfile } = useProfileManagement();
 
   return { 
-    signUp, 
-    signIn, 
-    signOut, 
+    signUp: register, 
+    signIn: login, 
+    signOut: logout, 
     resetPassword, 
     updatePassword,
     updateProfile: async (userId: string, userData: Partial<any>) => {

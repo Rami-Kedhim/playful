@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { AuthUser } from "@/types/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export type AuthState = {
   user: AuthUser | null;
@@ -9,63 +10,89 @@ export type AuthState = {
   userRoles: string[];
 };
 
-export function useAuthState(): [
-  AuthState,
-  (loading: boolean) => void,
-  () => Promise<void>
-] {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
-  const [userRoles, setUserRoles] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function useAuthState() {
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    profile: null,
+    isLoading: true,
+    userRoles: []
+  });
+
+  const setIsLoading = (loading: boolean) => {
+    setState(prev => ({ ...prev, isLoading: loading }));
+  };
+
+  const setUser = (user: AuthUser | null) => {
+    if (user) {
+      const roles = user.role ? [user.role] : ['user'];
+      setState(prev => ({ ...prev, user, userRoles: roles }));
+    } else {
+      setState(prev => ({ ...prev, user: null, userRoles: [], profile: null }));
+    }
+  };
+
+  const setProfile = (profile: any | null) => {
+    setState(prev => ({ ...prev, profile }));
+  };
 
   const refreshProfile = async () => {
-    if (!user) return;
+    if (!state.user) return;
     
     try {
-      // In a real app, fetch profile data here
-      console.log("Refreshing profile for user:", user.id);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', state.user.id)
+        .single();
       
-      // Mock profile data
-      setProfile({
-        id: user.id,
-        username: user.username || user.email?.split('@')[0],
-        avatar_url: user.profileImageUrl,
-      });
+      if (error) throw error;
       
-      // Set roles based on user.role
-      const roles = user.role ? [user.role] : ['user'];
-      setUserRoles(roles);
+      if (data) {
+        setProfile(data);
+      }
     } catch (error) {
-      console.error("Error refreshing profile:", error);
+      console.error("Error fetching profile:", error);
     }
   };
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('uberEscortsUser');
-    if (storedUser) {
+    const loadInitialUser = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        
-        // Set default profile
-        setProfile({
-          id: parsedUser.id,
-          username: parsedUser.username || parsedUser.email?.split('@')[0],
-          avatar_url: parsedUser.profileImageUrl,
-        });
-        
-        // Set roles based on user.role
-        const roles = parsedUser.role ? [parsedUser.role] : ['user'];
-        setUserRoles(roles);
+        const { data } = await supabase.auth.getSession();
+        if (data.session?.user) {
+          const user: AuthUser = {
+            id: data.session.user.id,
+            email: data.session.user.email || '',
+            username: data.session.user.user_metadata?.username || data.session.user.email?.split('@')[0] || '',
+            role: data.session.user.user_metadata?.role || 'user',
+            profileImageUrl: data.session.user.user_metadata?.avatar_url,
+            app_metadata: data.session.user.app_metadata || {},
+            user_metadata: data.session.user.user_metadata || {},
+            aud: data.session.user.aud || 'authenticated',
+            created_at: data.session.user.created_at || new Date().toISOString(),
+          };
+          
+          setUser(user);
+          await refreshProfile();
+        }
       } catch (error) {
-        console.error("Error loading user from localStorage:", error);
+        console.error("Error loading user:", error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
     
-    setIsLoading(false);
+    loadInitialUser();
   }, []);
 
-  return [{ user, profile, isLoading, userRoles }, setIsLoading, refreshProfile];
+  return {
+    authState: state,
+    setIsLoading,
+    setUser,
+    setProfile,
+    refreshProfile
+  };
 }
+
+export default useAuthState;

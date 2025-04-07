@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<any>(null);
 
   // Password management
-  const { resetPassword: resetPwd, updatePassword: updatePwd } = usePasswordManagement();
+  const { resetPassword, updatePassword } = usePasswordManagement();
 
   // Initialize auth state
   useEffect(() => {
@@ -261,7 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     logout,
-    resetPassword: resetPwd,
+    resetPassword,
     error,
     userRoles,
     updateUserProfile,
@@ -269,7 +269,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     refreshProfile,
     checkRole,
-    updatePassword: updatePwd
+    updatePassword
   };
 
   return (

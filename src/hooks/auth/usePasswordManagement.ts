@@ -40,8 +40,11 @@ export const usePasswordManagement = () => {
     setIsLoading(true);
     try {
       // First verify current password by trying to sign in
+      const { data: userData } = await supabase.auth.getUser();
+      const userEmail = userData.user?.email || '';
+      
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: supabase.auth.getUser().then(res => res.data.user?.email || ''),
+        email: userEmail,
         password: currentPassword,
       });
 
