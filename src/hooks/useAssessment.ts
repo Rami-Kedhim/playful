@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
 import BehavioralAssessmentService from '@/services/assessment/BehavioralAssessmentService';
-import { AssessmentResult, AssessmentInsight, AssessmentCategory, AssessmentSeverityLevel } from '@/types/enhancedBehavioral';
+import { AssessmentResult, AssessmentInsight, AssessmentCategory, AssessmentSeverityLevel } from '@/types/assessment';
 
 export const useAssessment = () => {
   const { user } = useAuth();
@@ -35,7 +35,16 @@ export const useAssessment = () => {
           insightSummary: assessment.insightSummary || 'Behavior analysis completed',
           recommendations: assessment.recommendations || [],
           overallScore: assessment.overallScore || 0,
-          insights: assessment.insights || [],
+          insights: (assessment.insights || []).map(insight => ({
+            id: insight.id || `insight-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            category: insight.category || 'engagement',
+            title: insight.title || '',
+            description: insight.description || '',
+            severityLevel: insight.severityLevel || 'opportunity',
+            impact: insight.impact || 50,
+            confidenceScore: insight.confidenceScore || 70,
+            recommendedActions: insight.recommendedActions || []
+          })),
           summary: assessment.summary || '',
           strengthAreas: assessment.strengthAreas || [],
           improvementAreas: assessment.improvementAreas || [],
@@ -47,8 +56,7 @@ export const useAssessment = () => {
             contentAffinity: 0,
             monetizationPropensity: 0,
             retentionLikelihood: 0
-          },
-          ...assessment // Include all properties from the original assessment
+          }
         };
         
         setAssessmentResults(completeAssessment);
