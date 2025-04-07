@@ -9,19 +9,6 @@ import AccountSettings from '@/components/profile/AccountSettings';
 import ProfileSettings from '@/components/profile/ProfileSettings';
 import NotificationSettings from '@/components/profile/NotificationSettings';
 
-interface AuthUser {
-  id: string;
-  email: string;
-  username?: string;
-}
-
-interface UserProfile {
-  id: string;
-  full_name?: string;
-  avatar_url?: string;
-  bio?: string;
-}
-
 interface ProfileManagementProps {
   initialTab?: string;
 }
@@ -31,7 +18,7 @@ const ProfileManagement: React.FC<ProfileManagementProps> = ({ initialTab = 'pro
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // Mock profile
-  const profile: UserProfile = {
+  const profile = {
     id: user?.id || 'mock-id',
     full_name: 'John Doe',
     avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',

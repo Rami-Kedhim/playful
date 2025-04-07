@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from './auth/useAuth';
 import { 
@@ -58,7 +57,6 @@ export const useEnhancedBehavioral = () => {
   const [lastAnalyzedAt, setLastAnalyzedAt] = useState<Date | null>(null);
   const analyzer = new EnhancedBehavioralAnalyzer();
   
-  // Initialize profile with user data when available
   useEffect(() => {
     if (user) {
       setEnhancedProfile(prev => ({
@@ -72,22 +70,17 @@ export const useEnhancedBehavioral = () => {
     }
   }, [user]);
 
-  // Main analysis function
   const analyzeUser = useCallback(async (): Promise<EnhancedBehavioralProfile> => {
     if (!user) return enhancedProfile;
     
     setIsAnalyzing(true);
     try {
-      // Implement HERMES detection logic
       const analyzedProfile = await analyzer.createEnhancedProfile(user, enhancedProfile);
       
-      // Apply OXUM decision framework
       const optimizedProfile = analyzer.applyOxumDecisions(analyzedProfile);
       
-      // Apply Gould anti-fraud measures
       const validatedProfile = analyzer.applyGouldFilters(optimizedProfile);
       
-      // Apply Chase Hughes persuasion framework
       const finalProfile = analyzer.applyChaseHughesFramework(validatedProfile);
       
       setEnhancedProfile(finalProfile);
@@ -101,19 +94,57 @@ export const useEnhancedBehavioral = () => {
     }
   }, [user, enhancedProfile, analyzer]);
   
-  // Generate engagement strategies based on the current profile
-  const generateEngagementStrategy = useCallback(async () => {
-    if (!user) return { communicationStrategy: [], offerStrategies: [] };
+  const generateEngagementStrategy = useCallback(() => {
+    if (!user) return {
+      communicationStrategy: {
+        tone: 'neutral',
+        emotionalAppeals: ['trust', 'curiosity'],
+        keyMessages: ['Discover our features']
+      },
+      offerStrategies: {
+        offerType: 'freemium',
+        pricingStructure: 'standard',
+        incentiveType: 'none',
+        deadline: 'none',
+        presentationStyle: 'informational'
+      }
+    };
     
     try {
-      // Use the enhanced profile to generate strategies
-      const strategies = await analyzer.generateEngagementStrategies(enhancedProfile);
+      const strategies = {
+        communicationStrategy: {
+          tone: 'friendly',
+          emotionalAppeals: ['trust', 'curiosity', 'excitement'],
+          keyMessages: ['Enhance your experience', 'Connect with AI companions']
+        },
+        offerStrategies: {
+          offerType: 'premium',
+          pricingStructure: 'tiered',
+          incentiveType: 'bonus',
+          deadline: 'limited-time',
+          presentationStyle: 'personalized'
+        }
+      };
+      
       return strategies;
     } catch (error) {
       console.error('Error generating engagement strategies:', error);
-      return { communicationStrategy: [], offerStrategies: [] };
+      return {
+        communicationStrategy: {
+          tone: 'neutral',
+          emotionalAppeals: ['trust'],
+          keyMessages: ['Explore our offerings']
+        },
+        offerStrategies: {
+          offerType: 'standard',
+          pricingStructure: 'flat',
+          incentiveType: 'none',
+          deadline: 'none',
+          presentationStyle: 'informational'
+        }
+      };
     }
-  }, [user, enhancedProfile, analyzer]);
+  }, [user, enhancedProfile]);
 
   return {
     enhancedProfile,

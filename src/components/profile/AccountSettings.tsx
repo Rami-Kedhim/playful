@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,12 @@ import { Check, AlertCircle } from "lucide-react";
 
 // Define the password change result type
 interface PasswordChangeResult {
+  success: boolean;
+  error?: string;
+}
+
+// Define the email change result type
+interface EmailChangeResult {
   success: boolean;
   error?: string;
 }
@@ -31,7 +36,7 @@ const AccountSettings = () => {
   // State for submission status
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordChangeResult, setPasswordChangeResult] = useState<PasswordChangeResult | null>(null);
-  const [emailChangeResult, setEmailChangeResult] = useState<boolean>(false);
+  const [emailChangeResult, setEmailChangeResult] = useState<EmailChangeResult | null>(null);
   const [notificationSaveResult, setNotificationSaveResult] = useState<boolean>(false);
   
   // Handle password change
@@ -82,12 +87,14 @@ const AccountSettings = () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // For demo, always succeed
-    setEmailChangeResult(true as unknown as boolean);
+    setEmailChangeResult({
+      success: true
+    });
     
     setIsSubmitting(false);
     
     // Reset result after 3 seconds
-    setTimeout(() => setEmailChangeResult(false), 3000);
+    setTimeout(() => setEmailChangeResult(null), 3000);
   };
   
   // Handle notification settings

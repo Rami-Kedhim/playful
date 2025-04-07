@@ -11,7 +11,7 @@ export interface AIMessage {
   price?: number;
   has_read?: boolean;
   conversation_id: string;
-  sender_id?: string;
+  sender_id: string; // Changed from optional to required
   conversationId?: string;
 }
 

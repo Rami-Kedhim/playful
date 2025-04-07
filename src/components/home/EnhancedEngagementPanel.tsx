@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useEnhancedBehavioral } from '@/hooks/useEnhancedBehavioral';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,7 +29,7 @@ const EnhancedEngagementPanel = () => {
     lastAnalyzedAt 
   } = useEnhancedBehavioral();
   
-  const [engagementStrategy, setEngagementStrategy] = useState(generateEngagementStrategy());
+  const [engagementStrategy, setEngagementStrategy] = useState(() => generateEngagementStrategy());
   
   // Update strategy when profile changes
   useEffect(() => {
@@ -86,17 +87,17 @@ const EnhancedEngagementPanel = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Trust Level</span>
-                    <span className="text-sm">{enhancedProfile.psychographicProfile.trustLevel}%</span>
+                    <span className="text-sm">{Number(enhancedProfile.psychographicProfile.trustLevel)}%</span>
                   </div>
-                  <Progress value={enhancedProfile.psychographicProfile.trustLevel} />
+                  <Progress value={Number(enhancedProfile.psychographicProfile.trustLevel)} />
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Price Sensitivity</span>
-                    <span className="text-sm">{enhancedProfile.psychographicProfile.priceSensitivity}%</span>
+                    <span className="text-sm">{Number(enhancedProfile.psychographicProfile.priceSensitivity)}%</span>
                   </div>
-                  <Progress value={enhancedProfile.psychographicProfile.priceSensitivity} className="bg-amber-200" />
+                  <Progress value={Number(enhancedProfile.psychographicProfile.priceSensitivity)} className="bg-amber-200" />
                 </div>
               </div>
               
@@ -130,13 +131,13 @@ const EnhancedEngagementPanel = () => {
                   <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'information_search' ? 'default' : 'outline'}>
                     Information Search
                   </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'evaluation' ? 'default' : 'outline'}>
+                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'alternative_evaluation' ? 'default' : 'outline'}>
                     Evaluation
                   </Badge>
                   <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'purchase_decision' ? 'default' : 'outline'}>
                     Purchase Decision
                   </Badge>
-                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'post_purchase' ? 'default' : 'outline'}>
+                  <Badge variant={enhancedProfile.psychographicProfile.decisionStage === 'post_purchase_evaluation' ? 'default' : 'outline'}>
                     Post Purchase
                   </Badge>
                 </div>
@@ -232,7 +233,7 @@ const EnhancedEngagementPanel = () => {
                   <div>
                     <span className="text-xs">Best time for offers: </span>
                     <span className="text-xs font-medium">
-                      {enhancedProfile.marketingOptimizations.optimalOfferTiming}:00
+                      {enhancedProfile.marketingOptimizations.optimalOfferTiming}
                     </span>
                   </div>
                   
@@ -241,7 +242,7 @@ const EnhancedEngagementPanel = () => {
                       <div 
                         key={hour}
                         className={`h-4 w-1 ${
-                          hour === enhancedProfile.marketingOptimizations.optimalOfferTiming 
+                          hour === parseInt(enhancedProfile.marketingOptimizations.optimalOfferTiming as string) 
                             ? 'bg-primary' 
                             : 'bg-gray-200'
                         }`}

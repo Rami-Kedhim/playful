@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,29 +28,27 @@ const AIChat: React.FC<AIChatProps> = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const { 
-    sendMessage, 
+    conversation,
     messages, 
+    sendMessage, 
     sendingMessage: isLoading, 
+    loadingConversation: isInitialLoading,
     error, 
-    loadInitialMessages, 
-    isInitialLoading,
-    companion, 
-    loadCompanion 
+    refreshConversation: loadInitialMessages
   } = useAICompanion(profileId);
   
   const [input, setInput] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   
-  // Placeholder for subscription status since it's required in the component
+  // Placeholder for subscription status and lucoin balance
   const subscriptionStatus = 'active';
   const lucoinBalance = 100; // Default value
   
-  // Load initial messages and companion data
+  // Load initial messages
   useEffect(() => {
     loadInitialMessages();
-    loadCompanion(profileId);
-  }, [loadInitialMessages, loadCompanion, profileId]);
+  }, [loadInitialMessages]);
   
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -152,7 +149,7 @@ const AIChat: React.FC<AIChatProps> = ({
           {messages.map((message) => (
             <AIMessageComponent 
               key={message.id} 
-              message={message} 
+              message={message as AIMessage} 
               onMessageUnlocked={handleMessageUnlocked}
             />
           ))}

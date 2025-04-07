@@ -3,15 +3,15 @@
 // Implements HERMES, OXUM, Gould, and Chase Hughes frameworks
 
 export enum TrustLevel {
-  Low = "low",
-  Moderate = "moderate",
-  High = "high"
+  Low = 30,
+  Moderate = 50,
+  High = 80
 }
 
 export enum PriceSensitivity {
-  Low = "low",
-  Moderate = "moderate", 
-  High = "high"
+  Low = 20,
+  Moderate = 50, 
+  High = 80
 }
 
 export enum BehavioralLoop {
@@ -123,9 +123,19 @@ export interface EnhancedBehavioralHookReturn {
   original: any;
   isAnalyzing: boolean;
   analyzeUser: () => Promise<EnhancedBehavioralProfile>;
-  generateEngagementStrategy: () => Promise<{
-    communicationStrategy: string[];
-    offerStrategies: string[];
-  }>;
+  generateEngagementStrategy: () => {
+    communicationStrategy: {
+      tone: string;
+      emotionalAppeals: string[];
+      keyMessages: string[];
+    };
+    offerStrategies: {
+      offerType: string;
+      pricingStructure: string;
+      incentiveType: string;
+      deadline: string;
+      presentationStyle: string;
+    };
+  };
   lastAnalyzedAt: Date | null;
 }
