@@ -4,7 +4,7 @@
  * This enhances the Lucie assistant with intelligence from HERMES
  */
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/auth';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
 import LucieAssistant from './LucieAssistant';
 
@@ -21,6 +21,7 @@ export const LucieHermesIntegration = ({
 }: LucieHermesIntegrationProps) => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(Boolean(forceVisible));
+  const [customMessage, setCustomMessage] = useState<string | undefined>(undefined);
   
   // Connect to HERMES insights if user is logged in
   const { insights } = useHermesInsights(user?.id);
@@ -29,6 +30,21 @@ export const LucieHermesIntegration = ({
   useEffect(() => {
     if (insights.isLucieEnabled) {
       setIsVisible(true);
+      
+      // Generate a personalized message based on HERMES insights
+      let personalizedMessage = '';
+      
+      if (insights.boostOffer) {
+        personalizedMessage = `I noticed you might be interested in a boost! I can offer you ${insights.boostOffer.value} off, but it expires in ${insights.boostOffer.expires}.`;
+      } else if (insights.vrEvent) {
+        personalizedMessage = `Have you heard about our ${insights.vrEvent} event? It's happening soon, and I think you'd really enjoy it!`;
+      } else if (insights.recommendedProfiles?.length > 0) {
+        personalizedMessage = `Based on your interests, I think you might like to check out ${insights.recommendedProfiles[0].name}'s profile. They're very popular in your area!`;
+      } else {
+        personalizedMessage = `Hey there${user ? ` ${user.username}` : ''}! I noticed you've been exploring our platform. Can I help you find something specific today?`;
+      }
+      
+      setCustomMessage(personalizedMessage);
       
       if (onLucieTriggered) {
         let reason = 'HERMES insight';
@@ -42,7 +58,7 @@ export const LucieHermesIntegration = ({
         onLucieTriggered(reason);
       }
     }
-  }, [insights.isLucieEnabled, insights.boostOffer, insights.vrEvent, onLucieTriggered]);
+  }, [insights, onLucieTriggered, user]);
 
   // Hide Lucie after a short delay if automatically triggered
   useEffect(() => {
@@ -65,23 +81,11 @@ export const LucieHermesIntegration = ({
     return null;
   }
   
-  // Generate custom messages based on HERMES insights
-  const getHermesCustomMessage = () => {
-    if (insights.boostOffer) {
-      return `I noticed you might be interested in a boost! I can offer you ${insights.boostOffer.value} off, but it expires in ${insights.boostOffer.expires}.`;
-    }
-    
-    if (insights.vrEvent) {
-      return `Have you heard about our ${insights.vrEvent} event? It's happening soon, and I think you'd really enjoy it!`;
-    }
-    
-    return undefined; // Use default message
-  };
-
   return (
     <LucieAssistant 
-      initiallyOpen={insights.isLucieEnabled}
-      customInitialMessage={getHermesCustomMessage()}
+      initiallyOpen={insights.isLucieEnabled || forceVisible}
+      customInitialMessage={customMessage}
+      onClose={() => setIsVisible(false)}
     />
   );
 };

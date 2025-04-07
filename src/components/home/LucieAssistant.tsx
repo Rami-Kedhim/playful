@@ -1,73 +1,64 @@
 
-import { useState } from 'react';
-import { X, MessageCircle, Sparkles } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { X, MessageCircle, Sparkles, SendIcon, Image, ArrowRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useLucieAssistant, LucieMessage } from '@/hooks/useLucieAssistant';
 
 interface LucieAssistantProps {
   initiallyOpen?: boolean;
   customInitialMessage?: string;
+  onClose?: () => void;
 }
 
-const LucieAssistant = ({ initiallyOpen = false, customInitialMessage }: LucieAssistantProps) => {
-  const [isOpen, setIsOpen] = useState(initiallyOpen);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: customInitialMessage || 'Hi there! I\'m Lucie, your personal UberEscorts assistant. How can I help you today?'
-    }
-  ]);
+const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }: LucieAssistantProps) => {
+  const {
+    messages,
+    isTyping,
+    isOpen,
+    sendMessage,
+    toggleChat,
+    handleSuggestedActionClick
+  } = useLucieAssistant();
+  
   const [inputMessage, setInputMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
-    
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputMessage
-    };
-    
-    setMessages([...messages, userMessage]);
-    setInputMessage('');
-    setIsTyping(true);
-    
-    // Simulate Lucie's response
-    setTimeout(() => {
-      const lucieResponses = [
-        "I'd be happy to help you verify your account! Verification is essential for using our secure features.",
-        "Lucoin is our native token system that enables private transactions. You can purchase Lucoin in the wallet section.",
-        "Route sharing is our E2E encrypted GPS feature that lets verified users share location data securely.",
-        "All profiles on UberEscorts are verified real individuals - no fakes or bots allowed.",
-        "I can guide you through the creator features if you'd like to monetize content on our platform.",
-        "Your privacy and security are our top priorities. All data is encrypted and protected."
-      ];
-      
-      const randomResponse = lucieResponses[Math.floor(Math.random() * lucieResponses.length)];
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Set initial open state from props
+  useEffect(() => {
+    if (initiallyOpen) {
+      toggleChat();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // Add custom initial message if provided
+  useEffect(() => {
+    if (customInitialMessage && messages.length === 1) {
+      const customMessage: LucieMessage = {
+        id: 'custom-' + Date.now(),
         role: 'assistant',
-        content: randomResponse
+        content: customInitialMessage,
+        timestamp: new Date()
       };
       
-      setMessages(prevMessages => [...prevMessages, assistantMessage]);
-      setIsTyping(false);
-    }, 1500);
+      // Replace the default welcome message with the custom one
+      messages[0] = customMessage;
+    }
+  }, [customInitialMessage, messages]);
+  
+  // Auto-scroll to the bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
+  
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) return;
+    sendMessage(inputMessage);
+    setInputMessage('');
   };
 
   return (
@@ -97,7 +88,7 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage }: LucieAs
               </h3>
               <p className="text-xs text-gray-400">UberEscorts AI Assistant</p>
             </div>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleChat}>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={isOpen ? toggleChat : onClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -112,16 +103,53 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage }: LucieAs
                 }`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
+                  className={`max-w-[85%] p-3 rounded-lg ${
                     message.role === 'user'
                       ? 'bg-primary/20 text-white'
                       : 'bg-white/5 text-white'
                   }`}
                 >
-                  {message.content}
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  
+                  {/* Suggested Actions */}
+                  {message.role === 'assistant' && message.suggestedActions && message.suggestedActions.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {message.suggestedActions.map((action, index) => (
+                        <Button 
+                          key={index} 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleSuggestedActionClick(action)}
+                          className="text-xs py-1 h-auto"
+                        >
+                          {action}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Links */}
+                  {message.role === 'assistant' && message.links && message.links.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {message.links.map((link, index) => (
+                        <Card key={index} className="p-2 hover:bg-white/10 transition-colors">
+                          <a 
+                            href={link.url} 
+                            className="flex items-center justify-between text-primary"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <span className="text-sm">{link.text}</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </a>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
+            
             {isTyping && (
               <div className="flex justify-start">
                 <div className="max-w-[80%] p-3 rounded-lg bg-white/5 text-white flex items-center gap-1">
@@ -131,11 +159,16 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage }: LucieAs
                 </div>
               </div>
             )}
+            
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
           <div className="p-3 border-t border-white/10 bg-background/90 backdrop-blur-sm">
             <div className="flex gap-2">
+              <Button variant="ghost" size="icon" className="shrink-0">
+                <Image className="h-5 w-5" />
+              </Button>
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
@@ -147,7 +180,13 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage }: LucieAs
                 }}
                 className="bg-white/5"
               />
-              <Button onClick={handleSendMessage} className="shrink-0">Send</Button>
+              <Button 
+                onClick={handleSendMessage} 
+                className="shrink-0"
+                disabled={!inputMessage.trim()}
+              >
+                <SendIcon className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>

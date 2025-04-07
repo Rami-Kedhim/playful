@@ -1,5 +1,5 @@
 
-project_id = "haffqtqpbnaviefewfmn"
+project_id = "your-project-id"
 
-[functions.generate-ai-content]
+[functions.lucie-chat]
 verify_jwt = true
