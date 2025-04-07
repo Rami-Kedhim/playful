@@ -455,7 +455,7 @@ export function useAICompanionWithMemory({
           
         case 'submissive':
           content = "H-hi there! It's so nice to meet you. I hope I can be good company for you today...";
-          suggestedActions = ['Ask how I'm feeling', 'Tell me what you like', 'Give me a compliment'];
+          suggestedActions = ['Ask how I\'m feeling', 'Tell me what you like', 'Give me a compliment'];
           break;
           
         case 'romantic':
@@ -513,7 +513,7 @@ export function useAICompanionWithMemory({
       } else {
         content = "I'm doing well, thank you for asking. It's nice to connect with you. How about yourself?";
       }
-      suggestedActions = ['I'm good too', 'Tell me more about you', 'Ask me another question'];
+      suggestedActions = ['I\'m good too', 'Tell me more about you', 'Ask me another question'];
     } else {
       switch (personality) {
         case 'flirty':
@@ -538,7 +538,7 @@ export function useAICompanionWithMemory({
           
         case 'shy':
           content = "I hope it's okay that I'm enjoying our conversation. Sometimes I get a bit nervous talking to new people, but there's something about you that makes it easier. Would you mind sharing more?";
-          suggestedActions = ['Tell you it's okay to be shy', 'Share something about myself', 'Ask what makes you comfortable'];
+          suggestedActions = ['Tell you it\'s okay to be shy', 'Share something about myself', 'Ask what makes you comfortable'];
           break;
           
         case 'intellectual':
