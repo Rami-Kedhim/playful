@@ -1,8 +1,10 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
+import EscortDashboard from './components/escorts/dashboard/EscortDashboard';
 
 // Use lazy loading for route components
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -45,6 +47,18 @@ function Routes() {
         } />
         
         <Route path="auth" element={
+          <Suspense fallback={<PageLoader />}>
+            <Auth />
+          </Suspense>
+        } />
+        
+        <Route path="login" element={
+          <Suspense fallback={<PageLoader />}>
+            <Auth />
+          </Suspense>
+        } />
+        
+        <Route path="register" element={
           <Suspense fallback={<PageLoader />}>
             <Auth />
           </Suspense>
@@ -110,7 +124,11 @@ function Routes() {
           </Suspense>
         } />
         
-        <Route path="ai-companions" element={<AICompanionPage />} />
+        <Route path="ai-companions" element={
+          <Suspense fallback={<PageLoader />}>
+            <AICompanionPage />
+          </Suspense>
+        } />
         
         {/* Protected Routes - Require Authentication */}
         <Route path="/profile" element={
@@ -157,6 +175,14 @@ function Routes() {
           <ProtectedRoute requiredRoles={["creator"]}>
             <Suspense fallback={<PageLoader />}>
               <CreatorDashboard />
+            </Suspense>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="escort-dashboard" element={
+          <ProtectedRoute requiredRoles={["escort"]}>
+            <Suspense fallback={<PageLoader />}>
+              <EscortDashboard />
             </Suspense>
           </ProtectedRoute>
         } />

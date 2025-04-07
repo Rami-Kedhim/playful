@@ -2,15 +2,13 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/hooks/auth/useAuth";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "react-i18next";
 
 const DesktopNavigation: React.FC = () => {
-  const { isAuthenticated, userRoles = [] } = useAuth();
-  const { currentLanguage } = useLanguage();
+  const { isAuthenticated, checkRole } = useAuth();
   const { t } = useTranslation();
   
-  const isAdmin = userRoles?.some(role => ['admin', 'moderator'].includes(role));
+  const isAdmin = checkRole('admin') || checkRole('moderator');
   
   const navItems = [
     { name: t('nav.escorts'), path: `/escorts`, auth: false },
@@ -33,7 +31,7 @@ const DesktopNavigation: React.FC = () => {
           return (
             <li key={item.path}>
               <NavLink
-                to={`/${currentLanguage}${item.path}`}
+                to={item.path}
                 className={({ isActive }) =>
                   `text-sm font-medium transition-colors ${
                     isActive

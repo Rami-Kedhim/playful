@@ -111,7 +111,7 @@ const HomePage = () => {
   const [searchLocation, setSearchLocation] = useState("");
   
   return (
-    <AppLayout>
+    <>
       <Helmet>
         <title>UberEscorts - Premium Web3 Adult Platform</title>
         <meta name="description" content="UberEscorts - The ultimate Web3 adult platform with verified escorts, content creators, secure payments, and metaverse integration." />
@@ -139,7 +139,7 @@ const HomePage = () => {
       <TrustSection />
       <CtaSection />
       <LucieAssistant />
-    </AppLayout>
+    </>
   );
 };
 

@@ -16,7 +16,7 @@ import ServiceTypeMenu from '../navigation/ServiceTypeMenu';
 
 const Navbar: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated, userRoles = [], logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const { isMobileMenuOpen, setIsMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
   const navigate = useNavigate();
   

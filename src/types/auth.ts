@@ -85,5 +85,15 @@ export interface AuthContextValue extends AuthState {
   error: string | null;
   clearError: () => void;
   refreshProfile: () => Promise<void>;
+  
+  // Role helpers
   checkRole: (role: string) => boolean;
+  hasRole: (role: string | string[]) => boolean;
+  hasAllRoles: (roles: string[]) => boolean;
+  isAdmin: () => boolean;
+  isModerator: () => boolean;
+  isCreator: () => boolean;
+  isEscort: () => boolean;
+  canAccessAdminFeatures: () => boolean;
+  roles: string[];
 }

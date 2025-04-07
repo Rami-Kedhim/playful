@@ -7,6 +7,7 @@ import { AuthProvider } from '@/hooks/auth/useAuth';
 import AppRoutes from './Routes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+// Initialize a new QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
