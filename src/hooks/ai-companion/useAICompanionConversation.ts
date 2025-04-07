@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useAICompanionMessages } from './useAICompanionMessages';
 import { useCompanionProfile } from './useCompanionProfile';
@@ -25,11 +24,9 @@ export function useAICompanionConversation({
   const { getUserContext } = useUserContext();
   const [isSpeaking, setIsSpeaking] = useState(false);
   
-  // Initialize with welcome message if no messages exist
   useEffect(() => {
     const initializeMessages = () => {
       if (initialMessages.length > 0) {
-        // Messages already initialized
         return;
       } 
       
@@ -49,7 +46,6 @@ export function useAICompanionConversation({
         
         addMessage(welcomeMessage);
         
-        // Connect to HERMES-OXUM neural hub
         console.log('[HERMES-OXUM] Initializing companion conversation');
         neuralHub.applyBoostToContent(
           companion.id,
@@ -63,7 +59,6 @@ export function useAICompanionConversation({
     initializeMessages();
   }, [companion, messages.length, addMessage, initialMessages.length]);
   
-  // Check speaking status
   useEffect(() => {
     const checkSpeakingInterval = setInterval(() => {
       const speaking = aiCompanionMessagingService.isSpeaking();
@@ -73,31 +68,24 @@ export function useAICompanionConversation({
     return () => clearInterval(checkSpeakingInterval);
   }, []);
   
-  // Send a message to the companion
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || !companion) return;
     
-    // Add user message
     addMessage({
       role: 'user',
       content,
       timestamp: new Date()
     });
     
-    // Set typing indicator
     setIsTypingState(true);
     
     try {
-      // Get user context
       const userContext = getUserContext();
       
-      // In a real implementation, this would call an API
-      // For now, we'll simulate a response after a delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Add companion response
       const responseMessage: CompanionMessage = {
-        id: uuidv4(), // Added unique ID to fix the TypeScript error
+        id: uuidv4(),
         role: 'assistant',
         content: `I appreciate your message: "${content}". How can I assist you further?`,
         timestamp: new Date(),
@@ -111,7 +99,6 @@ export function useAICompanionConversation({
       
       addMessage(responseMessage);
       
-      // Process through the messaging service
       await aiCompanionMessagingService.processMessage(
         responseMessage,
         companion.speechStyle ? true : false,
@@ -125,12 +112,10 @@ export function useAICompanionConversation({
     }
   }, [companion, getUserContext, addMessage, setIsTypingState, handleErrorResponse]);
   
-  // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {
     sendMessage(action);
   }, [sendMessage]);
   
-  // Stop speaking
   const stopSpeaking = useCallback(() => {
     aiCompanionMessagingService.stopSpeaking();
     setIsSpeaking(false);
