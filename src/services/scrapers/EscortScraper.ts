@@ -1,4 +1,3 @@
-
 /**
  * EscortScraper - Service for scraping tryst.link
  * Implements the BaseScraperService abstract class
@@ -130,19 +129,17 @@ export class EscortScraper extends BaseScraperService {
         reviews: Math.floor(Math.random() * 50),
         tags: selectedServices,
         languages: ['English'],
-        // Use contactInfo object instead of direct phoneNumber property
         contactInfo: {
           email: `escort${i}@example.com`,
-          phone: '+1234567890', // Use phone instead of phoneNumber
+          phone: '+1234567890',
           website: `https://example.com/escort${i}`
         },
-        // Use availability property instead of availableTimes
         availability: {
           days: ['monday', 'wednesday', 'friday', 'saturday'],
           hours: '10:00-22:00'
         },
-        boosted: Math.random() > 0.7,
-        price: randomPrices.hourly, // Add required price field
+        featured: Math.random() > 0.7,
+        price: randomPrices.hourly,
       });
     }
     

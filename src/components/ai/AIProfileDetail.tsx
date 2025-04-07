@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -52,8 +51,10 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
       return profile.personality.traits as PersonalityTrait[];
     }
     
-    // Proper type conversion: first cast to unknown, then to PersonalityTrait[]
-    return (profile.personality.traits as unknown as string[]).map(trait => ({
+    const traitsAsStrings = Array.isArray(profile.personality.traits) ? 
+      (profile.personality.traits as unknown as string[]) : [];
+      
+    return traitsAsStrings.map(trait => ({
       name: trait,
       description: '',
       intensity: 75
