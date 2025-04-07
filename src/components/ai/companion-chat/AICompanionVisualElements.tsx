@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 
 // Types for visual elements
 export type VisualElementType = 'image' | 'card' | 'carousel' | 'map';
@@ -91,7 +90,7 @@ export const AIVisualElement: React.FC<AIVisualElementProps> = ({ element, onAct
                 >
                   {action.label}
                 </Button>
-              )}
+              ))}
             </CardFooter>
           )}
         </Card>
