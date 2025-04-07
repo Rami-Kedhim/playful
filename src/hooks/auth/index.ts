@@ -1,6 +1,6 @@
 
 // Import all auth hooks
-import { useAuth, AuthProvider } from './useAuth';
+import { useAuth, AuthProvider } from './useAuthContext';
 import { useAuthState } from './useAuthState';
 import { useAuthActions } from './useAuthActions';
 import { usePasswordManagement } from './usePasswordManagement';
@@ -9,7 +9,7 @@ import { useRole } from './useRole';
 import { useAuthentication } from './useAuthentication';
 
 // Export all authentication related hooks from a single file
-export { useAuth, AuthProvider } from "./useAuth";
+export { useAuth, AuthProvider } from "./useAuthContext";
 export { useAuthState } from "./useAuthState";
 export { useAuthActions } from "./useAuthActions";
 export { usePasswordManagement } from "./usePasswordManagement";

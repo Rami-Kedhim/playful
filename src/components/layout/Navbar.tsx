@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,23 +5,23 @@ import { Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
 import LanguageSwitcher from '../language/LanguageSwitcher';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import MobileMenu from '../navigation/MobileMenu';
 import useMobileMenu from '@/hooks/useMobileMenu';
 import DesktopNavigation from '../navigation/DesktopNavigation';
-import UserDropdown from '../navigation/UserDropdown';
+import UserMenu from '../layout/UserMenu';
 import ServiceTypeMenu from '../navigation/ServiceTypeMenu';
 
 const Navbar: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const { isMobileMenuOpen, setIsMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
   const navigate = useNavigate();
   
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -77,7 +76,7 @@ const Navbar: React.FC = () => {
           {/* User menu - only visible on desktop */}
           <div className="hidden md:block">
             {isAuthenticated ? (
-              <UserDropdown user={user} handleLogout={handleLogout} />
+              <UserMenu user={user} handleLogout={handleLogout} />
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" asChild>

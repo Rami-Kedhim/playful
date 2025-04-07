@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "@/hooks/auth/useAuth";
+import { useAuth } from "@/hooks/auth/useAuthContext";
 import { useTranslation } from "react-i18next";
 
 const DesktopNavigation: React.FC = () => {
