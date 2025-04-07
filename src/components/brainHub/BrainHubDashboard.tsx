@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { brainHub, BrainHubConfig } from '@/services/neural/HermesOxumBrainHub';
-import BrainHubConfig from '@/components/admin/BrainHubConfig';
+import { brainHub, BrainHubConfig as BrainHubConfigType } from '@/services/neural/HermesOxumBrainHub';
+import BrainHubConfigPanel from '@/components/admin/BrainHubConfig';
 
 const BrainHubDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -31,7 +31,7 @@ const BrainHubDashboard = () => {
     const currentConfig = brainHub.getConfig();
     
     // Create an optimized config
-    const optimizedConfig: BrainHubConfig = {
+    const optimizedConfig: BrainHubConfigType = {
       ...currentConfig,
       psychology: {
         ...currentConfig.psychology,
@@ -120,7 +120,7 @@ const BrainHubDashboard = () => {
         </TabsContent>
         
         <TabsContent value="config" className="mt-4">
-          <BrainHubConfig />
+          <BrainHubConfigPanel />
         </TabsContent>
         
         <TabsContent value="logs" className="mt-4">

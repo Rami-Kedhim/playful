@@ -1,5 +1,4 @@
 
-// Update the useBoostableLivecams hook to work with the updated BrainHubService
 import { useState, useEffect, useCallback } from 'react';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 
@@ -132,6 +131,16 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
     loading,
     error,
     refreshLivecams: fetchLivecams,
-    boostLivecam
+    boostLivecam,
+    filters: options,
+    hasMore: false,
+    totalCount: livecams.length,
+    loadMore: () => {}, // No-op function for pagination
+    updateFilters: () => {}, // No-op function for filters
+    cancelBoost: () => false, // No-op function for canceling boosts
+    isBoosted: () => false, // No-op function to check if boosted
+    boostedIds: [] // Empty array for boosted IDs
   };
 };
+
+export default useBoostableLivecams;

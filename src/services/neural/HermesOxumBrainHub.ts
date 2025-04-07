@@ -83,13 +83,37 @@ class HermesOxumBrainHub {
     console.log('Brain Hub configuration updated');
   }
   
-  // Add processRequest method to fix errors in other files
+  /**
+   * Process requests through the Brain Hub
+   * @param request Request object containing type and data
+   * @param options Optional processing options
+   * @returns Processed response
+   */
   processRequest(request: any, options?: any): any {
     console.log('Processing request through Brain Hub', request, options);
-    // This is a stub implementation to fix TypeScript errors
+    
+    // Apply geo-legal filtering if enabled
+    if (this.config.geoLegalFilteringEnabled && request.filters?.geoRestrictions) {
+      console.log('Applying geo-legal filtering');
+      // In a real implementation, this would filter content based on regional restrictions
+    }
+    
+    // Apply neuro-emotion processing if enabled
+    if (this.config.neuroEmotionEnabled && request.type?.includes('ai_')) {
+      console.log('Applying neuro-emotion processing');
+      // In a real implementation, this would enhance AI responses with emotional context
+    }
+    
+    // Apply predictive modulation if enabled
+    if (this.config.predictiveModulationEnabled && request.type?.includes('boost')) {
+      console.log('Applying predictive modulation');
+      // In a real implementation, this would adjust boost algorithms based on predictive models
+    }
+
+    // This is just a stub implementation that returns the original data with success flag
     return {
       success: true,
-      data: request
+      data: request.data || request
     };
   }
 }

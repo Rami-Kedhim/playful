@@ -3,7 +3,7 @@ import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import LivecamGrid from "@/components/livecams/LivecamGrid";
 import LivecamFilters from "@/components/livecams/LivecamFilters";
-import useBoostableLivecams from "@/hooks/useBoostableLivecams";
+import { useBoostableLivecams } from "@/hooks/useBoostableLivecams";
 import { useToast } from "@/components/ui/use-toast";
 
 const Livecams: React.FC = () => {

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,8 +65,18 @@ const BrainHubConfig: React.FC = () => {
   
   const handleAcademicModelToggle = (model: keyof BrainHubConfigType, key: string, value: boolean) => {
     const updatedConfig = { ...config };
-    const modelObj = updatedConfig[model] as Record<string, boolean>;
-    modelObj[key] = value;
+    
+    // Use appropriate type casting based on the model
+    if (model === 'psychology') {
+      (updatedConfig.psychology as PsychologyModel)[key] = value;
+    } else if (model === 'physics') {
+      (updatedConfig.physics as PhysicsModel)[key] = value;
+    } else if (model === 'economics') {
+      (updatedConfig.economics as EconomicsModel)[key] = value;
+    } else if (model === 'robotics') {
+      (updatedConfig.robotics as RoboticsModel)[key] = value;
+    }
+    
     setConfig(updatedConfig);
   };
   
