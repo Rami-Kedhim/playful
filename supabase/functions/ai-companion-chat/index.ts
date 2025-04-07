@@ -15,10 +15,10 @@ serve(async (req) => {
   }
 
   try {
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
+    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')
     
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not set in environment variables')
+    if (!OPENROUTER_API_KEY) {
+      throw new Error('OPENROUTER_API_KEY is not set in environment variables')
     }
 
     // Parse request body
@@ -36,27 +36,29 @@ serve(async (req) => {
       { role: 'user', content: message }
     ]
 
-    // Call OpenAI with more advanced model
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call OpenRouter API with specified model
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://lovable.dev', // Identifying the source
+        'X-Title': 'Lovable AI Companion Chat' // Optional title for tracking
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // Upgraded to more advanced model
+        model: 'nous-hermes-2-mixtral', // Using the specified model
         messages: messages,
-        temperature: 0.8, // Slightly increased for more personality
-        max_tokens: 600, // Increased to allow for more detailed responses
-        frequency_penalty: 0.5, // Added to reduce repetition
-        presence_penalty: 0.5, // Added to encourage new topics
-        user: userContext?.name || 'anonymous', // Help OpenAI track user interactions
+        temperature: 0.8,
+        max_tokens: 600,
+        frequency_penalty: 0.5,
+        presence_penalty: 0.5,
+        user: userContext?.name || 'anonymous',
       }),
     })
 
     if (!response.ok) {
       const error = await response.json()
-      throw new Error(`OpenAI API error: ${JSON.stringify(error)}`)
+      throw new Error(`OpenRouter API error: ${JSON.stringify(error)}`)
     }
 
     const data = await response.json()

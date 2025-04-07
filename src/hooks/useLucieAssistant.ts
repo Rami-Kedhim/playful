@@ -182,21 +182,27 @@ export function useLucieAssistant() {
       const chatHistory = formatChatHistory();
       
       // Call the Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('lucie-chat', {
+      const { data, error } = await supabase.functions.invoke('ai-companion-chat', {
         body: {
           message: content,
           userContext,
-          chatHistory
+          chatHistory,
+          companionProfile: {
+            name: "Lucie",
+            personality: "Warm, seductive, playful, and helpful assistant",
+            speechStyle: "sultry",
+            interests: ["helping users", "escort services", "entertainment"]
+          }
         }
       });
       
       if (error) {
-        console.error('Error invoking Lucie chat function:', error);
+        console.error('Error invoking AI companion chat function:', error);
         throw new Error(error.message);
       }
       
       if (data.error || data.errorCode) {
-        console.log('Lucie chat function returned error:', data.error || data.errorCode);
+        console.log('AI companion chat function returned error:', data.error || data.errorCode);
         
         // Handle quota exceeded and other error types
         if (data.errorCode === 'QUOTA_EXCEEDED' || data.error?.includes('quota')) {
