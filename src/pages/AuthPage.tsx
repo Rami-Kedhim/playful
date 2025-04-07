@@ -1,21 +1,23 @@
 
-import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { useToast } from "@/components/ui/use-toast";
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import StandardPageLayout from '@/components/layout/StandardPageLayout';
 
-const AuthPage: React.FC = () => {
-  const { t } = useTranslation();
+const AuthPage = () => {
+  const { signIn, signUp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, register } = useAuth();
-  const { toast } = useToast();
+  
+  // Get the return URL from location state or default to homepage
+  const from = location.state?.from?.pathname || "/";
   
   // Determine which tab to show based on URL
   const initialTab = location.pathname.includes("register") ? "register" : "login";
@@ -25,99 +27,99 @@ const AuthPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // If user is already authenticated, redirect to the return URL
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    
     if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+      setError("Please fill in all fields");
+      setIsLoading(false);
       return;
     }
     
-    setLoading(true);
-    try {
-      await login(email, password);
-      navigate("/");
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
-    } catch (error) {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
-      console.error(error);
-    } finally {
-      setLoading(false);
+    const { error } = await signIn(email, password);
+    if (error) {
+      setError(error.message);
     }
+    setIsLoading(false);
   };
   
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    
     if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+      setError("Please fill in all required fields");
+      setIsLoading(false);
       return;
     }
     
-    setLoading(true);
-    try {
-      await register(email, password, username);
-      navigate("/");
-      toast({
-        title: "Account created!",
-        description: "Welcome to UberEscorts!",
-      });
-    } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: "Could not create account",
-        variant: "destructive",
-      });
-      console.error(error);
-    } finally {
-      setLoading(false);
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      setIsLoading(false);
+      return;
     }
+    
+    const { error } = await signUp(email, password, username || email.split('@')[0]);
+    if (error) {
+      setError(error.message);
+    }
+    setIsLoading(false);
   };
   
   return (
-    <div className="container mx-auto py-12 flex justify-center">
-      <div className="w-full max-w-md">
+    <StandardPageLayout>
+      <div className="max-w-md mx-auto py-12">
         <Card>
-          <CardHeader className="space-y-1">
+          <CardHeader>
             <CardTitle className="text-2xl font-bold">
-              {activeTab === "login" ? "Welcome back" : "Create an account"}
+              {activeTab === "login" ? "Welcome Back" : "Create an Account"}
             </CardTitle>
             <CardDescription>
-              {activeTab === "login" 
-                ? "Enter your credentials to access your account" 
-                : "Enter your information to create an account"}
+              {activeTab === "login"
+                ? "Enter your credentials to access your account"
+                : "Fill out the form below to create your account"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => {
+                setActiveTab(value);
+                setError(null);
+              }}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2 mb-8">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4 mt-4">
+                <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="name@example.com"
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -126,32 +128,46 @@ const AuthPage: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password">Password</Label>
-                      <a href="#" className="text-sm text-primary hover:underline">
+                      <Button
+                        type="button"
+                        variant="link"
+                        size="sm"
+                        className="p-0 h-auto font-normal"
+                        onClick={() => {}}
+                      >
                         Forgot password?
-                      </a>
+                      </Button>
                     </div>
-                    <Input 
-                      id="password" 
+                    <Input
+                      id="password"
                       type="password"
+                      placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
                   </Button>
                 </form>
               </TabsContent>
-              
+
               <TabsContent value="register">
-                <form onSubmit={handleRegister} className="space-y-4 mt-4">
+                <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email</Label>
-                    <Input 
-                      id="register-email" 
-                      type="email" 
-                      placeholder="name@example.com"
+                    <Input
+                      id="register-email"
+                      type="email"
+                      placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
@@ -159,32 +175,43 @@ const AuthPage: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="username">Username (optional)</Label>
-                    <Input 
-                      id="username" 
+                    <Input
+                      id="username"
                       type="text"
-                      placeholder="johndoe"
+                      placeholder="Choose a username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Password</Label>
-                    <Input 
-                      id="register-password" 
+                    <Input
+                      id="register-password"
                       type="password"
+                      placeholder="Create a password (min. 6 characters)"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Password must be at least 6 characters long
+                    </p>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Create account"}
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : (
+                      "Create Account"
+                    )}
                   </Button>
                 </form>
               </TabsContent>
             </Tabs>
-            
-            <div className="mt-4 text-center text-sm">
+
+            <div className="mt-6 text-center text-sm">
               By continuing, you agree to our{" "}
               <a href="#" className="text-primary hover:underline">
                 Terms of Service
@@ -195,34 +222,42 @@ const AuthPage: React.FC = () => {
               </a>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <div className="text-center text-sm text-muted-foreground">
+          <CardFooter className="flex justify-center border-t pt-6">
+            <div className="text-sm text-muted-foreground">
               {activeTab === "login" ? (
                 <>
                   Don't have an account?{" "}
-                  <button 
-                    onClick={() => setActiveTab("register")}
-                    className="text-primary hover:underline"
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto"
+                    onClick={() => {
+                      setActiveTab("register");
+                      setError(null);
+                    }}
                   >
-                    Sign up
-                  </button>
+                    Sign up now
+                  </Button>
                 </>
               ) : (
                 <>
                   Already have an account?{" "}
-                  <button 
-                    onClick={() => setActiveTab("login")}
-                    className="text-primary hover:underline"
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto"
+                    onClick={() => {
+                      setActiveTab("login");
+                      setError(null);
+                    }}
                   >
                     Sign in
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
           </CardFooter>
         </Card>
       </div>
-    </div>
+    </StandardPageLayout>
   );
 };
 

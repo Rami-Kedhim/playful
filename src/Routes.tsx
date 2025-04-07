@@ -4,11 +4,12 @@ import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
-import EscortDashboard from './components/escorts/dashboard/EscortDashboard';
+
+// Auth page
+import AuthPage from './pages/AuthPage';
 
 // Use lazy loading for route components
 const HomePage = lazy(() => import('./pages/HomePage'));
-const Auth = lazy(() => import('./pages/Auth'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
@@ -24,195 +25,125 @@ const CreatorDetail = lazy(() => import('./pages/CreatorDetail'));
 const AIProfiles = lazy(() => import("./pages/AIProfiles"));
 const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
-const CreatorDashboard = lazy(() => import('./components/creators/dashboard/Dashboard'));
-const VerificationContainer = lazy(() => import('./components/verification/VerificationContainer'));
-const AICompanionPage = lazy(() => import('./pages/AICompanionPage'));
-const SEODashboard = lazy(() => import('./pages/SEODashboard'));
 
-// Loading component for suspense fallback
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-[50vh]">
+// Loading component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen">
     <Loader2 className="h-12 w-12 animate-spin text-primary" />
   </div>
 );
 
-function AppRoutes() {
+// Main routes component
+const AppRoutes: React.FC = () => {
   return (
-    <RouterRoutes>
-      <Route path="/" element={<AppLayout />}>
-        <Route index element={
-          <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<LoadingFallback />}>
+      <RouterRoutes>
+        {/* Public routes */}
+        <Route path="/auth" element={<AuthPage />} />
+        
+        {/* Protected routes */}
+        <Route path="/" element={
+          <AppLayout>
             <HomePage />
-          </Suspense>
+          </AppLayout>
         } />
         
-        <Route path="auth" element={
-          <Suspense fallback={<PageLoader />}>
-            <Auth />
-          </Suspense>
-        } />
-        
-        <Route path="login" element={
-          <Suspense fallback={<PageLoader />}>
-            <Auth />
-          </Suspense>
-        } />
-        
-        <Route path="register" element={
-          <Suspense fallback={<PageLoader />}>
-            <Auth />
-          </Suspense>
-        } />
-        
-        <Route path="escorts" element={
-          <Suspense fallback={<PageLoader />}>
-            <Escorts />
-          </Suspense>
-        } />
-        
-        <Route path="escorts/:id" element={
-          <Suspense fallback={<PageLoader />}>
-            <EscortDetail />
-          </Suspense>
-        } />
-        
-        <Route path="escort-streams" element={
-          <Suspense fallback={<PageLoader />}>
-            <EscortLiveStreams />
-          </Suspense>
-        } />
-        
-        <Route path="escort/:id/live" element={
-          <Suspense fallback={<PageLoader />}>
-            <EscortLiveStreamDetail />
-          </Suspense>
-        } />
-        
-        <Route path="creators" element={
-          <Suspense fallback={<PageLoader />}>
-            <Creators />
-          </Suspense>
-        } />
-        
-        <Route path="creators/:username" element={
-          <Suspense fallback={<PageLoader />}>
-            <CreatorDetail />
-          </Suspense>
-        } />
-        
-        <Route path="search" element={
-          <Suspense fallback={<PageLoader />}>
-            <SearchPage />
-          </Suspense>
-        } />
-        
-        <Route path="ai-profiles" element={
-          <Suspense fallback={<PageLoader />}>
-            <AIProfiles />
-          </Suspense>
-        } />
-        
-        <Route path="livecams" element={
-          <Suspense fallback={<PageLoader />}>
-            <Livecams />
-          </Suspense>
-        } />
-        
-        <Route path="livecams/:id" element={
-          <Suspense fallback={<PageLoader />}>
-            <LivecamDetail />
-          </Suspense>
-        } />
-        
-        <Route path="ai-companions" element={
-          <Suspense fallback={<PageLoader />}>
-            <AICompanionPage />
-          </Suspense>
-        } />
-        
-        {/* Protected Routes - Require Authentication */}
         <Route path="/profile" element={
           <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
+            <AppLayout>
               <ProfilePage />
-            </Suspense>
+            </AppLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="favorites" element={
+        <Route path="/favorites" element={
           <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
+            <AppLayout>
               <FavoritesPage />
-            </Suspense>
+            </AppLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="messages" element={
+        <Route path="/messages" element={
           <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
+            <AppLayout>
               <MessagesPage />
-            </Suspense>
+            </AppLayout>
           </ProtectedRoute>
         } />
         
-        <Route path="metaverse" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <MetaversePage />
-            </Suspense>
-          </ProtectedRoute>
+        {/* Semi-public routes - can be viewed publicly but some features require auth */}
+        <Route path="/metaverse" element={
+          <AppLayout>
+            <MetaversePage />
+          </AppLayout>
         } />
         
-        <Route path="creator-application" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <CreatorDashboard />
-            </Suspense>
-          </ProtectedRoute>
+        <Route path="/search" element={
+          <AppLayout>
+            <SearchPage />
+          </AppLayout>
         } />
         
-        <Route path="creator-dashboard" element={
-          <ProtectedRoute requiredRoles={["creator"]}>
-            <Suspense fallback={<PageLoader />}>
-              <CreatorDashboard />
-            </Suspense>
-          </ProtectedRoute>
+        <Route path="/escorts" element={
+          <AppLayout>
+            <Escorts />
+          </AppLayout>
         } />
         
-        <Route path="escort-dashboard" element={
-          <ProtectedRoute requiredRoles={["escort"]}>
-            <Suspense fallback={<PageLoader />}>
-              <EscortDashboard />
-            </Suspense>
-          </ProtectedRoute>
+        <Route path="/escorts/:id" element={
+          <AppLayout>
+            <EscortDetail />
+          </AppLayout>
         } />
         
-        <Route path="verification" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <VerificationContainer />
-            </Suspense>
-          </ProtectedRoute>
+        <Route path="/livestreams" element={
+          <AppLayout>
+            <EscortLiveStreams />
+          </AppLayout>
         } />
         
-        {/* Protected SEO Routes - Require Admin/Moderator roles */}
-        <Route path="seo/*" element={
-          <ProtectedRoute requiredRoles={["admin"]}>
-            <Suspense fallback={<PageLoader />}>
-              <SEODashboard />
-            </Suspense>
-          </ProtectedRoute>
+        <Route path="/livestreams/:id" element={
+          <AppLayout>
+            <EscortLiveStreamDetail />
+          </AppLayout>
         } />
         
-        {/* Add a 404 catch-all route */}
-        <Route path="*" element={
-          <Suspense fallback={<PageLoader />}>
-            <NotFound />
-          </Suspense>
+        <Route path="/creators" element={
+          <AppLayout>
+            <Creators />
+          </AppLayout>
         } />
-      </Route>
-    </RouterRoutes>
+        
+        <Route path="/creators/:id" element={
+          <AppLayout>
+            <CreatorDetail />
+          </AppLayout>
+        } />
+        
+        <Route path="/ai-companions" element={
+          <AppLayout>
+            <AIProfiles />
+          </AppLayout>
+        } />
+        
+        <Route path="/livecams" element={
+          <AppLayout>
+            <Livecams />
+          </AppLayout>
+        } />
+        
+        <Route path="/livecams/:id" element={
+          <AppLayout>
+            <LivecamDetail />
+          </AppLayout>
+        } />
+        
+        {/* Catch-all route for 404s */}
+        <Route path="*" element={<NotFound />} />
+      </RouterRoutes>
+    </Suspense>
   );
-}
+};
 
 export default AppRoutes;

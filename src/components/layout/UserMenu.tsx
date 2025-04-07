@@ -1,8 +1,8 @@
 
 import { Link } from "react-router-dom";
-import { LogOut, User, Wallet } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/auth/useAuth";
+import { useAuth } from "@/hooks/auth/useAuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,16 +12,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface UserMenuProps {
-  handleSignOut: () => Promise<void>;
-}
-
-export const UserMenu = ({ handleSignOut }: UserMenuProps) => {
-  const { user, profile } = useAuth();
+const UserMenu = () => {
+  const { user, isAuthenticated, signOut } = useAuth();
   
   const getUserInitials = () => {
-    if (profile?.username) {
-      return profile.username.substring(0, 2).toUpperCase();
+    if (user?.user_metadata?.username) {
+      return user.user_metadata.username.substring(0, 2).toUpperCase();
     }
     
     if (user?.email) {
@@ -31,13 +27,13 @@ export const UserMenu = ({ handleSignOut }: UserMenuProps) => {
     return "U";
   };
   
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <>
         <Link to="/auth">
           <Button variant="ghost" size="sm">Login</Button>
         </Link>
-        <Link to="/auth">
+        <Link to="/auth?tab=register">
           <Button size="sm">Sign Up</Button>
         </Link>
       </>
@@ -49,27 +45,30 @@ export const UserMenu = ({ handleSignOut }: UserMenuProps) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={profile?.avatar_url} alt={profile?.username || "User"} />
+            <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.username || "User"} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem className="font-medium">
-          {profile?.username || user.email}
+          {user?.user_metadata?.username || user?.email}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/profile">Profile</Link>
+          <Link to="/profile" className="flex items-center">
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/wallet">
-            <Wallet className="mr-2 h-4 w-4" />
-            <span>Wallet</span>
+          <Link to="/settings" className="flex items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+        <DropdownMenuItem onClick={() => signOut()} className="text-destructive cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sign out</span>
         </DropdownMenuItem>

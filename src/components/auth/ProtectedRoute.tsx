@@ -1,29 +1,19 @@
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useRole } from '@/hooks/auth/useRole';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRoles?: string[];
-  requireAllRoles?: boolean;
   redirectPath?: string;
 }
 
-/**
- * Component that protects routes requiring authentication
- * Optionally checks for specific roles
- */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requiredRoles = [], 
-  requireAllRoles = false,
   redirectPath = "/auth"
 }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  const { hasRole, hasAllRoles } = useRole();
   const location = useLocation();
 
   // Show loading state while authentication is being checked
@@ -42,20 +32,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectPath} state={{ from: location.pathname }} replace />;
   }
 
-  // Check role-based access if roles are required
-  if (requiredRoles.length > 0) {
-    const hasRequiredRoles = requireAllRoles
-      ? hasAllRoles(requiredRoles)
-      : hasRole(requiredRoles);
-    
-    if (!hasRequiredRoles) {
-      return (
-        <Navigate to="/" replace />
-      );
-    }
-  }
-
-  // If authenticated and has required roles (if any), render the children
+  // If authenticated, render the children
   return <>{children}</>;
 };
 

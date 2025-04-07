@@ -1,37 +1,19 @@
 
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
-import { AuthProvider } from '@/hooks/auth/useAuth';
-import AppRoutes from './Routes';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LucieHermesIntegration } from '@/components/home/LucieHermesIntegration';
+import AppRouter from './routes';
+import { AuthProvider } from './hooks/auth/useAuthContext';
+import { Toaster } from '@/components/ui/toaster';
 
-// Initialize a new QueryClient
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-    },
-  },
-});
-
-function App() {
+const App: React.FC = () => {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="uber-escorts-theme">
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <Router>
-            <AppRoutes />
-            <LucieHermesIntegration />
-            <Toaster />
-          </Router>
-        </AuthProvider>
-      </QueryClientProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="app-theme">
+      <AuthProvider>
+        <AppRouter />
+        <Toaster />
+      </AuthProvider>
     </ThemeProvider>
   );
-}
+};
 
 export default App;
