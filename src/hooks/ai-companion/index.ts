@@ -5,8 +5,11 @@ import { useCompanionProfile } from './useCompanionProfile';
 import { useUserContext } from './useUserContext';
 import { v4 as uuidv4 } from 'uuid';
 import { CompanionMessage, UseAICompanionConversationProps } from './types';
+import { useAICompanionConversation } from './useAICompanionConversation';
 
-export function useAICompanionConversation({ 
+export { useAICompanionConversation } from './useAICompanionConversation';
+
+export function useAICompanionConversation_old({ 
   companionId, 
   initialMessages = [] 
 }: UseAICompanionConversationProps) {

@@ -1,34 +1,15 @@
 
-export interface CompanionProfile {
-  id: string;
-  name: string;
-  avatar?: string;
-  description?: string;
-  personality?: string;
-  visualCapabilities?: boolean;
-  voiceType?: string;
-  speechStyle?: string;
-}
-
 export interface CompanionMessage {
   id: string;
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant';
   content: string;
-  timestamp?: Date;
+  timestamp: Date;
+  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprised' | 'confused' | 'friendly' | 'apologetic';
   suggestedActions?: string[];
-  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprise' | 'fear' | 'disgust' | 'friendly' | 'professional' | 'supportive' | 'apologetic' | 'helpful' | 'confused';
-  links?: { text: string; url: string }[];
   visualElements?: {
     type: string;
     data: any;
   }[];
-}
-
-export interface UserContext {
-  name?: string;
-  interests?: string[];
-  recentInteractions?: string;
-  relationshipStatus?: string;
 }
 
 export interface UseAICompanionConversationProps {
@@ -36,9 +17,9 @@ export interface UseAICompanionConversationProps {
   initialMessages?: CompanionMessage[];
 }
 
-export interface AICompanionResponse {
-  text: string;
-  emotions?: string | null;
-  suggestedActions?: string[];
-  links?: { text: string; url: string }[];
+export interface AICompanionVoiceConfig {
+  voice: string;
+  rate?: number;
+  pitch?: number;
+  volume?: number;
 }
