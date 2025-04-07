@@ -12,6 +12,12 @@ export interface LucieMessage {
     data: any;
   }[];
   cards?: InteractiveCard[];
+  // New Schauberger flow properties
+  flowMetrics?: {
+    emotionalFlow: string;
+    vortexStrength: number;
+    resourceAllocation: string;
+  };
 }
 
 export interface InteractiveCard {
@@ -31,6 +37,15 @@ export interface UserContext {
   role?: string;
   recentActivity?: string;
   interests?: string[];
+  flowState?: SchaubergerFlowState;
+}
+
+export interface SchaubergerFlowState {
+  emotionalFlow: string;
+  vortexStrength: number;
+  resourceAllocation: string;
+  systemLoad?: number;
+  optimalTiming?: boolean;
 }
 
 export interface LucieResponse {
@@ -39,6 +54,7 @@ export interface LucieResponse {
   links?: { text: string; url: string }[];
   emotion?: string;
   cards?: InteractiveCard[];
+  flowState?: SchaubergerFlowState;
 }
 
 export interface LucieAPIOptions {
@@ -51,4 +67,5 @@ export interface LucieAPIOptions {
 export interface VisualElementRequest {
   type: string;
   content: any;
+  flowState?: SchaubergerFlowState;
 }
