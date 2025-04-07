@@ -1,3 +1,4 @@
+
 import { Escort } from "../types/escort";
 
 export const moreEscorts: Escort[] = [
@@ -123,7 +124,14 @@ export const moreEscorts: Escort[] = [
       streams: 4
     },
     providesVirtualContent: true,
-    subscriptionPrice: 22.99
+    subscriptionPrice: 22.99,
+    bio: "Sydney-based companion specializing in roleplay and fantasy fulfillment.",
+    contactInfo: {
+      email: "megan@example.com",
+      phone: "+61-2-1234-5678",
+      website: "megan-sydney.example.com"
+    },
+    featured: false
   },
   {
     id: "7",
@@ -180,7 +188,14 @@ export const moreEscorts: Escort[] = [
       live: false,
       streams: 0
     },
-    providesVirtualContent: false
+    providesVirtualContent: false,
+    bio: "Madrid-based companion available for couples and individuals.",
+    contactInfo: {
+      email: "laura@example.com",
+      phone: "+34-91-234-5678",
+      website: "laura-madrid.example.com"
+    },
+    featured: false
   },
   {
     id: "8",
@@ -238,6 +253,13 @@ export const moreEscorts: Escort[] = [
       streams: 5
     },
     providesVirtualContent: true,
-    subscriptionPrice: 24.99
+    subscriptionPrice: 24.99,
+    bio: "Elegant Rome-based companion available throughout the day.",
+    contactInfo: {
+      email: "olivia@example.com",
+      phone: "+39-06-1234-5678",
+      website: "olivia-rome.example.com"
+    },
+    featured: true
   }
 ];

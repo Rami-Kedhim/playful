@@ -65,14 +65,20 @@ export function useAICompanionWithMemory({
           
           if (!memory) {
             const initialState = aiPersonalityService.createPersonalizedEmotionalState(personalityType);
-            memory = {
-              state: initialState,
+            const initialMemoryWithRequiredProps = {
+              userId,
+              companionId,
+              state: initialState, 
               emotionalHistory: [],
               keyMemories: [],
               recentInteractions: [],
-              userId,
-              companionId
+              emotions: {
+                currentState: initialState,
+                history: []
+              },
+              lastUpdated: new Date().toISOString()
             };
+            memory = initialMemoryWithRequiredProps;
             await redisEmotionalMemoryService.setEmotionalMemory(companionId, userId, memory);
           }
           
@@ -229,13 +235,26 @@ export function useAICompanionWithMemory({
           );
           
           if (emotionalMemory) {
-            emotionalMemory.state = updatedState;
-            emotionalMemory.emotionalHistory.push({
+            const updatedEmotionalHistoryEntry = {
               emotion: updatedState.dominantEmotion || 'neutral',
               trigger: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
               intensity: updatedState.intensityLevel,
-              timestamp: new Date().toISOString()
-            });
+              timestamp: new Date().toISOString(),
+              joy: updatedState.joy,
+              interest: updatedState.interest,
+              surprise: updatedState.surprise,
+              sadness: updatedState.sadness,
+              anger: updatedState.anger,
+              fear: updatedState.fear,
+              trust: updatedState.trust,
+              anticipation: updatedState.anticipation,
+              dominantEmotion: updatedState.dominantEmotion,
+              intensityLevel: updatedState.intensityLevel,
+              lastUpdated: new Date().toISOString()
+            };
+            
+            emotionalMemory.state = updatedState;
+            emotionalMemory.emotionalHistory.push(updatedEmotionalHistoryEntry);
             
             if (emotionalMemory.emotionalHistory.length > 20) {
               emotionalMemory.emotionalHistory = emotionalMemory.emotionalHistory.slice(-20);

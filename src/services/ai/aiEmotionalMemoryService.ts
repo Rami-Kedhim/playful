@@ -63,30 +63,35 @@ export class AIEmotionalMemoryService {
           defaultState.fear += 15;
         }
         
-        const newMemory: EmotionalMemory = {
+        const newMemoryWithRequiredProps = {
           state: defaultState,
           emotionalHistory: [],
           keyMemories: [],
           recentInteractions: [],
           companionId,
-          userId
+          userId,
+          emotions: {
+            currentState: defaultState,
+            history: []
+          },
+          lastUpdated: new Date().toISOString()
         };
         
         // Store in cache
-        this.memoryCache.set(memoryKey, newMemory);
+        this.memoryCache.set(memoryKey, newMemoryWithRequiredProps);
         
         // Save to database
         try {
           await supabase.from('ai_emotional_memories').insert({
             companion_id: companionId,
             user_id: userId,
-            memory_data: newMemory
+            memory_data: newMemoryWithRequiredProps
           });
         } catch (dbError) {
           console.error('Error saving emotional memory to database:', dbError);
         }
         
-        return newMemory;
+        return newMemoryWithRequiredProps;
       }
     } catch (error) {
       console.error('Error in initializeEmotionalMemory:', error);
@@ -99,7 +104,12 @@ export class AIEmotionalMemoryService {
         keyMemories: [],
         recentInteractions: [],
         companionId,
-        userId
+        userId,
+        emotions: {
+          currentState: defaultState,
+          history: []
+        },
+        lastUpdated: new Date().toISOString()
       };
       
       this.memoryCache.set(memoryKey, fallbackMemory);
@@ -138,12 +148,25 @@ export class AIEmotionalMemoryService {
       memory.emotionalHistory = [];
     }
     
-    memory.emotionalHistory.push({
+    const updatedEmotionalHistoryEntry = {
       emotion: updatedState.dominantEmotion || 'neutral',
       trigger: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
       intensity: updatedState.intensityLevel,
-      timestamp: new Date().toISOString()
-    });
+      timestamp: new Date().toISOString(),
+      joy: updatedState.joy,
+      interest: updatedState.interest,
+      surprise: updatedState.surprise,
+      sadness: updatedState.sadness,
+      anger: updatedState.anger,
+      fear: updatedState.fear,
+      trust: updatedState.trust,
+      anticipation: updatedState.anticipation,
+      dominantEmotion: updatedState.dominantEmotion,
+      intensityLevel: updatedState.intensityLevel,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    memory.emotionalHistory.push(updatedEmotionalHistoryEntry);
     
     // Keep history limited to most recent 20 entries
     if (memory.emotionalHistory.length > 20) {

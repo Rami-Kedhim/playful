@@ -1,3 +1,4 @@
+
 import { Escort } from "../types/escort";
 
 export const escortProfiles: Escort[] = [
@@ -132,7 +133,14 @@ export const escortProfiles: Escort[] = [
       streams: 0
     },
     providesVirtualContent: true,
-    subscriptionPrice: 14.99
+    subscriptionPrice: 14.99,
+    bio: "LA-based companion offering premium massage and travel services.",
+    contactInfo: {
+      email: "emma@example.com",
+      phone: "+1-323-456-7890",
+      website: "emma-la.example.com"
+    },
+    featured: false
   },
   {
     id: "3",
@@ -191,7 +199,14 @@ export const escortProfiles: Escort[] = [
       streams: 3
     },
     providesVirtualContent: true,
-    subscriptionPrice: 29.99
+    subscriptionPrice: 29.99,
+    bio: "Experienced London-based companion specializing in roleplay and fantasy fulfillment.",
+    contactInfo: {
+      email: "alice@example.com",
+      phone: "+44-20-1234-5678",
+      website: "alice-london.example.com"
+    },
+    featured: true
   },
   {
     id: "4",
@@ -248,6 +263,13 @@ export const escortProfiles: Escort[] = [
       live: false,
       streams: 0
     },
-    providesVirtualContent: false
+    providesVirtualContent: false,
+    bio: "Parisian companion offering sophisticated experiences for the discerning client.",
+    contactInfo: {
+      email: "rachel@example.com",
+      phone: "+33-1-2345-6789",
+      website: "rachel-paris.example.com"
+    },
+    featured: false
   }
 ];
