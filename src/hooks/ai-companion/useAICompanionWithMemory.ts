@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { 
@@ -14,6 +15,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { sentimentAnalysisService } from '@/services/ai/sentimentAnalysisService';
 import { aiEmotionalMemoryService } from '@/services/ai/aiEmotionalMemoryService';
+import { useAICompanionMessages } from './useAICompanionMessages';
+import { useAIPersonality } from './useAIPersonality';
+import { useMonetizationSystem } from './useMonetizationSystem';
 
 export interface UseAICompanionWithMemoryProps {
   companionId: string;
@@ -459,7 +463,7 @@ export function useAICompanionWithMemory({
           
         case 'submissive':
           content = "H-hi there! It's so nice to meet you. I hope I can be good company for you today...";
-          suggestedActions = ['Ask how I'm feeling', 'Tell me what you like', 'Give me a compliment'];
+          suggestedActions = ["Ask how I'm feeling", "Tell me what you like", "Give me a compliment"];
           break;
           
         case 'romantic':
