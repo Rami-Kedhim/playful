@@ -124,10 +124,10 @@ export class EscortScraper extends BaseScraperService {
           hourly: randomPrices.hourly,
           overnight: randomPrices.overnight
         },
-        availableNow: Math.random() > 0.4, // Changed from available to availableNow
+        availableNow: Math.random() > 0.4,
         verified: Math.random() > 0.5,
         rating: Math.random() * 2 + 3,
-        reviewCount: Math.floor(Math.random() * 50),
+        reviews: Math.floor(Math.random() * 50), // Changed from reviewCount to reviews
         tags: selectedServices,
         languages: ['English'],
         phoneNumber: '+1234567890', // Fake number for mock data

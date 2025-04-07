@@ -1,4 +1,3 @@
-
 import React from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import LivecamGrid from "@/components/livecams/LivecamGrid";
@@ -36,13 +35,15 @@ const Livecams: React.FC = () => {
 
   // Adapter functions to match the expected parameter types in LivecamGrid
   const handleBoost = (livecamId: string, intensity: number, durationHours: number): boolean => {
+    // Call the async function but return a synchronous result
     boostLivecam(livecamId, intensity, durationHours);
-    return true;
+    return true; // For synchronous UI feedback
   };
   
   const handleCancelBoost = (livecamId: string): boolean => {
+    // Call the async function but return a synchronous result
     cancelBoost(livecamId);
-    return true;
+    return true; // For synchronous UI feedback
   };
 
   return (

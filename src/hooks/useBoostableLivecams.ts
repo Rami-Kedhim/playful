@@ -57,7 +57,9 @@ export const useBoostableLivecams = () => {
           region: filters.country
         });
         
-        if (brainHubResponse.economicData && 
+        // Ensure we properly check the response after awaiting it
+        if (brainHubResponse && 
+            brainHubResponse.economicData && 
             brainHubResponse.economicData.price && 
             brainHubResponse.economicData.price > 50) {
           boostedModelIds.push(model.id);

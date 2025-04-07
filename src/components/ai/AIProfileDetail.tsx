@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,7 +55,7 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
     }
     
     // Otherwise, convert string[] to PersonalityTrait[]
-    return (profile.personality.traits as string[]).map(trait => ({
+    return (profile.personality.traits as unknown as string[]).map(trait => ({
       name: trait,
       description: '',
       intensity: 75 // Default intensity
