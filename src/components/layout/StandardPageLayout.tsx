@@ -46,6 +46,7 @@ const StandardPageLayout: React.FC<StandardPageLayoutProps> = ({
   return (
     <MainLayout 
       title={showHeader ? title : undefined} 
+      description={description}
       showHeader={showHeader}
       containerClass={containerClass}
       hideNavbar={hideNavbar}

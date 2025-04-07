@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut } from 'lucide-react';
+import { User, Settings, LogOut, Home, Search, Compass } from 'lucide-react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { AnimatedContainer } from '@/components/ui/animated-container';
 import { Separator } from '@/components/ui/separator';
@@ -38,13 +38,56 @@ const MobileMenu = ({ open = false, onOpenChange }: MobileMenuProps) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[85%] sm:w-[350px] pt-10">
-        <SheetHeader className="mb-6">
+        <SheetHeader className="mb-4">
           <SheetTitle className="flex items-center justify-between">
             <span>{t('menu')}</span>
             <ThemeToggle />
           </SheetTitle>
         </SheetHeader>
         
+        <div className="mb-4">
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-base"
+            asChild
+            onClick={handleNavItemClick}
+          >
+            <Link to="/">
+              <Home className="h-5 w-5" />
+              {t('home')}
+            </Link>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-base"
+            asChild
+            onClick={handleNavItemClick}
+          >
+            <Link to="/search">
+              <Search className="h-5 w-5" />
+              {t('search')}
+            </Link>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-base"
+            asChild
+            onClick={handleNavItemClick}
+          >
+            <Link to="/metaverse">
+              <Compass className="h-5 w-5" />
+              {t('metaverse')}
+            </Link>
+          </Button>
+        </div>
+        
+        <Separator className="my-2" />
+        
+        <SheetTitle className="text-sm font-medium text-muted-foreground mb-2">
+          {t('services')}
+        </SheetTitle>
         <MobileNavigation onItemClick={handleNavItemClick} />
         
         <Separator className="my-6" />
