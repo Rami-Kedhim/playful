@@ -1,11 +1,10 @@
-
-// Update BrainHubDashboard to use the proper type for updating config
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { brainHub, BrainHubConfig as BrainHubConfigType } from '@/services/neural/HermesOxumBrainHub';
+import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { BrainHubConfig } from '@/types/brainHub';
 import BrainHubConfigPanel from '@/components/admin/BrainHubConfig';
 
 const BrainHubDashboard = () => {
@@ -31,7 +30,7 @@ const BrainHubDashboard = () => {
     const currentConfig = brainHub.getConfig();
     
     // Create an optimized config
-    const optimizedConfig: BrainHubConfigType = {
+    const optimizedConfig: BrainHubConfig = {
       ...currentConfig,
       psychology: {
         ...currentConfig.psychology,
@@ -41,6 +40,10 @@ const BrainHubDashboard = () => {
         ...currentConfig.physics,
         fluidDynamics: cpuUsage > 50 ? false : true
       },
+      economics: currentConfig.economics,
+      robotics: currentConfig.robotics,
+      geoLegalFilteringEnabled: currentConfig.geoLegalFilteringEnabled,
+      neuroEmotionEnabled: currentConfig.neuroEmotionEnabled,
       predictiveModulationEnabled: true
     };
     

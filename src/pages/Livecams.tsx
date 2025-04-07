@@ -5,30 +5,7 @@ import LivecamGrid from "@/components/livecams/LivecamGrid";
 import LivecamFilters from "@/components/livecams/LivecamFilters";
 import { useBoostableLivecams } from "@/hooks/useBoostableLivecams";
 import { useToast } from "@/components/ui/use-toast";
-import { LivecamModel as BoostableLivecamModel } from "@/types/livecams";
-
-// Create a type adapter to ensure compatibility between different LivecamModel types
-type AdaptedLivecamModel = {
-  id: string;
-  name?: string;
-  username: string;
-  displayName: string;
-  imageUrl: string;
-  thumbnailUrl: string; // Changed from optional to required
-  isLive: boolean;
-  viewerCount?: number;
-  tags?: string[];
-  boosted?: boolean;
-  boostScore?: number;
-  boostRank?: string;
-  country?: string;
-  categories?: string[];
-  language?: string;
-  description?: string;
-  age?: number;
-  streamUrl?: string;
-  previewVideoUrl?: string;
-};
+import { LivecamModel } from "@/types/livecams";
 
 const Livecams: React.FC = () => {
   const { toast } = useToast();
@@ -59,20 +36,18 @@ const Livecams: React.FC = () => {
   }, [error, toast]);
 
   // Adapter functions to match the expected parameter types in LivecamGrid
-  const handleBoost = (livecamId: string): boolean => {
-    // Call the async function but return a synchronous result for UI feedback
+  const handleBoost = (livecamId: string) => {
     boostLivecam(livecamId);
     return true;
   };
   
-  const handleCancelBoost = (livecamId: string): boolean => {
-    // Call the async function but return a synchronous result for UI feedback
+  const handleCancelBoost = (livecamId: string) => {
     cancelBoost(livecamId);
     return true;
   };
 
   // Adapt the livecams to match the expected type in LivecamGrid
-  const adaptedLivecams: AdaptedLivecamModel[] = livecams.map(cam => ({
+  const adaptedLivecams = livecams.map(cam => ({
     id: cam.id,
     username: cam.name || cam.id, // Fallback if name is missing
     displayName: cam.name || `Model ${cam.id}`, // Fallback if name is missing
@@ -112,7 +87,7 @@ const Livecams: React.FC = () => {
           )}
           
           <LivecamGrid 
-            models={adaptedLivecams as any} // Use type assertion to bypass the type check
+            models={adaptedLivecams as LivecamModel[]} 
             loading={loading} 
             hasMore={hasMore} 
             onLoadMore={loadMore}

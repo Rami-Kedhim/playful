@@ -1,46 +1,5 @@
 
-// Model interfaces for Brain Hub Configuration
-export interface PsychologyModel {
-  emotionalAnalysis: boolean;
-  personalityModeling: boolean;
-  behaviourPrediction: boolean;
-  sentimentAnalysis: boolean;
-  [key: string]: boolean;
-}
-
-export interface PhysicsModel {
-  collisionDetection: boolean;
-  gravitationalEffects: boolean;
-  fluidDynamics: boolean;
-  particleSystems: boolean;
-  [key: string]: boolean;
-}
-
-export interface EconomicsModel {
-  dynamicPricing: boolean;
-  demandForecasting: boolean;
-  marketSimulation: boolean;
-  transactionAnalysis: boolean;
-  [key: string]: boolean;
-}
-
-export interface RoboticsModel {
-  inverseKinematics: boolean;
-  pathPlanning: boolean;
-  sensorIntegration: boolean;
-  controlSystems: boolean;
-  [key: string]: boolean;
-}
-
-export interface BrainHubConfig {
-  psychology: PsychologyModel;
-  physics: PhysicsModel;
-  economics: EconomicsModel;
-  robotics: RoboticsModel;
-  geoLegalFilteringEnabled: boolean;
-  neuroEmotionEnabled: boolean;
-  predictiveModulationEnabled: boolean;
-}
+import { BrainHubConfig, BrainHubRequest, BrainHubResponse, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/types/brainHub';
 
 // Brain Hub Service
 class HermesOxumBrainHub {
@@ -89,7 +48,7 @@ class HermesOxumBrainHub {
    * @param options Optional processing options
    * @returns Processed response
    */
-  processRequest(request: any, options?: any): any {
+  processRequest(request: BrainHubRequest, options?: any): BrainHubResponse {
     console.log('Processing request through Brain Hub', request, options);
     
     // Apply geo-legal filtering if enabled
@@ -113,9 +72,11 @@ class HermesOxumBrainHub {
     // This is just a stub implementation that returns the original data with success flag
     return {
       success: true,
-      data: request.data || request
+      data: request.data || request,
+      error: undefined
     };
   }
 }
 
 export const brainHub = new HermesOxumBrainHub();
+export type { BrainHubConfig, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel };

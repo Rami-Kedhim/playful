@@ -1,26 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-
-// Define types for the livecam data
-interface LivecamModel {
-  id: string;
-  name: string;
-  isLive: boolean;
-  viewerCount: number;
-  thumbnailUrl: string;
-  profileUrl: string;
-  tags: string[];
-  boosted: boolean;
-  boostScore?: number;
-  boostRank?: string;
-}
-
-interface BoostableLivecamsOptions {
-  limit?: number;
-  onlyLive?: boolean;
-  categories?: string[];
-}
+import { LivecamModel, BoostableLivecamsOptions } from '@/types/livecams';
+import { BrainHubRequest } from '@/types/brainHub';
 
 export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => {
   const [livecams, setLivecams] = useState<LivecamModel[]>([]);
@@ -60,14 +42,16 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
   // Helper to process livecams through Brain Hub
   const processThroughBrainHub = async (data: LivecamModel[]): Promise<LivecamModel[]> => {
     try {
-      const response = await brainHub.processRequest({
+      const request: BrainHubRequest = {
         type: 'livecam_boost',
         data,
         options: {
           applyBoostScores: true,
           filterInappropriate: true
         }
-      });
+      };
+      
+      const response = await brainHub.processRequest(request);
       
       return response.data || data;
     } catch (error) {
@@ -82,14 +66,16 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
       const livecamToBoost = livecams.find(cam => cam.id === id);
       if (!livecamToBoost) return false;
       
-      const response = await brainHub.processRequest({
+      const request: BrainHubRequest = {
         type: 'apply_boost',
         data: {
           itemId: id,
           itemType: 'livecam',
           currentScore: livecamToBoost.boostScore || 0
         }
-      });
+      };
+      
+      const response = await brainHub.processRequest(request);
       
       if (response.success) {
         setLivecams(prev => 
@@ -112,13 +98,15 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
   // Helper to cancel a boost for a livecam
   const cancelBoost = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const response = await brainHub.processRequest({
+      const request: BrainHubRequest = {
         type: 'cancel_boost',
         data: {
           itemId: id,
           itemType: 'livecam'
         }
-      });
+      };
+      
+      const response = await brainHub.processRequest(request);
       
       if (response.success) {
         setLivecams(prev => 
@@ -153,9 +141,12 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
       models.push({
         id: `livecam-${i}`,
         name: `Model ${i}`,
+        username: `model${i}`,
+        displayName: `Model ${i}`,
         isLive,
         viewerCount: isLive ? Math.floor(Math.random() * 5000) : 0,
         thumbnailUrl: `https://picsum.photos/seed/livecam${i}/300/200`,
+        imageUrl: `https://picsum.photos/seed/livecam${i}/300/200`,
         profileUrl: `/livecams/model-${i}`,
         tags: ['interactive', 'hd', Math.random() > 0.5 ? 'featured' : 'new'],
         boosted: Math.random() > 0.8,

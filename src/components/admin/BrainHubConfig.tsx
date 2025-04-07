@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { brainHub, BrainHubConfig as BrainHubConfigType, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/services/neural/HermesOxumBrainHub';
+import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { BrainHubConfig as BrainHubConfigType, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/types/brainHub';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AcademicModelTabProps<T extends Record<string, boolean>> { 
@@ -68,13 +68,13 @@ const BrainHubConfig: React.FC = () => {
     
     // Use appropriate type casting based on the model
     if (model === 'psychology') {
-      (updatedConfig.psychology as PsychologyModel)[key] = value;
+      (updatedConfig.psychology as Record<string, boolean>)[key] = value;
     } else if (model === 'physics') {
-      (updatedConfig.physics as PhysicsModel)[key] = value;
+      (updatedConfig.physics as Record<string, boolean>)[key] = value;
     } else if (model === 'economics') {
-      (updatedConfig.economics as EconomicsModel)[key] = value;
+      (updatedConfig.economics as Record<string, boolean>)[key] = value;
     } else if (model === 'robotics') {
-      (updatedConfig.robotics as RoboticsModel)[key] = value;
+      (updatedConfig.robotics as Record<string, boolean>)[key] = value;
     }
     
     setConfig(updatedConfig);

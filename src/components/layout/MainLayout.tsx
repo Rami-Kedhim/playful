@@ -1,6 +1,7 @@
 
 import { ReactNode } from "react";
 import AppLayout from "./AppLayout";
+import Breadcrumbs from "../navigation/Breadcrumbs";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface MainLayoutProps {
   containerClass?: string;
   hideNavbar?: boolean;
   hideFooter?: boolean;
+  showBreadcrumbs?: boolean;
 }
 
 /**
@@ -23,11 +25,18 @@ const MainLayout = ({
   showHeader = true, 
   containerClass = "container mx-auto px-4 py-8",
   hideNavbar = false,
-  hideFooter = false
+  hideFooter = false,
+  showBreadcrumbs = true
 }: MainLayoutProps) => {
   return (
     <AppLayout hideNavbar={hideNavbar} hideFooter={hideFooter}>
       <div className={containerClass}>
+        {showBreadcrumbs && (
+          <div className="mb-4">
+            <Breadcrumbs />
+          </div>
+        )}
+        
         {showHeader && title && (
           <div className="mb-6">
             <h1 className="text-3xl font-bold">{title}</h1>
