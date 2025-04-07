@@ -80,28 +80,21 @@ export const useAssessment = () => {
     }
   }, [user, analyzeUser, enhancedProfile, assessmentService]);
 
-  const isGenerating = isProcessing;
-  const assessment = assessmentResults;
-  
-  const generateAssessment = useCallback(async () => {
-    return await runAssessment();
-  }, [runAssessment]);
-  
   const getPriorityInsights = useCallback(() => {
-    if (!assessment) return [];
+    if (!assessmentResults) return [];
     
-    return assessment.insights.filter(insight => 
+    return assessmentResults.insights.filter(insight => 
       insight.severityLevel === 'critical' || insight.severityLevel === 'warning'
     );
-  }, [assessment]);
+  }, [assessmentResults]);
   
   const filterInsightsByCategory = useCallback((category: AssessmentCategory) => {
-    if (!assessment) return [];
+    if (!assessmentResults) return [];
     
-    return assessment.insights.filter(insight => 
+    return assessmentResults.insights.filter(insight => 
       insight.category === category
     );
-  }, [assessment]);
+  }, [assessmentResults]);
 
   return {
     runAssessment,
