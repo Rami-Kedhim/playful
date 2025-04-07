@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useEnhancedBehavioral } from '@/hooks/useEnhancedBehavioral';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +24,8 @@ const EnhancedEngagementPanel = () => {
     enhancedProfile, 
     isAnalyzing, 
     analyzeUser, 
-    generateEngagementStrategy 
+    generateEngagementStrategy,
+    lastAnalyzedAt 
   } = useEnhancedBehavioral();
   
   const [engagementStrategy, setEngagementStrategy] = useState(generateEngagementStrategy());
