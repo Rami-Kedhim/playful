@@ -9,7 +9,7 @@ import ChaseHughesInfluencePanel from '../assessment/ChaseHughesInfluencePanel';
 import { useAssessment } from '@/hooks/useAssessment';
 
 const AssessmentDashboard = () => {
-  const { assessment, isLoading } = useAssessment();
+  const { assessment, isGenerating } = useAssessment();
 
   return (
     <div className="container mx-auto px-4 py-6 dark:bg-background dark:text-foreground">
@@ -54,7 +54,7 @@ const AssessmentDashboard = () => {
         
         <TabsContent value="behavioral" className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <ChaseHughesInfluencePanel profile={assessment?.chaseHughesProfile} isLoading={isLoading} />
+            <ChaseHughesInfluencePanel profile={assessment?.chaseHughesProfile} isLoading={isGenerating} />
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Schauberger Flow Analysis</CardTitle>
