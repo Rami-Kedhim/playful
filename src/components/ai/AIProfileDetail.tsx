@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -18,7 +18,8 @@ import { Calendar, Clock, MapPin, Flame } from "lucide-react";
 import AIProfileTypeIndicator from "./AIProfileTypeIndicator";
 import AIPersonalityTraits from "./AIPersonalityTraits";
 import AIEmotionStatus from "./AIEmotionStatus";
-import { PersonalityTrait, AIPersonalityConversation } from "@/types/ai-personality";
+import { PersonalityTrait } from "@/types/ai-personality";
+import { brainHub } from "@/services/neural/HermesOxumBrainHub";
 
 interface AIProfileDetailProps {
   profile: AIProfile;
@@ -34,12 +35,28 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
       description: `You are now subscribed to ${profile.name}'s premium content!`,
     });
     setSubscribeDialogOpen(false);
+    
+    // Track subscription action through Brain Hub
+    brainHub.processRequest({
+      requestType: 'economic',
+      content: `User subscribed to ${profile.name}`,
+      userId: 'current-user', // In a real app, use actual user ID
+      targetId: profile.id
+    });
   };
   
   const handleBoostComplete = () => {
     toast({
       title: "Boost Complete",
       description: `You've successfully boosted ${profile.name}'s profile!`,
+    });
+    
+    // Track boost action through Brain Hub
+    brainHub.processRequest({
+      requestType: 'economic',
+      content: `User boosted ${profile.name}'s profile`,
+      userId: 'current-user', // In a real app, use actual user ID
+      targetId: profile.id
     });
   };
 
@@ -64,6 +81,16 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
       intensity: 75
     }));
   };
+  
+  // Register profile view with Brain Hub on component mount
+  React.useEffect(() => {
+    if (profile?.id) {
+      brainHub.processRequest({
+        requestType: 'profile_view',
+        targetId: profile.id,
+      });
+    }
+  }, [profile?.id]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

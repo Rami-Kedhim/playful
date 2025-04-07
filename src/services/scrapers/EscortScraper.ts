@@ -1,9 +1,11 @@
+
 /**
  * EscortScraper - Service for scraping tryst.link
  * Implements the BaseScraperService abstract class
  */
 import { BaseScraperService } from "./baseScraperService";
 import { Escort } from "@/types/escort";
+import { brainHub } from "../neural/HermesOxumBrainHub";
 
 export class EscortScraper extends BaseScraperService {
   private static instance: EscortScraper;

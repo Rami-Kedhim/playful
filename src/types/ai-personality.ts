@@ -1,69 +1,51 @@
 
+export type PersonalityType = 
+  'flirty' | 
+  'shy' | 
+  'dominant' | 
+  'playful' | 
+  'professional' | 
+  'romantic' | 
+  'intellectual' | 
+  'adventurous' | 
+  'submissive';
+
 export interface PersonalityTrait {
   name: string;
   description: string;
   intensity: number;
 }
 
-export interface PersonalityProfile {
-  traits: PersonalityTrait[];
-  dominantTrait?: string;
-  compatibility?: {
-    matchScore: number;
-    matchTraits: string[];
-  };
+export interface AIPersonalityConversation {
+  id: string;
+  messages: string[];
+  created_at: string;
+  updated_at: string;
 }
-
-// Add all the missing types needed by the components
-export type PersonalityType = 'flirty' | 'dominant' | 'submissive' | 'romantic' | 'shy' | 'playful' | 'intellectual' | 'adventurous';
 
 export interface EmotionalState {
   joy: number;
-  trust: number;
-  fear: number;
+  interest: number;
   surprise: number;
   sadness: number;
   anger: number;
+  fear: number;
+  trust: number;
   anticipation: number;
-  interest: number;
   dominantEmotion: string;
   intensityLevel: number;
-  lastUpdated: string; // ISO date string
-}
-
-export interface EmotionalMemory {
-  state: EmotionalState;
-  keyMemories: Array<{
-    topic: string;
-    sentiment: number;
-    importance: number;
-    created: string;
-    lastRecalled: string;
-  }>;
-  recentInteractions: Array<{
-    content: string;
-    emotion: string;
-    timestamp: string;
-  }>;
-  relationshipLevel?: {
-    trust: number;
-    affection: number;
-    intimacy: number;
-  };
-  emotionalHistory: Array<{
-    emotion: string;
-    trigger: string;
-    intensity: number;
-    timestamp: string;
-  }>;
-  userId?: string;
-  companionId?: string;
+  lastUpdated: string;
 }
 
 export interface AIPersonalityConfig {
   type: PersonalityType;
   traits: string[];
-  baselineEmotions: Partial<EmotionalState>;
+  baselineEmotions: {
+    joy: number;
+    interest: number;
+    trust: number;
+    [key: string]: number;
+  };
   responseStyle: {
     formality: number;
     friendliness: number;
@@ -74,32 +56,6 @@ export interface AIPersonalityConfig {
     questionFrequency: number;
     emotionalResponseIntensity: number;
     personalDisclosureLevel: number;
-  };
-}
-
-export interface MonetizationHook {
-  shouldRestrict: (contentType: string) => boolean;
-  processPremiumContent: () => Promise<boolean>;
-  getContentPrice: (contentType: string) => number;
-  getUserBalance: () => number;
-  processPayment: (amount: number) => Promise<boolean>;
-  type: string;
-  triggerConditions: {
-    messageCount?: number;
-    intimacyLevel?: number;
-    keywords?: string[];
-  };
-  lucoinCost: number;
-  teaser?: string;
-  fullContent?: string;
-  previewUrl?: string;
-}
-
-// Fix for AIProfileDetail.tsx getPersonalityTraits function
-export interface AIPersonalityConversation {
-  id: string;
-  personality: {
-    traits: PersonalityTrait[] | string[];
-    dominantTrait?: string;
+    [key: string]: number;
   };
 }

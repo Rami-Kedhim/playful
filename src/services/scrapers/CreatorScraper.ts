@@ -5,6 +5,7 @@
  */
 import { BaseScraperService } from "./baseScraperService";
 import { Creator } from "@/hooks/useCreators";
+import { brainHub } from "../neural/HermesOxumBrainHub";
 
 export class CreatorScraper extends BaseScraperService {
   private static instance: CreatorScraper;
