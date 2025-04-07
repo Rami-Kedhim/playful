@@ -472,7 +472,7 @@ export function useAICompanionWithMemory({
     userMessage: string, 
     emotionalState: EmotionalState | null,
     personalityConfig: AIPersonalityConfig,
-    responseTone: string
+    responseTone: any
   ) => {
     let content = '';
     let suggestedActions: string[] = [];

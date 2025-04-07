@@ -17,7 +17,7 @@ import { Calendar, Clock, MapPin, Flame } from "lucide-react";
 import AIProfileTypeIndicator from "./AIProfileTypeIndicator";
 import AIPersonalityTraits from "./AIPersonalityTraits";
 import AIEmotionStatus from "./AIEmotionStatus";
-import { PersonalityTrait } from "@/types/ai-personality";
+import { PersonalityTrait, AIPersonalityConversation } from "@/types/ai-personality";
 
 interface AIProfileDetailProps {
   profile: AIProfile;
@@ -42,23 +42,19 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
     });
   };
 
-  // Check if profile is premium
   const isPremium = profile.subscription_price || (profile.boost_status?.is_boosted);
 
-  // Convert string[] traits to PersonalityTrait[] if needed
   const getPersonalityTraits = (): PersonalityTrait[] => {
     if (!profile.personality?.traits) return [];
     
-    // If the traits are already in the correct format, return them
     if (typeof profile.personality.traits[0] === 'object') {
       return profile.personality.traits as PersonalityTrait[];
     }
     
-    // Otherwise, convert string[] to PersonalityTrait[]
     return (profile.personality.traits as string[]).map(trait => ({
       name: trait,
       description: '',
-      intensity: 75 // Default intensity
+      intensity: 75
     }));
   };
 
@@ -128,7 +124,6 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
               ))}
             </div>
 
-            {/* Add personality traits if available */}
             {profile.personality?.traits && profile.personality.traits.length > 0 && (
               <div className="mt-4">
                 <AIPersonalityTraits traits={getPersonalityTraits()} compact />

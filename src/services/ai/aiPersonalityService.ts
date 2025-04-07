@@ -323,8 +323,21 @@ export class AIPersonalityService {
       default:
         return 'neutral but attentive';
     }
-    
-    // Returning a proper object-based response style (as part of AIPersonalityConfig)
+  }
+
+  // Add a separate method to get response style as an object
+  generateResponseStyle(
+    state: EmotionalState,
+    personalityType: PersonalityType
+  ): {
+    formality: number;
+    friendliness: number;
+    verbosity: number;
+    humor: number;
+  } {
+    const intensityLevel = state.intensityLevel;
+    const dominantEmotion = state.dominantEmotion;
+
     return {
       formality: intensityLevel > 5 ? 3 : 4,
       friendliness: dominantEmotion === 'joy' || dominantEmotion === 'trust' ? 5 : 3,
