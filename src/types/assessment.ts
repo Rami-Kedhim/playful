@@ -44,6 +44,7 @@ export interface AssessmentResult {
   engagementHealthScore: number; // 0-100
   conversionPotentialScore: number; // 0-100
   retentionRiskScore: number; // 0-100, higher is more risky
+  psychographicProfile?: EnhancedBehavioralProfile['psychographicProfile']; // Added to connect with Hermes-Oxum
 }
 
 /**

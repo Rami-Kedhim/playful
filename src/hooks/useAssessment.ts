@@ -1,10 +1,11 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { useEnhancedBehavioral } from '@/hooks/useEnhancedBehavioral';
 import behavioralAssessmentService from '@/services/assessment/BehavioralAssessmentService';
 import { AssessmentResult, AssessmentCategory, AssessmentPreferences } from '@/types/assessment';
 import { toast } from '@/hooks/use-toast';
+import neuralHub from '@/services/neural/HermesOxumNeuralHub';
 
 /**
  * Hook for using the behavioral assessment service
@@ -53,6 +54,25 @@ export function useAssessment() {
       // Generate assessment using the behavioral assessment service
       const result = behavioralAssessmentService.generateAssessment(user.id, enhancedProfile);
       
+      // Connect with Hermes-Oxum neural hub for enhanced insights
+      const hermesData = neuralHub.getHealthMetrics();
+      
+      // Add psychographic profile from enhanced behavioral profile
+      result.psychographicProfile = enhancedProfile.psychographicProfile;
+      
+      // Adjust assessment scores based on neural hub data
+      if (hermesData) {
+        result.engagementHealthScore = Math.round(
+          (result.engagementHealthScore + hermesData.userEngagement * 100) / 2
+        );
+        
+        // Use stability metric to influence retention risk
+        const stabilityFactor = 1 - hermesData.stability; // Lower stability = higher risk
+        result.retentionRiskScore = Math.round(
+          (result.retentionRiskScore + stabilityFactor * 100) / 2
+        );
+      }
+      
       // Filter insights based on preferences
       result.insights = result.insights.filter(insight => 
         assessmentPreferences.focusAreas.includes(insight.category) && 
@@ -73,6 +93,36 @@ export function useAssessment() {
       setIsGenerating(false);
     }
   }, [user?.id, enhancedProfile, analyzeUser, assessmentPreferences]);
+
+  // Automatic assessment generation based on preferences
+  useEffect(() => {
+    if (!assessment && user?.id && assessmentPreferences.autoRunFrequency !== 'never') {
+      generateAssessment();
+    }
+    
+    // Set up interval for auto-generation based on frequency preference
+    let intervalId: number | null = null;
+    
+    if (user?.id && assessmentPreferences.autoRunFrequency !== 'never') {
+      const frequencyMap = {
+        'daily': 24 * 60 * 60 * 1000,
+        'weekly': 7 * 24 * 60 * 60 * 1000,
+        'monthly': 30 * 24 * 60 * 60 * 1000
+      };
+      
+      const interval = frequencyMap[assessmentPreferences.autoRunFrequency || 'weekly'];
+      
+      intervalId = window.setInterval(() => {
+        generateAssessment();
+      }, interval);
+    }
+    
+    return () => {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [user?.id, assessment, assessmentPreferences.autoRunFrequency, generateAssessment]);
   
   /**
    * Update assessment preferences

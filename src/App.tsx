@@ -7,6 +7,7 @@ import { AuthProvider } from '@/hooks/auth';
 import LucieSchaubergerIntegration from '@/components/home/LucieSchaubergerIntegration';
 import HermesDebugPanel from '@/components/home/HermesDebugPanel';
 import AssessmentDashboard from './components/home/AssessmentDashboard';
+import HermesAssessmentIntegration from './components/home/HermesAssessmentIntegration';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           </RouterRoutes>
           <LucieSchaubergerIntegration />
           <HermesDebugPanel />
+          <HermesAssessmentIntegration />
           <Toaster />
         </Router>
       </AuthProvider>
