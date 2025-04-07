@@ -130,9 +130,12 @@ export class EscortScraper extends BaseScraperService {
         reviews: Math.floor(Math.random() * 50),
         tags: selectedServices,
         languages: ['English'],
-        phoneNumber: '+1234567890', // Changed property name from phone to phoneNumber
-        email: `escort${i}@example.com`,
-        website: `https://example.com/escort${i}`,
+        // Use contactInfo object instead of direct phoneNumber property
+        contactInfo: {
+          email: `escort${i}@example.com`,
+          phone: '+1234567890', // Use phone instead of phoneNumber
+          website: `https://example.com/escort${i}`
+        },
         availableTimes: {
           monday: { start: '10:00', end: '22:00' },
           wednesday: { start: '10:00', end: '22:00' },
@@ -140,6 +143,7 @@ export class EscortScraper extends BaseScraperService {
           saturday: { start: '12:00', end: '00:00' },
         },
         boosted: Math.random() > 0.7,
+        price: randomPrices.hourly, // Add required price field
       });
     }
     

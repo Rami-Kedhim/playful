@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -51,6 +52,7 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
       return profile.personality.traits as PersonalityTrait[];
     }
     
+    // Convert string[] to PersonalityTrait[] with proper type casting
     return (profile.personality.traits as string[]).map(trait => ({
       name: trait,
       description: '',

@@ -601,7 +601,11 @@ export function useAICompanionWithMemory({
       }
     }
     
-    content = `${content}\n\n[Response tone: ${responseTone}]`;
+    const responseToneString = typeof responseTone === 'string' 
+      ? responseTone 
+      : `${JSON.stringify(responseTone)}`;
+    
+    content = `${content}\n\n[Response tone: ${responseToneString}]`;
     
     return { content, suggestedActions };
   };
