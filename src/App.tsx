@@ -1,23 +1,19 @@
 
 import { BrowserRouter as Router } from 'react-router-dom';
+import Routes from '@/Routes';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { AuthProvider } from '@/hooks/auth';
+import { AuthProvider } from '@/providers/AuthProvider';
 import LucieSchaubergerIntegration from '@/components/home/LucieSchaubergerIntegration';
-import HermesDebugPanel from '@/components/home/HermesDebugPanel';
-import Routes from './Routes';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <AuthProvider>
         <Router>
-          <div className="min-h-screen bg-background text-foreground">
-            <Routes />
-            <Toaster />
-            <LucieSchaubergerIntegration />
-            <HermesDebugPanel />
-          </div>
+          <Routes />
+          <LucieSchaubergerIntegration />
+          <Toaster />
         </Router>
       </AuthProvider>
     </ThemeProvider>

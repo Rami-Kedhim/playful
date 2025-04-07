@@ -1,43 +1,34 @@
 
+export interface CompanionProfile {
+  id: string;
+  name: string;
+  avatar?: string;
+  description?: string;
+  personality?: string;
+  visualCapabilities?: boolean;
+  voiceType?: string;
+  speechStyle?: string;
+}
+
 export interface CompanionMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp: Date;
-  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprised' | 'confused' | 'friendly' | 'apologetic';
+  timestamp?: Date;
   suggestedActions?: string[];
-  links?: string[]; // Added links property
+  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprise' | 'fear' | 'disgust' | 'friendly' | 'professional' | 'supportive' | 'apologetic' | 'helpful' | 'confused';
+  links?: { text: string; url: string }[];
   visualElements?: {
     type: string;
     data: any;
   }[];
 }
 
-export interface CompanionProfile {
-  id: string;
-  name: string;
-  avatar_url?: string;
-  description?: string;
-  personality_traits?: string[];
-  speech_style?: string;
-  speechStyle?: string;
-  voice_id?: string;
-  created_at?: Date;
-  updated_at?: Date;
-}
-
 export interface UserContext {
-  userId?: string;
-  preferences?: {
-    topics?: string[];
-    learning_style?: string;
-    interaction_mode?: 'casual' | 'formal' | 'educational' | 'supportive';
-  };
-  recent_interactions?: {
-    topic: string;
-    timestamp: Date;
-  }[];
-  session_duration?: number;
+  name?: string;
+  interests?: string[];
+  recentInteractions?: string;
+  relationshipStatus?: string;
 }
 
 export interface UseAICompanionConversationProps {
@@ -45,9 +36,9 @@ export interface UseAICompanionConversationProps {
   initialMessages?: CompanionMessage[];
 }
 
-export interface AICompanionVoiceConfig {
-  voice: string;
-  rate?: number;
-  pitch?: number;
-  volume?: number;
+export interface AICompanionResponse {
+  text: string;
+  emotions?: string | null;
+  suggestedActions?: string[];
+  links?: { text: string; url: string }[];
 }

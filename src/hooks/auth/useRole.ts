@@ -2,54 +2,68 @@
 import { useAuth } from './useAuth';
 
 export const useRole = () => {
-  const auth = useAuth();
+  const { userRoles = [] } = useAuth();
   
   /**
-   * Check if the user has at least one of the provided roles
+   * Check if user has any of the specified roles
+   * @param role - A single role or array of roles to check
+   * @returns boolean indicating if the user has any of the specified roles
    */
-  const hasRole = (roles: string | string[]): boolean => {
-    if (!auth.userRoles || auth.userRoles.length === 0) return false;
-    
-    const rolesToCheck = Array.isArray(roles) ? roles : [roles];
-    return rolesToCheck.some(role => auth.userRoles.includes(role));
+  const hasRole = (role: string | string[]): boolean => {
+    if (Array.isArray(role)) {
+      return role.some(r => userRoles.includes(r));
+    }
+    return userRoles.includes(role);
   };
   
   /**
-   * Check if the user has all of the provided roles
+   * Check if user has all of the specified roles
+   * @param roles - Array of roles that are required
+   * @returns boolean indicating if the user has all specified roles
    */
   const hasAllRoles = (roles: string[]): boolean => {
-    if (!auth.userRoles || auth.userRoles.length === 0) return false;
-    
-    return roles.every(role => auth.userRoles.includes(role));
+    return roles.every(role => userRoles.includes(role));
   };
   
   /**
-   * Check if the user is an admin
+   * Check if user is an admin
+   * @returns boolean indicating if the user has admin role
    */
-  const isAdmin = (): boolean => {
-    return hasRole('admin');
-  };
+  const isAdmin = (): boolean => hasRole('admin');
   
   /**
-   * Check if the user is a moderator
+   * Check if user is a moderator
+   * @returns boolean indicating if the user has moderator role
    */
-  const isModerator = (): boolean => {
-    return hasRole('moderator');
-  };
+  const isModerator = (): boolean => hasRole('moderator');
   
   /**
-   * Check if the user is a creator
+   * Check if user is a creator
+   * @returns boolean indicating if the user has creator role
    */
-  const isCreator = (): boolean => {
-    return hasRole('creator');
-  };
+  const isCreator = (): boolean => hasRole('creator');
+  
+  /**
+   * Check if user is an escort
+   * @returns boolean indicating if the user has escort role
+   */
+  const isEscort = (): boolean => hasRole('escort');
+  
+  /**
+   * Check if user can access admin features
+   * @returns boolean indicating if user has admin or moderator role
+   */
+  const canAccessAdminFeatures = (): boolean => isAdmin() || isModerator();
   
   return {
     hasRole,
     hasAllRoles,
     isAdmin,
     isModerator,
-    isCreator
+    isCreator,
+    isEscort,
+    canAccessAdminFeatures,
+    userRoles,
   };
 };
 

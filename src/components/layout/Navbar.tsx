@@ -6,7 +6,7 @@ import { Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
 import LanguageSwitcher from '../language/LanguageSwitcher';
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import MobileMenu from '../navigation/MobileMenu';
 import useMobileMenu from '@/hooks/useMobileMenu';
@@ -81,10 +81,10 @@ const Navbar: React.FC = () => {
             ) : (
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" asChild>
-                  <Link to="/auth">{t('login')}</Link>
+                  <Link to="/login">{t('login')}</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link to="/auth">{t('register')}</Link>
+                  <Link to="/register">{t('register')}</Link>
                 </Button>
               </div>
             )}

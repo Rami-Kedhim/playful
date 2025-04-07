@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { useAICompanionConversation } from '@/hooks/ai-companion';
-import { voiceService } from '@/services/voiceService';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
 import AICompanionMessageList from './companion-chat/AICompanionMessageList';
 import AICompanionChatInput from './companion-chat/AICompanionChatInput';
@@ -19,10 +18,8 @@ const AICompanionChat = ({ companionId, initiallyOpen = true, onClose }: AICompa
     messages,
     isTyping,
     isLoading,
-    isSpeaking,
     companion,
     sendMessage,
-    stopSpeaking,
     handleSuggestedActionClick
   } = useAICompanionConversation({ companionId });
   
@@ -34,31 +31,8 @@ const AICompanionChat = ({ companionId, initiallyOpen = true, onClose }: AICompa
   };
 
   const handleClose = () => {
-    // Stop any ongoing speech before closing
-    if (isSpeaking) {
-      stopSpeaking();
-    }
-    
     setIsOpen(false);
     if (onClose) onClose();
-  };
-  
-  const handleToggleSpeaking = () => {
-    if (isSpeaking) {
-      stopSpeaking();
-    } else {
-      // If the companion is not currently speaking,
-      // we could potentially speak the last message
-      const lastAssistantMessage = [...messages]
-        .reverse()
-        .find(msg => msg.role === 'assistant');
-        
-      if (lastAssistantMessage && companion?.speechStyle) {
-        voiceService.speak(lastAssistantMessage.content, { 
-          voice: companion.speechStyle 
-        });
-      }
-    }
   };
 
   if (!isOpen) {
@@ -70,9 +44,7 @@ const AICompanionChat = ({ companionId, initiallyOpen = true, onClose }: AICompa
       <AICompanionChatHeader 
         isLoading={isLoading} 
         companion={companion} 
-        onClose={handleClose}
-        isSpeaking={isSpeaking}
-        onToggleSpeaking={handleToggleSpeaking}
+        onClose={handleClose} 
       />
 
       <AICompanionMessageList 

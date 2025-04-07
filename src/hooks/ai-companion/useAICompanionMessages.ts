@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import { CompanionMessage } from './types';
@@ -53,7 +52,8 @@ export const useAICompanionMessages = ({ initialMessages = [] }: UseAICompanionM
       content: `I'm having trouble connecting right now. ${errorMessage}`,
       timestamp: new Date(),
       suggestedActions: ['Try again', 'Ask something else'],
-      emotion: 'apologetic'
+      emotion: 'apologetic',
+      links: []
     };
     
     setMessages(current => [...current, errorResponse]);
@@ -66,7 +66,9 @@ export const useAICompanionMessages = ({ initialMessages = [] }: UseAICompanionM
       role: 'assistant',
       content: action,
       timestamp: new Date(),
-      suggestedActions: []
+      suggestedActions: [],
+      emotion: 'friendly',
+      links: []
     };
     setMessages(current => [...current, assistantMessage]);
   }, []);
@@ -81,7 +83,8 @@ export const useAICompanionMessages = ({ initialMessages = [] }: UseAICompanionM
       content: "I'm having trouble responding right now. Please try again in a moment.",
       timestamp: new Date(),
       suggestedActions: ['Try again later', 'Ask something else'],
-      emotion: 'apologetic'
+      emotion: 'apologetic',
+      links: []
     };
     
     setMessages(current => [...current, errorResponse]);

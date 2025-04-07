@@ -1,15 +1,29 @@
 
-import { useAuth } from './useAuth';
-import { AuthProvider } from './AuthProvider';
+// Import all auth hooks
+import { useAuth, AuthProvider } from './useAuth';
+import { useAuthState } from './useAuthState';
+import { useAuthActions } from './useAuthActions';
+import { usePasswordManagement } from './usePasswordManagement';
+import { useProfileManagement } from './useProfileManagement';
+import { useRole } from './useRole';
 
-// Export our hooks
-export { useAuth, AuthProvider };
+// Export all authentication related hooks from a single file
+export { useAuth, AuthProvider } from "./useAuth";
+export { useAuthState } from "./useAuthState";
+export { useAuthActions } from "./useAuthActions";
+export { usePasswordManagement } from "./usePasswordManagement";
+export { useProfileManagement } from "./useProfileManagement";
+export { useRole } from "./useRole";
 
-// Re-export types from auth types for convenience
-export type { AuthUser, UserProfile, AuthResult, AuthContextType } from '@/types/auth';
+// Export a default object with all hooks
+const authHooks = {
+  useAuth,
+  AuthProvider,
+  useAuthState,
+  useAuthActions,
+  usePasswordManagement,
+  useProfileManagement,
+  useRole
+};
 
-// Properly export the actual hook implementations
-export { useRole } from './useRole';
-export { useBehavioralProfile } from './useBehavioralProfile';
-export { useGouldianFilters } from './useGouldianFilters';
-export { useHermesMode } from './useHermesMode';
+export default authHooks;

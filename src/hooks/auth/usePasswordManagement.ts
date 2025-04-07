@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 import { AuthResult } from '@/types/auth';
 
 export const usePasswordManagement = () => {
@@ -9,46 +10,73 @@ export const usePasswordManagement = () => {
   const resetPassword = async (email: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // For email based password reset
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/reset-password`
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Password reset email sent",
+        description: "Check your email for the password reset link.",
+      });
+
       return true;
     } catch (error: any) {
-      console.error('Reset password error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send reset email",
+        variant: "destructive",
+      });
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<AuthResult> => {
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<AuthResult> => {
     setIsLoading(true);
     try {
-      // Since Supabase doesn't have a direct method to verify old password before updating,
-      // we'd typically handle this server-side or with a custom function
+      // First verify current password by trying to sign in
+      const { data: userData } = await supabase.auth.getUser();
+      const userEmail = userData.user?.email || '';
       
-      // In a real app, verify old password then update
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: currentPassword,
       });
 
-      if (error) return {
+      if (signInError) {
+        return {
+          success: false,
+          error: "Current password is incorrect"
+        };
+      }
+
+      // Update to new password
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully updated.",
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+      return {
         success: false,
         error: error.message
-      };
-
-      return {
-        success: true,
-        error: null
-      };
-    } catch (error: any) {
-      console.error('Update password error:', error);
-      return {
-        success: false,
-        error: error.message || 'Failed to update password'
       };
     } finally {
       setIsLoading(false);
@@ -58,7 +86,7 @@ export const usePasswordManagement = () => {
   return {
     resetPassword,
     updatePassword,
-    isLoading,
+    isLoading
   };
 };
 

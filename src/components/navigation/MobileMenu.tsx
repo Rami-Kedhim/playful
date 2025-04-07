@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { User, Settings, LogOut, Home, Search, Compass } from 'lucide-react';
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { AnimatedContainer } from '@/components/ui/animated-container';
 import { Separator } from '@/components/ui/separator';
 import MobileNavigation from './MobileNavigation';
