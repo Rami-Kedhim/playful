@@ -328,10 +328,10 @@ const AssessmentPanel = () => {
                         <Badge 
                           key={stage} 
                           variant="outline"
-                          className={assessment.timestamp ? 'capitalize' : ''}
+                          className={stage === assessment.psychographicProfile?.behavioralLoop ? 'capitalize' : ''}
                           style={{
-                            backgroundColor: stage === assessment.timestamp ? 'var(--primary)' : 'transparent',
-                            color: stage === assessment.timestamp ? 'white' : 'inherit'
+                            backgroundColor: stage === assessment.psychographicProfile?.behavioralLoop ? 'var(--primary)' : 'transparent',
+                            color: stage === assessment.psychographicProfile?.behavioralLoop ? 'white' : 'inherit'
                           }}
                         >
                           {stage}
@@ -352,8 +352,8 @@ const AssessmentPanel = () => {
                           variant="outline"
                           className="capitalize"
                           style={{
-                            backgroundColor: stage === assessment.timestamp ? 'var(--primary)' : 'transparent',
-                            color: stage === assessment.timestamp ? 'white' : 'inherit'
+                            backgroundColor: stage === assessment.psychographicProfile?.brandResonance ? 'var(--primary)' : 'transparent',
+                            color: stage === assessment.psychographicProfile?.brandResonance ? 'white' : 'inherit'
                           }}
                         >
                           {stage}
