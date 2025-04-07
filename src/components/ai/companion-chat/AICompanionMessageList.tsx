@@ -1,7 +1,7 @@
 
 import { useRef, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CompanionMessage } from '@/hooks/useAICompanionConversation';
+import { CompanionMessage } from '@/hooks/ai-companion/types';
 import AICompanionMessage from './AICompanionMessage';
 import AICompanionTypingIndicator from './AICompanionTypingIndicator';
 
