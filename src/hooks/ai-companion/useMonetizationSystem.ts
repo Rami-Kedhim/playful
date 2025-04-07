@@ -27,14 +27,30 @@ export const useMonetizationSystem = ({
 
   // Initialize monetization hooks based on personality type
   const initializeMonetizationHooks = useCallback(() => {
-    const shouldRestrict = (contentType: string) => contentType.includes('explicit');
-    const processPremiumContent = async () => true;
-    const getContentPrice = (contentType: string) => contentType === 'explicit_content' ? 25 : 15;
-    const getUserBalance = () => lucoinBalance;
-    const processPayment = async (amount: number) => lucoinBalance >= amount;
+    const createBaseHook = (): Partial<MonetizationHook> => ({
+      // Core required methods
+      triggerPurchaseFlow: async (productId: string, amount: number) => {
+        console.log(`Triggering purchase flow for ${productId} at ${amount} coins`);
+        return lucoinBalance >= amount;
+      },
+      checkUserCredits: async () => lucoinBalance,
+      deductCredits: async (amount: number, reason: string) => {
+        console.log(`Deducting ${amount} credits for ${reason}`);
+        return lucoinBalance >= amount;
+      },
+      getSubscriptionStatus: async () => ({ isSubscribed: false, plan: null }),
+      
+      // Helper functions
+      shouldRestrict: (contentType: string) => contentType.includes('explicit'),
+      processPremiumContent: async () => true,
+      getContentPrice: (contentType: string) => contentType === 'explicit_content' ? 25 : 15,
+      getUserBalance: () => lucoinBalance,
+      processPayment: async (amount: number) => lucoinBalance >= amount
+    });
     
     const hooks: MonetizationHook[] = [
       {
+        ...createBaseHook(),
         type: 'image',
         triggerConditions: {
           messageCount: 5,
@@ -43,13 +59,9 @@ export const useMonetizationSystem = ({
         lucoinCost: 10,
         teaser: "I'd love to show you a special photo of me...",
         previewUrl: '/blurred-preview.jpg',
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
       },
       {
+        ...createBaseHook(),
         type: 'voice',
         triggerConditions: {
           messageCount: 8,
@@ -57,13 +69,9 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 15,
         teaser: "Would you like to hear my voice? I've recorded something just for you.",
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
       },
       {
+        ...createBaseHook(),
         type: 'explicit_content',
         triggerConditions: {
           messageCount: 15,
@@ -72,16 +80,12 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 25,
         teaser: "I can share some more intimate thoughts with you...",
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
       }
     ];
     
     if (personalityType === 'flirty') {
       hooks.push({
+        ...createBaseHook(),
         type: 'special_interaction',
         triggerConditions: {
           messageCount: 10,
@@ -89,14 +93,10 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 20,
         teaser: "I have a fun little game we could play in private...",
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
       });
     } else if (personalityType === 'dominant') {
       hooks.push({
+        ...createBaseHook(),
         type: 'special_interaction',
         triggerConditions: {
           messageCount: 12,
@@ -104,11 +104,6 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 30,
         teaser: "I could give you some special instructions to follow...",
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
       });
     }
     

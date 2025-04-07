@@ -1,7 +1,78 @@
-
-import { Escort } from "../types/escort";
+import { Escort } from '@/types/escort';
 
 export const moreEscorts: Escort[] = [
+  {
+    id: "escort-7",
+    name: "Victoria Chen",
+    age: 25,
+    gender: "female",
+    location: "San Francisco, CA",
+    bio: "Elegant and sophisticated companion with a passion for fine arts and stimulating conversation. I can accompany you to high-profile events or create intimate moments.",
+    services: ["Elite Companionship", "Cultural Events", "Weekend Retreats", "Private Dinner"],
+    imageUrl: "https://source.unsplash.com/random/400x600/?asian,model",
+    gallery: [
+      "https://source.unsplash.com/random/800x1200/?asian,model",
+      "https://source.unsplash.com/random/800x1200/?elegant,asian",
+      "https://source.unsplash.com/random/800x1200/?fashion,asian",
+      "https://source.unsplash.com/random/800x1200/?glamour,asian"
+    ],
+    rates: {
+      hourly: 400,
+      twoHours: 750,
+      overnight: 2500,
+      weekend: 6000
+    },
+    availableNow: false,
+    verified: true,
+    rating: 4.9,
+    reviews: 32,
+    tags: ["Elite", "Model", "Educated", "Sophisticated", "Luxury"],
+    languages: ["English", "Mandarin", "Cantonese"],
+    contactInfo: {
+      email: "victoria@example.com",
+      phone: "+1-555-987-6543",
+      website: "https://example.com/victoria"
+    },
+    availability: {
+      days: ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      hours: "6PM-1AM"
+    },
+    featured: true,
+    price: 400,
+    sexualOrientation: "Heterosexual",
+    lastActive: new Date().toISOString(),
+    responseRate: 92,
+    description: "Sophisticated companion for discerning gentlemen seeking quality over quantity. I enjoy stimulating conversation and creating unforgettable memories.",
+    height: 170,
+    weight: 55,
+    measurements: {
+      bust: 89,
+      waist: 59,
+      hips: 90
+    },
+    hairColor: "Black",
+    eyeColor: "Brown",
+    ethnicity: "Asian",
+    verificationLevel: "premium",
+    serviceTypes: ["GFE", "Dinner Date", "Cultural Events"],
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    videos: [
+      {
+        id: "video1",
+        url: "https://example.com/victoria-video1",
+        thumbnail: "https://source.unsplash.com/random/300x200/?asian,model",
+        title: "Evening Gala"
+      }
+    ],
+    subscriptionPrice: 39.99,
+    contentStats: {
+      photos: 155,
+      videos: 17,
+      live: true,
+      streams: 4
+    }
+  },
   {
     id: "5",
     name: "Jessica",
@@ -263,3 +334,5 @@ export const moreEscorts: Escort[] = [
     featured: true
   }
 ];
+
+export default moreEscorts;

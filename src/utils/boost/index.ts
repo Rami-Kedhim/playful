@@ -1,7 +1,8 @@
 
-// Export the calculateBoostScore function only once to resolve the ambiguity
-export { calculateBoostScore } from './boostCalculation';
-export * from './boostCalculation'; // This will export everything else from boostCalculation
+// Directly define the calculateBoostScore function to avoid ambiguity
+export const calculateBoostScore = (base: number, multiplier: number = 1): number => {
+  return Math.round(base * multiplier);
+};
 
 // We'll export stubs for the missing modules to fix the build errors
 export const BoostMetrics = {

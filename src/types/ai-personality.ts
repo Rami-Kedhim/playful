@@ -79,11 +79,13 @@ export interface EmotionalMemory {
 }
 
 export interface MonetizationHook {
+  // Required core methods
   triggerPurchaseFlow: (productId: string, amount: number) => Promise<boolean>;
   checkUserCredits: () => Promise<number>;
   deductCredits: (amount: number, reason: string) => Promise<boolean>;
   getSubscriptionStatus: () => Promise<{ isSubscribed: boolean; plan: string | null }>;
-  // Add missing properties being used in code
+  
+  // Optional properties being used in the code
   type?: string;
   lucoinCost?: number;
   triggerConditions?: any;

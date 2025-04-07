@@ -63,35 +63,36 @@ export class AIEmotionalMemoryService {
           defaultState.fear += 15;
         }
         
-        const newMemoryWithRequiredProps = {
-          state: defaultState,
-          emotionalHistory: [],
-          keyMemories: [],
-          recentInteractions: [],
-          companionId,
+        const newMemory: EmotionalMemory = {
           userId,
+          companionId,
           emotions: {
             currentState: defaultState,
             history: []
           },
-          lastUpdated: new Date().toISOString()
+          lastUpdated: new Date().toISOString(),
+          // Backward compatibility
+          state: defaultState,
+          emotionalHistory: [],
+          keyMemories: [],
+          recentInteractions: []
         };
         
         // Store in cache
-        this.memoryCache.set(memoryKey, newMemoryWithRequiredProps);
+        this.memoryCache.set(memoryKey, newMemory);
         
         // Save to database
         try {
           await supabase.from('ai_emotional_memories').insert({
             companion_id: companionId,
             user_id: userId,
-            memory_data: newMemoryWithRequiredProps
+            memory_data: newMemory
           });
         } catch (dbError) {
           console.error('Error saving emotional memory to database:', dbError);
         }
         
-        return newMemoryWithRequiredProps;
+        return newMemory;
       }
     } catch (error) {
       console.error('Error in initializeEmotionalMemory:', error);
@@ -99,17 +100,18 @@ export class AIEmotionalMemoryService {
       // Fallback to in-memory only
       const defaultState = aiPersonalityService.createDefaultEmotionalState();
       const fallbackMemory: EmotionalMemory = {
-        state: defaultState,
-        emotionalHistory: [],
-        keyMemories: [],
-        recentInteractions: [],
-        companionId,
         userId,
+        companionId,
         emotions: {
           currentState: defaultState,
           history: []
         },
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        // Backward compatibility
+        state: defaultState,
+        emotionalHistory: [],
+        keyMemories: [],
+        recentInteractions: []
       };
       
       this.memoryCache.set(memoryKey, fallbackMemory);
@@ -148,11 +150,8 @@ export class AIEmotionalMemoryService {
       memory.emotionalHistory = [];
     }
     
-    const updatedEmotionalHistoryEntry = {
-      emotion: updatedState.dominantEmotion || 'neutral',
-      trigger: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
-      intensity: updatedState.intensityLevel,
-      timestamp: new Date().toISOString(),
+    // Update emotional history entry with proper format
+    const updatedEmotionalHistoryEntry: EmotionalState = {
       joy: updatedState.joy,
       interest: updatedState.interest,
       surprise: updatedState.surprise,
@@ -163,7 +162,9 @@ export class AIEmotionalMemoryService {
       anticipation: updatedState.anticipation,
       dominantEmotion: updatedState.dominantEmotion,
       intensityLevel: updatedState.intensityLevel,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
+      emotion: updatedState.dominantEmotion || 'neutral',
+      trigger: message.substring(0, 50) + (message.length > 50 ? '...' : '')
     };
     
     memory.emotionalHistory.push(updatedEmotionalHistoryEntry);

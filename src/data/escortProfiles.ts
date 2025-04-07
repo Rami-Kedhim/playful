@@ -1,275 +1,438 @@
+import { Escort } from '@/types/escort';
 
-import { Escort } from "../types/escort";
-
-export const escortProfiles: Escort[] = [
+export const escorts: Escort[] = [
   {
-    id: "1",
-    name: "Sophia",
-    age: 24,
-    location: "New York",
-    price: 300,
+    id: "escort-1",
+    name: "Sophia Martinez",
+    age: 26,
     gender: "female",
-    sexualOrientation: "bisexual",
-    imageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    location: "Miami, FL",
+    bio: "Luxury companion for discerning gentlemen. I enjoy meaningful conversations, fine dining, and creating unforgettable moments.",
+    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"],
+    imageUrl: "https://source.unsplash.com/random/400x600/?model,woman",
     gallery: [
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
-      "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80",
-      "https://images.unsplash.com/photo-1548142813-c348350df52b?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=635&q=80"
+      "https://source.unsplash.com/random/800x1200/?model,woman",
+      "https://source.unsplash.com/random/800x1200/?elegant,woman",
+      "https://source.unsplash.com/random/800x1200/?dress,woman",
+      "https://source.unsplash.com/random/800x1200/?glamour,woman"
     ],
-    videos: [
-      {
-        id: "v1",
-        url: "https://player.vimeo.com/external/371433846.sd.mp4?s=236da2f62a0900e1133dd188183763ecf181ccf3&profile_id=139&oauth2_token_id=57447761",
-        thumbnail: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200",
-        title: "Sophia in New York"
-      },
-      {
-        id: "v2",
-        url: "https://player.vimeo.com/external/394678700.sd.mp4?s=353646e34d7bde02ad638c7308a198786e0dff8f&profile_id=164&oauth2_token_id=57447761",
-        thumbnail: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200",
-        title: "Night Out"
-      }
-    ],
-    rating: 4.8,
-    reviews: 24,
-    tags: ["GFE", "Massage", "Overnight"],
-    verified: true,
-    availableNow: true,
-    description: "I'm a fun-loving companion available for exciting adventures in NYC. I enjoy both stimulating conversation and physical connection.",
-    height: 168,
-    weight: 54,
-    measurements: {
-      bust: 34,
-      waist: 24,
-      hips: 36
-    },
-    hairColor: "Blonde",
-    eyeColor: "Blue",
-    ethnicity: "Caucasian",
-    availability: {
-      days: ["Monday", "Tuesday", "Wednesday", "Friday", "Saturday"],
-      hours: "10:00 AM - 10:00 PM"
-    },
-    services: ["GFE", "Massage", "Overnight", "Travel Companion", "Dinner Date"],
-    languages: ["English", "French"],
     rates: {
       hourly: 300,
       twoHours: 550,
-      overnight: 1500,
-      weekend: 3000
+      overnight: 2000,
+      weekend: 5000
     },
-    verificationLevel: "premium",
-    contentStats: {
-      photos: 120,
-      videos: 15,
-      live: true,
-      streams: 2
-    },
-    providesVirtualContent: true,
-    subscriptionPrice: 19.99,
-    serviceTypes: ["in-person", "virtual"],
-    bio: "Sophisticated and charming, I'm your perfect NYC companion for any occasion.",
+    availableNow: true,
+    verified: true,
+    rating: 4.9,
+    reviews: 27,
+    tags: ["VIP", "Model", "Elite", "Luxury", "Travel"],
+    languages: ["English", "Spanish"],
     contactInfo: {
       email: "sophia@example.com",
-      phone: "+1-234-567-8900",
-      website: "sophianyc.example.com"
+      phone: "+1-555-123-4567",
+      website: "https://example.com/sophia"
+    },
+    availability: {
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      hours: "7PM-2AM"
     },
     featured: true,
-    avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200"
-  },
-  {
-    id: "2",
-    name: "Emma",
-    age: 22,
-    location: "Los Angeles",
-    price: 250,
-    gender: "female",
-    sexualOrientation: "straight",
-    imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
-      "https://images.unsplash.com/photo-1502323777036-f29e3972f5f2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-    ],
-    videos: [
-      {
-        id: "v3",
-        url: "https://player.vimeo.com/external/370467031.sd.mp4?s=9c119cdf1a7a3e9d08dfe8c90997ace4d3759f5f&profile_id=139&oauth2_token_id=57447761",
-        thumbnail: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
-        title: "Sunset in LA"
-      }
-    ],
-    rating: 4.7,
-    reviews: 18,
-    tags: ["Massage", "Dinner Date", "Travel Companion"],
-    verified: true,
-    availableNow: false,
-    description: "LA-based companion offering relaxing massages and engaging dinner dates. I'm the perfect plus-one for any event.",
-    height: 165,
-    weight: 52,
+    price: 300,
+    sexualOrientation: "Bisexual",
+    lastActive: new Date().toISOString(),
+    responseRate: 95,
+    description: "I'm Sophia, a luxury companion based in Miami. I offer upscale companionship services with discretion and class.",
+    height: 168,
+    weight: 57,
     measurements: {
-      bust: 32,
-      waist: 24,
-      hips: 36
+      bust: 92,
+      waist: 61,
+      hips: 92
     },
-    hairColor: "Brown",
-    eyeColor: "Green",
-    ethnicity: "Caucasian",
-    availability: {
-      days: ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-      hours: "12:00 PM - 12:00 AM"
-    },
-    services: ["Massage", "Dinner Date", "Travel Companion", "Overnight"],
-    languages: ["English", "Spanish"],
-    rates: {
-      hourly: 250,
-      twoHours: 450,
-      overnight: 1200
-    },
-    verificationLevel: "enhanced",
-    contentStats: {
-      photos: 75,
-      videos: 8,
-      live: false,
-      streams: 0
-    },
-    providesVirtualContent: true,
-    subscriptionPrice: 14.99,
-    bio: "LA-based companion offering premium massage and travel services.",
-    contactInfo: {
-      email: "emma@example.com",
-      phone: "+1-323-456-7890",
-      website: "emma-la.example.com"
-    },
-    featured: false
-  },
-  {
-    id: "3",
-    name: "Alice",
-    age: 25,
-    location: "London",
-    price: 400,
-    gender: "female",
-    sexualOrientation: "bisexual",
-    imageUrl: "https://images.unsplash.com/photo-1503443207922-dff7d5439e18?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=627&q=80",
-    gallery: [
-      "https://images.unsplash.com/photo-1503443207922-dff7d5439e18?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=627&q=80",
-      "https://images.unsplash.com/photo-1547425260-76bcadfa86c2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80"
-    ],
-    videos: [
-      {
-        id: "v4",
-        url: "https://player.vimeo.com/external/434244174.sd.mp4?s=ca987b64f4e4c14e10964445c4655d911340469f&profile_id=164&oauth2_token_id=57447761",
-        thumbnail: "https://images.unsplash.com/photo-1503443207922-dff7d5439e18?w=200",
-        title: "London Nights"
-      }
-    ],
-    rating: 4.9,
-    reviews: 32,
-    tags: ["Domination", "Roleplay", "BDSM"],
-    verified: true,
-    availableNow: true,
-    description: "Experienced London-based companion specializing in roleplay and fantasy fulfillment. 24/7 availability for serious inquiries.",
-    height: 175,
-    weight: 60,
-    measurements: {
-      bust: 36,
-      waist: 26,
-      hips: 38
-    },
-    hairColor: "Black",
+    hairColor: "Brunette",
     eyeColor: "Brown",
-    ethnicity: "Mixed",
-    availability: {
-      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-      hours: "24/7"
-    },
-    services: ["Domination", "Roleplay", "BDSM", "Fetish", "Couple Friendly"],
-    languages: ["English", "Italian"],
-    rates: {
-      hourly: 400,
-      twoHours: 750,
-      overnight: 2000,
-      weekend: 4000
-    },
+    ethnicity: "Latina",
     verificationLevel: "premium",
+    serviceTypes: ["GFE", "Dinner Date", "Travel Companion"],
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    videos: [
+      {
+        id: "video1",
+        url: "https://example.com/video1",
+        thumbnail: "https://source.unsplash.com/random/300x200/?model,woman",
+        title: "Beach Day"
+      }
+    ],
+    subscriptionPrice: 29.99,
     contentStats: {
-      photos: 200,
-      videos: 25,
+      photos: 124,
+      videos: 15,
       live: true,
       streams: 3
-    },
-    providesVirtualContent: true,
-    subscriptionPrice: 29.99,
-    bio: "Experienced London-based companion specializing in roleplay and fantasy fulfillment.",
-    contactInfo: {
-      email: "alice@example.com",
-      phone: "+44-20-1234-5678",
-      website: "alice-london.example.com"
-    },
-    featured: true
+    }
   },
   {
-    id: "4",
-    name: "Rachel",
+    id: "escort-2",
+    name: "Isabella Rossi",
     age: 28,
-    location: "Paris",
-    price: 350,
     gender: "female",
-    sexualOrientation: "lesbian",
-    imageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80",
+    location: "New York, NY",
+    bio: "Passionate and sensual companion ready to explore your deepest desires. Let's create unforgettable memories together.",
+    services: ["Sensual Massage", "Role Play", "BDSM", "Overnight"],
+    imageUrl: "https://source.unsplash.com/random/400x600/?sensual,woman",
     gallery: [
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80",
-      "https://images.unsplash.com/photo-1539571696350-5a9447586704?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=687&q=80"
+      "https://source.unsplash.com/random/800x1200/?sensual,woman",
+      "https://source.unsplash.com/random/800x1200/?lingerie,woman",
+      "https://source.unsplash.com/random/800x1200/?boudoir,woman",
+      "https://source.unsplash.com/random/800x1200/?intimate,woman"
     ],
-    videos: [
-      {
-        id: "v5",
-        url: "https://player.vimeo.com/external/483053404.sd.mp4?s=4cf1c5affc89a95453235e38c4ca0a49ff998965&profile_id=164&oauth2_token_id=57447761",
-        thumbnail: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200",
-        title: "Paris by Night"
-      }
-    ],
-    rating: 4.6,
-    reviews: 15,
-    tags: ["French Kissing", "Lingerie", "Exotic Dancing"],
-    verified: false,
-    availableNow: false,
-    description: "Parisian companion offering sophisticated experiences for the discerning client. Fluent in French and English.",
-    height: 170,
-    weight: 56,
-    measurements: {
-      bust: 34,
-      waist: 26,
-      hips: 36
-    },
-    hairColor: "Blonde",
-    eyeColor: "Brown",
-    ethnicity: "Caucasian",
-    availability: {
-      days: ["Tuesday", "Wednesday", "Thursday", "Friday"],
-      hours: "7:00 PM - 3:00 AM"
-    },
-    services: ["French Kissing", "Lingerie Shows", "Exotic Dancing", "Dinner Date"],
-    languages: ["French", "English"],
     rates: {
       hourly: 350,
       twoHours: 650,
-      overnight: 1800
+      overnight: 2500,
+      weekend: 6000
     },
-    verificationLevel: "basic",
+    availableNow: false,
+    verified: true,
+    rating: 4.8,
+    reviews: 35,
+    tags: ["Sensual", "Exotic", "Passionate", "Intimate", "Dominant"],
+    languages: ["English", "Italian"],
+    contactInfo: {
+      email: "isabella@example.com",
+      phone: "+1-555-234-5678",
+      website: "https://example.com/isabella"
+    },
+    availability: {
+      days: ["Monday", "Wednesday", "Thursday", "Saturday"],
+      hours: "8PM-3AM"
+    },
+    featured: true,
+    price: 350,
+    sexualOrientation: "Bisexual",
+    lastActive: new Date().toISOString(),
+    responseRate: 90,
+    description: "I'm Isabella, a passionate and sensual companion based in New York. I offer intimate and unforgettable experiences.",
+    height: 173,
+    weight: 60,
+    measurements: {
+      bust: 94,
+      waist: 64,
+      hips: 94
+    },
+    hairColor: "Black",
+    eyeColor: "Green",
+    ethnicity: "Caucasian",
+    verificationLevel: "premium",
+    serviceTypes: ["Sensual Massage", "Role Play", "BDSM"],
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    videos: [
+      {
+        id: "video2",
+        url: "https://example.com/video2",
+        thumbnail: "https://source.unsplash.com/random/300x200/?sensual,woman",
+        title: "Midnight Whispers"
+      }
+    ],
+    subscriptionPrice: 0,
     contentStats: {
-      photos: 75,
-      videos: 8,
+      photos: 0,
+      videos: 0,
       live: false,
       streams: 0
+    }
+  },
+  {
+    id: "escort-3",
+    name: "Aisha Khan",
+    age: 24,
+    gender: "female",
+    location: "Los Angeles, CA",
+    bio: "Exotic and alluring companion with a taste for adventure. Let's explore the city and create unforgettable memories.",
+    services: ["Travel Companion", "Events", "Dinner Date", "Overnight"],
+    imageUrl: "https://source.unsplash.com/random/400x600/?exotic,woman",
+    gallery: [
+      "https://source.unsplash.com/random/800x1200/?exotic,woman",
+      "https://source.unsplash.com/random/800x1200/?travel,woman",
+      "https://source.unsplash.com/random/800x1200/?adventure,woman",
+      "https://source.unsplash.com/random/800x1200/?luxury,woman"
+    ],
+    rates: {
+      hourly: 280,
+      twoHours: 500,
+      overnight: 1800,
+      weekend: 4500
     },
-    providesVirtualContent: false,
-    bio: "Parisian companion offering sophisticated experiences for the discerning client.",
+    availableNow: true,
+    verified: false,
+    rating: 4.7,
+    reviews: 19,
+    tags: ["Exotic", "Travel", "Adventure", "Luxury", "VIP"],
+    languages: ["English", "Hindi", "Urdu"],
     contactInfo: {
-      email: "rachel@example.com",
-      phone: "+33-1-2345-6789",
-      website: "rachel-paris.example.com"
+      email: "aisha@example.com",
+      phone: "+1-555-345-6789",
+      website: "https://example.com/aisha"
     },
-    featured: false
+    availability: {
+      days: ["Tuesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      hours: "6PM-1AM"
+    },
+    featured: false,
+    price: 280,
+    sexualOrientation: "Bisexual",
+    lastActive: new Date().toISOString(),
+    responseRate: 85,
+    description: "I'm Aisha, an exotic and adventurous companion based in Los Angeles. I offer unforgettable experiences and travel companionship.",
+    height: 165,
+    weight: 54,
+    measurements: {
+      bust: 90,
+      waist: 60,
+      hips: 90
+    },
+    hairColor: "Black",
+    eyeColor: "Brown",
+    ethnicity: "Indian",
+    verificationLevel: "basic",
+    serviceTypes: ["Travel Companion", "Events", "Dinner Date"],
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    videos: [
+      {
+        id: "video3",
+        url: "https://example.com/video3",
+        thumbnail: "https://source.unsplash.com/random/300x200/?travel,woman",
+        title: "City Exploration"
+      }
+    ],
+    subscriptionPrice: 0,
+    contentStats: {
+      photos: 0,
+      videos: 0,
+      live: false,
+      streams: 0
+    }
+  },
+  {
+    id: "escort-4",
+    name: "Carlos Rodriguez",
+    age: 30,
+    gender: "male",
+    location: "Chicago, IL",
+    bio: "Charming and sophisticated male escort for discerning women. I offer stimulating conversation, fine dining, and unforgettable moments.",
+    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"],
+    imageUrl: "https://source.unsplash.com/random/400x600/?model,man",
+    gallery: [
+      "https://source.unsplash.com/random/800x1200/?model,man",
+      "https://source.unsplash.com/random/800x1200/?elegant,man",
+      "https://source.unsplash.com/random/800x1200/?dress,man",
+      "https://source.unsplash.com/random/800x1200/?glamour,man"
+    ],
+    rates: {
+      hourly: 250,
+      twoHours: 450,
+      overnight: 1500,
+      weekend: 4000
+    },
+    availableNow: false,
+    verified: true,
+    rating: 4.6,
+    reviews: 22,
+    tags: ["VIP", "Model", "Elite", "Luxury", "Travel"],
+    languages: ["English", "Spanish"],
+    contactInfo: {
+      email: "carlos@example.com",
+      phone: "+1-555-456-7890",
+      website: "https://example.com/carlos"
+    },
+    availability: {
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      hours: "7PM-2AM"
+    },
+    featured: true,
+    price: 250,
+    sexualOrientation: "Heterosexual",
+    lastActive: new Date().toISOString(),
+    responseRate: 92,
+    description: "I'm Carlos, a charming and sophisticated male escort based in Chicago. I offer upscale companionship services with discretion and class.",
+    height: 180,
+    weight: 75,
+    measurements: {
+      bust: 0,
+      waist: 0,
+      hips: 0
+    },
+    hairColor: "Brown",
+    eyeColor: "Brown",
+    ethnicity: "Latino",
+    verificationLevel: "premium",
+    serviceTypes: ["GFE", "Dinner Date", "Travel Companion"],
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    videos: [
+      {
+        id: "video4",
+        url: "https://example.com/video4",
+        thumbnail: "https://source.unsplash.com/random/300x200/?model,man",
+        title: "City Nights"
+      }
+    ],
+    subscriptionPrice: 0,
+    contentStats: {
+      photos: 0,
+      videos: 0,
+      live: false,
+      streams: 0
+    }
+  },
+  {
+    id: "escort-5",
+    name: "Mei Ling",
+    age: 23,
+    gender: "female",
+    location: "San Francisco, CA",
+    bio: "Sweet and sensual Asian companion ready to fulfill your desires. Let's explore the city and create unforgettable memories.",
+    services: ["Sensual Massage", "Role Play", "BDSM", "Overnight"],
+    imageUrl: "https://source.unsplash.com/random/400x600/?asian,woman",
+    gallery: [
+      "https://source.unsplash.com/random/800x1200/?asian,woman",
+      "https://source.unsplash.com/random/800x1200/?lingerie,asian",
+      "https://source.unsplash.com/random/800x1200/?boudoir,asian",
+      "https://source.unsplash.com/random/800x1200/?intimate,asian"
+    ],
+    rates: {
+      hourly: 320,
+      twoHours: 600,
+      overnight: 2200,
+      weekend: 5500
+    },
+    availableNow: true,
+    verified: true,
+    rating: 4.9,
+    reviews: 40,
+    tags: ["Sensual", "Exotic", "Passionate", "Intimate", "Dominant"],
+    languages: ["English", "Chinese"],
+    contactInfo: {
+      email: "meiling@example.com",
+      phone: "+1-555-567-8901",
+      website: "https://example.com/meiling"
+    },
+    availability: {
+      days: ["Monday", "Wednesday", "Thursday", "Saturday"],
+      hours: "8PM-3AM"
+    },
+    featured: true,
+    price: 320,
+    sexualOrientation: "Bisexual",
+    lastActive: new Date().toISOString(),
+    responseRate: 95,
+    description: "I'm Mei Ling, a sweet and sensual Asian companion based in San Francisco. I offer intimate and unforgettable experiences.",
+    height: 160,
+    weight: 50,
+    measurements: {
+      bust: 88,
+      waist: 58,
+      hips: 88
+    },
+    hairColor: "Black",
+    eyeColor: "Brown",
+    ethnicity: "Asian",
+    verificationLevel: "premium",
+    serviceTypes: ["Sensual Massage", "Role Play", "BDSM"],
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    videos: [
+      {
+        id: "video5",
+        url: "https://example.com/video5",
+        thumbnail: "https://source.unsplash.com/random/300x200/?sensual,asian",
+        title: "Silk Dreams"
+      }
+    ],
+    subscriptionPrice: 0,
+    contentStats: {
+      photos: 0,
+      videos: 0,
+      live: false,
+      streams: 0
+    }
+  },
+  {
+    id: "escort-6",
+    name: "Javier Gomez",
+    age: 32,
+    gender: "male",
+    location: "Dallas, TX",
+    bio: "Experienced and charming male escort for discerning women. I offer stimulating conversation, fine dining, and unforgettable moments.",
+    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"],
+    imageUrl: "https://source.unsplash.com/random/400x600/?model,man",
+    gallery: [
+      "https://source.unsplash.com/random/800x1200/?model,man",
+      "https://source.unsplash.com/random/800x1200/?elegant,man",
+      "https://source.unsplash.com/random/800x1200/?dress,man",
+      "https://source.unsplash.com/random/800x1200/?glamour,man"
+    ],
+    rates: {
+      hourly: 270,
+      twoHours: 480,
+      overnight: 1700,
+      weekend: 4200
+    },
+    availableNow: true,
+    verified: false,
+    rating: 4.5,
+    reviews: 18,
+    tags: ["VIP", "Model", "Elite", "Luxury", "Travel"],
+    languages: ["English", "Spanish"],
+    contactInfo: {
+      email: "javier@example.com",
+      phone: "+1-555-678-9012",
+      website: "https://example.com/javier"
+    },
+    availability: {
+      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      hours: "7PM-2AM"
+    },
+    featured: false,
+    price: 270,
+    sexualOrientation: "Heterosexual",
+    lastActive: new Date().toISOString(),
+    responseRate: 88,
+    description: "I'm Javier, an experienced and charming male escort based in Dallas. I offer upscale companionship services with discretion and class.",
+    height: 185,
+    weight: 80,
+    measurements: {
+      bust: 0,
+      waist: 0,
+      hips: 0
+    },
+    hairColor: "Black",
+    eyeColor: "Brown",
+    ethnicity: "Latino",
+    verificationLevel: "basic",
+    serviceTypes: ["GFE", "Dinner Date", "Travel Companion"],
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    videos: [
+      {
+        id: "video6",
+        url: "https://example.com/video6",
+        thumbnail: "https://source.unsplash.com/random/300x200/?model,man",
+        title: "City Lights"
+      }
+    ],
+    subscriptionPrice: 0,
+    contentStats: {
+      photos: 0,
+      videos: 0,
+      live: false,
+      streams: 0
+    }
   }
 ];
+
+export default escorts;
