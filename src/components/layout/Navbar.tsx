@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +35,6 @@ const Navbar: React.FC = () => {
     { name: t('nav.metaverse'), path: `/metaverse`, auth: true },
   ];
   
-  // Add admin routes if user has admin access
   if (isAdmin) {
     navItems.push({ name: 'SEO', path: `/seo`, auth: true });
   }
@@ -68,11 +66,9 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
         
-        {/* Desktop Navigation */}
         <nav className="hidden md:block">
           <ul className="flex space-x-8">
             {navItems.map((item) => {
-              // Skip auth-required items if not authenticated
               if (item.auth && !isAuthenticated) return null;
               
               return (
@@ -107,7 +103,6 @@ const Navbar: React.FC = () => {
           
           <LanguageSwitcher />
           
-          {/* Mobile Menu Trigger */}
           <Button 
             variant="ghost" 
             size="icon" 
@@ -118,10 +113,8 @@ const Navbar: React.FC = () => {
             <Menu className="h-5 w-5" />
           </Button>
           
-          {/* Mobile Navigation */}
           <MobileMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} />
           
-          {/* Desktop Auth Menu */}
           <div className="hidden md:block">
             {isAuthenticated ? (
               <DropdownMenu>

@@ -23,6 +23,15 @@ const MobileMenu = ({ open = false, onOpenChange }: MobileMenuProps) => {
     { icon: Video, label: t('livecams'), href: '/livecams' },
     { icon: MessageCircle, label: t('messages'), href: '/messages' },
   ];
+
+  const handleLogout = () => {
+    if (logout) {
+      logout();
+    }
+    if (onOpenChange) {
+      onOpenChange(false);
+    }
+  };
   
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -96,10 +105,7 @@ const MobileMenu = ({ open = false, onOpenChange }: MobileMenuProps) => {
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-2 text-destructive"
-                    onClick={() => {
-                      if (logout) logout();
-                      onOpenChange && onOpenChange(false);
-                    }}
+                    onClick={handleLogout}
                   >
                     <LogOut className="h-5 w-5" />
                     {t('logout')}
