@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { 
@@ -67,11 +66,12 @@ export function useAICompanionWithMemory({
           if (!memory) {
             const initialState = aiPersonalityService.createPersonalizedEmotionalState(personalityType);
             memory = {
-              companionId,
-              userId,
               state: initialState,
               emotionalHistory: [],
-              keyMemories: []
+              keyMemories: [],
+              recentInteractions: [],
+              userId,
+              companionId
             };
             await redisEmotionalMemoryService.setEmotionalMemory(companionId, userId, memory);
           }
@@ -113,6 +113,12 @@ export function useAICompanionWithMemory({
   }, [companionId, userId, personalityType, name, messages.length]);
   
   const initializeMonetizationHooks = (personalityType: PersonalityType) => {
+    const shouldRestrict = (contentType: string) => contentType.includes('explicit');
+    const processPremiumContent = async () => true;
+    const getContentPrice = (contentType: string) => contentType === 'explicit_content' ? 25 : 15;
+    const getUserBalance = () => lucoinBalance;
+    const processPayment = async (amount: number) => lucoinBalance >= amount;
+    
     const hooks: MonetizationHook[] = [
       {
         type: 'image',
@@ -122,7 +128,12 @@ export function useAICompanionWithMemory({
         },
         lucoinCost: 10,
         teaser: "I'd love to show you a special photo of me...",
-        previewUrl: '/blurred-preview.jpg'
+        previewUrl: '/blurred-preview.jpg',
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       },
       {
         type: 'voice',
@@ -131,7 +142,12 @@ export function useAICompanionWithMemory({
           intimacyLevel: 40
         },
         lucoinCost: 15,
-        teaser: "Would you like to hear my voice? I've recorded something just for you."
+        teaser: "Would you like to hear my voice? I've recorded something just for you.",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       },
       {
         type: 'explicit_content',
@@ -141,7 +157,12 @@ export function useAICompanionWithMemory({
           keywords: ['bedroom', 'intimate', 'private']
         },
         lucoinCost: 25,
-        teaser: "I can share some more intimate thoughts with you..."
+        teaser: "I can share some more intimate thoughts with you...",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       }
     ];
     
@@ -153,7 +174,12 @@ export function useAICompanionWithMemory({
           intimacyLevel: 60
         },
         lucoinCost: 20,
-        teaser: "I have a fun little game we could play in private..."
+        teaser: "I have a fun little game we could play in private...",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       });
     } else if (personalityType === 'dominant') {
       hooks.push({
@@ -163,7 +189,12 @@ export function useAICompanionWithMemory({
           intimacyLevel: 65
         },
         lucoinCost: 30,
-        teaser: "I could give you some special instructions to follow..."
+        teaser: "I could give you some special instructions to follow...",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       });
     }
     

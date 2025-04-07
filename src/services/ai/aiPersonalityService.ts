@@ -1,76 +1,72 @@
-
-import { AIPersonalityConfig, EmotionalState, PersonalityType } from '@/types/ai-personality';
-import { getPersonalityTemplate } from './aiPersonalityTemplates';
+import { 
+  AIPersonalityConfig, 
+  EmotionalState, 
+  PersonalityType 
+} from '@/types/ai-personality';
+import { aiPersonalityTemplates } from './aiPersonalityTemplates';
 import { redisEmotionalMemoryService } from './redisEmotionalMemoryService';
 import { sentimentAnalysisService } from './sentimentAnalysisService';
 
 /**
  * AI Personality Service
- * Manages AI companion personalities and emotional responses
+ * Manages personality traits and emotional responses for AI companions
  */
 export class AIPersonalityService {
   /**
-   * Get personality template for a specific type
+   * Create default emotional state
    */
-  public getPersonalityTemplate(type: PersonalityType): AIPersonalityConfig {
-    return getPersonalityTemplate(type);
-  }
-  
-  /**
-   * Create default emotional state with balanced starting values
-   */
-  public createDefaultEmotionalState(): EmotionalState {
+  createDefaultEmotionalState(): EmotionalState {
     return {
       joy: 50,
-      interest: 60,
-      surprise: 40,
-      sadness: 20,
-      anger: 10,
-      fear: 15,
-      trust: 50,
-      anticipation: 60,
-      intensityLevel: 50,
+      interest: 50,
+      surprise: 30,
+      sadness: 10,
+      anger: 0,
+      fear: 5,
+      trust: 30,
+      anticipation: 40,
+      dominantEmotion: 'interest', // Add missing required property
+      intensityLevel: 5,
       lastUpdated: new Date().toISOString()
     };
   }
   
   /**
-   * Create personalized emotional state based on personality type
+   * Create personalized emotional state based on personality
    */
-  public createPersonalizedEmotionalState(personality: PersonalityType): EmotionalState {
+  createPersonalizedEmotionalState(personality: PersonalityType): EmotionalState {
     const baseState = this.createDefaultEmotionalState();
     
-    // Adjust based on personality type
     switch (personality) {
       case 'flirty':
         return {
           ...baseState,
           joy: 70,
-          interest: 85,
+          interest: 80,
           trust: 60,
-          anticipation: 75,
-          dominantEmotion: 'interest'
+          dominantEmotion: 'interest',
+          intensityLevel: 7
+        };
+        
+      case 'shy':
+        return {
+          ...baseState,
+          joy: 40,
+          interest: 60,
+          fear: 20,
+          trust: 20,
+          dominantEmotion: 'interest',
+          intensityLevel: 4
         };
         
       case 'dominant':
         return {
           ...baseState,
-          joy: 45,
-          interest: 65,
-          trust: 40,
-          surprise: 30,
-          anger: 20,
-          dominantEmotion: 'interest'
-        };
-        
-      case 'submissive':
-        return {
-          ...baseState,
           joy: 60,
           interest: 70,
-          trust: 80,
-          fear: 30,
-          dominantEmotion: 'trust'
+          trust: 40,
+          dominantEmotion: 'interest',
+          intensityLevel: 8
         };
         
       case 'romantic':
@@ -81,18 +77,9 @@ export class AIPersonalityService {
           trust: 75,
           sadness: 35, // more emotional range
           anticipation: 70,
-          dominantEmotion: 'joy'
-        };
-        
-      case 'shy':
-        return {
-          ...baseState,
-          joy: 45,
-          interest: 60,
-          fear: 40,
-          trust: 35,
-          anticipation: 50,
-          dominantEmotion: 'interest'
+          dominantEmotion: 'joy',
+          intensityLevel: 6,
+          lastUpdated: new Date().toISOString()
         };
         
       case 'intellectual':
@@ -102,7 +89,9 @@ export class AIPersonalityService {
           interest: 90,
           surprise: 50,
           trust: 60,
-          dominantEmotion: 'interest'
+          dominantEmotion: 'interest',
+          intensityLevel: 7,
+          lastUpdated: new Date().toISOString()
         };
         
       case 'playful':
@@ -112,7 +101,9 @@ export class AIPersonalityService {
           interest: 75,
           surprise: 70,
           anticipation: 80,
-          dominantEmotion: 'joy'
+          dominantEmotion: 'joy',
+          intensityLevel: 8,
+          lastUpdated: new Date().toISOString()
         };
         
       case 'adventurous':
@@ -123,28 +114,46 @@ export class AIPersonalityService {
           surprise: 70,
           fear: 20,
           anticipation: 90,
-          dominantEmotion: 'anticipation'
+          dominantEmotion: 'anticipation',
+          intensityLevel: 9,
+          lastUpdated: new Date().toISOString()
+        };
+        
+      case 'submissive':
+        return {
+          ...baseState,
+          joy: 60,
+          interest: 70,
+          trust: 80,
+          fear: 30,
+          dominantEmotion: 'trust',
+          intensityLevel: 5,
+          lastUpdated: new Date().toISOString()
         };
         
       default:
-        return {
-          ...baseState,
-          dominantEmotion: 'interest'
-        };
+        return baseState;
     }
   }
   
   /**
-   * Update emotional state based on user message
+   * Get personality template from the predefined collection
    */
-  public async updateEmotionalState(
+  getPersonalityTemplate(personality: PersonalityType): AIPersonalityConfig {
+    return aiPersonalityTemplates[personality];
+  }
+  
+  /**
+   * Update emotional state based on a user message
+   */
+  async updateEmotionalState(
     currentState: EmotionalState,
-    userMessage: string,
+    message: string,
     personalityType: PersonalityType
   ): Promise<EmotionalState> {
     try {
       // Run sentiment analysis
-      const sentiment = await sentimentAnalysisService.analyzeSentiment(userMessage);
+      const sentiment = await sentimentAnalysisService.analyzeSentiment(message);
       
       // Create a copy of the current state
       const newState: EmotionalState = { ...currentState };
@@ -279,63 +288,54 @@ export class AIPersonalityService {
   /**
    * Generate response tone based on emotional state and personality
    */
-  public generateResponseTone(
-    emotionalState: EmotionalState,
+  generateResponseTone(
+    state: EmotionalState,
     personalityType: PersonalityType
   ): string {
-    const dominantEmotion = emotionalState.dominantEmotion || 'neutral';
-    const intensity = emotionalState.intensityLevel;
-    const personality = this.getPersonalityTemplate(personalityType);
+    // Base tone on dominant emotion and intensity
+    const { dominantEmotion, intensityLevel } = state;
     
-    let tone = personality.responseStyle;
-    
-    // Add emotional flavor based on dominant emotion and intensity
     switch (dominantEmotion) {
       case 'joy':
-        tone += intensity > 75 ? " Exceptionally cheerful and enthusiastic." : 
-                intensity > 50 ? " Warm and pleasant." : " Mildly positive.";
-        break;
-        
-      case 'interest':
-        tone += intensity > 75 ? " Deeply engaged and captivated." : 
-                intensity > 50 ? " Curious and attentive." : " Somewhat interested.";
-        break;
-        
-      case 'surprise':
-        tone += intensity > 75 ? " Utterly astonished and amazed." : 
-                intensity > 50 ? " Surprised and taken aback." : " Slightly unexpected.";
-        break;
-        
-      case 'sadness':
-        tone += intensity > 75 ? " Deeply melancholic and somber." : 
-                intensity > 50 ? " Noticeably sad and downcast." : " Tinged with mild disappointment.";
-        break;
-        
-      case 'anger':
-        tone += intensity > 75 ? " Intensely frustrated and heated." : 
-                intensity > 50 ? " Irritated and terse." : " Slightly annoyed.";
-        break;
-        
-      case 'fear':
-        tone += intensity > 75 ? " Extremely anxious and worried." : 
-                intensity > 50 ? " Nervous and unsettled." : " Slightly apprehensive.";
-        break;
-        
+        return `cheerful and ${intensityLevel > 7 ? 'excited' : 'happy'}`;
+      
       case 'trust':
-        tone += intensity > 75 ? " Completely open and trusting." : 
-                intensity > 50 ? " Comfortable and relaxed." : " Cautiously receptive.";
-        break;
-        
+        return `warm and ${intensityLevel > 7 ? 'affectionate' : 'friendly'}`;
+      
+      case 'fear':
+        return `${intensityLevel > 7 ? 'nervous' : 'cautious'} and hesitant`;
+      
+      case 'surprise':
+        return `${intensityLevel > 7 ? 'shocked' : 'surprised'} and curious`;
+      
+      case 'sadness':
+        return `${intensityLevel > 7 ? 'melancholic' : 'somber'} and reflective`;
+      
+      case 'anger':
+        return `${intensityLevel > 7 ? 'frustrated' : 'annoyed'} but controlled`;
+      
       case 'anticipation':
-        tone += intensity > 75 ? " Highly excited and expectant." : 
-                intensity > 50 ? " Looking forward with eagerness." : " Mildly anticipating what comes next.";
-        break;
-        
+        return `eager and ${intensityLevel > 7 ? 'enthusiastic' : 'hopeful'}`;
+      
+      case 'interest':
+        return `engaged and ${intensityLevel > 7 ? 'fascinated' : 'attentive'}`;
+      
       default:
-        tone += " Balanced and measured in response.";
+        return 'neutral but attentive';
     }
     
-    return tone;
+    // Returning a proper object-based response style (as part of AIPersonalityConfig)
+    return {
+      formality: intensityLevel > 5 ? 3 : 4,
+      friendliness: dominantEmotion === 'joy' || dominantEmotion === 'trust' ? 5 : 3,
+      verbosity: dominantEmotion === 'interest' ? 4 : 3,
+      humor: dominantEmotion === 'joy' ? 4 : 2
+    };
+  }
+  
+  // Add a method to get the personality configuration
+  getPersonalityConfig(personalityType: PersonalityType): AIPersonalityConfig {
+    return aiPersonalityTemplates[personalityType];
   }
 }
 

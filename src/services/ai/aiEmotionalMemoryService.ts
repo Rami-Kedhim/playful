@@ -1,4 +1,3 @@
-
 import { EmotionalMemory, EmotionalState, PersonalityType } from '@/types/ai-personality';
 import { aiPersonalityService } from './aiPersonalityService';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,11 +64,12 @@ export class AIEmotionalMemoryService {
         }
         
         const newMemory: EmotionalMemory = {
-          companionId,
-          userId,
           state: defaultState,
           emotionalHistory: [],
-          keyMemories: []
+          keyMemories: [],
+          recentInteractions: [],
+          companionId,
+          userId
         };
         
         // Store in cache
@@ -94,11 +94,12 @@ export class AIEmotionalMemoryService {
       // Fallback to in-memory only
       const defaultState = aiPersonalityService.createDefaultEmotionalState();
       const fallbackMemory: EmotionalMemory = {
-        companionId,
-        userId,
         state: defaultState,
         emotionalHistory: [],
-        keyMemories: []
+        keyMemories: [],
+        recentInteractions: [],
+        companionId,
+        userId
       };
       
       this.memoryCache.set(memoryKey, fallbackMemory);
@@ -132,6 +133,11 @@ export class AIEmotionalMemoryService {
     
     // Update memory cache
     memory.state = updatedState;
+    
+    if (!memory.emotionalHistory) {
+      memory.emotionalHistory = [];
+    }
+    
     memory.emotionalHistory.push({
       emotion: updatedState.dominantEmotion || 'neutral',
       trigger: message.substring(0, 50) + (message.length > 50 ? '...' : ''),

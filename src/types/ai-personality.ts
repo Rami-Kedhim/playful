@@ -50,7 +50,6 @@ export interface EmotionalMemory {
     affection: number;
     intimacy: number;
   };
-  // Add the missing properties from the errors
   emotionalHistory: Array<{
     emotion: string;
     trigger: string;
@@ -84,7 +83,6 @@ export interface MonetizationHook {
   getContentPrice: (contentType: string) => number;
   getUserBalance: () => number;
   processPayment: (amount: number) => Promise<boolean>;
-  // Add the missing properties from the errors
   type: string;
   triggerConditions: {
     messageCount?: number;

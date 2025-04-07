@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { PersonalityType, MonetizationHook } from '@/types/ai-personality';
 import { CompanionMessage } from './types';
@@ -28,6 +27,12 @@ export const useMonetizationSystem = ({
 
   // Initialize monetization hooks based on personality type
   const initializeMonetizationHooks = useCallback(() => {
+    const shouldRestrict = (contentType: string) => contentType.includes('explicit');
+    const processPremiumContent = async () => true;
+    const getContentPrice = (contentType: string) => contentType === 'explicit_content' ? 25 : 15;
+    const getUserBalance = () => lucoinBalance;
+    const processPayment = async (amount: number) => lucoinBalance >= amount;
+    
     const hooks: MonetizationHook[] = [
       {
         type: 'image',
@@ -37,7 +42,12 @@ export const useMonetizationSystem = ({
         },
         lucoinCost: 10,
         teaser: "I'd love to show you a special photo of me...",
-        previewUrl: '/blurred-preview.jpg'
+        previewUrl: '/blurred-preview.jpg',
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       },
       {
         type: 'voice',
@@ -46,7 +56,12 @@ export const useMonetizationSystem = ({
           intimacyLevel: 40
         },
         lucoinCost: 15,
-        teaser: "Would you like to hear my voice? I've recorded something just for you."
+        teaser: "Would you like to hear my voice? I've recorded something just for you.",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       },
       {
         type: 'explicit_content',
@@ -56,7 +71,12 @@ export const useMonetizationSystem = ({
           keywords: ['bedroom', 'intimate', 'private']
         },
         lucoinCost: 25,
-        teaser: "I can share some more intimate thoughts with you..."
+        teaser: "I can share some more intimate thoughts with you...",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       }
     ];
     
@@ -68,7 +88,12 @@ export const useMonetizationSystem = ({
           intimacyLevel: 60
         },
         lucoinCost: 20,
-        teaser: "I have a fun little game we could play in private..."
+        teaser: "I have a fun little game we could play in private...",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       });
     } else if (personalityType === 'dominant') {
       hooks.push({
@@ -78,12 +103,17 @@ export const useMonetizationSystem = ({
           intimacyLevel: 65
         },
         lucoinCost: 30,
-        teaser: "I could give you some special instructions to follow..."
+        teaser: "I could give you some special instructions to follow...",
+        shouldRestrict,
+        processPremiumContent,
+        getContentPrice,
+        getUserBalance,
+        processPayment
       });
     }
     
     setMonetizationTriggers(hooks);
-  }, [personalityType]);
+  }, [personalityType, lucoinBalance]);
 
   // Check if monetization should be triggered
   const checkMonetizationTriggers = useCallback((
@@ -152,7 +182,6 @@ export const useMonetizationSystem = ({
         role: 'system',
         content: `Insufficient balance: You need ${cost} Lucoins to unlock this content. Current balance: ${lucoinBalance}`,
         timestamp: new Date(),
-        // Replace isError with a valid property
         emotion: 'sadness'
       });
       return false;
@@ -226,7 +255,6 @@ export const useMonetizationSystem = ({
         role: 'system',
         content: 'There was an error processing your payment.',
         timestamp: new Date(),
-        // Replace isError with a valid property
         emotion: 'sadness'
       });
       

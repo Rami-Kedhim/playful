@@ -1,4 +1,3 @@
-
 /**
  * EscortScraper - Service for scraping tryst.link
  * Implements the BaseScraperService abstract class
