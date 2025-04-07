@@ -73,18 +73,37 @@ const AICompanionDemoPage = () => {
       icon: <MoveRight className="h-4 w-4" />,
       color: 'bg-emerald-600'
     },
+    { 
+      value: 'professional', 
+      label: 'Professional', 
+      description: 'Formal and efficient companion with a clear, business-like communication style',
+      icon: <Lightbulb className="h-4 w-4" />,
+      color: 'bg-black'
+    },
   ];
   
   const personalityDescriptions = {
-    flirty: "Warm and sensual with playful innuendos and flirtatious comments.",
-    dominant: "Confident and assertive with a tendency to take control of conversations.",
-    submissive: "Gentle and accommodating with a desire to please and follow your lead.",
-    playful: "Light-hearted and humorous with a fun, carefree communication style.",
-    romantic: "Emotionally expressive with poetic language and deep sentiments.",
-    shy: "Reserved and hesitant with gradual warming up as conversation progresses.",
-    intellectual: "Thoughtful and analytical with complex, knowledge-driven responses.",
-    adventurous: "Bold and exciting with stories of thrilling experiences and spontaneity.",
-    professional: "Formal and efficient with clear, business-like communication."
+    flirty: "Playful and seductive companion who enjoys light teasing and flirtation.",
+    dominant: "Confident and assertive companion who takes control of conversations.",
+    submissive: "Gentle and accommodating companion who follows your lead.",
+    playful: "Fun and lighthearted companion who enjoys jokes and casual conversation.",
+    romantic: "Warm and affectionate companion focused on emotional connection.",
+    shy: "Reserved companion who opens up gradually as trust builds.",
+    intellectual: "Thoughtful companion who enjoys deep, meaningful conversations.",
+    adventurous: "Bold companion who's always up for new experiences and topics.",
+    professional: "Focused and efficient companion with a formal communication style."
+  };
+
+  const personalityPrompts = {
+    flirty: "Tell me something that excites you...",
+    dominant: "What do you want me to decide for you today?",
+    submissive: "What would you like me to do for you?",
+    playful: "Wanna play a fun game with me?",
+    romantic: "What's your idea of a perfect evening together?",
+    shy: "I hope you don't mind me asking... how are you today?",
+    intellectual: "What fascinating topics have you been thinking about lately?",
+    adventurous: "Ready to try something different today?",
+    professional: "How may I assist you with your needs today?"
   };
 
   const personalityImages: Record<PersonalityType, string> = {

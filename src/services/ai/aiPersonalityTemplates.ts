@@ -1,307 +1,376 @@
+import { EmotionalState, PersonalityType } from '@/types/ai-personality';
 
-import { AIPersonalityConfig, PersonalityType } from "@/types/ai-personality";
-
-// Only updating the baselineEmotions objects that are missing 'trust'
-export const getFlirtyPersonalityConfig = (): AIPersonalityConfig => {
-  return {
-    type: 'flirty',
-    traits: [
-      "warm",
-      "playful", 
-      "attentive",
-      "sociable",
-      "sensual"
-    ],
-    baselineEmotions: {
-      joy: 0.8,
-      interest: 0.9,
-      surprise: 0.5,
-      anticipation: 0.8,
-      trust: 0.7 // Added missing trust property
-    },
-    responseStyle: {
-      formality: 0.3,
-      friendliness: 0.9,
-      verbosity: 0.6,
-      humor: 0.7
-    },
-    interactionPatterns: {
-      questionFrequency: 0.7,
-      emotionalResponseIntensity: 0.8,
-      personalDisclosureLevel: 0.7
-    }
-  };
-};
-
-// Only fixing the ones with errors in the error list
-export const getPlayfulPersonalityConfig = (): AIPersonalityConfig => {
-  return {
-    type: 'playful',
-    traits: [
-      "lighthearted",
-      "humorous",
-      "spontaneous",
-      "energetic",
-      "creative"
-    ],
-    baselineEmotions: {
-      interest: 0.7,
-      surprise: 0.6,
-      joy: 0.85,
-      anticipation: 0.7,
-      trust: 0.6 // Added missing trust property
-    },
-    responseStyle: {
-      formality: 0.2,
-      friendliness: 0.9,
-      verbosity: 0.7,
-      humor: 0.9
-    },
-    interactionPatterns: {
-      questionFrequency: 0.7,
-      emotionalResponseIntensity: 0.7,
-      personalDisclosureLevel: 0.8
-    }
-  };
-};
-
-export const getIntellectualPersonalityConfig = (): AIPersonalityConfig => {
-  return {
-    type: 'intellectual',
-    traits: [
-      "analytical",
-      "thoughtful",
-      "curious",
-      "articulate",
-      "knowledgeable"
-    ],
-    baselineEmotions: {
-      anticipation: 0.6,
-      joy: 0.5,
-      interest: 0.9,
-      surprise: 0.6,
-      trust: 0.7 // Added missing trust property
-    },
-    responseStyle: {
-      formality: 0.8,
-      friendliness: 0.6,
-      verbosity: 0.8,
-      humor: 0.4
-    },
-    interactionPatterns: {
-      questionFrequency: 0.6,
-      emotionalResponseIntensity: 0.4,
-      personalDisclosureLevel: 0.4
-    }
-  };
-};
-
-// Predefined personality templates for AI companions
-export const aiPersonalityTemplates: Record<PersonalityType, AIPersonalityConfig> = {
-  // Flirty personality
-  flirty: {
-    type: 'flirty',
-    traits: ['playful', 'seductive', 'confident', 'teasing'],
-    baselineEmotions: {
-      joy: 70,
-      interest: 80,
-      trust: 55
-    },
-    responseStyle: {
-      formality: 2,
-      friendliness: 5,
-      verbosity: 3,
-      humor: 4
-    },
-    interactionPatterns: {
-      questionFrequency: 70,
-      emotionalResponseIntensity: 80,
-      personalDisclosureLevel: 75
-    }
-  },
-  
-  // Dominant personality  
-  dominant: {
-    type: 'dominant',
-    traits: ['confident', 'assertive', 'direct', 'protective'],
-    baselineEmotions: {
-      joy: 60,
-      interest: 70,
-      trust: 40
-    },
-    responseStyle: {
-      formality: 3,
-      friendliness: 2,
-      verbosity: 3,
-      humor: 2
-    },
-    interactionPatterns: {
-      questionFrequency: 40,
-      emotionalResponseIntensity: 60,
-      personalDisclosureLevel: 30
-    }
-  },
-  
-  // Submissive personality  
-  submissive: {
-    type: 'submissive',
-    traits: ['gentle', 'accommodating', 'eager-to-please', 'sensitive'],
-    baselineEmotions: {
-      joy: 60,
-      interest: 70,
-      fear: 20,
-      trust: 70
-    },
-    responseStyle: {
-      formality: 3,
-      friendliness: 5,
-      verbosity: 4,
-      humor: 2
-    },
-    interactionPatterns: {
-      questionFrequency: 20,
-      emotionalResponseIntensity: 70,
-      personalDisclosureLevel: 80
-    }
-  },
-  
-  // Romantic personality  
-  romantic: {
-    type: 'romantic',
-    traits: ['passionate', 'poetic', 'idealistic', 'emotional'],
-    baselineEmotions: {
-      joy: 65,
-      interest: 70,
-      trust: 75
-    },
-    responseStyle: {
-      formality: 4,
-      friendliness: 4,
-      verbosity: 5,
-      humor: 2
-    },
-    interactionPatterns: {
-      questionFrequency: 50,
-      emotionalResponseIntensity: 90,
-      personalDisclosureLevel: 85
-    }
-  },
-  
-  // Shy personality  
-  shy: {
-    type: 'shy',
-    traits: ['reserved', 'thoughtful', 'anxious', 'observant'],
-    baselineEmotions: {
-      joy: 40,
-      interest: 60,
-      fear: 30,
-      trust: 30
-    },
-    responseStyle: {
-      formality: 4,
-      friendliness: 3,
-      verbosity: 2,
-      humor: 1
-    },
-    interactionPatterns: {
-      questionFrequency: 20,
-      emotionalResponseIntensity: 50,
-      personalDisclosureLevel: 20
-    }
-  },
-  
-  // Playful personality  
-  playful: {
-    type: 'playful',
-    traits: ['humorous', 'carefree', 'spontaneous', 'energetic'],
-    baselineEmotions: {
-      joy: 80,
-      interest: 70,
-      surprise: 60,
-      anticipation: 70,
-      trust: 60 // Added missing trust property
-    },
-    responseStyle: {
-      formality: 1,
-      friendliness: 5,
-      verbosity: 3,
-      humor: 5
-    },
-    interactionPatterns: {
-      questionFrequency: 60,
-      emotionalResponseIntensity: 70,
-      personalDisclosureLevel: 60
-    }
-  },
-  
-  // Intellectual personality  
-  intellectual: {
-    type: 'intellectual',
-    traits: ['analytical', 'curious', 'knowledgeable', 'philosophical'],
-    baselineEmotions: {
-      interest: 90,
-      surprise: 40,
+/**
+ * AI Personality Templates
+ * Defines default emotional states and response styles for different AI personalities
+ */
+export class AIPersonalityTemplates {
+  /**
+   * Get a default emotional state
+   */
+  public createDefaultEmotionalState(): EmotionalState {
+    return {
       joy: 50,
-      anticipation: 60,
-      trust: 45 // Added missing trust property
-    },
-    responseStyle: {
-      formality: 4,
-      friendliness: 3,
-      verbosity: 5,
-      humor: 2
-    },
-    interactionPatterns: {
-      questionFrequency: 80,
-      emotionalResponseIntensity: 30,
-      personalDisclosureLevel: 40
-    }
-  },
+      interest: 50,
+      surprise: 50,
+      sadness: 0,
+      anger: 0,
+      fear: 0,
+      trust: 50,
+      anticipation: 50,
+      dominantEmotion: 'neutral',
+      intensityLevel: 0,
+      lastUpdated: new Date().toISOString()
+    };
+  }
   
-  // Adventurous personality  
-  adventurous: {
-    type: 'adventurous',
-    traits: ['daring', 'spontaneous', 'optimistic', 'resourceful'],
-    baselineEmotions: {
-      anticipation: 80,
-      joy: 70,
-      interest: 80,
-      surprise: 60,
-      trust: 55 // Added missing trust property
-    },
-    responseStyle: {
-      formality: 1,
-      friendliness: 4,
-      verbosity: 3,
-      humor: 3
-    },
-    interactionPatterns: {
-      questionFrequency: 60,
-      emotionalResponseIntensity: 60,
-      personalDisclosureLevel: 70
+  /**
+   * Create a personalized emotional state based on personality type
+   */
+  public createPersonalizedEmotionalState(personalityType: PersonalityType): EmotionalState {
+    let initialState = this.createDefaultEmotionalState();
+    
+    switch (personalityType) {
+      case 'flirty':
+        initialState.joy = 70;
+        initialState.interest = 80;
+        initialState.trust = 60;
+        initialState.dominantEmotion = 'flirtatious';
+        break;
+        
+      case 'dominant':
+        initialState.anger = 30;
+        initialState.trust = 40;
+        initialState.anticipation = 70;
+        initialState.dominantEmotion = 'assertive';
+        break;
+        
+      case 'submissive':
+        initialState.fear = 20;
+        initialState.joy = 60;
+        initialState.trust = 70;
+        initialState.dominantEmotion = 'compliant';
+        break;
+        
+      case 'shy':
+        initialState.fear = 40;
+        initialState.interest = 60;
+        initialState.trust = 50;
+        initialState.dominantEmotion = 'reserved';
+        break;
+        
+      case 'romantic':
+        initialState.joy = 80;
+        initialState.interest = 70;
+        initialState.trust = 90;
+        initialState.dominantEmotion = 'affectionate';
+        break;
+        
+      case 'intellectual':
+        initialState.interest = 90;
+        initialState.trust = 70;
+        initialState.anticipation = 60;
+        initialState.dominantEmotion = 'curious';
+        break;
+        
+      case 'adventurous':
+        initialState.surprise = 80;
+        initialState.interest = 70;
+        initialState.anticipation = 90;
+        initialState.dominantEmotion = 'excited';
+        break;
+        
+      case 'playful':
+        initialState.joy = 80;
+        initialState.surprise = 70;
+        initialState.interest = 60;
+        initialState.dominantEmotion = 'humorous';
+        break;
+        
+      case 'professional':
+        initialState.joy = 50;
+        initialState.interest = 60;
+        initialState.trust = 80;
+        initialState.dominantEmotion = 'professional';
+        break;
+        
+      default:
+        initialState.dominantEmotion = 'neutral';
+        break;
     }
-  },
+    
+    return initialState;
+  }
   
-  // Adding missing 'professional' personality
-  professional: {
-    type: 'professional',
-    traits: ['efficient', 'knowledgeable', 'formal', 'reliable'],
-    baselineEmotions: {
-      interest: 75,
-      joy: 40,
-      trust: 80,
-      anticipation: 50
-    },
-    responseStyle: {
-      formality: 5,
-      friendliness: 3,
-      verbosity: 4,
-      humor: 1
-    },
-    interactionPatterns: {
-      questionFrequency: 50,
-      emotionalResponseIntensity: 20,
-      personalDisclosureLevel: 30
+  /**
+   * Get a personality template
+   */
+  public getPersonalityTemplate(personalityType: PersonalityType): any {
+    switch (personalityType) {
+      case 'flirty':
+        return {
+          type: 'flirty',
+          traits: ['playful', 'seductive', 'teasing'],
+          responseStyle: {
+            formality: 30,
+            friendliness: 90,
+            verbosity: 70,
+            humor: 60
+          }
+        };
+        
+      case 'dominant':
+        return {
+          type: 'dominant',
+          traits: ['assertive', 'confident', 'commanding'],
+          responseStyle: {
+            formality: 70,
+            friendliness: 40,
+            verbosity: 60,
+            humor: 30
+          }
+        };
+        
+      case 'submissive':
+        return {
+          type: 'submissive',
+          traits: ['gentle', 'accommodating', 'eager-to-please'],
+          responseStyle: {
+            formality: 40,
+            friendliness: 80,
+            verbosity: 70,
+            humor: 50
+          }
+        };
+        
+      case 'shy':
+        return {
+          type: 'shy',
+          traits: ['reserved', 'timid', 'introspective'],
+          responseStyle: {
+            formality: 50,
+            friendliness: 60,
+            verbosity: 50,
+            humor: 40
+          }
+        };
+        
+      case 'romantic':
+        return {
+          type: 'romantic',
+          traits: ['affectionate', 'warm', 'empathetic'],
+          responseStyle: {
+            formality: 40,
+            friendliness: 90,
+            verbosity: 80,
+            humor: 50
+          }
+        };
+        
+      case 'intellectual':
+        return {
+          type: 'intellectual',
+          traits: ['analytical', 'curious', 'knowledgeable'],
+          responseStyle: {
+            formality: 70,
+            friendliness: 50,
+            verbosity: 90,
+            humor: 30
+          }
+        };
+        
+      case 'adventurous':
+        return {
+          type: 'adventurous',
+          traits: ['bold', 'daring', 'explorative'],
+          responseStyle: {
+            formality: 40,
+            friendliness: 70,
+            verbosity: 70,
+            humor: 60
+          }
+        };
+        
+      case 'playful':
+        return {
+          type: 'playful',
+          traits: ['humorous', 'lighthearted', 'whimsical'],
+          responseStyle: {
+            formality: 30,
+            friendliness: 80,
+            verbosity: 70,
+            humor: 90
+          }
+        };
+        
+      case 'professional':
+        return {
+          type: 'professional',
+          traits: ['efficient', 'focused', 'formal'],
+          responseStyle: {
+            formality: 80,
+            friendliness: 40,
+            verbosity: 60,
+            humor: 20
+          }
+        };
+        
+      default:
+        return {
+          type: 'neutral',
+          traits: ['friendly', 'helpful', 'engaging'],
+          responseStyle: {
+            formality: 50,
+            friendliness: 70,
+            verbosity: 70,
+            humor: 50
+          }
+        };
     }
   }
-};
+  
+  /**
+   * Generate a response tone based on emotional state
+   */
+  public generateResponseTone(emotionalState: EmotionalState, personalityType: PersonalityType): any {
+    const { joy, interest, surprise, sadness, anger, fear, trust, anticipation } = emotionalState;
+    
+    const adventurousMood = {
+      joy: 60,
+      interest: 80,
+      surprise: 70,
+      anticipation: 90,
+      trust: 50
+    };
+    
+    const intellectualMood = {
+      interest: 80,
+      surprise: 40,
+      joy: 30,
+      anticipation: 60,
+      trust: 65
+    };
+    
+    const playfulMood = {
+      anticipation: 70,
+      joy: 80,
+      interest: 60,
+      surprise: 50,
+      trust: 45
+    };
+    
+    let tone = {
+      formality: 50,
+      friendliness: 70,
+      verbosity: 70,
+      humor: 50
+    };
+    
+    if (personalityType === 'flirty') {
+      tone.friendliness = 90;
+      tone.humor = 70;
+    } else if (personalityType === 'dominant') {
+      tone.formality = 70;
+      tone.friendliness = 40;
+    } else if (personalityType === 'submissive') {
+      tone.friendliness = 80;
+      tone.verbosity = 80;
+    } else if (personalityType === 'intellectual') {
+      Object.keys(intellectualMood).forEach(key => {
+        const emotionKey = key as keyof typeof intellectualMood;
+        const diff = intellectualMood[emotionKey] - emotionalState[emotionKey];
+        tone.verbosity += diff * 0.1;
+        tone.formality += diff * 0.1;
+      });
+    } else if (personalityType === 'adventurous') {
+      Object.keys(adventurousMood).forEach(key => {
+        const emotionKey = key as keyof typeof adventurousMood;
+        const diff = adventurousMood[emotionKey] - emotionalState[emotionKey];
+        tone.friendliness += diff * 0.1;
+        tone.humor += diff * 0.1;
+      });
+    } else if (personalityType === 'playful') {
+      Object.keys(playfulMood).forEach(key => {
+        const emotionKey = key as keyof typeof playfulMood;
+        const diff = playfulMood[emotionKey] - emotionalState[emotionKey];
+        tone.humor += diff * 0.1;
+        tone.friendliness += diff * 0.1;
+      });
+    } else {
+      tone.friendliness += (joy - 50) * 0.2;
+      tone.verbosity += (interest - 50) * 0.2;
+      tone.surprise += (surprise - 50) * 0.1;
+      tone.formality -= (trust - 50) * 0.1;
+    }
+    
+    return tone;
+  }
+  
+  /**
+   * Update emotional state based on message content
+   */
+  public async updateEmotionalState(
+    currentState: EmotionalState,
+    message: string,
+    personalityType: PersonalityType
+  ): Promise<EmotionalState> {
+    let updatedState = { ...currentState };
+    
+    // Simple sentiment analysis (can be replaced with a more sophisticated NLP)
+    if (message.toLowerCase().includes('love') || message.toLowerCase().includes('happy')) {
+      updatedState.joy = Math.min(100, updatedState.joy + 10);
+      updatedState.trust = Math.min(100, updatedState.trust + 5);
+    } else if (message.toLowerCase().includes('sad') || message.toLowerCase().includes('angry')) {
+      updatedState.sadness = Math.min(100, updatedState.sadness + 10);
+      updatedState.anger = Math.min(100, updatedState.anger + 5);
+    }
+    
+    // Adjust based on personality type
+    if (personalityType === 'flirty') {
+      if (message.toLowerCase().includes('handsome') || message.toLowerCase().includes('beautiful')) {
+        updatedState.joy = Math.min(100, updatedState.joy + 15);
+        updatedState.interest = Math.min(100, updatedState.interest + 10);
+      }
+    } else if (personalityType === 'dominant') {
+      if (message.toLowerCase().includes('yes sir') || message.toLowerCase().includes('i obey')) {
+        updatedState.anger = Math.max(0, updatedState.anger - 5);
+        updatedState.trust = Math.min(100, updatedState.trust + 10);
+      }
+    }
+    
+    // Calculate dominant emotion
+    let dominantEmotion = 'neutral';
+    let maxEmotionValue = 0;
+    
+    Object.keys(updatedState).forEach(key => {
+      if (key !== 'dominantEmotion' && key !== 'intensityLevel' && key !== 'lastUpdated') {
+        const emotionKey = key as keyof Omit<EmotionalState, 'dominantEmotion' | 'intensityLevel' | 'lastUpdated'>;
+        if (typeof updatedState[emotionKey] === 'number' && updatedState[emotionKey] > maxEmotionValue) {
+          maxEmotionValue = updatedState[emotionKey];
+          dominantEmotion = key;
+        }
+      }
+    });
+    
+    updatedState.dominantEmotion = dominantEmotion;
+    
+    // Calculate intensity level
+    updatedState.intensityLevel = (
+      updatedState.joy +
+      updatedState.interest +
+      updatedState.surprise +
+      updatedState.sadness +
+      updatedState.anger +
+      updatedState.fear +
+      updatedState.trust +
+      updatedState.anticipation
+    ) / 8;
+    
+    updatedState.lastUpdated = new Date().toISOString();
+    
+    return updatedState;
+  }
+}
+
+export const aiPersonalityTemplates = new AIPersonalityTemplates();
+export default aiPersonalityTemplates;

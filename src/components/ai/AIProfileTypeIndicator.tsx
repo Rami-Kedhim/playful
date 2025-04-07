@@ -5,7 +5,6 @@ import { Bot, Crown } from "lucide-react";
 export interface AIProfileTypeIndicatorProps {
   type: 'ai' | 'premium' | 'human';
   showLabel?: boolean;
-  // Remove size prop as it's causing type errors
 }
 
 const AIProfileTypeIndicator: React.FC<AIProfileTypeIndicatorProps> = ({ 

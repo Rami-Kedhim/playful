@@ -73,7 +73,8 @@ export const escortProfiles: Escort[] = [
       phone: "+1-234-567-8900",
       website: "sophianyc.example.com"
     },
-    featured: true
+    featured: true,
+    avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200"
   },
   {
     id: "2",

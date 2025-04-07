@@ -35,6 +35,7 @@ export interface EmotionalState {
   dominantEmotion: string;
   intensityLevel: number;
   lastUpdated: string;
+  emotion?: string; // Add this property required by the code
 }
 
 export interface AIPersonalityConfig {
@@ -72,6 +73,7 @@ export interface EmotionalMemory {
   state?: EmotionalState; // Added for backward compatibility
   emotionalHistory?: EmotionalState[]; // Added for backward compatibility
   keyMemories?: any[]; // Added for backward compatibility
+  recentInteractions?: any[]; // Added for missing property
 }
 
 export interface MonetizationHook {
@@ -85,4 +87,6 @@ export interface MonetizationHook {
   triggerConditions?: any;
   teaser?: string;
   fullContent?: string;
+  previewUrl?: string;
+  shouldRestrict?: (contentType: string) => boolean;
 }

@@ -64,7 +64,8 @@ export const moreEscorts: Escort[] = [
       phone: "+49-123-456789",
       website: "jessicaberlin.example.com"
     },
-    featured: false
+    featured: false,
+    avatar_url: "https://images.unsplash.com/photo-1519085360753-af0119f825cd?w=200"
   },
   {
     id: "6",

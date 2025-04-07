@@ -90,7 +90,7 @@ export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired'
 export interface VerificationDocument {
   id: string;
   type: string;
-  fileUrl: string;  // Changed from url to fileUrl to match expected property
+  fileUrl: string;  
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
   url?: string; // For backward compatibility

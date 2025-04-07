@@ -33,7 +33,6 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
           </Badge>
           <AIProfileTypeIndicator 
             type={isPremium ? 'premium' : 'ai'} 
-            size="sm" 
             showLabel={false} 
           />
         </div>
