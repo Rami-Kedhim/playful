@@ -1,77 +1,84 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from './useAuth';
 
 export interface BehavioralProfile {
-  interests: string[];
-  preferences: Record<string, any>;
-  segments: string[];
-  lastAnalyzed?: Date;
+  id: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  trustScore: number;
+  engagementLevel: 'low' | 'moderate' | 'high';
+  contentPreferences: string[];
+  behaviorTags: string[];
+  interactionHistory: {
+    lastLogin: string;
+    sessionCount: number;
+    averageSessionDuration: number;
+    clickPatterns: {
+      category: string;
+      count: number;
+    }[];
+  };
 }
 
 export const useBehavioralProfile = () => {
   const { user, isAuthenticated } = useAuth();
+  
   const [profile, setProfile] = useState<BehavioralProfile>({
-    interests: [],
-    preferences: {},
-    segments: []
+    id: 'mock-profile',
+    userId: user?.id || 'unknown',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    trustScore: 65,
+    engagementLevel: 'moderate',
+    contentPreferences: ['images', 'videos', 'text'],
+    behaviorTags: ['early-adopter', 'tech-savvy', 'regular-user'],
+    interactionHistory: {
+      lastLogin: new Date().toISOString(),
+      sessionCount: 12,
+      averageSessionDuration: 423,
+      clickPatterns: [
+        { category: 'profiles', count: 45 },
+        { category: 'messages', count: 23 },
+        { category: 'settings', count: 8 }
+      ]
+    }
   });
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   
-  // Load profile when user changes
-  useEffect(() => {
-    if (user?.id) {
-      loadBehavioralProfile(user.id);
-    }
-  }, [user?.id]);
+  const updateProfile = useCallback((updates: Partial<BehavioralProfile>) => {
+    setProfile(prev => ({
+      ...prev,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }));
+  }, []);
   
-  const loadBehavioralProfile = async (userId: string) => {
-    try {
-      // In a real app, this would fetch from an API or backend
-      // For now, we'll use mock data
-      setProfile({
-        interests: ['virtual-experiences', 'premium-content', 'messaging'],
-        preferences: {
-          communication: 'direct',
-          pricing: 'value-oriented',
-          content: 'visual'
-        },
-        segments: ['active-explorer', 'occasional-spender'],
-        lastAnalyzed: new Date()
-      });
-    } catch (error) {
-      console.error('Error loading behavioral profile:', error);
-    }
-  };
-  
-  const analyzeUser = async () => {
-    if (!user?.id) return;
+  const resetProfile = useCallback(() => {
+    if (!user) return;
     
-    setIsAnalyzing(true);
-    
-    try {
-      // Simulate analysis delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // In a real app, this would call an API
-      setProfile(prev => ({
-        ...prev,
-        lastAnalyzed: new Date(),
-        // Add some randomized analysis results
-        interests: [...prev.interests, 'newly-discovered-interest'],
-        segments: [...prev.segments, 'high-potential']
-      }));
-    } catch (error) {
-      console.error('Error analyzing user behavior:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+    setProfile({
+      id: 'mock-profile',
+      userId: user.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      trustScore: 50,
+      engagementLevel: 'low',
+      contentPreferences: [],
+      behaviorTags: [],
+      interactionHistory: {
+        lastLogin: new Date().toISOString(),
+        sessionCount: 1,
+        averageSessionDuration: 0,
+        clickPatterns: []
+      }
+    });
+  }, [user]);
   
   return {
     profile,
-    isAnalyzing,
-    analyzeUser
+    updateProfile,
+    resetProfile
   };
 };
 

@@ -11,6 +11,11 @@ export interface AICompanionHookReturn {
   loadingConversation: boolean;
   error: string;
   refreshConversation: () => Promise<boolean>;
+  isLoading: boolean;
+  isInitialLoading: boolean;
+  loadInitialMessages: () => Promise<void>;
+  companion: any;
+  loadCompanion: () => Promise<void>;
 }
 
 export const useAICompanion = (profileId: string): AICompanionHookReturn => {
@@ -24,9 +29,51 @@ export const useAICompanion = (profileId: string): AICompanionHookReturn => {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [loadingConversation, setLoadingConversation] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState('');
+  const [companion, setCompanion] = useState<any>(null);
   
   const { user } = useAuth();
+  
+  const loadInitialMessages = async () => {
+    if (!profileId || !user) return;
+    
+    try {
+      setIsInitialLoading(true);
+      // In a real app, this would fetch messages from the API
+      const mockMessages: AIMessage[] = [{
+        id: 'welcome-msg',
+        conversationId: conversation.id,
+        content: 'Hello! How can I assist you today?',
+        role: 'assistant',
+        created_at: new Date().toISOString(),
+      }];
+      
+      setMessages(mockMessages);
+    } catch (err) {
+      setError('Failed to load initial messages');
+      console.error(err);
+    } finally {
+      setIsInitialLoading(false);
+    }
+  };
+  
+  const loadCompanion = async () => {
+    if (!profileId) return;
+    
+    try {
+      // In a real app, this would fetch companion data from the API
+      const mockCompanion = {
+        id: profileId,
+        name: "AI Companion",
+        avatar_url: "/default-avatar.png"
+      };
+      
+      setCompanion(mockCompanion);
+    } catch (err) {
+      console.error('Failed to load companion:', err);
+    }
+  };
   
   // Load existing conversation or create a new one
   useEffect(() => {
@@ -47,20 +94,13 @@ export const useAICompanion = (profileId: string): AICompanionHookReturn => {
         setConversation(mockConversation);
         
         // Load initial messages
-        const mockMessages: AIMessage[] = [{
-          id: 'welcome-msg',
-          conversationId: mockConversation.id,
-          content: 'Hello! How can I assist you today?',
-          role: 'assistant',
-          createdAt: new Date().toISOString(),
-        }];
-        
-        setMessages(mockMessages);
+        await loadInitialMessages();
       } catch (err) {
         setError('Failed to load conversation');
         console.error(err);
       } finally {
         setLoadingConversation(false);
+        setIsInitialLoading(false);
       }
     };
     
@@ -79,7 +119,7 @@ export const useAICompanion = (profileId: string): AICompanionHookReturn => {
         conversationId: conversation.id,
         content: content,
         role: 'user',
-        createdAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
       };
       
       setMessages(prevMessages => [...prevMessages, userMessage]);
@@ -92,7 +132,7 @@ export const useAICompanion = (profileId: string): AICompanionHookReturn => {
           conversationId: conversation.id,
           content: `I received your message: "${content}". This is a simulated response.`,
           role: 'assistant',
-          createdAt: new Date().toISOString(),
+          created_at: new Date().toISOString(),
         };
         
         setMessages(prevMessages => [...prevMessages, aiResponse]);
@@ -101,7 +141,7 @@ export const useAICompanion = (profileId: string): AICompanionHookReturn => {
         setConversation(prev => ({
           ...prev,
           lastMessageAt: new Date().toISOString(),
-          messagesCount: prev.messagesCount + 2
+          messagesCount: (prev.messagesCount || 0) + 2
         }));
         
         setSendingMessage(false);
@@ -137,8 +177,13 @@ export const useAICompanion = (profileId: string): AICompanionHookReturn => {
     sendMessage,
     sendingMessage,
     loadingConversation,
+    isLoading: sendingMessage || loadingConversation,
+    isInitialLoading,
     error,
-    refreshConversation
+    refreshConversation,
+    loadInitialMessages,
+    companion,
+    loadCompanion
   };
 };
 

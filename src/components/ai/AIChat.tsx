@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,15 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Loader2, Copy, Check, Lock, Coins } from 'lucide-react';
-import { AIMessage } from '@/types/ai-profile';
+import { AIMessage } from '@/types/ai-messages';
 import AIMessageComponent from './AIMessageComponent';
 import { useAuth } from '@/hooks/auth';
-import { useAIChat } from '@/hooks/useAIChat';
 import { useToast } from '@/components/ui/use-toast';
 import { copyToClipboard } from '@/utils/clipboardUtils';
-import { useSubscription } from '@/hooks/useSubscription';
-import { useLucoins } from '@/hooks/useLucoins';
-import { useHermesInsights } from '@/hooks/useHermesInsights';
 import { useAICompanion } from '@/hooks/ai-companion/useAICompanion';
 
 interface AIChatProps {
@@ -31,16 +28,24 @@ const AIChat: React.FC<AIChatProps> = ({
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { sendMessage, messages, isLoading: isSending, error, loadInitialMessages, isInitialLoading } = useAIChat(profileId);
+  const { 
+    sendMessage, 
+    messages, 
+    isLoading, 
+    error, 
+    loadInitialMessages, 
+    isInitialLoading,
+    companion, 
+    loadCompanion 
+  } = useAICompanion(profileId);
+  
   const [input, setInput] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
-  const { subscriptionStatus } = useSubscription();
-  const { lucoinBalance } = useLucoins();
-  const { recordAICompanionInteraction } = useHermesInsights(user?.id);
-  const { companion, loadCompanion } = useAICompanion(profileId);
   
-  const isSubscribed = subscriptionStatus === 'active';
+  // Placeholder for subscription status since it's required in the component
+  const subscriptionStatus = 'active';
+  const lucoinBalance = 100; // Default value
   
   // Load initial messages and companion data
   useEffect(() => {
@@ -54,13 +59,6 @@ const AIChat: React.FC<AIChatProps> = ({
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
-  
-  // Track message count for HERMES
-  useEffect(() => {
-    if (user && messages.length > 0) {
-      recordAICompanionInteraction(profileId, messages.length);
-    }
-  }, [messages, profileId, recordAICompanionInteraction, user]);
   
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -93,7 +91,7 @@ const AIChat: React.FC<AIChatProps> = ({
   };
   
   const renderUpgradePrompt = () => {
-    if (isSubscribed) return null;
+    if (subscriptionStatus === 'active') return null;
     
     return (
       <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-md">
@@ -127,7 +125,7 @@ const AIChat: React.FC<AIChatProps> = ({
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-4">
           <Avatar>
-            <AvatarImage src={profile?.avatar_url ? profile.avatar_url : '/default-avatar.png'} alt={profileName} />
+            <AvatarImage src={profileAvatar ? profileAvatar : '/default-avatar.png'} alt={profileName} />
             <AvatarFallback>{profileName.substring(0, 2)}</AvatarFallback>
           </Avatar>
           <div className="space-y-0.5">
@@ -170,10 +168,10 @@ const AIChat: React.FC<AIChatProps> = ({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           className="mr-2"
-          disabled={isSending}
+          disabled={isLoading}
         />
-        <Button onClick={handleSend} disabled={isSending}>
-          {isSending ? (
+        <Button onClick={handleSend} disabled={isLoading}>
+          {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               <span>Sending...</span>
