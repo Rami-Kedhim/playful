@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from 'react';
-import { AIMessage, AIConversation } from '@/types/ai-messages';
+import { useState, useCallback, useEffect } from 'react';
+import { AIMessage, AIConversation, AIProfile } from '@/types/ai-messages';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 export interface AICompanionHookReturn {
@@ -10,164 +10,203 @@ export interface AICompanionHookReturn {
   sendingMessage: boolean;
   loadingConversation: boolean;
   error: string;
-  refreshConversation: () => Promise<boolean>;
+  refreshConversation: () => Promise<AIConversation>;
+  companion?: AIProfile;
+  loadCompanion: (id: string) => Promise<AIProfile | null>;
   isLoading: boolean;
+  loadInitialMessages: () => Promise<AIMessage[]>;
   isInitialLoading: boolean;
-  loadInitialMessages: () => Promise<void>;
-  companion: any;
-  loadCompanion: () => Promise<void>;
 }
 
-export const useAICompanion = (profileId: string): AICompanionHookReturn => {
+export function useAICompanion(profileId: string): AICompanionHookReturn {
+  const { user } = useAuth();
   const [conversation, setConversation] = useState<AIConversation>({
     id: '',
     profileId: profileId,
-    lastMessageAt: new Date().toISOString(),
-    messagesCount: 0
+    lastMessageAt: new Date(),
+    messagesCount: 0,
+    messages: [],
+    ai_profile: {
+      id: profileId,
+      name: 'AI Assistant',
+      personality: {
+        type: 'friendly'
+      }
+    }
   });
   
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [loadingConversation, setLoadingConversation] = useState(true);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState('');
-  const [companion, setCompanion] = useState<any>(null);
+  const [companion, setCompanion] = useState<AIProfile | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   
-  const { user } = useAuth();
-  
-  const loadInitialMessages = async () => {
-    if (!profileId || !user) return;
-    
-    try {
-      setIsInitialLoading(true);
-      // In a real app, this would fetch messages from the API
-      const mockMessages: AIMessage[] = [{
-        id: 'welcome-msg',
-        conversationId: conversation.id,
-        content: 'Hello! How can I assist you today?',
-        role: 'assistant',
-        created_at: new Date().toISOString(),
-      }];
-      
-      setMessages(mockMessages);
-    } catch (err) {
-      setError('Failed to load initial messages');
-      console.error(err);
-    } finally {
-      setIsInitialLoading(false);
-    }
-  };
-  
-  const loadCompanion = async () => {
-    if (!profileId) return;
-    
-    try {
-      // In a real app, this would fetch companion data from the API
-      const mockCompanion = {
-        id: profileId,
-        name: "AI Companion",
-        avatar_url: "/default-avatar.png"
-      };
-      
-      setCompanion(mockCompanion);
-    } catch (err) {
-      console.error('Failed to load companion:', err);
-    }
-  };
-  
-  // Load existing conversation or create a new one
+  // Load conversation on mount
   useEffect(() => {
-    if (!profileId || !user) return;
-    
     const loadConversation = async () => {
+      setLoadingConversation(true);
       try {
-        setLoadingConversation(true);
-        // In a real app, this would make an API call
-        // For now, create a mock conversation
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Create a mock conversation
         const mockConversation: AIConversation = {
-          id: `conv-${profileId}-${user.id}`,
+          id: `conv-${Date.now()}`,
           profileId: profileId,
-          lastMessageAt: new Date().toISOString(),
-          messagesCount: 0
+          user_id: user?.id,
+          ai_profile_id: profileId,
+          lastMessageAt: new Date(),
+          messagesCount: 0,
+          created_at: new Date(),
+          updated_at: new Date(),
+          messages: [],
+          ai_profile: {
+            id: profileId,
+            name: 'AI Assistant',
+            personality: {
+              type: 'friendly'
+            }
+          }
         };
         
         setConversation(mockConversation);
-        
-        // Load initial messages
         await loadInitialMessages();
       } catch (err) {
         setError('Failed to load conversation');
         console.error(err);
       } finally {
         setLoadingConversation(false);
-        setIsInitialLoading(false);
       }
     };
     
-    loadConversation();
-  }, [profileId, user]);
+    if (profileId) {
+      loadConversation();
+    }
+  }, [profileId, user?.id]);
   
-  const sendMessage = async (content: string): Promise<boolean> => {
-    if (!content.trim() || !user || sendingMessage) return false;
-    
+  // Load initial messages
+  const loadInitialMessages = async (): Promise<AIMessage[]> => {
+    setIsInitialLoading(true);
     try {
-      setSendingMessage(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 700));
       
-      // Add user message to the conversation
-      const userMessage: AIMessage = {
-        id: `msg-${Date.now()}`,
+      // Create a welcome message
+      const welcomeMessage: AIMessage = {
+        id: `msg-welcome-${Date.now()}`,
         conversationId: conversation.id,
-        content: content,
-        role: 'user',
-        created_at: new Date().toISOString(),
+        role: 'assistant',
+        content: "Hello! I'm your AI assistant. How can I help you today?",
+        timestamp: new Date(),
+        sender_id: profileId,
+        conversation_id: conversation.id,
       };
       
-      setMessages(prevMessages => [...prevMessages, userMessage]);
+      setMessages([welcomeMessage]);
+      return [welcomeMessage];
+    } catch (err) {
+      setError('Failed to load messages');
+      console.error(err);
+      return [];
+    } finally {
+      setIsInitialLoading(false);
+    }
+  };
+  
+  // Send a message
+  const sendMessage = async (content: string): Promise<boolean> => {
+    if (!content.trim() || !user) return false;
+    
+    setSendingMessage(true);
+    try {
+      // Create user message
+      const userMessage: AIMessage = {
+        id: `msg-user-${Date.now()}`,
+        conversationId: conversation.id,
+        role: 'user',
+        content,
+        timestamp: new Date(),
+        sender_id: user.id,
+        conversation_id: conversation.id,
+      };
       
-      // In a real app, we would send this to an API
-      // For now, simulate a response
-      setTimeout(() => {
-        const aiResponse: AIMessage = {
-          id: `msg-${Date.now() + 1}`,
-          conversationId: conversation.id,
-          content: `I received your message: "${content}". This is a simulated response.`,
-          role: 'assistant',
-          created_at: new Date().toISOString(),
-        };
-        
-        setMessages(prevMessages => [...prevMessages, aiResponse]);
-        
-        // Update conversation
-        setConversation(prev => ({
-          ...prev,
-          lastMessageAt: new Date().toISOString(),
-          messagesCount: (prev.messagesCount || 0) + 2
-        }));
-        
-        setSendingMessage(false);
-      }, 1000);
+      setMessages(prev => [...prev, userMessage]);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create AI response
+      const aiResponse: AIMessage = {
+        id: `msg-ai-${Date.now()}`,
+        conversationId: conversation.id,
+        role: 'assistant',
+        content: `I received your message: "${content}". This is a simulated response.`,
+        timestamp: new Date(),
+        sender_id: profileId,
+        conversation_id: conversation.id,
+      };
+      
+      setMessages(prev => [...prev, aiResponse]);
+      
+      // Update conversation
+      setConversation(prev => ({
+        ...prev,
+        lastMessageAt: new Date(),
+        messagesCount: prev.messagesCount + 2
+      }));
       
       return true;
     } catch (err) {
       setError('Failed to send message');
       console.error(err);
-      setSendingMessage(false);
       return false;
+    } finally {
+      setSendingMessage(false);
     }
   };
   
-  const refreshConversation = async (): Promise<boolean> => {
+  // Refresh conversation
+  const refreshConversation = async (): Promise<AIConversation> => {
+    setLoadingConversation(true);
     try {
-      setLoadingConversation(true);
-      // In a real app, this would refresh from the API
-      // For now, just simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return true;
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return conversation;
     } catch (err) {
       setError('Failed to refresh conversation');
-      return false;
+      console.error(err);
+      return conversation;
     } finally {
       setLoadingConversation(false);
+    }
+  };
+  
+  // Load companion
+  const loadCompanion = async (id: string): Promise<AIProfile | null> => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Create mock companion
+      const mockCompanion: AIProfile = {
+        id,
+        name: 'AI Companion',
+        personality: {
+          type: 'friendly'
+        }
+      };
+      
+      setCompanion(mockCompanion);
+      return mockCompanion;
+    } catch (err) {
+      setError('Failed to load companion');
+      console.error(err);
+      return null;
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -177,14 +216,14 @@ export const useAICompanion = (profileId: string): AICompanionHookReturn => {
     sendMessage,
     sendingMessage,
     loadingConversation,
-    isLoading: sendingMessage || loadingConversation,
-    isInitialLoading,
     error,
     refreshConversation,
-    loadInitialMessages,
     companion,
-    loadCompanion
+    loadCompanion,
+    isLoading,
+    loadInitialMessages,
+    isInitialLoading
   };
-};
+}
 
 export default useAICompanion;

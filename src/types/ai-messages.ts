@@ -10,6 +10,8 @@ export interface AIMessage {
   payment_status?: 'pending' | 'completed' | 'failed';
   price?: number;
   has_read?: boolean;
+  conversation_id?: string;
+  sender_id?: string;
   conversationId?: string;
 }
 

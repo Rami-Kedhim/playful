@@ -1,339 +1,211 @@
-
-import React, { useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Loader2, Save } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AuthUser, UserProfile } from '@/types/auth';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
 
-// Form schema for account settings
-const accountFormSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: 'Username must be at least 3 characters' })
-    .max(30, { message: 'Username must be less than 30 characters' }),
-  email: z.string().email({ message: 'Invalid email address' }).optional(),
-  fullName: z.string().optional(),
-});
-
-type AccountFormValues = z.infer<typeof accountFormSchema>;
-
-// Form schema for password change
-const passwordFormSchema = z.object({
-  currentPassword: z
-    .string()
-    .min(6, { message: 'Current password must be at least 6 characters' }),
-  newPassword: z
-    .string()
-    .min(8, { message: 'New password must be at least 8 characters' }),
-  confirmPassword: z
-    .string()
-    .min(8, { message: 'Confirm password must be at least 8 characters' }),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
-
-type PasswordFormValues = z.infer<typeof passwordFormSchema>;
-
-interface AccountSettingsProps {
-  initialTab?: string;
-  user?: AuthUser;
-  profile?: UserProfile | null;
+interface AccountFormData {
+  username?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
 }
 
-const AccountSettings: React.FC<AccountSettingsProps> = ({ 
-  initialTab = 'general',
-  user: propUser,
-  profile: propProfile
-}) => {
-  const auth = useAuth();
-  // Use either props or auth context
-  const user = propUser || auth.user;
-  const profile = propProfile || auth.profile;
-  const { updateUserProfile, updatePassword } = auth;
-  
-  const [isSaving, setIsSaving] = useState(false);
+interface PasswordChangeResult {
+  success: boolean;
+  error?: string;
+}
+
+const AccountSettings = () => {
+  const { user, profile, updateUserProfile, updatePassword } = useAuth();
+  const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-
-  // Form for general settings
-  const accountForm = useForm<AccountFormValues>({
-    resolver: zodResolver(accountFormSchema),
+  
+  const { 
+    register, 
+    handleSubmit, 
+    watch,
+    formState: { errors } 
+  } = useForm<AccountFormData>({
     defaultValues: {
-      username: user?.username || '',
-      email: user?.email || '',
-      fullName: profile?.full_name || '',
-    },
+      username: profile?.username || '',
+      email: user?.email || ''
+    }
   });
-
-  // Form for password change
-  const passwordForm = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordFormSchema),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    },
-  });
-
-  // Handle account form submission
-  const onSubmitAccount = async (data: AccountFormValues) => {
-    setIsSaving(true);
+  
+  const onSubmit = async (data: AccountFormData) => {
+    if (!user) return;
+    
+    setIsUpdating(true);
     try {
-      const success = await updateUserProfile({
+      await updateUserProfile({
         username: data.username,
+        email: data.email
       });
-
-      if (success) {
-        toast({
-          title: 'Account updated',
-          description: 'Your account settings have been updated.',
-        });
-      }
-    } catch (error) {
-      console.error('Error updating account:', error);
+      
       toast({
-        title: 'Error',
-        description: 'Failed to update account settings. Please try again.',
-        variant: 'destructive',
+        title: "Profile Updated",
+        description: "Your account settings have been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: "There was a problem updating your account settings.",
+        variant: "destructive"
       });
     } finally {
-      setIsSaving(false);
+      setIsUpdating(false);
     }
   };
-
-  // Handle password form submission
-  const onSubmitPassword = async (data: PasswordFormValues) => {
+  
+  const onChangePassword = async (data: AccountFormData) => {
+    if (!data.currentPassword || !data.newPassword) return;
+    
     setIsChangingPassword(true);
     try {
-      const result = await updatePassword(data.currentPassword, data.newPassword);
-
+      const result = await updatePassword(data.currentPassword, data.newPassword) as PasswordChangeResult;
+      
       if (result.success) {
         toast({
-          title: 'Password updated',
-          description: 'Your password has been updated successfully.',
-        });
-        passwordForm.reset({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
+          title: "Password Changed",
+          description: "Your password has been changed successfully.",
         });
       } else {
         toast({
-          title: 'Error',
-          description: result.error || 'Failed to update password. Please try again.',
-          variant: 'destructive',
+          title: "Password Change Failed",
+          description: result.error || "There was a problem changing your password.",
+          variant: "destructive"
         });
       }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'An unexpected error occurred',
-        variant: 'destructive',
+        title: "Password Change Failed",
+        description: error?.message || "There was a problem changing your password.",
+        variant: "destructive"
       });
     } finally {
       setIsChangingPassword(false);
     }
   };
-
+  
   return (
-    <Tabs defaultValue={initialTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6">
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
-      </TabsList>
+    <div className="container mx-auto max-w-2xl p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+          <CardDescription>
+            Manage your account settings.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Username"
+                defaultValue={profile?.username}
+                {...register("username")}
+                disabled={isUpdating}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                defaultValue={user?.email}
+                {...register("email")}
+                disabled={isUpdating}
+              />
+            </div>
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update Profile"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <TabsContent value="general">
-        <Card>
-          <CardHeader>
-            <CardTitle>General Settings</CardTitle>
-            <CardDescription>
-              Update your account information and preferences
-            </CardDescription>
-          </CardHeader>
-          <Form {...accountForm}>
-            <form onSubmit={accountForm.handleSubmit(onSubmitAccount)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={accountForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input placeholder="username" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={accountForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="email@example.com" 
-                          {...field} 
-                          disabled
-                          readOnly 
-                        />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground">
-                        Email cannot be changed directly
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={accountForm.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isSaving} className="ml-auto">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="security">
-        <Card>
-          <CardHeader>
-            <CardTitle>Security Settings</CardTitle>
-            <CardDescription>
-              Update your password and security preferences
-            </CardDescription>
-          </CardHeader>
-          <Form {...passwordForm}>
-            <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={passwordForm.control}
-                  name="currentPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="current-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
-                  name="newPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button
-                  type="submit"
-                  disabled={isChangingPassword}
-                  className="ml-auto"
-                >
-                  {isChangingPassword ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    'Update Password'
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
-      </TabsContent>
-    </Tabs>
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+          <CardDescription>
+            Update your password.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleSubmit(onChangePassword)} className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="currentPassword">Current Password</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                placeholder="Current Password"
+                {...register("currentPassword", { required: true })}
+                disabled={isChangingPassword}
+              />
+              {errors.currentPassword && (
+                <p className="text-sm text-red-500">Current password is required</p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                placeholder="New Password"
+                {...register("newPassword", { required: true })}
+                disabled={isChangingPassword}
+              />
+              {errors.newPassword && (
+                <p className="text-sm text-red-500">New password is required</p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirm New Password"
+                {...register("confirmPassword", {
+                  required: true,
+                  validate: (value) => value === watch("newPassword") || "Passwords do not match",
+                })}
+                disabled={isChangingPassword}
+              />
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+              )}
+            </div>
+            <Button type="submit" disabled={isChangingPassword}>
+              {isChangingPassword ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Changing Password...
+                </>
+              ) : (
+                "Change Password"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

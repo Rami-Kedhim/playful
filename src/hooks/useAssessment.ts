@@ -1,105 +1,79 @@
 
 import { useState, useCallback } from 'react';
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
-import { ChaseHughesBehavioralProfile } from '@/types/chaseHughes';
+import { BehavioralAssessmentService } from '@/services/assessment/BehavioralAssessmentService';
+
+interface AssessmentScores {
+  engagementPotential: number;
+  contentAffinity: number;
+  monetizationPropensity: number;
+  retentionLikelihood: number;
+}
 
 interface AssessmentResult {
   assessmentId: string;
   userId: string;
   timestamp: string;
-  scores: {
-    engagementPotential: number;
-    contentAffinity: number;
-    monetizationPropensity: number;
-    retentionLikelihood: number;
-  };
+  scores: AssessmentScores;
   recommendations: string[];
   insightSummary: string;
-  chaseHughesProfile?: ChaseHughesBehavioralProfile;
+  chaseHughesProfile?: any;
 }
 
 export const useAssessment = () => {
   const { user } = useAuth();
-  const { analyzeUser } = useEnhancedBehavioral();
-  
+  const { analyzeUser, enhancedProfile } = useEnhancedBehavioral();
   const [assessmentResults, setAssessmentResults] = useState<AssessmentResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const assessmentService = new BehavioralAssessmentService();
   
-  // Added assessment and isGenerating to match what components expect
-  const [assessment, setAssessment] = useState<any>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  
+  // Run the main assessment process
   const runAssessment = useCallback(async () => {
-    if (!user) {
-      setError('User not authenticated');
-      return null;
-    }
+    if (!user) return null;
     
+    setIsProcessing(true);
     try {
-      setIsProcessing(true);
-      setError(null);
+      // First, get the enhanced behavioral profile
+      await analyzeUser();
       
-      // Generate mock assessment
-      const result: AssessmentResult = {
-        assessmentId: `assess-${Date.now()}`,
-        userId: user.id,
-        timestamp: new Date().toISOString(),
-        scores: {
-          engagementPotential: Math.random() * 100,
-          contentAffinity: Math.random() * 100,
-          monetizationPropensity: Math.random() * 100,
-          retentionLikelihood: Math.random() * 100
-        },
-        recommendations: [
-          'Personalize content recommendations',
-          'Increase engagement through interactive elements',
-          'Target promotional content during peak usage times'
-        ],
-        insightSummary: 'User shows moderate engagement potential with higher affinity for visual content.'
-      };
+      // Generate an assessment based on the enhanced profile
+      const assessment = assessmentService.generateAssessment(enhancedProfile);
       
-      setAssessmentResults(result);
-      setAssessment(result);
-      return result;
-    } catch (err: any) {
-      setError(err.message || 'Failed to run assessment');
+      setAssessmentResults(assessment);
+      return assessment;
+    } catch (error) {
+      console.error('Error running assessment:', error);
       return null;
     } finally {
       setIsProcessing(false);
     }
-  }, [user]);
+  }, [user, analyzeUser, enhancedProfile, assessmentService]);
+
+  // Additional methods
+  const assessment = assessmentResults;
+  const isGenerating = isProcessing;
   
-  // Add the missing methods expected by components
   const generateAssessment = useCallback(async () => {
-    setIsGenerating(true);
-    const result = await runAssessment();
-    setIsGenerating(false);
-    return result;
+    return await runAssessment();
   }, [runAssessment]);
   
   const getPriorityInsights = useCallback(() => {
     if (!assessment) return [];
     
-    return assessment.recommendations || [];
-  }, [assessment]);
+    return assessmentService.getPriorityInsights(enhancedProfile);
+  }, [assessment, assessmentService, enhancedProfile]);
   
   const filterInsightsByCategory = useCallback((category: string) => {
     if (!assessment) return [];
     
-    // Mock filtering based on category
-    return assessment.recommendations?.filter((rec: string) => 
-      rec.toLowerCase().includes(category.toLowerCase())
-    ) || [];
-  }, [assessment]);
-  
+    return assessmentService.getInsightsByCategory(enhancedProfile, category);
+  }, [assessment, assessmentService, enhancedProfile]);
+
   return {
     runAssessment,
     assessmentResults,
     isProcessing,
-    error,
-    // Add properties used by components
     assessment,
     isGenerating,
     generateAssessment,

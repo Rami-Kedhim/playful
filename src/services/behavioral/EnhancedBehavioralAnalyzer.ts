@@ -1,504 +1,461 @@
 
 import { 
-  MicroexpressionSignal, 
-  BehavioralLoop, 
+  EnhancedBehavioralProfile, 
+  TrustLevel, 
+  PriceSensitivity,
+  BehavioralLoop,
   BrandResonanceStage,
   ConsumerDecisionStage,
-  EnhancedBehavioralProfile,
-  PsychographicProfile
+  ValueOrientation,
+  MicroexpressionSignal
 } from '@/types/enhancedBehavioral';
-import { BehaviorTag, HermesMode, ToneFilter } from '@/types/behavioral';
+import { PsychographicProfile } from '@/types/enhancedBehavioral';
+import { ChaseHughesBehavioralProfile } from '@/types/chaseHughes';
 
-/**
- * Enhanced Behavioral Analyzer
- * Applies concepts from Chase Hughes on behavioral analysis and persuasion
- */
 export class EnhancedBehavioralAnalyzer {
-  /**
-   * Analyze interaction patterns to identify micro-expression signals
-   * Based on Chase Hughes' techniques for behavior analysis
-   */
-  public identifySignals(
-    messages: { content: string, isUser: boolean }[],
-    responseDelay: number[],
-    clickPatterns: { element: string, timeViewing: number }[]
-  ): MicroexpressionSignal[] {
-    const signals: MicroexpressionSignal[] = [];
+  // HERMES Detection System
+  // Handles behavior detection and pattern recognition
+  private async detectBehavioralPatterns(user: any): Promise<any> {
+    // Simulate behavioral pattern detection
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Analyze message content for linguistic markers
-    const userMessages = messages.filter(m => m.isUser).map(m => m.content);
+    // In a real implementation, this would analyze:
+    // - Click patterns
+    // - Time spent on pages
+    // - Navigation flow
+    // - Content preferences
+    // - Response to different messaging tones
     
-    // Analyze language patterns (Chase Hughes' linguistic indicators)
-    if (userMessages.some(msg => /\byes\b|certainly|absolutely|definitely/i.test(msg))) {
-      signals.push('commitment');
-    }
-    
-    if (userMessages.some(msg => /\bmaybe\b|\bperhaps\b|not sure|thinking/i.test(msg))) {
-      signals.push('resistance');
-    }
-    
-    if (userMessages.some(msg => /\bconfused\b|don't understand|what do you mean/i.test(msg))) {
-      signals.push('confusion');
-    }
-    
-    // Analyze question frequency (Hughes' interest indicator)
-    const questionCount = userMessages.filter(msg => msg.includes('?')).length;
-    if (questionCount / userMessages.length > 0.3) {
-      signals.push('interest');
-    }
-    
-    // Analyze response speed patterns (Hughes' engagement indicators)
-    if (responseDelay.length >= 3) {
-      const avgDelay = responseDelay.reduce((sum, delay) => sum + delay, 0) / responseDelay.length;
-      if (avgDelay < 30) { // Quick responses indicate engagement
-        signals.push('interest');
-      } else if (avgDelay > 120) { // Slow responses may indicate disinterest
-        signals.push('disinterest');
-      }
-    }
-    
-    // Analyze click patterns (Hughes' attention indicators)
-    const trustIndicators = clickPatterns.filter(p => 
-      p.element.includes('profile') || 
-      p.element.includes('testimonial') || 
-      p.element.includes('about')
-    ).length;
-    
-    if (trustIndicators > 3) {
-      signals.push('trust');
-    }
-    
-    // Return unique signals
-    return Array.from(new Set(signals));
+    return {
+      engagementLevel: Math.random() > 0.5 ? 'high' : 'medium',
+      clickPattern: Math.random() > 0.7 ? 'explorer' : 'focused',
+      responseToTone: Math.random() > 0.6 ? 'emotional' : 'rational',
+      contentPreference: Math.random() > 0.5 ? 'visual' : 'textual',
+      sessionDepth: Math.floor(Math.random() * 5) + 1
+    };
   }
   
-  /**
-   * Determine current behavioral loop stage
-   * Based on Hughes' concepts of behavioral cycle reinforcement
-   */
-  public identifyBehavioralLoop(
-    visitsCount: number,
-    interactionsCount: number,
-    timeSpentMinutes: number,
-    purchaseCount: number,
-    referralCount: number
-  ): BehavioralLoop {
-    if (referralCount > 0) {
-      return 'advocacy';
-    }
+  // OXUM Decision Framework
+  // Makes decisions based on behavioral data
+  private makeOxumDecisions(behavioralData: any): any {
+    // Apply Schauberger flow principles to decision-making
+    const flowIntensity = behavioralData.engagementLevel === 'high' ? 0.8 : 0.5;
     
-    if (purchaseCount > 3 || timeSpentMinutes > 180) {
-      return 'identity';
-    }
-    
-    if (purchaseCount > 0 || timeSpentMinutes > 60) {
-      return 'investment';
-    }
-    
-    if (interactionsCount > 5 || timeSpentMinutes > 15) {
-      return 'engagement';
-    }
-    
-    return 'discovery';
-  }
-  
-  /**
-   * Map behavioral data to Keller's brand resonance pyramid
-   */
-  public identifyBrandResonanceStage(
-    visitsCount: number,
-    timeOnSite: number,
-    purchaseHistory: number,
-    engagementRate: number
-  ): BrandResonanceStage {
-    // New users or low engagement
-    if (visitsCount <= 1 || timeOnSite < 60) {
-      return 'awareness';
-    }
-    
-    // Users who are evaluating functionality
-    if (visitsCount < 5 && purchaseHistory === 0) {
-      return 'performance';
-    }
-    
-    // Users who are connecting emotionally
-    if (engagementRate > 0.3 && timeOnSite > 300) {
-      return 'imagery';
-    }
-    
-    // Users who are making comparative evaluations
-    if (purchaseHistory === 1 || engagementRate > 0.5) {
-      return 'judgments';
-    }
-    
-    // Users who have formed emotional connections
-    if (purchaseHistory >= 2 && engagementRate > 0.7) {
-      return 'feelings';
-    }
-    
-    // Highest level of brand connection
-    if (purchaseHistory >= 3 && engagementRate > 0.8) {
-      return 'resonance';
-    }
-    
-    return 'performance'; // Default
-  }
-  
-  /**
-   * Identify consumer decision stage based on Kotler's model
-   */
-  public identifyDecisionStage(
-    searchQueries: string[],
-    pagesVisited: string[],
-    comparisonsViewed: number,
-    cartAbandoned: boolean,
-    purchaseCompleted: boolean,
-    postPurchaseEngagement: number
-  ): ConsumerDecisionStage {
-    if (purchaseCompleted && postPurchaseEngagement > 0) {
-      return 'post_purchase';
-    }
-    
-    if (purchaseCompleted || cartAbandoned) {
-      return 'purchase_decision';
-    }
-    
-    if (comparisonsViewed > 0 || pagesVisited.some(p => p.includes('compare'))) {
-      return 'evaluation';
-    }
-    
-    if (searchQueries.length > 0 || pagesVisited.length > 3) {
-      return 'information_search';
-    }
-    
-    return 'problem_recognition';
-  }
-  
-  /**
-   * Create comprehensive behavioral profile using multiple frameworks
-   */
-  public createEnhancedProfile(
-    userId: string,
-    behaviorTags: BehaviorTag[],
-    interactionData: {
-      messagesExchanged: number,
-      responseDelays: number[],
-      clickPatterns: { element: string, timeViewing: number }[],
-      searchQueries: string[],
-      pagesVisited: string[],
-      comparisonsViewed: number,
-      cartAbandoned: boolean,
-      purchaseCompleted: boolean,
-      postPurchaseEngagement: number,
-      purchaseHistory: number,
-      totalSpent: number,
-      visitsCount: number,
-      timeOnSite: number,
-      engagementRate: number,
-      sessionFrequency: number,
-      sessionDuration: number,
-      contentPreferences: string[],
-      pricePoints: number[],
-      responseToIncentives: number,
-      referralCount: number
-    }
-  ): EnhancedBehavioralProfile {
-    // Apply Chase Hughes' behavioral analysis
-    const signals = this.identifySignals(
-      // Convert to expected format
-      interactionData.messagesExchanged > 0 ? [{ content: "sample", isUser: true }] : [],
-      interactionData.responseDelays,
-      interactionData.clickPatterns
-    );
-    
-    // Determine behavioral loop stage
-    const behavioralLoop = this.identifyBehavioralLoop(
-      interactionData.visitsCount,
-      interactionData.messagesExchanged,
-      interactionData.timeOnSite,
-      interactionData.purchaseHistory,
-      interactionData.referralCount
-    );
-    
-    // Determine brand resonance stage (Keller)
-    const brandResonance = this.identifyBrandResonanceStage(
-      interactionData.visitsCount,
-      interactionData.timeOnSite,
-      interactionData.purchaseHistory,
-      interactionData.engagementRate
-    );
-    
-    // Determine decision stage (Kotler)
-    const decisionStage = this.identifyDecisionStage(
-      interactionData.searchQueries,
-      interactionData.pagesVisited,
-      interactionData.comparisonsViewed,
-      interactionData.cartAbandoned,
-      interactionData.purchaseCompleted,
-      interactionData.postPurchaseEngagement
-    );
-    
-    // Calculate trust level (Hughes)
-    const trustLevel = Math.min(
-      100, 
-      50 + 
-      (signals.includes('trust') ? 20 : 0) - 
-      (signals.includes('distrust') ? 20 : 0) +
-      (interactionData.purchaseHistory * 5)
-    );
-    
-    // Calculate price sensitivity (Chernev)
-    const priceSensitivity = this.calculatePriceSensitivity(
-      interactionData.pricePoints,
-      interactionData.responseToIncentives,
-      behavioralLoop
-    );
-    
-    // Determine value orientation (Chernev)
-    const valueOrientation = this.determineValueOrientation(
-      signals,
-      interactionData.contentPreferences,
-      priceSensitivity
-    );
-    
-    // Generate marketing optimizations
-    const marketingOptimizations = this.generateMarketingOptimizations(
-      behavioralLoop,
-      brandResonance,
-      decisionStage,
+    // Calculate optimal engagement approach based on behavioral data
+    const approach = behavioralData.responseToTone === 'emotional' 
+      ? 'emotional_connection' 
+      : 'value_proposition';
+      
+    const tone = behavioralData.responseToTone === 'emotional'
+      ? 'warm_friendly'
+      : 'professional_clear';
+      
+    // Calculate pricing strategy based on engagement patterns
+    const priceSensitivity = behavioralData.sessionDepth > 3 
+      ? PriceSensitivity.Low 
+      : PriceSensitivity.Moderate;
+      
+    // Determine trust level based on interaction patterns
+    const trustLevel = behavioralData.clickPattern === 'explorer'
+      ? TrustLevel.High
+      : TrustLevel.Moderate;
+      
+    return {
+      approach,
+      tone,
       priceSensitivity,
-      valueOrientation,
       trustLevel,
-      signals,
-      {
-        timeOfDayPreference: this.calculateTimePreference(interactionData.pagesVisited),
-        sessionFrequency: interactionData.sessionFrequency,
-        sessionDuration: interactionData.sessionDuration,
-        contentPreferences: interactionData.contentPreferences,
-        pricePoints: interactionData.pricePoints,
-        responseToIncentives: interactionData.responseToIncentives
+      flowIntensity,
+      nextBestAction: behavioralData.engagementLevel === 'high' 
+        ? 'offer_premium' 
+        : 'build_trust'
+    };
+  }
+  
+  // Gould Anti-Fraud System
+  // Validates user behavior for authenticity
+  private validateWithGould(profile: EnhancedBehavioralProfile): EnhancedBehavioralProfile {
+    // In a real implementation, this would check for:
+    // - Behavioral consistency
+    // - Suspicious patterns
+    // - Bot-like behavior
+    // - Fraud indicators
+    
+    // Apply confidence factor to various profile elements
+    const confidenceFactor = Math.min(0.7 + Math.random() * 0.3, 0.95);
+    
+    // Simple validation logic - in production this would be much more sophisticated
+    if (profile.psychographicProfile.trustLevel === TrustLevel.High && Math.random() > 0.9) {
+      // Downgrade suspiciously high trust
+      profile.psychographicProfile.trustLevel = TrustLevel.Moderate;
+    }
+    
+    return profile;
+  }
+  
+  // Chase Hughes Persuasion Framework
+  // Applies behavioral influence techniques
+  private applyChaseHughesPersuasion(profile: EnhancedBehavioralProfile): EnhancedBehavioralProfile {
+    // Create a Chase Hughes behavioral profile
+    const chaseProfile: ChaseHughesBehavioralProfile = {
+      primarySensoryPreference: 'visual',
+      currentInfluencePhase: 'interest',
+      influencePhaseProgress: 35,
+      detectedMicroExpressions: ['contempt', 'happiness'],
+      responsiveToTechniques: ['social_proof', 'reciprocity_trigger'],
+      suggestedApproach: {
+        technique: 'reciprocity_trigger',
+        languagePattern: 'Before I share more details, let me offer you...'
+      },
+      trustScore: 65,
+      desireScore: 45,
+      engagementScore: 70
+    };
+    
+    // Map Chase Hughes profile insights to our enhanced profile
+    // Determine optimal persuasion approach based on Chase Hughes framework
+    let approach: string;
+    let tone: string;
+    
+    switch (chaseProfile.currentInfluencePhase) {
+      case 'interest':
+        approach = 'curiosity_building';
+        tone = 'intriguing';
+        break;
+      case 'trust':
+        approach = 'credibility_demonstration';
+        tone = 'authoritative';
+        break;
+      case 'desire':
+        approach = 'emotional_amplification';
+        tone = 'passionate';
+        break;
+      case 'action':
+        approach = 'urgency_creation';
+        tone = 'direct';
+        break;
+      case 'loyalty':
+        approach = 'relationship_deepening';
+        tone = 'familiar';
+        break;
+      default:
+        approach = 'value_demonstration';
+        tone = 'helpful';
+    }
+    
+    // Update marketing optimizations based on Chase Hughes insights
+    profile.marketingOptimizations.recommendedApproach = approach;
+    profile.marketingOptimizations.messagingTone = tone;
+    profile.marketingOptimizations.nextBestAction = this.determineNextBestAction(chaseProfile);
+    
+    // Update the profile with specific behavioral loop stage
+    profile.psychographicProfile.behavioralLoop = this.mapInfluencePhaseToLoop(chaseProfile.currentInfluencePhase);
+    
+    return profile;
+  }
+  
+  private mapInfluencePhaseToLoop(phase: string): BehavioralLoop {
+    switch (phase) {
+      case 'interest': return BehavioralLoop.Discovery;
+      case 'trust': return BehavioralLoop.Engagement;
+      case 'desire': return BehavioralLoop.Conversion;
+      case 'action': return BehavioralLoop.Conversion;
+      case 'loyalty': return BehavioralLoop.Retention;
+      default: return BehavioralLoop.Discovery;
+    }
+  }
+  
+  private determineNextBestAction(chaseProfile: ChaseHughesBehavioralProfile): string {
+    const { currentInfluencePhase, influencePhaseProgress, trustScore } = chaseProfile;
+    
+    if (currentInfluencePhase === 'interest' && influencePhaseProgress > 70) {
+      return 'present_proof';
+    } else if (currentInfluencePhase === 'trust' && trustScore > 70) {
+      return 'introduce_offer';
+    } else if (currentInfluencePhase === 'desire') {
+      return 'remove_friction';
+    } else if (currentInfluencePhase === 'action') {
+      return 'clear_call_to_action';
+    } else if (currentInfluencePhase === 'loyalty') {
+      return 'provide_exclusivity';
+    }
+    
+    return 'build_rapport';
+  }
+  
+  // Main public methods
+  
+  // Create enhanced behavioral profile
+  public async createEnhancedProfile(user: any, existingProfile?: EnhancedBehavioralProfile): Promise<EnhancedBehavioralProfile> {
+    // Detect behavioral patterns using HERMES
+    const behavioralData = await this.detectBehavioralPatterns(user);
+    
+    // Apply OXUM decision framework
+    const decisions = this.makeOxumDecisions(behavioralData);
+    
+    // Build or enhance the profile
+    const baseProfile = existingProfile || this.createDefaultProfile(user);
+    
+    // Enhance with detected behavioral patterns
+    const enhancedProfile: EnhancedBehavioralProfile = {
+      standardProfile: {
+        ...baseProfile.standardProfile,
+        behaviorTags: this.generateBehaviorTags(behavioralData)
+      },
+      
+      psychographicProfile: {
+        ...baseProfile.psychographicProfile,
+        trustLevel: decisions.trustLevel,
+        priceSensitivity: decisions.priceSensitivity,
+        behavioralLoop: this.determineBehavioralLoopStage(behavioralData),
+        brandResonance: this.determineBrandResonance(behavioralData),
+        decisionStage: this.determineDecisionStage(behavioralData),
+        valueOrientation: this.determineValueOrientation(behavioralData),
+        identifiedSignals: this.identifySignals(behavioralData)
+      },
+      
+      marketingOptimizations: {
+        recommendedApproach: decisions.approach,
+        messagingTone: decisions.tone,
+        contentPreferences: this.determineContentPreferences(behavioralData),
+        callToActionStyle: this.determineCallToActionStyle(decisions),
+        idealEngagementTimes: this.determineIdealTimes(behavioralData),
+        optimalOfferTiming: this.determineOptimalTiming(behavioralData, decisions),
+        suggestedPricePoints: this.calculatePricePoints(decisions.priceSensitivity),
+        recommendedToneStyle: decisions.tone,
+        valuePropositionFocus: this.determineValueFocus(behavioralData),
+        engagementStrategy: this.determineEngagementStrategy(behavioralData, decisions),
+        retentionRisk: this.calculateRetentionRisk(behavioralData),
+        lifetimeValueEstimate: this.estimateLifetimeValue(behavioralData, decisions),
+        nextBestAction: decisions.nextBestAction
       }
-    );
+    };
     
-    // Map standard behavioral flags to Hermes/Gouldian system
-    const hermesMode: HermesMode = 
-      trustLevel > 80 ? 'premium' :
-      trustLevel < 40 ? 'protective' :
-      signals.includes('trust') ? 'emotional' : 'neutral';
+    return enhancedProfile;
+  }
+  
+  // Apply OXUM decisions to a profile
+  public applyOxumDecisions(profile: EnhancedBehavioralProfile): EnhancedBehavioralProfile {
+    // In a real implementation, this would adjust the profile based on business rules
+    // For now, we'll just make some simple adjustments
     
-    const toneFilter: ToneFilter = 
-      trustLevel > 80 ? 'enhanced' :
-      trustLevel < 40 ? 'generic' :
-      valueOrientation === 'emotional' ? 'authentic' : 'restrained';
+    // Adjust based on behavioral loop stage
+    if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Discovery) {
+      profile.marketingOptimizations.recommendedApproach = 'educational';
+      profile.marketingOptimizations.callToActionStyle = 'gentle';
+    } else if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Conversion) {
+      profile.marketingOptimizations.recommendedApproach = 'compelling';
+      profile.marketingOptimizations.callToActionStyle = 'direct';
+    }
     
-    // Return complete enhanced profile
+    return profile;
+  }
+  
+  // Apply Gould anti-fraud filters
+  public applyGouldFilters(profile: EnhancedBehavioralProfile): EnhancedBehavioralProfile {
+    return this.validateWithGould(profile);
+  }
+  
+  // Apply Chase Hughes persuasion framework
+  public applyChaseHughesFramework(profile: EnhancedBehavioralProfile): EnhancedBehavioralProfile {
+    return this.applyChaseHughesPersuasion(profile);
+  }
+  
+  // Generate engagement strategies
+  public async generateEngagementStrategies(profile: EnhancedBehavioralProfile): Promise<string[]> {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const behavioralLoop = profile.psychographicProfile.behavioralLoop;
+    const trustLevel = profile.psychographicProfile.trustLevel;
+    const decisionStage = profile.psychographicProfile.decisionStage;
+    
+    // Generate strategies based on current profile
+    const strategies: string[] = [];
+    
+    // Communication strategies
+    if (behavioralLoop === BehavioralLoop.Discovery) {
+      strategies.push("Provide educational content about the core value proposition");
+      strategies.push("Use visual storytelling to create emotional connection");
+      strategies.push("Demonstrate social proof through testimonials");
+    } else if (behavioralLoop === BehavioralLoop.Engagement) {
+      strategies.push("Showcase unique features and benefits relevant to user interests");
+      strategies.push("Provide interactive experiences to deepen engagement");
+      strategies.push("Offer limited preview of premium content");
+    } else if (behavioralLoop === BehavioralLoop.Conversion) {
+      strategies.push("Address objections preemptively with clear answers");
+      strategies.push("Create subtle urgency without pressure");
+      strategies.push("Simplify the conversion process to reduce friction");
+    }
+    
+    // Offer strategies
+    const offerStrategies: string[] = [];
+    
+    if (trustLevel === TrustLevel.Low) {
+      offerStrategies.push("Offer risk-free trial to build trust");
+      offerStrategies.push("Provide satisfaction guarantee");
+    } else if (trustLevel === TrustLevel.Moderate) {
+      offerStrategies.push("Introduce tiered pricing options");
+      offerStrategies.push("Highlight popular choice among similar users");
+    } else {
+      offerStrategies.push("Present premium options with exclusive benefits");
+      offerStrategies.push("Suggest higher-value long-term commitment options");
+    }
+    
+    return [...strategies, ...offerStrategies];
+  }
+  
+  // Helper methods
+  
+  private createDefaultProfile(user: any): EnhancedBehavioralProfile {
     return {
       standardProfile: {
-        behaviorTags,
-        hermesMode,
-        toneFilter,
-        trustScore: trustLevel,
-      },
-      psychographicProfile: {
-        behavioralLoop,
-        brandResonance,
-        decisionStage,
-        priceSensitivity,
-        valueOrientation,
-        trustLevel,
-        identifiedSignals: signals,
-        engagementPatterns: {
-          timeOfDayPreference: this.calculateTimePreference(interactionData.pagesVisited),
-          sessionFrequency: interactionData.sessionFrequency,
-          sessionDuration: interactionData.sessionDuration,
-          contentPreferences: interactionData.contentPreferences,
-          pricePoints: interactionData.pricePoints,
-          responseToIncentives: interactionData.responseToIncentives
+        id: `profile-${user?.id || 'anonymous'}`,
+        userId: user?.id || 'anonymous',
+        demographics: {
+          ageGroup: '25-34',
+          gender: 'unknown',
+          location: 'unknown'
         }
       },
-      marketingOptimizations
+      
+      psychographicProfile: {
+        personalityTraits: ['curious'],
+        interests: ['technology'],
+        values: ['convenience', 'quality'],
+        motivations: ['discovery'],
+        decisionMakingStyle: 'balanced',
+        trustLevel: TrustLevel.Moderate,
+        priceSensitivity: PriceSensitivity.Moderate,
+        behavioralLoop: BehavioralLoop.Discovery,
+        decisionStage: ConsumerDecisionStage.InformationSearch,
+        valueOrientation: ValueOrientation.Practical,
+        brandResonance: BrandResonanceStage.Awareness,
+        identifiedSignals: ['interest']
+      },
+      
+      marketingOptimizations: {
+        recommendedApproach: 'educational',
+        messagingTone: 'helpful',
+        contentPreferences: ['visual', 'concise'],
+        callToActionStyle: 'subtle',
+        idealEngagementTimes: ['weekend', 'evening'],
+        nextBestAction: 'provide_information',
+        optimalOfferTiming: 'not_ready',
+        suggestedPricePoints: [0, 5, 10],
+        retentionRisk: 0.3,
+        lifetimeValueEstimate: 50
+      }
     };
   }
   
-  /**
-   * Calculate price sensitivity based on Chernev's pricing psychology
-   */
-  private calculatePriceSensitivity(
-    pricePoints: number[],
-    responseToIncentives: number,
-    behavioralLoop: BehavioralLoop
-  ): number {
-    // More advanced users are less price sensitive
-    const loopFactor = 
-      behavioralLoop === 'advocacy' ? 0.5 :
-      behavioralLoop === 'identity' ? 0.7 :
-      behavioralLoop === 'investment' ? 0.9 : 
-      behavioralLoop === 'engagement' ? 1.0 : 1.2;
-      
-    // Higher response to incentives indicates higher price sensitivity
-    const incentiveFactor = responseToIncentives / 100 * 50;
+  private generateBehaviorTags(data: any): string[] {
+    const tags: string[] = [];
     
-    // Calculate variance in past purchases - lower variance indicates higher price sensitivity
-    let varianceFactor = 50;
-    if (pricePoints.length > 1) {
-      const avg = pricePoints.reduce((a, b) => a + b, 0) / pricePoints.length;
-      const variance = pricePoints.map(p => Math.pow(p - avg, 2)).reduce((a, b) => a + b, 0) / pricePoints.length;
-      varianceFactor = Math.min(50, Math.max(10, 50 - (variance / (avg * 0.1))));
-    }
+    if (data.engagementLevel === 'high') tags.push('high-engagement');
+    if (data.clickPattern === 'explorer') tags.push('explorer');
+    if (data.responseToTone === 'emotional') tags.push('emotion-driven');
+    if (data.sessionDepth > 3) tags.push('deep-researcher');
     
-    // Combine factors
-    return Math.min(100, Math.max(1, (incentiveFactor + varianceFactor) * loopFactor));
+    return tags;
   }
   
-  /**
-   * Determine value orientation based on Chernev's consumer behavior framework
-   */
-  private determineValueOrientation(
-    signals: MicroexpressionSignal[],
-    contentPreferences: string[],
-    priceSensitivity: number
-  ): 'economic' | 'functional' | 'emotional' | 'symbolic' {
-    // Extremely price sensitive users are economically oriented
-    if (priceSensitivity > 85) {
-      return 'economic';
-    }
-    
-    // Check content preferences for indicators
-    const emotionalContent = contentPreferences.filter(p => 
-      p.includes('story') || p.includes('experience') || p.includes('feeling')
-    ).length;
-    
-    const functionalContent = contentPreferences.filter(p => 
-      p.includes('feature') || p.includes('spec') || p.includes('how-to')
-    ).length;
-    
-    const symbolicContent = contentPreferences.filter(p => 
-      p.includes('status') || p.includes('exclusive') || p.includes('premium')
-    ).length;
-    
-    // Determine by highest count
-    const counts = [
-      { type: 'functional', count: functionalContent },
-      { type: 'emotional', count: emotionalContent },
-      { type: 'symbolic', count: symbolicContent },
-    ];
-    
-    // Sort descending
-    counts.sort((a, b) => b.count - a.count);
-    
-    // If there's a clear preference, use it
-    if (counts[0].count > 0 && counts[0].count > counts[1].count) {
-      return counts[0].type as 'functional' | 'emotional' | 'symbolic';
-    }
-    
-    // Use signals as tiebreaker
-    if (signals.includes('interest') && !signals.includes('resistance')) {
-      return 'emotional';
-    }
-    
-    // Default based on price sensitivity
-    return priceSensitivity > 60 ? 'functional' : 'emotional';
+  private determineBehavioralLoopStage(data: any): BehavioralLoop {
+    if (data.sessionDepth <= 1) return BehavioralLoop.Discovery;
+    if (data.sessionDepth <= 3) return BehavioralLoop.Engagement;
+    return BehavioralLoop.Conversion;
   }
   
-  /**
-   * Calculate time of day preference from visit patterns
-   */
-  private calculateTimePreference(pagesVisited: string[]): number[] {
-    // In a real implementation, this would analyze actual timestamps
-    // For demo purposes, return dummy data
-    return [9, 12, 19, 21];
+  private determineBrandResonance(data: any): BrandResonanceStage {
+    if (data.sessionDepth <= 1) return BrandResonanceStage.Awareness;
+    if (data.sessionDepth <= 3) return BrandResonanceStage.Consideration;
+    return BrandResonanceStage.Preference;
   }
   
-  /**
-   * Generate marketing optimizations using Kotler's 4P framework and Chernev's choice architecture
-   */
-  private generateMarketingOptimizations(
-    behavioralLoop: BehavioralLoop,
-    brandResonance: BrandResonanceStage,
-    decisionStage: ConsumerDecisionStage,
-    priceSensitivity: number,
-    valueOrientation: 'economic' | 'functional' | 'emotional' | 'symbolic',
-    trustLevel: number,
-    signals: MicroexpressionSignal[],
-    engagementPatterns: PsychographicProfile['engagementPatterns']
-  ) {
-    // Calculate optimal time for offers based on engagement patterns
-    const optimalOfferTiming = engagementPatterns.timeOfDayPreference[0] || 19;
+  private determineDecisionStage(data: any): ConsumerDecisionStage {
+    if (data.sessionDepth <= 1) return ConsumerDecisionStage.ProblemRecognition;
+    if (data.sessionDepth <= 3) return ConsumerDecisionStage.InformationSearch;
+    return ConsumerDecisionStage.AlternativeEvaluation;
+  }
+  
+  private determineValueOrientation(data: any): ValueOrientation {
+    if (data.responseToTone === 'emotional') return ValueOrientation.Emotional;
+    return ValueOrientation.Practical;
+  }
+  
+  private identifySignals(data: any): MicroexpressionSignal[] {
+    const signals: MicroexpressionSignal[] = [];
     
-    // Suggest price points based on Chernev's pricing psychology
-    const avgPrice = engagementPatterns.pricePoints.length > 0 
-      ? engagementPatterns.pricePoints.reduce((a, b) => a + b, 0) / engagementPatterns.pricePoints.length
-      : 50;
+    if (data.engagementLevel === 'high') signals.push('interest');
+    if (data.clickPattern === 'explorer') signals.push('excitement');
+    if (data.sessionDepth > 3) signals.push('consideration');
     
-    // Apply Chernev's charm pricing and bracketing principles
-    const suggestedPricePoints = [
-      Math.floor(avgPrice * 0.8) - 0.01, // Lower bracket
-      Math.floor(avgPrice) - 0.01,       // Target price
-      Math.floor(avgPrice * 1.2) - 0.01  // Premium option
-    ];
+    return signals;
+  }
+  
+  private determineContentPreferences(data: any): string[] {
+    const preferences: string[] = [];
     
-    // Determine messaging tone based on value orientation
-    const recommendedToneStyle = 
-      valueOrientation === 'economic' ? 'direct and value-focused' :
-      valueOrientation === 'functional' ? 'detailed and informative' :
-      valueOrientation === 'emotional' ? 'empathetic and story-based' :
-      'premium and exclusive';
-      
-    // Determine value proposition focus using Kotler's framework
-    const valuePropositionFocus = 
-      decisionStage === 'problem_recognition' ? 'pain point identification' :
-      decisionStage === 'information_search' ? 'educational content' :
-      decisionStage === 'evaluation' ? 'competitive differentiation' :
-      decisionStage === 'purchase_decision' ? 'risk reduction' :
-      'usage and community';
-      
-    // Determine engagement strategy based on behavioral loop
-    const engagementStrategy = 
-      behavioralLoop === 'discovery' ? 'provide valuable information with no commitment required' :
-      behavioralLoop === 'engagement' ? 'encourage small actions with immediate rewards' :
-      behavioralLoop === 'investment' ? 'deepen relationship with personalized experiences' :
-      behavioralLoop === 'identity' ? 'foster sense of belonging and ownership' :
-      'create advocacy opportunities and recognition';
-      
-    // Calculate retention risk based on Hughes' engagement indicators
-    const retentionRisk = Math.max(0, Math.min(100, 
-      100 - trustLevel + 
-      (signals.includes('disinterest') ? 30 : 0) +
-      (signals.includes('resistance') ? 20 : 0) -
-      (signals.includes('commitment') ? 20 : 0)
-    ));
+    if (data.contentPreference === 'visual') {
+      preferences.push('images');
+      preferences.push('videos');
+    } else {
+      preferences.push('detailed-text');
+      preferences.push('case-studies');
+    }
     
-    // Estimate lifetime value based on behavioral indicators
-    const lifetimeValueBase = engagementPatterns.pricePoints.reduce((sum, price) => sum + price, 0);
-    const loyaltyMultiplier = 
-      behavioralLoop === 'advocacy' ? 5 :
-      behavioralLoop === 'identity' ? 4 :
-      behavioralLoop === 'investment' ? 3 :
-      behavioralLoop === 'engagement' ? 2 : 1;
-      
-    const lifetimeValueEstimate = lifetimeValueBase * loyaltyMultiplier;
+    return preferences;
+  }
+  
+  private determineCallToActionStyle(decisions: any): string {
+    if (decisions.trustLevel === TrustLevel.Low) return 'subtle';
+    if (decisions.trustLevel === TrustLevel.Moderate) return 'balanced';
+    return 'direct';
+  }
+  
+  private determineIdealTimes(data: any): string[] {
+    // In a real implementation, this would use actual time analysis
+    return ['evening', 'weekend'];
+  }
+  
+  private determineOptimalTiming(data: any, decisions: any): string {
+    if (decisions.trustLevel === TrustLevel.Low) return 'not_ready';
+    if (data.sessionDepth > 3) return 'ready_now';
+    return 'next_visit';
+  }
+  
+  private calculatePricePoints(sensitivity: PriceSensitivity): number[] {
+    switch (sensitivity) {
+      case PriceSensitivity.Low: return [15, 25, 50];
+      case PriceSensitivity.Moderate: return [5, 15, 25];
+      case PriceSensitivity.High: return [0, 5, 15];
+      default: return [5, 10, 20];
+    }
+  }
+  
+  private determineValueFocus(data: any): string {
+    if (data.responseToTone === 'emotional') return 'emotional_benefits';
+    return 'functional_benefits';
+  }
+  
+  private determineEngagementStrategy(data: any, decisions: any): string {
+    if (decisions.trustLevel === TrustLevel.Low) return 'educational';
+    if (data.engagementLevel === 'high') return 'conversion_focused';
+    return 'relationship_building';
+  }
+  
+  private calculateRetentionRisk(data: any): number {
+    // Lower depth = higher risk of churn
+    const baseRisk = 0.8 - (data.sessionDepth * 0.15);
+    return Math.max(0.1, Math.min(0.9, baseRisk));
+  }
+  
+  private estimateLifetimeValue(data: any, decisions: any): number {
+    // Simple LTV calculation based on engagement and trust
+    const baseValue = 50;
+    const engagementMultiplier = data.engagementLevel === 'high' ? 2 : 1;
+    const trustMultiplier = decisions.trustLevel === TrustLevel.High ? 1.5 : 1;
     
-    // Determine next best action using Kotler's customer journey framework
-    const nextBestAction = 
-      decisionStage === 'problem_recognition' ? 'educate on solutions' :
-      decisionStage === 'information_search' ? 'provide comparison tools' :
-      decisionStage === 'evaluation' ? 'offer free trial or demonstration' :
-      decisionStage === 'purchase_decision' ? 'provide limited-time incentive' :
-      'request feedback and reviews';
-      
-    return {
-      optimalOfferTiming,
-      suggestedPricePoints,
-      recommendedToneStyle,
-      valuePropositionFocus,
-      engagementStrategy,
-      retentionRisk,
-      lifetimeValueEstimate,
-      nextBestAction
-    };
+    return baseValue * engagementMultiplier * trustMultiplier;
   }
 }
-
-// Export singleton instance
-export const enhancedBehavioralAnalyzer = new EnhancedBehavioralAnalyzer();
-export default enhancedBehavioralAnalyzer;

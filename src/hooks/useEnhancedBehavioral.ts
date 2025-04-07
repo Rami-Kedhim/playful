@@ -1,109 +1,116 @@
 
-import { useState, useCallback } from 'react';
-import { useBehavioralProfile } from '@/hooks/auth/useBehavioralProfile';
-import { EnhancedBehavioralProfile } from '@/types/enhancedBehavioral';
+import { useState, useCallback, useEffect } from 'react';
+import { useAuth } from './auth/useAuth';
+import { EnhancedBehavioralProfile, TrustLevel, PriceSensitivity, BehavioralLoop, ConsumerDecisionStage, BrandResonanceStage } from '@/types/enhancedBehavioral';
+import { EnhancedBehavioralAnalyzer } from '@/services/behavioral/EnhancedBehavioralAnalyzer';
 
-const DEFAULT_ENHANCED_PROFILE: EnhancedBehavioralProfile = {
+const defaultProfile: EnhancedBehavioralProfile = {
   standardProfile: {
-    id: 'default-profile',
-    userId: 'unknown',
+    id: 'default',
+    userId: 'anonymous',
     demographics: {
       ageGroup: '25-34',
       gender: 'unknown',
       location: 'unknown'
-    }
+    },
+    behaviorTags: ['new-user']
   },
   psychographicProfile: {
-    personalityTraits: ['curious', 'analytical'],
-    interests: ['technology', 'social media'],
-    values: ['convenience', 'privacy'],
-    motivations: ['self-improvement', 'connection'],
-    decisionMakingStyle: 'rational'
+    personalityTraits: ['curious'],
+    interests: ['technology'],
+    values: ['convenience', 'quality'],
+    motivations: ['discovery'],
+    decisionMakingStyle: 'balanced',
+    trustLevel: TrustLevel.Moderate,
+    priceSensitivity: PriceSensitivity.Moderate,
+    behavioralLoop: BehavioralLoop.Discovery,
+    decisionStage: ConsumerDecisionStage.InformationSearch,
+    valueOrientation: ValueOrientation.Practical,
+    brandResonance: BrandResonanceStage.Awareness,
+    identifiedSignals: ['interest']
   },
   marketingOptimizations: {
-    recommendedApproach: 'educational content',
-    messagingTone: 'professional',
-    contentPreferences: ['short-form video', 'infographics'],
-    callToActionStyle: 'direct',
-    idealEngagementTimes: ['evenings', 'weekends']
+    recommendedApproach: 'educational',
+    messagingTone: 'helpful',
+    contentPreferences: ['visual', 'concise'],
+    callToActionStyle: 'subtle',
+    idealEngagementTimes: ['weekend', 'evening'],
+    nextBestAction: 'provide_information',
+    optimalOfferTiming: 'not_ready',
+    suggestedPricePoints: [0, 5, 10],
+    retentionRisk: 0.3,
+    lifetimeValueEstimate: 50
   }
 };
 
 export const useEnhancedBehavioral = () => {
-  const { profile: standardProfile } = useBehavioralProfile();
-  const [enhancedProfile, setEnhancedProfile] = useState<EnhancedBehavioralProfile>(DEFAULT_ENHANCED_PROFILE);
+  const { user } = useAuth();
+  const [enhancedProfile, setEnhancedProfile] = useState<EnhancedBehavioralProfile>(defaultProfile);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastAnalyzedAt, setLastAnalyzedAt] = useState<Date | null>(null);
-
-  const analyzeUser = useCallback(async () => {
-    setIsAnalyzing(true);
-    
-    try {
-      // In a real app, this would call an AI service to analyze the user
-      // For now, we'll return a mock enhanced profile
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const enhancedData: EnhancedBehavioralProfile = {
+  const analyzer = new EnhancedBehavioralAnalyzer();
+  
+  // Initialize profile with user data when available
+  useEffect(() => {
+    if (user) {
+      setEnhancedProfile(prev => ({
+        ...prev,
         standardProfile: {
-          id: standardProfile.id,
-          userId: standardProfile.userId,
-          demographics: {
-            ageGroup: '25-34',
-            gender: 'unknown',
-            location: 'unknown'
-          }
-        },
-        psychographicProfile: {
-          personalityTraits: ['open-minded', 'curious', 'detail-oriented'],
-          interests: ['technology', 'innovation', 'self-development'],
-          values: ['privacy', 'efficiency', 'transparency'],
-          motivations: ['connection', 'knowledge', 'recognition'],
-          decisionMakingStyle: 'analytical'
-        },
-        marketingOptimizations: {
-          recommendedApproach: 'value-focused messaging',
-          messagingTone: 'professional with personal touches',
-          contentPreferences: ['in-depth articles', 'case studies', 'video tutorials'],
-          callToActionStyle: 'benefits-oriented',
-          idealEngagementTimes: ['weekday evenings', 'sunday mornings']
+          ...prev.standardProfile,
+          userId: user.id,
+          id: `profile-${user.id}`
         }
-      };
+      }));
+    }
+  }, [user]);
+
+  // Main analysis function
+  const analyzeUser = useCallback(async (): Promise<EnhancedBehavioralProfile> => {
+    if (!user) return enhancedProfile;
+    
+    setIsAnalyzing(true);
+    try {
+      // Implement HERMES detection logic
+      const analyzedProfile = await analyzer.createEnhancedProfile(user, enhancedProfile);
       
-      setEnhancedProfile(enhancedData);
-      const now = new Date();
-      setLastAnalyzedAt(now);
+      // Apply OXUM decision framework
+      const optimizedProfile = analyzer.applyOxumDecisions(analyzedProfile);
       
-      return enhancedData;
+      // Apply Gould anti-fraud measures
+      const validatedProfile = analyzer.applyGouldFilters(optimizedProfile);
+      
+      // Apply Chase Hughes persuasion framework
+      const finalProfile = analyzer.applyChaseHughesFramework(validatedProfile);
+      
+      setEnhancedProfile(finalProfile);
+      setLastAnalyzedAt(new Date());
+      return finalProfile;
     } catch (error) {
-      console.error('Error analyzing user:', error);
-      return DEFAULT_ENHANCED_PROFILE;
+      console.error('Error analyzing user behavior:', error);
+      return enhancedProfile;
     } finally {
       setIsAnalyzing(false);
     }
-  }, [standardProfile]);
-
-  const generateEngagementStrategy = useCallback(async () => {
+  }, [user, enhancedProfile, analyzer]);
+  
+  // Generate engagement strategies based on the current profile
+  const generateEngagementStrategy = useCallback(async (): Promise<string[]> => {
+    if (!user) return [];
+    
     try {
-      // Mock generating engagement strategies
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      return [
-        'Personalize content recommendations based on past interactions',
-        'Introduce gamification elements to increase engagement',
-        'Provide value-based incentives for continued participation',
-        'Create a sense of community through user-generated content',
-        'Use strategic timing for communications based on user activity patterns'
-      ];
+      // Use the enhanced profile to generate strategies
+      const strategies = await analyzer.generateEngagementStrategies(enhancedProfile);
+      return strategies;
     } catch (error) {
-      console.error('Error generating engagement strategy:', error);
+      console.error('Error generating engagement strategies:', error);
       return [];
     }
-  }, []);
+  }, [user, enhancedProfile, analyzer]);
 
   return {
     enhancedProfile,
     setEnhancedProfile,
-    original: standardProfile,
+    original: user,
     isAnalyzing,
     analyzeUser,
     generateEngagementStrategy,
