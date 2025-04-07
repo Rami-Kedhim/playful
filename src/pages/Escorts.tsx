@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import MainLayout from "@/components/layout/MainLayout";
 import EscortContainer from "@/components/escorts/EscortContainer";
@@ -9,6 +9,7 @@ import { availableServices } from "@/data/escortData";
 import LucieSchaubergerIntegration from "@/components/home/LucieSchaubergerIntegration";
 import { useEscortWithInsights } from "@/hooks/useEscortWithInsights";
 import { escorts as mockEscorts } from "@/data/escortData";
+import { getProfessionalServices } from "@/utils/serviceCategories";
 
 const Escorts: React.FC = () => {
   const { 
@@ -22,6 +23,16 @@ const Escorts: React.FC = () => {
   
   const { showInfo } = useNotifications();
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Ensure data is loaded on initial render
+  useEffect(() => {
+    if (!escorts || escorts.length === 0) {
+      fetchEscorts();
+    }
+  }, [escorts, fetchEscorts]);
+  
+  // Filter services to only show professional ones
+  const professionalServices = getProfessionalServices(availableServices);
   
   // Determine if assistant should be shown based on behavioral insights
   const showLucieAssistant = insights?.autoDrive?.isLucieEnabled || false;
@@ -70,7 +81,7 @@ const Escorts: React.FC = () => {
           ) : (
             <EscortContainer 
               escorts={escorts}
-              services={availableServices}
+              services={professionalServices}
               isLoading={loading}
               // Pass behavioral insights to allow personalization
               highlightVisual={showHighlightedContent}

@@ -9,6 +9,7 @@ import FilterLocation from "./filters/FilterLocation";
 import FilterPrice from "./filters/FilterPrice";
 import FilterVerified from "./filters/FilterVerified";
 import FilterBadges from "./filters/FilterBadges";
+import FilterServices from "./filters/FilterServices";
 
 interface EscortFiltersProps {
   escorts: Escort[];
@@ -140,11 +141,10 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
         
         <FilterVerified verifiedOnly={verifiedOnly} setVerifiedOnly={setVerifiedOnly} />
         
-        <FilterBadges 
-          title="Services" 
-          items={services}
-          selectedItems={selectedServices}
-          toggleItem={toggleService}
+        <FilterServices
+          services={services}
+          selectedServices={selectedServices}
+          toggleService={toggleService}
         />
         
         <FilterBadges

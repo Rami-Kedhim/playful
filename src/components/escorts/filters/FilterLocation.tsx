@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface FilterLocationProps {
   selectedLocation: string;
@@ -14,20 +15,25 @@ const FilterLocation: React.FC<FilterLocationProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      <label htmlFor="location" className="text-sm font-medium">Location</label>
-      <select
-        id="location"
+      <label htmlFor="location" className="text-sm font-medium">
+        Location
+      </label>
+      <Select
         value={selectedLocation}
-        onChange={(e) => setSelectedLocation(e.target.value)}
-        className="w-full border rounded-md p-2"
+        onValueChange={setSelectedLocation}
       >
-        <option value="">All Locations</option>
-        {uniqueLocations.map((location) => (
-          <option key={location} value={location}>
-            {location}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger id="location" className="w-full">
+          <SelectValue placeholder="All Locations" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">All Locations</SelectItem>
+          {uniqueLocations.map((location) => (
+            <SelectItem key={location} value={location}>
+              {location}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
