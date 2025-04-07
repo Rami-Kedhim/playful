@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AIProfileDetail from "@/components/ai/AIProfileDetail";
@@ -15,9 +14,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { AICompanionChat } from "@/components/ai";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+interface ExtendedAIProfile extends AIProfile {
+  tags?: string[];
+}
+
 const AIProfiles = () => {
   const { initialize, profiles, featuredProfiles, loading } = useAIProfileStore();
-  const [selectedProfile, setSelectedProfile] = useState<AIProfile | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<ExtendedAIProfile | null>(null);
   const [activeTab, setActiveTab] = useState("browse");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTags, setActiveTags] = useState<string[]>([]);
@@ -28,21 +31,20 @@ const AIProfiles = () => {
     initialize();
   }, [initialize]);
 
-  // Extract all available tags from profiles
   useEffect(() => {
     const tags = new Set<string>();
-    profiles.forEach(profile => {
-      profile.tags?.forEach(tag => tags.add(tag));
+    (profiles as ExtendedAIProfile[]).forEach(profile => {
+      profile.tags?.forEach(tag => tag && tags.add(tag));
     });
     setAvailableTags(Array.from(tags).sort());
   }, [profiles]);
 
-  const handleSelectProfile = (profile: AIProfile) => {
+  const handleSelectProfile = (profile: ExtendedAIProfile) => {
     setSelectedProfile(profile);
     setActiveTab("detail");
   };
 
-  const handleGenerateSuccess = (profile: AIProfile) => {
+  const handleGenerateSuccess = (profile: ExtendedAIProfile) => {
     toast({
       title: "AI Profile Generated",
       description: `${profile.name} has been created successfully!`,
@@ -59,13 +61,11 @@ const AIProfiles = () => {
     }
   };
 
-  const filteredProfiles = profiles.filter(profile => {
-    // Filter by search term
+  const filteredProfiles = (profiles as ExtendedAIProfile[]).filter(profile => {
     const matchesSearch = !searchTerm || 
       profile.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       profile.bio.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filter by tags
     const matchesTags = activeTags.length === 0 || 
       activeTags.every(tag => profile.tags?.includes(tag));
     
@@ -156,8 +156,8 @@ const AIProfiles = () => {
                     {featuredProfiles.map(profile => (
                       <AIProfileCard 
                         key={profile.id} 
-                        profile={profile} 
-                        onChatClick={() => handleSelectProfile(profile)}
+                        profile={profile as ExtendedAIProfile} 
+                        onChatClick={() => handleSelectProfile(profile as ExtendedAIProfile)}
                       />
                     ))}
                   </div>

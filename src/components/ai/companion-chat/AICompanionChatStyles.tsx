@@ -3,7 +3,8 @@ import React from 'react';
 
 const AICompanionChatStyles: React.FC = () => {
   return (
-    <style jsx global>{`
+    <style>
+      {`
       .typing-dot {
         width: 6px;
         height: 6px;
@@ -78,7 +79,8 @@ const AICompanionChatStyles: React.FC = () => {
       .scrollbar-thin::-webkit-scrollbar-thumb:hover {
         background-color: rgba(155, 155, 155, 0.7);
       }
-    `}</style>
+      `}
+    </style>
   );
 };
 

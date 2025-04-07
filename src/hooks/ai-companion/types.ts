@@ -17,10 +17,17 @@ export interface CompanionMessage {
   suggestedActions?: string[];
   visualElements?: { data: VisualElementData }[];
   emotion?: string;
+  links?: string[]; // Added missing links property
 }
 
 export interface UseAICompanionConversationOptions {
   companionId: string;
+}
+
+// Added missing interfaces for other components
+export interface UseAICompanionConversationProps {
+  companionId: string;
+  initialMessages?: CompanionMessage[];
 }
 
 export interface UseAICompanionConversationResult {
@@ -34,4 +41,23 @@ export interface UseAICompanionConversationResult {
   generateImage?: (prompt: string) => Promise<void>;
   generatingImage?: boolean;
   creditCost?: number;
+}
+
+export interface CompanionProfile {
+  id: string;
+  name: string;
+  avatar?: string;
+  avatar_url?: string;
+  personality: string;
+  description: string;
+  visualCapabilities: boolean;
+  voiceType: string;
+  speechStyle: string;
+}
+
+export interface UserContext {
+  name?: string;
+  interests?: string[];
+  relationshipStatus?: string;
+  recentInteractions?: string;
 }

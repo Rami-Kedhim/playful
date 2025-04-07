@@ -4,12 +4,12 @@ import { useAICompanionMessages } from './useAICompanionMessages';
 import { useCompanionProfile } from './useCompanionProfile';
 import { useUserContext } from './useUserContext';
 import { v4 as uuidv4 } from 'uuid';
-import { CompanionMessage, UseAICompanionConversationProps } from './types';
+import { CompanionMessage, UseAICompanionConversationProps, UseAICompanionConversationResult } from './types';
 
 export function useAICompanionConversation({ 
   companionId, 
   initialMessages = [] 
-}: UseAICompanionConversationProps) {
+}: UseAICompanionConversationProps): UseAICompanionConversationResult {
   const { 
     messages, 
     isTyping, 
@@ -21,6 +21,10 @@ export function useAICompanionConversation({
   
   const { companion, isLoading } = useCompanionProfile(companionId, initialMessages);
   const { getUserContext } = useUserContext();
+  
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const creditCost = 1; // Default credit cost
   
   // Initialize with welcome message if no messages exist
   useState(() => {
@@ -91,13 +95,53 @@ export function useAICompanionConversation({
     sendMessage(action);
   }, [sendMessage]);
   
+  // Implement generate image functionality
+  const generateImage = useCallback(async (prompt: string): Promise<void> => {
+    if (!prompt.trim() || !companion) return;
+    
+    setGeneratingImage(true);
+    setError(null);
+    
+    try {
+      // Mock image generation for now
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Add an image as a response
+      addMessage({
+        role: 'assistant',
+        content: `I've created an image based on: "${prompt}"`,
+        timestamp: new Date(),
+        visualElements: [
+          { 
+            data: {
+              type: 'image',
+              url: 'https://placehold.co/600x400?text=AI+Generated+Image',
+              alt: prompt,
+              caption: `Image based on: "${prompt}"`
+            }
+          }
+        ],
+        emotion: 'creative'
+      });
+    } catch (error: any) {
+      setError(error.message || "Failed to generate image");
+      handleErrorResponse("I couldn't generate that image right now.");
+    } finally {
+      setGeneratingImage(false);
+    }
+  }, [companion, addMessage, handleErrorResponse]);
+  
   return {
     messages,
     isTyping,
     isLoading,
+    error,
     companion,
     sendMessage,
-    handleSuggestedActionClick
+    handleSuggestedActionClick,
+    generateImage,
+    generatingImage,
+    creditCost
   };
 }
 

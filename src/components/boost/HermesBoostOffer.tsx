@@ -17,7 +17,7 @@ interface HermesBoostOfferProps {
 
 const HermesBoostOffer = ({ onAccept, onDismiss }: HermesBoostOfferProps) => {
   const { user } = useAuth();
-  const { insights, recordBoostRequest } = useHermesInsights(user?.id);
+  const { insights, reportUserAction } = useHermesInsights(user?.id);
   const [isVisible, setIsVisible] = useState(false);
   
   // Show offer when available from HERMES
@@ -34,7 +34,7 @@ const HermesBoostOffer = ({ onAccept, onDismiss }: HermesBoostOfferProps) => {
   
   const handleAccept = () => {
     // Record acceptance in HERMES
-    recordBoostRequest();
+    reportUserAction('requested_boost');
     
     toast({
       title: "Boost Offer Applied!",

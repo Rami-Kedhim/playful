@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
-import { CompanionProfile, CompanionMessage } from './types';
+import { CompanionMessage, CompanionProfile } from './types';
 
 export function useCompanionProfile(companionId: string, initialMessages: CompanionMessage[]) {
   const [companion, setCompanion] = useState<CompanionProfile | null>(null);
@@ -15,7 +15,7 @@ export function useCompanionProfile(companionId: string, initialMessages: Compan
     return {
       id: 'default-companion',
       name: 'AI Assistant',
-      avatar: '/ai-assistant-avatar.png',
+      avatar_url: '/ai-assistant-avatar.png',
       description: 'A helpful AI assistant',
       personality: 'Friendly and professional',
       visualCapabilities: false,
@@ -33,7 +33,7 @@ export function useCompanionProfile(companionId: string, initialMessages: Compan
         const mockCompanion: CompanionProfile = {
           id: companionId,
           name: "Sophia",
-          avatar: "/sophia-avatar.png",
+          avatar_url: "/sophia-avatar.png",
           personality: "Friendly, outgoing, empathetic",
           description: "Virtual companion specializing in meaningful conversations",
           visualCapabilities: true,

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAICompanionConversation } from '@/hooks/ai-companion';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
@@ -38,7 +39,8 @@ const AICompanionChat = ({
   const [localIsTyping, setLocalIsTyping] = useState(false);
   
   useEffect(() => {
-    initSpeechSynthesis();
+    // Initialize speech synthesis would be implemented in a real app
+    // initSpeechSynthesis();
   }, []);
   
   useEffect(() => {
@@ -101,7 +103,7 @@ const AICompanionChat = ({
         isLoading={isLoading}
         isTyping={localIsTyping}
         onActionClick={handleSuggestedActionClick}
-        voiceType={companion?.voice_type}
+        voiceType={companion?.voiceType}
       />
 
       <AICompanionChatInput 
