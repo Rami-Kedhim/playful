@@ -117,15 +117,21 @@ export class HermesOxumIntegration {
     
     // Generate Chase Hughes behavioral profile
     const chaseHughesProfile = chaseHughesAnalyzer.createBehavioralProfile({
-      primarySensoryPreference: sensoryPreferences.primary || 'visual',
-      secondarySensoryPreference: sensoryPreferences.secondary,
-      currentInfluencePhase: emotionalPhaseData.phase,
-      influencePhaseProgress: emotionalPhaseData.progress,
-      trustScore: neuralMetrics.stability * 100,
-      desireScore: emotionalPhaseData.phase === 'desire' ? 
-        emotionalPhaseData.progress : emotionalPhaseData.phase === 'action' || emotionalPhaseData.phase === 'loyalty' ? 
-        80 : 40,
-      engagementScore: emotionalPhaseData.engagementScore
+      messageHistory: [
+        // Provide some mock message history if no real data is available
+        { content: "I'm interested in learning more", isUser: true },
+        { content: "Could you tell me about the features?", isUser: true }
+      ],
+      interactionHistory: {
+        clickPatterns: [
+          { element: 'pricing-button', timeViewing: 30 }
+        ],
+        pageViews: [
+          { page: '/home', timeSpent: 120 }
+        ],
+        responseDelays: [2.5, 1.8]
+      },
+      contentPreferences: sensoryPreferences.primary ? [sensoryPreferences.primary] : []
     });
     
     // Combine all insights into a unified object
