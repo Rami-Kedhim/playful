@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
@@ -74,7 +73,6 @@ export const useAssessment = () => {
             brandResonance: assessment.psychographicProfile.brandResonance || BrandResonanceStage.Awareness,
             identifiedSignals: assessment.psychographicProfile.identifiedSignals || []
           } : {
-            // Provide all required properties for the psychographicProfile object
             personalityTraits: [],
             interests: [],
             values: [],
