@@ -6,7 +6,7 @@ import { Menu, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
 import LanguageSwitcher from '../language/LanguageSwitcher';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth';
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import MobileMenu from '../navigation/MobileMenu';
 import useMobileMenu from '@/hooks/useMobileMenu';

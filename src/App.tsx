@@ -3,8 +3,9 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import Routes from '@/Routes';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { AuthProvider } from '@/providers/AuthProvider';
+import { AuthProvider } from '@/hooks/auth';
 import LucieSchaubergerIntegration from '@/components/home/LucieSchaubergerIntegration';
+import HermesDebugPanel from '@/components/home/HermesDebugPanel';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Router>
           <Routes />
           <LucieSchaubergerIntegration />
+          <HermesDebugPanel />
           <Toaster />
         </Router>
       </AuthProvider>
