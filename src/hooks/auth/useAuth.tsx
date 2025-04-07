@@ -22,7 +22,7 @@ export const useAuth = () => {
 // Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Use our custom hooks
-  const [authState, setIsLoading, refreshProfile] = useAuthState();
+  const { authState, setIsLoading, setUser, setProfile, refreshProfile } = useAuthState();
   const { user, profile, isLoading, userRoles } = authState;
   
   const [error, setError] = useState<string | null>(null);
@@ -57,22 +57,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Update state
           setIsAuthenticated(true);
-          // Instead of directly using setUser, we'll update through the auth state
-          authState.user = mappedUser;
+          setUser(mappedUser);
           
           // Fetch profile after auth state changes
           await refreshProfile();
         } else {
           setIsAuthenticated(false);
-          // Clear user without directly using setUser
-          authState.user = null;
+          setUser(null);
         }
 
         if (event === 'SIGNED_OUT') {
           // Clear all auth state
           setIsAuthenticated(false);
-          authState.user = null;
-          authState.profile = null;
+          setUser(null);
         }
         
         setIsLoading(false);
@@ -99,8 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           setSession(initialSession);
           setIsAuthenticated(true);
-          // Instead of directly using setUser
-          authState.user = initialUser;
+          setUser(initialUser);
           await refreshProfile();
         }
       } catch (error) {
@@ -234,6 +230,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
       });
+      
+      // Refresh profile data
+      await refreshProfile();
       
       return true;
     } catch (error: any) {

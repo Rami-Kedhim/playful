@@ -4,13 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, UserProfile } from '@/types/auth';
 import { getUserRoles } from '@/utils/authStateUtils';
 
+export type AuthState = {
+  user: AuthUser | null;
+  profile: UserProfile | null;
+  isLoading: boolean;
+  userRoles: string[];
+};
+
 export const useAuthState = () => {
-  const [authState, setAuthState] = useState<{
-    user: AuthUser | null;
-    profile: UserProfile | null;
-    isLoading: boolean;
-    userRoles: string[];
-  }>({
+  const [authState, setAuthState] = useState<AuthState>({
     user: null,
     profile: null,
     isLoading: true,
@@ -20,6 +22,24 @@ export const useAuthState = () => {
   // Function to set the loading state
   const setIsLoading = (loading: boolean) => {
     setAuthState(prev => ({ ...prev, isLoading: loading }));
+  };
+
+  // Function to set the user state
+  const setUser = (user: AuthUser | null) => {
+    setAuthState(prev => ({ ...prev, user }));
+    
+    // Update roles when user changes
+    if (user) {
+      const roles = getUserRoles(user);
+      setAuthState(prev => ({ ...prev, user, userRoles: roles }));
+    } else {
+      setAuthState(prev => ({ ...prev, user: null, userRoles: [], profile: null }));
+    }
+  };
+
+  // Function to set the profile state
+  const setProfile = (profile: UserProfile | null) => {
+    setAuthState(prev => ({ ...prev, profile }));
   };
 
   // Function to refresh profile data
@@ -37,7 +57,7 @@ export const useAuthState = () => {
       
       // Update profile in state
       if (data) {
-        setAuthState(prev => ({ ...prev, profile: data }));
+        setProfile(data);
       }
       
       // Fetch roles for the user
@@ -48,5 +68,11 @@ export const useAuthState = () => {
     }
   };
   
-  return [authState, setIsLoading, refreshProfile] as const;
+  return { 
+    authState, 
+    setIsLoading, 
+    setUser, 
+    setProfile, 
+    refreshProfile 
+  };
 };

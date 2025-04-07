@@ -6,116 +6,136 @@ import { AuthResult } from '@/types/auth';
 
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
-
-  // Login action
+  const [error, setError] = useState<string | null>(null);
+  
+  /**
+   * Log in a user with email and password
+   */
   const login = async (email: string, password: string): Promise<AuthResult> => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
         password 
       });
       
-      if (error) {
-        toast({
-          title: "Login failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return { success: false, error: error.message };
-      }
+      if (error) throw error;
       
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
-      
+      // Auth state listener will handle setting user, session, etc.
       return { success: true };
     } catch (error: any) {
-      toast({
-        title: "Login failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return { success: false, error: error.message };
+      const errorMessage = error.message || "Failed to login. Please check your credentials.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Register action
+  /**
+   * Register a new user with email and password
+   */
   const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
     setIsLoading(true);
+    setError(null);
+    
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
+      // Register with Supabase
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
         password,
         options: {
           data: {
             username: username || email.split('@')[0],
-          },
-        },
+            role: 'user',
+          }
+        }
       });
       
-      if (error) {
-        toast({
-          title: "Registration failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return { success: false, error: error.message };
-      }
-      
+      if (error) throw error;
+
       toast({
         title: "Registration successful",
-        description: "Your account has been created.",
+        description: "Your account has been created successfully.",
+      });
+      
+      // Auth state listener will handle the rest
+      return { success: true };
+    } catch (error: any) {
+      const errorMessage = error.message || "Registration failed. Please try again.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Log out the current user
+   */
+  const logout = async (): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out successfully.",
       });
       
       return { success: true };
     } catch (error: any) {
-      toast({
-        title: "Registration failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return { success: false, error: error.message };
+      const errorMessage = error.message || "Failed to logout. Please try again.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Logout action
-  const logout = async (): Promise<boolean> => {
+  /**
+   * Sign in with a third-party provider (OAuth)
+   */
+  const signInWithProvider = async (provider: 'google' | 'facebook' | 'twitter' | 'github'): Promise<AuthResult> => {
     setIsLoading(true);
+    setError(null);
+    
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        toast({
-          title: "Logout failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return false;
-      }
-      
-      toast({
-        title: "Logout successful",
-        description: "You have been logged out.",
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
       
-      return true;
+      if (error) throw error;
+      
+      // This generally won't return directly as it redirects to the provider
+      return { success: true };
     } catch (error: any) {
-      toast({
-        title: "Logout failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return false;
+      const errorMessage = error.message || `Failed to sign in with ${provider}`;
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
-
-  return { login, register, logout, isLoading };
+  
+  const clearError = () => setError(null);
+  
+  return {
+    login,
+    register,
+    logout,
+    signInWithProvider,
+    isLoading,
+    error,
+    clearError,
+  };
 };

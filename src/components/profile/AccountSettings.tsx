@@ -1,148 +1,327 @@
 
-import { useState } from "react";
-import { useAuth } from "@/hooks/auth/useAuth";
-import AccountItem from "./settings/AccountItem";
-import PasswordDialog from "./settings/PasswordDialog";
-import EmailDialog from "./settings/EmailDialog";
-import LucoinBalance from "./settings/LucoinBalance";
-import ProfileCompleteness from "./ProfileCompleteness";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, Shield, Zap } from "lucide-react";
-import WalletConnect from "@/components/solana/WalletConnect";
-import { AuthUser } from "@/types/auth";
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Loader2, Save } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Form schema for account settings
+const accountFormSchema = z.object({
+  username: z
+    .string()
+    .min(3, { message: 'Username must be at least 3 characters' })
+    .max(30, { message: 'Username must be less than 30 characters' }),
+  email: z.string().email({ message: 'Invalid email address' }).optional(),
+  fullName: z.string().optional(),
+});
+
+type AccountFormValues = z.infer<typeof accountFormSchema>;
+
+// Form schema for password change
+const passwordFormSchema = z.object({
+  currentPassword: z
+    .string()
+    .min(6, { message: 'Current password must be at least 6 characters' }),
+  newPassword: z
+    .string()
+    .min(8, { message: 'New password must be at least 8 characters' }),
+  confirmPassword: z
+    .string()
+    .min(8, { message: 'Confirm password must be at least 8 characters' }),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 
 interface AccountSettingsProps {
-  user: AuthUser;
-  profile: any;
+  initialTab?: string;
 }
 
-const AccountSettings = ({ user, profile }: AccountSettingsProps) => {
-  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
-  
-  const getLastPasswordChange = () => {
-    // This would typically come from the user metadata
-    // For now, we'll just return 'Never' as a placeholder
-    return "Never";
+const AccountSettings: React.FC<AccountSettingsProps> = ({ initialTab = 'general' }) => {
+  const { user, profile, updateUserProfile, updatePassword } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Form for general settings
+  const accountForm = useForm<AccountFormValues>({
+    resolver: zodResolver(accountFormSchema),
+    defaultValues: {
+      username: user?.username || '',
+      email: user?.email || '',
+      fullName: profile?.full_name || '',
+    },
+  });
+
+  // Form for password change
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
+
+  // Handle account form submission
+  const onSubmitAccount = async (data: AccountFormValues) => {
+    setIsSaving(true);
+    try {
+      const success = await updateUserProfile({
+        username: data.username,
+      });
+
+      if (success) {
+        toast({
+          title: 'Account updated',
+          description: 'Your account settings have been updated.',
+        });
+      }
+    } catch (error) {
+      console.error('Error updating account:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update account settings. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
-  
+
+  // Handle password form submission
+  const onSubmitPassword = async (data: PasswordFormValues) => {
+    setIsChangingPassword(true);
+    try {
+      const result = await updatePassword(data.currentPassword, data.newPassword);
+
+      if (result.success) {
+        toast({
+          title: 'Password updated',
+          description: 'Your password has been updated successfully.',
+        });
+        passwordForm.reset({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: result.error || 'Failed to update password. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {profile && (
-        <ProfileCompleteness completeness={profile.profile_completeness || 0} />
-      )}
+    <Tabs defaultValue={initialTab} className="w-full">
+      <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="security">Security</TabsTrigger>
+      </TabsList>
 
-      <AccountItem 
-        title="Email Address" 
-        subtitle={user?.email} 
-        actionLabel="Change Email"
-        onAction={() => setEmailDialogOpen(true)}
-      />
-      
-      <AccountItem 
-        title="Password" 
-        subtitle={`Last changed: ${getLastPasswordChange()}`} 
-        actionLabel="Change Password"
-        onAction={() => setPasswordDialogOpen(true)}
-      />
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Wallet Connections</CardTitle>
-          <CardDescription>
-            Connect your cryptocurrency wallet to use Lucoins
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <svg width="24" height="24" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M113.5,23.7L76.8,45.2L84.6,29.9L113.5,23.7z" fill="#AB9FF2"/>
-                  <path d="M113.5,23.7L76.8,45.2L86.1,35.6L113.5,23.7z" fill="#E5D8FF"/>
-                  <path d="M13.9,23.7L50.6,45.8L42.6,29.9L13.9,23.7z" fill="#AB9FF2"/>
-                  <path d="M13.9,23.7L50.6,45.8L41.3,35.3L13.9,23.7z" fill="#E5D8FF"/>
-                  <path d="M98.9,88.9L86.1,110.1l32.3-8.9l9.1-31.2L98.9,88.9z" fill="#AB9FF2"/>
-                  <path d="M25.1,88.9l12.8,21.2l-32.3-8.9l-9.1-31.2L25.1,88.9z" fill="#AB9FF2"/>
-                  <path d="M41.8,59.4L34.6,74.3l41.7,2l-1.6-44.8L41.8,59.4z" fill="#AB9FF2"/>
-                  <path d="M85.7,59.4l-7.3,14.9l-41.7,2l1.6-44.8L85.7,59.4z" fill="#E5D8FF"/>
-                  <path d="M25.1,88.9L42.6,74.3L34.6,59.4L13.7,70.1L25.1,88.9z" fill="#E5D8FF"/>
-                  <path d="M98.9,88.9L81.5,74.3l7.9-14.9l20.9,10.7L98.9,88.9z" fill="#E5D8FF"/>
-                  <path d="M50.6,45.8L74.7,31.5L52.7,26.1L30.1,31.5L50.6,45.8z" fill="#AB9FF2"/>
-                  <path d="M76.8,45.8L52.7,31.5l22.1-5.4l22.6,5.4L76.8,45.8z" fill="#E5D8FF"/>
-                </svg>
-              </div>
-              <div>
-                <div className="font-medium">Phantom Wallet</div>
-                <div className="text-sm text-muted-foreground">Connect to buy Lucoins with SOL</div>
-              </div>
-            </div>
-            <WalletConnect />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <div className="text-sm text-muted-foreground flex items-center">
-            <Shield className="h-4 w-4 mr-1" />
-            Your wallet is only used for transactions and never shared with third parties
-          </div>
-        </CardFooter>
-      </Card>
-      
-      <LucoinBalance balance={profile?.lucoin_balance || 0} />
-      
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center">
-            <Zap className="h-5 w-5 text-yellow-500 mr-2" />
-            Premium Features
-          </CardTitle>
-          <CardDescription>
-            Enhance your experience with premium features
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg border">
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <Zap className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="font-medium">Profile Boost</div>
-                <div className="text-sm text-muted-foreground">Get more visibility with a boosted profile</div>
-              </div>
-            </div>
-            <div className="text-sm">
-              From <span className="font-bold">5 LC</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between p-3 rounded-lg border">
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                <ExternalLink className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="font-medium">Premium Content</div>
-                <div className="text-sm text-muted-foreground">Access exclusive content from creators</div>
-              </div>
-            </div>
-            <div className="text-sm">
-              From <span className="font-bold">10 LC</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <PasswordDialog 
-        open={passwordDialogOpen}
-        onOpenChange={setPasswordDialogOpen}
-      />
+      <TabsContent value="general">
+        <Card>
+          <CardHeader>
+            <CardTitle>General Settings</CardTitle>
+            <CardDescription>
+              Update your account information and preferences
+            </CardDescription>
+          </CardHeader>
+          <Form {...accountForm}>
+            <form onSubmit={accountForm.handleSubmit(onSubmitAccount)}>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={accountForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-      <EmailDialog 
-        open={emailDialogOpen}
-        onOpenChange={setEmailDialogOpen}
-      />
-    </div>
+                <FormField
+                  control={accountForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="email@example.com" 
+                          {...field} 
+                          disabled
+                          readOnly 
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        Email cannot be changed directly
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={accountForm.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" disabled={isSaving} className="ml-auto">
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="security">
+        <Card>
+          <CardHeader>
+            <CardTitle>Security Settings</CardTitle>
+            <CardDescription>
+              Update your password and security preferences
+            </CardDescription>
+          </CardHeader>
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)}>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={passwordForm.control}
+                  name="currentPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Current Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="••••••••"
+                          type="password"
+                          autoComplete="current-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={passwordForm.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="••••••••"
+                          type="password"
+                          autoComplete="new-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={passwordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm New Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="••••••••"
+                          type="password"
+                          autoComplete="new-password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              <CardFooter>
+                <Button
+                  type="submit"
+                  disabled={isChangingPassword}
+                  className="ml-auto"
+                >
+                  {isChangingPassword ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Password'
+                  )}
+                </Button>
+              </CardFooter>
+            </form>
+          </Form>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 };
 

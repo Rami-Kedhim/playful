@@ -3,90 +3,121 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
+interface PasswordResetResult {
+  success: boolean;
+  error?: string;
+}
+
 export const usePasswordManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
-
-  // Reset password request
-  const resetPassword = async (email: string): Promise<boolean> => {
+  const [error, setError] = useState<string | null>(null);
+  
+  /**
+   * Request a password reset email
+   * @param email Email address to send reset instructions to
+   * @returns Object indicating success or error
+   */
+  const resetPassword = async (email: string): Promise<PasswordResetResult> => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth/reset-password`,
       });
       
-      if (error) {
-        toast({
-          title: "Password reset failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return false;
-      }
+      if (error) throw error;
       
-      toast({
-        title: "Password reset email sent",
-        description: "Please check your email for the password reset link",
-      });
-      return true;
+      return { success: true };
     } catch (error: any) {
-      toast({
-        title: "Password reset failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return false;
+      setError(error.message || "Failed to send password reset instructions");
+      return { success: false, error: error.message };
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Update password
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+  
+  /**
+   * Update user's password
+   * @param currentPassword Current password for verification
+   * @param newPassword New password to set
+   * @returns Object indicating success or error
+   */
+  const updatePassword = async (currentPassword: string, newPassword: string): Promise<PasswordResetResult> => {
     setIsLoading(true);
+    setError(null);
+    
     try {
-      // First verify the old password is correct
-      const { error: verifyError } = await supabase.auth.signInWithPassword({
+      // First verify the current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: supabase.auth.getUser().then(({ data }) => data.user?.email || ''),
-        password: oldPassword,
+        password: currentPassword,
       });
       
-      if (verifyError) {
-        toast({
-          title: "Password update failed",
-          description: "Current password is incorrect",
-          variant: "destructive",
-        });
-        return false;
+      if (signInError) {
+        throw new Error("Current password is incorrect");
       }
       
-      // Then update to the new password
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      // Now update to the new password
+      const { error } = await supabase.auth.updateUser({ 
+        password: newPassword 
+      });
       
-      if (error) {
-        toast({
-          title: "Password update failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        return false;
-      }
+      if (error) throw error;
       
       toast({
         title: "Password updated",
         description: "Your password has been updated successfully",
       });
-      return true;
+      
+      return { success: true };
     } catch (error: any) {
-      toast({
-        title: "Password update failed",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
-      return false;
+      const errorMessage = error.message || "Failed to update password";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
-
-  return { resetPassword, updatePassword };
+  
+  /**
+   * Complete a password recovery from the reset link
+   * @param newPassword New password to set
+   * @returns Object indicating success or error
+   */
+  const completePasswordRecovery = async (newPassword: string): Promise<PasswordResetResult> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: newPassword 
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Password reset successful",
+        description: "Your password has been reset successfully. You can now log in with your new password.",
+      });
+      
+      return { success: true };
+    } catch (error: any) {
+      setError(error.message || "Failed to reset password");
+      return { success: false, error: error.message };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const clearError = () => setError(null);
+  
+  return { 
+    resetPassword, 
+    updatePassword, 
+    completePasswordRecovery,
+    isLoading, 
+    error, 
+    clearError 
+  };
 };
