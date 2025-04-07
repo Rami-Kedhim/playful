@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -20,12 +21,13 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import MobileMenu from '../navigation/MobileMenu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import useMobileMenu from '@/hooks/useMobileMenu';
 
 const Navbar: React.FC = () => {
   const { t } = useTranslation();
   const { user, isAuthenticated, userRoles = [], logout } = useAuth();
   const { currentLanguage } = useLanguage();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isMobileMenuOpen, setIsMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
   
   const isAdmin = userRoles?.some(role => ['admin', 'moderator'].includes(role));
   
@@ -107,13 +109,13 @@ const Navbar: React.FC = () => {
             variant="ghost" 
             size="icon" 
             className="md:hidden rounded-full"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={toggleMobileMenu}
             aria-label="Toggle menu"
           >
             <Menu className="h-5 w-5" />
           </Button>
           
-          <MobileMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} />
+          <MobileMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} />
           
           <div className="hidden md:block">
             {isAuthenticated ? (

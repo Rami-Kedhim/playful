@@ -1,8 +1,11 @@
 
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import MainLayout from "@/components/layout/MainLayout";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { getEscortById } from "@/data/escortData";
+import { LivecamDetailLayout } from "@/components/livecams/detail";
+import StandardPageLayout from "@/components/layout/StandardPageLayout";
 
 const EscortLiveStreamDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,31 +18,97 @@ const EscortLiveStreamDetail: React.FC = () => {
   
   if (!escort) {
     return (
-      <MainLayout>
+      <StandardPageLayout title="Escort not found">
         <div className="flex flex-col items-center justify-center py-12">
-          <h2 className="text-xl font-semibold mb-4">Escort not found</h2>
-          <button 
+          <p className="text-muted-foreground mb-4">
+            We couldn't find the escort or live stream you're looking for.
+          </p>
+          <Button 
             onClick={handleGoBack}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
+            className="flex items-center gap-2"
           >
+            <ArrowLeft className="h-4 w-4" />
             Go Back
-          </button>
+          </Button>
         </div>
-      </MainLayout>
+      </StandardPageLayout>
     );
   }
   
-  return (
-    <MainLayout title={`${escort.name}'s Live Stream`}>
-      <div className="space-y-6">
-        <p className="text-lg">Live stream details for {escort.name} will be displayed here.</p>
-        
-        {/* Placeholder for stream content */}
-        <div className="bg-muted aspect-video rounded-lg flex items-center justify-center">
-          <p className="text-muted-foreground">Stream preview not available</p>
+  const titleContent = (
+    <div>
+      <h1 className="text-2xl font-bold">{escort.name}'s Live Stream</h1>
+      <p className="text-muted-foreground text-sm">
+        Live entertainment with {escort.name}
+      </p>
+    </div>
+  );
+  
+  // Placeholder content until real implementation
+  const mainContent = (
+    <div className="space-y-6">
+      {/* Placeholder for stream content */}
+      <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+        <p className="text-muted-foreground">Stream preview not available</p>
+      </div>
+      
+      <div className="bg-card rounded-lg p-4">
+        <h2 className="text-xl font-semibold mb-2">About this stream</h2>
+        <p className="text-muted-foreground">
+          This is a live stream session with {escort.name}. Watch and interact in real-time.
+        </p>
+      </div>
+    </div>
+  );
+  
+  const sidebarContent = (
+    <div className="space-y-4">
+      <div className="bg-card rounded-lg p-4">
+        <h3 className="font-medium mb-2">Streamer Info</h3>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+            {escort.name.charAt(0)}
+          </div>
+          <div>
+            <p className="font-medium">{escort.name}</p>
+            <p className="text-sm text-muted-foreground">Online</p>
+          </div>
         </div>
       </div>
-    </MainLayout>
+      
+      <Button className="w-full">Send Tip</Button>
+      <Button variant="outline" className="w-full">Start Private Chat</Button>
+    </div>
+  );
+  
+  const chatContent = (
+    <div className="bg-card rounded-lg h-[500px] flex flex-col">
+      <div className="p-3 border-b">
+        <h3 className="font-medium">Live Chat</h3>
+      </div>
+      <div className="flex-1 p-3 overflow-y-auto">
+        <p className="text-center text-muted-foreground text-sm">
+          Chat will appear here
+        </p>
+      </div>
+      <div className="p-3 border-t">
+        <input 
+          type="text" 
+          placeholder="Type a message..." 
+          className="w-full bg-background p-2 rounded-md"
+          disabled
+        />
+      </div>
+    </div>
+  );
+  
+  return (
+    <LivecamDetailLayout
+      title={titleContent}
+      mainContent={mainContent}
+      sidebar={sidebarContent}
+      chatContent={chatContent}
+    />
   );
 };
 
