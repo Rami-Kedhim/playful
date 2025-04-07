@@ -61,7 +61,8 @@ const HermesManager: React.FC = () => {
             <div className="h-full bg-primary animate-[progress_2s_ease-in-out_forwards]"></div>
           </div>
           
-          <style jsx>{`
+          <style>
+            {`
             @keyframes progress {
               0% { width: 0%; }
               20% { width: 20%; }
@@ -69,7 +70,8 @@ const HermesManager: React.FC = () => {
               60% { width: 75%; }
               100% { width: 100%; }
             }
-          `}</style>
+            `}
+          </style>
         </div>
       </MainLayout>
     );
