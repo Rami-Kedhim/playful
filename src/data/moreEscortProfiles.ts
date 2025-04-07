@@ -1,4 +1,3 @@
-
 import { Escort } from "../types/escort";
 
 export const moreEscorts: Escort[] = [
@@ -58,7 +57,14 @@ export const moreEscorts: Escort[] = [
       streams: 0
     },
     providesVirtualContent: true,
-    subscriptionPrice: 15.99
+    subscriptionPrice: 15.99,
+    bio: "Berlin-based escort offering premium services with passion and discretion.",
+    contactInfo: {
+      email: "jessica@example.com",
+      phone: "+49-123-456789",
+      website: "jessicaberlin.example.com"
+    },
+    featured: false
   },
   {
     id: "6",

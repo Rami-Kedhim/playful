@@ -47,7 +47,7 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
   };
 
   const submitVerification = async (
-    escortId: string,
+    userId: string,
     documentUrls: string[]
   ): Promise<VerificationRequest | null> => {
     try {
@@ -57,20 +57,21 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
       const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
         id: `doc-${index}`,
         type: 'id-verification',
-        url: url,
+        fileUrl: url,
+        uploadedAt: new Date().toISOString(),
         status: 'pending'
       }));
       
       // Create verification request object
       const verificationRequest: Partial<VerificationRequest> = {
-        escortId,
+        userId,
         status: 'pending',
         documents: documents,
         submittedAt: new Date().toISOString(),
       };
       
       // In a real app, this would send the data to an API
-      const result = await updateFn(escortId, verificationRequest);
+      const result = await updateFn(userId, verificationRequest);
       
       // Show success message
       toast({

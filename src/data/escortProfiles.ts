@@ -66,7 +66,14 @@ export const escortProfiles: Escort[] = [
     },
     providesVirtualContent: true,
     subscriptionPrice: 19.99,
-    serviceTypes: ["in-person", "virtual"]
+    serviceTypes: ["in-person", "virtual"],
+    bio: "Sophisticated and charming, I'm your perfect NYC companion for any occasion.",
+    contactInfo: {
+      email: "sophia@example.com",
+      phone: "+1-234-567-8900",
+      website: "sophianyc.example.com"
+    },
+    featured: true
   },
   {
     id: "2",

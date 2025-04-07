@@ -21,14 +21,15 @@ export const useVerificationStatus = () => {
         const status = await checkVerificationStatus(user.id);
         
         if (status) {
-          setVerificationRequest({
+          const newRequest: VerificationRequest = {
             id: 'mock-request-id',
-            escortId: user.id,
+            userId: user.id,
             status: status,
             documents: [],
-            submittedAt: new Date().toISOString(), // Convert to string
-            userId: user.id
-          });
+            submittedAt: new Date().toISOString(),
+            // Fixed issue by removing escortId from here
+          };
+          setVerificationRequest(newRequest);
         }
         
         setError(null);

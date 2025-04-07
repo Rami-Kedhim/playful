@@ -87,14 +87,14 @@ const AICompanionDemoPage = () => {
     professional: "Formal and efficient with clear, business-like communication."
   };
 
-  const personalityImages = {
+  const personalityImages: Record<PersonalityType, string> = {
     flirty: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     dominant: "https://images.unsplash.com/photo-1563351672-62b74891a28a?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     submissive: "https://images.unsplash.com/photo-1488161628813-04466f872be2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     playful: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     romantic: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     shy: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
-    intellectual: "https://images.unsplash.com/photo-1496345875659-11f7dd282d1d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
+    intellectual: "https://images.unsplash.com/photo-1496345875659-11f7dd282d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     adventurous: "https://images.unsplash.com/photo-1531750026848-8ada78f641c2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80",
     professional: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80"
   };
@@ -107,7 +107,8 @@ const AICompanionDemoPage = () => {
     romantic: 'https://source.unsplash.com/random/400x600/?model,elegant',
     shy: 'https://source.unsplash.com/random/400x600/?model,quiet',
     intellectual: 'https://source.unsplash.com/random/400x600/?model,glasses',
-    adventurous: 'https://source.unsplash.com/random/400x600/?model,outdoor'
+    adventurous: 'https://source.unsplash.com/random/400x600/?model,outdoor',
+    professional: 'https://source.unsplash.com/random/400x600/?model,business'
   };
   
   const companionNames: Record<PersonalityType, string> = {
@@ -118,7 +119,8 @@ const AICompanionDemoPage = () => {
     romantic: 'Isabella',
     shy: 'Mia',
     intellectual: 'Alexandria',
-    adventurous: 'Skye'
+    adventurous: 'Skye',
+    professional: 'Victoria'
   };
 
   const handleAddCredits = () => {

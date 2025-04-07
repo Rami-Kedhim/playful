@@ -1,4 +1,5 @@
-import { AIPersonalityConfig } from "@/types/ai-personality";
+
+import { AIPersonalityConfig, PersonalityType } from "@/types/ai-personality";
 
 // Only updating the baselineEmotions objects that are missing 'trust'
 export const getFlirtyPersonalityConfig = (): AIPersonalityConfig => {
@@ -217,7 +218,8 @@ export const aiPersonalityTemplates: Record<PersonalityType, AIPersonalityConfig
       joy: 80,
       interest: 70,
       surprise: 60,
-      anticipation: 70
+      anticipation: 70,
+      trust: 60 // Added missing trust property
     },
     responseStyle: {
       formality: 1,
@@ -240,7 +242,8 @@ export const aiPersonalityTemplates: Record<PersonalityType, AIPersonalityConfig
       interest: 90,
       surprise: 40,
       joy: 50,
-      anticipation: 60
+      anticipation: 60,
+      trust: 45 // Added missing trust property
     },
     responseStyle: {
       formality: 4,
@@ -263,7 +266,8 @@ export const aiPersonalityTemplates: Record<PersonalityType, AIPersonalityConfig
       anticipation: 80,
       joy: 70,
       interest: 80,
-      surprise: 60
+      surprise: 60,
+      trust: 55 // Added missing trust property
     },
     responseStyle: {
       formality: 1,
@@ -275,6 +279,29 @@ export const aiPersonalityTemplates: Record<PersonalityType, AIPersonalityConfig
       questionFrequency: 60,
       emotionalResponseIntensity: 60,
       personalDisclosureLevel: 70
+    }
+  },
+  
+  // Adding missing 'professional' personality
+  professional: {
+    type: 'professional',
+    traits: ['efficient', 'knowledgeable', 'formal', 'reliable'],
+    baselineEmotions: {
+      interest: 75,
+      joy: 40,
+      trust: 80,
+      anticipation: 50
+    },
+    responseStyle: {
+      formality: 5,
+      friendliness: 3,
+      verbosity: 4,
+      humor: 1
+    },
+    interactionPatterns: {
+      questionFrequency: 50,
+      emotionalResponseIntensity: 20,
+      personalDisclosureLevel: 30
     }
   }
 };

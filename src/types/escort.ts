@@ -82,16 +82,18 @@ export interface VerificationRequest {
   documents: VerificationDocument[];
   rejectionReason?: string;
   expiresAt?: string;
+  escortId?: string; // Added to fix errors
 }
 
-export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired';
+export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'in_review';
 
 export interface VerificationDocument {
   id: string;
   type: string;
-  fileUrl: string;
+  fileUrl: string;  // Changed from url to fileUrl to match expected property
   uploadedAt: string;
   status: 'pending' | 'approved' | 'rejected';
+  url?: string; // For backward compatibility
 }
 
 export type ServiceType = 

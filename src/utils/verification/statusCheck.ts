@@ -45,7 +45,8 @@ export const createVerificationRequest = async (
   const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
     id: `doc-${index}`,
     type: 'id-verification',
-    url: url,
+    fileUrl: url,
+    uploadedAt: new Date().toISOString(),
     status: 'pending'
   }));
   
@@ -53,7 +54,6 @@ export const createVerificationRequest = async (
   const request: VerificationRequest = {
     id: `verification-${Date.now()}`,
     userId,
-    escortId: userId, // Assuming the same ID for this mock
     status: 'pending',
     documents: documents,
     submittedAt: new Date().toISOString()

@@ -60,7 +60,7 @@ export interface AIPersonalityConfig {
   };
 }
 
-// Add the missing types needed by other parts of the application
+// Updated types needed by other parts of the application
 export interface EmotionalMemory {
   userId: string;
   companionId: string;
@@ -69,6 +69,9 @@ export interface EmotionalMemory {
     history: EmotionalState[];
   };
   lastUpdated: string;
+  state?: EmotionalState; // Added for backward compatibility
+  emotionalHistory?: EmotionalState[]; // Added for backward compatibility
+  keyMemories?: any[]; // Added for backward compatibility
 }
 
 export interface MonetizationHook {
@@ -76,4 +79,10 @@ export interface MonetizationHook {
   checkUserCredits: () => Promise<number>;
   deductCredits: (amount: number, reason: string) => Promise<boolean>;
   getSubscriptionStatus: () => Promise<{ isSubscribed: boolean; plan: string | null }>;
+  // Add missing properties being used in code
+  type?: string;
+  lucoinCost?: number;
+  triggerConditions?: any;
+  teaser?: string;
+  fullContent?: string;
 }
