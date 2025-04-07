@@ -1,180 +1,369 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
+import { useAIMessaging, AIMessage } from '@/hooks/useAIMessaging';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Loader2, Copy, Check, Lock, Coins } from 'lucide-react';
-import { AIMessage } from '@/types/ai-messages';
-import AIMessageComponent from './AIMessageComponent';
-import { useAuth } from '@/hooks/auth';
-import { useToast } from '@/components/ui/use-toast';
-import { copyToClipboard } from '@/utils/clipboardUtils';
-import { useAICompanion } from '@/hooks/ai-companion/useAICompanion';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { Send, Coins, Image, X, MessageSquare, Info } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { UserProfile } from '@/types/auth';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface AIChatProps {
   profileId: string;
-  profileName: string;
-  profileDescription: string;
-  profileAvatar: string;
+  conversationId?: string;
+  userProfile?: UserProfile;
+  onClose?: () => void;
 }
 
 const AIChat: React.FC<AIChatProps> = ({ 
   profileId, 
-  profileName, 
-  profileDescription, 
-  profileAvatar 
+  conversationId, 
+  userProfile, 
+  onClose 
 }) => {
-  const { user } = useAuth();
+  const {
+    loading,
+    sendingMessage,
+    profile,
+    messages,
+    error,
+    paymentRequired,
+    paymentMessage,
+    simulatingTyping,
+    generatingImage,
+    initializeConversation,
+    sendMessage,
+    processPayment,
+    generateAIImage
+  } = useAIMessaging({ profileId, conversationId });
+  
+  const [inputValue, setInputValue] = useState('');
+  const [showImagePrompt, setShowImagePrompt] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const { 
-    conversation,
-    messages, 
-    sendMessage, 
-    sendingMessage: isLoading, 
-    loadingConversation: isInitialLoading,
-    error, 
-    refreshConversation: loadInitialMessages
-  } = useAICompanion(profileId);
-  
-  const [input, setInput] = useState('');
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const [copied, setCopied] = useState(false);
-  
-  const subscriptionStatus = 'active';
-  const lucoinBalance = 100; // Default value
   
   useEffect(() => {
-    loadInitialMessages();
-  }, [loadInitialMessages]);
+    initializeConversation();
+  }, [initializeConversation]);
   
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error,
+        variant: 'destructive',
+      });
     }
-  }, [messages]);
+  }, [error, toast]);
   
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  useEffect(() => {
+    // Scroll to bottom when messages change
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, simulatingTyping]);
+  
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    const success = await sendMessage(input);
-    if (success) {
-      setInput('');
+    if (!inputValue.trim()) return;
+    
+    sendMessage(inputValue);
+    setInputValue('');
+  };
+  
+  const handlePurchaseResponse = () => {
+    if (paymentRequired) {
+      processPayment();
     }
   };
-  
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSend();
+
+  const handleGenerateImage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!imagePrompt.trim()) return;
+    
+    const imageUrl = await generateAIImage(imagePrompt);
+    if (imageUrl) {
+      setGeneratedImage(imageUrl);
+      // Add a system message about the image generation
+      sendMessage(`I generated an image for you based on: "${imagePrompt}"`);
+      setImagePrompt('');
+      setShowImagePrompt(false);
     }
   };
-  
-  const handleMessageUnlocked = useCallback(() => {
-    loadInitialMessages();
-  }, [loadInitialMessages]);
-  
-  const handleCopyToClipboard = (text: string) => {
-    copyToClipboard(text);
-    setCopied(true);
-    toast({
-      title: "Copied to clipboard!",
-      description: "You can now paste this message anywhere.",
-    });
-    setTimeout(() => setCopied(false), 2000);
-  };
-  
-  const renderUpgradePrompt = () => {
-    if (subscriptionStatus === 'active') return null;
+
+  const getPersonalityBadge = () => {
+    if (!profile?.personality?.type) return null;
+    
+    const type = profile.personality.type;
+    let color;
+    
+    switch(type) {
+      case 'flirty':
+        color = 'bg-pink-500 hover:bg-pink-700';
+        break;
+      case 'shy':
+        color = 'bg-purple-500 hover:bg-purple-700';
+        break;
+      case 'dominant':
+        color = 'bg-red-500 hover:bg-red-700';
+        break;
+      case 'playful':
+        color = 'bg-blue-500 hover:bg-blue-700';
+        break;
+      default:
+        color = 'bg-slate-500 hover:bg-slate-700';
+    }
     
     return (
-      <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-        <p className="text-sm text-yellow-700">
-          Unlock unlimited messaging with {profileName} by subscribing today!
-        </p>
-        <Button size="sm" className="mt-2">
-          Upgrade Now
-        </Button>
-      </div>
+      <Badge className={`${color} capitalize`}>
+        {type}
+      </Badge>
     );
   };
-  
-  if (isInitialLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Loading Chat...</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
   
   return (
-    <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-4">
-          <Avatar>
-            <AvatarImage src={profileAvatar ? profileAvatar : '/default-avatar.png'} alt={profileName} />
-            <AvatarFallback>{profileName.substring(0, 2)}</AvatarFallback>
-          </Avatar>
-          <div className="space-y-0.5">
-            <CardTitle className="text-sm font-medium">{profileName}</CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
-              {profileDescription}
-            </CardDescription>
+    <Card className="w-full h-full flex flex-col">
+      <CardHeader className="px-4 py-3 border-b">
+        {loading && !profile ? (
+          <div className="flex items-center space-x-3">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
           </div>
-        </div>
-        
-        {lucoinBalance !== undefined && (
-          <div className="flex items-center gap-2">
-            <Coins className="h-4 w-4 text-yellow-500" />
-            <span>{lucoinBalance} LC</span>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Avatar>
+                <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">{profile?.name}</h3>
+                  {getPersonalityBadge()}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline" className="cursor-help">
+                          <Info className="h-3 w-3 mr-1" />
+                          AI
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">This is an AI-generated profile. The conversations are powered by artificial intelligence.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <p className="text-xs text-muted-foreground">{profile?.location}</p>
+              </div>
+            </div>
+            
+            {onClose && (
+              <Button variant="ghost" size="sm" onClick={onClose}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         )}
       </CardHeader>
       
-      <CardContent className="p-0">
-        <div 
-          ref={chatContainerRef}
-          className="h-[400px] overflow-y-auto px-4 py-2"
-        >
-          {messages.map((message) => (
-            <AIMessageComponent 
-              key={message.id} 
-              message={message} 
-              onMessageUnlocked={handleMessageUnlocked}
-            />
-          ))}
-        </div>
-      </CardContent>
+      <ScrollArea className="flex-1 p-4">
+        {loading && messages.length === 0 ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={`flex ${i % 2 === 0 ? 'justify-end' : ''}`}>
+                <div className={`max-w-[80%] ${i % 2 === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted'} rounded-lg p-3`}>
+                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-[80px] mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map((message) => {
+              const isUser = !message.is_ai;
+              const messageCreatedAt = message.created_at ? new Date(message.created_at) : message.timestamp;
+              
+              return (
+                <div key={message.id} className={`flex ${isUser ? 'justify-end' : ''}`}>
+                  {!isUser && (
+                    <Avatar className="h-8 w-8 mr-2 mt-1">
+                      <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                      <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
+                    </Avatar>
+                  )}
+                  
+                  <div className={`max-w-[80%] ${isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'} rounded-lg p-3`}>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    
+                    {/* Display generated image if this message mentions it */}
+                    {message.content.includes("generated an image") && generatedImage && (
+                      <div className="mt-2">
+                        <img 
+                          src={generatedImage} 
+                          alt="AI Generated" 
+                          className="w-full rounded-md" 
+                        />
+                      </div>
+                    )}
+                    
+                    <p className={`text-xs mt-1 ${isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                      {formatDistanceToNow(messageCreatedAt, { addSuffix: true })}
+                    </p>
+                    
+                    {message.requires_payment && message.payment_status === 'pending' && (
+                      <Button 
+                        className="mt-2 w-full"
+                        size="sm"
+                        onClick={handlePurchaseResponse}
+                      >
+                        <Coins className="w-4 h-4 mr-2" />
+                        Continue chatting ({message.price || 5} LC)
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {isUser && (
+                    <Avatar className="h-8 w-8 ml-2 mt-1">
+                      <AvatarImage src={userProfile?.avatarUrl} alt={userProfile?.username || 'User'} />
+                      <AvatarFallback>{userProfile?.username?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
+              );
+            })}
+            
+            {sendingMessage && (
+              <div className="flex">
+                <Avatar className="h-8 w-8 mr-2 mt-1">
+                  <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                  <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
+                </Avatar>
+                <div className="bg-muted rounded-lg p-3 max-w-[80%]">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '600ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {simulatingTyping && (
+              <div className="flex">
+                <Avatar className="h-8 w-8 mr-2 mt-1">
+                  <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                  <AvatarFallback>{profile?.name?.charAt(0) || 'A'}</AvatarFallback>
+                </Avatar>
+                <div className="bg-muted rounded-lg p-3 max-w-[80%]">
+                  <div className="flex space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '200ms' }}></div>
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ animationDelay: '400ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+      </ScrollArea>
       
-      {renderUpgradePrompt()}
-      
-      <div className="p-4 flex items-center border-t">
-        <Input
-          placeholder={`Send a message to ${profileName}...`}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="mr-2"
-          disabled={isLoading}
-        />
-        <Button onClick={handleSend} disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span>Sending...</span>
-            </>
-          ) : (
+      <CardFooter className="p-4 border-t flex-col gap-2">
+        {!paymentRequired && (
+          <div className="flex w-full justify-between items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowImagePrompt(true)}
+              disabled={loading || sendingMessage || paymentRequired}
+              className="text-xs"
+            >
+              <Image className="h-4 w-4 mr-1" />
+              Request Image
+            </Button>
+            
+            <p className="text-xs text-muted-foreground">
+              {profile?.lucoin_chat_price ? `${profile.lucoin_chat_price} LC per message` : ''}
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleSendMessage} className="flex w-full gap-2">
+          <Input
+            placeholder={paymentRequired ? "Purchase response to continue..." : "Type a message..."}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            disabled={loading || sendingMessage || paymentRequired || simulatingTyping}
+            className="flex-1"
+          />
+          <Button 
+            type="submit"
+            disabled={loading || sendingMessage || paymentRequired || simulatingTyping || !inputValue.trim()}
+          >
             <Send className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
+          </Button>
+        </form>
+      </CardFooter>
+
+      {/* Image Generation Dialog */}
+      <Dialog open={showImagePrompt} onOpenChange={setShowImagePrompt}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request an AI-generated image</DialogTitle>
+            <DialogDescription>
+              Describe what you'd like {profile?.name || 'the AI'} to generate for you. This will cost {profile?.lucoin_image_price || 10} Lucoins.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleGenerateImage} className="space-y-4">
+            <Input
+              placeholder="E.g., A sunset on a beautiful beach..."
+              value={imagePrompt}
+              onChange={(e) => setImagePrompt(e.target.value)}
+              disabled={generatingImage}
+            />
+            
+            <div className="flex justify-end gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowImagePrompt(false)}
+                disabled={generatingImage}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={generatingImage || !imagePrompt.trim()}
+              >
+                {generatingImage ? (
+                  <>Generating...</>
+                ) : (
+                  <>
+                    <Image className="mr-2 h-4 w-4" />
+                    Generate ({profile?.lucoin_image_price || 10} LC)
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

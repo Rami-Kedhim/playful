@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import HeroSection from "@/components/home/HeroSection";
@@ -7,10 +8,11 @@ import FeaturedContentSection from "@/components/home/FeaturedContentSection";
 import LucoinSection from "@/components/home/LucoinSection";
 import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
-import MetaverseSection from "@/components/home/MetaverseSection";
 import LucieAssistant from "@/components/home/LucieAssistant";
+import MetaverseSection from "@/components/home/MetaverseSection";
 import WelcomeAlert from "@/components/layout/WelcomeAlert";
-import { useAuth } from "@/hooks/auth";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { Helmet } from "react-helmet-async";
 
 // Sample data for featured profiles
 const featuredEscorts = [
@@ -110,20 +112,22 @@ const HomePage = () => {
   
   return (
     <AppLayout>
-      {/* Show welcome alert for authenticated users */}
+      <Helmet>
+        <title>UberEscorts - Premium Web3 Adult Platform</title>
+        <meta name="description" content="UberEscorts - The ultimate Web3 adult platform with verified escorts, content creators, secure payments, and metaverse integration." />
+      </Helmet>
+      
       {isAuthenticated && user && (
         <div className="container mx-auto px-4 pt-6">
           <WelcomeAlert username={user.username || 'User'} />
         </div>
       )}
       
-      {/* Hero section */}
       <HeroSection 
         searchLocation={searchLocation} 
         setSearchLocation={setSearchLocation} 
       />
       
-      {/* Other sections */}
       <FeaturesSection />
       <HowItWorksSection />
       <FeaturedContentSection 

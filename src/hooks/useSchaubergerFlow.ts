@@ -1,85 +1,206 @@
 
-import { useState, useEffect } from 'react';
-import neuralHub from '@/services/neural/HermesOxumNeuralHub';
+/**
+ * useSchaubergerFlow - Custom hook implementing Schauberger's natural flow principles
+ * for optimizing AI interactions based on emotional patterns and engagement
+ */
+import { useState, useEffect, useCallback } from 'react';
+import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { useHermesInsights } from './useHermesInsights';
 
-interface MessageHistoryItem {
-  role: string;
-  content: string;
-  timestamp?: Date;
+export type EmotionalFlow = 'neutral' | 'rising' | 'peaking' | 'receptive' | 'declining';
+export type ResourceAllocation = 'minimal' | 'standard' | 'enhanced' | 'maximum';
+
+interface SchaubergerFlowState {
+  emotionalFlow: EmotionalFlow;
+  vortexStrength: number;
+  resourceAllocation: ResourceAllocation;
+  systemLoad: number;
+  optimalTiming: boolean;
 }
 
 interface SchaubergerFlowOptions {
-  messageHistory?: MessageHistoryItem[];
   userId?: string;
+  conversationId?: string;
+  messageHistory?: Array<{
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    timestamp?: Date;
+  }>;
+  initialState?: Partial<SchaubergerFlowState>;
 }
 
-/**
- * Hook implementing Viktor Schauberger's natural flow principles
- * for optimizing resource usage and creating more natural interaction patterns
- */
 export const useSchaubergerFlow = (options: SchaubergerFlowOptions = {}) => {
-  const { messageHistory = [], userId } = options;
+  const { userId, messageHistory = [], initialState = {} } = options;
+  const { insights, recordAICompanionInteraction } = useHermesInsights(userId);
   
-  // Flow metrics
-  const [emotionalFlow, setEmotionalFlow] = useState<number>(0.5); // 0-1
-  const [vortexStrength, setVortexStrength] = useState<number>(0.5); // 0-1
-  const [resourceAllocation, setResourceAllocation] = useState<number>(0.5); // 0-1
+  // Initialize state with defaults or provided values
+  const [flowState, setFlowState] = useState<SchaubergerFlowState>({
+    emotionalFlow: initialState.emotionalFlow || 'neutral',
+    vortexStrength: initialState.vortexStrength || 0,
+    resourceAllocation: initialState.resourceAllocation || 'standard',
+    systemLoad: initialState.systemLoad || 0,
+    optimalTiming: initialState.optimalTiming || true
+  });
   
-  // Get metrics from neural hub
-  useEffect(() => {
-    // Initialize flow metrics from neural hub if available
-    const metrics = neuralHub.getHealthMetrics();
-    setEmotionalFlow(metrics.userEngagement || 0.5);
-    setVortexStrength(metrics.stability || 0.5);
-    setResourceAllocation(metrics.economicBalance || 0.5);
+  // Calculate emotional flow based on message patterns and content
+  const calculateEmotionalFlow = useCallback((messages: typeof messageHistory): EmotionalFlow => {
+    if (messages.length < 2) return 'neutral';
     
-    // Calculate metrics based on message history
-    if (messageHistory.length > 0) {
-      // Analyze message patterns
-      const messageCount = messageHistory.length;
-      const userMessages = messageHistory.filter(m => m.role === 'user').length;
-      const aiMessages = messageHistory.filter(m => m.role === 'assistant').length;
-      
-      // Conversation balance affects vortex strength
-      const conversationBalance = Math.min(1, Math.max(0.2, userMessages / Math.max(1, aiMessages)));
-      setVortexStrength(prev => (prev * 0.7) + (conversationBalance * 0.3));
-      
-      // Message timings affect flow
-      if (messageHistory.length >= 3 && messageHistory[0].timestamp) {
-        const timestamps = messageHistory
-          .filter(m => m.timestamp)
-          .map(m => m.timestamp as Date)
-          .map(d => d.getTime());
-        
-        const intervals = [];
-        for (let i = 1; i < timestamps.length; i++) {
-          intervals.push(timestamps[i] - timestamps[i-1]);
-        }
-        
-        const avgInterval = intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
-        const normalizedFlow = Math.min(1, Math.max(0.1, 10000 / avgInterval));
-        setEmotionalFlow(prev => (prev * 0.8) + (normalizedFlow * 0.2));
+    // Extract user messages
+    const userMessages = messages.filter(m => m.role === 'user');
+    
+    // Basic sentiment analysis (would be more sophisticated in real implementation)
+    const avgMessageLength = userMessages.reduce((sum, m) => sum + m.content.length, 0) / userMessages.length || 0;
+    const hasQuestions = userMessages.some(m => m.content.includes('?'));
+    const hasExclamations = userMessages.some(m => m.content.includes('!'));
+    const recentMessages = userMessages.slice(-3);
+    
+    // Check for declining pattern - shorter and shorter messages
+    if (recentMessages.length >= 3) {
+      const lengths = recentMessages.map(m => m.content.length);
+      if (lengths[2] < lengths[1] && lengths[1] < lengths[0] && lengths[2] < 10) {
+        return 'declining';
       }
     }
-  }, [messageHistory, userId]);
+    
+    // Determine flow state based on engagement patterns
+    if (avgMessageLength > 35 && (hasQuestions && hasExclamations)) {
+      return 'peaking';
+    } else if (avgMessageLength > 25 || (hasExclamations && userMessages.length > 3)) {
+      return 'rising';
+    } else if (hasQuestions && avgMessageLength > 15) {
+      return 'receptive';
+    }
+    
+    return 'neutral';
+  }, []);
   
-  // Optimize resource usage based on flow metrics
-  const shouldUseImages = () => {
-    // Only use images when flow and resources allow
-    return resourceAllocation > 0.3 && emotionalFlow > 0.4;
-  };
+  // Calculate resource allocation based on Schauberger's implosive logic
+  const calculateResourceAllocation = useCallback((
+    flow: EmotionalFlow, 
+    vortexStrength: number,
+    systemLoad: number
+  ): ResourceAllocation => {
+    // Only allocate higher resources when truly needed (implosive principle)
+    if (flow === 'peaking' && vortexStrength > 80 && systemLoad < 70) {
+      return 'maximum';
+    } else if ((flow === 'peaking' || flow === 'rising') && vortexStrength > 60) {
+      return 'enhanced';
+    } else if (flow !== 'declining' && vortexStrength > 40) {
+      return 'standard';
+    }
+    
+    // Default to minimal resources (save energy, be efficient)
+    return 'minimal';
+  }, []);
   
-  const shouldUseCards = () => {
-    // Only use cards when stability and resources allow
-    return resourceAllocation > 0.4 && vortexStrength > 0.5;
-  };
+  // Determine if the current time is optimal for intensive processing
+  // Fixed to not use private calculateTimeImpact method
+  const calculateOptimalTiming = useCallback((): boolean => {
+    // Get current time metrics
+    const currentHour = new Date().getHours();
+    
+    // Simple time-based heuristic (peak hours 9-11 AM and 7-10 PM)
+    const isPeakMorning = currentHour >= 9 && currentHour <= 11;
+    const isPeakEvening = currentHour >= 19 && currentHour <= 22;
+    
+    // Get health metrics from neural hub
+    const healthMetrics = neuralHub.getHealthMetrics();
+    
+    // Consider time and system health
+    return (isPeakMorning || isPeakEvening) && healthMetrics.stability > 0.7;
+  }, []);
+  
+  // Update the flow state when messages or system conditions change
+  useEffect(() => {
+    if (messageHistory.length === 0) return;
+    
+    // Get system health metrics from neural hub
+    const healthMetrics = neuralHub.getHealthMetrics();
+    const systemLoad = healthMetrics.load * 100;
+    
+    // Calculate emotional flow
+    const flow = calculateEmotionalFlow(messageHistory);
+    
+    // Calculate vortex strength (natural flow energy)
+    const baseStrength = flow === 'neutral' ? 30 : 
+                         flow === 'rising' ? 60 :
+                         flow === 'peaking' ? 90 :
+                         flow === 'receptive' ? 70 : 20;
+                         
+    const userEngagement = healthMetrics.userEngagement * 100;
+    const vortexStrength = Math.min((baseStrength + userEngagement) / 2, 100);
+    
+    // Determine resource allocation
+    const resourceAllocation = calculateResourceAllocation(flow, vortexStrength, systemLoad);
+    
+    // Check timing
+    const optimalTiming = calculateOptimalTiming();
+    
+    // Update state with all calculated values
+    setFlowState({
+      emotionalFlow: flow,
+      vortexStrength,
+      resourceAllocation,
+      systemLoad,
+      optimalTiming
+    });
+    
+    // Record flow in HERMES system if userId provided
+    if (userId) {
+      recordAICompanionInteraction('schauberger', messageHistory.length, {
+        emotionalFlow: flow,
+        vortexStrength,
+        resourceAllocation
+      });
+    }
+  }, [
+    messageHistory, 
+    userId, 
+    calculateEmotionalFlow, 
+    calculateResourceAllocation, 
+    calculateOptimalTiming, 
+    recordAICompanionInteraction
+  ]);
+  
+  /**
+   * Applies Schauberger's principles to decide what level of response is appropriate
+   * Uses implosive logic - only use what's needed, when it's needed
+   */
+  const getShouldActivate = useCallback((feature: 'voice' | 'images' | 'cards' | 'advanced'): boolean => {
+    const { emotionalFlow, vortexStrength, resourceAllocation, optimalTiming } = flowState;
+    
+    // Apply implosive logic - only activate when truly beneficial
+    switch (feature) {
+      case 'voice':
+        // Voice requires high engagement and optimal timing
+        return (resourceAllocation === 'enhanced' || resourceAllocation === 'maximum') && optimalTiming;
+        
+      case 'images':
+        // Images require at least standard resources
+        return resourceAllocation !== 'minimal' && vortexStrength > 50;
+        
+      case 'cards':
+        // Interactive cards can be used more liberally
+        return vortexStrength > 40;
+        
+      case 'advanced':
+        // Advanced features only when peaking and resources available
+        return emotionalFlow === 'peaking' && resourceAllocation === 'maximum';
+        
+      default:
+        return false;
+    }
+  }, [flowState]);
   
   return {
-    emotionalFlow,
-    vortexStrength,
-    resourceAllocation,
-    shouldUseImages,
-    shouldUseCards
+    ...flowState,
+    getShouldActivate,
+    // Helper methods for output enhancement
+    shouldUseVoice: () => getShouldActivate('voice'),
+    shouldUseImages: () => getShouldActivate('images'),
+    shouldUseCards: () => getShouldActivate('cards'),
+    shouldUseAdvancedFeatures: () => getShouldActivate('advanced')
   };
 };
 

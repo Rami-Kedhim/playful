@@ -1,15 +1,16 @@
 
-import { useAuth } from './useAuth';
-import { AuthProvider } from './AuthProvider';
+// Central export file for all auth-related hooks and providers
+import { useAuth, AuthProvider } from './useAuth';
+import { useRole } from './useRole';
+import { useBehavioralProfile } from './useBehavioralProfile';
+import { useGouldianFilters } from './useGouldianFilters';
+import { useHermesMode } from './useHermesMode';
 
-// Export our hooks
-export { useAuth, AuthProvider };
-
-// Re-export types from auth types for convenience
-export type { AuthUser, UserProfile, AuthResult, AuthContextType } from '@/types/auth';
-
-// Properly export the actual hook implementations
-export { useRole } from './useRole';
-export { useBehavioralProfile } from './useBehavioralProfile';
-export { useGouldianFilters } from './useGouldianFilters';
-export { useHermesMode } from './useHermesMode';
+export { 
+  useAuth,
+  AuthProvider, 
+  useRole,
+  useBehavioralProfile,
+  useGouldianFilters,
+  useHermesMode
+};

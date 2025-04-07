@@ -1,197 +1,104 @@
-// Enhanced behavioral profiling system types
-// Implements HERMES, OXUM, Gould, and Chase Hughes frameworks
 
-export enum TrustLevel {
-  Low = 30,
-  Moderate = 50,
-  High = 80
-}
+import { BehaviorTag, ToneFilter, HermesMode } from './behavioral';
 
-export enum PriceSensitivity {
-  Low = 20,
-  Moderate = 50, 
-  High = 80
-}
-
-export enum BehavioralLoop {
-  Discovery = "discovery",
-  Engagement = "engagement",
-  Conversion = "conversion",
-  Retention = "retention",
-  Action = "action",
-  Reward = "reward",
-  Reengagement = "reengagement",
-  Advocacy = "advocacy",
-  Investment = "investment",
-  Identity = "identity"
-}
-
-export enum BrandResonanceStage {
-  Awareness = "awareness",
-  Consideration = "consideration",
-  Preference = "preference",
-  Purchase = "purchase",
-  Loyalty = "loyalty",
-  Performance = "performance",
-  Imagery = "imagery",
-  Judgments = "judgments",
-  Feelings = "feelings",
-  Resonance = "resonance"
-}
-
-export enum ConsumerDecisionStage {
-  ProblemRecognition = "problem_recognition",
-  InformationSearch = "information_search",
-  AlternativeEvaluation = "alternative_evaluation",
-  PurchaseDecision = "purchase_decision",
-  PostPurchaseEvaluation = "post_purchase_evaluation",
-  Evaluation = "evaluation",
-  PostPurchase = "post_purchase"
-}
-
-export enum ValueOrientation {
-  Practical = "practical",
-  Emotional = "emotional",
-  Social = "social",
-  Spiritual = "spiritual",
-  Intellectual = "intellectual",
-  Economic = "economic",
-  Functional = "functional",
-  Symbolic = "symbolic"
-}
-
+/**
+ * Enhanced behavioral concepts based on Chase Hughes' principles
+ */
 export type MicroexpressionSignal = 
-  | "interest"
-  | "confusion"
-  | "doubt"
-  | "excitement"
-  | "hesitation"
-  | "conviction"
-  | "objection"
-  | "consideration";
+  | 'trust'
+  | 'distrust'
+  | 'interest'
+  | 'disinterest'
+  | 'confusion'
+  | 'commitment'
+  | 'resistance';
 
-// Psychographic profile extension with behavioral insights
+export type BehavioralLoop = 
+  | 'discovery'       // Initial exploration
+  | 'engagement'      // Active participation
+  | 'investment'      // Time/resource commitment
+  | 'identity'        // Personal identification with service
+  | 'advocacy';       // Promoting to others
+
+/**
+ * Marketing concepts from Chernev, Keller and Kotler
+ */
+export type BrandResonanceStage =
+  | 'awareness'       // Keller's first stage - knowing the brand exists
+  | 'performance'     // Functional needs fulfillment
+  | 'imagery'         // Psychological needs fulfillment
+  | 'judgments'       // Personal opinions and evaluations
+  | 'feelings'        // Emotional responses and reactions
+  | 'resonance';      // Ultimate relationship and level of identification
+
+export type ConsumerDecisionStage =
+  | 'problem_recognition'
+  | 'information_search'
+  | 'evaluation'
+  | 'purchase_decision'
+  | 'post_purchase';
+
 export interface PsychographicProfile {
-  personalityTraits: string[];
-  interests: string[];
-  values: string[];
-  motivations: string[];
-  decisionMakingStyle: string;
-  
-  // Enhanced behavioral analysis fields
-  trustLevel: TrustLevel;
-  priceSensitivity: PriceSensitivity;
   behavioralLoop: BehavioralLoop;
-  decisionStage: ConsumerDecisionStage;
-  valueOrientation: ValueOrientation;
   brandResonance: BrandResonanceStage;
+  decisionStage: ConsumerDecisionStage;
+  priceSensitivity: number; // 0-100
+  valueOrientation: 'economic' | 'functional' | 'emotional' | 'symbolic';
+  trustLevel: number; // 0-100
   identifiedSignals: MicroexpressionSignal[];
-  engagementPatterns?: string[];
-  contentPreferences?: string[];
+  engagementPatterns: {
+    timeOfDayPreference: number[]; // 0-23 hours, multiple entries
+    sessionFrequency: number; // Average sessions per week
+    sessionDuration: number; // Average minutes per session
+    contentPreferences: string[];
+    pricePoints: number[]; // Past purchase amounts
+    responseToIncentives: number; // 0-100
+  };
 }
 
-// Marketing optimizations based on behavioral analysis
-export interface MarketingOptimizations {
-  recommendedApproach: string;
-  messagingTone: string;
-  contentPreferences: string[];
-  callToActionStyle: string;
-  idealEngagementTimes: string[];
-  
-  // Enhanced marketing insights
-  nextBestAction: string;
-  optimalOfferTiming: string;
-  suggestedPricePoints: number[];
-  retentionRisk: number;
-  lifetimeValueEstimate: number;
-  recommendedToneStyle?: string; // Added for compatibility
-  marketingOptimizations?: any;
-}
-
+/**
+ * Enhanced behavioral profile with marketing psychology concepts
+ */
 export interface EnhancedBehavioralProfile {
   standardProfile: {
-    id: string;
-    userId: string;
-    demographics: {
-      ageGroup: string;
-      gender: string;
-      location: string;
-    };
-    behaviorTags?: string[];
+    behaviorTags: BehaviorTag[];
+    hermesMode: HermesMode;
+    toneFilter: ToneFilter;
+    trustScore: number;
   };
-  
   psychographicProfile: PsychographicProfile;
-  marketingOptimizations: MarketingOptimizations;
-}
-
-export interface EnhancedBehavioralHookReturn {
-  enhancedProfile: EnhancedBehavioralProfile;
-  setEnhancedProfile: React.Dispatch<React.SetStateAction<EnhancedBehavioralProfile>>;
-  original: any;
-  isAnalyzing: boolean;
-  analyzeUser: () => Promise<EnhancedBehavioralProfile>;
-  generateEngagementStrategy: () => {
-    communicationStrategy: {
-      tone: string;
-      emotionalAppeals: string[];
-      keyMessages: string[];
-    };
-    offerStrategies: {
-      offerType: string;
-      pricingStructure: string;
-      incentiveType: string;
-      deadline: string;
-      presentationStyle: string;
-    };
+  marketingOptimizations: {
+    optimalOfferTiming: number; // Hour of day (0-23)
+    suggestedPricePoints: number[];
+    recommendedToneStyle: string;
+    valuePropositionFocus: string;
+    engagementStrategy: string;
+    retentionRisk: number; // 0-100
+    lifetimeValueEstimate: number;
+    nextBestAction: string;
   };
-  lastAnalyzedAt: Date | null;
 }
 
-// Types for assessment capabilities
-export type AssessmentCategory = 
-  | 'engagement'
-  | 'conversion' 
-  | 'retention'
-  | 'monetization'
-  | 'trust';
-
-export type AssessmentSeverityLevel = 
-  | 'critical' 
-  | 'warning' 
-  | 'opportunity' 
-  | 'positive';
-
-export interface AssessmentInsight {
-  id: string;
-  category: AssessmentCategory;
-  title: string;
-  description: string;
-  severityLevel: AssessmentSeverityLevel;
-  impact: number; // 1-100
-  confidenceScore: number; // 1-100
-  recommendedActions: string[];
-}
-
-export interface AssessmentResult {
-  userId: string;
-  timestamp: string;
-  assessmentId: string;
-  insightSummary: string;
-  scores: {
-    engagementPotential: number;
-    contentAffinity: number;
-    monetizationPropensity: number;
-    retentionLikelihood: number;
+/**
+ * Response from the engagement optimizer
+ */
+export interface EngagementOptimization {
+  contentRecommendations: {
+    contentType: string;
+    timing: string;
+    presentationStyle: string;
+  }[];
+  offerStrategies: {
+    offerType: string;
+    pricingStructure: string;
+    incentiveType: string;
+    deadline: string;
+    presentationStyle: string;
   };
-  recommendations: string[];
-  overallScore: number; // 0-100
-  insights: AssessmentInsight[];
-  summary: string;
-  strengthAreas: string[];
-  improvementAreas: string[];
-  engagementHealthScore: number; // 0-100
-  conversionPotentialScore: number; // 0-100
-  retentionRiskScore: number; // 0-100, higher is more risky
-  psychographicProfile?: PsychographicProfile; // Added to connect with Hermes-Oxum
-  chaseHughesProfile?: any; // Added Chase Hughes behavioral profile
+  communicationStrategy: {
+    tone: string;
+    emotionalAppeals: string[];
+    keyMessages: string[];
+    psychologicalTriggers: string[];
+  };
 }
