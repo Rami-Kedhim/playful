@@ -1,3 +1,4 @@
+
 // Enhanced behavioral profiling system types
 // Implements HERMES, OXUM, Gould, and Chase Hughes frameworks
 
@@ -18,9 +19,9 @@ export enum BehavioralLoop {
   Engagement = "engagement",
   Conversion = "conversion",
   Retention = "retention",
-  Advocacy = "advocacy",
-  Investment = "investment", // Added for compatibility
-  Identity = "identity" // Added for compatibility
+  Action = "action",
+  Reward = "reward",
+  Reengagement = "reengagement"
 }
 
 export enum BrandResonanceStage {
@@ -29,11 +30,11 @@ export enum BrandResonanceStage {
   Preference = "preference",
   Purchase = "purchase",
   Loyalty = "loyalty",
-  Performance = "performance", // Added for compatibility
-  Imagery = "imagery", // Added for compatibility
-  Judgments = "judgments", // Added for compatibility
-  Feelings = "feelings", // Added for compatibility
-  Resonance = "resonance" // Added for compatibility
+  Performance = "performance",
+  Imagery = "imagery",
+  Judgments = "judgments",
+  Feelings = "feelings",
+  Resonance = "resonance"
 }
 
 export enum ConsumerDecisionStage {
@@ -42,8 +43,8 @@ export enum ConsumerDecisionStage {
   AlternativeEvaluation = "alternative_evaluation",
   PurchaseDecision = "purchase_decision",
   PostPurchaseEvaluation = "post_purchase_evaluation",
-  Evaluation = "evaluation", // Added for compatibility
-  PostPurchase = "post_purchase" // Added for compatibility
+  Evaluation = "evaluation",
+  PostPurchase = "post_purchase"
 }
 
 export enum ValueOrientation {
@@ -51,7 +52,10 @@ export enum ValueOrientation {
   Emotional = "emotional",
   Social = "social",
   Spiritual = "spiritual",
-  Intellectual = "intellectual"
+  Intellectual = "intellectual",
+  Economic = "economic",
+  Functional = "functional",
+  Symbolic = "symbolic"
 }
 
 export type MicroexpressionSignal = 
@@ -82,7 +86,6 @@ export interface PsychographicProfile {
   identifiedSignals: MicroexpressionSignal[];
   engagementPatterns?: string[];
   contentPreferences?: string[];
-  marketingOptimizations?: any;
 }
 
 // Marketing optimizations based on behavioral analysis
@@ -100,6 +103,7 @@ export interface MarketingOptimizations {
   retentionRisk: number;
   lifetimeValueEstimate: number;
   recommendedToneStyle?: string; // Added for compatibility
+  marketingOptimizations?: any;
 }
 
 export interface EnhancedBehavioralProfile {
@@ -139,4 +143,53 @@ export interface EnhancedBehavioralHookReturn {
     };
   };
   lastAnalyzedAt: Date | null;
+}
+
+// Types for assessment capabilities
+export type AssessmentCategory = 
+  | 'engagement'
+  | 'conversion' 
+  | 'retention'
+  | 'monetization'
+  | 'trust';
+
+export type AssessmentSeverityLevel = 
+  | 'critical' 
+  | 'warning' 
+  | 'opportunity' 
+  | 'positive';
+
+export interface AssessmentInsight {
+  id: string;
+  category: AssessmentCategory;
+  title: string;
+  description: string;
+  severityLevel: AssessmentSeverityLevel;
+  impact: number; // 1-100
+  confidenceScore: number; // 1-100
+  recommendedActions: string[];
+}
+
+export interface AssessmentResult {
+  userId: string;
+  timestamp: string;
+  assessmentId: string;
+  insightSummary: string;
+  scores: {
+    engagementPotential: number;
+    contentAffinity: number;
+    monetizationPropensity: number;
+    retentionLikelihood: number;
+  };
+  recommendations: string[];
+  overallScore: number; // 0-100
+  insights: AssessmentInsight[];
+  summary: string;
+  strengthAreas: string[];
+  improvementAreas: string[];
+  engagementHealthScore: number; // 0-100
+  conversionPotentialScore: number; // 0-100
+  retentionRiskScore: number; // 0-100, higher is more risky
+  psychographicProfile?: PsychographicProfile; // Added to connect with Hermes-Oxum
+  chaseHughesProfile?: any; // Added Chase Hughes behavioral profile
 }

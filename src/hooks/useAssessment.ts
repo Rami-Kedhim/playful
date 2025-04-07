@@ -3,7 +3,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
 import BehavioralAssessmentService from '@/services/assessment/BehavioralAssessmentService';
-import { AssessmentResult, AssessmentInsight, AssessmentCategory, AssessmentSeverityLevel } from '@/types/assessment';
+import { AssessmentResult, AssessmentInsight, AssessmentCategory, AssessmentSeverityLevel } from '@/types/enhancedBehavioral';
 
 export const useAssessment = () => {
   const { user } = useAuth();

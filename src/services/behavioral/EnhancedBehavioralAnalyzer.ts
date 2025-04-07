@@ -1,4 +1,13 @@
-import { EnhancedBehavioralProfile, BrandResonanceStage, BehavioralLoop, ConsumerDecisionStage, MarketingOptimizations } from '@/types/enhancedBehavioral';
+
+import { 
+  EnhancedBehavioralProfile, 
+  BrandResonanceStage, 
+  BehavioralLoop, 
+  ConsumerDecisionStage, 
+  MarketingOptimizations,
+  ValueOrientation,
+  MicroexpressionSignal
+} from '@/types/enhancedBehavioral';
 
 export class EnhancedBehavioralAnalyzer {
   // Create an enhanced profile based on user data
@@ -69,6 +78,36 @@ export class EnhancedBehavioralAnalyzer {
           messagingTone: 'confident',
           callToActionStyle: 'urgent',
           nextBestAction: 'present_offer'
+        };
+        break;
+        
+      case BehavioralLoop.Action:
+        optimizedProfile.marketingOptimizations = {
+          ...optimizedProfile.marketingOptimizations,
+          recommendedApproach: 'compelling',
+          messagingTone: 'motivating',
+          callToActionStyle: 'direct',
+          nextBestAction: 'facilitate_action'
+        };
+        break;
+        
+      case BehavioralLoop.Reward:
+        optimizedProfile.marketingOptimizations = {
+          ...optimizedProfile.marketingOptimizations,
+          recommendedApproach: 'rewarding',
+          messagingTone: 'appreciative',
+          callToActionStyle: 'celebratory',
+          nextBestAction: 'provide_recognition'
+        };
+        break;
+        
+      case BehavioralLoop.Reengagement:
+        optimizedProfile.marketingOptimizations = {
+          ...optimizedProfile.marketingOptimizations,
+          recommendedApproach: 'nostalgic',
+          messagingTone: 'familiar',
+          callToActionStyle: 'inviting',
+          nextBestAction: 'reconnect_value'
         };
         break;
         
