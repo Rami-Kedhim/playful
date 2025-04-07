@@ -15,9 +15,17 @@ interface EscortContainerProps {
   escorts: Escort[];
   services: string[];
   isLoading?: boolean;
+  highlightVisual?: boolean;
+  callToActionStyle?: string;
 }
 
-const EscortContainer = ({ escorts, services, isLoading: externalLoading = false }: EscortContainerProps) => {
+const EscortContainer = ({ 
+  escorts, 
+  services, 
+  isLoading: externalLoading = false,
+  highlightVisual = false,
+  callToActionStyle = 'standard'
+}: EscortContainerProps) => {
   const [showFilters, setShowFilters] = useState(false);
   const location = useLocation();
   
@@ -68,6 +76,15 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
 
   // Consider both internal and external loading states
   const combinedIsLoading = isLoading || externalLoading;
+
+  // Apply highlight styles based on prop
+  const resultsClassName = highlightVisual 
+    ? "lg:col-span-3 animate-pulse-subtle" 
+    : "lg:col-span-3";
+
+  // Determine CTA visibility based on style
+  const showActionButtons = callToActionStyle !== 'hidden';
+  const prominentCTA = callToActionStyle === 'prominent';
 
   return (
     <>
@@ -145,7 +162,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
           </div>
         )}
         
-        <div className="lg:col-span-3">
+        <div className={resultsClassName}>
           <SearchBar 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -186,6 +203,8 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
             setCurrentPage={setCurrentPage}
             totalPages={totalPages}
             isLoading={combinedIsLoading}
+            showActionButtons={showActionButtons}
+            prominentCTA={prominentCTA}
           />
         </div>
       </div>

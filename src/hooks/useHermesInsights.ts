@@ -117,6 +117,43 @@ export const useHermesInsights = (userId?: string) => {
   }, [userId]);
   
   /**
+   * Record boost request in HERMES
+   */
+  const recordBoostRequest = useCallback(() => {
+    if (!userId) return;
+    
+    hermesOxumIntegration.processUserInteraction(
+      userId, 
+      'requested_boost',
+      {}
+    );
+  }, [userId]);
+  
+  /**
+   * Generic method to report any user action
+   */
+  const reportUserAction = useCallback((
+    action: string,
+    options?: {
+      category?: string,
+      location?: string,
+      sessionTime?: number,
+      interactionData?: Record<string, any>
+    }
+  ) => {
+    if (!userId) {
+      console.warn('Cannot report to HERMES: missing userId');
+      return;
+    }
+    
+    hermesOxumIntegration.processUserInteraction(
+      userId, 
+      action, 
+      options || {}
+    );
+  }, [userId]);
+  
+  /**
    * Get the optimal UI configuration based on insights
    */
   const getOptimalUIConfig = useCallback(() => {
@@ -167,6 +204,8 @@ export const useHermesInsights = (userId?: string) => {
     recordElementInteraction,
     recordMessageInteraction,
     recordAICompanionInteraction,
+    recordBoostRequest,
+    reportUserAction,
     getOptimalUIConfig,
     getContentRecommendations,
     shouldEnableFeature

@@ -10,6 +10,7 @@ import { escorts as mockEscorts, availableServices } from "@/data/escortData";
 import { useHermesInsights } from "@/hooks/useHermesInsights";
 import LucieSchaubergerIntegration from "@/components/home/LucieSchaubergerIntegration";
 import { CircleHelp } from "lucide-react";
+import { useEscorts } from "@/hooks/useEscorts";
 
 const Escorts: React.FC = () => {
   const { user } = useAuth();
