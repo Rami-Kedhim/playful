@@ -73,7 +73,21 @@ export const useAssessment = () => {
             valueOrientation: assessment.psychographicProfile.valueOrientation || ValueOrientation.Practical,
             brandResonance: assessment.psychographicProfile.brandResonance || BrandResonanceStage.Awareness,
             identifiedSignals: assessment.psychographicProfile.identifiedSignals || []
-          } : undefined,
+          } : {
+            // Provide default values for all required properties if psychographicProfile is missing
+            personalityTraits: [],
+            interests: [],
+            values: [],
+            motivations: [],
+            decisionMakingStyle: 'analytical',
+            trustLevel: 50,
+            priceSensitivity: 50,
+            behavioralLoop: BehavioralLoop.Discovery,
+            decisionStage: ConsumerDecisionStage.InformationSearch,
+            valueOrientation: ValueOrientation.Practical,
+            brandResonance: BrandResonanceStage.Awareness,
+            identifiedSignals: []
+          },
           chaseHughesProfile: undefined // Will be filled in later if available
         };
         
