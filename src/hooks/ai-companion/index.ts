@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useAICompanionMessages } from './useAICompanionMessages';
 import { useCompanionProfile } from './useCompanionProfile';
@@ -24,7 +25,7 @@ export function useAICompanionConversation({
   } = useAICompanionMessages({ initialMessages });
   
   const { companion, isLoading } = useCompanionProfile(companionId, initialMessages);
-  const { getUserContext } = useUserContext();
+  const userContextUtils = useUserContext();
   
   const [generatingImage, setGeneratingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +69,7 @@ export function useAICompanionConversation({
     
     try {
       // Get user context
-      const userContext = getUserContext();
+      const userContext = userContextUtils.getUserContext();
       
       // In a real implementation, this would call an API
       // For now, we'll simulate a response after a delay
@@ -92,7 +93,7 @@ export function useAICompanionConversation({
     } finally {
       setIsTypingState(false);
     }
-  }, [companion, getUserContext, addMessage, setIsTypingState, handleErrorResponse]);
+  }, [companion, userContextUtils, addMessage, setIsTypingState, handleErrorResponse]);
   
   // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {

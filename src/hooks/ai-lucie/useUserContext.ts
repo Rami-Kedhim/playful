@@ -22,5 +22,8 @@ export const useUserContext = () => {
     }
   }, [user]);
 
-  return userContext;
+  // Return an object with a function to get the user context
+  return {
+    getUserContext: () => userContext
+  };
 };

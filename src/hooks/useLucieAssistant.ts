@@ -11,7 +11,7 @@ export function useLucieAssistant() {
   const [isTyping, setIsTyping] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   
-  const { getUserContext } = useUserContext();
+  const userContextUtils = useUserContext();
   const { 
     apiAvailable, 
     shouldRetryApi, 
@@ -75,7 +75,7 @@ export function useLucieAssistant() {
       }
 
       // Get user context and chat history
-      const userContext = getUserContext();
+      const userContext = userContextUtils.getUserContext();
       const chatHistory = formatChatHistory(messages);
       
       // Call the AI service
@@ -121,7 +121,7 @@ export function useLucieAssistant() {
     } finally {
       setIsTyping(false);
     }
-  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, getUserContext, callLucieAPI, messages, processVisualElements]);
+  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, userContextUtils, callLucieAPI, messages, processVisualElements]);
   
   // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {
