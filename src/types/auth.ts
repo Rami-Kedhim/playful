@@ -30,6 +30,12 @@ export interface UserProfile {
   birth_date?: string;
   updated_at?: string;
   created_at?: string;
+  
+  // Additional fields needed by components
+  lucoin_balance?: number;
+  profile_completeness?: number;
+  is_verified?: boolean;
+  is_boosted?: boolean;
 }
 
 export interface AuthResult {

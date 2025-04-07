@@ -30,10 +30,26 @@ export const useRole = () => {
     return hasRole('admin');
   };
   
+  /**
+   * Check if the user is a moderator
+   */
+  const isModerator = (): boolean => {
+    return hasRole('moderator');
+  };
+  
+  /**
+   * Check if the user is a creator
+   */
+  const isCreator = (): boolean => {
+    return hasRole('creator');
+  };
+  
   return {
     hasRole,
     hasAllRoles,
-    isAdmin
+    isAdmin,
+    isModerator,
+    isCreator
   };
 };
 

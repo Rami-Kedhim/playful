@@ -6,7 +6,7 @@ import { useAuthState } from './useAuthState';
 import { usePasswordManagement } from './usePasswordManagement';
 import { useAuthActions } from './useAuthActions';
 
-// Create auth context
+// Create auth context - export it so it can be imported by useAuth
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 // Use auth hook
@@ -174,6 +174,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Fix return type for logout to match the interface
+  const wrappedLogout = async (): Promise<void> => {
+    const result = await logout();
+    // Just use the result to trigger the auth state change, but return void
+    return;
+  };
+
+  // Fix return type for updatePassword to match the interface
+  const wrappedUpdatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    const result = await updatePassword(oldPassword, newPassword);
+    return result.success;
+  };
+
   // Combine our hooks into one context value
   const authContextValue: AuthContextType = {
     user,
@@ -181,7 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     login,
     register,
-    logout,
+    logout: wrappedLogout,
     resetPassword,
     error,
     userRoles,
@@ -190,7 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     profile,
     refreshProfile,
     checkRole,
-    updatePassword
+    updatePassword: wrappedUpdatePassword
   };
 
   return (
