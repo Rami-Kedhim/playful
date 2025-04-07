@@ -26,7 +26,6 @@ import { Loader2, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AuthUser, UserProfile } from '@/types/auth';
 
-// Form schema for account settings
 const accountFormSchema = z.object({
   username: z
     .string()
@@ -38,7 +37,6 @@ const accountFormSchema = z.object({
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-// Form schema for password change
 const passwordFormSchema = z.object({
   currentPassword: z
     .string()
@@ -68,7 +66,6 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
   profile: propProfile
 }) => {
   const auth = useAuth();
-  // Use either props or auth context
   const user = propUser || auth.user;
   const profile = propProfile || auth.profile;
   const { updateUserProfile, updatePassword } = auth;
@@ -76,7 +73,6 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  // Form for general settings
   const accountForm = useForm<AccountFormValues>({
     resolver: zodResolver(accountFormSchema),
     defaultValues: {
@@ -86,7 +82,6 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
     },
   });
 
-  // Form for password change
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
@@ -96,7 +91,6 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
     },
   });
 
-  // Handle account form submission
   const onSubmitAccount = async (data: AccountFormValues) => {
     setIsSaving(true);
     try {
@@ -122,7 +116,6 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
     }
   };
 
-  // Handle password form submission
   const onSubmitPassword = async (data: PasswordFormValues) => {
     setIsChangingPassword(true);
     try {

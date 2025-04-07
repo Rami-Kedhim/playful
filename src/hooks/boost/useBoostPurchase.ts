@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { BoostPackage } from '@/types/boost';
@@ -17,8 +18,8 @@ export const useBoostPurchase = () => {
   
   // Get the user's profile from the Auth context to access their balance
   const { profile } = useAuth();
-  // Access the lucoin balance from the profile
-  const userBalance = profile?.lucoin_balance ?? profile?.lucoinsBalance ?? 0;
+  // Access the lucoin balance from the profile, with fallback
+  const userBalance = profile?.lucoin_balance ?? 0;
   
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {

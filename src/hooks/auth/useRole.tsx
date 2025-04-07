@@ -30,6 +30,15 @@ export const useRole = () => {
   };
   
   /**
+   * Check if user has a specific role
+   * @param role - Role to check
+   * @returns boolean indicating if the user has the specified role
+   */
+  const checkRole = (role: string): boolean => {
+    return userRoles.includes(role);
+  };
+  
+  /**
    * Check if user is an admin
    * @returns boolean indicating if the user has admin role
    */
@@ -62,6 +71,7 @@ export const useRole = () => {
   return {
     hasRole,
     hasAllRoles,
+    checkRole, // Add the checkRole method
     isAdmin,
     isModerator,
     isCreator,

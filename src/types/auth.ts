@@ -58,8 +58,11 @@ export interface UserProfile {
   
   // Adding fields to fix type errors
   lucoin_balance?: number;
+  lucoinsBalance?: number; // Alias for lucoin_balance
   profile_completeness?: number;
+  profileCompleteness?: number; // Alias for profile_completeness
   is_boosted?: boolean;
+  isBoosted?: boolean; // Alias for is_boosted
 }
 
 // Auth state maintained by auth context
