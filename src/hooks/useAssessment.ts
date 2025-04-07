@@ -3,23 +3,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuth';
 import { useEnhancedBehavioral } from './useEnhancedBehavioral';
 import { BehavioralAssessmentService } from '@/services/assessment/BehavioralAssessmentService';
-
-interface AssessmentScores {
-  engagementPotential: number;
-  contentAffinity: number;
-  monetizationPropensity: number;
-  retentionLikelihood: number;
-}
-
-interface AssessmentResult {
-  assessmentId: string;
-  userId: string;
-  timestamp: string;
-  scores: AssessmentScores;
-  recommendations: string[];
-  insightSummary: string;
-  chaseHughesProfile?: any;
-}
+import { AssessmentResult, AssessmentInsight, AssessmentCategory } from '@/types/assessment';
 
 export const useAssessment = () => {
   const { user } = useAuth();
@@ -50,9 +34,9 @@ export const useAssessment = () => {
     }
   }, [user, analyzeUser, enhancedProfile, assessmentService]);
 
-  // Additional methods
-  const assessment = assessmentResults;
+  // Map additional methods for compatibility
   const isGenerating = isProcessing;
+  const assessment = assessmentResults;
   
   const generateAssessment = useCallback(async () => {
     return await runAssessment();
@@ -64,7 +48,7 @@ export const useAssessment = () => {
     return assessmentService.getPriorityInsights(enhancedProfile);
   }, [assessment, assessmentService, enhancedProfile]);
   
-  const filterInsightsByCategory = useCallback((category: string) => {
+  const filterInsightsByCategory = useCallback((category: AssessmentCategory) => {
     if (!assessment) return [];
     
     return assessmentService.getInsightsByCategory(enhancedProfile, category);

@@ -19,7 +19,9 @@ export enum BehavioralLoop {
   Engagement = "engagement",
   Conversion = "conversion",
   Retention = "retention",
-  Advocacy = "advocacy"
+  Advocacy = "advocacy",
+  Investment = "investment", // Added for compatibility
+  Identity = "identity" // Added for compatibility
 }
 
 export enum BrandResonanceStage {
@@ -27,7 +29,12 @@ export enum BrandResonanceStage {
   Consideration = "consideration",
   Preference = "preference",
   Purchase = "purchase",
-  Loyalty = "loyalty"
+  Loyalty = "loyalty",
+  Performance = "performance", // Added for compatibility
+  Imagery = "imagery", // Added for compatibility
+  Judgments = "judgments", // Added for compatibility
+  Feelings = "feelings", // Added for compatibility
+  Resonance = "resonance" // Added for compatibility
 }
 
 export enum ConsumerDecisionStage {
@@ -35,7 +42,9 @@ export enum ConsumerDecisionStage {
   InformationSearch = "information_search",
   AlternativeEvaluation = "alternative_evaluation",
   PurchaseDecision = "purchase_decision",
-  PostPurchaseEvaluation = "post_purchase_evaluation"
+  PostPurchaseEvaluation = "post_purchase_evaluation",
+  Evaluation = "evaluation", // Added for compatibility
+  PostPurchase = "post_purchase" // Added for compatibility
 }
 
 export enum ValueOrientation {
@@ -89,6 +98,7 @@ export interface MarketingOptimizations {
   suggestedPricePoints: number[];
   retentionRisk: number;
   lifetimeValueEstimate: number;
+  recommendedToneStyle?: string; // Added for compatibility
 }
 
 export interface EnhancedBehavioralProfile {
@@ -113,6 +123,9 @@ export interface EnhancedBehavioralHookReturn {
   original: any;
   isAnalyzing: boolean;
   analyzeUser: () => Promise<EnhancedBehavioralProfile>;
-  generateEngagementStrategy: () => Promise<string[]>;
+  generateEngagementStrategy: () => Promise<{
+    communicationStrategy: string[];
+    offerStrategies: string[];
+  }>;
   lastAnalyzedAt: Date | null;
 }

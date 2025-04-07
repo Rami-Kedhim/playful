@@ -31,7 +31,7 @@ const AIChat: React.FC<AIChatProps> = ({
   const { 
     sendMessage, 
     messages, 
-    isLoading, 
+    sendingMessage: isLoading, 
     error, 
     loadInitialMessages, 
     isInitialLoading,
@@ -50,8 +50,8 @@ const AIChat: React.FC<AIChatProps> = ({
   // Load initial messages and companion data
   useEffect(() => {
     loadInitialMessages();
-    loadCompanion();
-  }, [loadInitialMessages, loadCompanion]);
+    loadCompanion(profileId);
+  }, [loadInitialMessages, loadCompanion, profileId]);
   
   // Scroll to bottom on new messages
   useEffect(() => {

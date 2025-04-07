@@ -36,7 +36,16 @@ export interface AssessmentInsight {
  */
 export interface AssessmentResult {
   userId: string;
-  timestamp: Date;
+  timestamp: string;
+  assessmentId: string;
+  insightSummary: string;
+  scores: {
+    engagementPotential: number;
+    contentAffinity: number;
+    monetizationPropensity: number;
+    retentionLikelihood: number;
+  };
+  recommendations: string[];
   overallScore: number; // 0-100
   insights: AssessmentInsight[];
   summary: string;

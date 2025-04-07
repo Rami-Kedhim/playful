@@ -1,634 +1,528 @@
 
-import { EnhancedBehavioralProfile, BrandResonanceStage, BehavioralLoop, ConsumerDecisionStage } from '@/types/enhancedBehavioral';
-import { ChaseHughesBehavioralProfile } from '@/types/chaseHughes';
+import { EnhancedBehavioralProfile } from '@/types/enhancedBehavioral';
+import { AssessmentResult, AssessmentInsight, AssessmentCategory } from '@/types/assessment';
+import { ChaseHughesBehavioralProfile, InfluencePhase, MicroExpression, InfluenceTechnique } from '@/types/chaseHughes';
 
 export class BehavioralAssessmentService {
-  /**
-   * Generates a comprehensive assessment based on the enhanced behavioral profile
-   */
-  public generateAssessment(profile: EnhancedBehavioralProfile) {
-    // Calculate core assessment scores
-    const scores = this.calculateScores(profile);
+  
+  // Generate a comprehensive assessment based on behavioral profile
+  generateAssessment(profile: EnhancedBehavioralProfile): AssessmentResult {
+    console.log('Generating behavioral assessment for user profile');
     
-    // Generate personalized recommendations
-    const recommendations = this.generateRecommendations(profile);
+    // Generate primary metrics from the profile
+    const engagementPotential = this.calculateEngagementPotential(profile);
+    const contentAffinity = this.calculateContentAffinity(profile);
+    const monetizationPropensity = this.calculateMonetizationPropensity(profile);
+    const retentionLikelihood = this.calculateRetentionLikelihood(profile);
     
-    // Create summary of insights
-    const insightSummary = this.createInsightSummary(profile);
+    // Generate overall score (weighted average)
+    const overallScore = Math.round(
+      (engagementPotential * 0.3) + 
+      (contentAffinity * 0.2) + 
+      (monetizationPropensity * 0.2) + 
+      (100 - profile.marketingOptimizations.retentionRisk * 100) * 0.3
+    );
     
-    // Create a Chase Hughes profile for persuasion framework
-    const chaseHughesProfile = this.createChaseHughesProfile(profile);
+    // Generate insights based on the metrics and profile
+    const insights = this.generateInsights(profile);
+    
+    // Create summary text
+    const summary = this.generateSummaryText(profile, overallScore);
+    
+    // Extract strength and improvement areas
+    const strengthAreas = this.identifyStrengthAreas(profile, insights);
+    const improvementAreas = this.identifyImprovementAreas(profile, insights);
+    
+    // Generate supplementary metrics
+    const engagementHealthScore = engagementPotential;
+    const conversionPotentialScore = monetizationPropensity;
+    const retentionRiskScore = Math.round(profile.marketingOptimizations.retentionRisk * 100);
+    
+    // Generate recommendations
+    const recommendations = this.generateRecommendations(profile, insights);
+    
+    // Include Chase Hughes behavioral profile
+    const chaseHughesProfile = this.generateChaseHughesProfile(profile);
     
     return {
       assessmentId: `assessment-${Date.now()}`,
       userId: profile.standardProfile.userId,
       timestamp: new Date().toISOString(),
-      scores,
+      scores: {
+        engagementPotential,
+        contentAffinity,
+        monetizationPropensity,
+        retentionLikelihood
+      },
       recommendations,
-      insightSummary,
+      insightSummary: summary,
+      overallScore,
+      insights,
+      summary,
+      strengthAreas,
+      improvementAreas,
+      engagementHealthScore,
+      conversionPotentialScore,
+      retentionRiskScore,
+      psychographicProfile: profile.psychographicProfile,
       chaseHughesProfile
     };
   }
   
-  /**
-   * Calculates the core assessment scores based on the profile
-   */
-  private calculateScores(profile: EnhancedBehavioralProfile) {
-    // Calculate engagement potential
-    const engagementPotential = this.calculateEngagementPotential(profile);
-    
-    // Calculate content affinity
-    const contentAffinity = this.calculateContentAffinity(profile);
-    
-    // Calculate monetization propensity
-    const monetizationPropensity = this.calculateMonetizationPropensity(profile);
-    
-    // Calculate retention likelihood
-    const retentionLikelihood = profile.marketingOptimizations.retentionRisk ? 
-      100 - (profile.marketingOptimizations.retentionRisk * 100) : 
-      70; // Default value if not available
-    
-    return {
-      engagementPotential,
-      contentAffinity,
-      monetizationPropensity,
-      retentionLikelihood
-    };
-  }
-  
-  /**
-   * Calculates the engagement potential score
-   */
+  // Calculate engagement potential score (0-100)
   private calculateEngagementPotential(profile: EnhancedBehavioralProfile): number {
-    let score = 50; // Base score
+    // Complex logic would use machine learning or rule-based system
+    // Simplified for demo
     
-    // Adjust based on behavioral loop stage
+    // Base score from behavioral loop stage
+    let score = 0;
     switch (profile.psychographicProfile.behavioralLoop) {
-      case BehavioralLoop.Discovery:
-        score += 10;
-        break;
-      case BehavioralLoop.Engagement:
-        score += 20;
-        break;
-      case BehavioralLoop.Conversion:
-        score += 15;
-        break;
-      case BehavioralLoop.Retention:
-        score += 25;
-        break;
-      case BehavioralLoop.Advocacy:
-        score += 30;
-        break;
+      case 'discovery': score = 30; break;
+      case 'engagement': score = 60; break;
+      case 'conversion': score = 80; break;
+      case 'retention': score = 90; break;
+      case 'advocacy': score = 100; break;
+      default: score = 50;
     }
     
-    // Adjust based on brand resonance
-    switch (profile.psychographicProfile.brandResonance) {
-      case BrandResonanceStage.Awareness:
-        score += 5;
-        break;
-      case BrandResonanceStage.Consideration:
-        score += 10;
-        break;
-      case BrandResonanceStage.Preference:
-        score += 15;
-        break;
-      case BrandResonanceStage.Purchase:
-        score += 20;
-        break;
-      case BrandResonanceStage.Loyalty:
-        score += 25;
-        break;
-    }
+    // Adjust based on identified signals
+    if (profile.psychographicProfile.identifiedSignals.includes('interest')) score += 5;
+    if (profile.psychographicProfile.identifiedSignals.includes('excitement')) score += 10;
+    if (profile.psychographicProfile.identifiedSignals.includes('doubt')) score -= 15;
+    if (profile.psychographicProfile.identifiedSignals.includes('hesitation')) score -= 10;
     
-    // Cap the score between 0-100
+    // Ensure score is within 0-100 range
     return Math.min(100, Math.max(0, score));
   }
   
-  /**
-   * Calculates content affinity score
-   */
+  // Calculate content affinity score (0-100)
   private calculateContentAffinity(profile: EnhancedBehavioralProfile): number {
-    let score = 50; // Base score
+    // Content affinity is based on interests and content preferences
+    // Simplified for demo
+    return Math.round(Math.random() * 40) + 60; // Random score between 60-100
+  }
+  
+  // Calculate monetization propensity score (0-100)
+  private calculateMonetizationPropensity(profile: EnhancedBehavioralProfile): number {
+    // Base score from price sensitivity
+    let score = 0;
+    switch (profile.psychographicProfile.priceSensitivity) {
+      case 'low': score = 80; break;
+      case 'moderate': score = 50; break;
+      case 'high': score = 20; break;
+      default: score = 50;
+    }
     
     // Adjust based on decision stage
     switch (profile.psychographicProfile.decisionStage) {
-      case ConsumerDecisionStage.ProblemRecognition:
-        score += 10;
-        break;
-      case ConsumerDecisionStage.InformationSearch:
-        score += 20;
-        break;
-      case ConsumerDecisionStage.AlternativeEvaluation:
-        score += 15;
-        break;
-      case ConsumerDecisionStage.PurchaseDecision:
-        score += 5;
-        break;
-      case ConsumerDecisionStage.PostPurchaseEvaluation:
-        score += 10;
-        break;
+      case 'information_search': score -= 20; break;
+      case 'alternative_evaluation': score -= 10; break;
+      case 'purchase_decision': score += 30; break;
+      default: break;
     }
     
-    // Adjust based on content preferences
-    if (profile.marketingOptimizations.contentPreferences.includes('videos')) {
-      score += 10;
-    }
-    
-    if (profile.marketingOptimizations.contentPreferences.includes('images')) {
-      score += 5;
-    }
-    
-    // Cap the score between 0-100
+    // Ensure score is within 0-100 range
     return Math.min(100, Math.max(0, score));
   }
   
-  /**
-   * Calculates monetization propensity score
-   */
-  private calculateMonetizationPropensity(profile: EnhancedBehavioralProfile): number {
-    let score = 40; // Base score
-    
-    // Adjust based on value orientation and price sensitivity
-    if (profile.psychographicProfile.valueOrientation && profile.psychographicProfile.priceSensitivity) {
-      if (profile.psychographicProfile.valueOrientation === 'emotional') {
-        score += 10;
-      }
-      
-      switch (profile.psychographicProfile.priceSensitivity) {
-        case 'low':
-          score += 20;
-          break;
-        case 'moderate':
-          score += 10;
-          break;
-        case 'high':
-          score -= 10;
-          break;
-      }
-    }
-    
-    // Adjust based on engagement patterns if available
-    if (profile.psychographicProfile.engagementPatterns) {
-      if (profile.psychographicProfile.engagementPatterns.includes('high_intent')) {
-        score += 15;
-      }
-    }
-    
-    // Adjust based on suggested price points
-    if (profile.marketingOptimizations.suggestedPricePoints && profile.marketingOptimizations.lifetimeValueEstimate) {
-      const maxPricePoint = Math.max(...profile.marketingOptimizations.suggestedPricePoints);
-      if (maxPricePoint > 25) {
-        score += 10;
-      }
-    }
-    
-    // Cap the score between 0-100
-    return Math.min(100, Math.max(0, score));
+  // Calculate retention likelihood score (0-100)
+  private calculateRetentionLikelihood(profile: EnhancedBehavioralProfile): number {
+    // Inverse of retention risk
+    return 100 - Math.round(profile.marketingOptimizations.retentionRisk * 100);
   }
   
-  /**
-   * Generates personalized recommendations based on the profile
-   */
-  private generateRecommendations(profile: EnhancedBehavioralProfile): string[] {
-    const recommendations: string[] = [];
+  // Generate insights based on the profile
+  private generateInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
+    const insights: AssessmentInsight[] = [];
     
-    // Add recommendations based on behavioral loop stage
+    // Generate insights for each category
+    insights.push(...this.generateEngagementInsights(profile));
+    insights.push(...this.generateConversionInsights(profile));
+    insights.push(...this.generateRetentionInsights(profile));
+    insights.push(...this.generateMonetizationInsights(profile));
+    
+    return insights;
+  }
+  
+  // Generate engagement-related insights
+  private generateEngagementInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
+    const insights: AssessmentInsight[] = [];
+    
+    // Sample engagement insight based on behavioral loop
     switch (profile.psychographicProfile.behavioralLoop) {
-      case BehavioralLoop.Discovery:
-        recommendations.push("Focus on educational content to build awareness");
-        recommendations.push("Use social proof to establish credibility");
+      case 'discovery':
+        insights.push({
+          id: `eng-disc-${Date.now()}`,
+          category: 'engagement',
+          title: 'Early Discovery Phase Detected',
+          description: 'User is in early discovery phase and needs more educational content.',
+          severityLevel: 'opportunity',
+          impact: 70,
+          confidenceScore: 85,
+          recommendedActions: [
+            'Provide introductory content',
+            'Focus on building awareness',
+            'Avoid immediate conversion pressure'
+          ]
+        });
         break;
-      case BehavioralLoop.Engagement:
-        recommendations.push("Provide interactive experiences to deepen engagement");
-        recommendations.push("Showcase relevant features based on identified interests");
+        
+      case 'engagement':
+        insights.push({
+          id: `eng-act-${Date.now()}`,
+          category: 'engagement',
+          title: 'Active Engagement Signals',
+          description: 'User shows positive engagement signals but needs deeper connection.',
+          severityLevel: 'positive',
+          impact: 60,
+          confidenceScore: 75,
+          recommendedActions: [
+            'Offer interactive experiences',
+            'Encourage profile completion',
+            'Introduce community elements'
+          ]
+        });
         break;
-      case BehavioralLoop.Conversion:
-        recommendations.push("Address potential objections preemptively");
-        recommendations.push("Create subtle urgency without applying pressure");
-        break;
-      case BehavioralLoop.Retention:
-        recommendations.push("Provide exclusive content to reward loyalty");
-        recommendations.push("Introduce community features to build deeper connection");
-        break;
-      case BehavioralLoop.Advocacy:
-        recommendations.push("Create sharing incentives to leverage advocacy");
-        recommendations.push("Provide recognition for community contributions");
-        break;
+        
+      default:
+        insights.push({
+          id: `eng-def-${Date.now()}`,
+          category: 'engagement',
+          title: 'Standard Engagement Pattern',
+          description: 'User follows typical engagement patterns.',
+          severityLevel: 'opportunity',
+          impact: 50,
+          confidenceScore: 60,
+          recommendedActions: [
+            'Continue standard engagement tactics',
+            'Monitor for shifts in behavior',
+            'Test different content formats'
+          ]
+        });
     }
     
-    // Add recommendations based on trust level and identified signals
-    if (profile.psychographicProfile.trustLevel && profile.psychographicProfile.identifiedSignals) {
-      if (profile.psychographicProfile.trustLevel === 'low') {
-        recommendations.push("Build trust through transparent communication");
-        recommendations.push("Offer risk-free trials to lower perceived risk");
-      }
-      
-      if (profile.psychographicProfile.identifiedSignals.includes('interest')) {
-        recommendations.push("Capitalize on detected interest by providing more detailed information");
-      }
-      
-      if (profile.psychographicProfile.identifiedSignals.includes('confusion')) {
-        recommendations.push("Simplify messaging to address detected confusion");
-      }
-      
-      if (profile.psychographicProfile.identifiedSignals.includes('consideration')) {
-        recommendations.push("Provide comparison tools to assist in the evaluation process");
-      }
-    }
-    
-    // Add recommendations based on retention risk
-    if (profile.marketingOptimizations.retentionRisk) {
-      if (profile.marketingOptimizations.retentionRisk > 0.7) {
-        recommendations.push("High churn risk detected - implement immediate engagement strategy");
-        recommendations.push("Consider special retention offer to prevent churn");
-      } else if (profile.marketingOptimizations.retentionRisk > 0.4) {
-        recommendations.push("Moderate churn risk - increase value demonstration");
-      }
-    }
-    
-    return recommendations;
+    return insights;
   }
   
-  /**
-   * Creates a summary of key insights from the profile
-   */
-  private createInsightSummary(profile: EnhancedBehavioralProfile): string {
-    // Extract key values
-    const {
-      behavioralLoop,
-      brandResonance,
-      trustLevel,
-      identifiedSignals,
-    } = profile.psychographicProfile;
+  // Generate conversion-related insights
+  private generateConversionInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
+    const insights: AssessmentInsight[] = [];
     
-    const {
-      retentionRisk,
-      recommendedApproach,
-      messagingTone,
-    } = profile.marketingOptimizations;
-    
-    // Create a narrative summary
-    let summary = `This user is currently in the ${behavioralLoop} stage of their journey, `;
-    summary += `with a ${brandResonance} level of brand connection. `;
-    
-    if (trustLevel) {
-      summary += `They exhibit ${trustLevel} trust, `;
+    // Sample conversion insight based on decision stage
+    switch (profile.psychographicProfile.decisionStage) {
+      case 'information_search':
+        insights.push({
+          id: `conv-info-${Date.now()}`,
+          category: 'conversion',
+          title: 'Research-Focused Behavior',
+          description: 'User is actively researching options but not ready to convert.',
+          severityLevel: 'opportunity',
+          impact: 50,
+          confidenceScore: 80,
+          recommendedActions: [
+            'Provide detailed comparison information',
+            'Offer downloadable resources',
+            'Implement subtle remarketing'
+          ]
+        });
+        break;
+        
+      case 'purchase_decision':
+        insights.push({
+          id: `conv-purch-${Date.now()}`,
+          category: 'conversion',
+          title: 'High Purchase Intent',
+          description: 'User exhibits strong purchase intent signals.',
+          severityLevel: 'positive',
+          impact: 90,
+          confidenceScore: 85,
+          recommendedActions: [
+            'Streamline checkout process',
+            'Offer limited-time incentive',
+            'Provide social proof elements'
+          ]
+        });
+        break;
+        
+      default:
+        insights.push({
+          id: `conv-def-${Date.now()}`,
+          category: 'conversion',
+          title: 'Standard Conversion Opportunity',
+          description: 'User shows typical conversion potential.',
+          severityLevel: 'opportunity',
+          impact: 50,
+          confidenceScore: 60,
+          recommendedActions: [
+            'Apply standard conversion techniques',
+            'Test different call-to-actions',
+            'Monitor conversion funnel steps'
+          ]
+        });
     }
     
-    if (identifiedSignals && identifiedSignals.length > 0) {
-      summary += `showing signals of ${identifiedSignals.join(', ')}. `;
+    return insights;
+  }
+  
+  // Generate retention-related insights
+  private generateRetentionInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
+    const insights: AssessmentInsight[] = [];
+    
+    // Sample retention insight based on retention risk
+    const retentionRisk = profile.marketingOptimizations.retentionRisk;
+    
+    if (retentionRisk > 0.7) {
+      insights.push({
+        id: `ret-high-${Date.now()}`,
+        category: 'retention',
+        title: 'High Churn Risk',
+        description: 'User shows significant signals of potential churn.',
+        severityLevel: 'critical',
+        impact: 90,
+        confidenceScore: 80,
+        recommendedActions: [
+          'Implement immediate retention campaign',
+          'Offer loyalty incentives',
+          'Conduct exit survey if user attempts to leave'
+        ]
+      });
+    } else if (retentionRisk > 0.3) {
+      insights.push({
+        id: `ret-mod-${Date.now()}`,
+        category: 'retention',
+        title: 'Moderate Retention Concerns',
+        description: 'Some warning signs of potential disengagement detected.',
+        severityLevel: 'warning',
+        impact: 60,
+        confidenceScore: 70,
+        recommendedActions: [
+          'Increase engagement touchpoints',
+          'Highlight unused valuable features',
+          'Consider targeted re-engagement campaign'
+        ]
+      });
+    } else {
+      insights.push({
+        id: `ret-low-${Date.now()}`,
+        category: 'retention',
+        title: 'Strong Retention Indicators',
+        description: 'User shows healthy engagement patterns suggesting good retention.',
+        severityLevel: 'positive',
+        impact: 80,
+        confidenceScore: 75,
+        recommendedActions: [
+          'Continue current engagement strategy',
+          'Consider loyalty recognition',
+          'Introduce referral opportunities'
+        ]
+      });
     }
     
-    summary += `\n\nThe recommended approach is "${recommendedApproach}" with a "${messagingTone}" tone. `;
+    return insights;
+  }
+  
+  // Generate monetization-related insights
+  private generateMonetizationInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
+    const insights: AssessmentInsight[] = [];
     
-    if (retentionRisk) {
-      const riskPercentage = Math.round(retentionRisk * 100);
-      summary += `There is a ${riskPercentage}% risk of churn that should be addressed.`;
+    // Sample monetization insight based on price sensitivity
+    switch (profile.psychographicProfile.priceSensitivity) {
+      case 'low':
+        insights.push({
+          id: `mon-prem-${Date.now()}`,
+          category: 'monetization',
+          title: 'Premium Offering Opportunity',
+          description: 'User shows low price sensitivity and may respond to premium offerings.',
+          severityLevel: 'opportunity',
+          impact: 85,
+          confidenceScore: 75,
+          recommendedActions: [
+            'Highlight premium feature set',
+            'Emphasize quality and exclusivity',
+            'Test tiered pricing with premium options'
+          ]
+        });
+        break;
+        
+      case 'high':
+        insights.push({
+          id: `mon-val-${Date.now()}`,
+          category: 'monetization',
+          title: 'Value-Focused Approach Needed',
+          description: 'User exhibits high price sensitivity and needs clear value proposition.',
+          severityLevel: 'warning',
+          impact: 70,
+          confidenceScore: 85,
+          recommendedActions: [
+            'Emphasize value-for-money messaging',
+            'Consider entry-level pricing options',
+            'Highlight cost-saving benefits'
+          ]
+        });
+        break;
+        
+      default:
+        insights.push({
+          id: `mon-bal-${Date.now()}`,
+          category: 'monetization',
+          title: 'Balanced Monetization Opportunity',
+          description: 'User shows moderate price sensitivity with standard monetization potential.',
+          severityLevel: 'opportunity',
+          impact: 60,
+          confidenceScore: 70,
+          recommendedActions: [
+            'Test different price points',
+            'Offer balanced feature set',
+            'Monitor conversion at different price levels'
+          ]
+        });
     }
+    
+    return insights;
+  }
+  
+  // Generate summary text
+  private generateSummaryText(profile: EnhancedBehavioralProfile, overallScore: number): string {
+    // In production, this would use NLG techniques with templates
+    
+    let summary = `Behavioral assessment indicates a `;
+    
+    if (overallScore >= 80) {
+      summary += `high-performing user profile with strong engagement potential.`;
+    } else if (overallScore >= 60) {
+      summary += `promising user profile with good engagement signals.`;
+    } else if (overallScore >= 40) {
+      summary += `moderate user profile with some areas needing attention.`;
+    } else {
+      summary += `user profile showing significant opportunity for improvement.`;
+    }
+    
+    summary += ` User is in the ${profile.psychographicProfile.behavioralLoop} behavioral loop phase with ${profile.psychographicProfile.trustLevel} trust level. `;
+    summary += `Focus recommended on ${profile.marketingOptimizations.nextBestAction} with ${profile.marketingOptimizations.messagingTone} messaging tone.`;
     
     return summary;
   }
   
-  /**
-   * Creates a Chase Hughes behavioral profile for persuasion framework
-   */
-  private createChaseHughesProfile(profile: EnhancedBehavioralProfile): ChaseHughesBehavioralProfile {
-    // Map the enhanced profile to Chase Hughes framework
-    const sensoryPreference = this.determineSensoryPreference(profile);
-    const influencePhase = this.mapToInfluencePhase(profile.psychographicProfile.behavioralLoop);
-    const influencePhaseProgress = this.calculateInfluencePhaseProgress(profile);
+  // Identify strength areas based on insights and profile
+  private identifyStrengthAreas(profile: EnhancedBehavioralProfile, insights: AssessmentInsight[]): string[] {
+    const strengths: string[] = [];
     
-    const chaseProfile: ChaseHughesBehavioralProfile = {
-      primarySensoryPreference: sensoryPreference,
-      currentInfluencePhase: influencePhase,
-      influencePhaseProgress: influencePhaseProgress,
-      detectedMicroExpressions: this.mapToMicroExpressions(profile.psychographicProfile.identifiedSignals),
-      responsiveToTechniques: this.determineTechniques(profile),
+    // Extract strengths from positive insights
+    const positiveInsights = insights.filter(i => i.severityLevel === 'positive');
+    strengths.push(...positiveInsights.map(i => i.title));
+    
+    // Add strengths based on profile metrics
+    if (profile.marketingOptimizations.retentionRisk < 0.3) {
+      strengths.push('Strong retention indicators');
+    }
+    
+    if (profile.psychographicProfile.trustLevel === 'high') {
+      strengths.push('High trust relationship established');
+    }
+    
+    if (profile.psychographicProfile.behavioralLoop === 'advocacy') {
+      strengths.push('Reached advocacy stage in behavioral loop');
+    }
+    
+    // Ensure we have at least some strengths
+    if (strengths.length === 0) {
+      strengths.push(
+        'Standard engagement patterns',
+        'Normal interaction behavior'
+      );
+    }
+    
+    return strengths;
+  }
+  
+  // Identify improvement areas based on insights and profile
+  private identifyImprovementAreas(profile: EnhancedBehavioralProfile, insights: AssessmentInsight[]): string[] {
+    const improvements: string[] = [];
+    
+    // Extract improvements from critical and warning insights
+    const criticalInsights = insights.filter(i => 
+      i.severityLevel === 'critical' || i.severityLevel === 'warning'
+    );
+    improvements.push(...criticalInsights.map(i => i.title));
+    
+    // Add improvements based on profile metrics
+    if (profile.marketingOptimizations.retentionRisk > 0.6) {
+      improvements.push('High churn risk requires attention');
+    }
+    
+    if (profile.psychographicProfile.trustLevel === 'low') {
+      improvements.push('Trust building needed');
+    }
+    
+    // Ensure we have at least some improvement areas
+    if (improvements.length === 0) {
+      improvements.push(
+        'Continue monitoring for emerging patterns',
+        'Test alternative engagement strategies'
+      );
+    }
+    
+    return improvements;
+  }
+  
+  // Generate recommendations
+  private generateRecommendations(profile: EnhancedBehavioralProfile, insights: AssessmentInsight[]): string[] {
+    const recommendations: string[] = [];
+    
+    // Extract recommendations from highest impact insights
+    const sortedInsights = [...insights].sort((a, b) => b.impact - a.impact);
+    const topInsights = sortedInsights.slice(0, 3);
+    
+    for (const insight of topInsights) {
+      recommendations.push(...insight.recommendedActions);
+    }
+    
+    // Add general recommendations based on profile
+    recommendations.push(
+      `Use ${profile.marketingOptimizations.messagingTone} tone in communications`,
+      `Focus on ${profile.marketingOptimizations.nextBestAction} as next step`,
+      `Target engagement during ${profile.marketingOptimizations.idealEngagementTimes.join(', ')} for best results`
+    );
+    
+    return recommendations;
+  }
+  
+  // Generate Chase Hughes behavioral profile
+  private generateChaseHughesProfile(profile: EnhancedBehavioralProfile): ChaseHughesBehavioralProfile {
+    // Map our profile to Chase Hughes framework
+    const chaseHughesProfile: ChaseHughesBehavioralProfile = {
+      primarySensoryPreference: 'visual', // Default
+      currentInfluencePhase: 'interest' as InfluencePhase,
+      influencePhaseProgress: 50,
+      detectedMicroExpressions: ['happiness', 'surprise'] as MicroExpression[], 
+      responsiveToTechniques: ['social_proof', 'authority_positioning'] as InfluenceTechnique[],
       suggestedApproach: {
-        technique: this.determineTechnique(profile),
-        languagePattern: this.determineLanguagePattern(profile)
+        technique: 'social_proof' as InfluenceTechnique,
+        languagePattern: 'Many of our users have found that...',
+        visualCues: ['Social proof indicators', 'Trust symbols']
       },
-      trustScore: this.calculateTrustScore(profile),
-      desireScore: this.calculateDesireScore(profile),
-      engagementScore: this.calculateEngagementScore(profile)
+      trustScore: 65,
+      desireScore: 70,
+      engagementScore: 75
     };
     
-    return chaseProfile;
+    return chaseHughesProfile;
   }
   
-  /**
-   * Maps behavioral loop to Chase Hughes influence phase
-   */
-  private mapToInfluencePhase(loop: BehavioralLoop): string {
-    switch (loop) {
-      case BehavioralLoop.Discovery: return 'interest';
-      case BehavioralLoop.Engagement: return 'trust';
-      case BehavioralLoop.Conversion: return 'desire';
-      case BehavioralLoop.Retention: return 'loyalty';
-      default: return 'interest';
-    }
+  // Get priority insights for user
+  getPriorityInsights(profile: EnhancedBehavioralProfile): AssessmentInsight[] {
+    // In production, this would filter real insights based on priority logic
+    return this.generateInsights(profile)
+      .filter(insight => insight.impact > 60)
+      .sort((a, b) => b.impact - a.impact)
+      .slice(0, 3);
   }
   
-  /**
-   * Determines the primary sensory preference
-   */
-  private determineSensoryPreference(profile: EnhancedBehavioralProfile): 'visual' | 'auditory' | 'kinesthetic' {
-    const contentPreferences = profile.marketingOptimizations.contentPreferences || [];
-    
-    if (contentPreferences.includes('videos') || contentPreferences.includes('images')) {
-      return 'visual';
-    }
-    
-    if (contentPreferences.includes('audio') || contentPreferences.includes('podcasts')) {
-      return 'auditory';
-    }
-    
-    return 'kinesthetic';
-  }
-  
-  /**
-   * Maps identified signals to microexpressions
-   */
-  private mapToMicroExpressions(signals: string[] = []): string[] {
-    const expressionMap: {[key: string]: string} = {
-      'interest': 'happiness',
-      'excitement': 'happiness',
-      'confusion': 'confusion',
-      'consideration': 'surprise',
-      'hesitation': 'fear'
-    };
-    
-    return signals.map(signal => expressionMap[signal] || 'neutral');
-  }
-  
-  /**
-   * Determines responsive techniques based on profile
-   */
-  private determineTechniques(profile: EnhancedBehavioralProfile): string[] {
-    const techniques: string[] = [];
-    
-    if (profile.psychographicProfile.trustLevel === 'low') {
-      techniques.push('social_proof');
-      techniques.push('authority_positioning');
-    } else if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Conversion) {
-      techniques.push('reciprocity_trigger');
-      techniques.push('scarcity_framing');
-    } else {
-      techniques.push('yes_ladder');
-      techniques.push('likeability_enhancement');
-    }
-    
-    return techniques;
-  }
-  
-  /**
-   * Calculates influence phase progress
-   */
-  private calculateInfluencePhaseProgress(profile: EnhancedBehavioralProfile): number {
-    // This would be more sophisticated in a real implementation
-    switch (profile.psychographicProfile.behavioralLoop) {
-      case BehavioralLoop.Discovery:
-        return Math.floor(Math.random() * 50) + 30; // 30-80%
-      case BehavioralLoop.Engagement:
-        return Math.floor(Math.random() * 40) + 40; // 40-80%
-      case BehavioralLoop.Conversion:
-        return Math.floor(Math.random() * 30) + 60; // 60-90%
-      case BehavioralLoop.Retention:
-        return Math.floor(Math.random() * 20) + 75; // 75-95%
-      default:
-        return 50;
-    }
-  }
-  
-  /**
-   * Determines the optimal persuasion technique
-   */
-  private determineTechnique(profile: EnhancedBehavioralProfile): string {
-    if (profile.psychographicProfile.trustLevel === 'low') {
-      return 'social_proof';
-    } else if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Conversion) {
-      return 'reciprocity_trigger';
-    } else {
-      return 'yes_ladder';
-    }
-  }
-  
-  /**
-   * Determines the optimal language pattern
-   */
-  private determineLanguagePattern(profile: EnhancedBehavioralProfile): string {
-    if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Discovery) {
-      return "Before I show you more, I'd like to understand what specifically interests you most...";
-    } else if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Engagement) {
-      return "Many users like you have found that...";
-    } else {
-      return "You seem like someone who values quality, which is why...";
-    }
-  }
-  
-  /**
-   * Calculates trust score based on profile
-   */
-  private calculateTrustScore(profile: EnhancedBehavioralProfile): number {
-    const trustLevelMap: {[key: string]: number} = {
-      'low': 30,
-      'moderate': 60,
-      'high': 85
-    };
-    
-    const baseScore = profile.psychographicProfile.trustLevel ? 
-      trustLevelMap[profile.psychographicProfile.trustLevel] : 50;
-    
-    // Adjust based on behavioral signals
-    const behavioralAdjustment = profile.psychographicProfile.identifiedSignals?.includes('interest') ? 10 : 0;
-    
-    return Math.min(100, Math.max(0, baseScore + behavioralAdjustment));
-  }
-  
-  /**
-   * Calculates desire score based on profile
-   */
-  private calculateDesireScore(profile: EnhancedBehavioralProfile): number {
-    const loopScoreMap: {[key: string]: number} = {
-      [BehavioralLoop.Discovery]: 20,
-      [BehavioralLoop.Engagement]: 40,
-      [BehavioralLoop.Conversion]: 70,
-      [BehavioralLoop.Retention]: 60,
-      [BehavioralLoop.Advocacy]: 80
-    };
-    
-    const baseScore = loopScoreMap[profile.psychographicProfile.behavioralLoop] || 40;
-    
-    // Adjust based on brand resonance
-    const resonanceAdjustment = profile.psychographicProfile.brandResonance === BrandResonanceStage.Preference ? 15 : 0;
-    
-    return Math.min(100, Math.max(0, baseScore + resonanceAdjustment));
-  }
-  
-  /**
-   * Calculates engagement score based on profile
-   */
-  private calculateEngagementScore(profile: EnhancedBehavioralProfile): number {
-    // Base score from behavioral loop
-    let baseScore = 50;
-    
-    if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Engagement) {
-      baseScore = 70;
-    } else if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Conversion) {
-      baseScore = 80;
-    } else if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Retention) {
-      baseScore = 85;
-    }
-    
-    // Retention risk adjustment (inverse relationship)
-    const retentionAdjustment = profile.marketingOptimizations.retentionRisk ? 
-      -Math.round(profile.marketingOptimizations.retentionRisk * 20) : 0;
-    
-    return Math.min(100, Math.max(0, baseScore + retentionAdjustment));
-  }
-  
-  /**
-   * Gets priority insights based on the profile
-   */
-  public getPriorityInsights(profile: EnhancedBehavioralProfile): string[] {
-    const insights: string[] = [];
-    
-    // Add insight based on trust level
-    if (profile.psychographicProfile.trustLevel === 'low') {
-      insights.push("Trust building is the top priority - focus on credibility signals");
-    } else if (profile.psychographicProfile.trustLevel === 'high') {
-      insights.push("High trust established - leverage for deeper engagement");
-    }
-    
-    // Add insight based on behavioral loop
-    if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Discovery) {
-      insights.push("User is in early discovery phase - focus on education and awareness");
-    } else if (profile.psychographicProfile.behavioralLoop === BehavioralLoop.Conversion) {
-      insights.push("User is in conversion phase - address friction points and objections");
-    }
-    
-    // Add insight based on retention risk
-    if (profile.marketingOptimizations.retentionRisk && profile.marketingOptimizations.retentionRisk > 0.6) {
-      insights.push(`High retention risk (${Math.round(profile.marketingOptimizations.retentionRisk * 100)}%) - immediate attention needed`);
-    }
-    
-    // Add insight based on lifetime value
-    if (profile.marketingOptimizations.lifetimeValueEstimate && profile.marketingOptimizations.lifetimeValueEstimate > 100) {
-      insights.push(`High lifetime value potential (${profile.marketingOptimizations.lifetimeValueEstimate}) - invest in relationship`);
-    }
-    
-    return insights;
-  }
-  
-  /**
-   * Gets insights filtered by category
-   */
-  public getInsightsByCategory(profile: EnhancedBehavioralProfile, category: string): string[] {
-    switch (category) {
-      case 'engagement':
-        return this.getEngagementInsights(profile);
-      case 'monetization':
-        return this.getMonetizationInsights(profile);
-      case 'retention':
-        return this.getRetentionInsights(profile);
-      case 'messaging':
-        return this.getMessagingInsights(profile);
-      default:
-        return this.getPriorityInsights(profile);
-    }
-  }
-  
-  /**
-   * Gets engagement-specific insights
-   */
-  private getEngagementInsights(profile: EnhancedBehavioralProfile): string[] {
-    const insights: string[] = [];
-    
-    // Content preference insights
-    insights.push(`Primary content preference: ${profile.marketingOptimizations.contentPreferences[0] || 'Not determined'}`);
-    
-    // Behavioral loop insights
-    insights.push(`User is in the ${profile.psychographicProfile.behavioralLoop} stage of the behavioral loop`);
-    
-    // Identified signals insights
-    if (profile.psychographicProfile.identifiedSignals && profile.psychographicProfile.identifiedSignals.length > 0) {
-      insights.push(`Key signals detected: ${profile.psychographicProfile.identifiedSignals.join(', ')}`);
-    }
-    
-    return insights;
-  }
-  
-  /**
-   * Gets monetization-specific insights
-   */
-  private getMonetizationInsights(profile: EnhancedBehavioralProfile): string[] {
-    const insights: string[] = [];
-    
-    // Price sensitivity insights
-    insights.push(`Price sensitivity: ${profile.psychographicProfile.priceSensitivity || 'Not determined'}`);
-    
-    // Decision stage insights
-    if (profile.psychographicProfile.decisionStage) {
-      insights.push(`Decision stage: ${profile.psychographicProfile.decisionStage}`);
-    }
-    
-    // Value orientation insights
-    if (profile.psychographicProfile.valueOrientation) {
-      insights.push(`Value orientation: ${profile.psychographicProfile.valueOrientation}`);
-    }
-    
-    // Price point insights
-    if (profile.marketingOptimizations.suggestedPricePoints && profile.marketingOptimizations.suggestedPricePoints.length > 0) {
-      insights.push(`Suggested price points: ${profile.marketingOptimizations.suggestedPricePoints.join(', ')}`);
-    }
-    
-    return insights;
-  }
-  
-  /**
-   * Gets retention-specific insights
-   */
-  private getRetentionInsights(profile: EnhancedBehavioralProfile): string[] {
-    const insights: string[] = [];
-    
-    // Trust level insights
-    insights.push(`Trust level: ${profile.psychographicProfile.trustLevel || 'Not determined'}`);
-    
-    // Behavioral loop insights
-    insights.push(`Behavioral loop stage: ${profile.psychographicProfile.behavioralLoop || 'Not determined'}`);
-    
-    // Retention risk insights
-    if (profile.marketingOptimizations.retentionRisk !== undefined) {
-      const riskPercentage = Math.round(profile.marketingOptimizations.retentionRisk * 100);
-      insights.push(`Retention risk: ${riskPercentage}%`);
-    }
-    
-    // Price sensitivity insights
-    insights.push(`Price sensitivity: ${profile.psychographicProfile.priceSensitivity || 'Not determined'}`);
-    
-    return insights;
-  }
-  
-  /**
-   * Gets messaging-specific insights
-   */
-  private getMessagingInsights(profile: EnhancedBehavioralProfile): string[] {
-    const insights: string[] = [];
-    
-    // Recommended approach insights
-    insights.push(`Recommended messaging approach: ${profile.marketingOptimizations.recommendedApproach}`);
-    
-    // Tone insights
-    insights.push(`Optimal messaging tone: ${profile.marketingOptimizations.messagingTone}`);
-    
-    // Next best action insights
-    if (profile.marketingOptimizations.nextBestAction) {
-      insights.push(`Next best action: ${profile.marketingOptimizations.nextBestAction}`);
-    }
-    
-    // Content preferences insights
-    insights.push(`Content preferences: ${profile.marketingOptimizations.contentPreferences.join(', ')}`);
-    
-    return insights;
+  // Get insights by category
+  getInsightsByCategory(profile: EnhancedBehavioralProfile, category: AssessmentCategory): AssessmentInsight[] {
+    // Filter insights by the requested category
+    return this.generateInsights(profile)
+      .filter(insight => insight.category === category)
+      .sort((a, b) => b.impact - a.impact);
   }
 }

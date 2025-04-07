@@ -10,7 +10,7 @@ export interface AIMessage {
   payment_status?: 'pending' | 'completed' | 'failed';
   price?: number;
   has_read?: boolean;
-  conversation_id?: string;
+  conversation_id: string;
   sender_id?: string;
   conversationId?: string;
 }
@@ -39,7 +39,7 @@ export interface AIProfile {
 
 export interface AIConversation {
   id: string;
-  profileId?: string;
+  profileId: string;
   user_id?: string;
   ai_profile_id?: string;
   lastMessageAt?: string | Date;

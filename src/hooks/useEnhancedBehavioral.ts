@@ -1,7 +1,15 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from './auth/useAuth';
-import { EnhancedBehavioralProfile, TrustLevel, PriceSensitivity, BehavioralLoop, ConsumerDecisionStage, BrandResonanceStage } from '@/types/enhancedBehavioral';
+import { 
+  EnhancedBehavioralProfile, 
+  TrustLevel, 
+  PriceSensitivity, 
+  BehavioralLoop, 
+  ConsumerDecisionStage,
+  ValueOrientation,
+  BrandResonanceStage 
+} from '@/types/enhancedBehavioral';
 import { EnhancedBehavioralAnalyzer } from '@/services/behavioral/EnhancedBehavioralAnalyzer';
 
 const defaultProfile: EnhancedBehavioralProfile = {
@@ -94,8 +102,8 @@ export const useEnhancedBehavioral = () => {
   }, [user, enhancedProfile, analyzer]);
   
   // Generate engagement strategies based on the current profile
-  const generateEngagementStrategy = useCallback(async (): Promise<string[]> => {
-    if (!user) return [];
+  const generateEngagementStrategy = useCallback(async () => {
+    if (!user) return { communicationStrategy: [], offerStrategies: [] };
     
     try {
       // Use the enhanced profile to generate strategies
@@ -103,7 +111,7 @@ export const useEnhancedBehavioral = () => {
       return strategies;
     } catch (error) {
       console.error('Error generating engagement strategies:', error);
-      return [];
+      return { communicationStrategy: [], offerStrategies: [] };
     }
   }, [user, enhancedProfile, analyzer]);
 

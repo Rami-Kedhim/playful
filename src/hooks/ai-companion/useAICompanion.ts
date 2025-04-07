@@ -96,12 +96,11 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
       // Create a welcome message
       const welcomeMessage: AIMessage = {
         id: `msg-welcome-${Date.now()}`,
-        conversationId: conversation.id,
+        conversation_id: conversation.id,
         role: 'assistant',
         content: "Hello! I'm your AI assistant. How can I help you today?",
         timestamp: new Date(),
         sender_id: profileId,
-        conversation_id: conversation.id,
       };
       
       setMessages([welcomeMessage]);
@@ -124,12 +123,11 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
       // Create user message
       const userMessage: AIMessage = {
         id: `msg-user-${Date.now()}`,
-        conversationId: conversation.id,
+        conversation_id: conversation.id,
         role: 'user',
         content,
         timestamp: new Date(),
         sender_id: user.id,
-        conversation_id: conversation.id,
       };
       
       setMessages(prev => [...prev, userMessage]);
@@ -140,12 +138,11 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
       // Create AI response
       const aiResponse: AIMessage = {
         id: `msg-ai-${Date.now()}`,
-        conversationId: conversation.id,
+        conversation_id: conversation.id,
         role: 'assistant',
         content: `I received your message: "${content}". This is a simulated response.`,
         timestamp: new Date(),
         sender_id: profileId,
-        conversation_id: conversation.id,
       };
       
       setMessages(prev => [...prev, aiResponse]);
@@ -154,7 +151,7 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
       setConversation(prev => ({
         ...prev,
         lastMessageAt: new Date(),
-        messagesCount: prev.messagesCount + 2
+        messagesCount: prev.messagesCount ? prev.messagesCount + 2 : 2
       }));
       
       return true;
@@ -184,7 +181,7 @@ export function useAICompanion(profileId: string): AICompanionHookReturn {
   };
   
   // Load companion
-  const loadCompanion = async (id: string): Promise<AIProfile | null> => {
+  const loadCompanion = async (id: string = profileId): Promise<AIProfile | null> => {
     setIsLoading(true);
     try {
       // Simulate API call

@@ -2,21 +2,17 @@
 import { useState, useCallback } from 'react';
 
 export interface HermesSettings {
-  toneFilter: 'warm' | 'neutral' | 'cool';
-  emotionalResponseEnabled: boolean;
-  dynamicPersonalization: boolean;
-  behavioralPrimingMode: 'subtle' | 'moderate' | 'aggressive';
-  conversationTracking: boolean;
+  responseMode: 'emotional' | 'protective' | 'neutral' | 'premium';
+  toneFilter: 'authentic' | 'restrained' | 'generic' | 'enhanced';
+  responseSpeed: number; // milliseconds of delay
 }
 
 export const useHermesMode = () => {
   const [isEnabled, setIsEnabled] = useState(true);
   const [settings, setSettings] = useState<HermesSettings>({
-    toneFilter: 'warm',
-    emotionalResponseEnabled: true,
-    dynamicPersonalization: true,
-    behavioralPrimingMode: 'subtle',
-    conversationTracking: true
+    responseMode: 'emotional',
+    toneFilter: 'authentic',
+    responseSpeed: 0
   });
   
   const toggleMode = useCallback(() => {
@@ -30,17 +26,18 @@ export const useHermesMode = () => {
     }));
   }, []);
   
+  // Additional functions for compatibility with existing code
   const getCurrentMode = useCallback(() => {
-    return isEnabled ? 'active' : 'disabled';
-  }, [isEnabled]);
+    return settings.responseMode;
+  }, [settings.responseMode]);
   
   const getToneFilter = useCallback(() => {
     return settings.toneFilter;
   }, [settings.toneFilter]);
   
   const shouldUseEmotionalResponses = useCallback(() => {
-    return isEnabled && settings.emotionalResponseEnabled;
-  }, [isEnabled, settings.emotionalResponseEnabled]);
+    return settings.responseMode === 'emotional' || settings.responseMode === 'premium';
+  }, [settings.responseMode]);
   
   return {
     isEnabled,
