@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 
@@ -146,7 +147,9 @@ Remember these guidelines when responding:
 3. When appropriate, suggest actions the user could take next or topics to explore.
 4. Your responses should be conversational, natural, and feel like talking to a friend.
 5. Use the appropriate tone of voice matching your personality style.
-6. Include an emotional state with each response (happy, thoughtful, excited, curious, playful, etc).
+6. Always include an emotional state with each response using the format: [EMOTION: emotion_name].
+   Choose from these emotions: happy, sad, excited, thoughtful, curious, surprised, amused, confused, 
+   loving, playful, concerned, impressed, grateful, sympathetic, flirty, proud, disappointed, hopeful.
 7. Format your responses as plain text with occasional markdown for emphasis.
 8. Avoid being overly formal or robotic.
 `;
@@ -177,7 +180,7 @@ Remember these guidelines when responding:
   return basePrompt;
 }
 
-// Process the AI response to extract any special UI elements and emotional state
+// Improved process response function to extract UI elements and emotional state
 function processResponse(content, companionProfile) {
   // Default response object
   const response = {
@@ -188,7 +191,7 @@ function processResponse(content, companionProfile) {
   }
   
   // Extract emotions using pattern [EMOTION: happy]
-  const emotionPattern = /\[EMOTION: (.+?)\]/i;
+  const emotionPattern = /\[EMOTION\s*:\s*(.+?)\]/i;
   const emotionMatch = content.match(emotionPattern);
   
   if (emotionMatch) {
@@ -196,11 +199,11 @@ function processResponse(content, companionProfile) {
     response.text = content.replace(emotionPattern, '');
   } else {
     // If no explicit emotion, try to detect one based on content
-    response.emotions = detectEmotion(content);
+    response.emotions = detectEmotion(content, companionProfile?.speechStyle);
   }
   
   // Extract suggested actions with pattern [ACTION: action text]
-  const actionPattern = /\[ACTION: (.+?)\]/g;
+  const actionPattern = /\[ACTION\s*:\s*(.+?)\]/g;
   const actionMatches = [...content.matchAll(actionPattern)];
   
   if (actionMatches.length > 0) {
@@ -209,7 +212,7 @@ function processResponse(content, companionProfile) {
   }
   
   // Extract links with format [LINK: text | url]
-  const linkPattern = /\[LINK: (.+?) \| (.+?)\]/g;
+  const linkPattern = /\[LINK\s*:\s*(.+?)\s*\|\s*(.+?)\]/g;
   const linkMatches = [...content.matchAll(linkPattern)];
   
   if (linkMatches.length > 0) {
@@ -226,27 +229,72 @@ function processResponse(content, companionProfile) {
   return response;
 }
 
-// Simple emotion detection based on text content
-function detectEmotion(text) {
+// Enhanced emotion detection based on text content
+function detectEmotion(text, speechStyle = '') {
   const lowerText = text.toLowerCase();
   
-  // Simple keyword-based emotion detection
-  if (lowerText.includes('happy') || lowerText.includes('excited') || lowerText.includes('joy') || lowerText.includes('!')) {
-    return 'happy';
-  } else if (lowerText.includes('sad') || lowerText.includes('sorry') || lowerText.includes('unfortunately')) {
-    return 'sad';
-  } else if (lowerText.includes('angry') || lowerText.includes('upset') || lowerText.includes('frustrat')) {
-    return 'angry';
-  } else if (lowerText.includes('confused') || lowerText.includes('not sure') || lowerText.includes('unclear')) {
-    return 'confused';
-  } else if (lowerText.includes('curious') || lowerText.includes('wonder') || lowerText.includes('interesting')) {
-    return 'curious';
-  } else if (lowerText.includes('love') || lowerText.includes('adore') || lowerText.includes('heart')) {
-    return 'loving';
-  } else if (lowerText.includes('laugh') || lowerText.includes('funny') || lowerText.includes('haha')) {
-    return 'amused';
+  // More comprehensive keyword dictionary for emotion detection
+  const emotionPatterns = {
+    happy: ['happy', 'joy', 'delighted', 'glad', 'pleased', 'content', 'cheerful', '😊', '😄', 'wonderful', 'terrific', 'fantastic'],
+    excited: ['excited', 'thrilled', 'enthusiastic', 'eager', 'energetic', 'pumped', '🤩', '😃', 'can\'t wait', 'looking forward'],
+    amused: ['laugh', 'funny', 'amused', 'hilarious', 'haha', 'lol', '😂', '🤣', 'humorous', 'joke'],
+    curious: ['curious', 'wonder', 'interesting', 'fascinating', 'intrigued', 'tell me more', '🤔', 'puzzling', 'question'],
+    thoughtful: ['thoughtful', 'reflecting', 'considering', 'pondering', 'hmm', 'perhaps', 'maybe', 'thinking', 'contemplating'],
+    concerned: ['concerned', 'worried', 'anxious', 'careful', 'issue', 'problem', 'caution', '😟', 'attention'],
+    surprised: ['surprised', 'wow', 'oh', 'unexpected', 'amazing', 'astonished', 'stunned', '😲', '😮', 'remarkable', 'shocking'],
+    sympathetic: ['sympathetic', 'sorry to hear', 'understand', 'compassion', 'feel for you', 'empathize', '❤️', 'support'],
+    proud: ['proud', 'accomplished', 'achievement', 'success', 'well done', 'congratulations', '👏', 'impressive'],
+    confused: ['confused', 'not sure', 'unclear', 'puzzled', 'don\'t understand', 'complex', 'confusing', '😕', 'complicated'],
+    sad: ['sad', 'sorry', 'unfortunately', 'regret', 'disappointing', 'upset', '😔', '☹️', 'unhappy', 'sorrow'],
+    loving: ['love', 'adore', 'heart', 'affection', 'fond', 'care', '❤️', '😍', 'passion'],
+    hopeful: ['hopeful', 'optimistic', 'promising', 'looking forward', 'positive', 'better', 'improve', '🙂', 'future'],
+    flirty: ['flirty', 'playful', 'tease', 'wink', 'charming', 'attractive', '😉', '😘', 'flattering'],
+    grateful: ['grateful', 'thankful', 'appreciate', 'thanks', 'gratitude', 'blessed', '🙏', 'kind of you']
+  };
+  
+  // Count pattern matches for each emotion
+  const emotionScores = {};
+  
+  for (const [emotion, patterns] of Object.entries(emotionPatterns)) {
+    emotionScores[emotion] = 0;
+    for (const pattern of patterns) {
+      // Use regex to count all occurrences
+      const matches = lowerText.match(new RegExp(pattern, 'gi'));
+      if (matches) {
+        emotionScores[emotion] += matches.length;
+      }
+    }
   }
   
-  // Default emotion
-  return 'neutral';
+  // Find emotion with highest score
+  let highestScore = 0;
+  let dominantEmotion = 'neutral';
+  
+  for (const [emotion, score] of Object.entries(emotionScores)) {
+    if (score > highestScore) {
+      highestScore = score;
+      dominantEmotion = emotion;
+    }
+  }
+  
+  // If no strong emotion detected, use speech style to guess default emotion
+  if (highestScore === 0 && speechStyle) {
+    // Map speech styles to default emotions
+    const speechStyleToEmotion = {
+      'deep': 'thoughtful',
+      'soft': 'sympathetic',
+      'sultry': 'flirty',
+      'sophisticated': 'proud',
+      'bubbly': 'excited',
+      'breathy': 'loving',
+      'cheerful': 'happy',
+      'serious': 'concerned',
+      'authoritative': 'confident',
+      'friendly': 'amused'
+    };
+    
+    return speechStyleToEmotion[speechStyle.toLowerCase()] || 'neutral';
+  }
+  
+  return dominantEmotion;
 }
