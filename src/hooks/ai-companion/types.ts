@@ -1,3 +1,4 @@
+
 export interface CompanionProfile {
   id: string;
   name: string;
@@ -6,6 +7,7 @@ export interface CompanionProfile {
   personality?: string;
   visualCapabilities?: boolean;
   voiceType?: string;
+  speechStyle?: string;
 }
 
 export interface CompanionMessage {
@@ -14,7 +16,8 @@ export interface CompanionMessage {
   content: string;
   timestamp?: Date;
   suggestedActions?: string[];
-  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprise' | 'fear' | 'disgust' | 'friendly' | 'professional' | 'supportive' | 'apologetic' | 'helpful';
+  emotion?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprise' | 'fear' | 'disgust' | 'friendly' | 'professional' | 'supportive' | 'apologetic' | 'helpful' | 'confused';
+  links?: { text: string; url: string }[];
   visualElements?: {
     type: string;
     data: any;

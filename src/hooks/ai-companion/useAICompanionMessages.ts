@@ -1,135 +1,106 @@
+import { useState, useEffect, useCallback } from 'react';
+import { nanoid } from 'nanoid';
+import { CompanionMessage } from './types';
 
-import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-import { v4 as uuidv4 } from 'uuid';
-import { CompanionMessage, CompanionProfile, UserContext, AICompanionResponse } from './types';
+interface UseAICompanionMessagesProps {
+  initialMessages?: CompanionMessage[];
+}
 
-const MAX_STORED_MESSAGES = 50;
-const MAX_CONTEXT_MESSAGES = 10;
-
-export function useAICompanionMessages() {
-  const [messages, setMessages] = useState<CompanionMessage[]>([]);
+export const useAICompanionMessages = ({ initialMessages = [] }: UseAICompanionMessagesProps = {}) => {
+  const [messages, setMessages] = useState<CompanionMessage[]>(initialMessages);
   const [isTyping, setIsTyping] = useState(false);
-  const { toast } = useToast();
 
-  // Load stored messages from local storage on component mount
   useEffect(() => {
-    const storedMessages = localStorage.getItem('aiCompanionMessages');
-    if (storedMessages) {
-      try {
-        const parsedMessages = JSON.parse(storedMessages);
-        setMessages(parsedMessages);
-      } catch (error) {
-        console.error('Failed to parse stored messages:', error);
-        // If parsing fails, clear the stored messages
-        localStorage.removeItem('aiCompanionMessages');
-      }
+    if (initialMessages && initialMessages.length > 0) {
+      setMessages(initialMessages);
     }
-  }, []);
+  }, [initialMessages]);
 
-  // Store messages in local storage when they change
-  useEffect(() => {
-    if (messages.length > 0) {
-      // Only store up to MAX_STORED_MESSAGES
-      const messagesToStore = messages.slice(-MAX_STORED_MESSAGES);
-      localStorage.setItem('aiCompanionMessages', JSON.stringify(messagesToStore));
-    }
-  }, [messages]);
-
-  // Format chat history for the API
-  const formatChatHistory = useCallback(() => {
-    // Send only the most recent messages for context
-    return messages.slice(-MAX_CONTEXT_MESSAGES).map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
-  }, [messages]);
-
-  // Send a message to the companion
-  const sendMessage = useCallback(async (
-    content: string,
-    companion: CompanionProfile | null,
-    userContext: UserContext
-  ) => {
-    if (!content.trim() || !companion) return;
-    
-    // Add user message to UI immediately
-    const userMessage: CompanionMessage = {
-      id: uuidv4(),
-      role: 'user',
-      content,
+  const addMessage = useCallback((message: Omit<CompanionMessage, 'id'>) => {
+    const newMessage: CompanionMessage = {
+      id: nanoid(),
+      ...message,
       timestamp: new Date()
     };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setIsTyping(true);
-    
-    try {
-      // Get user context and chat history
-      const chatHistory = formatChatHistory();
-      
-      // Call the Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('ai-companion-chat', {
-        body: {
-          message: content,
-          userContext,
-          chatHistory,
-          companionProfile: companion
-        }
-      });
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      // Add companion's response to the UI
-      const companionResponse: CompanionMessage = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: data.text,
-        timestamp: new Date(),
-        emotion: data.emotions,
-        suggestedActions: data.suggestedActions || [],
-        links: data.links || []
-      };
-      
-      setMessages(prev => [...prev, companionResponse]);
-    } catch (error) {
-      console.error('Error sending message to companion:', error);
-      
-      toast({
-        title: 'Error',
-        description: 'Failed to get a response. Please try again.',
-        variant: 'destructive'
-      });
-      
-      // Add error message
-      const errorMessage: CompanionMessage = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: "I'm sorry, I'm having trouble responding right now. Please try again in a moment.",
-        timestamp: new Date(),
-        emotion: "confused"
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  }, [formatChatHistory, toast]);
+    setMessages(current => [...current, newMessage]);
+  }, []);
 
-  // Clear conversation history
+  const updateMessage = useCallback((messageId: string, updates: Partial<CompanionMessage>) => {
+    setMessages(current =>
+      current.map(msg =>
+        msg.id === messageId ? { ...msg, ...updates } : msg
+      )
+    );
+  }, []);
+
+  const deleteMessage = useCallback((messageId: string) => {
+    setMessages(current => current.filter(msg => msg.id !== messageId));
+  }, []);
+
   const clearMessages = useCallback(() => {
     setMessages([]);
-    localStorage.removeItem('aiCompanionMessages');
   }, []);
+
+  const setIsTypingState = useCallback((typing: boolean) => {
+    setIsTyping(typing);
+  }, []);
+
+  const handleErrorResponse = (errorMessage: string) => {
+    const errorResponse: CompanionMessage = {
+      id: nanoid(),
+      role: 'assistant',
+      content: `I'm having trouble connecting right now. ${errorMessage}`,
+      timestamp: new Date(),
+      suggestedActions: ['Try again', 'Ask something else'],
+      emotion: 'apologetic',
+      links: []
+    };
+    
+    setMessages(current => [...current, errorResponse]);
+    setIsTyping(false);
+  };
+
+  const handleSuggestedAction = useCallback((action: string) => {
+    const assistantMessage: CompanionMessage = {
+      id: nanoid(),
+      role: 'assistant',
+      content: action,
+      timestamp: new Date(),
+      suggestedActions: [],
+      emotion: 'friendly',
+      links: []
+    };
+    setMessages(current => [...current, assistantMessage]);
+  }, []);
+
+  // Error response when API or processing fails
+  const handleApiFailure = (error: any) => {
+    console.error("API call failed:", error);
+    
+    const errorResponse: CompanionMessage = {
+      id: nanoid(),
+      role: 'assistant',
+      content: "I'm having trouble responding right now. Please try again in a moment.",
+      timestamp: new Date(),
+      suggestedActions: ['Try again later', 'Ask something else'],
+      emotion: 'apologetic',
+      links: []
+    };
+    
+    setMessages(current => [...current, errorResponse]);
+    setIsTyping(false);
+  };
 
   return {
     messages,
-    setMessages,
     isTyping,
-    sendMessage,
-    clearMessages
+    addMessage,
+    updateMessage,
+    deleteMessage,
+    clearMessages,
+    setIsTyping: setIsTypingState,
+    handleErrorResponse,
+    handleSuggestedAction,
+    handleApiFailure
   };
-}
+};

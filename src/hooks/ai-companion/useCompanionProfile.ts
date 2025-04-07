@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { CompanionProfile, CompanionMessage } from './types';
@@ -8,6 +7,21 @@ export function useCompanionProfile(companionId: string, initialMessages: Compan
   const [companion, setCompanion] = useState<CompanionProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Initialize default profile if none is provided
+  const initializeDefaultProfile = useCallback(() => {
+    // Set a default companion profile if none is loaded
+    return {
+      id: 'default-companion',
+      name: 'AI Assistant',
+      avatar: '/ai-assistant-avatar.png',
+      description: 'A helpful AI assistant',
+      personality: 'Friendly and professional',
+      visualCapabilities: false,
+      voiceType: 'feminine',
+      speechStyle: 'friendly'
+    };
+  }, []);
 
   // Fetch companion profile
   useEffect(() => {

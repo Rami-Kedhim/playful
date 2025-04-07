@@ -1,40 +1,25 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
-
-export interface LucieMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
-  suggestedActions?: string[];
-  links?: { text: string; url: string }[];
-  emotion?: string;
-  visualElements?: {
-    type: 'image' | 'card';
-    data: any;
-  }[];
-}
-
-export interface UserContext {
-  name?: string;
-  role?: string;
-  recentActivity?: string;
-  interests?: string[];
-}
+import { useUserContext } from './ai-lucie/useUserContext';
+import { useLucieAPI } from './ai-lucie/useLucieAPI';
+import { useFallbackResponses } from './ai-lucie/useFallbackResponses';
+import { useMessageFormatting } from './ai-lucie/useMessageFormatting';
+import { LucieMessage } from './ai-lucie/types';
 
 export function useLucieAssistant() {
   const [messages, setMessages] = useState<LucieMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [apiAvailable, setApiAvailable] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
-  const [lastRequestTime, setLastRequestTime] = useState<number | null>(null);
-  const [apiBackoffTime, setApiBackoffTime] = useState(60000); // Start with 1 minute
-  const { user } = useAuth();
-  const { toast } = useToast();
+  
+  const { getUserContext } = useUserContext();
+  const { 
+    apiAvailable, 
+    shouldRetryApi, 
+    callLucieAPI, 
+    processVisualElements 
+  } = useLucieAPI();
+  const { getFallbackResponse } = useFallbackResponses();
+  const { formatChatHistory } = useMessageFormatting();
   
   // Initialize with welcome message
   useEffect(() => {
@@ -56,121 +41,12 @@ export function useLucieAssistant() {
     }
   }, [messages.length]);
   
-  // Build user context based on authenticated user info
-  const getUserContext = useCallback((): UserContext => {
-    if (!user) return {};
-    
-    return {
-      name: user.username,
-      role: user.role,
-      interests: user.user_metadata?.interests || []
-    };
-  }, [user]);
-  
-  // Format chat history for the API
-  const formatChatHistory = useCallback(() => {
-    return messages.slice(-10).map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
-  }, [messages]);
-
-  // Process visual elements request
-  const generateVisualElement = useCallback(async (type: string, content: any) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('lucie-visual-response', {
-        body: { type, content }
-      });
-      
-      if (error) {
-        console.error('Error generating visual element:', error);
-        return null;
-      }
-      
-      return data.data;
-    } catch (error) {
-      console.error('Error generating visual element:', error);
-      return null;
-    }
-  }, []);
-
-  // Get a fallback response when the API is unavailable
-  const getFallbackResponse = useCallback((userMessage: string): LucieMessage => {
-    // Smart fallback responses based on keywords in the user message
-    const lowercaseMsg = userMessage.toLowerCase();
-    
-    // Predefined fallback responses for different topics
-    const fallbackResponses = {
-      profile: {
-        content: "While I can't access my full capabilities right now, I can help you browse profiles. Would you like to see popular profiles or search by specific criteria?",
-        suggestedActions: ["Popular profiles", "Search by location", "Browse newest profiles"],
-        emotion: "helpful"
-      },
-      content: {
-        content: "I'm having trouble accessing my AI systems, but I can still help you find content. Would you like to see trending content or browse by category?",
-        suggestedActions: ["Trending content", "Premium content", "Creator spotlight"],
-        emotion: "friendly"
-      },
-      payment: {
-        content: "Though I'm experiencing some technical issues, I can direct you to payment and wallet information. What would you like to know about?",
-        suggestedActions: ["Check wallet balance", "Add funds", "Subscription info"],
-        emotion: "professional"
-      },
-      help: {
-        content: "I'm currently operating with limited capabilities, but I can still guide you to help resources. What kind of assistance do you need?",
-        suggestedActions: ["Contact support", "FAQs", "Account issues"],
-        emotion: "supportive"
-      },
-      default: {
-        content: "I apologize, but I'm currently operating with limited capabilities due to high demand. Can I help you with something from these options instead?",
-        suggestedActions: ["Browse profiles", "Check account", "View content"],
-        emotion: "apologetic"
-      }
-    };
-    
-    // Determine which fallback to use based on message content
-    let responseType = 'default';
-    
-    if (lowercaseMsg.match(/profile|escort|model|person|girl|woman|man|guy/i)) {
-      responseType = 'profile';
-    } else if (lowercaseMsg.match(/content|video|photo|picture|image|watch|view/i)) {
-      responseType = 'content';
-    } else if (lowercaseMsg.match(/pay|wallet|money|coin|lucoin|credit|fund|subscription/i)) {
-      responseType = 'payment';
-    } else if (lowercaseMsg.match(/help|support|issue|problem|question|how|why/i)) {
-      responseType = 'help';
-    }
-    
-    const response = fallbackResponses[responseType];
-    
-    return {
-      id: 'fallback-' + Date.now(),
-      role: 'assistant',
-      content: response.content,
-      timestamp: new Date(),
-      suggestedActions: response.suggestedActions,
-      emotion: response.emotion
-    };
-  }, []);
-
-  // Check if we should retry the API based on time passed
-  const shouldRetryApi = useCallback(() => {
-    if (apiAvailable) return true;
-    
-    if (!lastRequestTime) return false;
-    
-    const timeSinceLastRequest = Date.now() - lastRequestTime;
-    return timeSinceLastRequest > apiBackoffTime;
-  }, [apiAvailable, lastRequestTime, apiBackoffTime]);
-
   // Reset API availability after backoff time
   useEffect(() => {
     if (!apiAvailable && shouldRetryApi()) {
-      console.log(`Attempting to reset API availability after ${apiBackoffTime / 1000} seconds`);
-      setApiAvailable(true);
-      setRetryCount(0);
+      console.log(`Attempting to reset API availability`);
     }
-  }, [apiAvailable, shouldRetryApi, apiBackoffTime]);
+  }, [apiAvailable, shouldRetryApi]);
 
   // Send a message to Lucie
   const sendMessage = useCallback(async (content: string) => {
@@ -198,141 +74,54 @@ export function useLucieAssistant() {
         return;
       }
 
-      setLastRequestTime(Date.now());
-
       // Get user context and chat history
       const userContext = getUserContext();
-      const chatHistory = formatChatHistory();
+      const chatHistory = formatChatHistory(messages);
       
-      // Call the Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('ai-companion-chat', {
-        body: {
-          message: content,
-          userContext,
-          chatHistory,
-          companionProfile: {
-            name: "Lucie",
-            personality: "Warm, seductive, playful, and helpful assistant",
-            speechStyle: "sultry",
-            interests: ["helping users", "escort services", "entertainment"],
-            visualCapabilities: true // New flag to indicate we support visual elements
-          }
-        }
-      });
+      // Call the AI service
+      const lucieResponse = await callLucieAPI(content, userContext, chatHistory);
       
-      if (error) {
-        console.error('Error invoking AI companion chat function:', error);
-        throw new Error(error.message);
-      }
-      
-      if (data.error || data.errorCode) {
-        console.log('AI companion chat function returned error:', data.error || data.errorCode);
-        
-        // Handle quota exceeded and other error types
-        if (data.errorCode === 'QUOTA_EXCEEDED' || data.error?.includes('quota')) {
-          setApiAvailable(false);
-          setApiBackoffTime(prev => Math.min(prev * 2, 30 * 60 * 1000)); // Exponential backoff, max 30 minutes
-          console.log(`API quota exceeded, backing off for ${apiBackoffTime / 1000} seconds`);
-        }
-        
-        // Add the error response to messages, it already contains appropriate text
+      if (lucieResponse.error) {
+        // Add the error response to messages
         const errorResponse: LucieMessage = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: data.text,
+          content: lucieResponse.text || "Sorry, I'm having trouble connecting at the moment.",
           timestamp: new Date(),
-          suggestedActions: data.suggestedActions || [],
-          links: data.links || [],
+          suggestedActions: lucieResponse.suggestedActions || [],
+          links: lucieResponse.links || [],
           emotion: 'apologetic'
         };
         
         setMessages(prev => [...prev, errorResponse]);
-      } else if (data) {
+      } else {
         // Process any visual elements that might be requested in the response
-        let visualElements = [];
-        
-        // Check for image request patterns like [IMAGE: description]
-        const imageMatches = data.text.match(/\[IMAGE: (.+?)\]/g);
-        if (imageMatches) {
-          for (const match of imageMatches) {
-            const description = match.replace('[IMAGE: ', '').replace(']', '');
-            const imageElement = await generateVisualElement('image', description);
-            if (imageElement) {
-              visualElements.push({
-                type: 'image',
-                data: imageElement
-              });
-            }
-          }
-          // Remove the image tags from the text
-          data.text = data.text.replace(/\[IMAGE: (.+?)\]/g, '');
-        }
-        
-        // Check for card request patterns like [CARD: {...json...}]
-        const cardMatches = data.text.match(/\[CARD: (.+?)\]/g);
-        if (cardMatches) {
-          for (const match of cardMatches) {
-            try {
-              const cardContent = JSON.parse(match.replace('[CARD: ', '').replace(']', ''));
-              const cardElement = await generateVisualElement('card', cardContent);
-              if (cardElement) {
-                visualElements.push({
-                  type: 'card',
-                  data: cardElement
-                });
-              }
-            } catch (e) {
-              console.error('Error parsing card content:', e);
-            }
-          }
-          // Remove the card tags from the text
-          data.text = data.text.replace(/\[CARD: (.+?)\]/g, '');
-        }
+        const { visualElements, processedText } = await processVisualElements(lucieResponse.text);
         
         // Add Lucie's normal response to the UI
-        const lucieResponse: LucieMessage = {
+        const lucieMessage: LucieMessage = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: data.text,
+          content: processedText,
           timestamp: new Date(),
-          suggestedActions: data.suggestedActions || [],
-          links: data.links || [],
-          emotion: data.emotion || 'neutral',
-          visualElements: visualElements.length > 0 ? visualElements : undefined
+          suggestedActions: lucieResponse.suggestedActions || [],
+          links: lucieResponse.links || [],
+          emotion: lucieResponse.emotion || 'neutral',
+          visualElements
         };
         
-        setMessages(prev => [...prev, lucieResponse]);
-        
-        // Reset backoff time on successful request
-        if (!apiAvailable) {
-          setApiAvailable(true);
-          setApiBackoffTime(60000); // Reset to 1 minute
-        }
+        setMessages(prev => [...prev, lucieMessage]);
       }
     } catch (error: any) {
       console.error('Error sending message to Lucie:', error);
       
-      toast({
-        title: 'Connection Issue',
-        description: 'Sorry, I had trouble connecting. Please try again.',
-        variant: 'destructive'
-      });
-      
       // Use fallback response
       const fallbackMessage = getFallbackResponse(content);
       setMessages(prev => [...prev, fallbackMessage]);
-      
-      // Mark API as potentially unavailable after consecutive errors
-      setRetryCount(prev => prev + 1);
-      
-      if (retryCount >= 2) {
-        setApiAvailable(false);
-        setApiBackoffTime(prev => Math.min(prev * 2, 30 * 60 * 1000)); // Exponential backoff
-      }
     } finally {
       setIsTyping(false);
     }
-  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, getUserContext, retryCount, toast, apiBackoffTime, lastRequestTime, generateVisualElement]);
+  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, getUserContext, callLucieAPI, messages, processVisualElements]);
   
   // Handle suggested action click
   const handleSuggestedActionClick = useCallback((action: string) => {
@@ -354,4 +143,5 @@ export function useLucieAssistant() {
   };
 }
 
+export type { LucieMessage } from './ai-lucie/types';
 export default useLucieAssistant;
