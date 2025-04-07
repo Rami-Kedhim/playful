@@ -24,7 +24,10 @@ export const useAssessment = () => {
         [] // Providing empty behavior events array as placeholder
       );
       
-      setAssessmentResults(assessment);
+      // Only set if we got valid assessment results
+      if (assessment) {
+        setAssessmentResults(assessment);
+      }
       return assessment;
     } catch (error) {
       console.error('Error running assessment:', error);

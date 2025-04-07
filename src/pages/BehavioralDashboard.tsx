@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UnifiedBehavioralInsights } from '@/components/behavioral/UnifiedBehavioralInsights';
+import UnifiedBehavioralInsights from '@/components/behavioral/UnifiedBehavioralInsights';
 import { useUnifiedBehavioral } from '@/hooks/useUnifiedBehavioral';
 import { RefreshCcw, Brain, LineChart, Settings } from 'lucide-react';
 

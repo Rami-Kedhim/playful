@@ -63,5 +63,6 @@ export interface ChaseHughesBehavioralProfile {
   };
   trustScore: number; // 0-100%
   desireScore: number; // 0-100%
-  engagementScore: number; // 0-100% 
+  engagementScore: number; // 0-100%
+  // Removed userId field as it doesn't belong in this type
 }

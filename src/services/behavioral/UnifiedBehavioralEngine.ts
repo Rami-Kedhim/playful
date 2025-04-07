@@ -1,4 +1,3 @@
-
 /**
  * UnifiedBehavioralEngine
  * This service unifies HERMES-OXUM engine with Enhanced Behavioral Profiling
@@ -10,7 +9,9 @@ import { EnhancedBehavioralAnalyzer } from "@/services/behavioral/EnhancedBehavi
 import { 
   EnhancedBehavioralProfile, 
   BehavioralLoop,
-  ValueOrientation 
+  ValueOrientation,
+  ConsumerDecisionStage,
+  BrandResonanceStage
 } from '@/types/enhancedBehavioral';
 import { ChaseHughesBehavioralProfile } from '@/types/chaseHughes';
 import { AssessmentResult } from '@/types/assessment';
@@ -112,9 +113,9 @@ class UnifiedBehavioralEngine {
           trustLevel: 50,
           priceSensitivity: 50,
           behavioralLoop: BehavioralLoop.Discovery,
-          decisionStage: 'information_search',
+          decisionStage: ConsumerDecisionStage.InformationSearch,
           valueOrientation: ValueOrientation.Practical,
-          brandResonance: 'awareness',
+          brandResonance: BrandResonanceStage.Awareness,
           identifiedSignals: ['interest']
         },
         marketingOptimizations: {
@@ -143,16 +144,18 @@ class UnifiedBehavioralEngine {
       
       // Create a simplified Chase Hughes behavioral profile
       const chaseHughesProfile: ChaseHughesBehavioralProfile = {
-        userId: userId,
-        trustScore: 65,
-        desireScore: 40,
-        socialProofLevel: 3,
+        primarySensoryPreference: 'visual',
         currentInfluencePhase: 'interest',
         influencePhaseProgress: 60,
-        receptivityToPersuasion: 'moderate',
-        dominantPersuasionTriggers: ['scarcity', 'authority'],
-        resistancePoints: ['skepticism'],
-        lastAnalyzed: new Date().toISOString()
+        detectedMicroExpressions: [],
+        responsiveToTechniques: [],
+        suggestedApproach: {
+          technique: 'social_proof',
+          languagePattern: 'Most users find that...'
+        },
+        trustScore: 65,
+        desireScore: 40,
+        engagementScore: 55
       };
       
       // Create an assessment result
@@ -287,7 +290,7 @@ class UnifiedBehavioralEngine {
                   'minimal' : 'moderate',
       messageStyle: psychographicProfile.trustLevel > 70 ? 
                    'friendly' : 'professional',
-      contentPrioritization: psychographicProfile.contentPreferences?.includes('visual') ? 
+      contentPrioritization: psychographicProfile.marketingOptimizations?.contentPreferences?.includes('visual') ? 
                             'visual' : 'balanced'
     };
   }

@@ -1,4 +1,3 @@
-
 // Enhanced behavioral profiling system types
 // Implements HERMES, OXUM, Gould, and Chase Hughes frameworks
 
@@ -82,6 +81,8 @@ export interface PsychographicProfile {
   brandResonance: BrandResonanceStage;
   identifiedSignals: MicroexpressionSignal[];
   engagementPatterns?: string[];
+  contentPreferences?: string[];
+  marketingOptimizations?: any;
 }
 
 // Marketing optimizations based on behavioral analysis
