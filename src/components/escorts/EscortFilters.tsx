@@ -73,18 +73,18 @@ const EscortFilters: React.FC<EscortFiltersProps> = ({
 
     // Filter by price range
     filtered = filtered.filter(escort => {
-      const price = escort.hourlyRate || 0;
+      const price = escort.price || 0;
       return price >= minPrice && price <= maxPrice;
     });
 
     // Filter by availability
     if (isAvailable) {
-      filtered = filtered.filter(escort => escort.available === true);
+      filtered = filtered.filter(escort => escort.availableNow === true);
     }
 
     // Filter by verification status
     if (isVerified) {
-      filtered = filtered.filter(escort => escort.is_verified === true);
+      filtered = filtered.filter(escort => escort.verified === true);
     }
 
     onApplyFilters(filtered);
