@@ -3,3 +3,6 @@ project_id = "your-project-id"
 
 [functions.lucie-chat]
 verify_jwt = true
+
+[functions.ai-companion-chat]
+verify_jwt = true

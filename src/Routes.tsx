@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -25,7 +24,7 @@ const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const CreatorDashboard = lazy(() => import('./components/creators/dashboard/Dashboard'));
 const VerificationContainer = lazy(() => import('./components/verification/VerificationContainer'));
-const AICompanionPage = lazy(() => import('./pages/ai-companion'));
+const AICompanionPage = lazy(() => import('./pages/AICompanionPage'));
 const SEODashboard = lazy(() => import('./pages/SEODashboard'));
 
 // Loading component for suspense fallback
@@ -35,7 +34,7 @@ const PageLoader = () => (
   </div>
 );
 
-const AppRoutes = () => {
+function Routes() {
   return (
     <RouterRoutes>
       <Route path="/" element={<AppLayout />}>
@@ -111,11 +110,7 @@ const AppRoutes = () => {
           </Suspense>
         } />
         
-        <Route path="ai-companion" element={
-          <Suspense fallback={<PageLoader />}>
-            <AICompanionPage />
-          </Suspense>
-        } />
+        <Route path="ai-companions" element={<AICompanionPage />} />
         
         {/* Protected Routes - Require Authentication */}
         <Route path="/profile" element={
@@ -192,6 +187,6 @@ const AppRoutes = () => {
       </Route>
     </RouterRoutes>
   );
-};
+}
 
-export default AppRoutes;
+export default Routes;
