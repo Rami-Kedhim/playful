@@ -103,7 +103,7 @@ const AICompanionChat = ({
         isLoading={isLoading}
         isTyping={localIsTyping}
         onActionClick={handleSuggestedActionClick}
-        voiceType={companion?.voiceType}
+        voiceType={companion?.voice_type}
       />
 
       <AICompanionChatInput 

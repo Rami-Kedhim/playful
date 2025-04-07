@@ -17,14 +17,14 @@ export interface CompanionMessage {
   suggestedActions?: string[];
   visualElements?: { data: VisualElementData }[];
   emotion?: string;
-  links?: string[]; // Added missing links property
+  links?: string[]; // Include links property to fix type error
 }
 
 export interface UseAICompanionConversationOptions {
   companionId: string;
 }
 
-// Added missing interfaces for other components
+// Using the same interface name to match the import in index.ts
 export interface UseAICompanionConversationProps {
   companionId: string;
   initialMessages?: CompanionMessage[];
@@ -51,7 +51,7 @@ export interface CompanionProfile {
   personality: string;
   description: string;
   visualCapabilities: boolean;
-  voiceType: string;
+  voice_type: string; // Changed from voiceType to match AICompanion
   speechStyle: string;
 }
 

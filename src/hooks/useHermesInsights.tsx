@@ -36,12 +36,8 @@ export function useHermesInsights(userId?: string) {
    */
   const reportUserAction = useCallback(async (
     action: string,
-    options?: {
-      category?: string,
-      location?: string,
-      sessionTime?: number,
-      interactionData?: Record<string, any>
-    }
+    category?: string,
+    data?: Record<string, any>
   ) => {
     if (!userId) {
       console.warn('Cannot report to HERMES: missing userId');
@@ -55,10 +51,8 @@ export function useHermesInsights(userId?: string) {
       const actionData: HermesUserAction = {
         user_id: userId,
         action,
-        category: options?.category,
-        location: options?.location,
-        session_time: options?.sessionTime,
-        interaction_data: options?.interactionData // New field for more context
+        category,
+        interaction_data: data // New field for more context
       };
       
       // Get response from HERMES
@@ -75,6 +69,7 @@ export function useHermesInsights(userId?: string) {
         isLoading: false
       });
       
+      return response;
     } catch (error) {
       console.error('Error getting HERMES insights:', error);
       setInsights(prev => ({ 
@@ -82,6 +77,7 @@ export function useHermesInsights(userId?: string) {
         isLoading: false,
         error: 'Failed to get HERMES insights' 
       }));
+      return null;
     }
   }, [userId]);
 
@@ -89,9 +85,8 @@ export function useHermesInsights(userId?: string) {
    * Record profile view in HERMES
    */
   const recordProfileView = useCallback((profileId: string, sessionTime?: number) => {
-    return reportUserAction('viewed_profile', { 
-      category: 'profile', 
-      sessionTime
+    return reportUserAction('viewed_profile', 'profile', { 
+      sessionTime 
     });
   }, [reportUserAction]);
   
@@ -99,7 +94,7 @@ export function useHermesInsights(userId?: string) {
    * Record favorites action in HERMES
    */
   const recordFavorite = useCallback((profileId: string) => {
-    return reportUserAction('selected_favorite', { category: 'profile' });
+    return reportUserAction('selected_favorite', 'profile');
   }, [reportUserAction]);
   
   /**
@@ -114,11 +109,10 @@ export function useHermesInsights(userId?: string) {
    * New method to track AI companion interactions
    */
   const recordAICompanionInteraction = useCallback((companionId: string, messageCount: number, interactionData?: Record<string, any>) => {
-    return reportUserAction('ai_companion_interaction', {
-      category: 'ai_companion',
+    return reportUserAction('ai_companion_interaction', 'ai_companion', {
       location: companionId,
       sessionTime: messageCount,
-      interactionData
+      ...interactionData
     });
   }, [reportUserAction]);
   
