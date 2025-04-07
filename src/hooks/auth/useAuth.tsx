@@ -46,8 +46,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     updateProfile
   } = useAuthentication(setIsLoading, refreshProfile);
   
-  // Role checking utility
-  const { checkRole } = useRole();
+  // Use the role helpers with the current roles from authState
+  const roleHelpers = useRole(authState.userRoles);
   
   // Computed auth state
   const isAuthenticated = !!authState.user;
@@ -221,7 +221,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     error,
     clearError,
     refreshProfile,
-    checkRole
+    ...roleHelpers // Spread role helpers
   };
   
   return (

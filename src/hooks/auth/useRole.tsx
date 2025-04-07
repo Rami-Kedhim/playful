@@ -1,13 +1,9 @@
 
-import { useAuth } from './useAuth';
-
 /**
  * Custom hook for role-based access control
  * Provides functions to check user roles and permissions
  */
-export const useRole = () => {
-  const { userRoles = [] } = useAuth();
-  
+export const useRole = (userRoles: string[] = []) => {
   /**
    * Check if user has any of the specified roles
    * @param role - A single role or array of roles to check
@@ -71,7 +67,7 @@ export const useRole = () => {
   return {
     hasRole,
     hasAllRoles,
-    checkRole, // Add the checkRole method
+    checkRole,
     isAdmin,
     isModerator,
     isCreator,
