@@ -6,6 +6,7 @@ import EnhancedEngagementPanel from './EnhancedEngagementPanel';
 import AssessmentPanel from '../assessment/AssessmentPanel';
 import ChaseHughesPanel from '../assessment/ChaseHughesPanel';
 import ChaseHughesInfluencePanel from '../assessment/ChaseHughesInfluencePanel';
+import SchaubergerFlowVisualization from '../visualization/SchaubergerFlowVisualization';
 import { useAssessment } from '@/hooks/useAssessment';
 
 const AssessmentDashboard = () => {
@@ -55,19 +56,7 @@ const AssessmentDashboard = () => {
         <TabsContent value="behavioral" className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ChaseHughesInfluencePanel profile={assessment?.chaseHughesProfile} isLoading={isGenerating} />
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Schauberger Flow Analysis</CardTitle>
-                <CardDescription>
-                  Natural flow dynamics and emotional implosion metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm">
-                <p className="text-muted-foreground">
-                  Coming soon: Visualization of user vortex patterns and energy flows based on Schauberger principles.
-                </p>
-              </CardContent>
-            </Card>
+            <SchaubergerFlowVisualization />
           </div>
         </TabsContent>
       </Tabs>
@@ -90,6 +79,7 @@ const AssessmentDashboard = () => {
               <li><span className="font-medium">Keller's Brand Resonance:</span> Measures progression from awareness to deep brand connection.</li>
               <li><span className="font-medium">Kotler's Decision Journey:</span> Tracks consumer decision stages for optimal intervention.</li>
               <li><span className="font-medium">Chernev's Choice Architecture:</span> Optimizes monetization based on value orientation.</li>
+              <li><span className="font-medium">Schauberger's Flow Principles:</span> Visualizes natural energy flows and emotional implosion metrics.</li>
             </ul>
           </CardContent>
         </Card>
