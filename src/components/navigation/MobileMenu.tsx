@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { User, Settings, LogOut, Home, Search, Compass } from 'lucide-react';
-import { useAuth } from '@/hooks/auth/useAuth';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { AnimatedContainer } from '@/components/ui/animated-container';
 import { Separator } from '@/components/ui/separator';
 import MobileNavigation from './MobileNavigation';
@@ -18,11 +18,11 @@ interface MobileMenuProps {
 
 const MobileMenu = ({ open = false, onOpenChange }: MobileMenuProps) => {
   const { t } = useTranslation();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   
   const handleLogout = () => {
-    if (logout) {
-      logout();
+    if (signOut) {
+      signOut();
     }
     if (onOpenChange) {
       onOpenChange(false);
@@ -102,7 +102,7 @@ const MobileMenu = ({ open = false, onOpenChange }: MobileMenuProps) => {
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium">{user?.username || user?.email}</p>
+                  <p className="font-medium">{user?.user_metadata?.username || user?.email}</p>
                 </div>
               </div>
               
