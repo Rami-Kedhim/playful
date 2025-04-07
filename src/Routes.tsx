@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route, Navigate } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -69,116 +70,116 @@ function Routes() {
           </Suspense>
         } />
         
-        <Route path="escort/:id/live" element={
+      <Route path="escort/:id/live" element={
+        <Suspense fallback={<PageLoader />}>
+          <EscortLiveStreamDetail />
+        </Suspense>
+      } />
+        
+      <Route path="creators/:username" element={
+        <Suspense fallback={<PageLoader />}>
+          <CreatorDetail />
+        </Suspense>
+      } />
+        
+      <Route path="search" element={
+        <Suspense fallback={<PageLoader />}>
+          <SearchPage />
+        </Suspense>
+      } />
+        
+      <Route path="ai-profiles" element={
+        <Suspense fallback={<PageLoader />}>
+          <AIProfiles />
+        </Suspense>
+      } />
+        
+      <Route path="livecams" element={
+        <Suspense fallback={<PageLoader />}>
+          <Livecams />
+        </Suspense>
+      } />
+        
+      <Route path="livecams/:id" element={
+        <Suspense fallback={<PageLoader />}>
+          <LivecamDetail />
+        </Suspense>
+      } />
+        
+      <Route path="ai-companions" element={<AICompanionPage />} />
+        
+      {/* Protected Routes - Require Authentication */}
+      <Route path="/profile" element={
+        <ProtectedRoute>
           <Suspense fallback={<PageLoader />}>
-            <EscortLiveStreamDetail />
+            <ProfilePage />
           </Suspense>
-        } />
+        </ProtectedRoute>
+      } />
         
-        <Route path="creators/:username" element={
+      <Route path="favorites" element={
+        <ProtectedRoute>
           <Suspense fallback={<PageLoader />}>
-            <CreatorDetail />
+            <FavoritesPage />
           </Suspense>
-        } />
+        </ProtectedRoute>
+      } />
         
-        <Route path="search" element={
+      <Route path="messages" element={
+        <ProtectedRoute>
           <Suspense fallback={<PageLoader />}>
-            <SearchPage />
+            <MessagesPage />
           </Suspense>
-        } />
+        </ProtectedRoute>
+      } />
         
-        <Route path="ai-profiles" element={
+      <Route path="metaverse" element={
+        <ProtectedRoute>
           <Suspense fallback={<PageLoader />}>
-            <AIProfiles />
+            <MetaversePage />
           </Suspense>
-        } />
+        </ProtectedRoute>
+      } />
         
-        <Route path="livecams" element={
+      <Route path="creator-application" element={
+        <ProtectedRoute>
           <Suspense fallback={<PageLoader />}>
-            <Livecams />
+            <CreatorDashboard />
           </Suspense>
-        } />
+        </ProtectedRoute>
+      } />
         
-        <Route path="livecams/:id" element={
+      <Route path="creator-dashboard" element={
+        <ProtectedRoute requiredRoles={["creator"]}>
           <Suspense fallback={<PageLoader />}>
-            <LivecamDetail />
+            <CreatorDashboard />
           </Suspense>
-        } />
+        </ProtectedRoute>
+      } />
         
-        <Route path="ai-companions" element={<AICompanionPage />} />
-        
-        {/* Protected Routes - Require Authentication */}
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <ProfilePage />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="favorites" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <FavoritesPage />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="messages" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <MessagesPage />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="metaverse" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <MetaversePage />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="creator-application" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <CreatorDashboard />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="creator-dashboard" element={
-          <ProtectedRoute requiredRoles={["creator"]}>
-            <Suspense fallback={<PageLoader />}>
-              <CreatorDashboard />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="verification" element={
-          <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
-              <VerificationContainer />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        {/* Protected SEO Routes - Require Admin/Moderator roles */}
-        <Route path="seo/*" element={
-          <ProtectedRoute requiredRoles={["admin"]}>
-            <Suspense fallback={<PageLoader />}>
-              <SEODashboard />
-            </Suspense>
-          </ProtectedRoute>
-        } />
-        
-        {/* Add a 404 catch-all route */}
-        <Route path="*" element={
+      <Route path="verification" element={
+        <ProtectedRoute>
           <Suspense fallback={<PageLoader />}>
-            <NotFound />
+            <VerificationContainer />
           </Suspense>
-        } />
+        </ProtectedRoute>
+      } />
+        
+      {/* Protected SEO Routes - Require Admin/Moderator roles */}
+      <Route path="seo/*" element={
+        <ProtectedRoute requiredRoles={["admin"]}>
+          <Suspense fallback={<PageLoader />}>
+            <SEODashboard />
+          </Suspense>
+        </ProtectedRoute>
+      } />
+        
+      {/* Add a 404 catch-all route */}
+      <Route path="*" element={
+        <Suspense fallback={<PageLoader />}>
+          <NotFound />
+        </Suspense>
+      } />
     </RouterRoutes>
   );
 }

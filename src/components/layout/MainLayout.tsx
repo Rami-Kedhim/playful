@@ -34,12 +34,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
                 <Link to="/" className="text-xl font-bold">
-                  YourSite
+                  UberEscorts
                 </Link>
                 <nav className="hidden md:flex ml-10 space-x-4">
                   <Link to="/" className="px-3 py-2 hover:text-primary">Home</Link>
                   <Link to="/escorts" className="px-3 py-2 hover:text-primary">Escorts</Link>
                   <Link to="/creators" className="px-3 py-2 hover:text-primary">Creators</Link>
+                  <Link to="/livecams" className="px-3 py-2 hover:text-primary">Livecams</Link>
+                  <Link to="/metaverse" className="px-3 py-2 hover:text-primary">Metaverse</Link>
                 </nav>
               </div>
               <div className="flex items-center space-x-2">
@@ -52,10 +54,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                   </>
                 ) : (
                   <>
-                    <Link to="/login">
+                    <Link to="/auth">
                       <Button variant="outline" size="sm">Login</Button>
                     </Link>
-                    <Link to="/register">
+                    <Link to="/auth">
                       <Button size="sm">Register</Button>
                     </Link>
                   </>
@@ -88,7 +90,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="mb-4 md:mb-0">
                 <p className="text-sm text-muted-foreground">
-                  © {new Date().getFullYear()} YourSite. All rights reserved.
+                  © {new Date().getFullYear()} UberEscorts. All rights reserved.
                 </p>
               </div>
               <div className="flex space-x-4">
