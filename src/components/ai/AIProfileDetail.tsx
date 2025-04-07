@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AIProfile } from "@/types/ai-profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,10 +48,13 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profile }) => {
   const getPersonalityTraits = (): PersonalityTrait[] => {
     if (!profile.personality?.traits) return [];
     
+    // If traits is already an array of PersonalityTrait objects
     if (typeof profile.personality.traits[0] === 'object') {
-      return profile.personality.traits as PersonalityTrait[];
+      // Explicitly cast to PersonalityTrait[] to satisfy TypeScript
+      return profile.personality.traits as unknown as PersonalityTrait[];
     }
     
+    // If traits is an array of strings, convert each string to a PersonalityTrait object
     const traitsAsStrings = Array.isArray(profile.personality.traits) ? 
       (profile.personality.traits as unknown as string[]) : [];
       
