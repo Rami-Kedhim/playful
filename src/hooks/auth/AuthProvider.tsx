@@ -1,17 +1,17 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthUser, AuthResult, UserProfile } from '@/types/auth';
+import React, { createContext, useState, useEffect } from 'react';
+import { AuthUser, AuthResult, UserProfile, AuthContextType } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthState } from './useAuthState';
 import { usePasswordManagement } from './usePasswordManagement';
 import { useAuthActions } from './useAuthActions';
 
 // Create auth context
-const AuthContext = createContext<any>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 // Use auth hook
 export const useAuthContext = () => {
-  const context = useContext(AuthContext);
+  const context = React.useContext(AuthContext);
   if (!context) {
     throw new Error('useAuthContext must be used within an AuthProvider');
   }
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => { 
       subscription.unsubscribe(); 
     };
-  }, []);
+  }, [refreshProfile, setIsLoading, setUser]);
 
   // Clear error function
   const clearError = () => {
@@ -175,7 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Combine our hooks into one context value
-  const authContextValue = {
+  const authContextValue: AuthContextType = {
     user,
     isAuthenticated,
     isLoading,

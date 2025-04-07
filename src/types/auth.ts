@@ -9,7 +9,7 @@ export interface AuthUser {
   user_metadata?: Record<string, any>;
   aud?: string;
   created_at?: string;
-  lucoinsBalance?: number; // Added this field
+  lucoinsBalance?: number;
 }
 
 export type UserRole = 'admin' | 'moderator' | 'escort' | 'creator' | 'user';
@@ -35,4 +35,22 @@ export interface UserProfile {
 export interface AuthResult {
   success: boolean;
   error?: string | null;
+}
+
+export interface AuthContextType {
+  user: AuthUser | null;
+  profile: UserProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (email: string, password: string, username?: string) => Promise<AuthResult>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<boolean>;
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
+  error: string | null;
+  clearError: () => void;
+  userRoles: string[];
+  refreshProfile: () => Promise<void>;
+  checkRole: (role: string) => boolean;
 }
