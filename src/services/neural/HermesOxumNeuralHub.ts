@@ -1,364 +1,420 @@
 
-/**
- * HermesOxumNeuralHub - Central control system for the HERMES-OXUM engine
- * Implements advanced mathematical models from Zill's frameworks
- */
-import hermesOxumEngine from "@/services/boost/HermesOxumEngine";
-import visibilitySystem from "@/services/visibility/VisibilitySystem";
-import { toast } from "@/components/ui/use-toast";
+// Hermes Oxum Neural Hub - Advanced neural network system for intelligent decision making
+import { v4 as uuidv4 } from 'uuid';
 
-// System health status interface
 export interface SystemHealthMetrics {
-  load: number; // 0-1 system load
-  stability: number; // 0-1 stability score
-  userEngagement: number; // 0-1 engagement factor
-  economicBalance: number; // 0-1 economic health
+  load: number; // 0-1
+  memoryUtilization: number; // 0-1
+  operationsPerSecond: number;
+  responseTime: number; // milliseconds
+  errorRate: number; // 0-1
+  stability: number; // 0-1
+  userEngagement: number; // 0-1
   lastUpdated: Date;
 }
 
-// Mathematical model parameters
-export interface ModelParameters {
-  // ODE parameters
-  decayConstant: number;
-  growthFactor: number;
-  
-  // Fourier parameters
-  cyclePeriod: number;
-  harmonicCount: number;
-  
-  // Nonlinear dynamics parameters
-  bifurcationPoint: number;
-  attractorStrength: number;
-  
-  // PDE parameters
-  diffusionRate: number;
-  driftVelocity: number;
-  
-  // Stochastic parameters
-  randomnessFactor: number;
-  noiseLevel: number;
+export interface NeuralModel {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  status: 'active' | 'training' | 'inactive' | 'error';
+  parameters: number; // millions
+  specialization: string[];
+  capabilities: string[];
+  performance: {
+    accuracy: number; // 0-1
+    latency: number; // milliseconds
+    throughput: number; // requests per second
+  };
 }
 
-export type ContentType = 'profile' | 'post' | 'video' | 'livecam' | 'event' | 'metaverse';
+export interface TrainingProgress {
+  modelId: string;
+  epoch: number;
+  totalEpochs: number;
+  accuracy: number;
+  loss: number;
+  startedAt: Date;
+  estimatedCompletion: Date;
+  progress: number; // 0-1
+}
 
-export class HermesOxumNeuralHub {
-  private static instance: HermesOxumNeuralHub;
+class HermesOxumNeuralHub {
+  private models: NeuralModel[] = [];
   private healthMetrics: SystemHealthMetrics;
-  private modelParams: ModelParameters;
-  private observers: Array<(metrics: SystemHealthMetrics) => void> = [];
-  private updateInterval: ReturnType<typeof setInterval> | null = null;
+  private trainingJobs: Map<string, TrainingProgress> = new Map();
+  private predictionCache: Map<string, any> = new Map();
   
-  // Private constructor for singleton pattern
-  private constructor() {
-    // Initialize with default values
+  constructor() {
     this.healthMetrics = {
-      load: 0.5,
-      stability: 0.9,
-      userEngagement: 0.7,
-      economicBalance: 0.8,
+      load: 0.2,
+      memoryUtilization: 0.3,
+      operationsPerSecond: 1200,
+      responseTime: 45,
+      errorRate: 0.002,
+      stability: 0.98,
+      userEngagement: 0.76,
       lastUpdated: new Date()
     };
     
-    this.modelParams = {
-      decayConstant: 0.2,
-      growthFactor: 1.5,
-      cyclePeriod: 24, // hours
-      harmonicCount: 3,
-      bifurcationPoint: 0.7,
-      attractorStrength: 0.5,
-      diffusionRate: 0.3,
-      driftVelocity: 0.1,
-      randomnessFactor: 0.2,
-      noiseLevel: 0.1
-    };
-    
-    // Start system monitoring
-    this.startMonitoring();
+    this.initializeModels();
   }
   
-  // Singleton accessor
-  public static getInstance(): HermesOxumNeuralHub {
-    if (!HermesOxumNeuralHub.instance) {
-      HermesOxumNeuralHub.instance = new HermesOxumNeuralHub();
-    }
-    return HermesOxumNeuralHub.instance;
+  private initializeModels() {
+    // Initialize with some default models
+    this.models = [
+      {
+        id: uuidv4(),
+        name: 'HermesGPT-Core',
+        description: 'General purpose language model for application integration',
+        version: '2.4.1',
+        status: 'active',
+        parameters: 12500,
+        specialization: ['natural-language-processing', 'text-generation', 'conversation'],
+        capabilities: ['chat', 'content-generation', 'translation', 'summarization'],
+        performance: {
+          accuracy: 0.92,
+          latency: 120,
+          throughput: 35
+        }
+      },
+      {
+        id: uuidv4(),
+        name: 'OxumVision',
+        description: 'Visual understanding and generation model',
+        version: '1.8.0',
+        status: 'active',
+        parameters: 8700,
+        specialization: ['computer-vision', 'image-processing', 'multimedia'],
+        capabilities: ['image-recognition', 'object-detection', 'scene-understanding'],
+        performance: {
+          accuracy: 0.89,
+          latency: 180,
+          throughput: 22
+        }
+      },
+      {
+        id: uuidv4(),
+        name: 'NexusEmbed',
+        description: 'Vector embedding generator for semantic understanding',
+        version: '3.1.2',
+        status: 'active',
+        parameters: 1800,
+        specialization: ['embeddings', 'similarity-search', 'document-indexing'],
+        capabilities: ['document-retrieval', 'semantic-search', 'clustering'],
+        performance: {
+          accuracy: 0.95,
+          latency: 15,
+          throughput: 250
+        }
+      },
+      {
+        id: uuidv4(),
+        name: 'BehaviorPredict',
+        description: 'User behavior prediction and content recommendation',
+        version: '2.0.5',
+        status: 'active',
+        parameters: 4200,
+        specialization: ['recommendation', 'personalization', 'behavior-analysis'],
+        capabilities: ['content-recommendation', 'preference-prediction', 'trend-analysis'],
+        performance: {
+          accuracy: 0.87,
+          latency: 65,
+          throughput: 180
+        }
+      },
+      {
+        id: uuidv4(),
+        name: 'HermesGPT-Expert',
+        description: 'Advanced specialized language model for expert domains',
+        version: '1.2.0',
+        status: 'training',
+        parameters: 38000,
+        specialization: ['expert-knowledge', 'reasoning', 'domain-adaptation'],
+        capabilities: ['complex-reasoning', 'domain-expertise', 'technical-writing'],
+        performance: {
+          accuracy: 0.94,
+          latency: 350,
+          throughput: 12
+        }
+      }
+    ];
   }
   
-  // Start system monitoring
-  private startMonitoring(): void {
-    if (this.updateInterval) return;
-    
-    this.updateInterval = setInterval(() => {
-      this.updateHealthMetrics();
-      this.notifyObservers();
-    }, 60000); // Update every minute
+  // Get all available models
+  getModels(): NeuralModel[] {
+    return [...this.models];
   }
   
-  // Stop system monitoring
-  public stopMonitoring(): void {
-    if (this.updateInterval) {
-      clearInterval(this.updateInterval);
-      this.updateInterval = null;
-    }
+  // Get a specific model by ID
+  getModel(modelId: string): NeuralModel | undefined {
+    return this.models.find(m => m.id === modelId);
   }
   
-  // Update system health metrics using ODE models
-  private updateHealthMetrics(): void {
-    // Simulating ODE calculations for system metrics
-    
-    // In a real implementation, these would be calculated using the actual
-    // differential equations from Zill's mathematical models
-    
-    // Example of simulated ODE-based update:
-    // dL/dt = -decayConstant * L + growthFactor * (1-L) * U
-    // where L is load and U is user activity
-    
-    const userActivity = Math.random(); // This would come from actual user data
-    
-    // Simple Euler method for the ODE
-    const deltaT = 1/60; // 1 minute in hours
-    const deltaLoad = (
-      -this.modelParams.decayConstant * this.healthMetrics.load + 
-      this.modelParams.growthFactor * (1 - this.healthMetrics.load) * userActivity
-    ) * deltaT;
-    
-    // Update load with bounds check
-    this.healthMetrics.load = Math.max(0, Math.min(1, this.healthMetrics.load + deltaLoad));
-    
-    // Similar calculations for other metrics...
-    this.healthMetrics.stability = this.calculateStabilityScore();
-    this.healthMetrics.userEngagement = this.calculateEngagementScore();
-    this.healthMetrics.economicBalance = this.calculateEconomicScore();
-    this.healthMetrics.lastUpdated = new Date();
-    
-    // Update Hermes engine with new system load value
-    hermesOxumEngine.updateSystemLoad(this.healthMetrics.load);
+  // Get models by capability
+  getModelsByCapability(capability: string): NeuralModel[] {
+    return this.models.filter(m => 
+      m.capabilities.includes(capability) && m.status === 'active'
+    );
   }
   
-  // Calculate stability score using nonlinear dynamics
-  private calculateStabilityScore(): number {
-    // Simulate bifurcation-based stability model
-    const currentStability = this.healthMetrics.stability;
-    const bifurcationDelta = this.modelParams.bifurcationPoint - currentStability;
-    
-    // Simple model: if we're near the bifurcation point, stability changes more rapidly
-    const stabilityChange = 
-      -0.1 * Math.sign(bifurcationDelta) * 
-      Math.pow(Math.abs(bifurcationDelta), this.modelParams.attractorStrength) + 
-      (Math.random() - 0.5) * this.modelParams.noiseLevel;
-    
-    return Math.max(0, Math.min(1, currentStability + stabilityChange));
+  // Get system health metrics
+  getHealthMetrics(): SystemHealthMetrics {
+    // In a real system, we would collect real metrics here
+    this.updateHealthMetrics();
+    return {...this.healthMetrics};
   }
   
-  // Calculate engagement using Fourier components
-  private calculateEngagementScore(): number {
-    // Get current hour of day (0-23)
-    const hourOfDay = new Date().getHours();
-    
-    // Calculate time-of-day factor using Fourier series
-    // Simple version with just two harmonics
-    const baseEngagement = 0.5;
-    const amplitude1 = 0.2;
-    const amplitude2 = 0.1;
-    
-    // First harmonic: daily cycle (24h)
-    const harmonic1 = amplitude1 * Math.sin(2 * Math.PI * hourOfDay / 24);
-    
-    // Second harmonic: twice-daily cycle (12h)
-    const harmonic2 = amplitude2 * Math.sin(4 * Math.PI * hourOfDay / 24);
-    
-    // Combine harmonics
-    const timeEngagement = baseEngagement + harmonic1 + harmonic2;
-    
-    // Add some randomness to simulate real-world noise
-    const noiseComponent = (Math.random() - 0.5) * this.modelParams.noiseLevel;
-    
-    return Math.max(0, Math.min(1, timeEngagement + noiseComponent));
-  }
-  
-  // Calculate economic health using stochastic models
-  private calculateEconomicScore(): number {
-    // Simple stochastic model with mean reversion
-    const currentScore = this.healthMetrics.economicBalance;
-    const meanReversionStrength = 0.1;
-    const targetEconomicBalance = 0.75;
-    
-    // Mean reversion component
-    const reversion = meanReversionStrength * (targetEconomicBalance - currentScore);
-    
-    // Random component
-    const randomWalk = (Math.random() - 0.5) * this.modelParams.randomnessFactor;
-    
-    // Combine components
-    return Math.max(0, Math.min(1, currentScore + reversion + randomWalk));
-  }
-  
-  // Apply boost to content based on mathematical models
-  public applyBoostToContent(
-    contentId: string,
-    contentType: ContentType,
-    baseScore: number,
-    region?: string,
-    language?: string
-  ): number {
-    // Calculate boost enhancement using the ODE model
-    const timeImpact = this.calculateTimeImpact();
-    
-    // Apply PDE-based regional effect if region specified
-    const regionMultiplier = region ? this.calculateRegionalEffect(region) : 1.0;
-    
-    // Combine factors for final boost score
-    const boostedScore = baseScore * timeImpact * regionMultiplier;
-    
-    // Register with visibility system
-    visibilitySystem.registerItem({
-      id: contentId,
-      type: this.mapContentTypeToVisibilityType(contentType),
-      score: boostedScore,
-      lastViewedAt: new Date(),
-      region,
-      language
-    });
-    
-    return boostedScore;
-  }
-  
-  // Calculate time impact using ODE and Fourier models
-  private calculateTimeImpact(): number {
-    const currentHour = new Date().getHours() + (new Date().getMinutes() / 60);
-    
-    // Base time impact from Hermes engine
-    const baseTimeImpact = hermesOxumEngine.calculateTimeImpact(currentHour);
-    
-    // Enhance with Fourier components for more nuanced time effects
-    const hourAngle = (2 * Math.PI * currentHour) / 24;
-    
-    // Create enhanced curve with harmonics
-    let fourierComponent = 0;
-    for (let i = 1; i <= this.modelParams.harmonicCount; i++) {
-      // Decreasing amplitude for higher harmonics
-      const amplitude = 10 / (i * i);
-      // Phase shift varies by harmonic
-      const phaseShift = i * Math.PI / 4;
-      
-      fourierComponent += amplitude * Math.sin(i * hourAngle + phaseShift);
-    }
-    
-    // Normalize fourier component to 0-20 range for adjustment
-    const normalizedFourier = (fourierComponent + 10) / 20 * 20;
-    
-    // Combine base impact with Fourier enhancement
-    return Math.max(50, Math.min(100, baseTimeImpact + normalizedFourier));
-  }
-  
-  // Calculate regional effect using PDE diffusion model
-  private calculateRegionalEffect(region: string): number {
-    // In a real implementation, this would use actual PDE-based diffusion
-    // modeling with geospatial data and population heatmaps
-    
-    // For now, just a simple proxy based on time zones
+  // Update health metrics with simulated changes
+  private updateHealthMetrics() {
     const now = new Date();
-    const hour = now.getUTCHours();
+    const timeDiff = (now.getTime() - this.healthMetrics.lastUpdated.getTime()) / 1000;
     
-    // Simple model based on time of day in the region
-    let timeZoneOffset = 0;
-    switch (region) {
-      case 'NA': // North America
-        timeZoneOffset = -5; // EST average
-        break;
-      case 'EU': // Europe
-        timeZoneOffset = 1; // CET average
-        break;
-      case 'ASIA': // Asia
-        timeZoneOffset = 8; // China standard time
-        break;
-      default:
-        timeZoneOffset = 0;
-    }
+    // Only update if more than 5 seconds have passed
+    if (timeDiff < 5) return;
     
-    // Calculate local time in the region
-    const localHour = (hour + timeZoneOffset + 24) % 24;
-    
-    // Peak hours get higher multiplier (prime time)
-    const isPeakHours = (localHour >= 18 && localHour <= 23) || 
-                        (localHour >= 7 && localHour <= 9);
-                        
-    return isPeakHours ? 1.2 : 0.9;
-  }
-  
-  // Map content types to visibility system types
-  private mapContentTypeToVisibilityType(
-    contentType: ContentType
-  ): 'escort' | 'creator' | 'content' | 'livecam' {
-    switch (contentType) {
-      case 'profile': return 'escort';
-      case 'post':
-      case 'video':
-      case 'event':
-      case 'metaverse':
-        return 'content';
-      case 'livecam': return 'livecam';
-      default: return 'content';
-    }
-  }
-  
-  // Observer pattern methods for dashboard monitoring
-  public addObserver(callback: (metrics: SystemHealthMetrics) => void): void {
-    this.observers.push(callback);
-  }
-  
-  public removeObserver(callback: (metrics: SystemHealthMetrics) => void): void {
-    this.observers = this.observers.filter(observer => observer !== callback);
-  }
-  
-  private notifyObservers(): void {
-    this.observers.forEach(observer => observer(this.healthMetrics));
-  }
-  
-  // Getters and setters for model parameters
-  public getModelParameters(): ModelParameters {
-    return { ...this.modelParams };
-  }
-  
-  public updateModelParameters(params: Partial<ModelParameters>): void {
-    this.modelParams = { ...this.modelParams, ...params };
-    toast({
-      title: "System parameters updated",
-      description: "HERMES-OXUM parameters have been reconfigured."
-    });
-  }
-  
-  public getHealthMetrics(): SystemHealthMetrics {
-    return { ...this.healthMetrics };
-  }
-  
-  // Reset system to defaults
-  public resetSystem(): void {
-    this.stopMonitoring();
-    
-    // Reset to default parameters
-    this.modelParams = {
-      decayConstant: 0.2,
-      growthFactor: 1.5,
-      cyclePeriod: 24,
-      harmonicCount: 3,
-      bifurcationPoint: 0.7,
-      attractorStrength: 0.5,
-      diffusionRate: 0.3,
-      driftVelocity: 0.1,
-      randomnessFactor: 0.2,
-      noiseLevel: 0.1
+    // Simulate some variation in metrics
+    this.healthMetrics = {
+      load: Math.min(0.95, Math.max(0.1, this.healthMetrics.load + (Math.random() - 0.5) * 0.1)),
+      memoryUtilization: Math.min(0.9, Math.max(0.2, this.healthMetrics.memoryUtilization + (Math.random() - 0.5) * 0.08)),
+      operationsPerSecond: Math.max(800, Math.min(2000, this.healthMetrics.operationsPerSecond + (Math.random() - 0.5) * 200)),
+      responseTime: Math.max(20, Math.min(200, this.healthMetrics.responseTime + (Math.random() - 0.5) * 15)),
+      errorRate: Math.max(0.001, Math.min(0.05, this.healthMetrics.errorRate + (Math.random() - 0.5) * 0.005)),
+      stability: Math.max(0.7, Math.min(1.0, this.healthMetrics.stability + (Math.random() - 0.5) * 0.03)),
+      userEngagement: Math.max(0.5, Math.min(0.95, this.healthMetrics.userEngagement + (Math.random() - 0.5) * 0.02)),
+      lastUpdated: now
     };
     
-    this.startMonitoring();
-    
-    toast({
-      title: "System reset",
-      description: "HERMES-OXUM neural hub has been reset to defaults."
+    // Update model statuses occasionally
+    if (Math.random() > 0.8) {
+      this.updateModelStatuses();
+    }
+  }
+  
+  // Update model statuses based on simulated events
+  private updateModelStatuses() {
+    this.models = this.models.map(model => {
+      // Small chance to change status
+      if (Math.random() > 0.9) {
+        const statuses: NeuralModel['status'][] = ['active', 'training', 'inactive', 'error'];
+        const currentIndex = statuses.indexOf(model.status);
+        let newIndex;
+        
+        // Higher chance of becoming active if not active
+        if (model.status !== 'active' && Math.random() > 0.7) {
+          newIndex = 0; // active
+        } else {
+          // Random status but with lower probability of error
+          newIndex = Math.floor(Math.random() * (Math.random() > 0.8 ? 4 : 3));
+        }
+        
+        // Don't update to the same status
+        if (newIndex !== currentIndex) {
+          return {
+            ...model,
+            status: statuses[newIndex]
+          };
+        }
+      }
+      
+      return model;
     });
+    
+    // Update training progress
+    this.updateTrainingProgress();
+  }
+  
+  // Update training progress for models in training
+  private updateTrainingProgress() {
+    const trainingModels = this.models.filter(m => m.status === 'training');
+    
+    trainingModels.forEach(model => {
+      let progress = this.trainingJobs.get(model.id);
+      
+      // Create new training job if none exists
+      if (!progress) {
+        const totalEpochs = Math.floor(Math.random() * 50) + 50;
+        const currentEpoch = Math.floor(Math.random() * (totalEpochs / 2));
+        const startDate = new Date();
+        startDate.setHours(startDate.getHours() - Math.floor(Math.random() * 24));
+        
+        const estimatedHoursRemaining = Math.floor(Math.random() * 12) + 1;
+        const estimatedCompletion = new Date();
+        estimatedCompletion.setHours(estimatedCompletion.getHours() + estimatedHoursRemaining);
+        
+        progress = {
+          modelId: model.id,
+          epoch: currentEpoch,
+          totalEpochs,
+          accuracy: 0.7 + (Math.random() * 0.2),
+          loss: 0.1 + (Math.random() * 0.2),
+          startedAt: startDate,
+          estimatedCompletion,
+          progress: currentEpoch / totalEpochs
+        };
+        
+        this.trainingJobs.set(model.id, progress);
+      } else {
+        // Update existing training job
+        const epochsIncrement = Math.floor(Math.random() * 3) + 1;
+        const newEpoch = Math.min(progress.totalEpochs, progress.epoch + epochsIncrement);
+        const newProgress = newEpoch / progress.totalEpochs;
+        
+        progress = {
+          ...progress,
+          epoch: newEpoch,
+          accuracy: Math.min(0.98, progress.accuracy + (Math.random() * 0.01)),
+          loss: Math.max(0.01, progress.loss - (Math.random() * 0.01)),
+          progress: newProgress
+        };
+        
+        // Check if training complete
+        if (newEpoch >= progress.totalEpochs) {
+          // Training finished, update model status
+          const modelIndex = this.models.findIndex(m => m.id === model.id);
+          if (modelIndex !== -1) {
+            this.models[modelIndex].status = 'active';
+            this.models[modelIndex].performance.accuracy = progress.accuracy;
+            this.trainingJobs.delete(model.id);
+          }
+        } else {
+          this.trainingJobs.set(model.id, progress);
+        }
+      }
+    });
+  }
+  
+  // Get training progress for a model
+  getTrainingProgress(modelId: string): TrainingProgress | undefined {
+    return this.trainingJobs.get(modelId);
+  }
+  
+  // Get active training jobs
+  getActiveTrainingJobs(): TrainingProgress[] {
+    return Array.from(this.trainingJobs.values());
+  }
+  
+  // Start training a model
+  startTraining(modelId: string, trainingConfig: any = {}): boolean {
+    const modelIndex = this.models.findIndex(m => m.id === modelId);
+    if (modelIndex === -1) return false;
+    
+    // Check if model can be trained
+    if (this.models[modelIndex].status === 'training') {
+      return false; // Already training
+    }
+    
+    // Update model status
+    this.models[modelIndex].status = 'training';
+    
+    // Create training job
+    const totalEpochs = trainingConfig.epochs || Math.floor(Math.random() * 50) + 100;
+    const startDate = new Date();
+    
+    const estimatedHoursRemaining = trainingConfig.estimatedHours || Math.floor(Math.random() * 24) + 6;
+    const estimatedCompletion = new Date();
+    estimatedCompletion.setHours(estimatedCompletion.getHours() + estimatedHoursRemaining);
+    
+    const progress: TrainingProgress = {
+      modelId,
+      epoch: 0,
+      totalEpochs,
+      accuracy: this.models[modelIndex].performance.accuracy - 0.1, // Start slightly lower than current
+      loss: 0.5 + (Math.random() * 0.5), // Start with higher loss
+      startedAt: startDate,
+      estimatedCompletion,
+      progress: 0
+    };
+    
+    this.trainingJobs.set(modelId, progress);
+    
+    return true;
+  }
+  
+  // Stop training a model
+  stopTraining(modelId: string): boolean {
+    const modelIndex = this.models.findIndex(m => m.id === modelId);
+    if (modelIndex === -1) return false;
+    
+    // Check if model is training
+    if (this.models[modelIndex].status !== 'training') {
+      return false; // Not training
+    }
+    
+    // Update model status
+    this.models[modelIndex].status = 'inactive';
+    
+    // Remove training job
+    this.trainingJobs.delete(modelId);
+    
+    return true;
+  }
+  
+  // Run inference with a specific model
+  async runInference(modelId: string, input: any): Promise<any> {
+    const model = this.models.find(m => m.id === modelId);
+    if (!model) throw new Error(`Model ${modelId} not found`);
+    if (model.status !== 'active') throw new Error(`Model ${modelId} is not active`);
+    
+    // Create a cache key based on model and input
+    const cacheKey = `${modelId}:${JSON.stringify(input)}`;
+    
+    // Check cache first
+    if (this.predictionCache.has(cacheKey)) {
+      return this.predictionCache.get(cacheKey);
+    }
+    
+    // In a real system, this would run actual inference
+    // For demo purposes, we'll simulate a delay based on model complexity
+    const inferenceTimeMs = model.performance.latency + (Math.random() * 50);
+    await new Promise(resolve => setTimeout(resolve, inferenceTimeMs));
+    
+    // Simulate a response
+    const response = this.generateSimulatedResponse(model, input);
+    
+    // Cache the result
+    this.predictionCache.set(cacheKey, response);
+    
+    // Limit cache size
+    if (this.predictionCache.size > 100) {
+      // Remove oldest entries
+      const keys = Array.from(this.predictionCache.keys());
+      this.predictionCache.delete(keys[0]);
+    }
+    
+    return response;
+  }
+  
+  // Generate a simulated response based on model type and input
+  private generateSimulatedResponse(model: NeuralModel, input: any): any {
+    // In a real system, this would be the actual model output
+    // For demo purposes, we'll return a simulated response
+    
+    if (model.capabilities.includes('chat')) {
+      return {
+        message: `This is a simulated response from ${model.name} for input: ${JSON.stringify(input).substring(0, 50)}...`,
+        confidence: 0.7 + (Math.random() * 0.3),
+        processingTime: model.performance.latency
+      };
+    }
+    
+    if (model.capabilities.includes('image-recognition')) {
+      return {
+        objects: ['person', 'car', 'tree', 'building'].slice(0, Math.floor(Math.random() * 4) + 1),
+        confidence: 0.7 + (Math.random() * 0.3),
+        processingTime: model.performance.latency
+      };
+    }
+    
+    // Default response
+    return {
+      result: Math.random() > 0.5,
+      confidence: 0.5 + (Math.random() * 0.5),
+      processingTime: model.performance.latency
+    };
   }
 }
 
-// Export singleton instance
-export const neuralHub = HermesOxumNeuralHub.getInstance();
-export default neuralHub;
+// Singleton instance
+export const neuralHub = new HermesOxumNeuralHub();

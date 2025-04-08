@@ -1,41 +1,37 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { brainHub } from "./HermesOxumBrainHub";
-import { AIAnalyticsService } from "@/services/ai/aiAnalyticsService";
+// Business Intelligence service for Brain Hub
+import { v4 as uuidv4 } from 'uuid';
 
-export type RevenueMetric = {
+export interface RevenueMetric {
   id: string;
-  timeframe: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  source: string;
   amount: number;
-  source: 'ai_chat' | 'premium_content' | 'subscriptions' | 'boosts' | 'other';
   timestamp: number;
-  details?: Record<string, any>;
-};
+  timeframe: 'hourly' | 'daily' | 'weekly' | 'monthly';
+}
 
-export type EngagementMetric = {
+export interface EngagementMetric {
   id: string;
-  metricType: 'session_time' | 'messages_sent' | 'content_views' | 'conversion_rate' | 'retention';
+  type: string;
   value: number;
-  userSegment?: string;
   timestamp: number;
   details?: Record<string, any>;
-};
+}
 
-export type PlatformInsight = {
+export interface PlatformInsight {
   id: string;
-  insightType: 'trend' | 'anomaly' | 'opportunity' | 'risk';
   title: string;
   description: string;
+  insightType: 'trend' | 'opportunity' | 'risk' | 'anomaly';
+  impact: 'critical' | 'high' | 'medium' | 'low';
   confidence: number;
-  impact: 'low' | 'medium' | 'high' | 'critical';
-  actionable: boolean;
-  suggestedActions?: string[];
-  timestamp: number;
   source: string;
-  metadata: Record<string, any>;
-};
+  timestamp: number;
+  suggestedActions?: string[];
+  relatedMetrics?: string[];
+}
 
-export type RegionalPerformance = {
+export interface RegionalPerformance {
   region: string;
   metrics: {
     revenue: number;
@@ -47,903 +43,624 @@ export type RegionalPerformance = {
   trends: {
     revenueGrowth: number;
     userGrowth: number;
+    conversionRateChange: number;
   };
-  timestamp: number;
-};
+}
 
 class BrainHubBusinessIntelligence {
-  private revenueMetrics: RevenueMetric[] = [];
-  private engagementMetrics: EngagementMetric[] = [];
+  private revenueData: RevenueMetric[] = [];
+  private engagementData: EngagementMetric[] = [];
   private insights: PlatformInsight[] = [];
-  private regionalPerformance: Record<string, RegionalPerformance> = {};
+  private regionalData: Record<string, RegionalPerformance> = {};
   
-  private aiContentPerformance: Record<string, {
-    profileId: string;
-    conversationCount: number;
-    messageCount: number;
-    averageSessionTime: number;
-    conversionRate: number;
-    revenue: number;
-    popularity: number;
-  }> = {};
-  
-  private revenueGoals: Record<string, number> = {
-    daily: 5000,
-    weekly: 35000,
-    monthly: 150000
+  // Dashboard summary data structure
+  private dashboardSummary = {
+    revenueToday: 0,
+    revenueGoals: {
+      daily: 5000,
+      weekly: 35000,
+      monthly: 150000
+    },
+    topInsights: [] as PlatformInsight[],
+    regionSummary: [] as any[]
   };
   
-  private lastAnalysisTime: number = Date.now();
+  // Last analysis timestamp
+  private lastAnalysisRun: number = 0;
   
   constructor() {
-    // Initialize with some sample data for demo purposes
-    this.generateSampleData();
-    
-    // Register this module with the Brain Hub
-    brainHub.storeInMemory('business_intelligence', this);
+    this.initializeDemoData();
+    this.updateDashboardSummary();
   }
   
-  private generateSampleData() {
-    // Generate sample revenue data
-    const sources = ['ai_chat', 'premium_content', 'subscriptions', 'boosts', 'other'] as const;
+  private initializeDemoData() {
+    // Generate demo revenue data
+    this.revenueData = this.generateDemoRevenueData();
+    
+    // Generate demo engagement data
+    this.engagementData = this.generateDemoEngagementData();
+    
+    // Generate demo insights
+    this.insights = this.generateDemoInsights();
+    
+    // Generate demo regional data
+    this.regionalData = this.generateDemoRegionalData();
+  }
+  
+  // Generate demo revenue data
+  private generateDemoRevenueData(): RevenueMetric[] {
+    const sources = ['ai_chat', 'premium_content', 'subscriptions', 'boost_packages', 'verification_fees', 'gifts', 'tips'];
+    const timeframes: ('hourly' | 'daily' | 'weekly' | 'monthly')[] = ['hourly', 'daily', 'weekly', 'monthly'];
+    const demoData: RevenueMetric[] = [];
+    
     const now = Date.now();
     
-    // Generate hourly data for the last 24 hours
-    for (let i = 0; i < 24; i++) {
-      for (const source of sources) {
-        this.revenueMetrics.push({
-          id: `rev-${now}-${i}-${source}`,
-          timeframe: 'hourly',
-          amount: Math.random() * 1000 + 500,
-          source: source,
-          timestamp: now - (i * 60 * 60 * 1000)
+    // Generate 30 days of daily data
+    for (let i = 0; i < 30; i++) {
+      const dayTimestamp = now - (i * 24 * 60 * 60 * 1000);
+      
+      // Generate different revenue sources for each day
+      sources.forEach(source => {
+        // Base amount for each source with some randomization
+        let baseAmount = 0;
+        switch (source) {
+          case 'ai_chat': baseAmount = 750; break;
+          case 'premium_content': baseAmount = 1200; break;
+          case 'subscriptions': baseAmount = 2000; break;
+          case 'boost_packages': baseAmount = 500; break;
+          case 'verification_fees': baseAmount = 300; break;
+          case 'gifts': baseAmount = 400; break;
+          case 'tips': baseAmount = 300; break;
+        }
+        
+        // Add some randomization to the amount (±20%)
+        const randomFactor = 0.8 + (Math.random() * 0.4); // 0.8 to 1.2
+        const amount = baseAmount * randomFactor;
+        
+        demoData.push({
+          id: uuidv4(),
+          source,
+          amount,
+          timestamp: dayTimestamp,
+          timeframe: 'daily'
         });
+        
+        // Add weekly data for the first day of each week
+        if (i % 7 === 0) {
+          demoData.push({
+            id: uuidv4(),
+            source,
+            amount: amount * 7 * (0.9 + Math.random() * 0.2), // Weekly amount with some variation
+            timestamp: dayTimestamp,
+            timeframe: 'weekly'
+          });
+        }
+        
+        // Add monthly data for the first day of the month
+        if (i === 0) {
+          demoData.push({
+            id: uuidv4(),
+            source,
+            amount: amount * 30 * (0.9 + Math.random() * 0.2), // Monthly amount with some variation
+            timestamp: dayTimestamp,
+            timeframe: 'monthly'
+          });
+        }
+      });
+      
+      // Add hourly data for today only
+      if (i === 0) {
+        for (let h = 0; h < 24; h++) {
+          const hourTimestamp = now - (h * 60 * 60 * 1000);
+          
+          // Only add for a subset of sources to avoid too much data
+          ['ai_chat', 'premium_content', 'subscriptions'].forEach(source => {
+            let baseAmount = 0;
+            switch (source) {
+              case 'ai_chat': baseAmount = 30; break;
+              case 'premium_content': baseAmount = 50; break;
+              case 'subscriptions': baseAmount = 80; break;
+            }
+            
+            // Add time-of-day variation
+            let timeOfDayFactor = 1.0;
+            if (h >= 9 && h <= 22) { // Higher during waking hours
+              timeOfDayFactor = 1.5;
+            }
+            if (h >= 18 && h <= 21) { // Peak evening hours
+              timeOfDayFactor = 2.0;
+            }
+            
+            const randomFactor = 0.7 + (Math.random() * 0.6); // 0.7 to 1.3
+            const amount = baseAmount * randomFactor * timeOfDayFactor;
+            
+            demoData.push({
+              id: uuidv4(),
+              source,
+              amount,
+              timestamp: hourTimestamp,
+              timeframe: 'hourly'
+            });
+          });
+        }
       }
     }
     
-    // Generate sample engagement metrics
-    const metricTypes = ['session_time', 'messages_sent', 'content_views', 'conversion_rate', 'retention'] as const;
-    for (let i = 0; i < 14; i++) {
-      for (const metricType of metricTypes) {
-        this.engagementMetrics.push({
-          id: `eng-${now}-${i}-${metricType}`,
-          metricType: metricType,
-          value: metricType === 'conversion_rate' || metricType === 'retention' 
-            ? Math.random() * 0.2 + 0.1 // 10-30% for rates
-            : Math.random() * 10000 + 1000, // large numbers for counts
-          timestamp: now - (i * 24 * 60 * 60 * 1000)
+    return demoData;
+  }
+  
+  // Generate demo engagement data
+  private generateDemoEngagementData(): EngagementMetric[] {
+    const types = ['active_users', 'session_duration', 'interaction_rate', 'conversion_rate', 'retention_rate'];
+    const demoData: EngagementMetric[] = [];
+    
+    const now = Date.now();
+    
+    // Generate 30 days of daily data
+    for (let i = 0; i < 30; i++) {
+      const dayTimestamp = now - (i * 24 * 60 * 60 * 1000);
+      
+      types.forEach(type => {
+        let baseValue = 0;
+        let details: Record<string, any> = {};
+        
+        switch (type) {
+          case 'active_users': 
+            baseValue = 12000;
+            details = { new_users: Math.floor(baseValue * 0.1), returning_users: Math.floor(baseValue * 0.9) };
+            break;
+          case 'session_duration': 
+            baseValue = 15; // minutes
+            break;
+          case 'interaction_rate': 
+            baseValue = 0.35; // 35% of users interact
+            details = { 
+              message_rate: 0.25, 
+              profile_view_rate: 0.4, 
+              feature_usage: {
+                chat: 0.65,
+                video: 0.22,
+                audio: 0.13
+              }
+            };
+            break;
+          case 'conversion_rate': 
+            baseValue = 0.08; // 8% conversion
+            details = { funnel: { viewed: 100, clicked: 35, signed_up: 12, purchased: 8 } };
+            break;
+          case 'retention_rate': 
+            baseValue = 0.65; // 65% retention
+            details = { day1: 0.8, day7: 0.65, day30: 0.45 };
+            break;
+        }
+        
+        // Add some randomization to the value (±15%)
+        const randomFactor = 0.85 + (Math.random() * 0.3); // 0.85 to 1.15
+        const value = baseValue * randomFactor;
+        
+        // If it's an older date, apply a slight downward trend
+        const trendFactor = 1.0 - (i * 0.003); // Slight downward trend with time
+        
+        demoData.push({
+          id: uuidv4(),
+          type,
+          value: value * trendFactor,
+          timestamp: dayTimestamp,
+          details
         });
-      }
+      });
     }
     
-    // Generate sample insights
-    this.insights = [
+    return demoData;
+  }
+  
+  // Generate demo insights
+  private generateDemoInsights(): PlatformInsight[] {
+    return [
       {
-        id: `insight-${now}-1`,
+        id: uuidv4(),
+        title: 'Premium content consumption increasing by 23%',
+        description: 'The consumption of premium content has increased by 23% over the past 14 days, primarily driven by interactive AI companions. This suggests strong user interest in AI-driven premium experiences.',
         insightType: 'trend',
-        title: 'AI Chat Revenue Increasing',
-        description: 'The AI chat feature has shown a 15% increase in revenue over the past week.',
-        confidence: 0.85,
         impact: 'medium',
-        actionable: true,
-        suggestedActions: [
-          'Increase AI profile variety',
-          'Add more conversational scenarios'
-        ],
-        timestamp: now - (2 * 24 * 60 * 60 * 1000),
-        source: 'revenue_analysis',
-        metadata: {}
-      },
-      {
-        id: `insight-${now}-2`,
-        insightType: 'opportunity',
-        title: 'Weekend Engagement Spike',
-        description: 'User engagement consistently spikes by 35% on weekends, suggesting an opportunity for weekend-specific content.',
         confidence: 0.92,
-        impact: 'high',
-        actionable: true,
+        source: 'usage_analytics',
+        timestamp: Date.now() - (2 * 24 * 60 * 60 * 1000),
         suggestedActions: [
-          'Create weekend special offers',
-          'Launch weekend-only AI characters'
-        ],
-        timestamp: now - (5 * 24 * 60 * 60 * 1000),
-        source: 'engagement_analysis',
-        metadata: {}
+          'Increase promotion of premium AI companion features',
+          'Consider creating premium content bundles that include AI companion access',
+          'Develop more interactive features for premium content'
+        ]
       },
       {
-        id: `insight-${now}-3`,
+        id: uuidv4(),
+        title: 'Urgent: Payment processing latency increasing',
+        description: 'Payment processing times have increased by 40% in the last 24 hours, potentially affecting user experience during checkout. Several users have reported timeout errors.',
         insightType: 'risk',
-        title: 'Premium Content Conversions Declining',
-        description: 'Premium content unlock rates have declined by 8% in the past month.',
-        confidence: 0.78,
-        impact: 'medium',
-        actionable: true,
+        impact: 'critical',
+        confidence: 0.95,
+        source: 'system_monitoring',
+        timestamp: Date.now() - (4 * 60 * 60 * 1000),
         suggestedActions: [
-          'Review pricing strategy',
-          'Improve premium content previews'
-        ],
-        timestamp: now - (10 * 24 * 60 * 60 * 1000),
-        source: 'conversion_analysis',
-        metadata: {}
+          'Investigate payment gateway connection issues',
+          'Enable backup payment processor temporarily',
+          'Add monitoring alerts for payment processing times',
+          'Contact payment provider support team'
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: 'User retention opportunity in North America',
+        description: 'Users from North America show 22% higher spending but 15% lower retention than the global average. Targeted retention strategies could yield significant revenue increases.',
+        insightType: 'opportunity',
+        impact: 'high',
+        confidence: 0.87,
+        source: 'user_analytics',
+        timestamp: Date.now() - (5 * 24 * 60 * 60 * 1000),
+        suggestedActions: [
+          'Develop region-specific loyalty program',
+          'Create targeted re-engagement campaign for North American users',
+          'Analyze most common drop-off points for this region'
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: 'AI Companion response quality dropping',
+        description: 'User satisfaction scores for AI Companion responses have decreased by 8% over the past week, with reports of repetitive answers increasing.',
+        insightType: 'risk',
+        impact: 'medium',
+        confidence: 0.85,
+        source: 'feedback_analysis',
+        timestamp: Date.now() - (3 * 24 * 60 * 60 * 1000),
+        suggestedActions: [
+          'Review recent model training data for quality issues',
+          'Analyze user feedback to identify specific weak spots',
+          'Consider rolling back to previous model version temporarily'
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: 'Weekend promotion opportunity identified',
+        description: 'Usage patterns show 40% increase in weekend user activity but only 15% increase in weekend purchases. A weekend-specific promotion could close this gap.',
+        insightType: 'opportunity',
+        impact: 'medium',
+        confidence: 0.83,
+        source: 'purchase_patterns',
+        timestamp: Date.now() - (7 * 24 * 60 * 60 * 1000),
+        suggestedActions: [
+          'Create weekend-only discount packages',
+          'Implement time-limited weekend features',
+          'Target users who are active on weekends but rarely purchase'
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: 'New user onboarding friction detected',
+        description: 'First-time users are spending 35% more time on the verification step than two weeks ago, and conversion rate from signup to active user has dropped by 12%.',
+        insightType: 'anomaly',
+        impact: 'high',
+        confidence: 0.89,
+        source: 'funnel_analysis',
+        timestamp: Date.now() - (1 * 24 * 60 * 60 * 1000),
+        suggestedActions: [
+          'Review recent changes to verification process',
+          'Analyze error logs for verification step',
+          'Consider implementing a simplified verification path'
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: 'Market expansion opportunity: Spanish language',
+        description: 'Spanish-speaking users are growing 3x faster than overall user base, but Spanish content and companions are limited compared to English. Expanding Spanish offerings could accelerate growth.',
+        insightType: 'opportunity',
+        impact: 'high',
+        confidence: 0.91,
+        source: 'market_analysis',
+        timestamp: Date.now() - (14 * 24 * 60 * 60 * 1000),
+        suggestedActions: [
+          'Prioritize Spanish language AI model training',
+          'Recruit more Spanish-speaking content creators',
+          'Launch targeted marketing campaign for Spanish-speaking regions'
+        ]
       }
     ];
+  }
+  
+  // Generate demo regional data
+  private generateDemoRegionalData(): Record<string, RegionalPerformance> {
+    const regions = ['North America', 'Europe', 'Asia Pacific', 'Latin America', 'Middle East & Africa'];
+    const demoData: Record<string, RegionalPerformance> = {};
     
-    // Generate regional performance data
-    const regions = ['North America', 'Europe', 'Asia', 'South America', 'Oceania'];
-    for (const region of regions) {
-      this.regionalPerformance[region] = {
+    regions.forEach(region => {
+      let baseRevenue = 0;
+      let baseUserCount = 0;
+      let baseConversionRate = 0;
+      let baseEngagementScore = 0;
+      let baseCompliance = 0;
+      
+      // Set different base values for different regions
+      switch (region) {
+        case 'North America':
+          baseRevenue = 120000;
+          baseUserCount = 45000;
+          baseConversionRate = 0.12;
+          baseEngagementScore = 72;
+          baseCompliance = 0.98;
+          break;
+        case 'Europe':
+          baseRevenue = 95000;
+          baseUserCount = 38000;
+          baseConversionRate = 0.10;
+          baseEngagementScore = 68;
+          baseCompliance = 0.99;
+          break;
+        case 'Asia Pacific':
+          baseRevenue = 85000;
+          baseUserCount = 52000;
+          baseConversionRate = 0.08;
+          baseEngagementScore = 70;
+          baseCompliance = 0.95;
+          break;
+        case 'Latin America':
+          baseRevenue = 32000;
+          baseUserCount = 22000;
+          baseConversionRate = 0.06;
+          baseEngagementScore = 75;
+          baseCompliance = 0.94;
+          break;
+        case 'Middle East & Africa':
+          baseRevenue = 18000;
+          baseUserCount = 15000;
+          baseConversionRate = 0.05;
+          baseEngagementScore = 65;
+          baseCompliance = 0.92;
+          break;
+      }
+      
+      // Add some randomization
+      const randomRevenue = baseRevenue * (0.9 + Math.random() * 0.2);
+      const randomUserCount = Math.floor(baseUserCount * (0.9 + Math.random() * 0.2));
+      const randomConversionRate = baseConversionRate * (0.9 + Math.random() * 0.2);
+      const randomEngagementScore = baseEngagementScore * (0.9 + Math.random() * 0.2);
+      const randomCompliance = baseCompliance * (0.95 + Math.random() * 0.05);
+      
+      // Generate random growth trends (between -10% and +30%)
+      const revenueGrowth = -0.1 + Math.random() * 0.4;
+      const userGrowth = -0.05 + Math.random() * 0.35;
+      const conversionRateChange = -0.08 + Math.random() * 0.25;
+      
+      demoData[region] = {
         region,
         metrics: {
-          revenue: Math.random() * 50000 + 10000,
-          userCount: Math.floor(Math.random() * 50000 + 5000),
-          conversionRate: Math.random() * 0.15 + 0.05,
-          engagementScore: Math.random() * 50 + 50,
-          contentCompliance: Math.random() * 0.2 + 0.8,
+          revenue: randomRevenue,
+          userCount: randomUserCount,
+          conversionRate: randomConversionRate,
+          engagementScore: randomEngagementScore,
+          contentCompliance: randomCompliance
         },
         trends: {
-          revenueGrowth: Math.random() * 0.3 - 0.1, // -10% to +20%
-          userGrowth: Math.random() * 0.4 - 0.05, // -5% to +35%
-        },
-        timestamp: now
+          revenueGrowth,
+          userGrowth,
+          conversionRateChange
+        }
       };
-    }
-  }
-  
-  // Track new revenue data
-  trackRevenue(source: RevenueMetric['source'], amount: number, details?: Record<string, any>) {
-    const metric: RevenueMetric = {
-      id: `rev-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      timeframe: 'hourly',
-      amount,
-      source,
-      timestamp: Date.now(),
-      details
-    };
-    
-    this.revenueMetrics.push(metric);
-    
-    // Also aggregate into daily and update Brain Hub memory
-    this.aggregateRevenue();
-    
-    // Record the decision for the Brain Hub
-    brainHub.logDecision('revenue_tracking', { source, amount, timestamp: Date.now() });
-    
-    return metric;
-  }
-  
-  // Track engagement metrics
-  trackEngagement(metricType: EngagementMetric['metricType'], value: number, userSegment?: string) {
-    const metric: EngagementMetric = {
-      id: `eng-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      metricType,
-      value,
-      userSegment,
-      timestamp: Date.now()
-    };
-    
-    this.engagementMetrics.push(metric);
-    
-    // Record the decision for the Brain Hub
-    brainHub.logDecision('engagement_tracking', { metricType, value, userSegment, timestamp: Date.now() });
-    
-    return metric;
-  }
-  
-  // Add new insight
-  addInsight(
-    insightType: PlatformInsight['insightType'], 
-    title: string, 
-    description: string,
-    confidence: number,
-    impact: PlatformInsight['impact'],
-    source: string,
-    actionable: boolean = false,
-    suggestedActions: string[] = [],
-    metadata: Record<string, any> = {}
-  ) {
-    const insight: PlatformInsight = {
-      id: `insight-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      insightType,
-      title,
-      description,
-      confidence,
-      impact,
-      actionable,
-      suggestedActions,
-      timestamp: Date.now(),
-      source,
-      metadata
-    };
-    
-    this.insights.push(insight);
-    
-    // If the insight is high impact, store it in Brain Hub memory
-    if (impact === 'high' || impact === 'critical') {
-      const highImpactInsights = brainHub.retrieveFromMemory('high_impact_insights') || [];
-      brainHub.storeInMemory('high_impact_insights', [...highImpactInsights, insight]);
-    }
-    
-    // Record the decision for the Brain Hub
-    brainHub.logDecision('insight_generated', { 
-      insightType, 
-      title,
-      confidence,
-      impact,
-      timestamp: Date.now() 
     });
     
-    return insight;
+    return demoData;
   }
   
-  // Update regional performance data
-  updateRegionalPerformance(region: string, metrics: Partial<RegionalPerformance['metrics']>, trends: Partial<RegionalPerformance['trends']>) {
-    const currentData = this.regionalPerformance[region] || {
-      region,
-      metrics: {
-        revenue: 0,
-        userCount: 0,
-        conversionRate: 0,
-        engagementScore: 0,
-        contentCompliance: 0,
-      },
-      trends: {
-        revenueGrowth: 0,
-        userGrowth: 0,
-      },
-      timestamp: Date.now()
-    };
-    
-    this.regionalPerformance[region] = {
-      ...currentData,
-      metrics: { ...currentData.metrics, ...metrics },
-      trends: { ...currentData.trends, ...trends },
-      timestamp: Date.now()
-    };
-    
-    return this.regionalPerformance[region];
-  }
-  
-  // Get revenue metrics with optional filtering
-  getRevenueMetrics(options?: {
-    timeframe?: RevenueMetric['timeframe'],
-    source?: RevenueMetric['source'],
-    startTime?: number,
-    endTime?: number
-  }): RevenueMetric[] {
-    let filteredMetrics = [...this.revenueMetrics];
-    
-    if (options) {
-      if (options.timeframe) {
-        filteredMetrics = filteredMetrics.filter(m => m.timeframe === options.timeframe);
-      }
-      
-      if (options.source) {
-        filteredMetrics = filteredMetrics.filter(m => m.source === options.source);
-      }
-      
-      if (options.startTime) {
-        filteredMetrics = filteredMetrics.filter(m => m.timestamp >= options.startTime);
-      }
-      
-      if (options.endTime) {
-        filteredMetrics = filteredMetrics.filter(m => m.timestamp <= options.endTime);
-      }
-    }
-    
-    return filteredMetrics.sort((a, b) => b.timestamp - a.timestamp);
-  }
-  
-  // Get engagement metrics with optional filtering
-  getEngagementMetrics(options?: {
-    metricType?: EngagementMetric['metricType'],
-    userSegment?: string,
-    startTime?: number,
-    endTime?: number
-  }): EngagementMetric[] {
-    let filteredMetrics = [...this.engagementMetrics];
-    
-    if (options) {
-      if (options.metricType) {
-        filteredMetrics = filteredMetrics.filter(m => m.metricType === options.metricType);
-      }
-      
-      if (options.userSegment) {
-        filteredMetrics = filteredMetrics.filter(m => m.userSegment === options.userSegment);
-      }
-      
-      if (options.startTime) {
-        filteredMetrics = filteredMetrics.filter(m => m.timestamp >= options.startTime);
-      }
-      
-      if (options.endTime) {
-        filteredMetrics = filteredMetrics.filter(m => m.timestamp <= options.endTime);
-      }
-    }
-    
-    return filteredMetrics.sort((a, b) => b.timestamp - a.timestamp);
-  }
-  
-  // Get insights with optional filtering
-  getInsights(options?: {
-    insightType?: PlatformInsight['insightType'],
-    impact?: PlatformInsight['impact'],
-    actionable?: boolean,
-    source?: string,
-    startTime?: number,
-    endTime?: number,
-    limit?: number
-  }): PlatformInsight[] {
-    let filteredInsights = [...this.insights];
-    
-    if (options) {
-      if (options.insightType) {
-        filteredInsights = filteredInsights.filter(i => i.insightType === options.insightType);
-      }
-      
-      if (options.impact) {
-        filteredInsights = filteredInsights.filter(i => i.impact === options.impact);
-      }
-      
-      if (options.actionable !== undefined) {
-        filteredInsights = filteredInsights.filter(i => i.actionable === options.actionable);
-      }
-      
-      if (options.source) {
-        filteredInsights = filteredInsights.filter(i => i.source === options.source);
-      }
-      
-      if (options.startTime) {
-        filteredInsights = filteredInsights.filter(i => i.timestamp >= options.startTime);
-      }
-      
-      if (options.endTime) {
-        filteredInsights = filteredInsights.filter(i => i.timestamp <= options.endTime);
-      }
-    }
-    
-    // Sort by timestamp (newest first)
-    filteredInsights = filteredInsights.sort((a, b) => b.timestamp - a.timestamp);
-    
-    // Apply limit if specified
-    if (options?.limit && options.limit > 0) {
-      filteredInsights = filteredInsights.slice(0, options.limit);
-    }
-    
-    return filteredInsights;
-  }
-  
-  // Get regional performance data
-  getRegionalPerformance(region?: string): RegionalPerformance | Record<string, RegionalPerformance> {
-    if (region) {
-      return this.regionalPerformance[region] || null;
-    }
-    
-    return this.regionalPerformance;
-  }
-  
-  // Aggregate hourly revenue metrics into daily
-  private aggregateRevenue() {
-    const now = Date.now();
-    const oneDayAgo = now - (24 * 60 * 60 * 1000);
-    
-    // Get all hourly metrics from the last 24 hours
-    const recentHourlyMetrics = this.revenueMetrics.filter(m => 
-      m.timeframe === 'hourly' && m.timestamp >= oneDayAgo
-    );
-    
-    // Group by source
-    const bySource: Record<string, number> = {};
-    for (const metric of recentHourlyMetrics) {
-      bySource[metric.source] = (bySource[metric.source] || 0) + metric.amount;
-    }
-    
-    // Create a daily metric for each source
-    for (const source of Object.keys(bySource) as Array<RevenueMetric['source']>) {
-      this.revenueMetrics.push({
-        id: `rev-daily-${now}-${source}`,
-        timeframe: 'daily',
-        amount: bySource[source],
-        source: source,
-        timestamp: now
-      });
-    }
-    
-    // Store in Brain Hub memory
-    brainHub.storeInMemory('daily_revenue', {
-      timestamp: now,
-      bySource,
-      total: Object.values(bySource).reduce((sum, val) => sum + val, 0)
-    });
-  }
-  
-  // Run autonomous analysis to generate insights
-  async runAutonomousAnalysis() {
-    const now = Date.now();
-    
-    // Only run once per hour
-    if (now - this.lastAnalysisTime < 60 * 60 * 1000) {
-      return {
-        ran: false,
-        reason: "Analysis already ran within the last hour",
-        lastRun: new Date(this.lastAnalysisTime).toISOString()
-      };
-    }
-    
-    try {
-      // Update last analysis time
-      this.lastAnalysisTime = now;
-      
-      // 1. Analyze revenue trends
-      await this.analyzeRevenueTrends();
-      
-      // 2. Analyze engagement patterns
-      await this.analyzeEngagementPatterns();
-      
-      // 3. Analyze regional performance
-      await this.analyzeRegionalPerformance();
-      
-      // 4. Analyze content performance
-      await this.analyzeContentPerformance();
-      
-      // 5. Analyze opportunities and suggest actions
-      await this.analyzeOpportunities();
-      
-      // Record that we ran the analysis
-      brainHub.logDecision('autonomous_analysis', { 
-        ran: true, 
-        timestamp: now,
-        insightsGenerated: this.insights.filter(i => i.timestamp > now - (60 * 60 * 1000)).length
-      });
-      
-      return {
-        ran: true,
-        timestamp: new Date(now).toISOString(),
-        insightsGenerated: this.insights.filter(i => i.timestamp > now - (60 * 60 * 1000)).length
-      };
-    } catch (error) {
-      console.error("Error running autonomous analysis:", error);
-      
-      // Record the error
-      brainHub.logDecision('autonomous_analysis_error', { 
-        error: error.message, 
-        timestamp: now
-      });
-      
-      return {
-        ran: false,
-        error: error.message,
-        timestamp: new Date(now).toISOString()
-      };
-    }
-  }
-  
-  // Analyze revenue trends
-  private async analyzeRevenueTrends() {
-    const now = Date.now();
-    const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
-    const twoWeeksAgo = now - (14 * 24 * 60 * 60 * 1000);
-    
-    // Get daily revenue from the last week
-    const lastWeekRevenue = this.revenueMetrics.filter(m => 
-      m.timeframe === 'daily' && m.timestamp >= oneWeekAgo
-    );
-    
-    // Get daily revenue from the week before
-    const previousWeekRevenue = this.revenueMetrics.filter(m => 
-      m.timeframe === 'daily' && m.timestamp >= twoWeeksAgo && m.timestamp < oneWeekAgo
-    );
-    
-    // Calculate total revenue for each period by source
-    const lastWeekBySource: Record<string, number> = {};
-    const previousWeekBySource: Record<string, number> = {};
-    
-    for (const metric of lastWeekRevenue) {
-      lastWeekBySource[metric.source] = (lastWeekBySource[metric.source] || 0) + metric.amount;
-    }
-    
-    for (const metric of previousWeekRevenue) {
-      previousWeekBySource[metric.source] = (previousWeekBySource[metric.source] || 0) + metric.amount;
-    }
-    
-    // Calculate growth rates and identify significant trends
-    for (const source of Object.keys(lastWeekBySource) as Array<RevenueMetric['source']>) {
-      const current = lastWeekBySource[source] || 0;
-      const previous = previousWeekBySource[source] || 0;
-      
-      // Avoid division by zero
-      if (previous === 0) continue;
-      
-      const growthRate = (current - previous) / previous;
-      
-      // Generate insights for significant changes (more than 10%)
-      if (Math.abs(growthRate) >= 0.1) {
-        const isIncrease = growthRate > 0;
-        
-        this.addInsight(
-          'trend',
-          `${source.replace('_', ' ').toUpperCase()} revenue ${isIncrease ? 'increase' : 'decrease'}`,
-          `${source.replace('_', ' ').toUpperCase()} revenue has ${isIncrease ? 'increased' : 'decreased'} by ${Math.abs(growthRate * 100).toFixed(1)}% compared to the previous week.`,
-          0.85,
-          Math.abs(growthRate) >= 0.2 ? 'high' : 'medium',
-          'revenue_analysis',
-          true,
-          isIncrease ? 
-            [`Capitalize on growth with expanded ${source.replace('_', ' ')} offerings`] :
-            [`Investigate ${source.replace('_', ' ')} decline and optimize offerings`],
-          {
-            currentRevenue: current,
-            previousRevenue: previous,
-            growthRate: growthRate
-          }
-        );
-      }
-    }
-    
-    // Check against revenue goals
-    const totalLastWeek = Object.values(lastWeekBySource).reduce((sum, val) => sum + val, 0);
-    const weeklyGoal = this.revenueGoals.weekly;
-    
-    if (totalLastWeek < weeklyGoal * 0.9) {
-      this.addInsight(
-        'risk',
-        'Weekly revenue below target',
-        `Last week's revenue of ${totalLastWeek.toLocaleString('en-US', {style: 'currency', currency: 'USD'})} is below the weekly target of ${weeklyGoal.toLocaleString('en-US', {style: 'currency', currency: 'USD'})}`,
-        0.95,
-        'high',
-        'revenue_goals',
-        true,
-        [
-          'Review pricing strategy',
-          'Analyze user drop-off points',
-          'Launch a limited-time promotion'
-        ],
-        {
-          actualRevenue: totalLastWeek,
-          goalRevenue: weeklyGoal,
-          deficit: weeklyGoal - totalLastWeek
-        }
-      );
-    }
-  }
-  
-  // Analyze engagement patterns
-  private async analyzeEngagementPatterns() {
-    const now = Date.now();
-    const oneWeekAgo = now - (7 * 24 * 60 * 60 * 1000);
-    
-    // Get recent engagement metrics
-    const recentEngagement = this.engagementMetrics.filter(m => m.timestamp >= oneWeekAgo);
-    
-    // Group by type
-    const byType: Record<string, EngagementMetric[]> = {};
-    for (const metric of recentEngagement) {
-      if (!byType[metric.metricType]) {
-        byType[metric.metricType] = [];
-      }
-      byType[metric.metricType].push(metric);
-    }
-    
-    // Look for patterns in each type
-    for (const [type, metrics] of Object.entries(byType)) {
-      // Sort by timestamp
-      metrics.sort((a, b) => a.timestamp - b.timestamp);
-      
-      // Simple trend analysis - compare first and last values
-      if (metrics.length >= 2) {
-        const firstValue = metrics[0].value;
-        const lastValue = metrics[metrics.length - 1].value;
-        const change = lastValue - firstValue;
-        const percentChange = firstValue !== 0 ? (change / firstValue) : 0;
-        
-        // Generate insights for significant changes (more than 15%)
-        if (Math.abs(percentChange) >= 0.15) {
-          const isIncrease = percentChange > 0;
-          const formattedType = type.replace('_', ' ');
-          
-          this.addInsight(
-            'trend',
-            `${formattedType.toUpperCase()} ${isIncrease ? 'increasing' : 'decreasing'}`,
-            `${formattedType} has ${isIncrease ? 'increased' : 'decreased'} by ${Math.abs(percentChange * 100).toFixed(1)}% over the past week.`,
-            0.8,
-            Math.abs(percentChange) >= 0.25 ? 'high' : 'medium',
-            'engagement_analysis',
-            true,
-            isIncrease ? 
-              [`Further optimize ${formattedType} features`] :
-              [`Address declining ${formattedType} with targeted improvements`],
-            {
-              startValue: firstValue,
-              endValue: lastValue,
-              percentChange: percentChange
-            }
-          );
-        }
-      }
-      
-      // For session time, look for optimal times of day
-      if (type === 'session_time' && metrics.length >= 24) {
-        const byHour: Record<number, number[]> = {};
-        
-        for (const metric of metrics) {
-          const hour = new Date(metric.timestamp).getHours();
-          if (!byHour[hour]) byHour[hour] = [];
-          byHour[hour].push(metric.value);
-        }
-        
-        // Calculate average by hour
-        const avgByHour: [number, number][] = Object.entries(byHour).map(([hour, values]) => {
-          const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
-          return [parseInt(hour), avg];
-        });
-        
-        // Sort to find peak hours
-        avgByHour.sort((a, b) => b[1] - a[1]);
-        
-        // Generate insight about peak hours
-        if (avgByHour.length > 0) {
-          const topHours = avgByHour.slice(0, 3).map(([hour, _]) => {
-            const hourNum = parseInt(hour.toString());
-            const period = hourNum >= 12 ? 'PM' : 'AM';
-            const adjustedHour = hourNum % 12 || 12;
-            return `${adjustedHour}${period}`;
-          }).join(', ');
-          
-          this.addInsight(
-            'opportunity',
-            'Peak engagement hours identified',
-            `User engagement is highest during these hours: ${topHours}`,
-            0.9,
-            'medium',
-            'engagement_analysis',
-            true,
-            [
-              'Schedule content releases during peak hours',
-              'Increase AI profile availability during these times',
-              'Consider time-based promotions'
-            ],
-            {
-              peakHours: avgByHour.slice(0, 3).map(([hour, value]) => ({ hour, value }))
-            }
-          );
-        }
-      }
-    }
-  }
-  
-  // Analyze regional performance
-  private async analyzeRegionalPerformance() {
-    // Compare regions to identify opportunities and risks
-    const regions = Object.values(this.regionalPerformance);
-    
-    // Skip if no data
-    if (regions.length === 0) return;
-    
-    // Find best and worst performing regions by revenue
-    regions.sort((a, b) => b.metrics.revenue - a.metrics.revenue);
-    const bestRevenueRegion = regions[0];
-    const worstRevenueRegion = regions[regions.length - 1];
-    
-    // Find regions with highest growth
-    regions.sort((a, b) => b.trends.revenueGrowth - a.trends.revenueGrowth);
-    const fastestGrowingRegion = regions[0];
-    
-    // Find regions with concerning compliance
-    const lowComplianceRegions = regions.filter(r => r.metrics.contentCompliance < 0.85);
-    
-    // Generate insights
-    if (bestRevenueRegion.metrics.revenue > worstRevenueRegion.metrics.revenue * 3) {
-      this.addInsight(
-        'opportunity',
-        `${bestRevenueRegion.region} outperforming other regions`,
-        `${bestRevenueRegion.region} is generating ${(bestRevenueRegion.metrics.revenue / worstRevenueRegion.metrics.revenue).toFixed(1)}x more revenue than ${worstRevenueRegion.region}`,
-        0.9,
-        'high',
-        'regional_analysis',
-        true,
-        [
-          `Analyze what's working in ${bestRevenueRegion.region} and apply to other regions`,
-          `Consider region-specific content for ${worstRevenueRegion.region}`
-        ],
-        {
-          bestRegion: bestRevenueRegion,
-          worstRegion: worstRevenueRegion
-        }
-      );
-    }
-    
-    if (fastestGrowingRegion.trends.revenueGrowth > 0.2) {
-      this.addInsight(
-        'trend',
-        `Strong growth in ${fastestGrowingRegion.region}`,
-        `${fastestGrowingRegion.region} is showing ${(fastestGrowingRegion.trends.revenueGrowth * 100).toFixed(1)}% revenue growth`,
-        0.85,
-        'medium',
-        'regional_analysis',
-        true,
-        [
-          `Increase marketing investment in ${fastestGrowingRegion.region}`,
-          'Create region-specific AI profiles and content'
-        ],
-        {
-          region: fastestGrowingRegion
-        }
-      );
-    }
-    
-    if (lowComplianceRegions.length > 0) {
-      this.addInsight(
-        'risk',
-        `Compliance concerns in ${lowComplianceRegions.length} region(s)`,
-        `${lowComplianceRegions.map(r => r.region).join(', ')} showing lower content compliance scores`,
-        0.9,
-        'critical',
-        'compliance_analysis',
-        true,
-        [
-          'Review content filtering rules for these regions',
-          'Implement stricter geo-legal filtering',
-          'Consider disabling sensitive features in these regions'
-        ],
-        {
-          regions: lowComplianceRegions
-        }
-      );
-    }
-  }
-  
-  // Analyze content performance
-  private async analyzeContentPerformance() {
-    try {
-      // In a real implementation, we would:
-      // 1. Fetch analytics data from our service
-      const analyticsData = await AIAnalyticsService.getProfileAnalytics();
-      
-      // 2. Analyze what content is performing well
-      const engagementRate = analyticsData.engagementRate;
-      const conversionRate = analyticsData.conversionRate;
-      
-      // 3. Generate insights
-      if (engagementRate > 0.35) {
-        this.addInsight(
-          'opportunity',
-          'High content engagement rate',
-          `AI profiles are achieving a ${(engagementRate * 100).toFixed(1)}% engagement rate, above industry average`,
-          0.9,
-          'medium',
-          'content_analysis',
-          true,
-          [
-            'Expand successful content types',
-            'Analyze top-performing AI profiles for common elements'
-          ],
-          { engagementRate }
-        );
-      }
-      
-      if (conversionRate < 0.1) {
-        this.addInsight(
-          'risk',
-          'Low content conversion rate',
-          `Content is only converting at ${(conversionRate * 100).toFixed(1)}%, below target of 15%`,
-          0.85,
-          'high',
-          'content_analysis',
-          true,
-          [
-            'Review pricing strategy',
-            'Improve content previews',
-            'Enhance call-to-action prompts'
-          ],
-          { conversionRate }
-        );
-      }
-      
-    } catch (error) {
-      console.error("Error analyzing content performance:", error);
-    }
-  }
-  
-  // Analyze opportunities and suggest actions
-  private async analyzeOpportunities() {
-    // This would be where we tie together our various analysis points
-    // to identify strategic opportunities
-    
-    // For demo purposes, we'll add a few strategic insights
-    this.addInsight(
-      'opportunity',
-      'AI Profile Diversification',
-      'Current engagement data suggests users prefer a wider variety of AI personalities',
-      0.8,
-      'high',
-      'strategic_analysis',
-      true,
-      [
-        'Create 5-10 new AI profiles with distinct personalities',
-        'Emphasize variety in marketing materials',
-        'Test new emotional traits in existing AI profiles'
-      ],
-      {
-        supportingData: {
-          profileEngagementVariance: 0.35,
-          repeatedInteractions: 0.45,
-          topProfileTypes: ['flirty', 'shy', 'dominant']
-        }
-      }
-    );
-    
-    this.addInsight(
-      'opportunity',
-      'Implement Gamification Elements',
-      'User engagement patterns suggest gamification would increase retention',
-      0.75,
-      'medium',
-      'strategic_analysis',
-      true,
-      [
-        'Add achievement system for interaction milestones',
-        'Implement loyalty rewards for returning users',
-        'Create challenges with content unlocks as rewards'
-      ],
-      {
-        supportingData: {
-          averageSessionFrequency: 2.3,
-          returnRate: 0.65,
-          dropoffPoints: ['after first message', 'after viewing premium content options']
-        }
-      }
-    );
-  }
-  
-  // Get summary dashboard data
-  getDashboardSummary() {
-    // Get total revenue for today
+  // Update dashboard summary with current data
+  private updateDashboardSummary() {
+    // Calculate revenue today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayStart = today.getTime();
+    const todayTimestamp = today.getTime();
     
-    const todayRevenue = this.revenueMetrics
-      .filter(m => m.timestamp >= todayStart)
-      .reduce((sum, metric) => sum + metric.amount, 0);
+    const todayRevenue = this.revenueData
+      .filter(r => r.timestamp >= todayTimestamp && r.timeframe === 'daily')
+      .reduce((sum, r) => sum + r.amount, 0);
     
-    // Get recent engagement metrics
-    const recentEngagement = this.engagementMetrics
-      .filter(m => m.timestamp >= todayStart)
-      .sort((a, b) => b.timestamp - a.timestamp);
+    this.dashboardSummary.revenueToday = todayRevenue;
     
-    // Get recent insights, prioritizing high/critical impact
-    const criticalInsights = this.getInsights({ 
-      impact: 'critical',
-      limit: 3 
-    });
+    // Get top insights (high impact and confidence)
+    this.dashboardSummary.topInsights = this.insights
+      .filter(i => i.impact === 'critical' || i.impact === 'high')
+      .sort((a, b) => {
+        // Sort by impact first, then confidence
+        if (a.impact === 'critical' && b.impact !== 'critical') return -1;
+        if (a.impact !== 'critical' && b.impact === 'critical') return 1;
+        return b.confidence - a.confidence;
+      })
+      .slice(0, 3);
     
-    const highInsights = this.getInsights({ 
-      impact: 'high',
-      limit: 3 - criticalInsights.length 
-    });
-    
-    const topInsights = [...criticalInsights, ...highInsights];
-    
-    // Get regional summary
-    const regionSummary = Object.values(this.regionalPerformance)
-      .sort((a, b) => b.metrics.revenue - a.metrics.revenue)
-      .slice(0, 3)
+    // Get region summary
+    this.dashboardSummary.regionSummary = Object.values(this.regionalData)
       .map(r => ({
         region: r.region,
         revenue: r.metrics.revenue,
-        growth: r.trends.revenueGrowth,
-        users: r.metrics.userCount
-      }));
+        growth: r.trends.revenueGrowth
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+  }
+  
+  // Get dashboard summary
+  getDashboardSummary() {
+    this.updateDashboardSummary();
+    return { ...this.dashboardSummary };
+  }
+  
+  // Get revenue metrics with optional filtering
+  getRevenueMetrics(filter?: { source?: string; timeframe?: string; startDate?: number; endDate?: number }) {
+    let filteredData = [...this.revenueData];
+    
+    if (filter?.source) {
+      filteredData = filteredData.filter(r => r.source === filter.source);
+    }
+    
+    if (filter?.timeframe) {
+      filteredData = filteredData.filter(r => r.timeframe === filter.timeframe);
+    }
+    
+    if (filter?.startDate) {
+      filteredData = filteredData.filter(r => r.timestamp >= filter.startDate);
+    }
+    
+    if (filter?.endDate) {
+      filteredData = filteredData.filter(r => r.timestamp <= filter.endDate);
+    }
+    
+    // Sort by timestamp (newest first)
+    return filteredData.sort((a, b) => b.timestamp - a.timestamp);
+  }
+  
+  // Get engagement metrics with optional filtering
+  getEngagementMetrics(filter?: { type?: string; startDate?: number; endDate?: number }) {
+    let filteredData = [...this.engagementData];
+    
+    if (filter?.type) {
+      filteredData = filteredData.filter(r => r.type === filter.type);
+    }
+    
+    if (filter?.startDate) {
+      filteredData = filteredData.filter(r => r.timestamp >= filter.startDate);
+    }
+    
+    if (filter?.endDate) {
+      filteredData = filteredData.filter(r => r.timestamp <= filter.endDate);
+    }
+    
+    // Sort by timestamp (newest first)
+    return filteredData.sort((a, b) => b.timestamp - a.timestamp);
+  }
+  
+  // Get insights with optional filtering
+  getInsights(filter?: { insightType?: string; impact?: string; minConfidence?: number }) {
+    let filteredData = [...this.insights];
+    
+    if (filter?.insightType) {
+      filteredData = filteredData.filter(i => i.insightType === filter.insightType);
+    }
+    
+    if (filter?.impact) {
+      filteredData = filteredData.filter(i => i.impact === filter.impact);
+    }
+    
+    if (filter?.minConfidence) {
+      filteredData = filteredData.filter(i => i.confidence >= filter.minConfidence);
+    }
+    
+    // Sort by timestamp (newest first) and then by impact
+    return filteredData.sort((a, b) => {
+      if (b.timestamp !== a.timestamp) return b.timestamp - a.timestamp;
+      
+      const impactOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
+      return (impactOrder[a.impact as keyof typeof impactOrder] - impactOrder[b.impact as keyof typeof impactOrder]);
+    });
+  }
+  
+  // Get regional performance data
+  getRegionalPerformance(region?: string) {
+    if (region) {
+      return this.regionalData[region];
+    }
+    return this.regionalData;
+  }
+  
+  // Run autonomous analysis to generate new insights
+  async runAutonomousAnalysis() {
+    // Check if we've run analysis recently (limit to once per hour)
+    const now = Date.now();
+    if (now - this.lastAnalysisRun < 60 * 60 * 1000) {
+      return {
+        ran: false,
+        reason: 'Analysis was run recently',
+        nextAvailableRun: new Date(this.lastAnalysisRun + 60 * 60 * 1000)
+      };
+    }
+    
+    // In a real system, this would run actual analysis algorithms
+    // For demo purposes, we'll simulate analysis with a delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Generate a couple of new insights
+    const newInsights = [
+      {
+        id: uuidv4(),
+        title: 'Rising engagement pattern detected in evening hours',
+        description: 'User engagement metrics show consistent 35% higher activity between 8PM-11PM compared to other times. Content scheduling should prioritize this window.',
+        insightType: 'trend' as const,
+        impact: 'medium' as const,
+        confidence: 0.88,
+        source: 'time_pattern_analysis',
+        timestamp: Date.now(),
+        suggestedActions: [
+          'Schedule premium content releases during 8PM-11PM window',
+          'Increase support staff availability during evening hours',
+          'Consider evening-specific promotional campaigns'
+        ]
+      },
+      {
+        id: uuidv4(),
+        title: 'Payment method preference shifting towards mobile wallets',
+        description: 'Mobile wallet payments have increased by 27% in the last 30 days while credit card usage decreased by 12%. User preference is shifting towards faster payment methods.',
+        insightType: 'trend' as const,
+        impact: 'medium' as const,
+        confidence: 0.91,
+        source: 'payment_analytics',
+        timestamp: Date.now(),
+        suggestedActions: [
+          'Optimize mobile wallet payment experience',
+          'Add support for additional mobile payment providers',
+          'Create promotions specific to mobile wallet users'
+        ]
+      }
+    ];
+    
+    // Add random insights based on current data
+    if (Math.random() > 0.5) {
+      const warningTitles = [
+        'Unusual drop in conversion rate detected',
+        'API response time degradation detected',
+        'Search feature usage declining rapidly',
+        'Security anomaly: unusual login patterns detected'
+      ];
+      
+      const randomTitle = warningTitles[Math.floor(Math.random() * warningTitles.length)];
+      
+      newInsights.push({
+        id: uuidv4(),
+        title: randomTitle,
+        description: `An anomaly has been detected in recent system metrics that requires attention. This pattern deviates significantly from historical trends.`,
+        insightType: 'anomaly' as const,
+        impact: 'high' as const,
+        confidence: 0.85,
+        source: 'anomaly_detection',
+        timestamp: Date.now(),
+        suggestedActions: [
+          'Investigate recent system changes',
+          'Review affected metrics for correlation',
+          'Compare with historical patterns'
+        ]
+      });
+    }
+    
+    // Add the new insights to our collection
+    this.insights = [...newInsights, ...this.insights];
+    
+    // Update last analysis run time
+    this.lastAnalysisRun = now;
     
     return {
-      revenueToday: todayRevenue,
-      revenueGoals: this.revenueGoals,
-      recentEngagement: recentEngagement.slice(0, 5),
-      topInsights,
-      regionSummary,
-      lastUpdated: new Date().toISOString()
+      ran: true,
+      insightsGenerated: newInsights.length,
+      completedAt: new Date(),
+      insights: newInsights
     };
   }
 }
 
-export const businessIntelligence = new BrainHubBusinessIntelligence();
+// Create singleton instance
+const businessIntelligence = new BrainHubBusinessIntelligence();
+
 export default businessIntelligence;

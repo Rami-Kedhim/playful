@@ -1,393 +1,319 @@
-import { toast } from "@/components/ui/use-toast";
-import { brainHub } from "./HermesOxumBrainHub";
 
-// Types for autonomy modules
-export type ModuleStatus = 'active' | 'inactive' | 'learning' | 'error';
-
-export interface AutonomyModuleConfig {
-  learningRate: number; // 0-1, how quickly the module adapts
-  confidenceThreshold: number; // 0-1, threshold for autonomous decisions
-  feedbackLoopEnabled: boolean; // Whether to learn from outcomes
-  maxDecisionsPerHour: number; // Rate limiting for safety
-  oversightLevel: 'none' | 'low' | 'medium' | 'high'; // Human oversight level
-}
+// Brain Hub Autonomy Engine - Manages autonomous decision making and module states
+import { v4 as uuidv4 } from 'uuid';
 
 export interface AutonomyModule {
   id: string;
   name: string;
   description: string;
-  status: ModuleStatus;
-  config: AutonomyModuleConfig;
-  lastExecuted?: Date;
+  status: 'active' | 'learning' | 'idle' | 'error';
   decisionsMade: number;
-  successRate: number; // 0-1
+  successRate: number;
+  config: {
+    learningRate: number;
+    confidenceThreshold: number;
+    [key: string]: any;
+  };
 }
 
-export interface Decision {
+export interface DecisionRecord {
   id: string;
-  moduleId: string;
   timestamp: Date;
+  moduleId: string;
   description: string;
-  confidence: number; // 0-1
-  impact: 'low' | 'medium' | 'high';
-  outcome?: 'success' | 'failure' | 'unknown';
+  confidence: number;
+  impact: 'critical' | 'high' | 'medium' | 'low';
   metadata: Record<string, any>;
 }
 
-// Main autonomy engine class
-export class BrainHubAutonomyEngine {
-  private static instance: BrainHubAutonomyEngine;
-  private modules: Map<string, AutonomyModule> = new Map();
-  private decisions: Decision[] = [];
-  private isRunning: boolean = false;
-  private runInterval: ReturnType<typeof setInterval> | null = null;
-  private autonomyLevel: number = 50; // 0-100
+class BrainHubAutonomyEngine {
+  private modules: AutonomyModule[] = [];
+  private decisions: DecisionRecord[] = [];
+  private engineStatus: 'running' | 'paused' | 'stopped' = 'stopped';
+  private autonomyLevel: number = 50; // 0-100 scale
   
-  private constructor() {
+  constructor() {
     this.initializeDefaultModules();
   }
   
-  public static getInstance(): BrainHubAutonomyEngine {
-    if (!BrainHubAutonomyEngine.instance) {
-      BrainHubAutonomyEngine.instance = new BrainHubAutonomyEngine();
-    }
-    return BrainHubAutonomyEngine.instance;
-  }
-  
   private initializeDefaultModules() {
-    // Strategy Core (placeholder for future implementation)
-    this.registerModule({
-      id: 'strategy-core',
-      name: 'AI Strategy Core',
-      description: 'Makes decisions on feature prioritization based on metrics',
-      status: 'inactive',
-      config: {
-        learningRate: 0.3,
-        confidenceThreshold: 0.7,
-        feedbackLoopEnabled: true,
-        maxDecisionsPerHour: 5,
-        oversightLevel: 'high'
+    this.modules = [
+      {
+        id: 'neural-core',
+        name: 'Neural Core',
+        description: 'Primary decision making neural network',
+        status: 'idle',
+        decisionsMade: 0,
+        successRate: 0.92,
+        config: {
+          learningRate: 0.05,
+          confidenceThreshold: 0.75,
+          networkArchitecture: 'transformer',
+          parameterCount: '1.5B'
+        }
       },
-      decisionsMade: 0,
-      successRate: 0
-    });
-    
-    // Code Generator (placeholder for future implementation)
-    this.registerModule({
-      id: 'code-generator',
-      name: 'AI Code Generator',
-      description: 'Generates and deploys code for new features and fixes',
-      status: 'inactive',
-      config: {
-        learningRate: 0.2,
-        confidenceThreshold: 0.85,
-        feedbackLoopEnabled: true,
-        maxDecisionsPerHour: 2,
-        oversightLevel: 'high'
+      {
+        id: 'strategy-core',
+        name: 'Strategic Planning',
+        description: 'Long-term strategy and resource planning',
+        status: 'idle',
+        decisionsMade: 0,
+        successRate: 0.88,
+        config: {
+          learningRate: 0.03,
+          confidenceThreshold: 0.80,
+          predictionHorizon: '7d'
+        }
       },
-      decisionsMade: 0,
-      successRate: 0
-    });
-    
-    // Lucoin Governor (placeholder for future implementation)
-    this.registerModule({
-      id: 'lucoin-governor',
-      name: 'Lucoin Governor',
-      description: 'Dynamically adjusts economic parameters of the platform',
-      status: 'inactive',
-      config: {
-        learningRate: 0.4,
-        confidenceThreshold: 0.6,
-        feedbackLoopEnabled: true,
-        maxDecisionsPerHour: 10,
-        oversightLevel: 'medium'
+      {
+        id: 'user-intelligence',
+        name: 'User Intelligence',
+        description: 'User behavior analysis and preference prediction',
+        status: 'idle',
+        decisionsMade: 0,
+        successRate: 0.94,
+        config: {
+          learningRate: 0.07,
+          confidenceThreshold: 0.65,
+          privacyLevel: 'high'
+        }
       },
-      decisionsMade: 0,
-      successRate: 0
-    });
-    
-    // Reputation Monitor (placeholder for future implementation)
-    this.registerModule({
-      id: 'reputation-monitor',
-      name: 'Reputation & Compliance Monitor',
-      description: 'Monitors and manages platform compliance and reputation',
-      status: 'inactive',
-      config: {
-        learningRate: 0.25,
-        confidenceThreshold: 0.8,
-        feedbackLoopEnabled: true,
-        maxDecisionsPerHour: 20,
-        oversightLevel: 'medium'
+      {
+        id: 'security-core',
+        name: 'Security Intelligence',
+        description: 'Threat detection and security optimization',
+        status: 'idle',
+        decisionsMade: 0,
+        successRate: 0.97,
+        config: {
+          learningRate: 0.02,
+          confidenceThreshold: 0.90,
+          detectionSensitivity: 'high'
+        }
       },
-      decisionsMade: 0,
-      successRate: 0
-    });
-    
-    // Growth Hacker (placeholder for future implementation)
-    this.registerModule({
-      id: 'growth-hacker',
-      name: 'AI Growth Hacker',
-      description: 'Automates growth strategies and campaigns',
-      status: 'inactive',
-      config: {
-        learningRate: 0.5,
-        confidenceThreshold: 0.6,
-        feedbackLoopEnabled: true,
-        maxDecisionsPerHour: 15,
-        oversightLevel: 'medium'
-      },
-      decisionsMade: 0,
-      successRate: 0
-    });
-    
-    // AI Persona Trainer (placeholder for future implementation)
-    this.registerModule({
-      id: 'persona-trainer',
-      name: 'AI Persona Self-Trainer',
-      description: 'Continuously improves AI profile behavior and responses',
-      status: 'inactive',
-      config: {
-        learningRate: 0.6,
-        confidenceThreshold: 0.5,
-        feedbackLoopEnabled: true,
-        maxDecisionsPerHour: 30,
-        oversightLevel: 'low'
-      },
-      decisionsMade: 0,
-      successRate: 0
-    });
+      {
+        id: 'resource-optimizer',
+        name: 'Resource Optimizer',
+        description: 'System resource allocation and optimization',
+        status: 'idle',
+        decisionsMade: 0,
+        successRate: 0.91,
+        config: {
+          learningRate: 0.04,
+          confidenceThreshold: 0.70,
+          optimizationTarget: 'balanced'
+        }
+      }
+    ];
   }
   
-  // Register a new autonomy module
-  public registerModule(module: AutonomyModule): void {
-    this.modules.set(module.id, module);
-  }
-  
-  // Get all registered modules
-  public getModules(): AutonomyModule[] {
-    return Array.from(this.modules.values());
+  // Get all modules
+  getModules(): AutonomyModule[] {
+    return [...this.modules];
   }
   
   // Get a specific module by ID
-  public getModule(id: string): AutonomyModule | undefined {
-    return this.modules.get(id);
+  getModule(moduleId: string): AutonomyModule | undefined {
+    return this.modules.find(m => m.id === moduleId);
   }
   
-  // Update a module's configuration
-  public updateModuleConfig(moduleId: string, config: Partial<AutonomyModuleConfig>): boolean {
-    const module = this.modules.get(moduleId);
-    if (!module) return false;
+  // Toggle module active state
+  toggleModule(moduleId: string, active: boolean): boolean {
+    const moduleIndex = this.modules.findIndex(m => m.id === moduleId);
+    if (moduleIndex === -1) return false;
     
-    module.config = { ...module.config, ...config };
-    return true;
-  }
-  
-  // Toggle a module's status
-  public toggleModule(moduleId: string, active: boolean): boolean {
-    const module = this.modules.get(moduleId);
-    if (!module) return false;
+    this.modules[moduleIndex].status = active ? 'active' : 'idle';
     
-    module.status = active ? 'active' : 'inactive';
-    
-    toast({
-      title: `${module.name} ${active ? 'Activated' : 'Deactivated'}`,
-      description: active 
-        ? `The ${module.name} is now running autonomously`
-        : `The ${module.name} has been disabled`
-    });
-    
-    // Log this action in Brain Hub
-    brainHub.logDecision('toggle_autonomy_module', {
-      moduleId,
-      moduleName: module.name,
-      action: active ? 'activate' : 'deactivate',
-      timestamp: new Date().toISOString()
-    });
-    
-    return true;
-  }
-  
-  // Start the autonomy engine
-  public start(): void {
-    if (this.isRunning) return;
-    
-    this.isRunning = true;
-    this.runInterval = setInterval(() => this.runDecisionCycle(), 60000); // Run every minute
-    
-    toast({
-      title: "Brain Hub Autonomy Activated",
-      description: `Autonomy engine is now running at level ${this.autonomyLevel}`
-    });
-    
-    // Log this in Brain Hub
-    brainHub.logDecision('autonomy_engine_start', {
-      level: this.autonomyLevel,
-      timestamp: new Date().toISOString()
-    });
-  }
-  
-  // Stop the autonomy engine
-  public stop(): void {
-    if (!this.isRunning) return;
-    
-    this.isRunning = false;
-    if (this.runInterval) {
-      clearInterval(this.runInterval);
-      this.runInterval = null;
+    // Record a decision
+    if (active) {
+      this.recordDecision({
+        moduleId: 'neural-core',
+        description: `Module ${this.modules[moduleIndex].name} activated`,
+        confidence: 1.0,
+        impact: 'low',
+        metadata: {}
+      });
+    } else {
+      this.recordDecision({
+        moduleId: 'neural-core',
+        description: `Module ${this.modules[moduleIndex].name} deactivated`,
+        confidence: 1.0,
+        impact: 'low',
+        metadata: {}
+      });
     }
     
-    toast({
-      title: "Brain Hub Autonomy Deactivated",
-      description: "Autonomy engine has been stopped"
-    });
-    
-    // Log this in Brain Hub
-    brainHub.logDecision('autonomy_engine_stop', {
-      timestamp: new Date().toISOString()
-    });
+    return true;
   }
   
-  // Set the autonomy level
-  public setAutonomyLevel(level: number): void {
+  // Add a new module
+  addModule(module: Omit<AutonomyModule, 'id'>): AutonomyModule {
+    const newModule = {
+      ...module,
+      id: uuidv4()
+    };
+    
+    this.modules.push(newModule);
+    
+    this.recordDecision({
+      moduleId: 'neural-core',
+      description: `New module "${newModule.name}" added to autonomy engine`,
+      confidence: 0.95,
+      impact: 'medium',
+      metadata: {
+        moduleType: newModule.name
+      }
+    });
+    
+    return newModule;
+  }
+  
+  // Remove a module
+  removeModule(moduleId: string): boolean {
+    const initialLength = this.modules.length;
+    this.modules = this.modules.filter(m => m.id !== moduleId);
+    
+    if (this.modules.length < initialLength) {
+      this.recordDecision({
+        moduleId: 'neural-core',
+        description: `Module (${moduleId}) removed from autonomy engine`,
+        confidence: 1.0,
+        impact: 'medium',
+        metadata: {}
+      });
+      return true;
+    }
+    
+    return false;
+  }
+  
+  // Start all active modules
+  start(): boolean {
+    if (this.engineStatus === 'running') return false;
+    
+    this.engineStatus = 'running';
+    this.modules.forEach(module => {
+      if (module.status === 'active') {
+        // In a real implementation, this would initialize and start the module's processes
+      }
+    });
+    
+    this.recordDecision({
+      moduleId: 'neural-core',
+      description: 'Autonomy engine started',
+      confidence: 1.0,
+      impact: 'high',
+      metadata: {
+        activeModules: this.modules.filter(m => m.status === 'active').length
+      }
+    });
+    
+    return true;
+  }
+  
+  // Pause all modules
+  pause(): boolean {
+    if (this.engineStatus !== 'running') return false;
+    
+    this.engineStatus = 'paused';
+    
+    this.recordDecision({
+      moduleId: 'neural-core',
+      description: 'Autonomy engine paused',
+      confidence: 1.0,
+      impact: 'medium',
+      metadata: {}
+    });
+    
+    return true;
+  }
+  
+  // Stop all modules
+  stop(): boolean {
+    if (this.engineStatus === 'stopped') return false;
+    
+    this.engineStatus = 'stopped';
+    this.modules.forEach(module => {
+      module.status = 'idle';
+    });
+    
+    this.recordDecision({
+      moduleId: 'neural-core',
+      description: 'Autonomy engine stopped',
+      confidence: 1.0,
+      impact: 'high',
+      metadata: {}
+    });
+    
+    return true;
+  }
+  
+  // Get engine status
+  getStatus(): 'running' | 'paused' | 'stopped' {
+    return this.engineStatus;
+  }
+  
+  // Set autonomy level (0-100)
+  setAutonomyLevel(level: number): void {
     this.autonomyLevel = Math.max(0, Math.min(100, level));
     
-    // Update Brain Hub autonomy level
-    brainHub.setAutonomy(this.isRunning, this.autonomyLevel);
-    
-    toast({
-      title: "Autonomy Level Updated",
-      description: `Brain Hub autonomy level set to ${this.autonomyLevel}%`
+    this.recordDecision({
+      moduleId: 'neural-core',
+      description: `Autonomy level set to ${this.autonomyLevel}%`,
+      confidence: 1.0,
+      impact: this.autonomyLevel > 80 ? 'high' : this.autonomyLevel > 50 ? 'medium' : 'low',
+      metadata: {
+        previousLevel: this.autonomyLevel
+      }
     });
   }
   
-  // Get the current autonomy level and status
-  public getAutonomyStatus(): { level: number; isRunning: boolean } {
-    return {
-      level: this.autonomyLevel,
-      isRunning: this.isRunning
-    };
+  // Get current autonomy level
+  getAutonomyLevel(): number {
+    return this.autonomyLevel;
   }
   
-  // Get recent decisions made by the autonomy engine
-  public getRecentDecisions(count: number = 50): Decision[] {
-    return this.decisions.slice(-count);
-  }
-  
-  // Record a new decision made by a module
-  public recordDecision(decision: Omit<Decision, 'id' | 'timestamp'>): string {
-    const newDecision: Decision = {
-      ...decision,
-      id: `decision_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      timestamp: new Date()
+  // Record a decision made by a module
+  recordDecision(decision: Omit<DecisionRecord, 'id' | 'timestamp'>): DecisionRecord {
+    const newDecision: DecisionRecord = {
+      id: uuidv4(),
+      timestamp: new Date(),
+      ...decision
     };
     
     this.decisions.push(newDecision);
     
-    // Keep only the last 1000 decisions in memory
+    // Update module statistics
+    const moduleIndex = this.modules.findIndex(m => m.id === decision.moduleId);
+    if (moduleIndex !== -1) {
+      this.modules[moduleIndex].decisionsMade += 1;
+    }
+    
+    // Limit decision history size
     if (this.decisions.length > 1000) {
-      this.decisions = this.decisions.slice(-1000);
+      this.decisions = this.decisions.slice(this.decisions.length - 1000);
     }
     
-    // Update the module's stats
-    const module = this.modules.get(decision.moduleId);
-    if (module) {
-      module.decisionsMade += 1;
-      module.lastExecuted = new Date();
-      
-      // Log this in Brain Hub
-      brainHub.logDecision('autonomy_decision', {
-        decisionId: newDecision.id,
-        moduleId: module.id,
-        moduleName: module.name,
-        description: decision.description,
-        confidence: decision.confidence,
-        impact: decision.impact
-      });
-    }
-    
-    return newDecision.id;
+    return newDecision;
   }
   
-  // Update the outcome of a decision
-  public updateDecisionOutcome(decisionId: string, outcome: 'success' | 'failure' | 'unknown'): boolean {
-    const decision = this.decisions.find(d => d.id === decisionId);
-    if (!decision) return false;
-    
-    decision.outcome = outcome;
-    
-    // Update the module's success rate
-    const module = this.modules.get(decision.moduleId);
-    if (module) {
-      const completedDecisions = this.decisions.filter(
-        d => d.moduleId === module.id && d.outcome !== undefined
-      );
-      
-      const successfulDecisions = completedDecisions.filter(
-        d => d.outcome === 'success'
-      );
-      
-      module.successRate = completedDecisions.length > 0
-        ? successfulDecisions.length / completedDecisions.length
-        : 0;
-    }
-    
-    return true;
-  }
-  
-  // The main decision cycle that runs periodically
-  private runDecisionCycle(): void {
-    if (!this.isRunning) return;
-    
-    const activeModules = Array.from(this.modules.values()).filter(
-      m => m.status === 'active'
+  // Get recent decisions
+  getRecentDecisions(count: number = 50): DecisionRecord[] {
+    return this.decisions.slice(-count).sort((a, b) => 
+      b.timestamp.getTime() - a.timestamp.getTime()
     );
-    
-    // This is where the actual decision logic would happen for each active module
-    // For now, we'll just log that the cycle ran
-    console.log(`[${new Date().toISOString()}] Autonomy decision cycle running with ${activeModules.length} active modules`);
-    
-    // In a real implementation, each module would have its own decision logic
-    // For example:
-    /*
-    for (const module of activeModules) {
-      // Check if this module is allowed to make a decision now (rate limiting)
-      const moduleDecisionsLastHour = this.decisions.filter(
-        d => d.moduleId === module.id && 
-        (new Date().getTime() - d.timestamp.getTime()) < 3600000
-      ).length;
-      
-      if (moduleDecisionsLastHour >= module.config.maxDecisionsPerHour) {
-        continue; // Skip this module for now
-      }
-      
-      switch (module.id) {
-        case 'strategy-core':
-          this.runStrategyCore(module);
-          break;
-        case 'code-generator':
-          this.runCodeGenerator(module);
-          break;
-        // ... and so on for each module
-      }
-    }
-    */
-    
-    // Update Brain Hub with the latest system status
-    brainHub.storeInMemory('last_autonomy_cycle', Date.now());
   }
   
-  // Placeholder for module-specific logic (to be implemented in the future)
-  private runStrategyCore(module: AutonomyModule): void {
-    // This would contain the specific logic for the Strategy Core module
+  // Get decisions by module
+  getDecisionsByModule(moduleId: string, count: number = 50): DecisionRecord[] {
+    return this.decisions
+      .filter(d => d.moduleId === moduleId)
+      .slice(-count)
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
-  
-  private runCodeGenerator(module: AutonomyModule): void {
-    // This would contain the specific logic for the Code Generator module
-  }
-  
-  // ... and so on for each module
 }
 
-// Export a singleton instance
-export const autonomyEngine = BrainHubAutonomyEngine.getInstance();
+// Singleton instance
+const autonomyEngine = new BrainHubAutonomyEngine();
+
 export default autonomyEngine;
