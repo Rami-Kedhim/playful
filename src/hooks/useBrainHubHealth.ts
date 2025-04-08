@@ -50,14 +50,14 @@ export function useBrainHubHealth(monitoringInterval = 30000) {
         status = 'error';
         errors.push('Critical memory utilization detected');
       } else if (systemStatus.memoryUsage > 70) {
-        if (status !== 'error') status = 'warning';
+        if (status === 'good') status = 'warning';
         warnings.push('High memory utilization detected');
       }
       
       // Check optimization age
       const hoursSinceOptimization = (Date.now() - systemStatus.lastOptimized) / (1000 * 60 * 60);
       if (hoursSinceOptimization > 48) {
-        if (status !== 'error') status = 'warning';
+        if (status === 'good') status = 'warning';
         warnings.push('System optimization is overdue');
       }
       
