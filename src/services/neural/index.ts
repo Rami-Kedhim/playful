@@ -5,8 +5,7 @@
  
 // Main hub and services
 export { neuralHub } from './HermesOxumNeuralHub';
-export { neuralService } from './NeuralService';
-export { neuralMetrics } from './reporting/neuralMetrics';
+export { brainHub } from './HermesOxumBrainHub';
 
 // Types
 export type { 
@@ -17,9 +16,12 @@ export type {
 } from './types/neuralHub';
 
 export type { 
-  MetricsHistory, 
-  PerformanceReport 
-} from './reporting/neuralMetrics';
+  BrainHubConfig, 
+  PsychologyModel, 
+  PhysicsModel, 
+  EconomicsModel, 
+  RoboticsModel 
+} from './HermesOxumBrainHub';
 
 // Utility functions
 export { 

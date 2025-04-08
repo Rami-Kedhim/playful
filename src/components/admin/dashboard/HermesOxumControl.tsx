@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,12 +22,9 @@ import {
   neuralHub, 
   SystemHealthMetrics, 
   ModelParameters 
-} from "@/services/neural/HermesOxumNeuralHub";
+} from "@/services/neural";
 
-// Simple line chart component for system metrics visualization
 const MetricsChart = ({ data, title }: { data: number[], title: string }) => {
-  // In a real implementation, this would use a proper chart library like recharts
-  // For simplicity, we're using a simplified visualization
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
@@ -63,31 +59,24 @@ const HermesOxumControl = () => {
   const [healthMetrics, setHealthMetrics] = useState<SystemHealthMetrics | null>(null);
   const [modelParams, setModelParams] = useState<ModelParameters | null>(null);
   
-  // Metrics history for charts
   const [loadHistory, setLoadHistory] = useState<number[]>(Array(30).fill(0.5));
   const [stabilityHistory, setStabilityHistory] = useState<number[]>(Array(30).fill(0.7));
   const [engagementHistory, setEngagementHistory] = useState<number[]>(Array(30).fill(0.6));
   const [economicHistory, setEconomicHistory] = useState<number[]>(Array(30).fill(0.8));
   
-  // Loading states
   const [isResetting, setIsResetting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
-  // Initialize data on component mount
   useEffect(() => {
-    // Get initial model parameters
     const initialParams = neuralHub.getModelParameters();
     setModelParams(initialParams);
     
-    // Get initial health metrics
     const initialMetrics = neuralHub.getHealthMetrics();
     setHealthMetrics(initialMetrics);
     
-    // Subscribe to metrics updates
     const updateMetrics = (metrics: SystemHealthMetrics) => {
       setHealthMetrics(metrics);
       
-      // Update history arrays
       setLoadHistory(prev => [...prev.slice(1), metrics.load]);
       setStabilityHistory(prev => [...prev.slice(1), metrics.stability]);
       setEngagementHistory(prev => [...prev.slice(1), metrics.userEngagement]);
@@ -96,7 +85,6 @@ const HermesOxumControl = () => {
     
     neuralHub.addObserver(updateMetrics);
     
-    // Cleanup on unmount
     return () => {
       neuralHub.removeObserver(updateMetrics);
     };
@@ -108,7 +96,6 @@ const HermesOxumControl = () => {
   ) => {
     if (!modelParams) return;
     
-    // Update local state
     setModelParams({
       ...modelParams,
       [paramName]: Array.isArray(value) ? value[0] : value
@@ -121,7 +108,6 @@ const HermesOxumControl = () => {
     setIsSaving(true);
     
     try {
-      // Update neural hub with new parameters
       neuralHub.updateModelParameters(modelParams);
       
       toast({
@@ -143,10 +129,8 @@ const HermesOxumControl = () => {
     setIsResetting(true);
     
     try {
-      // Reset neural hub to defaults
       neuralHub.resetSystem();
       
-      // Update local state with defaults
       setModelParams(neuralHub.getModelParameters());
     } catch (error) {
       toast({

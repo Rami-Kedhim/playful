@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { neuralHub, SystemHealthMetrics } from '@/services/neural/HermesOxumNeuralHub';
+import { neuralHub, SystemHealthMetrics } from '@/services/neural';
 
 export type BrainHubHealthStatus = 'good' | 'warning' | 'error';
 
@@ -34,7 +33,6 @@ export function useBrainHubHealth() {
 
   const [isMonitoring, setIsMonitoring] = useState(false);
 
-  // Initialize monitoring
   useEffect(() => {
     startMonitoring();
     
@@ -43,39 +41,31 @@ export function useBrainHubHealth() {
     };
   }, []);
 
-  // Start health monitoring
   const startMonitoring = () => {
     if (isMonitoring) return;
     
     setIsMonitoring(true);
     
-    // Initial check
     checkHealth();
     
-    // Setup interval for continuous monitoring
     const interval = setInterval(() => {
       checkHealth();
-    }, 10000); // Check every 10 seconds
+    }, 10000);
     
-    // Store interval ID for cleanup
     return () => {
       clearInterval(interval);
       setIsMonitoring(false);
     };
   };
 
-  // Stop health monitoring
   const stopMonitoring = () => {
     setIsMonitoring(false);
   };
 
-  // Perform health check
   const checkHealth = () => {
     try {
-      // Get system metrics from Brain Hub
       const systemStatus = brainHub.getSystemStatus();
       
-      // Get neural metrics if available
       let neuralMetrics: SystemHealthMetrics | undefined = undefined;
       try {
         neuralMetrics = neuralHub.getHealthMetrics();
@@ -83,14 +73,11 @@ export function useBrainHubHealth() {
         console.warn("Neural hub metrics unavailable", error);
       }
       
-      // Get enhanced metrics
       const enhancedMetrics = brainHub.getEnhancedSystemMetrics();
       
-      // Collect warnings and errors
       const warnings: string[] = [];
       const errors: string[] = [];
       
-      // Check for high resource usage
       if (systemStatus.cpuUsage > 80) {
         warnings.push(`High CPU usage: ${systemStatus.cpuUsage}%`);
       }
@@ -103,12 +90,10 @@ export function useBrainHubHealth() {
         warnings.push(`High request rate: ${systemStatus.requestsPerMinute} requests/minute`);
       }
       
-      // Check neural hub stability if available
       if (neuralMetrics && neuralMetrics.stability < 0.7) {
         warnings.push(`Low neural stability: ${(neuralMetrics.stability * 100).toFixed(1)}%`);
       }
       
-      // Check for critical issues
       if (systemStatus.cpuUsage > 95) {
         errors.push(`Critical CPU usage: ${systemStatus.cpuUsage}%`);
       }
@@ -117,12 +102,10 @@ export function useBrainHubHealth() {
         errors.push(`Critical memory usage: ${systemStatus.memoryUsage}%`);
       }
       
-      // Add optimization opportunities from enhanced metrics
       if (enhancedMetrics.predictive?.optimizationOpportunities) {
         warnings.push(...enhancedMetrics.predictive.optimizationOpportunities);
       }
       
-      // Determine overall status
       let overallStatus: BrainHubHealthStatus = 'good';
       let message: string | undefined = undefined;
       
@@ -134,7 +117,6 @@ export function useBrainHubHealth() {
         message = `${warnings.length} warning${warnings.length > 1 ? 's' : ''} detected`;
       }
       
-      // Update health state
       setHealth({
         status: overallStatus,
         message,
