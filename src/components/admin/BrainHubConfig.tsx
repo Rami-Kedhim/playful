@@ -139,7 +139,7 @@ const BrainHubConfig: React.FC = () => {
           
           <TabsContent value="psychology">
             <AcademicModelTab<PsychologyModel>
-              model={config.psychology}
+              model={config.psychology as PsychologyModel}
               title="Psychological Models"
               description="Configure the psychological models that drive AI personality and emotional responses"
               onToggle={(key, value) => handleAcademicModelToggle('psychology', key, value)}
@@ -148,7 +148,7 @@ const BrainHubConfig: React.FC = () => {
           
           <TabsContent value="physics">
             <AcademicModelTab<PhysicsModel>
-              model={config.physics}
+              model={config.physics as PhysicsModel}
               title="Physics Models"
               description="Configure simulation models for physical behavior in virtual environments"
               onToggle={(key, value) => handleAcademicModelToggle('physics', key, value)}
@@ -157,7 +157,7 @@ const BrainHubConfig: React.FC = () => {
           
           <TabsContent value="economics">
             <AcademicModelTab<EconomicsModel>
-              model={config.economics}
+              model={config.economics as EconomicsModel}
               title="Economic Models"
               description="Configure economic models that drive pricing, boosts, and monetization"
               onToggle={(key, value) => handleAcademicModelToggle('economics', key, value)}
@@ -166,7 +166,7 @@ const BrainHubConfig: React.FC = () => {
           
           <TabsContent value="robotics">
             <AcademicModelTab<RoboticsModel>
-              model={config.robotics}
+              model={config.robotics as RoboticsModel}
               title="Robotics Models"
               description="Configure AI control interfaces and automation behavior"
               onToggle={(key, value) => handleAcademicModelToggle('robotics', key, value)}

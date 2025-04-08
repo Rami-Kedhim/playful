@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -8,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Filter, X, Sliders, Users, Body, Languages, MapPin, Calendar, Clock, CreditCard } from 'lucide-react';
+import { Filter, X, Sliders, Users, User, Languages, MapPin, Calendar, Clock, CreditCard } from 'lucide-react';
 
 interface EnhancedEscortFiltersProps {
   filters: {
@@ -344,7 +343,7 @@ const EnhancedEscortFilters: React.FC<EnhancedEscortFiltersProps> = ({
           <TabsContent value="physical" className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Body className="h-4 w-4 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm">Height Range (cm)</Label>
               </div>
               <div className="pt-2 px-1">
@@ -365,7 +364,7 @@ const EnhancedEscortFilters: React.FC<EnhancedEscortFiltersProps> = ({
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Body className="h-4 w-4 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm">Weight Range (kg)</Label>
               </div>
               <div className="pt-2 px-1">
@@ -386,7 +385,7 @@ const EnhancedEscortFilters: React.FC<EnhancedEscortFiltersProps> = ({
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Body className="h-4 w-4 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm">Hair Color</Label>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -407,7 +406,7 @@ const EnhancedEscortFilters: React.FC<EnhancedEscortFiltersProps> = ({
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Body className="h-4 w-4 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm">Eye Color</Label>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -428,7 +427,7 @@ const EnhancedEscortFilters: React.FC<EnhancedEscortFiltersProps> = ({
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Body className="h-4 w-4 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm">Ethnicity</Label>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -449,7 +448,7 @@ const EnhancedEscortFilters: React.FC<EnhancedEscortFiltersProps> = ({
             
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Body className="h-4 w-4 text-muted-foreground" />
+                <User className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-sm">Body Type</Label>
               </div>
               <div className="grid grid-cols-2 gap-2">
