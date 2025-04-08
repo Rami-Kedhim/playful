@@ -25,8 +25,10 @@ export const EscortConsumer: React.FC<EscortConsumerProps> = ({
         
         // Apply OxumAlgorithm boost settings based on user's premium status
         escortsNeuralService.configure({
-          resourceAllocation: premiumMode ? 50 : 25,
+          enabled: true,
           priority: premiumMode ? 80 : 40,
+          autonomyLevel: premiumMode ? 70 : 40,
+          resourceAllocation: premiumMode ? 50 : 25,
           boostingEnabled: true, // Enable boosting logic as per request
           boostingAlgorithm: "OxumAlgorithm",
           orderByBoost: true // As specified in the module requirements

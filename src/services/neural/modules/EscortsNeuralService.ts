@@ -11,9 +11,10 @@ export interface EscortsNeuralConfig extends NeuralServiceConfig {
 
 export class EscortsNeuralService extends BaseNeuralService {
   private config: EscortsNeuralConfig = {
+    enabled: true,
+    priority: 50,
     autonomyLevel: 60,
     resourceAllocation: 40,
-    priority: 50,
     boostingEnabled: true,
     boostingAlgorithm: 'OxumAlgorithm',
     orderByBoost: true
@@ -34,10 +35,10 @@ export class EscortsNeuralService extends BaseNeuralService {
   }
   
   isEnabled(): boolean {
-    return true;
+    return this.config.enabled;
   }
   
-  getConfig(): EscortsNeuralConfig {
+  getConfig(): NeuralServiceConfig {
     return this.config;
   }
 

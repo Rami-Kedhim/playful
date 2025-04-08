@@ -1,6 +1,6 @@
 
-import { NeuralServiceRegistry } from "./registry/NeuralServiceRegistry";
-import { NeuralQueryResponse } from "./types/neuralQuery";
+import { neuralServiceRegistry } from "./registry/NeuralServiceRegistry";
+import type { NeuralQueryResponse } from "./types/neuralQuery";
 import { EscortsNeuralService } from "./modules/EscortsNeuralService";
 import { Escort } from "@/types/escort";
 
@@ -8,10 +8,10 @@ import { Escort } from "@/types/escort";
  * HermesOxumBrainHub - The central neural processing system
  */
 export class HermesOxumBrainHub {
-  private registry: NeuralServiceRegistry;
+  private registry: typeof neuralServiceRegistry;
   private isInitialized: boolean = false;
   
-  constructor(registry: NeuralServiceRegistry) {
+  constructor(registry: typeof neuralServiceRegistry) {
     this.registry = registry;
   }
   
@@ -68,6 +68,27 @@ export class HermesOxumBrainHub {
   }
   
   /**
+   * Process a request through BrainHub
+   */
+  public processRequest(request: any): any {
+    // Basic error checking
+    if (!request || !request.type) {
+      return {
+        success: false,
+        error: "Invalid request format"
+      };
+    }
+    
+    console.log(`Processing ${request.type} request through BrainHub`);
+    
+    // Return successful response by default
+    return {
+      success: true,
+      data: request.data || {}
+    };
+  }
+  
+  /**
    * Legacy method for backward compatibility
    */
   public async executeQuery(query: any): Promise<any> {
@@ -79,6 +100,116 @@ export class HermesOxumBrainHub {
    */
   public getInitStatus(): boolean {
     return this.isInitialized;
+  }
+  
+  /**
+   * Get Brain Hub configuration
+   */
+  public getConfig(): any {
+    return {
+      geoLegalFilteringEnabled: true,
+      neuroEmotionEnabled: true,
+      predictiveModulationEnabled: false,
+      psychology: {
+        emotionalAnalysis: true,
+        personalityModeling: true,
+        behaviourPrediction: false,
+        sentimentAnalysis: true
+      },
+      physics: {
+        collisionDetection: true,
+        gravitationalEffects: true,
+        fluidDynamics: false,
+        particleSystems: true
+      },
+      economics: {
+        dynamicPricing: true,
+        demandForecasting: true,
+        marketSimulation: true,
+        transactionAnalysis: true
+      },
+      robotics: {
+        inverseKinematics: true,
+        pathPlanning: true,
+        sensorIntegration: false,
+        controlSystems: true
+      }
+    };
+  }
+  
+  /**
+   * Update Brain Hub configuration
+   */
+  public updateConfig(config: any): void {
+    console.log("Updating BrainHub configuration:", config);
+    // In a real implementation, we would update the configuration here
+  }
+  
+  /**
+   * Get all available models
+   */
+  public getModels(): any[] {
+    return [
+      {
+        id: "model-1",
+        name: "Neural Processing Model Alpha",
+        status: "active",
+        specializationType: "general",
+        specialization: "multi-domain",
+        metrics: {
+          accuracy: 92.7,
+          latency: 45,
+          resourceUsage: 35
+        }
+      },
+      {
+        id: "model-2",
+        name: "Advanced Pattern Recognition",
+        status: "active",
+        specializationType: "pattern",
+        specialization: "visual-data",
+        metrics: {
+          accuracy: 97.2,
+          latency: 78,
+          resourceUsage: 62
+        }
+      },
+      {
+        id: "model-3",
+        name: "Sentiment Analysis Engine",
+        status: "inactive",
+        specializationType: "sentiment",
+        specialization: "language",
+        metrics: {
+          accuracy: 88.5,
+          latency: 28,
+          resourceUsage: 22
+        }
+      }
+    ];
+  }
+  
+  /**
+   * Calculate system efficiency
+   */
+  public calculateSystemEfficiency(): number {
+    return Math.floor(Math.random() * 15) + 80; // 80-95%
+  }
+  
+  /**
+   * Get active training jobs
+   */
+  public getActiveTrainingJobs(): any[] {
+    return [
+      {
+        id: "train-1",
+        modelId: "model-2",
+        status: "running",
+        progress: 67,
+        startTime: new Date(Date.now() - 3600000),
+        estimatedCompletion: new Date(Date.now() + 1800000)
+      }
+    ];
   }
   
   /**
@@ -161,3 +292,6 @@ export class HermesOxumBrainHub {
     return escorts;
   }
 }
+
+// Create and export a singleton instance of HermesOxumBrainHub
+export const brainHub = new HermesOxumBrainHub(neuralServiceRegistry);

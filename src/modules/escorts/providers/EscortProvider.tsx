@@ -213,7 +213,10 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
         const userPrefs = user ? { userId: user.id } : {};
         escortsNeuralService.updateConfig({ 
           ...userPrefs,
-          resourceAllocation: 'high',
+          enabled: true,
+          priority: 70,
+          autonomyLevel: 60,
+          resourceAllocation: 50,
           boostingEnabled: true,
           boostingAlgorithm: "OxumAlgorithm",
           orderByBoost: true
