@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth/useAuthContext";
 
 interface CreatorProfile {
   isVerified: boolean;

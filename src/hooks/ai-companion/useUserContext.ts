@@ -1,5 +1,5 @@
 
-import { useAuth } from '@/hooks/auth';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useEffect, useState } from 'react';
 
 export const useUserContext = () => {

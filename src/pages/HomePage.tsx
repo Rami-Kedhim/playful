@@ -11,7 +11,7 @@ import CtaSection from "@/components/home/CtaSection";
 import LucieAssistant from "@/components/home/LucieAssistant";
 import MetaverseSection from "@/components/home/MetaverseSection";
 import WelcomeAlert from "@/components/layout/WelcomeAlert";
-import { useAuth } from "@/hooks/auth/useAuthContext"; // Changed from useAuth to useAuthContext
+import { useAuth } from "@/hooks/auth/useAuthContext";
 import { Helmet } from "react-helmet-async";
 
 // Sample data for featured profiles
