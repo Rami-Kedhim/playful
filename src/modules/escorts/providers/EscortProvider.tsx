@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort, EscortFilterOptions } from '@/types/escort';
 import { EscortScraper } from '@/services/scrapers/EscortScraper';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,6 +23,8 @@ interface EscortState {
     rating: number;
     verified: boolean;
     availableNow: boolean;
+    escortType: "verified" | "ai" | "provisional" | "all";  // Added escort type filter
+    language: string[];  // Added language filter
   };
 }
 
@@ -63,6 +65,8 @@ const initialState: EscortState = {
     rating: 0,
     verified: false,
     availableNow: false,
+    escortType: "all", // Default to showing all escort types
+    language: [], // Default to no language filter
   },
 };
 
@@ -111,28 +115,62 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
         });
       }
       
-      // Fetch escorts through the scraper
-      const fetchedEscorts = await escortScraper.scrape();
+      let processedEscorts: Escort[] = [];
       
-      // Process through neural hub if enabled
-      let processedEscorts = [...fetchedEscorts];
-      if (useNeuralProcessing) {
+      // Only perform scraping if neural processing is not enabled
+      // This addresses the premature scraping issue
+      if (!useNeuralProcessing) {
+        // Fetch escorts directly from cache if available
+        processedEscorts = escortScraper.getCachedResults();
+      } else {
         try {
-          // Sort escorts based on preferences and relevancy
-          processedEscorts = processedEscorts.sort((a, b) => {
-            // This is just a placeholder until we implement neural scoring
-            const scoreA = a.rating || 0; 
-            const scoreB = b.rating || 0;
-            return scoreB - scoreA;
-          });
+          // Process through neural hub if enabled
+          // This will use BrainHub.query() as specified in requirements
+          const neuralQuery = {
+            filters: state.filters,
+            boostingEnabled: escortsNeuralService.getConfig().boostingEnabled,
+            boostingAlgorithm: escortsNeuralService.getConfig().boostingAlgorithm,
+            orderByBoost: escortsNeuralService.getConfig().orderByBoost
+          };
+          
+          // Use BrainHub to fetch and process escorts
+          processedEscorts = await neuralHub.processQuery(
+            'escorts',
+            neuralQuery
+          ) as Escort[];
+          
+          // Tag escorts based on their profile type for differentiation
+          processedEscorts = processedEscorts.map(escort => ({
+            ...escort,
+            profileType: escort.verified ? 'verified' : 
+                         escort.isAI ? 'ai' : 'provisional'
+          }));
+          
+          // Apply sorting based on boost level if enabled
+          if (escortsNeuralService.getConfig().orderByBoost) {
+            processedEscorts = processedEscorts.sort((a, b) => {
+              // First sort by boost level
+              const boostDiff = (b.boostLevel || 0) - (a.boostLevel || 0);
+              if (boostDiff !== 0) return boostDiff;
+              
+              // Then by other criteria like verification status
+              if (a.verified && !b.verified) return -1;
+              if (!a.verified && b.verified) return 1;
+              
+              // Then by rating
+              return b.rating - a.rating;
+            });
+          }
         } catch (err) {
           console.error("Error in neural processing:", err);
+          // Fallback to cached results if neural processing fails
+          processedEscorts = escortScraper.getCachedResults();
         }
       }
 
       // Extract featured escorts
       const featured = processedEscorts
-        .filter(escort => escort.featured)
+        .filter(escort => escort.featured || (escort.boostLevel && escort.boostLevel > 2))
         .slice(0, 8);
 
       dispatch({ type: 'SET_ESCORTS', payload: processedEscorts });
@@ -150,7 +188,7 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [escortScraper, state.filters.location, toast]);
+  }, [escortScraper, state.filters, toast]);
 
   const getEscortById = useCallback(
     (id: string) => state.escorts.find(escort => escort.id === id),
@@ -166,7 +204,7 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
     dispatch({ type: 'UPDATE_FILTERS', payload: newFilters });
   }, []);
 
-  // Initial load effect
+  // Initialize escorts and setup neural service
   useEffect(() => {
     // Set up neural service if available
     try {
@@ -175,15 +213,23 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
         const userPrefs = user ? { userId: user.id } : {};
         escortsNeuralService.configure({ 
           ...userPrefs,
-          resourcePriority: 'high'
+          resourcePriority: 'high',
+          boostingEnabled: true,
+          boostingAlgorithm: "OxumAlgorithm",
+          orderByBoost: true
         });
       }
     } catch (err) {
       console.error("Error initializing neural service:", err);
     }
 
-    // Load initial escort data
-    loadEscorts();
+    // Delay initial load until neural system is ready 
+    // (prevents premature scraping)
+    const timer = setTimeout(() => {
+      loadEscorts(true); // Always use neural processing for initial load
+    }, 500);
+    
+    return () => clearTimeout(timer);
   }, [loadEscorts, user]);
 
   // Context value

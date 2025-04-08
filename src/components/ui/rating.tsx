@@ -10,6 +10,7 @@ interface RatingProps {
   readOnly?: boolean;
   size?: 'sm' | 'md' | 'lg';
   color?: string;
+  className?: string; // Added className for more flexibility
 }
 
 export const Rating: React.FC<RatingProps> = ({
@@ -18,7 +19,8 @@ export const Rating: React.FC<RatingProps> = ({
   onChange,
   readOnly = false,
   size = 'md',
-  color = 'text-yellow-400'
+  color = 'text-yellow-400',
+  className
 }) => {
   const sizeMap = {
     sm: 'h-3 w-3',
@@ -34,7 +36,7 @@ export const Rating: React.FC<RatingProps> = ({
   };
 
   return (
-    <div className="flex items-center">
+    <div className={cn("flex items-center", className)}>
       {[...Array(max)].map((_, index) => {
         const starValue = index + 1;
         return (

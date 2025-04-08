@@ -1,163 +1,167 @@
 
-import { useState, useEffect, useContext, createContext, ReactNode } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 export interface Wallet {
   id: string;
-  userId: string;
   balance: number;
   currency: string;
-  lastTransaction?: {
-    id: string;
-    amount: number;
-    type: 'credit' | 'debit';
-    timestamp: Date;
-  };
-  createdAt: Date;
-  updatedAt: Date;
+  lastUpdated: Date;
+  transactions?: WalletTransaction[];
+  status: WalletStatus;
 }
 
-interface WalletContextType {
+export interface WalletTransaction {
+  id: string;
+  amount: number;
+  type: "deposit" | "withdrawal" | "transfer" | "purchase";
+  description: string;
+  timestamp: Date;
+  status: "pending" | "completed" | "failed";
+}
+
+export type WalletStatus = "active" | "suspended" | "pending";
+
+interface WalletContextValue {
   wallet: Wallet | null;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
   refreshWallet: () => Promise<void>;
-  addFunds: (amount: number) => Promise<boolean>;
-  withdrawFunds: (amount: number) => Promise<boolean>;
+  updateBalance: (amount: number) => Promise<boolean>;
 }
 
-// Create wallet context with default values
-const WalletContext = createContext<WalletContextType>({
-  wallet: null,
-  isLoading: false,
-  error: null,
-  refreshWallet: async () => {},
-  addFunds: async () => false,
-  withdrawFunds: async () => false,
-});
-
-// Mock wallet data for development
+// Mock data for development
 const mockWallet: Wallet = {
-  id: "wallet-1",
-  userId: "user-1",
-  balance: 250,
-  currency: "LUCOIN",
-  lastTransaction: {
-    id: "tx-123",
-    amount: 50,
-    type: 'credit',
-    timestamp: new Date(),
-  },
-  createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-  updatedAt: new Date(),
+  id: "wallet-123",
+  balance: 500,
+  currency: "LC",
+  lastUpdated: new Date(),
+  status: "active",
+  transactions: [
+    {
+      id: "tx1",
+      amount: 100,
+      type: "deposit",
+      description: "Initial deposit",
+      timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      status: "completed"
+    },
+    {
+      id: "tx2",
+      amount: -50,
+      type: "purchase",
+      description: "Premium content purchase",
+      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      status: "completed"
+    }
+  ]
 };
 
-export const WalletProvider = ({ children }: { children: ReactNode }) => {
+/**
+ * Hook for managing user wallet operations
+ */
+export const useWallet = (): WalletContextValue => {
   const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const refreshWallet = async () => {
+  // Fetch wallet data from API/backend
+  const fetchWallet = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setIsLoading(true);
-      // In a real implementation, fetch from API
-      // For now, just use mock data
+      // In a real app, this would call an API endpoint
+      // const response = await api.get('/wallet');
+      // setWallet(response.data);
+      
+      // Using mock data for development
       await new Promise(resolve => setTimeout(resolve, 500));
       setWallet(mockWallet);
-      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch wallet data");
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch wallet';
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const addFunds = async (amount: number): Promise<boolean> => {
+  // Refresh wallet data
+  const refreshWallet = useCallback(async () => {
+    await fetchWallet();
+  }, [fetchWallet]);
+
+  // Update wallet balance
+  const updateBalance = useCallback(async (amount: number): Promise<boolean> => {
+    setLoading(true);
+    
     try {
-      setIsLoading(true);
-      // In a real implementation, call API to add funds
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // In a real app, this would call an API endpoint
+      // const response = await api.post('/wallet/update', { amount });
       
-      if (wallet) {
-        const newWallet = {
-          ...wallet,
-          balance: wallet.balance + amount,
-          lastTransaction: {
-            id: `tx-${Date.now()}`,
-            amount,
-            type: 'credit' as const,
-            timestamp: new Date()
-          },
-          updatedAt: new Date()
+      // Mock implementation
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      setWallet(prevWallet => {
+        if (!prevWallet) return null;
+        
+        return {
+          ...prevWallet,
+          balance: prevWallet.balance + amount,
+          lastUpdated: new Date(),
+          transactions: [
+            {
+              id: `tx-${Date.now()}`,
+              amount: amount,
+              type: amount > 0 ? "deposit" : "purchase",
+              description: amount > 0 ? "Wallet deposit" : "Service purchase",
+              timestamp: new Date(),
+              status: "completed"
+            },
+            ...(prevWallet.transactions || [])
+          ]
         };
-        setWallet(newWallet);
-      }
+      });
+      
+      const actionType = amount > 0 ? "deposit" : "purchase";
+      toast({
+        title: `${actionType.charAt(0).toUpperCase() + actionType.slice(1)} Successful`,
+        description: `Your wallet has been ${amount > 0 ? "credited with" : "debited"} ${Math.abs(amount)} LC`,
+      });
       
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add funds");
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update balance';
+      setError(errorMessage);
+      toast({
+        title: "Transaction Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
       return false;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const withdrawFunds = async (amount: number): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      
-      if (!wallet) {
-        setError("Wallet not initialized");
-        return false;
-      }
-      
-      if (wallet.balance < amount) {
-        setError("Insufficient funds");
-        return false;
-      }
-      
-      // In a real implementation, call API to withdraw funds
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      const newWallet = {
-        ...wallet,
-        balance: wallet.balance - amount,
-        lastTransaction: {
-          id: `tx-${Date.now()}`,
-          amount,
-          type: 'debit' as const,
-          timestamp: new Date()
-        },
-        updatedAt: new Date()
-      };
-      
-      setWallet(newWallet);
-      return true;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to withdraw funds");
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Initialize wallet on component mount
   useEffect(() => {
-    refreshWallet();
-  }, []);
+    fetchWallet();
+  }, [fetchWallet]);
 
-  return (
-    <WalletContext.Provider value={{
-      wallet,
-      isLoading,
-      error,
-      refreshWallet,
-      addFunds,
-      withdrawFunds
-    }}>
-      {children}
-    </WalletContext.Provider>
-  );
+  return {
+    wallet,
+    loading,
+    error,
+    refreshWallet,
+    updateBalance
+  };
 };
-
-export const useWallet = () => useContext(WalletContext);
 
 export default useWallet;

@@ -62,6 +62,13 @@ export interface Escort {
     live: boolean;
     streams: number;
   };
+  
+  // Added fields for profile type differentiation and boosting
+  profileType: "verified" | "ai" | "provisional"; // For clear profile tagging
+  boostLevel?: number; // For boosting algorithm
+  boostExpiry?: Date; // For boosted profile expiration
+  isAI?: boolean; // Flag for AI models
+  isScraped?: boolean; // Flag for scraped profiles
 }
 
 export interface Video {
@@ -120,4 +127,17 @@ export interface EscortAvailability {
     available: boolean;
     customHours?: string;
   }[];
+}
+
+// New interface for filter options as requested in requirements
+export interface EscortFilterOptions {
+  location?: string;
+  ageRange?: [number, number];
+  priceRange?: [number, number];
+  verifiedOnly?: boolean;
+  escortType?: "verified" | "ai" | "provisional" | "all";
+  languages?: string[];
+  services?: string[];
+  gender?: string[];
+  sortBy?: "boosted" | "newest" | "price_low" | "price_high" | "rating";
 }

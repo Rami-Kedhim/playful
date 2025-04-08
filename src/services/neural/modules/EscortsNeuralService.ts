@@ -8,6 +8,9 @@ interface EscortsNeuralConfig {
   autonomyLevel?: number;
   resourceAllocation?: number;
   priority?: number;
+  boostingEnabled?: boolean; // Added boosting config option
+  boostingAlgorithm?: string; // Added algorithm config
+  orderByBoost?: boolean; // Added ordering config
 }
 
 /**
@@ -25,7 +28,10 @@ export class EscortsNeuralService implements BaseNeuralService {
       regionFiltering: true,
       autonomyLevel: 60,
       resourceAllocation: 40,
-      priority: 50
+      priority: 50,
+      boostingEnabled: true, // Enable boosting by default
+      boostingAlgorithm: "OxumAlgorithm", // Default algorithm as specified in requirements
+      orderByBoost: true // Enable ordering by boost by default
     };
   }
   

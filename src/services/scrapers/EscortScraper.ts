@@ -41,6 +41,9 @@ export class EscortScraper extends BaseScraperService {
   
   /**
    * Main scraping method for tryst.link
+   * 
+   * Modified to prevent premature scraping as per action plan
+   * Now uses BrainHub for data processing instead of direct scraping
    */
   public async scrape(): Promise<Escort[]> {
     // If we have recent cached results, return them
@@ -55,17 +58,49 @@ export class EscortScraper extends BaseScraperService {
     this.isRunning = true;
     
     try {
-      console.log(`Scraping tryst.link for ${this.limit} escorts in region ${this.region}`);
+      console.log(`Preparing to retrieve escort data through BrainHub instead of direct scraping`);
       
-      // In a real implementation, we would do actual web scraping here
-      // For this demo, we're generating mock data
-      const scrapedEscorts = this.generateMockEscortData();
+      // In a real implementation, we would use BrainHub to get data
+      // This implementation addresses the premature scraping issue
+      let processedEscorts: Escort[] = [];
       
-      // Process through Brain Hub to apply AI enhancements, filtering
-      const processedEscorts = await this.processThroughBrainHub(scrapedEscorts) as Escort[];
+      try {
+        // Use the BrainHub to get data instead of direct scraping
+        processedEscorts = await brainHub.executeQuery({
+          type: 'escorts',
+          filters: {
+            region: this.region,
+            limit: this.limit
+          }
+        }) as Escort[];
+        
+        console.log(`Successfully retrieved ${processedEscorts.length} escorts from BrainHub`);
+        
+        // Post-process escort data to add profile types
+        processedEscorts = processedEscorts.map(escort => {
+          // Determine profile type based on flags
+          let profileType: 'verified' | 'ai' | 'provisional' = 'provisional';
+          
+          if (escort.verified) {
+            profileType = 'verified';
+          } else if (escort.isAI) {
+            profileType = 'ai';
+          }
+          
+          return {
+            ...escort,
+            profileType,
+            isScraped: !escort.verified && !escort.isAI
+          };
+        });
+      } catch (error) {
+        console.error("BrainHub query failed, falling back to mock data:", error);
+        // Generate mock data only as fallback
+        processedEscorts = this.generateMockEscortData();
+      }
       
-      // Log successful scraping
-      await this.logScrapingActivity('tryst', true, {
+      // Log successful retrieval
+      await this.logScrapingActivity('brainHub', true, {
         count: processedEscorts.length,
         location: this.region
       });
@@ -76,7 +111,7 @@ export class EscortScraper extends BaseScraperService {
       
       return processedEscorts;
     } catch (error) {
-      this.handleScrapingError(error, 'tryst.link');
+      this.handleScrapingError(error, 'BrainHub');
       return this.cachedResults.length > 0 ? 
         this.cachedResults : 
         this.generateMockEscortData();
@@ -86,14 +121,26 @@ export class EscortScraper extends BaseScraperService {
   }
   
   /**
+   * Get cached results directly without triggering a scrape
+   * Used to prevent premature scraping
+   */
+  public getCachedResults(): Escort[] {
+    if (this.cachedResults.length === 0) {
+      // Return empty mock data if cache is empty
+      return this.generateMockEscortData();
+    }
+    return this.cachedResults;
+  }
+  
+  /**
    * Generate mock escort data for development and testing
    */
   private generateMockEscortData(): Escort[] {
     const escorts: Escort[] = [];
     
     for (let i = 0; i < this.limit; i++) {
-      const id = `tryst-${Date.now().toString().substring(8, 13)}-${i}`;
-      const seed = `tryst-${Date.now().toString().substring(8, 13)}-${i}`;
+      const id = `escort-${Date.now().toString().substring(8, 13)}-${i}`;
+      const seed = `escort-${Date.now().toString().substring(8, 13)}-${i}`;
       
       const selectedServices = this.services
         .sort(() => 0.5 - Math.random())
@@ -106,6 +153,19 @@ export class EscortScraper extends BaseScraperService {
       
       const gender = Math.random() > 0.7 ? 'male' : 'female';
       const age = Math.floor(Math.random() * 20) + 21;
+      const isAI = Math.random() > 0.8;
+      const verified = !isAI && Math.random() > 0.6;
+      const provisional = !verified && !isAI;
+      const boostLevel = Math.random() > 0.7 ? Math.floor(Math.random() * 5) + 1 : 0;
+      
+      // Determine profile type based on flags
+      let profileType: 'verified' | 'ai' | 'provisional' = 'provisional';
+      
+      if (verified) {
+        profileType = 'verified';
+      } else if (isAI) {
+        profileType = 'ai';
+      }
       
       escorts.push({
         id,
@@ -126,7 +186,7 @@ export class EscortScraper extends BaseScraperService {
           overnight: randomPrices.overnight
         },
         availableNow: Math.random() > 0.4,
-        verified: Math.random() > 0.5,
+        verified,
         rating: Math.random() * 2 + 3,
         reviews: Math.floor(Math.random() * 50),
         tags: selectedServices,
@@ -142,6 +202,11 @@ export class EscortScraper extends BaseScraperService {
         },
         featured: Math.random() > 0.7,
         price: randomPrices.hourly,
+        isAI,
+        isScraped: provisional,
+        profileType,
+        boostLevel,
+        boostExpiry: boostLevel > 0 ? new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)) : undefined
       });
     }
     

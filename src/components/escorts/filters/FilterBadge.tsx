@@ -1,24 +1,29 @@
 
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 
 interface FilterBadgeProps {
-  label: React.ReactNode;
+  label: string;
   onRemove: () => void;
 }
 
 const FilterBadge = ({ label, onRemove }: FilterBadgeProps) => {
   return (
-    <Badge variant="secondary" className="flex items-center gap-1">
+    <Badge
+      className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+    >
       {label}
-      <X 
-        size={14} 
-        className="cursor-pointer ml-1" 
+      <button
+        className="ml-1 rounded-full p-0.5 hover:bg-primary/20"
         onClick={(e) => {
-          e.stopPropagation();
+          e.preventDefault();
           onRemove();
         }}
-      />
+      >
+        <X className="h-3 w-3" />
+        <span className="sr-only">Remove {label} filter</span>
+      </button>
     </Badge>
   );
 };

@@ -16,19 +16,24 @@ export const EscortConsumer: React.FC<EscortConsumerProps> = ({
   const { state, loadEscorts } = useEscortContext();
   const { wallet } = useWallet();
   
-  // Refresh escorts when neural system is initialized
+  // Wait for neural system initialization before loading escorts
   useEffect(() => {
     if (isNeuralInitialized) {
       // Configure neural service based on user's wallet balance
       if (wallet && escortsNeuralService) {
         const premiumMode = (wallet.balance > 100);
+        
+        // Apply OxumAlgorithm boost settings based on user's premium status
         escortsNeuralService.configure({
           resourceAllocation: premiumMode ? 50 : 25,
-          priority: premiumMode ? 80 : 40
+          priority: premiumMode ? 80 : 40,
+          boostingEnabled: true, // Enable boosting logic as per request
+          boostingAlgorithm: "OxumAlgorithm",
+          orderByBoost: true // As specified in the module requirements
         });
       }
       
-      // Refresh escorts with neural processing
+      // Refresh escorts with neural processing (not raw scraping)
       loadEscorts(true);
     }
   }, [isNeuralInitialized, wallet?.balance, loadEscorts]);

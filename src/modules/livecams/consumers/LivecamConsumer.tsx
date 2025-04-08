@@ -16,7 +16,7 @@ export const LivecamConsumer: React.FC<LivecamConsumerProps> = ({
   const { state, loadLivecams } = useLivecamContext();
   const { wallet } = useWallet();
   
-  // Refresh livecams when neural system is initialized
+  // Wait for neural system initialization before loading livecams
   useEffect(() => {
     if (isNeuralInitialized) {
       // Configure neural service based on user's wallet balance
@@ -24,7 +24,8 @@ export const LivecamConsumer: React.FC<LivecamConsumerProps> = ({
         const premiumMode = (wallet.balance > 100);
         livecamsNeuralService.configure({
           resourceAllocation: premiumMode ? 60 : 40,
-          priority: premiumMode ? 85 : 50
+          priority: premiumMode ? 85 : 50,
+          orderByBoost: true // Apply boosting for consistency across modules
         });
       }
       

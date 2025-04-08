@@ -16,7 +16,7 @@ export const CreatorConsumer: React.FC<CreatorConsumerProps> = ({
   const { state, loadCreators } = useCreatorContext();
   const { wallet } = useWallet();
   
-  // Refresh creators when neural system is initialized
+  // Wait for neural system initialization before loading creators
   useEffect(() => {
     if (isNeuralInitialized) {
       // Configure neural service based on user's wallet balance
@@ -24,7 +24,9 @@ export const CreatorConsumer: React.FC<CreatorConsumerProps> = ({
         const premiumMode = (wallet.balance > 100);
         creatorsNeuralService.configure({
           resourceAllocation: premiumMode ? 50 : 30,
-          priority: premiumMode ? 80 : 45
+          priority: premiumMode ? 80 : 45,
+          boostingEnabled: true, // Enable boosting for consistency with escort module
+          orderByBoost: true
         });
       }
       
