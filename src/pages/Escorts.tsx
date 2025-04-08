@@ -7,8 +7,10 @@ import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Filter, SlidersHorizontal, MapPin, Star } from 'lucide-react';
+import { EscortsModule } from '@/modules/escorts/EscortsModule';
 
-const Escorts = () => {
+// Content component that uses the escort hooks
+const EscortsContent = () => {
   const { 
     escorts, 
     featuredEscorts, 
@@ -114,6 +116,15 @@ const Escorts = () => {
         />
       )}
     </div>
+  );
+};
+
+// Main component that wraps the content with the provider
+const Escorts = () => {
+  return (
+    <EscortsModule>
+      <EscortsContent />
+    </EscortsModule>
   );
 };
 
