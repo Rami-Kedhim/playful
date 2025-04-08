@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { BrainHubConfig } from '@/types/brainHub';
 import BrainHubConfigPanel from '@/components/admin/BrainHubConfig';
@@ -11,6 +12,8 @@ import { nsfwAIProviderService } from '@/services/ai/NSFWAIProviderService';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoCircledIcon, PlayIcon, StopIcon } from '@radix-ui/react-icons';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const BrainHubDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -20,13 +23,34 @@ const BrainHubDashboard = () => {
   const [providers, setProviders] = useState(nsfwAIProviderService.getProviders());
   const [brainHubConfig, setBrainHubConfig] = useState(brainHub.getConfig());
   const [autonomyEnabled, setAutonomyEnabled] = useState(false);
+  const [autonomyLevel, setAutonomyLevel] = useState(50);
+  const [capabilities, setCapabilities] = useState<any>({}); // Will store Brain Hub capabilities
+  const [decisionLogs, setDecisionLogs] = useState<any[]>([]); // Store decision logs
+  
+  // Load initial status from Brain Hub
+  useEffect(() => {
+    // Get autonomy status
+    const autonomyStatus = brainHub.getAutonomyStatus();
+    setAutonomyEnabled(autonomyStatus.enabled);
+    setAutonomyLevel(autonomyStatus.level);
+    
+    // Get capabilities
+    setCapabilities(brainHub.getCapabilities());
+    
+    // Get decision logs
+    setDecisionLogs(brainHub.getDecisionLogs(20));
+  }, []);
   
   // Simulate system metrics
   useEffect(() => {
     const timer = setInterval(() => {
-      setCpuUsage(Math.random() * 40 + 30);
-      setMemoryUsage(Math.random() * 30 + 40);
-      setRequestsPerSecond(Math.floor(Math.random() * 150));
+      const status = brainHub.getSystemStatus();
+      setCpuUsage(status.cpuUsage);
+      setMemoryUsage(status.memoryUsage);
+      setRequestsPerSecond(Math.floor(status.requestsPerMinute / 60));
+      
+      // Get latest decision logs
+      setDecisionLogs(brainHub.getDecisionLogs(20));
     }, 5000);
     
     return () => clearInterval(timer);
@@ -34,38 +58,47 @@ const BrainHubDashboard = () => {
   
   // Function to optimize Brain Hub
   const handleOptimize = () => {
-    // Get current config
-    const currentConfig = brainHub.getConfig();
+    brainHub.optimizeSystem();
     
-    // Create an optimized config
-    const optimizedConfig: BrainHubConfig = {
-      ...currentConfig,
-      psychology: {
-        ...currentConfig.psychology,
-        behaviourPrediction: true
-      },
-      physics: {
-        ...currentConfig.physics,
-        fluidDynamics: cpuUsage > 50 ? false : true
-      },
-      economics: currentConfig.economics,
-      robotics: currentConfig.robotics,
-      geoLegalFilteringEnabled: currentConfig.geoLegalFilteringEnabled,
-      neuroEmotionEnabled: currentConfig.neuroEmotionEnabled,
-      predictiveModulationEnabled: true
-    };
+    // Update config state
+    setBrainHubConfig(brainHub.getConfig());
     
-    // Update the config
-    brainHub.updateConfig(optimizedConfig);
-    setBrainHubConfig(optimizedConfig);
-    
-    // Force memory usage down (simulation)
-    setMemoryUsage(prev => Math.max(prev * 0.7, 25));
+    // Get updated system status
+    const status = brainHub.getSystemStatus();
+    setCpuUsage(status.cpuUsage);
+    setMemoryUsage(status.memoryUsage);
   };
 
   // Toggle Brain Hub autonomy mode
   const toggleAutonomy = () => {
-    setAutonomyEnabled(prev => !prev);
+    const newState = !autonomyEnabled;
+    brainHub.setAutonomy(newState, autonomyLevel);
+    setAutonomyEnabled(newState);
+  };
+  
+  // Update autonomy level
+  const handleAutonomyLevelChange = (value: number[]) => {
+    const level = value[0];
+    setAutonomyLevel(level);
+    brainHub.setAutonomy(autonomyEnabled, level);
+  };
+  
+  // Toggle a specific capability
+  const toggleCapability = (category: string, capability: string, enabled: boolean) => {
+    brainHub.toggleCapability(category as any, capability, enabled);
+    setCapabilities(brainHub.getCapabilities());
+  };
+  
+  // Test provider recommendation
+  const testProviderRecommendation = (isNSFW: boolean, region: string) => {
+    const recommendation = brainHub.getRecommendedProvider({
+      isNSFW,
+      userRegion: region,
+      quality: 'premium'
+    });
+    
+    console.log('Provider recommendation:', recommendation);
+    return recommendation;
   };
   
   return (
@@ -101,8 +134,22 @@ const BrainHubDashboard = () => {
           <AlertDescription>
             Brain Hub is now operating in autonomous mode with minimal human oversight. 
             The system will self-optimize and make decisions about AI model selection, content filtering,
-            and resource allocation.
+            and resource allocation. Current autonomy level: {autonomyLevel}%
           </AlertDescription>
+          <div className="mt-4">
+            <Label>Autonomy Level</Label>
+            <Slider
+              defaultValue={[autonomyLevel]}
+              max={100}
+              step={1}
+              className="mt-2"
+              onValueChange={handleAutonomyLevelChange}
+            />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Low Autonomy</span>
+              <span>High Autonomy</span>
+            </div>
+          </div>
         </Alert>
       )}
       
@@ -142,6 +189,7 @@ const BrainHubDashboard = () => {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="aiProviders">AI Providers</TabsTrigger>
+          <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
           <TabsTrigger value="config">Configuration</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
@@ -177,6 +225,48 @@ const BrainHubDashboard = () => {
                       {provider.name}
                     </Badge>
                   ))}
+                </div>
+                
+                {/* Provider Recommendation Test */}
+                <div className="mt-6 p-4 border rounded-md bg-muted/20">
+                  <h4 className="font-medium mb-2">Provider Recommendation Test</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Button 
+                        onClick={() => testProviderRecommendation(false, 'us')}
+                        size="sm"
+                        className="mb-2"
+                      >
+                        Test SFW Content (US)
+                      </Button>
+                      <Button 
+                        onClick={() => testProviderRecommendation(true, 'us')}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        Test NSFW Content (US)
+                      </Button>
+                    </div>
+                    <div>
+                      <Button 
+                        onClick={() => testProviderRecommendation(false, 'jp')}
+                        size="sm"
+                        className="mb-2"
+                      >
+                        Test SFW Content (JP)
+                      </Button>
+                      <Button 
+                        onClick={() => testProviderRecommendation(true, 'jp')}
+                        size="sm"
+                        variant="destructive"
+                      >
+                        Test NSFW Content (JP)
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Check browser console for recommendation results
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -219,6 +309,113 @@ const BrainHubDashboard = () => {
           </Card>
         </TabsContent>
         
+        <TabsContent value="capabilities" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Brain Hub Capabilities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {Object.keys(capabilities).length > 0 ? (
+                <div className="space-y-6">
+                  {/* Project Management Capabilities */}
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Project Management</h3>
+                    <div className="space-y-4">
+                      {Object.entries(capabilities.projectManagement).map(([key, enabled]) => (
+                        <div key={key} className="flex justify-between items-center">
+                          <div>
+                            <Label className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</Label>
+                            <p className="text-xs text-muted-foreground">
+                              Enable autonomous project management capabilities
+                            </p>
+                          </div>
+                          <Switch 
+                            checked={enabled as boolean}
+                            onCheckedChange={(checked) => 
+                              toggleCapability('projectManagement', key, checked)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Platform Optimization Capabilities */}
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Platform Optimization</h3>
+                    <div className="space-y-4">
+                      {Object.entries(capabilities.platformOptimization).map(([key, enabled]) => (
+                        <div key={key} className="flex justify-between items-center">
+                          <div>
+                            <Label className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</Label>
+                            <p className="text-xs text-muted-foreground">
+                              Enable autonomous platform optimization capabilities
+                            </p>
+                          </div>
+                          <Switch 
+                            checked={enabled as boolean}
+                            onCheckedChange={(checked) => 
+                              toggleCapability('platformOptimization', key, checked)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* User Intelligence Capabilities */}
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">User Intelligence</h3>
+                    <div className="space-y-4">
+                      {Object.entries(capabilities.userIntelligence).map(([key, enabled]) => (
+                        <div key={key} className="flex justify-between items-center">
+                          <div>
+                            <Label className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</Label>
+                            <p className="text-xs text-muted-foreground">
+                              Enable advanced user analysis and personalization
+                            </p>
+                          </div>
+                          <Switch 
+                            checked={enabled as boolean}
+                            onCheckedChange={(checked) => 
+                              toggleCapability('userIntelligence', key, checked)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Growth & Engagement Capabilities */}
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Growth & Engagement</h3>
+                    <div className="space-y-4">
+                      {Object.entries(capabilities.growthEngagement).map(([key, enabled]) => (
+                        <div key={key} className="flex justify-between items-center">
+                          <div>
+                            <Label className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</Label>
+                            <p className="text-xs text-muted-foreground">
+                              Enable growth optimization and user engagement features
+                            </p>
+                          </div>
+                          <Switch 
+                            checked={enabled as boolean}
+                            onCheckedChange={(checked) => 
+                              toggleCapability('growthEngagement', key, checked)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p>Loading capabilities...</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
         <TabsContent value="config" className="mt-4">
           <BrainHubConfigPanel />
         </TabsContent>
@@ -226,18 +423,25 @@ const BrainHubDashboard = () => {
         <TabsContent value="logs" className="mt-4">
           <Card>
             <CardContent className="pt-6">
-              <h3 className="text-lg font-medium mb-4">System Logs</h3>
+              <h3 className="text-lg font-medium mb-4">System Logs & Decisions</h3>
               <div className="bg-muted rounded-md p-4 font-mono text-xs h-64 overflow-y-auto">
-                <div className="text-gray-500">[2025-04-07T16:32:08Z] info: HERMES API initialized in mock mode</div>
-                <div className="text-green-500">[2025-04-07T16:35:22Z] info: Content filtering engine started</div>
-                <div className="text-green-500">[2025-04-07T16:35:24Z] info: Geo-legal restrictions applied for regions: [US, UK, EU]</div>
-                <div className="text-yellow-500">[2025-04-07T16:36:01Z] warn: High CPU usage detected (76%)</div>
-                <div className="text-green-500">[2025-04-07T16:36:05Z] info: Auto-scaling initiated</div>
-                <div className="text-gray-500">[2025-04-07T16:36:22Z] info: Memory usage stable at 42%</div>
-                <div className="text-green-500">[2025-04-07T16:37:30Z] info: Neural prediction models loaded</div>
-                <div className="text-red-500">[2025-04-07T16:37:45Z] error: NSFW content blocked in restricted region</div>
-                <div className="text-green-500">[2025-04-07T16:38:45Z] info: AI emotional states initialized</div>
-                <div className="text-blue-500">[2025-04-07T16:39:00Z] info: Autonomous mode {autonomyEnabled ? 'enabled' : 'disabled'}</div>
+                {decisionLogs.map((log, index) => (
+                  <div key={index} className="text-green-500 mb-1">
+                    [{new Date(log.timestamp).toISOString()}] {log.decision}: {JSON.stringify(log.context)}
+                  </div>
+                ))}
+                
+                {/* Fallback logs if no decision logs yet */}
+                {decisionLogs.length === 0 && (
+                  <>
+                    <div className="text-gray-500">[2025-04-07T16:32:08Z] info: HERMES API initialized in mock mode</div>
+                    <div className="text-green-500">[2025-04-07T16:35:22Z] info: Content filtering engine started</div>
+                    <div className="text-green-500">[2025-04-07T16:35:24Z] info: Geo-legal restrictions applied for regions: [US, UK, EU]</div>
+                    <div className="text-yellow-500">[2025-04-07T16:36:01Z] warn: High CPU usage detected (76%)</div>
+                    <div className="text-green-500">[2025-04-07T16:36:05Z] info: Auto-scaling initiated</div>
+                    <div className="text-gray-500">[2025-04-07T16:36:22Z] info: Memory usage stable at 42%</div>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

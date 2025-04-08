@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useUserContext } from '@/hooks/ai-lucie/useUserContext';
@@ -206,7 +205,10 @@ export const useBrainHubAIContext = (componentId: string) => {
     updateAIContext({
       sessionData: {
         emotionalState,
-        lastInteractionTimestamp: Date.now()
+        lastInteractionTimestamp: Date.now(),
+        interactionCount: aiContext ? aiContext.sessionData.interactionCount : 0,
+        favoriteTopics: aiContext ? aiContext.sessionData.favoriteTopics : [],
+        responseQuality: aiContext ? aiContext.sessionData.responseQuality : 'basic'
       }
     });
   };
@@ -219,7 +221,9 @@ export const useBrainHubAIContext = (componentId: string) => {
         lastInteractionTimestamp: Date.now(),
         favoriteTopics: topic && aiContext ? 
           [...new Set([...aiContext.sessionData.favoriteTopics, topic])] : 
-          aiContext?.sessionData.favoriteTopics
+          aiContext?.sessionData.favoriteTopics || [],
+        responseQuality: aiContext ? aiContext.sessionData.responseQuality : 'basic',
+        emotionalState: aiContext?.sessionData.emotionalState
       }
     });
   };
@@ -229,11 +233,19 @@ export const useBrainHubAIContext = (componentId: string) => {
     updateAIContext({
       userPreferences: {
         contentFilters: {
-          nsfw: enabled
+          nsfw: enabled,
+          violence: aiContext ? aiContext.userPreferences.contentFilters.violence : false,
+          political: aiContext ? aiContext.userPreferences.contentFilters.political : false,
+          religious: aiContext ? aiContext.userPreferences.contentFilters.religious : false
         }
       },
       systemContext: {
-        modelFamily: enabled ? 'nsfw' : 'mitigation'
+        modelFamily: enabled ? 'nsfw' : 'mitigation',
+        currentProvider: aiContext ? aiContext.systemContext.currentProvider : 'openai',
+        fallbackProvider: aiContext ? aiContext.systemContext.fallbackProvider : 'openai',
+        modelCapabilities: aiContext ? aiContext.systemContext.modelCapabilities : ['text', 'chat'],
+        legalCompliance: aiContext ? aiContext.systemContext.legalCompliance : true,
+        geolocation: aiContext?.systemContext.geolocation
       }
     });
   };
