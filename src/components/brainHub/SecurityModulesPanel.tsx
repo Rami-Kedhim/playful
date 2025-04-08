@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,21 +23,12 @@ const SecurityModulesPanel: React.FC = () => {
   const [auditFindings, setAuditFindings] = useState<any[]>([]);
   const [isRunningAudit, setIsRunningAudit] = useState(false);
   
-  // Initialize data
   useEffect(() => {
-    // Get all security rules
     setSecurityRules(securityEngine.getSecurityRules());
-    
-    // Get all content filters
     setContentFilters(securityEngine.getContentFilters());
-    
-    // Get recent alerts
     setRecentAlerts(securityEngine.getRecentAlerts());
-    
-    // Get monitoring status
     setIsMonitoring(securityEngine.getMonitoringStatus());
     
-    // Set up interval to refresh data
     const interval = setInterval(() => {
       setSecurityRules(securityEngine.getSecurityRules());
       setRecentAlerts(securityEngine.getRecentAlerts());
@@ -48,7 +38,6 @@ const SecurityModulesPanel: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
   
-  // Toggle security monitoring
   const toggleMonitoring = () => {
     if (isMonitoring) {
       securityEngine.stopMonitoring();
@@ -58,7 +47,6 @@ const SecurityModulesPanel: React.FC = () => {
     setIsMonitoring(securityEngine.getMonitoringStatus());
   };
   
-  // Toggle a security rule
   const toggleSecurityRule = (ruleId: string, isActive: boolean) => {
     securityEngine.updateSecurityRule(ruleId, { isActive });
     setSecurityRules(securityEngine.getSecurityRules());
@@ -69,7 +57,6 @@ const SecurityModulesPanel: React.FC = () => {
     });
   };
   
-  // Toggle a content filter
   const toggleContentFilter = (filterId: string, isActive: boolean) => {
     securityEngine.updateContentFilter(filterId, { isActive });
     setContentFilters(securityEngine.getContentFilters());
@@ -80,7 +67,6 @@ const SecurityModulesPanel: React.FC = () => {
     });
   };
   
-  // Resolve an alert
   const resolveAlert = (alertId: string) => {
     securityEngine.resolveAlert(alertId, "admin");
     setRecentAlerts(securityEngine.getRecentAlerts());
@@ -91,7 +77,6 @@ const SecurityModulesPanel: React.FC = () => {
     });
   };
   
-  // Run a security audit
   const runSecurityAudit = async () => {
     setIsRunningAudit(true);
     
@@ -116,7 +101,6 @@ const SecurityModulesPanel: React.FC = () => {
     }
   };
   
-  // Get severity badge for alerts and rules
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case 'critical':
@@ -132,7 +116,6 @@ const SecurityModulesPanel: React.FC = () => {
     }
   };
   
-  // Get category icon
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'access':
@@ -297,7 +280,7 @@ const SecurityModulesPanel: React.FC = () => {
                             {auditFindings.length > 0 ? (
                               <div className="space-y-2">
                                 {auditFindings.map((finding, index) => (
-                                  <Alert key={index} variant="outline" className={
+                                  <Alert key={index} className={
                                     finding.severity === 'critical' ? 'border-red-200 bg-red-50' :
                                     finding.severity === 'high' ? 'border-orange-200 bg-orange-50' :
                                     finding.severity === 'medium' ? 'border-amber-200 bg-amber-50' :

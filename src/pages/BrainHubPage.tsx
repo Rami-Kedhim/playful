@@ -36,7 +36,8 @@ const BrainHubPage: React.FC = () => {
             moduleId: 'strategy-core',
             description: 'Initialized system with optimal parameters based on current traffic',
             confidence: 0.85,
-            impact: 'low'
+            impact: 'low',
+            metadata: {} // Adding the required empty metadata object
           });
         }, 2000);
       }
