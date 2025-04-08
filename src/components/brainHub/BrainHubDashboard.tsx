@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -12,6 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import AutonomyModulesPanel from './AutonomyModulesPanel';
 import SecurityModulesPanel from './SecurityModulesPanel';
+import BusinessIntelligencePanel from './BusinessIntelligencePanel';
 import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
 import securityEngine from '@/services/neural/BrainHubSecurityEngine';
 import {
@@ -29,10 +29,11 @@ import {
   XCircle,
   PlayCircle,
   Zap,
-  Shield
+  Shield,
+  DollarSign,
+  Lightbulb
 } from 'lucide-react';
 
-// Interface for module capabilities
 interface ModuleCapabilities {
   [key: string]: boolean;
 }
@@ -46,18 +47,15 @@ const BrainHubDashboard: React.FC = () => {
   const [decisionLogs, setDecisionLogs] = useState<{timestamp: number, decision: string, context: any}[]>([]);
   const [enhancedSystemMetrics, setEnhancedSystemMetrics] = useState<any>(null);
   
-  // For provider testing
   const [testRegion, setTestRegion] = useState("global");
   const [testNSFW, setTestNSFW] = useState(false);
   const [testQuality, setTestQuality] = useState<'basic' | 'premium'>('basic');
   const [providerResult, setProviderResult] = useState<any>(null);
 
-  // Update system status periodically
   useEffect(() => {
     const interval = setInterval(() => {
       setSystemStatus(brainHub.getSystemStatus());
       
-      // Try to get enhanced metrics if available
       try {
         if (typeof brainHub.getEnhancedSystemMetrics === 'function') {
           setEnhancedSystemMetrics(brainHub.getEnhancedSystemMetrics());
@@ -70,7 +68,6 @@ const BrainHubDashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
   
-  // Fetch decision logs periodically
   useEffect(() => {
     const fetchLogs = () => {
       setDecisionLogs(brainHub.getDecisionLogs());
@@ -82,12 +79,10 @@ const BrainHubDashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
   
-  // Handle autonomy level change
   const handleAutonomyChange = (value: number[]) => {
     const level = value[0];
     brainHub.setAutonomy(autonomyStatus.enabled, level);
     
-    // Also update the autonomy engine if available
     if (autonomyEngine) {
       autonomyEngine.setAutonomyLevel(level);
     }
@@ -99,12 +94,10 @@ const BrainHubDashboard: React.FC = () => {
     });
   };
   
-  // Toggle autonomy
   const toggleAutonomy = () => {
     const newState = !autonomyStatus.enabled;
     brainHub.setAutonomy(newState, autonomyStatus.level);
     
-    // Also toggle the autonomy engine if available
     if (autonomyEngine) {
       if (newState) {
         autonomyEngine.start();
@@ -122,7 +115,6 @@ const BrainHubDashboard: React.FC = () => {
     });
   };
   
-  // Toggle capability
   const toggleCapability = (category: string, capability: string, enabled: boolean) => {
     brainHub.toggleCapability(category as any, capability as any, enabled);
     setCapabilities(brainHub.getCapabilities());
@@ -132,7 +124,6 @@ const BrainHubDashboard: React.FC = () => {
     });
   };
   
-  // Test provider recommendation
   const testProviderRecommendation = () => {
     const result = brainHub.getRecommendedProvider({
       isNSFW: testNSFW,
@@ -147,12 +138,10 @@ const BrainHubDashboard: React.FC = () => {
     });
   };
   
-  // Format timestamp to readable date
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
   
-  // Initialize security monitoring if it's not already active
   useEffect(() => {
     if (securityEngine && !securityEngine.getMonitoringStatus()) {
       securityEngine.startMonitoring();
@@ -191,7 +180,7 @@ const BrainHubDashboard: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-7 mb-8">
+        <TabsList className="grid grid-cols-8 mb-8">
           <TabsTrigger value="status">
             <BarChart className="h-4 w-4 mr-2" />
             System Status
@@ -207,6 +196,10 @@ const BrainHubDashboard: React.FC = () => {
           <TabsTrigger value="security">
             <Shield className="h-4 w-4 mr-2" />
             Security
+          </TabsTrigger>
+          <TabsTrigger value="intelligence">
+            <Lightbulb className="h-4 w-4 mr-2" />
+            Intelligence
           </TabsTrigger>
           <TabsTrigger value="ai-providers">
             <MessageSquare className="h-4 w-4 mr-2" />
@@ -436,6 +429,10 @@ const BrainHubDashboard: React.FC = () => {
         
         <TabsContent value="security" className="space-y-6">
           <SecurityModulesPanel />
+        </TabsContent>
+        
+        <TabsContent value="intelligence" className="space-y-6">
+          <BusinessIntelligencePanel />
         </TabsContent>
         
         <TabsContent value="ai-providers" className="space-y-6">
