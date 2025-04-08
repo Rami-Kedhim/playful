@@ -9,15 +9,15 @@ import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
 import securityEngine from '@/services/neural/BrainHubSecurityEngine';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
+import { BrainHubHealthStatus } from '@/types/brainHubHealth';
 
 const BrainHubPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [initErrors, setInitErrors] = useState<string[]>([]);
-  const [systemHealth, setSystemHealth] = useState<{status: 'good' | 'warning' | 'error', message?: string}>({
-    status: 'good'
-  });
   const { isAuthenticated, checkRole } = useAuth();
+  const { health, startMonitoring } = useBrainHubHealth();
   const navigate = useNavigate();
   
   // Check if user has permission to access Brain Hub
@@ -41,7 +41,11 @@ const BrainHubPage: React.FC = () => {
     
     // Initialize Brain Hub
     initializeBrainHub();
-  }, [isAuthenticated, navigate, checkRole]);
+    
+    // Start health monitoring
+    startMonitoring();
+    
+  }, [isAuthenticated, navigate, checkRole, startMonitoring]);
 
   // Initialize Brain Hub systems
   const initializeBrainHub = async () => {
@@ -70,7 +74,7 @@ const BrainHubPage: React.FC = () => {
             description: 'Initialized system with optimal parameters based on current traffic',
             confidence: 0.85,
             impact: 'low',
-            metadata: {} // Adding the required empty metadata object
+            metadata: {}
           });
         }, 2000);
       }
@@ -83,15 +87,38 @@ const BrainHubPage: React.FC = () => {
         'security': true
       });
       
-      // Perform a health check
-      const healthCheck = performSystemHealthCheck();
-      setSystemHealth(healthCheck);
-      
-      if (healthCheck.status === 'warning') {
+      // Notify the user about system status
+      if (health.status === 'warning') {
         toast({
           title: "System Warning",
-          description: healthCheck.message,
-          variant: "warning"
+          description: health.message || "System is operating with warnings.",
+          variant: "warning",
+          action: (
+            <div className="h-8 w-8 bg-yellow-500/20 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+            </div>
+          )
+        });
+      } else if (health.status === 'error') {
+        toast({
+          title: "System Error",
+          description: health.message || "Critical errors detected in the system.",
+          variant: "destructive",
+          action: (
+            <div className="h-8 w-8 bg-red-500/20 rounded-full flex items-center justify-center">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+            </div>
+          )
+        });
+      } else {
+        toast({
+          title: "System Online",
+          description: "Brain Hub initialized successfully.",
+          action: (
+            <div className="h-8 w-8 bg-green-500/20 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </div>
+          )
         });
       }
     } catch (error: any) {
@@ -101,28 +128,6 @@ const BrainHubPage: React.FC = () => {
       // Simulate loading time
       setTimeout(() => setIsLoading(false), 1500);
     }
-  };
-  
-  // Perform a simulated health check of the system
-  const performSystemHealthCheck = () => {
-    // This is a placeholder - in a real implementation, this would check actual system metrics
-    const randomCheck = Math.random();
-    
-    if (randomCheck > 0.9) {
-      return { 
-        status: 'warning' as const, 
-        message: "High memory usage detected in neural processing module."
-      };
-    }
-    
-    if (randomCheck > 0.95) {
-      return { 
-        status: 'error' as const, 
-        message: "Critical error in data processing pipeline."
-      };
-    }
-    
-    return { status: 'good' as const };
   };
   
   // Retry initialization
@@ -176,23 +181,6 @@ const BrainHubPage: React.FC = () => {
       hideNavbar={false}
       containerClass="container mx-auto px-4"
     >
-      {systemHealth.status === 'warning' && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-amber-700">
-                {systemHealth.message || "System operating with warnings. Check system health."}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <BrainHubDashboard />
     </MainLayout>
   );
