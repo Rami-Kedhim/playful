@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { BrainHubConfig as BrainHubConfigType } from '@/services/neural/HermesOxumBrainHub';
+import { PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/services/neural/HermesOxumBrainHub';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AcademicModelTabProps<T extends Record<string, boolean>> { 

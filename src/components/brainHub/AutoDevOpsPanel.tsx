@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
 import { RefreshCw, Code, CheckCircle, AlertTriangle, Box, Activity, GitMerge, PlayCircle } from "lucide-react";
-import { autoDevOpsManager, MissingComponentAnalysis, CodeGenerationResult, DeploymentResult } from "@/services/neural/BrainHubAutoDevOpsManager";
+import { brainHubAutoDevOpsManager, MissingComponentAnalysis, CodeGenerationResult, DeploymentResult } from "@/services/neural/BrainHubAutoDevOpsManager";
 
 const AutoDevOpsPanel: React.FC = () => {
   const [missingComponents, setMissingComponents] = useState<MissingComponentAnalysis[]>([]);
@@ -25,20 +24,18 @@ const AutoDevOpsPanel: React.FC = () => {
   const [selectedComponent, setSelectedComponent] = useState<MissingComponentAnalysis | null>(null);
   const [selectedCode, setSelectedCode] = useState<CodeGenerationResult | null>(null);
 
-  // Initialize and load data
   useEffect(() => {
     refreshData();
-    // Refresh every 30 seconds
     const interval = setInterval(refreshData, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const refreshData = () => {
-    setMissingComponents(autoDevOpsManager.getDetectedMissingComponents());
-    setReviewQueue(autoDevOpsManager.getCodeReviewQueue());
-    setPendingDeployments(autoDevOpsManager.getPendingDeployments());
-    setDeploymentHistory(autoDevOpsManager.getDeploymentHistory());
-    const status = autoDevOpsManager.getSystemStatus();
+    setMissingComponents(brainHubAutoDevOpsManager.getDetectedMissingComponents());
+    setReviewQueue(brainHubAutoDevOpsManager.getCodeReviewQueue());
+    setPendingDeployments(brainHubAutoDevOpsManager.getPendingDeployments());
+    setDeploymentHistory(brainHubAutoDevOpsManager.getDeploymentHistory());
+    const status = brainHubAutoDevOpsManager.getSystemStatus();
     setSystemStatus(status);
     setAutonomyLevel(status.autonomyLevel);
     setIsAnalyzing(status.isAnalyzing);
@@ -47,16 +44,16 @@ const AutoDevOpsPanel: React.FC = () => {
   const handleAutonomyChange = (value: number[]) => {
     const level = value[0];
     setAutonomyLevel(level);
-    autoDevOpsManager.setAutonomyLevel(level);
+    brainHubAutoDevOpsManager.setAutonomyLevel(level);
   };
 
   const handleStartAnalysis = () => {
-    autoDevOpsManager.scheduleSystemAnalysis();
+    brainHubAutoDevOpsManager.scheduleSystemAnalysis();
     setIsAnalyzing(true);
   };
 
   const handleGenerateCode = async (component: MissingComponentAnalysis) => {
-    await autoDevOpsManager.generateCode({
+    await brainHubAutoDevOpsManager.generateCode({
       componentType: component.componentType,
       description: component.description,
       requirements: [component.description],
@@ -67,17 +64,17 @@ const AutoDevOpsPanel: React.FC = () => {
   };
 
   const handleApproveCode = (fileName: string) => {
-    autoDevOpsManager.approveCode(fileName);
+    brainHubAutoDevOpsManager.approveCode(fileName);
     refreshData();
   };
 
   const handleRejectCode = (fileName: string) => {
-    autoDevOpsManager.rejectCode(fileName, "Did not meet quality standards");
+    brainHubAutoDevOpsManager.rejectCode(fileName, "Did not meet quality standards");
     refreshData();
   };
 
   const handleDeployCode = async (fileName: string) => {
-    await autoDevOpsManager.deployCode(fileName);
+    await brainHubAutoDevOpsManager.deployCode(fileName);
     refreshData();
   };
 
