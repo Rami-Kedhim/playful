@@ -1,104 +1,165 @@
 
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import MainLayout from "@/components/layout/MainLayout";
-import LivecamGrid from "@/components/livecams/LivecamGrid";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Brain, Settings } from "lucide-react";
+import { LivecamsModule } from "@/modules/livecams/LivecamsModule";
+import useLivecams from "@/hooks/useLivecams";
 import LivecamFilters from "@/components/livecams/LivecamFilters";
-import { useBoostableLivecams } from "@/hooks/useBoostableLivecams";
-import { useToast } from "@/components/ui/use-toast";
-import { LivecamModel } from "@/types/livecams";
+import LivecamGrid from "@/components/livecams/LivecamGrid";
+import { livecamsNeuralService } from "@/services/neural/modules/LivecamsNeuralService";
 
 const Livecams: React.FC = () => {
-  const { toast } = useToast();
+  return (
+    <LivecamsModule>
+      <LivecamsPageContent />
+    </LivecamsModule>
+  );
+};
+
+const LivecamsPageContent: React.FC = () => {
   const { 
-    livecams,
+    livecams, 
     loading, 
     error, 
     filters, 
-    hasMore, 
     totalCount,
-    loadMore, 
+    hasMore,
+    fetchLivecams, 
     updateFilters,
-    boostLivecam,
-    cancelBoost,
-    isBoosted,
-    boostedIds
-  } = useBoostableLivecams();
-
-  // Show error toast if something went wrong
-  React.useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
-
-  // Adapter functions to match the expected parameter types in LivecamGrid
-  const handleBoost = (livecamId: string) => {
-    boostLivecam(livecamId);
-    return true;
+    resetFilters,
+    loadMore
+  } = useLivecams();
+  
+  const handleRefresh = () => {
+    fetchLivecams(true); // Force refresh
   };
   
-  const handleCancelBoost = (livecamId: string) => {
-    cancelBoost(livecamId);
-    return true;
-  };
-
-  // Adapt the livecams to match the expected type in LivecamGrid
-  const adaptedLivecams = livecams.map(cam => ({
-    id: cam.id,
-    username: cam.name || cam.id, // Fallback if name is missing
-    displayName: cam.name || `Model ${cam.id}`, // Fallback if name is missing
-    imageUrl: cam.thumbnailUrl || 'https://picsum.photos/300/200', // Fallback if thumbnailUrl is missing
-    thumbnailUrl: cam.thumbnailUrl || 'https://picsum.photos/300/200', // Always provide a thumbnailUrl (required field)
-    isLive: cam.isLive,
-    viewerCount: cam.viewerCount,
-    tags: cam.tags,
-    boosted: cam.boosted,
-    boostScore: cam.boostScore,
-    boostRank: cam.boostRank,
-    country: "Unknown",
-    categories: cam.tags,
-  }));
-
+  const neuralStatus = livecamsNeuralService.isEnabled() 
+    ? `Neural processing active (${livecamsNeuralService.getConfig().autonomyLevel}%)`
+    : "Neural processing disabled";
+  
   return (
-    <MainLayout title="Live Cams">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Live Cams</h1>
-        <p className="text-muted-foreground">
-          Watch live webcam shows from models around the world
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <LivecamFilters filters={filters} onFilterChange={updateFilters} />
-        </div>
-        
-        <div className="lg:col-span-3">
-          {!loading && adaptedLivecams.length > 0 && (
-            <div className="mb-4 flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">
-                Showing {adaptedLivecams.length} of {totalCount} models
-              </p>
+    <>
+      <Helmet>
+        <title>Live Cams | Watch Live Webcam Streams</title>
+        <meta name="description" content="Watch live webcam shows from models around the world. Interactive streams, HD quality, and real-time chat." />
+      </Helmet>
+      
+      <MainLayout>
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-3xl font-bold">Live Cams</h1>
+                {livecamsNeuralService.isEnabled() && (
+                  <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full flex items-center">
+                    <Brain className="h-3 w-3 mr-1" />
+                    Neural Enhanced
+                  </span>
+                )}
+              </div>
+              <p className="text-muted-foreground">Watch live webcam shows from models around the world</p>
             </div>
-          )}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-1"
+                onClick={() => updateFilters({ 
+                  sortBy: filters.sortBy === 'recommended' ? 'viewers' : 'recommended' 
+                })}
+              >
+                <Settings className="h-4 w-4" />
+                {filters.sortBy === 'recommended' ? 'Neural' : 'Standard'} Sorting
+              </Button>
+              <Button onClick={handleRefresh} disabled={loading}>
+                {loading ? "Refreshing..." : "Refresh"}
+              </Button>
+            </div>
+          </div>
           
-          <LivecamGrid 
-            models={adaptedLivecams as LivecamModel[]} 
-            loading={loading} 
-            hasMore={hasMore} 
-            onLoadMore={loadMore}
-            showBoostControls={true}
-            boostedIds={boostedIds}
-            onBoost={handleBoost}
-            onCancelBoost={handleCancelBoost}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1">
+              <LivecamFilters 
+                filters={filters} 
+                onFilterChange={updateFilters}
+                onResetFilters={resetFilters}
+              />
+              
+              <div className="mt-4 text-xs text-muted-foreground">
+                {neuralStatus}
+              </div>
+            </div>
+            
+            <div className="lg:col-span-3">
+              {!loading && !error && livecams.length > 0 && (
+                <div className="mb-4 flex justify-between items-center">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {livecams.length} of {totalCount} models
+                  </p>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => updateFilters({ status: filters.status === 'live' ? 'all' : 'live' })}
+                  >
+                    {filters.status === 'live' ? 'Show All' : 'Show Live Only'}
+                  </Button>
+                </div>
+              )}
+              
+              {error ? (
+                <div className="p-4 bg-red-500/10 border border-red-500 rounded-md text-center mb-6">
+                  <p className="text-red-500">Error: {error}</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleRefresh}
+                    className="mt-2"
+                  >
+                    Try Again
+                  </Button>
+                </div>
+              ) : loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array(6).fill(0).map((_, i) => (
+                    <div key={i} className="rounded-lg overflow-hidden">
+                      <Skeleton className="w-full aspect-video" />
+                      <div className="p-3">
+                        <Skeleton className="w-2/3 h-5 mb-2" />
+                        <Skeleton className="w-1/2 h-4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <LivecamGrid 
+                  livecams={livecams} 
+                  hasMore={hasMore}
+                  onLoadMore={loadMore}
+                />
+              )}
+              
+              {!loading && livecams.length === 0 && !error && (
+                <div className="text-center py-12">
+                  <p className="text-lg font-medium">No livecams found matching your criteria</p>
+                  <p className="text-muted-foreground">Try adjusting your filters</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={resetFilters}
+                    className="mt-4"
+                  >
+                    Reset All Filters
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </MainLayout>
+      </MainLayout>
+    </>
   );
 };
 

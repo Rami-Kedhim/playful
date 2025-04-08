@@ -1,118 +1,149 @@
 
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import MainLayout from "@/components/layout/MainLayout";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import useCreators, { Creator } from "@/hooks/useCreators";
-import ContentCreatorHero from "@/components/creators/detail/ContentCreatorHero";
-import SubscriptionCard from "@/components/creators/detail/SubscriptionCard";
-import CreatorStatistics from "@/components/creators/detail/CreatorStatistics";
-import ContentTabs from "@/components/creators/detail/ContentTabs";
+import { ArrowLeft, Share2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
+import useCreatorDetail from "@/hooks/useCreatorDetail";
+import { CreatorsModule } from "@/modules/creators/CreatorsModule";
+import MainLayout from "@/components/layout/MainLayout";
+import CreatorHeader from "@/components/creators/detail/CreatorHeader";
+import CreatorTabs from "@/components/creators/detail/CreatorTabs";
+import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
 
-const CreatorDetail = () => {
-  const { username } = useParams<{ username: string }>();
-  const { fetchCreatorByUsername, isLoading } = useCreators();
-  const [creator, setCreator] = useState<Creator | null>(null);
+const CreatorDetail: React.FC = () => {
+  return (
+    <CreatorsModule>
+      <CreatorDetailContent />
+    </CreatorsModule>
+  );
+};
+
+const CreatorDetailContent: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const [isFavorited, setIsFavorited] = useState(false);
-
-  useEffect(() => {
-    const loadCreator = async () => {
-      if (!username) return;
-      
-      const creatorData = await fetchCreatorByUsername(username);
-      if (creatorData) {
-        setCreator(creatorData);
-      }
-    };
-
-    loadCreator();
-  }, [username, fetchCreatorByUsername]);
-
-  const toggleFavorite = () => {
-    setIsFavorited(!isFavorited);
+  const { 
+    creator, 
+    loading, 
+    error, 
+    isFavorite,
+    isSubscribed,
+    canSubscribe,
+    handleSubscribe,
+    handleSendTip
+  } = useCreatorDetail(id);
+  
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
     toast({
-      title: isFavorited ? "Removed from favorites" : "Added to favorites",
-      description: isFavorited 
-        ? `${creator?.name} has been removed from your favorites.` 
-        : `${creator?.name} has been added to your favorites.`,
+      title: "Link copied",
+      description: "Creator profile link copied to clipboard"
     });
   };
-
-  const handleSubscribe = () => {
-    toast({
-      title: "Subscription processing",
-      description: `Your subscription to ${creator?.name}'s content is being processed.`,
-    });
-  };
-
-  const handleSendMessage = () => {
-    toast({
-      title: "Message sent",
-      description: `Your message to ${creator?.name} has been sent.`,
-    });
-  };
-
+  
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Button variant="ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </div>
+          
+          <div className="space-y-6">
+            <Skeleton className="h-64 w-full rounded-xl" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="md:col-span-2">
+                <Skeleton className="h-96 w-full rounded-xl" />
+              </div>
+              
+              <div className="md:col-span-1">
+                <Skeleton className="h-80 w-full rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+  
+  if (error || !creator) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Button variant="ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+          </div>
+          
+          <div className="bg-red-500/10 border border-red-500 rounded-lg p-8 text-center">
+            <h2 className="text-2xl font-bold text-red-500 mb-2">Creator Not Found</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              {error || "The creator profile you're looking for doesn't exist or has been removed."}
+            </p>
+            <Button onClick={() => navigate('/creators')}>
+              Browse Other Creators
+            </Button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+  
   return (
     <>
       <Helmet>
-        {creator ? (
-          <>
-            <title>{creator.name} - Creator Profile | Premium Directory</title>
-            <meta name="description" content={`${creator.name} - Content creator${creator.region ? ` from ${creator.region}` : ''}. Subscribe for exclusive content.`} />
-          </>
-        ) : (
-          <title>Creator Profile | Premium Directory</title>
-        )}
+        <title>{`${creator.name} - Content Creator | Subscribe for Exclusive Content`}</title>
+        <meta name="description" content={`${creator.name} - Subscribe to access exclusive photos, videos, and live streams. Starting at $${creator.price}/month.`} />
       </Helmet>
-
+      
       <MainLayout>
-        {isLoading ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Skeleton className="w-full h-[400px] rounded-lg" />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            
+            <Button variant="outline" onClick={handleShare}>
+              <Share2 className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+          </div>
+          
+          <CreatorHeader 
+            creator={creator} 
+            isSubscribed={isSubscribed}
+            isFavorite={isFavorite}
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+            <div className="md:col-span-2">
+              <CreatorTabs 
+                creator={creator} 
+                isSubscribed={isSubscribed}
+              />
             </div>
-            <div>
-              <Skeleton className="w-full h-[200px] rounded-lg mb-6" />
-              <Skeleton className="w-full h-[300px] rounded-lg" />
+            
+            <div className="md:col-span-1">
+              <CreatorSubscriptionCard 
+                creator={creator}
+                isSubscribed={isSubscribed}
+                canSubscribe={canSubscribe}
+                onSubscribe={handleSubscribe}
+                onSendTip={handleSendTip}
+              />
             </div>
           </div>
-        ) : !creator ? (
-          <div className="flex flex-col items-center justify-center py-12">
-            <h2 className="text-2xl font-bold mb-2">Creator Not Found</h2>
-            <p className="text-gray-500 mb-4">The creator you're looking for doesn't exist or has been removed.</p>
-            <Button onClick={() => window.history.back()}>Go Back</Button>
-          </div>
-        ) : (
-          <>
-            <ContentCreatorHero 
-              creator={creator}
-              isFavorited={isFavorited}
-              onToggleFavorite={toggleFavorite}
-            />
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-              {/* Left Column - Content Tabs */}
-              <div className="lg:col-span-2">
-                <ContentTabs creator={creator} handleSubscribe={handleSubscribe} />
-              </div>
-              
-              {/* Right Column - Subscription Info */}
-              <div className="space-y-6">
-                <SubscriptionCard 
-                  creator={creator}
-                  onSubscribe={handleSubscribe}
-                  onMessage={handleSendMessage}
-                />
-                
-                <CreatorStatistics creator={creator} />
-              </div>
-            </div>
-          </>
-        )}
+        </div>
       </MainLayout>
     </>
   );

@@ -1,18 +1,27 @@
 
-import { useState, useEffect } from "react";
-import { Escort } from "@/types/escort";
-import { useNotifications } from "@/contexts/NotificationsContext";
+import { useState, useEffect } from 'react';
+import { Escort } from '@/types/escort';
+import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { useWallet } from '@/hooks/useWallet';
 
-export const useEscortDetail = (escortId: string | undefined) => {
+export const useEscortDetail = (escortId?: string) => {
+  const { getEscortById, state } = useEscortContext();
   const [escort, setEscort] = useState<Escort | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { showError } = useNotifications();
-
+  const { isFavorite } = useFavorites();
+  const { wallet, deductBalance } = useWallet();
+  
+  // For booking functionality
+  const [isBookingAvailable, setIsBookingAvailable] = useState(false);
+  const [isMessagingAvailable, setIsMessagingAvailable] = useState(false);
+  
+  // Fetch escort details on mount or when ID changes
   useEffect(() => {
-    const fetchEscortDetail = async () => {
+    const fetchEscortDetails = async () => {
       if (!escortId) {
-        setError("Escort ID is required");
+        setEscort(null);
         setLoading(false);
         return;
       }
@@ -21,39 +30,71 @@ export const useEscortDetail = (escortId: string | undefined) => {
       setError(null);
       
       try {
-        // In a real app, this would be an API call like:
-        // const response = await fetch(`/api/escorts/${escortId}`);
-        // const data = await response.json();
+        const fetchedEscort = await getEscortById(escortId);
         
-        // For now, we'll simulate an API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        // Mock data - in real app this would come from API
-        // Simulating data from local storage (could be from imported mock data too)
-        const localEscorts = localStorage.getItem("mockEscorts");
-        const allEscorts = localEscorts ? JSON.parse(localEscorts) : [];
-        const foundEscort = allEscorts.find((e: Escort) => e.id === escortId);
-        
-        if (foundEscort) {
-          setEscort(foundEscort);
+        if (fetchedEscort) {
+          setEscort(fetchedEscort);
+          
+          // Check availability of booking and messaging based on wallet balance
+          if (wallet) {
+            const hourlyRate = fetchedEscort.rates?.hourly || fetchedEscort.price || 0;
+            setIsBookingAvailable(wallet.balance >= hourlyRate);
+            setIsMessagingAvailable(wallet.balance >= 10); // Messaging costs 10 Lucoins
+          }
         } else {
-          setError("Escort not found");
-          if (showError) showError("Not Found", "The escort profile you're looking for doesn't exist or has been removed");
+          setError('Escort not found');
         }
       } catch (err) {
-        console.error("Error fetching escort details:", err);
-        const errorMessage = err instanceof Error ? err.message : "Failed to fetch escort details";
-        setError(errorMessage);
-        if (showError) {
-          showError("Error Loading Profile", errorMessage);
-        }
+        console.error('Error fetching escort details:', err);
+        setError('Failed to load escort details');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchEscortDetail();
-  }, [escortId, showError]);
+    fetchEscortDetails();
+  }, [escortId, wallet?.balance]);
   
-  return { escort, loading, error };
+  // Handle booking request
+  const handleBook = async () => {
+    if (!escort) return false;
+    
+    const bookingCost = escort.rates?.hourly || escort.price || 100;
+    
+    if (wallet?.balance < bookingCost) {
+      return false;
+    }
+    
+    // Deduct Lucoins for booking
+    const success = await deductBalance(bookingCost, `Booking with ${escort.name}`);
+    return success;
+  };
+  
+  // Handle message request
+  const handleMessage = async () => {
+    if (!escort) return false;
+    
+    const messageCost = 10; // 10 Lucoins to start a conversation
+    
+    if (wallet?.balance < messageCost) {
+      return false;
+    }
+    
+    // Deduct Lucoins for messaging
+    const success = await deductBalance(messageCost, `Message to ${escort.name}`);
+    return success;
+  };
+  
+  return {
+    escort,
+    loading,
+    error,
+    isFavorite: escort ? isFavorite(escort.id) : false,
+    isBookingAvailable,
+    isMessagingAvailable,
+    handleBook,
+    handleMessage
+  };
 };
+
+export default useEscortDetail;

@@ -1,110 +1,53 @@
 
-/**
- * Enhanced useEscorts hook that integrates with the EscortScraper
- */
-import { useState, useEffect, useCallback } from "react";
-import { Escort } from "@/types/escort";
-import { EscortScraper } from "@/services/scrapers/EscortScraper";
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect } from 'react';
+import { Escort } from '@/types/escort';
+import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 
 interface UseEscortsOptions {
   initialData?: Escort[];
-  autoFetch?: boolean;
   filters?: {
     location?: string;
     services?: string[];
     gender?: string;
-    ageMin?: number;
-    ageMax?: number;
+    availability?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
   };
 }
 
 export const useEscorts = (options: UseEscortsOptions = {}) => {
-  const [escorts, setEscorts] = useState<Escort[]>(options.initialData || []);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { state, loadEscorts, applyFilters, resetFilters } = useEscortContext();
+  const [initialized, setInitialized] = useState(false);
   
-  const fetchEscorts = useCallback(async (filters?: {
-    location?: string;
-    services?: string[];
-    limit?: number;
-  }) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Get the scraper instance
-      const scraper = EscortScraper.getInstance();
-      
-      // Apply filters if provided
-      if (filters) {
-        scraper.setFilters({
-          region: filters.location,
-          categories: filters.services,
-          limit: filters.limit || 20
-        });
-      }
-      
-      // Perform scraping
-      const scrapedEscorts = await scraper.scrape();
-      
-      // Apply additional filters
-      let filteredEscorts = [...scrapedEscorts];
-      
-      if (options.filters) {
-        // Filter by gender if provided
-        if (options.filters.gender) {
-          filteredEscorts = filteredEscorts.filter(
-            escort => escort.gender === options.filters?.gender
-          );
-        }
-        
-        // Filter by age if provided
-        if (options.filters.ageMin !== undefined || options.filters.ageMax !== undefined) {
-          filteredEscorts = filteredEscorts.filter(escort => {
-            const age = escort.age;
-            const minCondition = options.filters?.ageMin !== undefined ? 
-              age >= options.filters.ageMin : true;
-            const maxCondition = options.filters?.ageMax !== undefined ? 
-              age <= options.filters.ageMax : true;
-            
-            return minCondition && maxCondition;
-          });
-        }
-      }
-      
-      setEscorts(filteredEscorts);
-      return filteredEscorts;
-    } catch (err: any) {
-      console.error("Error fetching escorts:", err);
-      const errorMessage = err.message || "Failed to load escort data";
-      setError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  }, [options.filters, toast]);
-  
-  // Fetch data on component mount if autoFetch is true
+  // Apply initial filters if provided
   useEffect(() => {
-    if (options.autoFetch !== false) {
-      fetchEscorts({
-        location: options.filters?.location,
-        services: options.filters?.services
-      });
+    if (options.filters && !initialized) {
+      applyFilters(options.filters);
+      setInitialized(true);
     }
-  }, [fetchEscorts, options.autoFetch, options.filters?.location, options.filters?.services]);
+  }, [options.filters, initialized]);
+  
+  // Function to fetch escorts with optional force refresh
+  const fetchEscorts = async (forceRefresh = false) => {
+    await loadEscorts(forceRefresh);
+  };
+  
+  // Function to update filters
+  const updateFilters = (newFilters: Partial<typeof options.filters>) => {
+    applyFilters(newFilters);
+  };
   
   return {
-    escorts,
-    loading,
-    error,
-    fetchEscorts
+    escorts: state.filteredEscorts,
+    allEscorts: state.escorts,
+    loading: state.isLoading,
+    error: state.error,
+    filters: state.filters,
+    fetchEscorts,
+    updateFilters,
+    resetFilters
   };
 };
+
+export default useEscorts;

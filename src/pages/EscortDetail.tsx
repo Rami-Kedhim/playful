@@ -1,39 +1,77 @@
+
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import MainLayout from "@/components/layout/MainLayout";
-import { useEscortDetail } from "@/hooks/useEscortDetail";
-import { useFavorites } from "@/contexts/FavoritesContext";
-import { useNotifications } from "@/contexts/NotificationsContext";
-import ProfileInfo from "@/components/escorts/detail/ProfileInfo";
-import ProfileTabs from "@/components/escorts/detail/ProfileTabs";
-import EscortImageGallery from "@/components/escorts/detail/EscortImageGallery";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
+import { useEscortDetail } from "@/hooks/useEscortDetail";
+import { EscortsModule } from "@/modules/escorts/EscortsModule";
+import MainLayout from "@/components/layout/MainLayout";
+import EscortGallery from "@/components/escorts/detail/EscortGallery";
+import EscortDetailTabs from "@/components/escorts/detail/EscortDetailTabs";
+import EscortQuickActions from "@/components/escorts/detail/EscortQuickActions";
+import EscortContactCard from "@/components/escorts/detail/EscortContactCard";
 
 const EscortDetail: React.FC = () => {
+  return (
+    <EscortsModule>
+      <EscortDetailContent />
+    </EscortsModule>
+  );
+};
+
+const EscortDetailContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { escort, loading, error } = useEscortDetail(id);
-  const { toggleFavorite, isFavorite } = useFavorites();
-  const { showSuccess } = useNotifications();
+  const { toast } = useToast();
+  const { 
+    escort, 
+    loading, 
+    error, 
+    isFavorite, 
+    isBookingAvailable,
+    isMessagingAvailable,
+    handleBook,
+    handleMessage
+  } = useEscortDetail(id);
   
   const [bookingOpen, setBookingOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-  
-  const handleFavoriteToggle = () => {
-    if (escort) {
-      toggleFavorite(escort.id);
-    }
-  };
   
   const handleShare = () => {
-    // In a real app, this would open a share dialog
-    setShareOpen(true);
     navigator.clipboard.writeText(window.location.href);
-    if (showSuccess) showSuccess("Link Copied", "Profile link copied to clipboard");
+    toast({
+      title: "Link copied",
+      description: "Profile link copied to clipboard"
+    });
+  };
+  
+  // Handle booking modal open with wallet check
+  const handleBookNowClick = () => {
+    if (!isBookingAvailable) {
+      toast({
+        title: "Insufficient funds",
+        description: "Please add more Lucoins to your wallet to book this escort",
+        variant: "destructive"
+      });
+      return;
+    }
+    setBookingOpen(true);
+  };
+  
+  // Handle message modal open with wallet check
+  const handleMessageClick = () => {
+    if (!isMessagingAvailable) {
+      toast({
+        title: "Insufficient funds",
+        description: "Please add more Lucoins to your wallet to message this escort",
+        variant: "destructive"
+      });
+      return;
+    }
+    setMessageOpen(true);
   };
   
   if (loading) {
@@ -110,23 +148,27 @@ const EscortDetail: React.FC = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <EscortImageGallery 
-                images={escort.gallery || escort.gallery_images || [escort.imageUrl || escort.avatar_url || '']} 
-                name={escort.name}
+              <EscortGallery escort={escort} />
+              
+              <EscortQuickActions 
+                escort={escort}
+                isFavorite={isFavorite}
+                onBookNow={handleBookNowClick}
+                onMessage={handleMessageClick}
               />
               
               <div className="mt-8">
-                <ProfileTabs escort={escort} />
+                <EscortDetailTabs escort={escort} />
               </div>
             </div>
             
             <div className="lg:col-span-1">
-              <ProfileInfo 
+              <EscortContactCard 
                 escort={escort}
-                onFavoriteToggle={handleFavoriteToggle}
-                onBookingOpen={() => setBookingOpen(true)}
-                onMessageOpen={() => setMessageOpen(true)}
-                onShareOpen={() => setShareOpen(true)}
+                isBookingAvailable={isBookingAvailable}
+                isMessagingAvailable={isMessagingAvailable}
+                onBookNow={handleBookNowClick}
+                onMessage={handleMessageClick}
               />
             </div>
           </div>
