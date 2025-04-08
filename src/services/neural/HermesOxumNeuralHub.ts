@@ -1,8 +1,10 @@
 
-import { NeuralModel } from './types/neuralHub';
+import { NeuralModel, ModelParameters, SystemHealthMetrics, TrainingProgress } from './types/neuralHub';
+import { TrainingManager } from './training/trainingManager';
 
 class HermesOxumNeuralHub {
   private models: NeuralModel[] = [];
+  private trainingManager: TrainingManager;
   
   constructor() {
     // Initialize with some default models
@@ -50,10 +52,18 @@ class HermesOxumNeuralHub {
         updatedAt: new Date()
       }
     ];
+    
+    this.trainingManager = new TrainingManager();
   }
 
   getModels(): NeuralModel[] {
     return [...this.models];
+  }
+  
+  getModelsByCapability(capability: string): NeuralModel[] {
+    return this.models.filter(model => 
+      model.capabilities.includes(capability) && model.status === 'active'
+    );
   }
 
   calculateSystemEfficiency(): number {
@@ -105,6 +115,141 @@ class HermesOxumNeuralHub {
       valid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined
     };
+  }
+  
+  // Added method for getting health metrics
+  getHealthMetrics(): SystemHealthMetrics {
+    return {
+      cpuUtilization: Math.random() * 0.6 + 0.2,
+      memoryUtilization: Math.random() * 0.5 + 0.3,
+      networkLatency: Math.random() * 50 + 20,
+      errorFrequency: Math.random() * 0.01,
+      uptime: Math.floor(Math.random() * 100) + 120,
+      load: Math.random() * 0.7 + 0.2,
+      operationsPerSecond: Math.floor(Math.random() * 10000) + 5000,
+      responseTime: Math.random() * 100 + 50,
+      errorRate: Math.random() * 0.05,
+      stability: Math.random() * 0.3 + 0.7,
+      userEngagement: Math.random() * 0.4 + 0.5,
+      economicBalance: Math.random() * 0.5 + 0.5,
+      lastUpdated: new Date()
+    };
+  }
+  
+  // Added methods for model parameters
+  getModelParameters(): ModelParameters {
+    return {
+      learningRate: 0.001,
+      batchSize: 32,
+      epochs: 10,
+      optimizerType: 'adam',
+      dropout: 0.2,
+      activationFunction: 'relu',
+      embeddingSize: 128,
+      hiddenLayers: [64, 32],
+      decayConstant: 0.2,
+      growthFactor: 1.5,
+      cyclePeriod: 24,
+      harmonicCount: 3,
+      bifurcationPoint: 0.6,
+      attractorStrength: 0.7
+    };
+  }
+  
+  updateModelParameters(params: ModelParameters): void {
+    console.log('Model parameters updated:', params);
+    // In a real implementation, this would update the parameters
+  }
+  
+  resetSystem(): void {
+    console.log('System reset to defaults');
+    // Would reset all parameters to default values
+  }
+  
+  // Training related methods
+  getActiveTrainingJobs(): TrainingProgress[] {
+    return this.trainingManager.getActiveTrainingJobs();
+  }
+  
+  startTraining(modelId: string, baseAccuracy: number, trainingConfig?: any): boolean {
+    return this.trainingManager.startTraining(modelId, baseAccuracy, trainingConfig);
+  }
+  
+  stopTraining(modelId: string): boolean {
+    return this.trainingManager.stopTraining(modelId);
+  }
+  
+  // Content boost application
+  applyBoostToContent(
+    contentId: string, 
+    contentType: 'profile' | 'post' | 'video' | 'livecam' | 'event' | 'metaverse',
+    boostScore: number,
+    region?: string,
+    language?: string
+  ): number {
+    // Apply neural-enhanced boost algorithm
+    const baseScore = boostScore;
+    const regionMultiplier = region ? 1.2 : 1.0;
+    const languageMultiplier = language ? 1.1 : 1.0;
+    
+    let typeMultiplier = 1.0;
+    switch (contentType) {
+      case 'profile': 
+        typeMultiplier = 1.3;
+        break;
+      case 'post':
+        typeMultiplier = 1.1;
+        break;
+      case 'video':
+        typeMultiplier = 1.5;
+        break;
+      case 'livecam':
+        typeMultiplier = 1.7;
+        break;
+      case 'event':
+        typeMultiplier = 1.4;
+        break;
+      case 'metaverse':
+        typeMultiplier = 1.8;
+        break;
+    }
+    
+    const effectiveScore = baseScore * regionMultiplier * languageMultiplier * typeMultiplier;
+    
+    console.log(`Applied neural boost to ${contentType} ${contentId}: ${effectiveScore}`);
+    return effectiveScore;
+  }
+  
+  runInference(modelId: string, input: any): Promise<any> {
+    return new Promise((resolve) => {
+      // Simulate processing time
+      setTimeout(() => {
+        const model = this.models.find(m => m.id === modelId);
+        if (!model) {
+          resolve({ error: 'Model not found' });
+          return;
+        }
+        
+        // Simple mock inference based on model type
+        if (model.capabilities.includes('text-understanding')) {
+          resolve({ 
+            sentiment: Math.random() > 0.5 ? 'positive' : 'negative',
+            confidence: Math.random() * 0.3 + 0.7
+          });
+        } else if (model.capabilities.includes('object-detection')) {
+          resolve({
+            objects: ['person', 'car', 'building'],
+            counts: [2, 1, 3],
+            confidence: Math.random() * 0.3 + 0.7
+          });
+        } else {
+          resolve({
+            result: Math.random(),
+            confidence: Math.random() * 0.3 + 0.7
+          });
+        }
+      }, 100);
+    });
   }
 }
 

@@ -1,8 +1,13 @@
+
 // Define neural hub types
 
 export interface SystemHealthMetrics {
-  load: number;
+  cpuUtilization: number;
   memoryUtilization: number;
+  networkLatency: number;
+  errorFrequency: number;
+  uptime: number;
+  load: number;
   operationsPerSecond: number;
   responseTime: number;
   errorRate: number;

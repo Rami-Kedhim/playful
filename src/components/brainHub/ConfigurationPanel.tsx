@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import { ModelParameters } from '@/services/neural/types/neuralHub';
@@ -51,9 +50,9 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ advancedMode })
   
   // Save parameters to neural hub
   const handleSave = () => {
-    const { valid, issues } = neuralHub.validateModelParameters(modelParams);
-    if (!valid) {
-      setValidationErrors(issues);
+    const validation = neuralHub.validateModelParameters(modelParams);
+    if (!validation.valid) {
+      setValidationErrors(validation.errors || []);
       return;
     }
     

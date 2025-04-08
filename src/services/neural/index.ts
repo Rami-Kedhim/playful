@@ -38,8 +38,7 @@ export {
 // Metrics and reporting
 export { 
   neuralMetrics,
-  type MetricsHistory,
-  type PerformanceReport 
+  type PerformanceReport
 } from './reporting/neuralMetrics';
 
 // Training management

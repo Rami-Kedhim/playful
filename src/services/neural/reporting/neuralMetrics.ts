@@ -1,10 +1,19 @@
-
 export interface PerformanceReport {
   totalOperations: number;
   averageResponseTime: number;
   errorRate: number;
   peakUsageTime: string;
   resourceEfficiency: number;
+}
+
+export interface MetricsHistory {
+  timestamp: Date;
+  metrics: {
+    cpuUsage: number;
+    memoryUsage: number;
+    responseTime: number;
+    errorRate: number;
+  }[];
 }
 
 class NeuralMetrics {

@@ -1,100 +1,93 @@
 
-/**
- * Model Parameters - Utility functions for neural model parameters
- */
 import { ModelParameters } from '../types/neuralHub';
 
-export const initializeDefaultParameters = (): ModelParameters => {
+/**
+ * Calculate system efficiency based on model parameters
+ */
+export function calculateSystemEfficiency(params?: ModelParameters): number {
+  // Default parameters if none provided
+  const parameters = params || initializeDefaultParameters();
+  
+  // Calculate efficiency based on parameter values
+  // This is a simplified calculation for demonstration
+  const learningRateScore = Math.min(1, parameters.learningRate * 1000);
+  const batchSizeScore = Math.min(1, parameters.batchSize / 128);
+  const epochsScore = Math.min(1, parameters.epochs / 20);
+  
+  // Advanced parameters contribute to efficiency if available
+  let advancedScore = 0.8; // Default
+  if (parameters.decayConstant !== undefined && 
+      parameters.attractorStrength !== undefined) {
+    advancedScore = 
+      (1 - Math.abs(parameters.decayConstant - 0.2)) * 0.5 +
+      (parameters.attractorStrength * 0.5);
+  }
+  
+  // Weighted calculation
+  const efficiency = (
+    learningRateScore * 0.3 +
+    batchSizeScore * 0.2 +
+    epochsScore * 0.2 +
+    advancedScore * 0.3
+  );
+  
+  return efficiency;
+}
+
+/**
+ * Validate model parameters
+ */
+export function validateModelParameters(parameters: ModelParameters): { valid: boolean; errors?: string[] } {
+  const errors: string[] = [];
+  
+  // Check required parameters
+  if (parameters.learningRate <= 0 || parameters.learningRate > 1) {
+    errors.push('Learning rate must be between 0 and 1');
+  }
+  
+  if (parameters.batchSize < 1) {
+    errors.push('Batch size must be at least 1');
+  }
+  
+  if (parameters.epochs < 1) {
+    errors.push('Number of epochs must be at least 1');
+  }
+  
+  // Check advanced parameters if provided
+  if (parameters.decayConstant !== undefined && 
+      (parameters.decayConstant < 0 || parameters.decayConstant > 1)) {
+    errors.push('Decay constant must be between 0 and 1');
+  }
+  
+  if (parameters.attractorStrength !== undefined && 
+      (parameters.attractorStrength < 0 || parameters.attractorStrength > 1)) {
+    errors.push('Attractor strength must be between 0 and 1');
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors: errors.length > 0 ? errors : undefined
+  };
+}
+
+/**
+ * Initialize default model parameters
+ */
+export function initializeDefaultParameters(): ModelParameters {
   return {
     learningRate: 0.001,
     batchSize: 32,
     epochs: 10,
     optimizerType: 'adam',
-    // Extended parameters
+    dropout: 0.2,
+    activationFunction: 'relu',
+    embeddingSize: 128,
+    hiddenLayers: [64, 32],
     decayConstant: 0.2,
     growthFactor: 1.5,
     cyclePeriod: 24,
     harmonicCount: 3,
     bifurcationPoint: 0.6,
-    attractorStrength: 0.7,
-    // Optional parameters that match our interface
-    dropout: 0.2,
-    activationFunction: 'relu',
-    embeddingSize: 256,
-    hiddenLayers: [128, 64]
+    attractorStrength: 0.7
   };
-};
-
-export const validateModelParameters = (params: ModelParameters): { valid: boolean, issues: string[] } => {
-  const issues: string[] = [];
-  
-  // Validate basic parameters
-  if (params.learningRate <= 0 || params.learningRate > 1) 
-    issues.push('Learning rate must be between 0 and 1');
-  
-  if (params.batchSize < 1) 
-    issues.push('Batch size must be positive');
-  
-  if (params.epochs < 1) 
-    issues.push('Epochs must be positive');
-  
-  if (params.dropout !== undefined && (params.dropout < 0 || params.dropout >= 1)) 
-    issues.push('Dropout must be between 0 and 1');
-    
-  // Validate extended parameters
-  if (params.decayConstant !== undefined && (params.decayConstant < 0 || params.decayConstant > 1))
-    issues.push('Decay constant must be between 0 and 1');
-  
-  if (params.growthFactor !== undefined && params.growthFactor <= 0)
-    issues.push('Growth factor must be positive');
-  
-  if (params.cyclePeriod !== undefined && params.cyclePeriod <= 0)
-    issues.push('Cycle period must be positive');
-  
-  if (params.harmonicCount !== undefined && params.harmonicCount < 0)
-    issues.push('Harmonic count must be non-negative');
-  
-  if (params.bifurcationPoint !== undefined && (params.bifurcationPoint < 0 || params.bifurcationPoint > 1))
-    issues.push('Bifurcation point must be between 0 and 1');
-  
-  if (params.attractorStrength !== undefined && (params.attractorStrength < 0 || params.attractorStrength > 1))
-    issues.push('Attractor strength must be between 0 and 1');
-  
-  return { 
-    valid: issues.length === 0,
-    issues 
-  };
-};
-
-export const calculateSystemEfficiency = (params: ModelParameters): number => {
-  // Base efficiency calculation
-  let efficiency = 0.5;
-  
-  // Calculate efficiency based on parameters
-  if (params.decayConstant !== undefined) {
-    efficiency += (0.5 - Math.abs(0.2 - params.decayConstant)) * 0.2;
-  }
-  
-  if (params.growthFactor !== undefined) {
-    efficiency += Math.min(0.2, (params.growthFactor - 1) * 0.1);
-  }
-  
-  if (params.cyclePeriod !== undefined) {
-    efficiency += Math.min(0.1, params.cyclePeriod / 240);
-  }
-  
-  if (params.harmonicCount !== undefined && params.harmonicCount > 0) {
-    efficiency += Math.min(0.1, params.harmonicCount / 10);
-  }
-  
-  if (params.bifurcationPoint !== undefined) {
-    efficiency += (0.5 - Math.abs(0.6 - params.bifurcationPoint)) * 0.2;
-  }
-  
-  if (params.attractorStrength !== undefined) {
-    efficiency += params.attractorStrength * 0.2;
-  }
-  
-  // Ensure efficiency is between 0 and 1
-  return Math.max(0, Math.min(1, efficiency));
-};
+}

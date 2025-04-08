@@ -64,11 +64,19 @@ export function generateNeuralAnalytics(): NeuralAnalyticsReport {
     },
     trends,
     systemHealth: {
-      cpuUtilization: Math.random() * 0.6 + 0.2,
+      load: Math.random() * 0.6 + 0.2,
       memoryUtilization: Math.random() * 0.5 + 0.3,
       networkLatency: Math.random() * 50 + 20,
       errorFrequency: Math.random() * 0.01,
-      uptime: Math.floor(Math.random() * 100) + 120
+      uptime: Math.floor(Math.random() * 100) + 120,
+      cpuUtilization: Math.random() * 0.6 + 0.2,
+      operationsPerSecond: Math.floor(Math.random() * 10000) + 5000,
+      responseTime: Math.random() * 100 + 50,
+      errorRate: Math.random() * 0.05,
+      stability: Math.random() * 0.3 + 0.7,
+      userEngagement: Math.random() * 0.4 + 0.5,
+      economicBalance: Math.random() * 0.5 + 0.5,
+      lastUpdated: now
     }
   };
 }

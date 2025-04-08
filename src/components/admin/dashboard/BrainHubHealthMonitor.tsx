@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { RefreshCcw, Activity, Server, Clock, Brain, AlertTriangle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
-import useBrainHubHealth, { BrainHubHealth } from '@/hooks/useBrainHubHealth';
+import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import Alert from '@/components/common/Alert';
 
