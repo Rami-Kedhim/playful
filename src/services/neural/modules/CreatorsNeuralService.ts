@@ -1,77 +1,42 @@
 
-import { BaseNeuralService } from '../types/neuralHub';
+import { BaseNeuralService } from './BaseNeuralService';
+import { ModuleType } from '../registry/NeuralServiceRegistry';
 
-interface CreatorsNeuralConfig {
-  resourcePriority?: 'low' | 'medium' | 'high';
-  userId?: string;
-  contentFiltering?: boolean;
-  autonomyLevel?: number;
-  resourceAllocation?: number;
-  priority?: number;
-}
+export class CreatorsNeuralService extends BaseNeuralService {
+  constructor(moduleId: string) {
+    super(moduleId, 'creators');
+  }
 
-/**
- * Neural service for the Content Creators module
- * Integrates with the Brain Hub for enhanced creator content processing
- */
-export class CreatorsNeuralService implements BaseNeuralService {
-  public moduleId: string;
-  public config: CreatorsNeuralConfig;
+  getCapabilities(): string[] {
+    return [
+      'content-recommendation',
+      'creator-matching',
+      'audience-analysis',
+      'pricing-optimization',
+      'content-scheduling'
+    ];
+  }
   
-  constructor(moduleId: string = 'creators-neural') {
-    this.moduleId = moduleId;
-    this.config = {
-      resourcePriority: 'medium',
-      contentFiltering: true,
-      autonomyLevel: 70,
-      resourceAllocation: 50,
-      priority: 60
+  // Additional methods specific to creators service
+  analyzeAudience(contentData: any): any {
+    // Implementation would analyze audience demographics
+    return {
+      demographics: {
+        ageGroups: { '18-24': 0.3, '25-34': 0.4, '35-44': 0.2, '45+': 0.1 },
+        genderDistribution: { male: 0.7, female: 0.25, other: 0.05 },
+        interests: ['lifestyle', 'fitness', 'travel', 'fashion']
+      }
     };
   }
   
-  /**
-   * Initialize the neural service and register with the Brain Hub
-   */
-  public async initialize(): Promise<void> {
-    console.log(`Initializing ${this.moduleId} with Brain Hub`);
-    // In a real implementation, this would register with Brain Hub
-    return Promise.resolve();
-  }
-  
-  /**
-   * Gracefully shut down the neural service
-   */
-  public async shutdown(): Promise<void> {
-    console.log(`Shutting down ${this.moduleId}`);
-    return Promise.resolve();
-  }
-  
-  /**
-   * Update neural service configuration
-   */
-  public configure(config: Partial<CreatorsNeuralConfig>): void {
-    this.config = { 
-      ...this.config,
-      ...config 
+  recommendContentStrategy(creatorData: any): any {
+    // Implementation would recommend content strategy
+    return {
+      recommendedTopics: ['travel', 'lifestyle', 'behind-the-scenes'],
+      optimalPostingFrequency: 'daily',
+      bestPerformingContentTypes: ['short-videos', 'photo-sets']
     };
-    console.log(`${this.moduleId} configured:`, this.config);
-  }
-  
-  /**
-   * Check if the neural service is enabled
-   */
-  public isEnabled(): boolean {
-    return true;
-  }
-  
-  /**
-   * Get current config
-   */
-  public getConfig(): CreatorsNeuralConfig {
-    return this.config;
   }
 }
 
-// Create singleton instance for the application
-export const creatorsNeuralService = new CreatorsNeuralService();
-export default creatorsNeuralService;
+export const creatorsNeuralService = new CreatorsNeuralService('creators-neural-primary');

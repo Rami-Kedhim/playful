@@ -39,6 +39,7 @@ export const moreEscorts: Escort[] = [
     },
     featured: true,
     price: 400,
+    profileType: "verified",
     sexualOrientation: "Heterosexual",
     lastActive: new Date().toISOString(),
     responseRate: 92,
@@ -334,5 +335,11 @@ export const moreEscorts: Escort[] = [
     featured: true
   }
 ];
+
+moreEscorts.forEach(escort => {
+  if (!escort.profileType) {
+    escort.profileType = escort.verified ? 'verified' : escort.isAI ? 'ai' : 'provisional';
+  }
+});
 
 export default moreEscorts;

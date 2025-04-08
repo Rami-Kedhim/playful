@@ -53,7 +53,7 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
   
   const getStatusColor = () => {
     switch (trainingJob.status) {
-      case 'running': return "bg-blue-500";
+      case 'training': return "bg-blue-500";
       case 'completed': return "bg-green-500";
       case 'failed': return "bg-red-500";
       case 'stopped': return "bg-amber-500";
@@ -63,7 +63,7 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
 
   const getStatusText = () => {
     switch (trainingJob.status) {
-      case 'running': return "In Progress";
+      case 'training': return "In Progress";
       case 'completed': return "Completed";
       case 'failed': return "Failed";
       case 'stopped': return "Stopped";
@@ -72,7 +72,7 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
   };
   
   const getEstimatedTimeRemaining = () => {
-    if (trainingJob.status !== 'running') return 'N/A';
+    if (trainingJob.status !== 'training') return 'N/A';
     
     const now = new Date();
     const estCompletion = new Date(trainingJob.estimatedCompletionTime);
@@ -104,7 +104,7 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
           </div>
         </div>
         
-        {trainingJob.status === 'running' && (
+        {trainingJob.status === 'training' && (
           <Button 
             variant="outline" 
             size="sm"
@@ -148,7 +148,7 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
           <div>
             <span className="text-xs text-muted-foreground">Status</span>
             <div className="font-medium flex items-center">
-              {trainingJob.status === 'running' && <Clock className="h-4 w-4 mr-1 text-blue-500" />}
+              {trainingJob.status === 'training' && <Clock className="h-4 w-4 mr-1 text-blue-500" />}
               {trainingJob.status === 'completed' && <CheckCircle className="h-4 w-4 mr-1 text-green-500" />}
               {trainingJob.status === 'failed' && <AlertTriangle className="h-4 w-4 mr-1 text-red-500" />}
               {getStatusText()}

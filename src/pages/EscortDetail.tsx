@@ -1,180 +1,186 @@
 
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast";
-import { useEscortDetail } from "@/hooks/useEscortDetail";
-import { EscortsModule } from "@/modules/escorts/EscortsModule";
-import MainLayout from "@/components/layout/MainLayout";
-import EscortGallery from "@/components/escorts/detail/EscortGallery";
-import EscortDetailTabs from "@/components/escorts/detail/EscortDetailTabs";
-import EscortQuickActions from "@/components/escorts/detail/EscortQuickActions";
-import EscortContactCard from "@/components/escorts/detail/EscortContactCard";
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useEscortDetail } from '@/hooks/useEscortDetail';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Share2, Heart, MessageSquare, Calendar, MapPin, Star } from 'lucide-react';
+import EscortGallery from '@/components/escorts/detail/EscortGallery';
+import EscortBio from '@/components/escorts/detail/tabs/EscortBio';
+import EscortRates from '@/components/escorts/detail/tabs/EscortRates';
+import EscortServices from '@/components/escorts/detail/tabs/EscortServices';
+import EscortDetailSkeleton from '@/components/escorts/detail/EscortDetailSkeleton';
+import ProfileTypeBadge from '@/components/escorts/profile/ProfileTypeBadge';
 
-const EscortDetail: React.FC = () => {
-  return (
-    <EscortsModule>
-      <EscortDetailContent />
-    </EscortsModule>
-  );
-};
-
-const EscortDetailContent: React.FC = () => {
+const EscortDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const { 
     escort, 
     loading, 
     error, 
     isFavorite, 
-    isBookingAvailable,
-    isMessagingAvailable,
-    handleBook,
-    handleMessage
+    toggleFavorite,
+    handleBookingRequest,
+    canBook
   } = useEscortDetail(id);
+
+  // Define additional variables that are needed
+  const isBookingAvailable = canBook;
+  const isMessagingAvailable = true;
   
-  const [bookingOpen, setBookingOpen] = useState(false);
-  const [messageOpen, setMessageOpen] = useState(false);
-  
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast({
-      title: "Link copied",
-      description: "Profile link copied to clipboard"
-    });
+  // Define handler functions
+  const handleBook = () => {
+    // Mock implementation for booking
+    const now = new Date();
+    const twoHoursLater = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+    handleBookingRequest(now, twoHoursLater, 'standard');
   };
   
-  // Handle booking modal open with wallet check
-  const handleBookNowClick = () => {
-    if (!isBookingAvailable) {
-      toast({
-        title: "Insufficient funds",
-        description: "Please add more Lucoins to your wallet to book this escort",
-        variant: "destructive"
-      });
-      return;
-    }
-    setBookingOpen(true);
+  const handleMessage = () => {
+    console.log('Message escort:', escort?.name);
+    // Implementation would send a message to the escort
   };
-  
-  // Handle message modal open with wallet check
-  const handleMessageClick = () => {
-    if (!isMessagingAvailable) {
-      toast({
-        title: "Insufficient funds",
-        description: "Please add more Lucoins to your wallet to message this escort",
-        variant: "destructive"
-      });
-      return;
-    }
-    setMessageOpen(true);
-  };
-  
+
   if (loading) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-2 mb-6">
-            <Button variant="ghost" onClick={() => navigate(-1)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
-              <Skeleton className="h-[500px] w-full rounded-xl" />
-            </div>
-            
-            <div className="md:col-span-1">
-              <Skeleton className="h-[200px] w-full mb-4 rounded-xl" />
-              <Skeleton className="h-[300px] w-full rounded-xl" />
-            </div>
-          </div>
-        </div>
-      </MainLayout>
-    );
+    return <EscortDetailSkeleton />;
   }
-  
+
   if (error || !escort) {
     return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center gap-2 mb-6">
-            <Button variant="ghost" onClick={() => navigate(-1)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-          </div>
-          
-          <div className="bg-red-500/10 border border-red-500 rounded-lg p-8 text-center">
-            <h2 className="text-2xl font-bold text-red-500 mb-2">Profile Not Found</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {error || "The escort profile you're looking for doesn't exist or has been removed."}
-            </p>
-            <Button onClick={() => navigate('/escorts')}>
-              Browse Other Profiles
-            </Button>
-          </div>
-        </div>
-      </MainLayout>
+      <div className="container mx-auto py-16 px-4 text-center">
+        <h2 className="text-2xl font-bold mb-4">Profile Not Found</h2>
+        <p className="text-muted-foreground">
+          Sorry, the escort profile you're looking for is not available.
+        </p>
+        <Button className="mt-4" href="/escorts">
+          Browse Escorts
+        </Button>
+      </div>
     );
   }
-  
+
   return (
-    <>
-      <Helmet>
-        <title>{`${escort.name} - Escort Profile | Premium Directory`}</title>
-        <meta name="description" content={`${escort.name} - ${escort.age} years old escort from ${escort.location}. View photos, services, and booking information.`} />
-      </Helmet>
-      
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <Button variant="ghost" onClick={() => navigate(-1)}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to search
-            </Button>
-            
-            <Button variant="outline" onClick={handleShare}>
-              <Share2 className="mr-2 h-4 w-4" />
-              Share
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <EscortGallery escort={escort} />
+    <div className="container mx-auto py-8 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Left Column */}
+        <div className="col-span-2">
+          {/* Header Section */}
+          <div className="mb-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <h1 className="text-3xl font-bold">{escort.name}, {escort.age}</h1>
+                <div className="flex items-center mt-1 text-muted-foreground">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  <span>{escort.location}</span>
+                  
+                  <div className="mx-2">•</div>
+                  
+                  <Star className="h-4 w-4 mr-1 text-yellow-500" />
+                  <span>{escort.rating} ({escort.reviews} reviews)</span>
+                </div>
+              </div>
               
-              <EscortQuickActions 
-                escort={escort}
-                isFavorite={isFavorite}
-                onBookNow={handleBookNowClick}
-                onMessage={handleMessageClick}
-              />
-              
-              <div className="mt-8">
-                <EscortDetailTabs escort={escort} />
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm">
+                  <Share2 className="h-4 w-4 mr-1" />
+                  Share
+                </Button>
+                
+                <Button 
+                  variant={isFavorite ? "default" : "outline"} 
+                  size="sm"
+                  onClick={toggleFavorite}
+                >
+                  <Heart className={`h-4 w-4 mr-1 ${isFavorite ? 'fill-current' : ''}`} />
+                  {isFavorite ? 'Saved' : 'Save'}
+                </Button>
               </div>
             </div>
             
-            <div className="lg:col-span-1">
-              <EscortContactCard 
-                escort={escort}
-                isBookingAvailable={isBookingAvailable}
-                isMessagingAvailable={isMessagingAvailable}
-                onBookNow={handleBookNowClick}
-                onMessage={handleMessageClick}
-              />
+            <div className="flex flex-wrap gap-2 mt-3">
+              <ProfileTypeBadge type={escort.profileType} />
+              
+              {escort.availableNow && (
+                <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                  Available Now
+                </span>
+              )}
+            </div>
+          </div>
+          
+          {/* Gallery Section */}
+          <EscortGallery gallery={escort.gallery} name={escort.name} />
+          
+          {/* Tabs Section */}
+          <div className="mt-8">
+            <Tabs defaultValue="about">
+              <TabsList className="mb-6">
+                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="rates">Rates</TabsTrigger>
+                <TabsTrigger value="services">Services</TabsTrigger>
+                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="about">
+                <EscortBio escort={escort} />
+              </TabsContent>
+              
+              <TabsContent value="rates">
+                <EscortRates escort={escort} />
+              </TabsContent>
+              
+              <TabsContent value="services">
+                <EscortServices escort={escort} />
+              </TabsContent>
+              
+              <TabsContent value="reviews">
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Reviews coming soon.</p>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+        
+        {/* Right Column */}
+        <div>
+          <div className="sticky top-24 space-y-6">
+            <div className="border rounded-lg p-6 space-y-4">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-primary">${escort.price}</h3>
+                <p className="text-sm text-muted-foreground">Starting price per hour</p>
+              </div>
+              
+              <div className="space-y-2">
+                <Button 
+                  className="w-full" 
+                  disabled={!isBookingAvailable}
+                  onClick={handleBook}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Book Now
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  disabled={!isMessagingAvailable}
+                  onClick={handleMessage}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Message
+                </Button>
+              </div>
+              
+              <div className="text-center text-xs text-muted-foreground">
+                <p>Last active: {new Date(escort.lastActive as string).toLocaleDateString()}</p>
+                <p>Response rate: {escort.responseRate}%</p>
+              </div>
             </div>
           </div>
         </div>
-      </MainLayout>
-    </>
+      </div>
+    </div>
   );
 };
 

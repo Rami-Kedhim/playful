@@ -1,4 +1,3 @@
-
 import { Escort } from '@/types/escort';
 
 const escorts: Escort[] = [
@@ -40,6 +39,7 @@ const escorts: Escort[] = [
     },
     featured: true,
     price: 300,
+    profileType: "verified",
     sexualOrientation: "Bisexual",
     lastActive: new Date().toISOString(),
     responseRate: 95,
@@ -112,6 +112,7 @@ const escorts: Escort[] = [
     },
     featured: true,
     price: 350,
+    profileType: "verified",
     sexualOrientation: "Bisexual",
     lastActive: new Date().toISOString(),
     responseRate: 90,
@@ -184,6 +185,7 @@ const escorts: Escort[] = [
     },
     featured: false,
     price: 280,
+    profileType: "provisional",
     sexualOrientation: "Bisexual",
     lastActive: new Date().toISOString(),
     responseRate: 85,
@@ -256,6 +258,7 @@ const escorts: Escort[] = [
     },
     featured: true,
     price: 250,
+    profileType: "verified",
     sexualOrientation: "Heterosexual",
     lastActive: new Date().toISOString(),
     responseRate: 92,
@@ -328,6 +331,7 @@ const escorts: Escort[] = [
     },
     featured: true,
     price: 320,
+    profileType: "verified",
     sexualOrientation: "Bisexual",
     lastActive: new Date().toISOString(),
     responseRate: 95,
@@ -400,6 +404,7 @@ const escorts: Escort[] = [
     },
     featured: false,
     price: 270,
+    profileType: "provisional",
     sexualOrientation: "Heterosexual",
     lastActive: new Date().toISOString(),
     responseRate: 88,
@@ -435,5 +440,11 @@ const escorts: Escort[] = [
     }
   }
 ];
+
+escorts.forEach(escort => {
+  if (!escort.profileType) {
+    escort.profileType = escort.verified ? 'verified' : escort.isAI ? 'ai' : 'provisional';
+  }
+});
 
 export default escorts;

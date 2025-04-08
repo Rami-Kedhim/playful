@@ -22,11 +22,10 @@ export const CreatorConsumer: React.FC<CreatorConsumerProps> = ({
       // Configure neural service based on user's wallet balance
       if (wallet && creatorsNeuralService) {
         const premiumMode = (wallet.balance > 100);
-        creatorsNeuralService.configure({
-          resourceAllocation: premiumMode ? 50 : 30,
-          priority: premiumMode ? 80 : 45,
-          boostingEnabled: true, // Enable boosting for consistency with escort module
-          orderByBoost: true
+        creatorsNeuralService.updateConfig({
+          resourceAllocation: premiumMode ? 60 : 40,
+          priority: premiumMode ? 85 : 50,
+          boostingEnabled: true // Use boostingEnabled property for configuration
         });
       }
       

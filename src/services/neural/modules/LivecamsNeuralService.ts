@@ -1,78 +1,42 @@
 
-import { BaseNeuralService } from '../types/neuralHub';
+import { BaseNeuralService } from './BaseNeuralService';
+import { ModuleType } from '../registry/NeuralServiceRegistry';
 
-interface LivecamsNeuralConfig {
-  resourcePriority?: 'low' | 'medium' | 'high';
-  userId?: string;
-  streamingQuality?: 'low' | 'medium' | 'high';
-  autonomyLevel?: number;
-  resourceAllocation?: number;
-  priority?: number;
-}
+export class LivecamsNeuralService extends BaseNeuralService {
+  constructor(moduleId: string) {
+    super(moduleId, 'livecams');
+  }
 
-/**
- * Neural service for the Livecams module
- * Integrates with the Brain Hub for enhanced livestream recommendations
- * and processing
- */
-export class LivecamsNeuralService implements BaseNeuralService {
-  public moduleId: string;
-  public config: LivecamsNeuralConfig;
+  getCapabilities(): string[] {
+    return [
+      'livecam-recommendation',
+      'user-matching',
+      'traffic-optimization',
+      'performance-prediction',
+      'content-categorization'
+    ];
+  }
   
-  constructor(moduleId: string = 'livecams-neural') {
-    this.moduleId = moduleId;
-    this.config = {
-      resourcePriority: 'high',
-      streamingQuality: 'medium',
-      autonomyLevel: 80,
-      resourceAllocation: 60,
-      priority: 70
+  // Additional methods specific to livecams service
+  predictViewership(livecamData: any): any {
+    // Implementation would predict viewership patterns
+    return {
+      peakHours: ['20:00', '21:00', '22:00', '23:00'],
+      estimatedAudience: Math.floor(Math.random() * 1000) + 200,
+      audienceRetention: 0.65,
+      recommendedStreamLength: 120 // minutes
     };
   }
   
-  /**
-   * Initialize the neural service and register with the Brain Hub
-   */
-  public async initialize(): Promise<void> {
-    console.log(`Initializing ${this.moduleId} with Brain Hub`);
-    // In a real implementation, this would register with Brain Hub
-    return Promise.resolve();
-  }
-  
-  /**
-   * Gracefully shut down the neural service
-   */
-  public async shutdown(): Promise<void> {
-    console.log(`Shutting down ${this.moduleId}`);
-    return Promise.resolve();
-  }
-  
-  /**
-   * Update neural service configuration
-   */
-  public configure(config: Partial<LivecamsNeuralConfig>): void {
-    this.config = { 
-      ...this.config,
-      ...config 
+  optimizeStreamSettings(userData: any, networkData: any): any {
+    // Implementation would optimize stream settings
+    return {
+      recommendedResolution: '1080p',
+      recommendedBitrate: 4500,
+      recommendedFramerate: 30,
+      recommendedAudioSettings: { codec: 'AAC', bitrate: 128 }
     };
-    console.log(`${this.moduleId} configured:`, this.config);
-  }
-  
-  /**
-   * Check if the neural service is enabled
-   */
-  public isEnabled(): boolean {
-    return true;
-  }
-  
-  /**
-   * Get current config
-   */
-  public getConfig(): LivecamsNeuralConfig {
-    return this.config;
   }
 }
 
-// Create singleton instance for the application
-export const livecamsNeuralService = new LivecamsNeuralService();
-export default livecamsNeuralService;
+export const livecamsNeuralService = new LivecamsNeuralService('livecams-neural-primary');

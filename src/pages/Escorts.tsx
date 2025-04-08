@@ -1,89 +1,119 @@
 
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { Button } from "@/components/ui/button";
-import { useNotifications } from "@/contexts/NotificationsContext";
-import { EscortsModule } from "@/modules/escorts/EscortsModule";
-import { useEscortContext } from "@/modules/escorts/providers/EscortProvider";
-import MainLayout from "@/components/layout/MainLayout";
-import EscortGrid from "@/components/escorts/EscortGrid";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Settings, SlidersHorizontal } from "lucide-react";
-import { escortsNeuralService } from "@/services/neural/modules/EscortsNeuralService";
+import React, { useEffect, useState } from 'react';
+import { useEscorts } from '@/hooks/useEscorts';
+import EscortFilters from '@/components/escorts/filters/EscortFilters';
+import EscortGrid from '@/components/escorts/EscortGrid';
+import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Filter, SlidersHorizontal, MapPin, Star } from 'lucide-react';
 
-const Escorts: React.FC = () => {
-  return (
-    <EscortsModule>
-      <EscortPageContent />
-    </EscortsModule>
-  );
-};
-
-const EscortPageContent: React.FC = () => {
-  const { state, loadEscorts, updateFilters } = useEscortContext();
-  const { showInfo } = useNotifications();
+const Escorts = () => {
+  const { 
+    escorts, 
+    featuredEscorts, 
+    loading, 
+    filters,
+    updateFilters,
+    applyCurrentFilters,
+    clearAllFilters
+  } = useEscorts();
   
-  const handleRefresh = () => {
-    loadEscorts(true); // Force refresh with neural processing
-    if (showInfo) showInfo("Refreshing Data", "Getting the latest escorts");
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Apply filters when component mounts
+  useEffect(() => {
+    applyCurrentFilters();
+  }, [applyCurrentFilters]);
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
   };
   
-  const neuralStatus = escortsNeuralService.isEnabled() 
-    ? `Neural processing active (${escortsNeuralService.getConfig().autonomyLevel}%)`
-    : "Neural processing disabled";
-  
   return (
-    <>
-      <Helmet>
-        <title>Premium Escorts | Find Your Perfect Companion</title>
-        <meta name="description" content="Browse our curated selection of premium escorts. Find your perfect companion for any occasion." />
-      </Helmet>
-      
-      <MainLayout>
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold">Escorts</h1>
-                {escortsNeuralService.isEnabled() && (
-                  <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full flex items-center">
-                    <Brain className="h-3 w-3 mr-1" />
-                    Neural Enhanced
-                  </span>
-                )}
-              </div>
-              <p className="text-muted-foreground">Find your perfect companion</p>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => updateFilters({ 
-                  location: state.filters.location === 'global' ? '' : 'global' 
-                })}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                {state.filters.location === 'global' ? 'Local' : 'Global'} Search
-              </Button>
-              <Button onClick={handleRefresh} disabled={state.isLoading}>
-                {state.isLoading ? "Refreshing..." : "Refresh"}
-              </Button>
-            </div>
-          </div>
+    <div className="container mx-auto py-8 px-4">
+      {/* Featured Section */}
+      <FeaturedEscorts escorts={featuredEscorts} loading={loading} />
+
+      {/* Filter Controls */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Find Escorts</h2>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={toggleFilters}
+            className="flex items-center"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filters {Object.keys(filters).length > 0 && <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
+              {Object.values(filters).flat().length}
+            </span>}
+          </Button>
           
-          <EscortGrid 
-            escorts={state.escorts} 
-            loading={state.isLoading}
-            error={state.error}
-          />
-          
-          <div className="mt-4 text-xs text-muted-foreground">
-            {neuralStatus}
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center"
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            Sort
+          </Button>
         </div>
-      </MainLayout>
-    </>
+      </div>
+
+      {/* Quick Filter Tabs */}
+      <Tabs defaultValue="all" className="mb-6">
+        <TabsList className="mb-4">
+          <TabsTrigger value="all">All Escorts</TabsTrigger>
+          <TabsTrigger value="verified">Verified</TabsTrigger>
+          <TabsTrigger value="available">Available Now</TabsTrigger>
+          <TabsTrigger value="featured">Featured</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="all">
+          <EscortGrid escorts={escorts} loading={loading} />
+        </TabsContent>
+        
+        <TabsContent value="verified">
+          <EscortGrid 
+            escorts={escorts.filter(escort => escort.verified)} 
+            loading={loading} 
+          />
+        </TabsContent>
+        
+        <TabsContent value="available">
+          <EscortGrid 
+            escorts={escorts.filter(escort => escort.availableNow)} 
+            loading={loading} 
+          />
+        </TabsContent>
+        
+        <TabsContent value="featured">
+          <EscortGrid 
+            escorts={escorts.filter(escort => escort.featured)} 
+            loading={loading} 
+          />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Filter Panel */}
+      {showFilters && (
+        <EscortFilters 
+          filters={filters} 
+          onUpdate={updateFilters}
+          onApply={() => {
+            applyCurrentFilters();
+            setShowFilters(false);
+          }}
+          onClear={() => {
+            clearAllFilters();
+            setShowFilters(false);
+          }}
+        />
+      )}
+    </div>
   );
 };
 

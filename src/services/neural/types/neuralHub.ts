@@ -1,18 +1,4 @@
 
-/**
- * BaseNeuralService - Abstract base for all neural service implementations 
- * providing standard interface for Brain Hub integration
- */
-export interface BaseNeuralService {
-  moduleId: string;
-  initialize(): Promise<void>;
-  shutdown(): Promise<void>;
-  configure(config: any): void;
-}
-
-/**
- * Neural Model interface representing a model in the Neural Hub system
- */
 export interface NeuralModel {
   id: string;
   name: string;
@@ -21,16 +7,14 @@ export interface NeuralModel {
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
     accuracy: number;
-    latency: number; // in milliseconds
-    resourceUsage: number; // 0-1 scale
+    latency: number;
+    resourceUsage: number;
   };
   createdAt: Date;
   updatedAt: Date;
+  specialization?: string; // Adding specialization property
 }
 
-/**
- * Neural Model parameters for configuration
- */
 export interface ModelParameters {
   learningRate: number;
   batchSize: number;
@@ -48,9 +32,6 @@ export interface ModelParameters {
   attractorStrength: number;
 }
 
-/**
- * System health metrics for monitoring
- */
 export interface SystemHealthMetrics {
   cpuUtilization: number;
   memoryUtilization: number;
@@ -67,16 +48,17 @@ export interface SystemHealthMetrics {
   lastUpdated: Date;
 }
 
-/**
- * Training progress tracking
- */
+// Update TrainingProgress to include all required properties
 export interface TrainingProgress {
   modelId: string;
+  status: 'training' | 'starting' | 'validating' | 'completed' | 'failed' | 'running' | 'stopped';
   startTime: Date;
   currentEpoch: number;
   totalEpochs: number;
-  currentAccuracy: number;
-  validationAccuracy: number;
-  estimatedTimeRemaining: number; // seconds
-  status: 'starting' | 'training' | 'validating' | 'completed' | 'failed';
+  progress: number;
+  accuracy: number;
+  targetAccuracy: number;
+  estimatedCompletionTime: Date;
+  message?: string;
+  error?: string;
 }

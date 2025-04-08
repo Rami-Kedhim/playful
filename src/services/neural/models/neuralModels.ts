@@ -1,109 +1,85 @@
 
-/**
- * Neural Models - Default models for the neural system
- */
 import { NeuralModel } from '../types/neuralHub';
-import { initializeDefaultParameters } from './modelParameters';
 
-export const createBaseNeuralModels = (): NeuralModel[] => {
-  const now = new Date();
-  const baseTime = new Date();
-  
+// Generate neural models for the demo
+export const generateNeuralModels = (): NeuralModel[] => {
   return [
     {
-      id: 'adaptive-cognitive-core-v1',
-      name: 'Adaptive Cognitive Core',
-      version: '1.0.0',
-      capabilities: ['user-behavior-analysis', 'platform-optimization', 'content-adaptation'],
-      specialization: ['behavioral-patterns', 'user-engagement', 'dynamic-adjustments'],
+      id: 'semantic-analyzer-v2',
+      name: 'Neural Semantic Analyzer',
+      version: '2.0.0',
+      capabilities: ['text-understanding', 'context-analysis', 'sentiment-detection'],
       status: 'active',
       performance: {
-        accuracy: 0.88,
-        latency: 120,
-        resourceUsage: 0.65,
-        throughput: 1000,
-        precision: 0.86,
-        recall: 0.89,
-        f1Score: 0.87
-      },
-      createdAt: new Date(baseTime.getTime() - 90 * 24 * 60 * 60 * 1000),
-      updatedAt: new Date(baseTime.getTime() - 5 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 'contextual-awareness-grid-v1',
-      name: 'Multilevel Contextual Awareness Grid',
-      version: '1.0.0',
-      capabilities: ['context-recognition', 'geo-personalization', 'temporal-adaptation'],
-      specialization: ['location-services', 'time-awareness', 'cultural-context'],
-      status: 'active',
-      performance: {
-        accuracy: 0.92,
+        accuracy: 0.94,
         latency: 85,
-        resourceUsage: 0.48,
-        throughput: 750,
-        precision: 0.91,
-        recall: 0.93,
-        f1Score: 0.92
+        resourceUsage: 0.45
       },
-      createdAt: new Date(baseTime.getTime() - 60 * 24 * 60 * 60 * 1000),
-      updatedAt: new Date(baseTime.getTime() - 2 * 24 * 60 * 60 * 1000)
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      specialization: 'text-processing'
     },
     {
-      id: 'emotional-prediction-v1',
-      name: 'Quantum Emotional Prediction Engine',
-      version: '1.0.0',
-      capabilities: ['emotion-recognition', 'interaction-adaptation', 'engagement-optimization'],
-      specialization: ['microbehavior-analysis', 'affective-computing', 'user-satisfaction'],
-      status: 'training',
+      id: 'visual-recognition-v3',
+      name: 'Visual Recognition Engine',
+      version: '3.1.2',
+      capabilities: ['object-detection', 'scene-recognition', 'facial-analysis'],
+      status: 'active',
       performance: {
-        accuracy: 0.78,
-        latency: 45,
-        resourceUsage: 0.35,
-        throughput: 1500,
-        precision: 0.76,
-        recall: 0.79,
-        f1Score: 0.77
+        accuracy: 0.91,
+        latency: 120,
+        resourceUsage: 0.65
       },
-      createdAt: new Date(baseTime.getTime() - 45 * 24 * 60 * 60 * 1000),
-      updatedAt: new Date(baseTime.getTime() - 1 * 24 * 60 * 60 * 1000)
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      specialization: 'image-processing'
     },
     {
-      id: 'neurosemantic-cluster-v1',
-      name: 'Neurosemantic Cluster',
-      version: '0.9.5',
-      capabilities: ['memory-formation', 'personality-adaptation', 'relationship-simulation'],
-      specialization: ['personality-development', 'emotional-memory', 'narrative-generation'],
-      status: 'training',
+      id: 'recommendation-engine-v1',
+      name: 'Neural Recommendation Engine',
+      version: '1.5.0',
+      capabilities: ['content-recommendation', 'preference-learning', 'profile-matching'],
+      status: 'active',
+      performance: {
+        accuracy: 0.87,
+        latency: 110,
+        resourceUsage: 0.55
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      specialization: 'recommendation-systems'
+    },
+    {
+      id: 'conversation-agent-v2',
+      name: 'Conversational Agent',
+      version: '2.3.1',
+      capabilities: ['dialogue-generation', 'personality-simulation', 'emotion-detection'],
+      status: 'active',
       performance: {
         accuracy: 0.82,
-        latency: 180,
-        resourceUsage: 0.78,
-        throughput: 400,
-        precision: 0.81,
-        recall: 0.84,
-        f1Score: 0.82
+        latency: 90,
+        resourceUsage: 0.48
       },
-      createdAt: new Date(baseTime.getTime() - 30 * 24 * 60 * 60 * 1000),
-      updatedAt: new Date()
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      specialization: 'conversational-ai'
     },
     {
-      id: 'ethical-defense-core-v1',
-      name: 'Ethical Algorithmic Defense Core',
-      version: '1.1.0',
-      capabilities: ['bias-detection', 'compliance-monitoring', 'ethical-verification'],
-      specialization: ['legal-compliance', 'ethics', 'risk-assessment'],
-      status: 'active',
+      id: 'pattern-detector-v1',
+      name: 'Neural Pattern Detector',
+      version: '1.0.3',
+      capabilities: ['anomaly-detection', 'pattern-recognition', 'time-series-analysis'],
+      status: 'inactive',
       performance: {
-        accuracy: 0.95,
-        latency: 90,
-        resourceUsage: 0.45,
-        throughput: 200,
-        precision: 0.96,
-        recall: 0.94,
-        f1Score: 0.95
+        accuracy: 0.79,
+        latency: 150,
+        resourceUsage: 0.70
       },
-      createdAt: new Date(baseTime.getTime() - 120 * 24 * 60 * 60 * 1000),
-      updatedAt: new Date(baseTime.getTime() - 15 * 24 * 60 * 60 * 1000)
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      specialization: 'pattern-analysis'
     }
   ];
 };
+
+export default generateNeuralModels;

@@ -18,7 +18,9 @@ export abstract class BaseNeuralService implements NeuralService {
       enabled: false,
       priority: 50,
       autonomyLevel: 30,
-      resourceAllocation: 25
+      resourceAllocation: 25,
+      boostingEnabled: false,
+      orderByBoost: false
     };
   }
 
@@ -67,6 +69,14 @@ export abstract class BaseNeuralService implements NeuralService {
    * @returns Array of capability strings
    */
   abstract getCapabilities(): string[];
+
+  /**
+   * Get current configuration
+   * @returns The current service configuration
+   */
+  getConfig(): NeuralServiceConfig {
+    return this.config;
+  }
 
   /**
    * Update service configuration

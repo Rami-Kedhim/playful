@@ -22,10 +22,10 @@ export const LivecamConsumer: React.FC<LivecamConsumerProps> = ({
       // Configure neural service based on user's wallet balance
       if (wallet && livecamsNeuralService) {
         const premiumMode = (wallet.balance > 100);
-        livecamsNeuralService.configure({
+        livecamsNeuralService.updateConfig({
           resourceAllocation: premiumMode ? 60 : 40,
           priority: premiumMode ? 85 : 50,
-          orderByBoost: true // Apply boosting for consistency across modules
+          boostingEnabled: true // Use boostingEnabled property for configuration
         });
       }
       

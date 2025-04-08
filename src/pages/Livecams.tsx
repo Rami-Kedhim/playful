@@ -1,146 +1,245 @@
 
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { Button } from "@/components/ui/button";
-import { useNotifications } from "@/contexts/NotificationsContext";
-import { LivecamsModule } from "@/modules/livecams/LivecamsModule";
-import { useLivecamContext } from "@/modules/livecams/providers/LivecamProvider";
-import MainLayout from "@/components/layout/MainLayout";
-import LivecamFilters from "@/components/livecams/LivecamFilters";
-import LivecamGrid from "@/components/livecams/LivecamGrid";
-import LiveTrendingBar from "@/components/livecams/LiveTrendingBar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Settings, SlidersHorizontal } from "lucide-react";
-import { livecamsNeuralService } from "@/services/neural/modules/LivecamsNeuralService";
+import React, { useEffect, useState } from 'react';
+import { useLivecams } from '@/hooks/useLivecams';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Filter, TrendingUp, Eye, Users, MapPin } from 'lucide-react';
+import LiveTrendingBar from '@/components/livecams/LiveTrendingBar';
+import LivecamFilters from '@/components/livecams/LivecamFilters';
+import LivecamGrid from '@/components/livecams/LivecamGrid';
+import LivecamFeatured from '@/components/livecams/LivecamFeatured';
+import { LivecamModel } from '@/types/livecams';
 
-const Livecams: React.FC = () => {
-  return (
-    <LivecamsModule>
-      <LivecamPageContent />
-    </LivecamsModule>
-  );
-};
-
-const LivecamPageContent: React.FC = () => {
-  const { state, loadLivecams, updateFilters } = useLivecamContext();
-  const { showInfo } = useNotifications();
+const Livecams = () => {
+  const { 
+    livecams, 
+    featuredLivecams, 
+    loading, 
+    filters,
+    updateFilters
+  } = useLivecams();
   
-  const handleRefresh = () => {
-    loadLivecams(true); // Force refresh with neural processing
-    if (showInfo) showInfo("Refreshing Data", "Getting the latest livestreams");
+  const [showFilters, setShowFilters] = useState(false);
+  const [currentTab, setCurrentTab] = useState<string>('all');
+  const [filteredResults, setFilteredResults] = useState<LivecamModel[]>([]);
+  
+  // Apply filters based on selected tab
+  useEffect(() => {
+    if (loading) return;
+    
+    let results = [...livecams];
+    
+    switch (currentTab) {
+      case 'featured':
+        results = featuredLivecams;
+        break;
+      case 'live':
+        results = livecams.filter(model => model.isLive);
+        break;
+      case 'popular':
+        results = livecams
+          .filter(model => model.isLive)
+          .sort((a, b) => (b.viewerCount || 0) - (a.viewerCount || 0))
+          .slice(0, 20);
+        break;
+    }
+    
+    setFilteredResults(results);
+  }, [currentTab, livecams, featuredLivecams, loading]);
+  
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
   };
   
-  const neuralStatus = livecamsNeuralService.isEnabled() 
-    ? `Neural processing active (${livecamsNeuralService.getConfig().autonomyLevel}%)`
-    : "Neural processing disabled";
+  const handleApplyFilters = () => {
+    // Update filters in context
+    updateFilters({
+      status: currentTab === 'live' ? 'live' : 'all',
+      categories: filters.categories,
+      gender: 'all',
+      region: 'all',
+      minViewers: filters.viewers[0],
+      sortBy: filters.sortBy
+    });
+    
+    // Close filter panel
+    setShowFilters(false);
+  };
   
-  // Only show trending section if we have live streams
-  const hasLiveStreams = state.livecams.some(livecam => livecam.isLive);
+  const handleLoadMore = () => {
+    console.log('Loading more livecams');
+    // Implementation would load more livecams
+  };
   
   return (
-    <>
-      <Helmet>
-        <title>Live Cams | Watch Live Streams</title>
-        <meta name="description" content="Watch live cam streams from top models. Interactive live broadcasts available now." />
-      </Helmet>
+    <div className="container mx-auto py-8 px-4">
+      {/* Featured Section */}
+      <LivecamFeatured livecams={featuredLivecams.slice(0, 3)} loading={loading} />
       
-      <MainLayout>
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+      {/* Trending Bar */}
+      {!loading && (
+        <LiveTrendingBar trendingModels={featuredLivecams.slice(0, 6)} />
+      )}
+      
+      {/* Filter Controls */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Live Cams</h2>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={toggleFilters}
+          className="flex items-center"
+        >
+          <Filter className="h-4 w-4 mr-2" />
+          Filters
+        </Button>
+      </div>
+      
+      {/* Category Pills */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        <Badge 
+          variant="outline" 
+          className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+        >
+          All
+        </Badge>
+        <Badge 
+          variant="outline" 
+          className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+        >
+          New Models
+        </Badge>
+        <Badge 
+          variant="outline" 
+          className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+        >
+          Couples
+        </Badge>
+        <Badge 
+          variant="outline" 
+          className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+        >
+          Female
+        </Badge>
+        <Badge 
+          variant="outline" 
+          className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+        >
+          Male
+        </Badge>
+        <Badge 
+          variant="outline" 
+          className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+        >
+          Trans
+        </Badge>
+      </div>
+
+      {/* Quick Filter Tabs */}
+      <Tabs 
+        defaultValue="all" 
+        value={currentTab}
+        onValueChange={setCurrentTab}
+        className="mb-6"
+      >
+        <TabsList className="mb-4">
+          <TabsTrigger value="all">All Cams</TabsTrigger>
+          <TabsTrigger value="live">Live Now</TabsTrigger>
+          <TabsTrigger value="featured">Featured</TabsTrigger>
+          <TabsTrigger value="popular">Popular</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="all">
+          <LivecamGrid 
+            livecams={filteredResults} 
+            hasMore={filteredResults.length < livecams.length}
+            onLoadMore={handleLoadMore}
+          />
+        </TabsContent>
+        
+        <TabsContent value="live">
+          <LivecamGrid 
+            livecams={filteredResults}
+            hasMore={false}
+            onLoadMore={handleLoadMore}
+          />
+        </TabsContent>
+        
+        <TabsContent value="featured">
+          <LivecamGrid 
+            livecams={filteredResults}
+            hasMore={false}
+            onLoadMore={handleLoadMore}
+          />
+        </TabsContent>
+        
+        <TabsContent value="popular">
+          <LivecamGrid 
+            livecams={filteredResults}
+            hasMore={false}
+            onLoadMore={handleLoadMore}
+          />
+        </TabsContent>
+      </Tabs>
+      
+      {/* Filter Panel */}
+      {showFilters && (
+        <LivecamFilters 
+          filters={filters} 
+          onUpdate={updateFilters}
+          onApply={handleApplyFilters}
+          onClear={() => {
+            updateFilters({
+              categories: [],
+              viewers: [0, 10000],
+              sortBy: 'recommended',
+              showOffline: false
+            });
+            setShowFilters(false);
+          }}
+        />
+      )}
+      
+      {/* Stats Card */}
+      <Card className="mt-8 bg-primary/5 border-primary/20">
+        <CardContent className="flex flex-wrap items-center justify-around py-6">
+          <div className="flex items-center gap-2 p-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              <TrendingUp className="h-5 w-5 text-primary" />
+            </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold">Live Cams</h1>
-                {livecamsNeuralService.isEnabled() && (
-                  <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full flex items-center">
-                    <Brain className="h-3 w-3 mr-1" />
-                    Neural Enhanced
-                  </span>
-                )}
-              </div>
-              <p className="text-muted-foreground">Watch live interactive streams</p>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => updateFilters({ 
-                  showOffline: !state.filters.showOffline
-                })}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                {state.filters.showOffline ? 'Hide' : 'Show'} Offline
-              </Button>
-              <Button onClick={handleRefresh} disabled={state.isLoading}>
-                {state.isLoading ? "Refreshing..." : "Refresh"}
-              </Button>
+              <div className="text-2xl font-bold">{loading ? '...' : livecams.filter(l => l.isLive).length}</div>
+              <div className="text-sm text-muted-foreground">Live Now</div>
             </div>
           </div>
           
-          {hasLiveStreams && !state.isLoading && (
-            <div className="mb-8">
-              <LiveTrendingBar livecams={state.featuredLivecams} />
+          <div className="flex items-center gap-2 p-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              <Eye className="h-5 w-5 text-primary" />
             </div>
-          )}
-          
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1">
-              <LivecamFilters 
-                filters={state.filters} 
-                onFilterChange={updateFilters}
-              />
-              
-              <div className="mt-4 text-xs text-muted-foreground">
-                {neuralStatus}
+            <div>
+              <div className="text-2xl font-bold">
+                {loading ? '...' : livecams.reduce((sum, model) => sum + (model.viewerCount || 0), 0).toLocaleString()}
               </div>
-            </div>
-            
-            <div className="lg:col-span-3">
-              {state.error ? (
-                <div className="p-4 bg-red-500/10 border border-red-500 rounded-md text-center mb-6">
-                  <p className="text-red-500">Error: {state.error}</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleRefresh}
-                    className="mt-2"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              ) : state.isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Array(6).fill(0).map((_, i) => (
-                    <div key={i} className="rounded-lg overflow-hidden">
-                      <Skeleton className="w-full aspect-video" />
-                      <div className="p-3">
-                        <Skeleton className="w-2/3 h-5 mb-2" />
-                        <Skeleton className="w-1/2 h-4" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <LivecamGrid livecams={state.livecams} />
-              )}
-              
-              {!state.isLoading && state.livecams.length === 0 && !state.error && (
-                <div className="text-center py-12">
-                  <p className="text-lg font-medium">No livestreams found matching your criteria</p>
-                  <p className="text-muted-foreground">Try adjusting your filters</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.location.reload()}
-                    className="mt-4"
-                  >
-                    Reset All Filters
-                  </Button>
-                </div>
-              )}
+              <div className="text-sm text-muted-foreground">Total Viewers</div>
             </div>
           </div>
-        </div>
-      </MainLayout>
-    </>
+          
+          <div className="flex items-center gap-2 p-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold">{loading ? '...' : livecams.length}</div>
+              <div className="text-sm text-muted-foreground">Total Models</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

@@ -115,7 +115,6 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
     switch (status) {
       case 'completed':
         return <Badge className="bg-green-500">Completed</Badge>;
-      case 'running':
       case 'training':
         return <Badge className="bg-blue-500">In Progress</Badge>;
       case 'failed':
@@ -124,6 +123,7 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
         return <Badge className="bg-amber-500">Stopped</Badge>;
       case 'pending':
       case 'preparing':
+      case 'starting':
         return <Badge variant="secondary">Preparing</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
@@ -221,7 +221,7 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
                       onClick={() => setSelectedTrainingJob(job.modelId)}
                     >
                       {getModelName(job.modelId)}
-                      {job.status === 'running' && (
+                      {job.status === 'training' && (
                         <span className="ml-2 w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                       )}
                     </Button>

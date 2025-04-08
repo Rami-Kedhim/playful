@@ -1,59 +1,43 @@
 
 import { BaseNeuralService } from './BaseNeuralService';
+import { ModuleType } from '../registry/NeuralServiceRegistry';
 
-/**
- * AI Companion Neural Service
- * Specialized neural service for AI companion functionality
- */
 export class AICompanionNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
     super(moduleId, 'ai-companion');
-    // Set default config specific to AI companions
-    this.config = {
-      ...this.config,
-      priority: 70,
-      autonomyLevel: 60,
-      resourceAllocation: 40
-    };
   }
 
-  /**
-   * Get AI Companion specific capabilities
-   */
   getCapabilities(): string[] {
     return [
-      'conversation',
-      'emotion-detection',
-      'personality-modeling',
-      'context-awareness',
+      'companion-conversation',
+      'personality-simulation',
+      'emotional-response',
+      'learning-adaptation',
       'memory-retention'
     ];
   }
-
-  /**
-   * Process AI conversation data
-   * @param conversation Conversation data to process
-   * @returns Processed response data
-   */
-  processConversation(conversation: any): any {
-    if (!this.config.enabled) {
-      return { error: 'Service disabled' };
-    }
-
-    // Simulate processing delay
-    const processingTime = Math.random() * 200 + 100;
-    
-    console.log(`Processing conversation with ${this.moduleId}, autonomy: ${this.config.autonomyLevel}%`);
-    
-    // Return simulated response
+  
+  // Additional methods specific to AI companion service
+  generateResponse(userMessage: string, companionProfile: any): string {
+    // Implementation would generate conversational responses
+    const responses = [
+      "I've been thinking about you.",
+      "Tell me more about your day.",
+      "That's such an interesting perspective.",
+      "I'd love to explore that topic with you."
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  analyzeEmotionalTone(message: string): any {
+    // Implementation would analyze emotional tone
+    const emotions = ['happy', 'sad', 'excited', 'curious', 'anxious'];
     return {
-      response: 'This is a simulated AI companion response',
-      emotionalContext: Math.random() > 0.5 ? 'positive' : 'neutral',
-      confidenceScore: Math.random() * 0.3 + 0.7,
-      processingTime
+      dominantEmotion: emotions[Math.floor(Math.random() * emotions.length)],
+      intensity: Math.random() * 0.6 + 0.2,
+      confidence: Math.random() * 0.3 + 0.7
     };
   }
 }
 
-// Create a default instance
-export const aiCompanionNeuralService = new AICompanionNeuralService('ai-companion-primary');
+export const aiCompanionNeuralService = new AICompanionNeuralService('ai-companion-neural-primary');

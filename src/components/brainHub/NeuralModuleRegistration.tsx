@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,11 +6,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Plus, Brain, AlertCircle } from "lucide-react";
-import { ModuleType, neuralServiceRegistry, BaseNeuralService } from '@/services/neural';
-import { EscortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
-import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
-import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
-import { AICompanionNeuralService } from '@/services/neural/modules/AICompanionNeuralService';
+import { 
+  ModuleType, 
+  neuralServiceRegistry, 
+  NeuralService 
+} from '@/services/neural/registry/NeuralServiceRegistry';
+import { 
+  EscortsNeuralService 
+} from '@/services/neural/modules/EscortsNeuralService';
+import { 
+  CreatorsNeuralService 
+} from '@/services/neural/modules/CreatorsNeuralService';
+import { 
+  LivecamsNeuralService 
+} from '@/services/neural/modules/LivecamsNeuralService';
+import { 
+  AICompanionNeuralService 
+} from '@/services/neural/modules/AICompanionNeuralService';
 
 interface NeuralModuleRegistrationProps {
   onRegistered?: () => void;
@@ -37,7 +50,7 @@ const NeuralModuleRegistration: React.FC<NeuralModuleRegistrationProps> = ({ onR
       }
       
       // Create a new service instance based on the selected module type
-      let service: BaseNeuralService;
+      let service: NeuralService;
       
       switch (moduleType) {
         case 'escorts':
