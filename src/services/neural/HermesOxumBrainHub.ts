@@ -118,9 +118,13 @@ class HermesOxumBrainHub {
   }
   
   // Toggle specific capability
-  toggleCapability(category: keyof typeof this.capabilities, capability: string, enabled: boolean): boolean {
+  toggleCapability<K extends keyof typeof this.capabilities>(
+    category: K,
+    capability: keyof typeof this.capabilities[K],
+    enabled: boolean
+  ): boolean {
     if (this.capabilities[category] && capability in this.capabilities[category]) {
-      this.capabilities[category][capability as keyof typeof this.capabilities[category]] = enabled;
+      this.capabilities[category][capability] = enabled;
       this.logDecision('capability_toggle', { category, capability, enabled });
       return true;
     }

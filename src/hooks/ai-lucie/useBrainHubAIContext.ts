@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useUserContext } from '@/hooks/ai-lucie/useUserContext';
@@ -232,12 +233,15 @@ export const useBrainHubAIContext = (componentId: string) => {
   const toggleNSFWContent = (enabled: boolean) => {
     updateAIContext({
       userPreferences: {
+        language: aiContext?.userPreferences.language || 'en',
+        region: aiContext?.userPreferences.region || 'global',
         contentFilters: {
           nsfw: enabled,
           violence: aiContext ? aiContext.userPreferences.contentFilters.violence : false,
           political: aiContext ? aiContext.userPreferences.contentFilters.political : false,
           religious: aiContext ? aiContext.userPreferences.contentFilters.religious : false
-        }
+        },
+        modelPreference: aiContext?.userPreferences.modelPreference
       },
       systemContext: {
         modelFamily: enabled ? 'nsfw' : 'mitigation',
