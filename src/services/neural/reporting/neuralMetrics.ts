@@ -1,141 +1,127 @@
 
-/**
- * Neural Metrics - Tracking and reporting on neural system performance
- */
 import { SystemHealthMetrics } from '../types/neuralHub';
 
-// Define types for metrics collection
 export interface MetricsHistory {
   timestamp: Date;
   metrics: SystemHealthMetrics;
 }
 
 export interface PerformanceReport {
-  period: 'hourly' | 'daily' | 'weekly';
-  startTime: Date;
-  endTime: Date;
-  averageLoad: number;
-  peakLoad: number;
-  averageResponseTime: number;
   totalOperations: number;
+  averageResponseTime: number;
   errorRate: number;
+  peakLoad: number;
   stability: number;
 }
 
-class NeuralMetricsCollector {
-  private metricsHistory: MetricsHistory[] = [];
-  private readonly MAX_HISTORY_SIZE = 1000;
+class NeuralMetricsService {
+  private history: MetricsHistory[] = [];
   
-  /**
-   * Record a metrics snapshot
-   */
-  recordMetrics(metrics: SystemHealthMetrics): void {
-    const entry: MetricsHistory = {
-      timestamp: new Date(),
-      metrics: { ...metrics }
+  constructor() {
+    // Initialize with some sample data
+    const now = new Date();
+    for (let i = 0; i < 24; i++) {
+      const timestamp = new Date(now.getTime() - (i * 60 * 60 * 1000));
+      this.history.push({
+        timestamp,
+        metrics: this.generateSampleMetrics()
+      });
+    }
+  }
+  
+  private generateSampleMetrics(): SystemHealthMetrics {
+    return {
+      load: 0.2 + Math.random() * 0.5,
+      memoryUtilization: 0.3 + Math.random() * 0.4,
+      operationsPerSecond: 800 + Math.random() * 500,
+      responseTime: 30 + Math.random() * 30,
+      errorRate: 0.001 + Math.random() * 0.01,
+      stability: 0.9 + Math.random() * 0.09,
+      userEngagement: 0.6 + Math.random() * 0.3,
+      economicBalance: 0.7 + Math.random() * 0.2,
+      lastUpdated: new Date()
     };
+  }
+  
+  recordMetrics(metrics: SystemHealthMetrics): void {
+    this.history.push({
+      timestamp: new Date(),
+      metrics
+    });
     
-    this.metricsHistory.push(entry);
-    
-    // Maintain limited history size
-    if (this.metricsHistory.length > this.MAX_HISTORY_SIZE) {
-      this.metricsHistory = this.metricsHistory.slice(
-        this.metricsHistory.length - this.MAX_HISTORY_SIZE
-      );
+    // Limit history size
+    if (this.history.length > 720) { // Keep about 30 days at hourly records
+      this.history = this.history.slice(-720);
     }
   }
   
-  /**
-   * Get metrics history within a time range
-   */
-  getMetricsHistory(startTime?: Date, endTime?: Date): MetricsHistory[] {
-    if (!startTime && !endTime) {
-      return [...this.metricsHistory];
-    }
+  getHistory(hours: number = 24): MetricsHistory[] {
+    const cutoff = new Date();
+    cutoff.setHours(cutoff.getHours() - hours);
     
-    const now = new Date();
-    const start = startTime || new Date(0);
-    const end = endTime || now;
-    
-    return this.metricsHistory.filter(entry => 
-      entry.timestamp >= start && entry.timestamp <= end
-    );
+    return this.history.filter(item => item.timestamp >= cutoff);
   }
   
-  /**
-   * Generate a performance report for a specific period
-   */
-  generatePerformanceReport(period: 'hourly' | 'daily' | 'weekly'): PerformanceReport {
-    const now = new Date();
-    let startTime: Date;
+  generatePerformanceReport(period: 'hourly' | 'daily' | 'weekly' | 'monthly'): PerformanceReport {
+    let hours: number;
     
     switch (period) {
       case 'hourly':
-        startTime = new Date(now.getTime() - 60 * 60 * 1000);
+        hours = 1;
         break;
       case 'daily':
-        startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        hours = 24;
         break;
       case 'weekly':
-        startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        hours = 24 * 7;
+        break;
+      case 'monthly':
+        hours = 24 * 30;
         break;
     }
     
-    const relevantMetrics = this.getMetricsHistory(startTime, now);
+    const relevantHistory = this.getHistory(hours);
     
-    if (relevantMetrics.length === 0) {
+    if (relevantHistory.length === 0) {
       return {
-        period,
-        startTime,
-        endTime: now,
-        averageLoad: 0,
-        peakLoad: 0,
-        averageResponseTime: 0,
         totalOperations: 0,
+        averageResponseTime: 0,
         errorRate: 0,
-        stability: 0
+        peakLoad: 0,
+        stability: 1
       };
     }
     
-    // Calculate aggregate metrics
-    let totalLoad = 0;
-    let peakLoad = 0;
-    let totalResponseTime = 0;
+    // Calculate average values
     let totalOps = 0;
-    let totalErrors = 0;
-    let totalStability = 0;
+    let totalResponseTime = 0;
+    let totalErrorRate = 0;
+    let peakLoad = 0;
+    let averageStability = 0;
     
-    relevantMetrics.forEach(entry => {
-      totalLoad += entry.metrics.load;
-      peakLoad = Math.max(peakLoad, entry.metrics.load);
-      totalResponseTime += entry.metrics.responseTime;
-      totalOps += entry.metrics.operationsPerSecond;
-      totalStability += entry.metrics.stability;
-      totalErrors += entry.metrics.errorRate;
+    relevantHistory.forEach(item => {
+      totalOps += item.metrics.operationsPerSecond;
+      totalResponseTime += item.metrics.responseTime;
+      totalErrorRate += item.metrics.errorRate;
+      peakLoad = Math.max(peakLoad, item.metrics.load);
+      averageStability += item.metrics.stability;
     });
     
-    const count = relevantMetrics.length;
+    const count = relevantHistory.length;
+    const operationsPerSecond = totalOps / count;
+    
+    // Adjust for the time period
+    const secondsInPeriod = hours * 60 * 60;
+    const totalOperations = Math.round(operationsPerSecond * secondsInPeriod);
     
     return {
-      period,
-      startTime,
-      endTime: now,
-      averageLoad: totalLoad / count,
-      peakLoad,
+      totalOperations,
       averageResponseTime: totalResponseTime / count,
-      totalOperations: totalOps,
-      errorRate: totalErrors / count,
-      stability: totalStability / count
+      errorRate: totalErrorRate / count,
+      peakLoad,
+      stability: averageStability / count
     };
-  }
-  
-  /**
-   * Clear all metrics history
-   */
-  clearHistory(): void {
-    this.metricsHistory = [];
   }
 }
 
-// Singleton instance
-export const neuralMetrics = new NeuralMetricsCollector();
+export const neuralMetrics = new NeuralMetricsService();

@@ -1,19 +1,42 @@
+
 /**
  * Neural Analytics - Analytics and reporting for the neural hub
  */
 import { NeuralModel, SystemHealthMetrics } from '../types/neuralHub';
 
-interface PerformancePoint {
+export interface PerformancePoint {
   timestamp: Date;
   value: number;
   label: string;
 }
 
-interface PerformanceData {
+export interface PerformanceData {
   accuracy: PerformancePoint[];
   latency: PerformancePoint[];
   throughput: PerformancePoint[];
   resourceUsage: PerformancePoint[];
+}
+
+export interface PerformanceTrend {
+  date: Date;
+  value: number;
+  category: string;
+}
+
+export interface NeuralAnalyticsReport {
+  summary: {
+    accuracy: number;
+    latency: number;
+    throughput: number;
+    resourceUsage: number;
+    recommendations: string[];
+  };
+  trends: {
+    timestamp: Date;
+    load: number;
+    accuracy: number;
+    latency: number;
+  }[];
 }
 
 export class NeuralAnalytics {
@@ -157,3 +180,68 @@ export class NeuralAnalytics {
 
 // Singleton instance
 export const neuralAnalytics = new NeuralAnalytics();
+
+// Functions needed by other components
+export function generateNeuralAnalytics(): NeuralAnalyticsReport {
+  // Generate a simulated analytics report
+  const currentDate = new Date();
+  const trends = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6-i));
+    return {
+      timestamp: date,
+      load: 0.3 + Math.random() * 0.4,
+      accuracy: 0.85 + Math.random() * 0.1,
+      latency: 30 + Math.random() * 20
+    };
+  });
+  
+  return {
+    summary: {
+      accuracy: 0.91,
+      latency: 45.2,
+      throughput: 1200,
+      resourceUsage: 0.65,
+      recommendations: [
+        "Increase model batch size to improve throughput",
+        "Consider reducing precision to improve latency",
+        "Add additional training data to improve accuracy"
+      ]
+    },
+    trends
+  };
+}
+
+export function generatePerformanceForecast(days: number): PerformanceTrend[] {
+  const forecast: PerformanceTrend[] = [];
+  const currentDate = new Date();
+  
+  // Generate synthetic forecast data
+  for (let i = 0; i < days; i++) {
+    const date = new Date();
+    date.setDate(currentDate.getDate() + i);
+    
+    // Add accuracy forecast
+    forecast.push({
+      date,
+      value: 0.85 + (i * 0.01) + (Math.random() * 0.05),
+      category: 'accuracy'
+    });
+    
+    // Add latency forecast
+    forecast.push({
+      date,
+      value: 45 - (i * 0.5) + (Math.random() * 5),
+      category: 'latency'
+    });
+    
+    // Add resource usage forecast
+    forecast.push({
+      date,
+      value: 0.65 + (i * 0.02) + (Math.random() * 0.1),
+      category: 'resourceUsage'
+    });
+  }
+  
+  return forecast;
+}

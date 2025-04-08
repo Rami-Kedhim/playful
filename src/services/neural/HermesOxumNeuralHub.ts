@@ -1,4 +1,3 @@
-
 /**
  * Hermes Oxum Neural Hub - Advanced neural network system for intelligent decision making
  */
@@ -9,7 +8,7 @@ import {
   TrainingProgress 
 } from './types/neuralHub';
 import { createBaseNeuralModels } from './models/neuralModels';
-import { initializeDefaultParameters, validateModelParameters } from './models/modelParameters';
+import { initializeDefaultParameters, validateModelParameters, calculateSystemEfficiency } from './models/modelParameters';
 import { simulateMetricsUpdate, generateSimulatedResponse } from './utils/neuralHubUtils';
 import { TrainingManager } from './training/trainingManager';
 
@@ -65,6 +64,16 @@ class HermesOxumNeuralHub {
       console.warn('Invalid model parameters:', validation.issues);
     }
     console.log('Model parameters updated:', this.modelParameters);
+  }
+  
+  // Method to validate model parameters
+  validateModelParameters(params: ModelParameters): { valid: boolean, issues: string[] } {
+    return validateModelParameters(params);
+  }
+  
+  // Method to calculate system efficiency
+  calculateSystemEfficiency(): number {
+    return calculateSystemEfficiency(this.modelParameters);
   }
   
   // Method to reset system

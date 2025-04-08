@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { neuralHub } from '@/services/neural';
 import { 
@@ -17,11 +16,9 @@ export function useNeuralAnalytics() {
   const [error, setError] = useState<string | null>(null);
   const [refreshInterval, setRefreshInterval] = useState<number>(30000); // 30 seconds default
   
-  // Load initial data
   useEffect(() => {
     refreshData();
     
-    // Set up refresh interval
     const intervalId = setInterval(() => {
       refreshData();
     }, refreshInterval);
@@ -29,20 +26,16 @@ export function useNeuralAnalytics() {
     return () => clearInterval(intervalId);
   }, [refreshInterval]);
   
-  // Function to refresh all analytics data
   const refreshData = async () => {
     try {
       setLoading(true);
       
-      // Get neural analytics
       const analyticsData = generateNeuralAnalytics();
       setAnalytics(analyticsData);
       
-      // Get performance forecast
       const forecastData = generatePerformanceForecast(7); // 7-day forecast
       setForecast(forecastData);
       
-      // Get training jobs
       const activeTrainingJobs = neuralHub.getActiveTrainingJobs();
       setTrainingJobs(activeTrainingJobs);
       
@@ -55,12 +48,11 @@ export function useNeuralAnalytics() {
     }
   };
   
-  // Start a new model training job
   const startModelTraining = (modelId: string, config?: any) => {
     try {
       const success = neuralHub.startTraining(modelId, config);
       if (success) {
-        refreshData(); // Refresh data to show new training job
+        refreshData();
       }
       return success;
     } catch (err) {
@@ -70,12 +62,11 @@ export function useNeuralAnalytics() {
     }
   };
   
-  // Stop an ongoing training job
   const stopModelTraining = (modelId: string) => {
     try {
       const success = neuralHub.stopTraining(modelId);
       if (success) {
-        refreshData(); // Refresh data to reflect stopped training
+        refreshData();
       }
       return success;
     } catch (err) {
@@ -85,7 +76,6 @@ export function useNeuralAnalytics() {
     }
   };
   
-  // Update refresh interval
   const updateRefreshInterval = (interval: number) => {
     setRefreshInterval(interval);
   };
