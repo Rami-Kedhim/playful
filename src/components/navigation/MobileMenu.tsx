@@ -1,172 +1,87 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import { useAuth } from "@/hooks/auth/useAuthContext";
+import { useTranslation } from "react-i18next";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut, Home, Search, Compass } from 'lucide-react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { AnimatedContainer } from '@/components/ui/animated-container';
-import { Separator } from '@/components/ui/separator';
-import MobileNavigation from './MobileNavigation';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { AppRoutes } from "@/utils/navigation";
 
 interface MobileMenuProps {
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-const MobileMenu = ({ open = false, onOpenChange }: MobileMenuProps) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({ open, onOpenChange }) => {
+  const { isAuthenticated, checkRole } = useAuth();
   const { t } = useTranslation();
-  const { user, isAuthenticated, signOut } = useAuth();
   
-  const handleLogout = () => {
-    if (signOut) {
-      signOut();
-    }
-    if (onOpenChange) {
-      onOpenChange(false);
-    }
-  };
+  const isAdmin = checkRole('admin') || checkRole('moderator');
   
-  const handleNavItemClick = () => {
-    if (onOpenChange) {
-      onOpenChange(false);
-    }
-  };
+  const navItems = [
+    { name: t('nav.home'), path: '/', auth: false },
+    { name: t('nav.escorts'), path: '/escorts', auth: false },
+    { name: t('nav.creators'), path: '/creators', auth: false },
+    { name: t('nav.metaverse'), path: '/metaverse', auth: true },
+    { name: t('nav.brainHub'), path: AppRoutes.BRAIN_HUB, auth: true }, // Added Brain Hub link
+  ];
+  
+  // Add admin routes if user has admin access
+  if (isAdmin) {
+    navItems.push({ name: 'SEO', path: '/seo', auth: true });
+  }
+  
+  // Add account-related routes if authenticated
+  if (isAuthenticated) {
+    navItems.push(
+      { name: t('nav.profile'), path: '/profile', auth: true },
+      { name: t('nav.favorites'), path: '/favorites', auth: true },
+      { name: t('nav.messages'), path: '/messages', auth: true }
+    );
+  }
   
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[85%] sm:w-[350px] pt-10">
-        <SheetHeader className="mb-4">
-          <SheetTitle className="flex items-center justify-between">
-            <span>{t('menu')}</span>
-            <ThemeToggle />
-          </SheetTitle>
+      <SheetContent side="right" className="w-[80%] sm:w-[350px] pt-10">
+        <SheetHeader className="mb-6">
+          <SheetTitle className="text-xl">{t('nav.menu')}</SheetTitle>
         </SheetHeader>
-        
-        <div className="mb-4">
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 text-base"
-            asChild
-            onClick={handleNavItemClick}
-          >
-            <Link to="/">
-              <Home className="h-5 w-5" />
-              {t('home')}
-            </Link>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 text-base"
-            asChild
-            onClick={handleNavItemClick}
-          >
-            <Link to="/search">
-              <Search className="h-5 w-5" />
-              {t('search')}
-            </Link>
-          </Button>
-          
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 text-base"
-            asChild
-            onClick={handleNavItemClick}
-          >
-            <Link to="/metaverse">
-              <Compass className="h-5 w-5" />
-              {t('metaverse')}
-            </Link>
-          </Button>
-        </div>
-        
-        <Separator className="my-2" />
-        
-        <SheetTitle className="text-sm font-medium text-muted-foreground mb-2">
-          {t('services')}
-        </SheetTitle>
-        <MobileNavigation onItemClick={handleNavItemClick} />
-        
-        <Separator className="my-6" />
-        
-        <div>
-          {isAuthenticated ? (
-            <>
-              <div className="flex items-center gap-3 mb-4 px-2">
-                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-medium text-lg">
-                    {user?.email?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium">{user?.user_metadata?.username || user?.email}</p>
-                </div>
-              </div>
+        <nav className="space-y-6">
+          <div className="space-y-2">
+            {navItems.map((item) => {
+              // Skip auth-required items if not authenticated
+              if (item.auth && !isAuthenticated) return null;
               
-              <div className="flex flex-col gap-2">
-                <AnimatedContainer delay={0.1} animation="fade">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2"
-                    asChild
-                    onClick={handleNavItemClick}
-                  >
-                    <Link to="/profile">
-                      <User className="h-5 w-5" />
-                      {t('profile')}
-                    </Link>
-                  </Button>
-                </AnimatedContainer>
-                
-                <AnimatedContainer delay={0.15} animation="fade">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2"
-                    asChild
-                    onClick={handleNavItemClick}
-                  >
-                    <Link to="/settings">
-                      <Settings className="h-5 w-5" />
-                      {t('settings')}
-                    </Link>
-                  </Button>
-                </AnimatedContainer>
-                
-                <AnimatedContainer delay={0.2} animation="fade">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 text-destructive"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="h-5 w-5" />
-                    {t('logout')}
-                  </Button>
-                </AnimatedContainer>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <Button 
-                className="w-full" 
-                asChild
-                onClick={handleNavItemClick}
+              return (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => onOpenChange(false)}
+                  className={({ isActive }) =>
+                    `block py-2 px-4 text-base rounded-md transition-colors ${
+                      isActive
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "hover:bg-muted"
+                    }`
+                  }
+                >
+                  {item.name}
+                </NavLink>
+              );
+            })}
+          </div>
+          
+          {!isAuthenticated && (
+            <div className="pt-4 border-t border-border">
+              <NavLink
+                to="/auth"
+                onClick={() => onOpenChange(false)}
+                className="block w-full py-2.5 px-4 bg-primary text-primary-foreground text-center rounded-md font-medium"
               >
-                <Link to="/login">{t('login')}</Link>
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                asChild
-                onClick={handleNavItemClick}
-              >
-                <Link to="/register">{t('register')}</Link>
-              </Button>
+                {t('auth.login')}
+              </NavLink>
             </div>
           )}
-        </div>
+        </nav>
       </SheetContent>
     </Sheet>
   );

@@ -1,10 +1,15 @@
 
 import React, { useEffect, useState } from 'react';
-import AppLayout from '@/components/layout/AppLayout';
+import { useNavigate } from 'react-router-dom';
+import MainLayout from '@/components/layout/MainLayout';
 import BrainHubDashboard from '@/components/brainHub/BrainHubDashboard';
+import BrainHubError from '@/components/brainHub/BrainHubError';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
+import securityEngine from '@/services/neural/BrainHubSecurityEngine';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { toast } from "@/components/ui/use-toast";
+import { Loader2 } from 'lucide-react';
 
 const BrainHubPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -12,9 +17,34 @@ const BrainHubPage: React.FC = () => {
   const [systemHealth, setSystemHealth] = useState<{status: 'good' | 'warning' | 'error', message?: string}>({
     status: 'good'
   });
-
-  // Initialize Brain Hub when the page loads
+  const { isAuthenticated, checkRole } = useAuth();
+  const navigate = useNavigate();
+  
+  // Check if user has permission to access Brain Hub
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/auth', { state: { from: '/brain-hub' } });
+      return;
+    }
+    
+    // Check if user has admin role
+    const hasAdminAccess = checkRole('admin') || checkRole('moderator');
+    if (!hasAdminAccess) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access Brain Hub",
+        variant: "destructive"
+      });
+      navigate('/');
+      return;
+    }
+    
+    // Initialize Brain Hub
+    initializeBrainHub();
+  }, [isAuthenticated, navigate, checkRole]);
+
+  // Initialize Brain Hub systems
+  const initializeBrainHub = async () => {
     try {
       // Example: Store some initial data in Brain Hub memory
       brainHub.storeInMemory('initial_load_time', Date.now());
@@ -25,6 +55,9 @@ const BrainHubPage: React.FC = () => {
       // Initialize the autonomy engine with the same settings as the Brain Hub
       const autonomyStatus = brainHub.getAutonomyStatus();
       autonomyEngine.setAutonomyLevel(autonomyStatus.level);
+      
+      // Start the security engine
+      securityEngine.startMonitoring();
       
       // Start the autonomy engine if it's enabled in the Brain Hub
       if (autonomyStatus.enabled) {
@@ -46,7 +79,8 @@ const BrainHubPage: React.FC = () => {
       brainHub.storeInMemory('connected_modules', {
         'neural': true,
         'autonomy': true,
-        'userIntelligence': true
+        'userIntelligence': true,
+        'security': true
       });
       
       // Perform a health check
@@ -57,17 +91,17 @@ const BrainHubPage: React.FC = () => {
         toast({
           title: "System Warning",
           description: healthCheck.message,
-          variant: "destructive"
+          variant: "warning"
         });
       }
     } catch (error: any) {
       console.error("Error initializing Brain Hub:", error);
       setInitErrors(prev => [...prev, error.message || "Unknown error initializing Brain Hub"]);
+    } finally {
+      // Simulate loading time
+      setTimeout(() => setIsLoading(false), 1500);
     }
-    
-    // Simulate loading time
-    setTimeout(() => setIsLoading(false), 1500);
-  }, []);
+  };
   
   // Perform a simulated health check of the system
   const performSystemHealthCheck = () => {
@@ -90,11 +124,22 @@ const BrainHubPage: React.FC = () => {
     
     return { status: 'good' as const };
   };
+  
+  // Retry initialization
+  const handleRetry = () => {
+    setIsLoading(true);
+    setInitErrors([]);
+    initializeBrainHub();
+  };
 
   if (isLoading) {
     return (
-      <AppLayout>
-        <div className="flex items-center justify-center h-[80vh]">
+      <MainLayout
+        title="Brain Hub"
+        description="Initializing Brain Hub systems..."
+        hideNavbar={false}
+      >
+        <div className="flex items-center justify-center h-[50vh]">
           <div className="animate-pulse flex flex-col items-center">
             <div className="h-16 w-16 bg-primary/20 rounded-full flex items-center justify-center">
               <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -103,37 +148,34 @@ const BrainHubPage: React.FC = () => {
             <p className="text-sm text-muted-foreground mt-2">Configuring neural pathways and autonomy systems</p>
           </div>
         </div>
-      </AppLayout>
+      </MainLayout>
     );
   }
 
   if (initErrors.length > 0) {
     return (
-      <AppLayout>
-        <div className="container py-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-red-800 mb-4">Brain Hub Initialization Failed</h2>
-            <div className="space-y-2">
-              {initErrors.map((error, index) => (
-                <div key={index} className="bg-white p-3 rounded border border-red-100 text-red-700">
-                  {error}
-                </div>
-              ))}
-            </div>
-            <button 
-              onClick={() => window.location.reload()}
-              className="mt-6 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition"
-            >
-              Retry Initialization
-            </button>
-          </div>
-        </div>
-      </AppLayout>
+      <MainLayout
+        title="Brain Hub Initialization Failed"
+        description="The Brain Hub system could not be initialized due to errors."
+        hideNavbar={false}
+      >
+        <BrainHubError 
+          title="Brain Hub Initialization Failed"
+          description="The Brain Hub system could not be initialized due to the following errors:"
+          errors={initErrors}
+          onRetry={handleRetry}
+        />
+      </MainLayout>
     );
   }
 
   return (
-    <AppLayout>
+    <MainLayout
+      title="Brain Hub"
+      description="Unified control and monitoring of autonomous AI systems"
+      hideNavbar={false}
+      containerClass="container mx-auto px-4"
+    >
       {systemHealth.status === 'warning' && (
         <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
           <div className="flex">
@@ -152,7 +194,7 @@ const BrainHubPage: React.FC = () => {
       )}
       
       <BrainHubDashboard />
-    </AppLayout>
+    </MainLayout>
   );
 };
 

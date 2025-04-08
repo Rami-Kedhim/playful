@@ -1,0 +1,28 @@
+
+{
+  "nav": {
+    "home": "Home",
+    "escorts": "Escorts",
+    "creators": "Creators",
+    "metaverse": "Metaverse",
+    "brainHub": "Brain Hub",
+    "profile": "Profile",
+    "favorites": "Favorites",
+    "messages": "Messages",
+    "menu": "Menu",
+    "search": "Search"
+  },
+  "services": {
+    "livecams": "Livecams",
+    "aiCompanions": "AI Companions",
+    "brainHub": "Brain Hub"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?"
+  }
+}
