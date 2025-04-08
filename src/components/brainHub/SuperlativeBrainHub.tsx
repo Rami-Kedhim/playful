@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Brain, ShieldCheck, PieChart, UserCheck } from 'lucide-react';
+import { Brain, ShieldCheck, PieChart, UserCheck, Sparkles, Heart } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -13,6 +13,8 @@ import UberConsolePanel from './UberConsolePanel';
 import BrainCore from './BrainCore';
 import BrainHubHealthMonitor from '@/components/admin/dashboard/BrainHubHealthMonitor';
 import SystemDiagnostics from '@/components/admin/dashboard/SystemDiagnostics';
+import QuantumEmotionalPrediction from './QuantumEmotionalPrediction';
+import NeurosemanticCluster from './NeurosemanticCluster';
 
 /**
  * SuperlativeBrainHub - Main component for the enhanced Brain Hub
@@ -79,6 +81,14 @@ const SuperlativeBrainHub: React.FC = () => {
               <Brain className="h-4 w-4 mr-2" />
               Intelligence Core
             </TabsTrigger>
+            <TabsTrigger value="emotional" className="flex items-center">
+              <Heart className="h-4 w-4 mr-2" />
+              Emotional System
+            </TabsTrigger>
+            <TabsTrigger value="neurosemantic" className="flex items-center">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Neurosemantic Cluster
+            </TabsTrigger>
             <TabsTrigger value="control" className="flex items-center">
               <PieChart className="h-4 w-4 mr-2" />
               Control Center
@@ -115,6 +125,18 @@ const SuperlativeBrainHub: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="emotional">
+          <div className="space-y-6">
+            <QuantumEmotionalPrediction />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="neurosemantic">
+          <div className="space-y-6">
+            <NeurosemanticCluster />
           </div>
         </TabsContent>
         
