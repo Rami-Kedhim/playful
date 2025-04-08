@@ -40,18 +40,7 @@ const EscortGrid: React.FC<EscortGridProps> = ({ escorts, loading = false }) => 
       {escorts.map(escort => (
         <EscortCard 
           key={escort.id}
-          name={escort.name}
-          age={escort.age}
-          location={escort.location}
-          rating={escort.rating}
-          reviews={escort.reviews}
-          tags={escort.tags}
-          imageUrl={escort.imageUrl}
-          price={escort.price}
-          verified={escort.verified}
-          escortId={escort.id}
-          profileType={escort.profileType}
-          availableNow={escort.availableNow}
+          escort={escort}
         />
       ))}
     </div>

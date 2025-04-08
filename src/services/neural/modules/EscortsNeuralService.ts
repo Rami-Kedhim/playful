@@ -1,8 +1,24 @@
 
 import { BaseNeuralService } from './BaseNeuralService';
 import { ModuleType } from '../registry/NeuralServiceRegistry';
+import { NeuralServiceConfig } from '../types/neuralConfig';
+
+export interface EscortsNeuralConfig extends NeuralServiceConfig {
+  boostingEnabled: boolean;
+  boostingAlgorithm: string;
+  orderByBoost: boolean;
+}
 
 export class EscortsNeuralService extends BaseNeuralService {
+  private config: EscortsNeuralConfig = {
+    autonomyLevel: 60,
+    resourceAllocation: 40,
+    priority: 50,
+    boostingEnabled: true,
+    boostingAlgorithm: 'OxumAlgorithm',
+    orderByBoost: true
+  };
+
   constructor(moduleId: string) {
     super(moduleId, 'escorts');
   }
@@ -17,6 +33,18 @@ export class EscortsNeuralService extends BaseNeuralService {
     ];
   }
   
+  isEnabled(): boolean {
+    return true;
+  }
+  
+  getConfig(): EscortsNeuralConfig {
+    return this.config;
+  }
+
+  updateConfig(partialConfig: Partial<EscortsNeuralConfig>): void {
+    this.config = { ...this.config, ...partialConfig };
+  }
+
   // Additional methods specific to escort service
   verifyEscortProfile(profileData: any): boolean {
     // Implementation would verify escort profile data
@@ -32,6 +60,10 @@ export class EscortsNeuralService extends BaseNeuralService {
         overnight: Math.floor(Math.random() * 1000) + 1000
       }
     };
+  }
+  
+  configure(config: Partial<EscortsNeuralConfig>): void {
+    this.updateConfig(config);
   }
 }
 

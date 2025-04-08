@@ -143,7 +143,7 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
           processedEscorts = processedEscorts.map(escort => ({
             ...escort,
             profileType: escort.verified ? 'verified' : 
-                         escort.isAI ? 'ai' : 'provisional'
+                       escort.isAI ? 'ai' : 'provisional'
           }));
           
           // Apply sorting based on boost level if enabled
@@ -211,9 +211,9 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
       if (escortsNeuralService) {
         // Initialize with user preferences if available
         const userPrefs = user ? { userId: user.id } : {};
-        escortsNeuralService.configure({ 
+        escortsNeuralService.updateConfig({ 
           ...userPrefs,
-          resourcePriority: 'high',
+          resourceAllocation: 'high',
           boostingEnabled: true,
           boostingAlgorithm: "OxumAlgorithm",
           orderByBoost: true

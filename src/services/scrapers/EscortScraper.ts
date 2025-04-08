@@ -1,8 +1,4 @@
 
-/**
- * EscortScraper - Service for scraping tryst.link
- * Implements the BaseScraperService abstract class
- */
 import { BaseScraperService } from "./baseScraperService";
 import { Escort } from "@/types/escort";
 import { brainHub } from "../neural/HermesOxumBrainHub";
@@ -66,7 +62,7 @@ export class EscortScraper extends BaseScraperService {
       
       try {
         // Use the BrainHub to get data instead of direct scraping
-        processedEscorts = await brainHub.executeQuery({
+        processedEscorts = await brainHub.processQuery('escorts', {
           type: 'escorts',
           filters: {
             region: this.region,

@@ -1,120 +1,195 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useEscortDetail } from '@/hooks/useEscortDetail';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useParams, Link } from 'react-router-dom';
+import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
-import { Share2, Heart, MessageSquare, Calendar, MapPin, Star } from 'lucide-react';
-import EscortGallery from '@/components/escorts/detail/EscortGallery';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Calendar, Heart, MessageSquare, Star, Video } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useEscortDetail } from '@/hooks/useEscortDetail';
 import EscortBio from '@/components/escorts/detail/tabs/EscortBio';
 import EscortRates from '@/components/escorts/detail/tabs/EscortRates';
-import EscortServices from '@/components/escorts/detail/tabs/EscortServices';
 import EscortDetailSkeleton from '@/components/escorts/detail/EscortDetailSkeleton';
-import ProfileTypeBadge from '@/components/escorts/profile/ProfileTypeBadge';
+import EscortGallery from '@/components/escorts/detail/EscortGallery';
 
 const EscortDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
+  const { toast } = useToast();
   const { 
     escort, 
     loading, 
     error, 
     isFavorite, 
-    toggleFavorite,
+    toggleFavorite, 
     handleBookingRequest,
     canBook
   } = useEscortDetail(id);
-
-  // Define additional variables that are needed
-  const isBookingAvailable = canBook;
-  const isMessagingAvailable = true;
   
-  // Define handler functions
+  // This is a fallback if there was an error or the escort wasn't found
+  if (error || (!loading && !escort)) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Button variant="ghost" onClick={() => window.history.back()} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to escorts
+          </Button>
+          
+          <div className="flex flex-col items-center justify-center py-12">
+            <h2 className="text-2xl font-bold mb-2">Escort Not Found</h2>
+            <p className="text-gray-500 mb-4">The escort you're looking for doesn't exist or has been removed.</p>
+            <Button asChild>
+              <Link to="/escorts" className="text-white">
+                Browse Escorts
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+  
+  // Loading state
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-8">
+          <Button variant="ghost" onClick={() => window.history.back()} className="mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to escorts
+          </Button>
+          <EscortDetailSkeleton />
+        </div>
+      </MainLayout>
+    );
+  }
+  
   const handleBook = () => {
-    // Mock implementation for booking
-    const now = new Date();
-    const twoHoursLater = new Date(now.getTime() + (2 * 60 * 60 * 1000));
-    handleBookingRequest(now, twoHoursLater, 'standard');
+    toast({
+      title: "Booking Request",
+      description: `Your booking request for ${escort.name} has been submitted.`,
+    });
   };
   
   const handleMessage = () => {
-    console.log('Message escort:', escort?.name);
-    // Implementation would send a message to the escort
+    toast({
+      title: "Message Sent",
+      description: `Your message to ${escort.name} has been sent.`,
+    });
   };
-
-  if (loading) {
-    return <EscortDetailSkeleton />;
-  }
-
-  if (error || !escort) {
-    return (
-      <div className="container mx-auto py-16 px-4 text-center">
-        <h2 className="text-2xl font-bold mb-4">Profile Not Found</h2>
-        <p className="text-muted-foreground">
-          Sorry, the escort profile you're looking for is not available.
-        </p>
-        <Button className="mt-4" href="/escorts">
-          Browse Escorts
-        </Button>
-      </div>
-    );
-  }
-
+  
+  const isBookingAvailable = canBook && !escort.isAI;
+  const isMessagingAvailable = true;
+  
+  // Calculate verification badge display
+  const getVerificationBadge = () => {
+    if (escort.verified) {
+      return (
+        <Badge className="bg-primary text-white">
+          <Star className="h-3 w-3 fill-current mr-1" />
+          Verified
+        </Badge>
+      );
+    } else if (escort.isAI || escort.profileType === "ai") {
+      return <Badge variant="secondary">AI Model</Badge>;
+    } else {
+      return <Badge variant="outline">Provisional</Badge>;
+    }
+  };
+  
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column */}
-        <div className="col-span-2">
-          {/* Header Section */}
-          <div className="mb-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <h1 className="text-3xl font-bold">{escort.name}, {escort.age}</h1>
-                <div className="flex items-center mt-1 text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  <span>{escort.location}</span>
-                  
-                  <div className="mx-2">•</div>
-                  
-                  <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                  <span>{escort.rating} ({escort.reviews} reviews)</span>
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <Button variant="ghost" onClick={() => window.history.back()} className="mb-6">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to escorts
+        </Button>
+        
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Left column - Photos */}
+          <div className="md:w-2/5 space-y-6">
+            <EscortGallery 
+              images={escort.gallery || [escort.imageUrl]} 
+              name={escort.name} 
+            />
+            
+            {escort.videos && escort.videos.length > 0 && (
+              <Button variant="outline" className="w-full" asChild>
+                <Link to={`/escorts/${id}/videos`}>
+                  <Video className="h-4 w-4 mr-2" />
+                  View Videos ({escort.videos.length})
+                </Link>
+              </Button>
+            )}
+            
+            {escort.providesVirtualContent && (
+              <Button variant="outline" className="w-full" asChild>
+                <Link to={`/escorts/${id}/content`}>
+                  <Video className="h-4 w-4 mr-2" />
+                  View Virtual Content
+                </Link>
+              </Button>
+            )}
+          </div>
+          
+          {/* Right column - Details */}
+          <div className="md:w-3/5">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-3xl font-bold">{escort.name}</h1>
+                  {getVerificationBadge()}
                 </div>
+                <Button 
+                  size="icon" 
+                  variant={isFavorite ? "default" : "outline"} 
+                  onClick={toggleFavorite}
+                  className="h-8 w-8"
+                >
+                  <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+                  <span className="sr-only">Favorite</span>
+                </Button>
               </div>
               
-              <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  <Share2 className="h-4 w-4 mr-1" />
-                  Share
-                </Button>
+              <div className="flex items-center text-muted-foreground mb-3">
+                <span>{escort.age} years • {escort.location}</span>
                 
-                <Button 
-                  variant={isFavorite ? "default" : "outline"} 
-                  size="sm"
-                  onClick={toggleFavorite}
-                >
-                  <Heart className={`h-4 w-4 mr-1 ${isFavorite ? 'fill-current' : ''}`} />
-                  {isFavorite ? 'Saved' : 'Save'}
-                </Button>
+                {escort.rating > 0 && (
+                  <div className="ml-auto flex items-center">
+                    <Star className="h-4 w-4 fill-yellow-500 text-yellow-500 mr-1" />
+                    <span>{escort.rating.toFixed(1)}</span>
+                    {escort.reviews > 0 && (
+                      <span className="text-xs ml-1">({escort.reviews} reviews)</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 mt-3">
-              <ProfileTypeBadge type={escort.profileType} />
+            {/* Action buttons */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {isBookingAvailable && (
+                <Button onClick={handleBook}>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Book Now
+                </Button>
+              )}
               
-              {escort.availableNow && (
-                <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                  Available Now
-                </span>
+              {isMessagingAvailable && (
+                <Button 
+                  variant={isBookingAvailable ? "outline" : "default"} 
+                  onClick={handleMessage}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Message
+                </Button>
               )}
             </div>
-          </div>
-          
-          {/* Gallery Section */}
-          <EscortGallery gallery={escort.gallery} name={escort.name} />
-          
-          {/* Tabs Section */}
-          <div className="mt-8">
-            <Tabs defaultValue="about">
-              <TabsList className="mb-6">
+            
+            {/* Tabs for different sections */}
+            <Tabs defaultValue="about" className="mt-6">
+              <TabsList className="w-full justify-start">
                 <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="rates">Rates</TabsTrigger>
                 <TabsTrigger value="services">Services</TabsTrigger>
@@ -122,65 +197,62 @@ const EscortDetail = () => {
               </TabsList>
               
               <TabsContent value="about">
-                <EscortBio escort={escort} />
+                <EscortBio 
+                  name={escort.name}
+                  age={escort.age}
+                  location={escort.location}
+                  bio={escort.bio}
+                  gender={escort.gender}
+                  orientation={escort.sexualOrientation}
+                  languages={escort.languages}
+                  ethnicity={escort.ethnicity}
+                  height={escort.height}
+                  weight={escort.weight}
+                  hairColor={escort.hairColor}
+                  eyeColor={escort.eyeColor}
+                  measurements={escort.measurements}
+                  tags={escort.tags}
+                />
               </TabsContent>
               
               <TabsContent value="rates">
-                <EscortRates escort={escort} />
+                <EscortRates rates={escort.rates || {}} />
               </TabsContent>
               
               <TabsContent value="services">
-                <EscortServices escort={escort} />
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold">My Services</h3>
+                  
+                  {escort.services && escort.services.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {escort.services.map((service, index) => (
+                        <div key={index} className="flex items-center p-3 rounded-lg border">
+                          <span className="text-sm">{service}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No services specified.</p>
+                  )}
+                </div>
               </TabsContent>
               
               <TabsContent value="reviews">
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">Reviews coming soon.</p>
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold">Reviews</h3>
+                  
+                  {escort.reviews > 0 ? (
+                    <p>Review functionality coming soon.</p>
+                  ) : (
+                    <p className="text-muted-foreground">No reviews yet.</p>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
           </div>
         </div>
-        
-        {/* Right Column */}
-        <div>
-          <div className="sticky top-24 space-y-6">
-            <div className="border rounded-lg p-6 space-y-4">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-primary">${escort.price}</h3>
-                <p className="text-sm text-muted-foreground">Starting price per hour</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Button 
-                  className="w-full" 
-                  disabled={!isBookingAvailable}
-                  onClick={handleBook}
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Book Now
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  disabled={!isMessagingAvailable}
-                  onClick={handleMessage}
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Message
-                </Button>
-              </div>
-              
-              <div className="text-center text-xs text-muted-foreground">
-                <p>Last active: {new Date(escort.lastActive as string).toLocaleDateString()}</p>
-                <p>Response rate: {escort.responseRate}%</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

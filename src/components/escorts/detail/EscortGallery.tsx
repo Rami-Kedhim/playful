@@ -1,196 +1,116 @@
 
-import { useState, useRef, useEffect } from "react";
-import { Escort } from "@/types/escort";
-import { Card } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { ImageType, GalleryImage } from "./gallery/types";
-import GalleryFilters from "./gallery/GalleryFilters";
-import GalleryControls from "./gallery/GalleryControls";
-import GalleryThumbnails from "./gallery/GalleryThumbnails";
-import NoImagesMessage from "./gallery/NoImagesMessage";
-import EscortImageGallery from "./EscortImageGallery";
+import React, { useState } from 'react';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface EscortGalleryProps {
-  escort: Escort;
+  images: string[];
+  name: string;
 }
 
-const EscortGallery = ({ escort }: EscortGalleryProps) => {
-  // For demo purposes, we'll create a more structured array of images with types
-  const allImages: GalleryImage[] = [
-    {
-      url: escort.imageUrl || escort.avatar_url || '',
-      type: "portrait",
-      alt: `${escort.name} portrait photo`
-    },
-    {
-      url: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80",
-      type: "full-body",
-      alt: `${escort.name} full body photo`
-    },
-    {
-      url: "https://images.unsplash.com/photo-1533973860224-d3603adb6d73?ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80",
-      type: "artistic",
-      alt: `${escort.name} artistic photo`
-    },
-    {
-      url: "https://images.unsplash.com/photo-1582643381759-d3560e50f8cc?ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=80",
-      type: "portrait",
-      alt: `${escort.name} second portrait photo`
-    },
-  ];
+const EscortGallery: React.FC<EscortGalleryProps> = ({ images, name }) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
   
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [galleryOpen, setGalleryOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
-  const [selectedType, setSelectedType] = useState<ImageType>("all");
-  const [filteredImages, setFilteredImages] = useState<GalleryImage[]>(allImages);
-  const slideshowTimerRef = useRef<NodeJS.Timeout | null>(null);
+  if (!images || images.length === 0) {
+    return (
+      <div className="rounded-lg bg-muted w-full aspect-[3/4] flex items-center justify-center">
+        <p className="text-muted-foreground">No gallery images available</p>
+      </div>
+    );
+  }
   
-  // Filter images when type changes
-  useEffect(() => {
-    if (selectedType === "all") {
-      setFilteredImages(allImages);
-    } else {
-      const filtered = allImages.filter(image => image.type === selectedType);
-      setFilteredImages(filtered);
-    }
-    // Reset current image index when filter changes
-    setCurrentImageIndex(0);
-  }, [selectedType]);
-  
-  const goToNextImage = () => {
-    if (filteredImages.length <= 1) return;
-    setCurrentImageIndex((prev) => (prev + 1) % filteredImages.length);
+  const handleImageClick = (image: string, index: number) => {
+    setSelectedImage(image);
+    setCurrentIndex(index);
   };
   
-  const goToPrevImage = () => {
-    if (filteredImages.length <= 1) return;
-    setCurrentImageIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
-  };
-
-  const openGallery = () => {
-    setGalleryOpen(true);
-    // Stop slideshow when opening gallery
-    if (slideshowTimerRef.current) {
-      clearInterval(slideshowTimerRef.current);
-      setIsPlaying(false);
-    }
+  const handleClose = () => {
+    setSelectedImage(null);
   };
   
-  // Touch swipe functionality
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
+  const handlePrevious = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newIndex = (currentIndex - 1 + images.length) % images.length;
+    setCurrentIndex(newIndex);
+    setSelectedImage(images[newIndex]);
   };
   
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newIndex = (currentIndex + 1) % images.length;
+    setCurrentIndex(newIndex);
+    setSelectedImage(images[newIndex]);
   };
-  
-  const handleTouchEnd = () => {
-    const minSwipeDistance = 50;
-    if (touchStart - touchEnd > minSwipeDistance) {
-      // Left swipe
-      goToNextImage();
-    } else if (touchEnd - touchStart > minSwipeDistance) {
-      // Right swipe
-      goToPrevImage();
-    }
-  };
-  
-  // Slideshow functionality
-  const toggleSlideshow = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening gallery
-    
-    if (isPlaying) {
-      if (slideshowTimerRef.current) {
-        clearInterval(slideshowTimerRef.current);
-        slideshowTimerRef.current = null;
-      }
-    } else {
-      slideshowTimerRef.current = setInterval(() => {
-        goToNextImage();
-      }, 3000);
-    }
-    
-    setIsPlaying(!isPlaying);
-  };
-  
-  // Clean up slideshow on unmount
-  useEffect(() => {
-    return () => {
-      if (slideshowTimerRef.current) {
-        clearInterval(slideshowTimerRef.current);
-      }
-    };
-  }, []);
   
   return (
-    <>
-      <div className="space-y-2">
-        {/* Filter tabs */}
-        <GalleryFilters 
-          selectedType={selectedType} 
-          onTypeChange={setSelectedType} 
+    <div className="space-y-2">
+      <AspectRatio ratio={3/4} className="bg-muted mb-3 overflow-hidden rounded-lg">
+        <img 
+          src={images[0]} 
+          alt={`${name} main`}
+          className="w-full h-full object-cover"
         />
-
-        <Card 
-          className="overflow-hidden relative"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <AspectRatio ratio={1/1} className="bg-gray-900">
-            {filteredImages.length > 0 ? (
+      </AspectRatio>
+      
+      <div className="grid grid-cols-4 gap-2">
+        {images.slice(0, 4).map((image, index) => (
+          <div 
+            key={index}
+            className="cursor-pointer rounded-md overflow-hidden"
+            onClick={() => handleImageClick(image, index)}
+          >
+            <AspectRatio ratio={1/1}>
               <img 
-                src={filteredImages[currentImageIndex].url} 
-                alt={filteredImages[currentImageIndex].alt} 
-                className="object-cover w-full h-full cursor-pointer"
-                onClick={openGallery}
+                src={image} 
+                alt={`${name} ${index + 1}`}
+                className="w-full h-full object-cover"
               />
-            ) : (
-              <NoImagesMessage onResetFilter={() => setSelectedType("all")} />
-            )}
-          </AspectRatio>
-          
-          {/* Only show controls if we have images */}
-          {filteredImages.length > 0 && (
-            <GalleryControls 
-              hasMultipleImages={filteredImages.length > 1}
-              onPrev={(e) => {
-                e.stopPropagation();
-                goToPrevImage();
-              }}
-              onNext={(e) => {
-                e.stopPropagation();
-                goToNextImage();
-              }}
-              onOpenGallery={openGallery}
-              isPlaying={isPlaying}
-              onToggleSlideshow={toggleSlideshow}
-              currentIndex={currentImageIndex}
-              totalImages={filteredImages.length}
-            />
-          )}
-        </Card>
-        
-        {/* Thumbnails */}
-        <GalleryThumbnails 
-          images={filteredImages}
-          currentIndex={currentImageIndex}
-          onSelectImage={setCurrentImageIndex}
-        />
+            </AspectRatio>
+          </div>
+        ))}
       </div>
-
-      <EscortImageGallery
-        images={filteredImages.map(img => img.url)}
-        name={escort.name}
-        isOpen={galleryOpen}
-        onClose={() => setGalleryOpen(false)}
-        initialIndex={currentImageIndex}
-      />
-    </>
+      
+      <Dialog open={!!selectedImage} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] p-0 overflow-hidden bg-black">
+          <div className="relative w-full h-full">
+            <button 
+              className="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/80"
+              onClick={handleClose}
+            >
+              <X className="h-5 w-5" />
+            </button>
+            
+            {images.length > 1 && (
+              <>
+                <button 
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/80"
+                  onClick={handlePrevious}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                
+                <button 
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/80"
+                  onClick={handleNext}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+            
+            <div className="w-full h-full flex items-center justify-center p-4">
+              <img 
+                src={selectedImage || ""} 
+                alt={`${name} gallery`}
+                className="max-h-[80vh] max-w-full object-contain"
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
