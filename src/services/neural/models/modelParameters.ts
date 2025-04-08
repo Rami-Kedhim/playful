@@ -2,66 +2,59 @@
 import { ModelParameters } from '../types/neuralHub';
 
 /**
- * Calculate system efficiency based on model parameters
+ * Calculate the efficiency score of the system based on the provided parameters
+ * @param params Model parameters
+ * @returns Efficiency score (0-100)
  */
-export function calculateSystemEfficiency(params?: ModelParameters): number {
-  // Default parameters if none provided
-  const parameters = params || initializeDefaultParameters();
+export function calculateSystemEfficiency(params: ModelParameters): number {
+  // This is a simplified algorithm to calculate system efficiency
+  // In a real application, this would be more complex
   
-  // Calculate efficiency based on parameter values
-  // This is a simplified calculation for demonstration
-  const learningRateScore = Math.min(1, parameters.learningRate * 1000);
-  const batchSizeScore = Math.min(1, parameters.batchSize / 128);
-  const epochsScore = Math.min(1, parameters.epochs / 20);
+  let score = 60; // Base score
   
-  // Advanced parameters contribute to efficiency if available
-  let advancedScore = 0.8; // Default
-  if (parameters.decayConstant !== undefined && 
-      parameters.attractorStrength !== undefined) {
-    advancedScore = 
-      (1 - Math.abs(parameters.decayConstant - 0.2)) * 0.5 +
-      (parameters.attractorStrength * 0.5);
+  // Adjust score based on parameters
+  if (params.decayConstant !== undefined) {
+    score += (params.decayConstant < 0.25) ? 10 : (params.decayConstant > 0.3) ? -5 : 5;
   }
   
-  // Weighted calculation
-  const efficiency = (
-    learningRateScore * 0.3 +
-    batchSizeScore * 0.2 +
-    epochsScore * 0.2 +
-    advancedScore * 0.3
-  );
+  if (params.growthFactor !== undefined) {
+    score += (params.growthFactor > 1.5) ? 8 : (params.growthFactor < 1.2) ? -3 : 4;
+  }
   
-  return efficiency;
+  if (params.cyclePeriod !== undefined) {
+    score += (params.cyclePeriod >= 20 && params.cyclePeriod <= 28) ? 6 : -2;
+  }
+  
+  if (params.harmonicCount !== undefined) {
+    score += (params.harmonicCount === 3) ? 7 : (params.harmonicCount > 5) ? -4 : 2;
+  }
+  
+  // Ensure score is within 0-100 range
+  return Math.max(0, Math.min(100, score));
 }
 
 /**
  * Validate model parameters
+ * @param parameters Parameters to validate
+ * @returns Validation result
  */
 export function validateModelParameters(parameters: ModelParameters): { valid: boolean; errors?: string[] } {
   const errors: string[] = [];
   
-  // Check required parameters
-  if (parameters.learningRate <= 0 || parameters.learningRate > 1) {
+  if (parameters.learningRate !== undefined && (parameters.learningRate <= 0 || parameters.learningRate > 1)) {
     errors.push('Learning rate must be between 0 and 1');
   }
   
-  if (parameters.batchSize < 1) {
+  if (parameters.batchSize !== undefined && parameters.batchSize < 1) {
     errors.push('Batch size must be at least 1');
   }
   
-  if (parameters.epochs < 1) {
+  if (parameters.epochs !== undefined && parameters.epochs < 1) {
     errors.push('Number of epochs must be at least 1');
   }
   
-  // Check advanced parameters if provided
-  if (parameters.decayConstant !== undefined && 
-      (parameters.decayConstant < 0 || parameters.decayConstant > 1)) {
-    errors.push('Decay constant must be between 0 and 1');
-  }
-  
-  if (parameters.attractorStrength !== undefined && 
-      (parameters.attractorStrength < 0 || parameters.attractorStrength > 1)) {
-    errors.push('Attractor strength must be between 0 and 1');
+  if (parameters.dropout !== undefined && (parameters.dropout < 0 || parameters.dropout >= 1)) {
+    errors.push('Dropout must be between 0 and 1');
   }
   
   return {
@@ -72,6 +65,7 @@ export function validateModelParameters(parameters: ModelParameters): { valid: b
 
 /**
  * Initialize default model parameters
+ * @returns Default model parameters
  */
 export function initializeDefaultParameters(): ModelParameters {
   return {

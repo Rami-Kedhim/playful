@@ -2,9 +2,7 @@
 import { useState, useCallback } from 'react';
 import { 
   neuralServiceRegistry, 
-  NeuralService, 
-  BaseNeuralService,
-  ModuleType
+  NeuralService
 } from '@/services/neural';
 
 /**

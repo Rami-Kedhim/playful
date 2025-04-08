@@ -1,6 +1,49 @@
 
-// Define neural hub types
+/**
+ * Neural model interface
+ */
+export interface NeuralModel {
+  id: string;
+  name: string;
+  version: string;
+  capabilities: string[];
+  specialization?: string[];
+  status: 'active' | 'inactive' | 'training' | 'error';
+  performance: {
+    accuracy: number;
+    latency: number;
+    resourceUsage: number;
+    [key: string]: number;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+  [key: string]: any;
+}
 
+/**
+ * Neural model parameters
+ */
+export interface ModelParameters {
+  learningRate?: number;
+  batchSize?: number;
+  epochs?: number;
+  optimizerType?: string;
+  dropout?: number;
+  activationFunction?: string;
+  embeddingSize?: number;
+  hiddenLayers?: number[];
+  decayConstant?: number;
+  growthFactor?: number;
+  cyclePeriod?: number;
+  harmonicCount?: number;
+  bifurcationPoint?: number;
+  attractorStrength?: number;
+  [key: string]: any;
+}
+
+/**
+ * System health metrics
+ */
 export interface SystemHealthMetrics {
   cpuUtilization: number;
   memoryUtilization: number;
@@ -15,68 +58,19 @@ export interface SystemHealthMetrics {
   userEngagement: number;
   economicBalance: number;
   lastUpdated: Date;
-}
-
-export interface ModelParameters {
-  learningRate: number;
-  batchSize: number;
-  epochs: number;
-  optimizerType: string;
-  dropout?: number;
-  activationFunction?: string;
-  embeddingSize?: number;
-  hiddenLayers?: number[];
-  decayConstant?: number;
-  growthFactor?: number;
-  cyclePeriod?: number;
-  harmonicCount?: number;
-  bifurcationPoint?: number;
-  attractorStrength?: number;
-}
-
-export interface NeuralModel {
-  id: string;
-  name: string;
-  version: string;
-  capabilities: string[];
-  specialization?: string[];
-  status: 'active' | 'inactive' | 'training' | 'error';
-  performance: {
-    accuracy: number;
-    latency: number;
-    resourceUsage: number;
-    throughput?: number;
-    precision?: number;
-    recall?: number;
-    f1Score?: number;
-    lastEvaluation?: Date;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface TrainingProgress {
-  modelId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'preparing' | 'training' | 'evaluating';
-  progress: number; // 0-100
-  accuracy: number;
-  startTime: Date;
-  estimatedCompletionTime?: Date;
-  error?: string;
-  message?: string;
-  trainingConfig?: any;
+  [key: string]: any;
 }
 
 /**
- * Interfaces for the Neural Hub state persistence
+ * Training progress interface
  */
-export interface BrainHubUserState {
-  userPreferences: Record<string, any>;
-  lastActiveModels: string[];
-  autonomySettings: {
-    enabled: boolean;
-    level: number;
-  };
-  uiConfiguration: Record<string, any>;
-  lastSaved: string;
+export interface TrainingProgress {
+  modelId: string;
+  startTime: Date;
+  currentEpoch: number;
+  totalEpochs: number;
+  currentAccuracy: number;
+  targetAccuracy: number;
+  estimatedCompletionTime: Date;
+  status: 'running' | 'completed' | 'failed' | 'stopped';
 }
