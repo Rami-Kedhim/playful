@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { brainHub } from '@/services/neural';
 import { neuralHub, SystemHealthMetrics } from '@/services/neural';
-import { neuralMetrics, generateNeuralAnalytics } from '@/services/neural/reporting/neuralAnalytics';
+import { generateNeuralAnalytics } from '@/services/neural/reporting/neuralAnalytics';
+import { neuralMetrics } from '@/services/neural/reporting/neuralMetrics';
 
 export type BrainHubHealthStatus = 'good' | 'warning' | 'error';
 
