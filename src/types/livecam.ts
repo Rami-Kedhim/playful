@@ -31,21 +31,31 @@ export interface LivecamModel {
     viewerCount: number;
     status: 'active' | 'inactive' | 'private';
   };
+  // Adding missing properties from error messages
+  status?: 'live' | 'offline' | 'away';
+  isPopular?: boolean;
+  previewUrl?: string;
+  gender?: string;
+  createdAt?: Date;
 }
 
 export interface LiveTrendingBarProps {
-  models: LivecamModel[];
+  trendingCams: LivecamModel[];
+  title?: string;
+  loading?: boolean;
 }
 
 export interface LivecamFeaturedProps {
-  model: LivecamModel;
+  livecams: LivecamModel[];
+  title?: string;
+  loading?: boolean;
 }
 
 export interface LivecamsFilter {
-  status: 'all' | 'live' | 'offline';
-  categories: string[];
-  gender: string;
-  region: string;
-  minViewers: number;
-  sortBy: string;
+  status?: 'all' | 'live' | 'offline';
+  categories?: string[];
+  gender?: string;
+  region?: string;
+  minViewers?: number;
+  sortBy?: string;
 }

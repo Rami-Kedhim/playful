@@ -54,7 +54,7 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
           <Card key={livecam.id} className="overflow-hidden">
             <div className="aspect-video relative group">
               <img 
-                src={livecam.previewUrl || livecam.thumbnailUrl} 
+                src={livecam.previewUrl || livecam.previewVideoUrl || livecam.thumbnailUrl} 
                 alt={livecam.name}
                 className="w-full h-full object-cover"
               />
@@ -63,7 +63,7 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
                 <PlayCircle className="h-16 w-16 text-white opacity-80" />
               </div>
               
-              {livecam.status === 'live' && (
+              {livecam.isLive && (
                 <Badge className="absolute top-2 right-2 bg-red-500 text-white">
                   LIVE
                 </Badge>

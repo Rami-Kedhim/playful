@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Users, Heart } from 'lucide-react';
 import { LivecamModel } from '@/types/livecam';
@@ -57,14 +57,14 @@ const LiveTrendingBar: React.FC<LiveTrendingBarProps> = ({
                 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 
-                {cam.status === 'live' && (
+                {cam.isLive && (
                   <Badge 
                     className={cn(
                       "absolute top-2 right-2",
-                      cam.status === 'live' ? "bg-red-500" : "bg-gray-500"
+                      "bg-red-500"
                     )}
                   >
-                    {cam.status === 'live' ? 'LIVE' : 'OFFLINE'}
+                    LIVE
                   </Badge>
                 )}
                 

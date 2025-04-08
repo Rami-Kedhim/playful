@@ -17,6 +17,7 @@ interface EscortBioProps {
   weight?: string;
   hairColor?: string;
   eyeColor?: string;
+  physique?: string;
   measurements?: string;
   tags?: string[];
 }
@@ -34,115 +35,115 @@ const EscortBio: React.FC<EscortBioProps> = ({
   weight,
   hairColor,
   eyeColor,
+  physique,
   measurements,
   tags = []
 }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">About {name}</h2>
-        <p className="text-muted-foreground whitespace-pre-line">{bio || `Hello, I'm ${name}, a ${age} year old escort based in ${location}. I offer premium companionship services tailored to your desires.`}</p>
+        <h2 className="text-xl font-semibold mb-4">About {name}</h2>
+        <p className="text-gray-600 dark:text-gray-400">{bio || "No bio provided."}</p>
       </div>
       
       <Separator />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Details</h3>
-          
-          <div className="space-y-2">
-            {age && (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{age} years old</span>
-              </div>
-            )}
-            
-            {location && (
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{location}</span>
-              </div>
-            )}
-            
-            {gender && (
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{gender.charAt(0).toUpperCase() + gender.slice(1)}</span>
-              </div>
-            )}
-            
-            {orientation && (
-              <div className="flex items-center gap-2">
-                <span className="h-4 w-4 text-muted-foreground">💓</span>
-                <span className="text-sm">{orientation.charAt(0).toUpperCase() + orientation.slice(1)}</span>
-              </div>
-            )}
-            
-            {languages.length > 0 && (
-              <div className="flex items-center gap-2">
-                <Languages className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{languages.join(', ')}</span>
-              </div>
-            )}
-            
-            {ethnicity && (
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{ethnicity}</span>
-              </div>
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+        <div className="flex items-start gap-3">
+          <User className="h-5 w-5 text-primary mt-1" />
+          <div>
+            <p className="font-medium">Age</p>
+            <p className="text-gray-600 dark:text-gray-400">{age} years</p>
           </div>
         </div>
         
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Physical</h3>
-          
-          <div className="space-y-2">
-            {height && (
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Height</span>
-                <span className="text-sm font-medium">{height}</span>
-              </div>
-            )}
-            
-            {weight && (
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Weight</span>
-                <span className="text-sm font-medium">{weight}</span>
-              </div>
-            )}
-            
-            {hairColor && (
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Hair</span>
-                <span className="text-sm font-medium">{hairColor}</span>
-              </div>
-            )}
-            
-            {eyeColor && (
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Eyes</span>
-                <span className="text-sm font-medium">{eyeColor}</span>
-              </div>
-            )}
-            
-            {measurements && (
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Measurements</span>
-                <span className="text-sm font-medium">{measurements}</span>
-              </div>
-            )}
+        {gender && (
+          <div className="flex items-start gap-3">
+            <User className="h-5 w-5 text-primary mt-1" />
+            <div>
+              <p className="font-medium">Gender</p>
+              <p className="text-gray-600 dark:text-gray-400">{gender}</p>
+            </div>
+          </div>
+        )}
+        
+        {orientation && (
+          <div className="flex items-start gap-3">
+            <User className="h-5 w-5 text-primary mt-1" />
+            <div>
+              <p className="font-medium">Orientation</p>
+              <p className="text-gray-600 dark:text-gray-400">{orientation}</p>
+            </div>
+          </div>
+        )}
+        
+        <div className="flex items-start gap-3">
+          <MapPin className="h-5 w-5 text-primary mt-1" />
+          <div>
+            <p className="font-medium">Location</p>
+            <p className="text-gray-600 dark:text-gray-400">{location}</p>
           </div>
         </div>
+        
+        {languages && languages.length > 0 && (
+          <div className="flex items-start gap-3">
+            <Languages className="h-5 w-5 text-primary mt-1" />
+            <div>
+              <p className="font-medium">Languages</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                {languages.join(', ')}
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {ethnicity && (
+          <div className="flex items-start gap-3">
+            <Globe className="h-5 w-5 text-primary mt-1" />
+            <div>
+              <p className="font-medium">Ethnicity</p>
+              <p className="text-gray-600 dark:text-gray-400">{ethnicity}</p>
+            </div>
+          </div>
+        )}
+        
+        {height && (
+          <div className="flex items-start gap-3">
+            <User className="h-5 w-5 text-primary mt-1" />
+            <div>
+              <p className="font-medium">Height</p>
+              <p className="text-gray-600 dark:text-gray-400">{height}</p>
+            </div>
+          </div>
+        )}
+        
+        {weight && (
+          <div className="flex items-start gap-3">
+            <User className="h-5 w-5 text-primary mt-1" />
+            <div>
+              <p className="font-medium">Weight</p>
+              <p className="text-gray-600 dark:text-gray-400">{weight}</p>
+            </div>
+          </div>
+        )}
+        
+        {physique && (
+          <div className="flex items-start gap-3">
+            <User className="h-5 w-5 text-primary mt-1" />
+            <div>
+              <p className="font-medium">Measurements</p>
+              <p className="text-gray-600 dark:text-gray-400">{physique}</p>
+            </div>
+          </div>
+        )}
       </div>
       
-      {tags.length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium">Tags</h3>
+      {tags && tags.length > 0 && (
+        <div className="pt-4">
+          <h3 className="text-lg font-medium mb-3">Tags</h3>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag, index) => (
-              <Badge key={index} variant="secondary">
+              <Badge key={index} variant="outline" className="px-2.5 py-1">
                 {tag}
               </Badge>
             ))}

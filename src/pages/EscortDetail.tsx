@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -11,6 +12,8 @@ import EscortBio from '@/components/escorts/detail/tabs/EscortBio';
 import EscortRates from '@/components/escorts/detail/tabs/EscortRates';
 import EscortDetailSkeleton from '@/components/escorts/detail/EscortDetailSkeleton';
 import EscortGallery from '@/components/escorts/detail/EscortGallery';
+import EscortAvailability from '@/components/escorts/detail/tabs/EscortAvailability';
+import EscortReviews from '@/components/escorts/detail/tabs/EscortReviews';
 
 const EscortDetail = () => {
   const { id } = useParams();
@@ -92,6 +95,14 @@ const EscortDetail = () => {
     } else {
       return <Badge variant="outline">Provisional</Badge>;
     }
+  };
+  
+  // Format measurements for display
+  const getFormattedPhysique = () => {
+    if (escort.measurements) {
+      return `${escort.measurements.bust}-${escort.measurements.waist}-${escort.measurements.hips}`;
+    }
+    return "Not specified";
   };
   
   return (
@@ -186,6 +197,7 @@ const EscortDetail = () => {
                 <TabsTrigger value="rates">Rates</TabsTrigger>
                 <TabsTrigger value="services">Services</TabsTrigger>
                 <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="availability">Availability</TabsTrigger>
               </TabsList>
               
               <TabsContent value="about">
@@ -198,11 +210,9 @@ const EscortDetail = () => {
                   orientation={escort.sexualOrientation}
                   languages={escort.languages}
                   ethnicity={escort.ethnicity}
-                  height={escort.height ? String(escort.height) : "Not specified"}
-                  weight={escort.weight ? String(escort.weight) : "Not specified"}
-                  physique={escort.physique 
-                    ? `${escort.physique.bust}-${escort.physique.waist}-${escort.physique.hips}` 
-                    : "Not specified"}
+                  height={String(escort.height || "Not specified")}
+                  weight={String(escort.weight || "Not specified")}
+                  physique={getFormattedPhysique()}
                   tags={escort.tags}
                 />
               </TabsContent>
@@ -230,15 +240,11 @@ const EscortDetail = () => {
               </TabsContent>
               
               <TabsContent value="reviews">
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold">Reviews</h3>
-                  
-                  {escort.reviews > 0 ? (
-                    <p>Review functionality coming soon.</p>
-                  ) : (
-                    <p className="text-muted-foreground">No reviews yet.</p>
-                  )}
-                </div>
+                <EscortReviews escort={escort} />
+              </TabsContent>
+              
+              <TabsContent value="availability">
+                <EscortAvailability escort={escort} />
               </TabsContent>
             </Tabs>
           </div>

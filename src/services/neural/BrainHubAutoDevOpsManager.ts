@@ -597,6 +597,61 @@ export default ${request.description.split(' ').map(word => word.charAt(0).toUpp
       isAnalyzing: this.isAnalyzing
     };
   }
+  
+  // Fix the method calls with incorrect argument numbers
+  // Only showing the specific methods that need fixing
+
+  // Original line: this.logAction('autoScaleDecision', { previousLevel, newLevel, humanReviewRequired });
+  // Fix by converting object to JSON string:
+  logAction(actionType: string, actionData: any = null, userId: string = 'system', priority: string = 'normal'): void {
+    let actionDataString: string;
+    
+    // Convert object data to JSON string
+    if (actionData && typeof actionData === 'object') {
+      actionDataString = JSON.stringify(actionData);
+    } else {
+      actionDataString = actionData?.toString() || '';
+    }
+    
+    console.log(`[AUTO-DEVOPS][${actionType}]: ${actionDataString}`);
+    
+    // Record in action log
+    this.actionLogs.push({
+      timestamp: Date.now(),
+      actionType,
+      actionData: actionDataString,
+      userId,
+      priority
+    });
+  }
+  
+  // Make this method accept object data and convert to string internally
+  // Original: this.logComponentCreation(fileName, componentType);
+  logComponentCreation(data: any): void {
+    const { fileName, componentType } = data;
+    console.log(`[AUTO-DEVOPS][COMPONENT-CREATION]: Created ${componentType} component in ${fileName}`);
+    
+    // Store in component creation log
+    this.componentCreationLogs.push({
+      timestamp: Date.now(),
+      fileName,
+      componentType
+    });
+  }
+  
+  // Make this method accept object data and convert to string internally
+  // Original: this.logFileRejection(fileName, reason);
+  logFileRejection(data: any): void {
+    const { fileName, reason } = data;
+    console.log(`[AUTO-DEVOPS][FILE-REJECTION]: File ${fileName} rejected: ${reason}`);
+    
+    // Store in rejection log
+    this.fileRejectionLogs.push({
+      timestamp: Date.now(),
+      fileName,
+      reason
+    });
+  }
 }
 
 // Export the singleton instance

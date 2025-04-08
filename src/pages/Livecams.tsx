@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,19 +9,21 @@ import { LivecamModel, LivecamsFilter } from '@/types/livecam';
 import LiveTrendingBar from '@/components/livecams/LiveTrendingBar';
 import LivecamFeatured from '@/components/livecams/LivecamFeatured';
 import { Search, Filter, Loader2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 const Livecams: React.FC = () => {
   const [livecams, setLivecams] = useState<LivecamModel[]>([]);
   const [trendingModels, setTrendingModels] = useState<LivecamModel[]>([]);
-  const [featuredModel, setFeaturedModel] = useState<LivecamModel | null>(null);
+  const [featuredLivecams, setFeaturedLivecams] = useState<LivecamModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [totalCount, setTotalCount] = useState(0);
   const [canLoadMore, setCanLoadMore] = useState(true);
+  const { toast } = useToast();
   
-  // Fix filter with proper LivecamsFilter type
-  const [filters, setFilters] = useState<Partial<LivecamsFilter>>({
+  // Fix filter type to match expected LivecamsFilter
+  const [filters, setFilters] = useState<LivecamsFilter>({
     status: 'all',
     categories: [],
     gender: 'all',
@@ -35,7 +38,7 @@ const Livecams: React.FC = () => {
     fetchLivecams(filters);
   }, []);
   
-  const fetchLivecams = useCallback(async (filterOptions: Partial<LivecamsFilter> = {}) => {
+  const fetchLivecams = useCallback(async (filterOptions: LivecamsFilter = {}) => {
     setLoading(true);
     try {
       // Simulate API call
@@ -45,10 +48,15 @@ const Livecams: React.FC = () => {
       setCanLoadMore(data.hasMore);
     } catch (error) {
       console.error('Error fetching livecams:', error);
+      toast({
+        title: "Error fetching livecams",
+        description: "Could not load livecams data. Please try again later.",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize]);
+  }, [page, pageSize, toast]);
   
   const fetchMoreModels = useCallback(async (): Promise<boolean> => {
     setLoading(true);
@@ -76,42 +84,33 @@ const Livecams: React.FC = () => {
   const fetchFeatured = useCallback(() => {
     // Simulate featured model
     const featured = simulateFeatured();
-    setFeaturedModel(featured);
+    setFeaturedLivecams([featured]);
   }, []);
   
   // Fix the Promise<void> methods
-  const handleLoadMore = async (): Promise<void> => {
+  const handleLoadMore = async () => {
     const hasMore = await fetchMoreModels();
     if (!hasMore) {
       setCanLoadMore(false);
     }
   };
   
-  const handleFilterChange = async (newFilters: Partial<LivecamsFilter>): Promise<void> => {
+  const handleFilterChange = async (newFilters: Partial<LivecamsFilter>) => {
     setFilters({...filters, ...newFilters});
     await fetchLivecams({...filters, ...newFilters});
   };
   
-  const handleSortChange = async (sort: string): Promise<void> => {
+  const handleSortChange = async (sort: string) => {
     const newFilters = {...filters, sortBy: sort};
     setFilters(newFilters);
     await fetchLivecams(newFilters);
   };
   
-  const handleCategoryChange = async (categories: string[]): Promise<void> => {
+  // Fix the categories handler to work with string arrays
+  const handleCategoryChange = async (categories: string[]) => {
     const newFilters = {...filters, categories};
     setFilters(newFilters);
     await fetchLivecams(newFilters);
-  };
-  
-  // And update the filters to match expected type
-  const defaultFilters: LivecamsFilter = {
-    status: filters.status || 'all',
-    categories: filters.categories || [],
-    gender: filters.gender || 'all',
-    region: filters.region || 'all',
-    minViewers: filters.minViewers || 0,
-    sortBy: filters.sortBy || 'popularity'
   };
   
   return (
@@ -138,7 +137,11 @@ const Livecams: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="status">Status</Label>
-                <Select onValueChange={(value) => handleFilterChange({ status: value })}>
+                <Select 
+                  onValueChange={(value) => handleFilterChange({ 
+                    status: value as 'all' | 'live' | 'offline' 
+                  })}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="All" />
                   </SelectTrigger>
@@ -152,19 +155,27 @@ const Livecams: React.FC = () => {
               
               <div>
                 <Label htmlFor="categories">Categories</Label>
-                <Select 
-                  multiple
-                  onValueChange={(values) => handleCategoryChange(values)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="amateur">Amateur</SelectItem>
-                    <SelectItem value="teen">Teen</SelectItem>
-                    <SelectItem value="mature">Mature</SelectItem>
-                  </SelectContent>
-                </Select>
+                {/* Use checkboxes for multi-select instead */}
+                <div className="space-y-2 mt-2">
+                  {['amateur', 'teen', 'mature'].map((category) => (
+                    <div key={category} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`category-${category}`}
+                        checked={filters.categories?.includes(category)}
+                        onChange={(e) => {
+                          const currentCategories = filters.categories || [];
+                          const newCategories = e.target.checked
+                            ? [...currentCategories, category]
+                            : currentCategories.filter(c => c !== category);
+                          handleCategoryChange(newCategories);
+                        }}
+                        className="mr-2"
+                      />
+                      <label htmlFor={`category-${category}`}>{category}</label>
+                    </div>
+                  ))}
+                </div>
               </div>
               
               <div>
@@ -222,12 +233,11 @@ const Livecams: React.FC = () => {
         </div>
         
         <div className="md:col-span-3">
-          {featuredModel && (
-            <LivecamFeatured model={featuredModel} />
+          {featuredLivecams.length > 0 && (
+            <LivecamFeatured livecams={featuredLivecams} />
           )}
           
-          {/* Fix the LiveTrendingBar props */}
-          <LiveTrendingBar models={trendingModels} />
+          <LiveTrendingBar trendingCams={trendingModels} />
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {livecams.map(cam => (
@@ -259,8 +269,14 @@ const Livecams: React.FC = () => {
 
 export default Livecams;
 
+// Update the API simulation functions to match the types
+
 // Simulate API call
-async function simulateApiCall(page: number, pageSize: number, filterOptions: Partial<LivecamsFilter>): Promise<{ models: LivecamModel[]; totalCount: number; page: number; pageSize: number; hasMore: boolean; }> {
+async function simulateApiCall(
+  page: number, 
+  pageSize: number, 
+  filterOptions: LivecamsFilter
+): Promise<{ models: LivecamModel[]; totalCount: number; page: number; pageSize: number; hasMore: boolean; }> {
   return new Promise((resolve) => {
     setTimeout(() => {
       const allModels = generateMockLivecams();
@@ -268,13 +284,13 @@ async function simulateApiCall(page: number, pageSize: number, filterOptions: Pa
       // Apply filters
       const filteredModels = allModels.filter(model => {
         if (filterOptions.status && filterOptions.status !== 'all') {
-          const isLive = model.status === 'live';
+          const isLive = model.isLive;
           if ((filterOptions.status === 'live' && !isLive) || (filterOptions.status === 'offline' && isLive)) {
             return false;
           }
         }
         
-        if (filterOptions.categories && filterOptions.categories.length > 0 && (!model.categories || !filterOptions.categories.some(cat => model.categories.includes(cat)))) {
+        if (filterOptions.categories && filterOptions.categories.length > 0 && (!model.categories || !filterOptions.categories.some(cat => model.categories?.includes(cat)))) {
           return false;
         }
         
@@ -286,7 +302,7 @@ async function simulateApiCall(page: number, pageSize: number, filterOptions: Pa
           return false;
         }
         
-        if (filterOptions.minViewers && model.viewerCount && model.viewerCount < filterOptions.minViewers) {
+        if (filterOptions.minViewers !== undefined && model.viewerCount !== undefined && model.viewerCount < filterOptions.minViewers) {
           return false;
         }
         
@@ -296,8 +312,12 @@ async function simulateApiCall(page: number, pageSize: number, filterOptions: Pa
       // Apply sorting
       const sortedModels = [...filteredModels].sort((a, b) => {
         if (filterOptions.sortBy === 'newest') {
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          // Compare by creation date if available, fallback to random sort
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
         } else {
+          // Default to popularity (viewer count)
           return (b.viewerCount || 0) - (a.viewerCount || 0);
         }
       });
@@ -343,6 +363,8 @@ function generateMockLivecams(): LivecamModel[] {
     const region = regions[Math.floor(Math.random() * regions.length)];
     const gender = genders[Math.floor(Math.random() * genders.length)];
     const isLive = Math.random() > 0.5;
+    const now = new Date();
+    const randomDate = new Date(now.getTime() - Math.random() * 30 * 24 * 60 * 60 * 1000);
     
     models.push({
       id: `livecam-${i}`,
@@ -352,6 +374,7 @@ function generateMockLivecams(): LivecamModel[] {
       imageUrl: `https://picsum.photos/id/${i + 100}/300/200`,
       thumbnailUrl: `https://picsum.photos/id/${i + 100}/220/120`,
       isLive: isLive,
+      status: isLive ? 'live' : 'offline',
       viewerCount: Math.floor(Math.random() * 500),
       tags: ['popular', 'new'],
       boosted: Math.random() > 0.7,
@@ -369,16 +392,17 @@ function generateMockLivecams(): LivecamModel[] {
       age: Math.floor(Math.random() * 20) + 18,
       streamUrl: `/stream/user${i}`,
       previewVideoUrl: `/video/user${i}`,
+      previewUrl: `/preview/user${i}`,
       gender: gender,
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+      createdAt: randomDate,
+      isPopular: Math.random() > 0.7,
       room: {
         id: `room-${i}`,
         name: `Room ${i}`,
         capacity: 100,
         viewerCount: Math.floor(Math.random() * 100),
         status: isLive ? 'active' : 'inactive'
-      },
-      status: isLive ? 'live' : 'offline'
+      }
     });
   }
   
