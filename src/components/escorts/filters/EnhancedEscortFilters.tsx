@@ -1,603 +1,472 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { 
+  Search, 
+  MapPin, 
+  CheckSquare, 
+  Star, 
+  Clock, 
+  Users, 
+  Heart,
+  Filter,
+  Sliders,
+  X,
+  ChevronDown,
+  ChevronUp,
+  User
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Filter, X, Sliders, Users, User, Languages, MapPin, Calendar, Clock, CreditCard } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useEscortEnhancedFilters } from '@/hooks/useEscortEnhancedFilters';
 
-interface EnhancedEscortFiltersProps {
-  filters: {
-    location: string;
-    serviceTypes: string[];
-    priceRange: [number, number];
-    gender: string[];
-    orientation: string[];
-    ageRange: [number, number];
-    rating: number;
-    verified: boolean;
-    availableNow: boolean;
-    escortType: "verified" | "ai" | "provisional" | "all";
-    language: string[];
-    height: [number, number];
-    weight: [number, number];
-    hairColor: string[];
-    eyeColor: string[];
-    ethnicity: string[];
-    bodyType: string[];
-    availability: {
-      days: string[];
-      hours: string[];
-    };
-  };
-  onUpdate: (filters: Partial<EnhancedEscortFiltersProps['filters']>) => void;
-  onApply: () => void;
-  onClear: () => void;
-}
-
-const EnhancedEscortFilters: React.FC<EnhancedEscortFiltersProps> = ({ 
-  filters, 
-  onUpdate, 
-  onApply, 
-  onClear 
-}) => {
-  const [activeTab, setActiveTab] = useState('basic');
-
-  const commonServices = [
-    { id: 'gfe', label: 'GFE' },
-    { id: 'massage', label: 'Massage' },
-    { id: 'overnight', label: 'Overnight' },
-    { id: 'dinner-date', label: 'Dinner Date' },
-    { id: 'travel', label: 'Travel Companion' },
-    { id: 'fetish', label: 'Fetish' },
-    { id: 'bdsm', label: 'BDSM' },
-    { id: 'roleplay', label: 'Role Play' }
-  ];
-
-  const genderOptions = [
-    { id: 'female', label: 'Female' },
-    { id: 'male', label: 'Male' },
-    { id: 'transgender', label: 'Transgender' },
-    { id: 'non-binary', label: 'Non-binary' }
-  ];
-
-  const orientationOptions = [
-    { id: 'straight', label: 'Straight' },
-    { id: 'lesbian', label: 'Lesbian' },
-    { id: 'gay', label: 'Gay' },
-    { id: 'bisexual', label: 'Bisexual' },
-    { id: 'pansexual', label: 'Pansexual' }
-  ];
-
-  const ethnicityOptions = [
-    { id: 'asian', label: 'Asian' },
-    { id: 'black', label: 'Black' },
-    { id: 'hispanic', label: 'Hispanic/Latin' },
-    { id: 'middle-eastern', label: 'Middle Eastern' },
-    { id: 'white', label: 'White/Caucasian' },
-    { id: 'mixed', label: 'Mixed' },
-    { id: 'other', label: 'Other' }
-  ];
-
-  const hairColorOptions = [
-    { id: 'black', label: 'Black' },
-    { id: 'blonde', label: 'Blonde' },
-    { id: 'brown', label: 'Brown' },
-    { id: 'red', label: 'Red' },
-    { id: 'grey', label: 'Grey' },
-    { id: 'colorful', label: 'Colorful' }
-  ];
-
-  const eyeColorOptions = [
-    { id: 'blue', label: 'Blue' },
-    { id: 'brown', label: 'Brown' },
-    { id: 'green', label: 'Green' },
-    { id: 'hazel', label: 'Hazel' },
-    { id: 'grey', label: 'Grey' }
-  ];
-
-  const bodyTypeOptions = [
-    { id: 'slim', label: 'Slim' },
-    { id: 'athletic', label: 'Athletic' },
-    { id: 'average', label: 'Average' },
-    { id: 'curvy', label: 'Curvy' },
-    { id: 'plus-size', label: 'Plus Size' }
-  ];
-
-  const languageOptions = [
-    { id: 'english', label: 'English' },
-    { id: 'spanish', label: 'Spanish' },
-    { id: 'french', label: 'French' },
-    { id: 'german', label: 'German' },
-    { id: 'italian', label: 'Italian' },
-    { id: 'russian', label: 'Russian' },
-    { id: 'chinese', label: 'Chinese' },
-    { id: 'japanese', label: 'Japanese' },
-    { id: 'portuguese', label: 'Portuguese' },
-    { id: 'arabic', label: 'Arabic' }
-  ];
-
-  const dayOptions = [
-    { id: 'monday', label: 'Monday' },
-    { id: 'tuesday', label: 'Tuesday' },
-    { id: 'wednesday', label: 'Wednesday' },
-    { id: 'thursday', label: 'Thursday' },
-    { id: 'friday', label: 'Friday' },
-    { id: 'saturday', label: 'Saturday' },
-    { id: 'sunday', label: 'Sunday' }
-  ];
-
-  const hourOptions = [
-    { id: 'morning', label: 'Morning (6AM-12PM)' },
-    { id: 'afternoon', label: 'Afternoon (12PM-6PM)' },
-    { id: 'evening', label: 'Evening (6PM-12AM)' },
-    { id: 'night', label: 'Night (12AM-6AM)' }
-  ];
-
-  const handleServiceToggle = (service: string) => {
-    const updatedServices = filters.serviceTypes.includes(service)
-      ? filters.serviceTypes.filter(s => s !== service)
-      : [...filters.serviceTypes, service];
-      
-    onUpdate({ serviceTypes: updatedServices });
-  };
+const EnhancedEscortFilters = () => {
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>('basic');
   
-  const handleFilterToggle = <T extends keyof EnhancedEscortFiltersProps['filters']>(
-    filterType: T,
-    value: string
-  ) => {
-    const currentValues = filters[filterType] as string[];
-    const updated = currentValues.includes(value)
-      ? currentValues.filter(v => v !== value)
-      : [...currentValues, value];
-    
-    onUpdate({ [filterType]: updated } as Partial<EnhancedEscortFiltersProps['filters']>);
+  const {
+    filters,
+    isFiltering,
+    updateFilters,
+    resetFilters,
+    applyFilters,
+    toggleFilterValue,
+    toggleAvailability,
+    escorts
+  } = useEscortEnhancedFilters();
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
   };
 
   const handlePriceRangeChange = (values: number[]) => {
-    onUpdate({ priceRange: [values[0], values[1]] as [number, number] });
+    updateFilters({ priceRange: [values[0], values[1]] });
   };
-
-  const handleHeightRangeChange = (values: number[]) => {
-    onUpdate({ height: [values[0], values[1]] as [number, number] });
-  };
-
-  const handleWeightRangeChange = (values: number[]) => {
-    onUpdate({ weight: [values[0], values[1]] as [number, number] });
-  };
-
+  
   const handleAgeRangeChange = (values: number[]) => {
-    onUpdate({ ageRange: [values[0], values[1]] as [number, number] });
+    updateFilters({ ageRange: [values[0], values[1]] });
   };
+  
+  const handleHeightRangeChange = (values: number[]) => {
+    updateFilters({ height: [values[0], values[1]] });
+  };
+  
+  const handleWeightRangeChange = (values: number[]) => {
+    updateFilters({ weight: [values[0], values[1]] });
+  };
+  
+  const toggleVerified = () => {
+    updateFilters({ verified: !filters.verified });
+  };
+  
+  const toggleAvailableNow = () => {
+    updateFilters({ availableNow: !filters.availableNow });
+  };
+  
+  const toggleBoostSorting = () => {
+    updateFilters({ useBoostSorting: !filters.useBoostSorting });
+  };
+  
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateFilters({ location: e.target.value });
+  };
+  
+  const handleSortByChange = (value: string) => {
+    updateFilters({ sortBy: value });
+  };
+  
+  const handleEscortTypeChange = (value: "verified" | "ai" | "provisional" | "all") => {
+    updateFilters({ escortType: value });
+  };
+  
+  const serviceOptions = [
+    'GFE', 'Massage', 'Dinner Date', 'Overnight', 'Travel', 
+    'BDSM', 'Role Play', 'Fetish', 'Couples'
+  ];
+  
+  const genderOptions = ['female', 'male', 'transgender', 'non-binary'];
+  const orientationOptions = ['straight', 'gay', 'lesbian', 'bisexual', 'pansexual'];
+  const hairColors = ['blonde', 'brunette', 'black', 'red', 'other'];
+  const eyeColors = ['blue', 'green', 'brown', 'hazel', 'other'];
+  const ethnicities = ['caucasian', 'asian', 'black', 'hispanic', 'mixed', 'other'];
+  const bodyTypes = ['slim', 'athletic', 'curvy', 'plus-size'];
+  const availabilityDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
-  const handleAvailabilityToggle = (type: 'days' | 'hours', value: string) => {
-    const current = filters.availability[type];
-    const updated = current.includes(value)
-      ? current.filter(v => v !== value)
-      : [...current, value];
+  const renderFilterCount = () => {
+    let count = 0;
     
-    onUpdate({ 
-      availability: {
-        ...filters.availability,
-        [type]: updated
-      }
-    });
+    if (filters.location) count++;
+    if (filters.serviceTypes.length > 0) count += filters.serviceTypes.length;
+    if (filters.gender.length > 0) count += filters.gender.length;
+    if (filters.orientation.length > 0) count += filters.orientation.length;
+    if (filters.verified) count++;
+    if (filters.availableNow) count++;
+    if (filters.priceRange[0] > 0 || filters.priceRange[1] < 1000) count++;
+    if (filters.ageRange[0] > 21 || filters.ageRange[1] < 50) count++;
+    if (filters.rating > 0) count++;
+    if (filters.escortType !== "all") count++;
+    if (filters.language.length > 0) count += filters.language.length;
+    if (filters.height[0] > 140 || filters.height[1] < 200) count++;
+    if (filters.weight[0] > 40 || filters.weight[1] < 120) count++;
+    if (filters.hairColor.length > 0) count += filters.hairColor.length;
+    if (filters.eyeColor.length > 0) count += filters.eyeColor.length;
+    if (filters.ethnicity.length > 0) count += filters.ethnicity.length;
+    if (filters.bodyType.length > 0) count += filters.bodyType.length;
+    if (filters.availability.days.length > 0) count++;
+    
+    return count;
   };
   
   return (
-    <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg flex items-center">
-          <Filter className="mr-2 h-4 w-4" />
-          Advanced Filters
-        </CardTitle>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-4">
         <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onClear}
-          className="h-8 text-xs flex items-center"
+          variant="outline" 
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          className="flex items-center gap-2"
         >
-          <X className="h-3 w-3 mr-1" />
-          Clear All
+          <Filter size={16} />
+          <span>Filters</span>
+          {renderFilterCount() > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {renderFilterCount()}
+            </Badge>
+          )}
         </Button>
-      </CardHeader>
+        
+        <div className="flex items-center gap-2">
+          <Label htmlFor="boost-toggle" className="text-sm cursor-pointer">
+            Boosted first
+          </Label>
+          <Switch
+            id="boost-toggle"
+            checked={filters.useBoostSorting}
+            onCheckedChange={toggleBoostSorting}
+          />
+        </div>
+      </div>
       
-      <CardContent className="space-y-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="basic">Basic</TabsTrigger>
-            <TabsTrigger value="physical">Physical</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="availability">Availability</TabsTrigger>
-          </TabsList>
-
-          {/* Basic Filters Tab */}
-          <TabsContent value="basic" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="location" className="text-sm">Location</Label>
-              </div>
-              <Input
-                id="location"
-                placeholder="City or area..."
-                value={filters.location}
-                onChange={(e) => onUpdate({ location: e.target.value })}
-                className="h-8"
-              />
+      {filtersOpen && (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Enhanced Filters</h3>
+              <Button variant="ghost" size="sm" onClick={() => setFiltersOpen(false)}>
+                <X size={18} />
+              </Button>
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Price Range (per hour)</Label>
-              </div>
-              <div className="pt-2 px-1">
-                <Slider
-                  defaultValue={[filters.priceRange[0], filters.priceRange[1]]}
-                  min={0}
-                  max={1000}
-                  step={50}
-                  value={[filters.priceRange[0], filters.priceRange[1]]}
-                  onValueChange={handlePriceRangeChange}
-                />
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>${filters.priceRange[0]}</span>
-                  <span>${filters.priceRange[1]}+</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Age Range</Label>
-              </div>
-              <div className="pt-2 px-1">
-                <Slider
-                  defaultValue={[filters.ageRange[0], filters.ageRange[1]]}
-                  min={18}
-                  max={60}
-                  step={1}
-                  value={[filters.ageRange[0], filters.ageRange[1]]}
-                  onValueChange={handleAgeRangeChange}
-                />
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>{filters.ageRange[0]} years</span>
-                  <span>{filters.ageRange[1]} years</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="verified"
-                  checked={filters.verified}
-                  onCheckedChange={(checked) => onUpdate({ verified: !!checked })}
-                />
-                <Label htmlFor="verified" className="text-sm font-normal">
-                  Verified Only
-                </Label>
+            {/* Basic Filters Section */}
+            <div className="mb-6">
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={() => toggleSection('basic')}
+              >
+                <h4 className="font-medium">Basic Filters</h4>
+                {expandedSection === 'basic' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="availableNow"
-                  checked={filters.availableNow}
-                  onCheckedChange={(checked) => onUpdate({ availableNow: !!checked })}
-                />
-                <Label htmlFor="availableNow" className="text-sm font-normal">
-                  Available Now
-                </Label>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Gender</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {genderOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`gender-${option.id}`}
-                      checked={filters.gender.includes(option.id)}
-                      onCheckedChange={() => handleFilterToggle('gender', option.id)}
-                    />
-                    <Label htmlFor={`gender-${option.id}`} className="text-sm font-normal">
-                      {option.label}
-                    </Label>
+              {expandedSection === 'basic' && (
+                <div className="mt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                      <Input 
+                        id="location"
+                        placeholder="Enter location" 
+                        className="pl-10"
+                        value={filters.location}
+                        onChange={handleLocationChange}
+                      />
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Sexual Orientation</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {orientationOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`orientation-${option.id}`}
-                      checked={filters.orientation.includes(option.id)}
-                      onCheckedChange={() => handleFilterToggle('orientation', option.id)}
+                  
+                  <div className="space-y-2">
+                    <Label>Price Range: ${filters.priceRange[0]} - ${filters.priceRange[1]}</Label>
+                    <Slider
+                      min={0}
+                      max={1000}
+                      step={10}
+                      value={[filters.priceRange[0], filters.priceRange[1]]}
+                      onValueChange={handlePriceRangeChange}
+                      className="py-4"
                     />
-                    <Label htmlFor={`orientation-${option.id}`} className="text-sm font-normal">
-                      {option.label}
-                    </Label>
                   </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-          
-          {/* Physical Attributes Tab */}
-          <TabsContent value="physical" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Height Range (cm)</Label>
-              </div>
-              <div className="pt-2 px-1">
-                <Slider
-                  defaultValue={[filters.height[0], filters.height[1]]}
-                  min={140}
-                  max={210}
-                  step={1}
-                  value={[filters.height[0], filters.height[1]]}
-                  onValueChange={handleHeightRangeChange}
-                />
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>{filters.height[0]} cm</span>
-                  <span>{filters.height[1]} cm</span>
+                  
+                  <div className="space-y-2">
+                    <Label>Age Range: {filters.ageRange[0]} - {filters.ageRange[1]}</Label>
+                    <Slider
+                      min={21}
+                      max={60}
+                      step={1}
+                      value={[filters.ageRange[0], filters.ageRange[1]]}
+                      onValueChange={handleAgeRangeChange}
+                      className="py-4"
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="verified">Verified Only</Label>
+                      <Switch 
+                        id="verified" 
+                        checked={filters.verified}
+                        onCheckedChange={toggleVerified}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="available">Available Now</Label>
+                      <Switch 
+                        id="available" 
+                        checked={filters.availableNow}
+                        onCheckedChange={toggleAvailableNow}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Profile Type</Label>
+                    <ToggleGroup 
+                      type="single" 
+                      className="justify-between"
+                      value={filters.escortType}
+                      onValueChange={(value) => {
+                        if (value) handleEscortTypeChange(value as any);
+                      }}
+                    >
+                      <ToggleGroupItem value="all" className="flex-1">All</ToggleGroupItem>
+                      <ToggleGroupItem value="verified" className="flex-1">Verified</ToggleGroupItem>
+                      <ToggleGroupItem value="ai" className="flex-1">AI</ToggleGroupItem>
+                      <ToggleGroupItem value="provisional" className="flex-1">New</ToggleGroupItem>
+                    </ToggleGroup>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Weight Range (kg)</Label>
-              </div>
-              <div className="pt-2 px-1">
-                <Slider
-                  defaultValue={[filters.weight[0], filters.weight[1]]}
-                  min={40}
-                  max={140}
-                  step={1}
-                  value={[filters.weight[0], filters.weight[1]]}
-                  onValueChange={handleWeightRangeChange}
-                />
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>{filters.weight[0]} kg</span>
-                  <span>{filters.weight[1]} kg</span>
-                </div>
-              </div>
-            </div>
+            <Separator className="my-4" />
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Hair Color</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {hairColorOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`hair-${option.id}`}
-                      checked={filters.hairColor.includes(option.id)}
-                      onCheckedChange={() => handleFilterToggle('hairColor', option.id)}
-                    />
-                    <Label htmlFor={`hair-${option.id}`} className="text-sm font-normal">
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Eye Color</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {eyeColorOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`eye-${option.id}`}
-                      checked={filters.eyeColor.includes(option.id)}
-                      onCheckedChange={() => handleFilterToggle('eyeColor', option.id)}
-                    />
-                    <Label htmlFor={`eye-${option.id}`} className="text-sm font-normal">
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Ethnicity</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {ethnicityOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`ethnicity-${option.id}`}
-                      checked={filters.ethnicity.includes(option.id)}
-                      onCheckedChange={() => handleFilterToggle('ethnicity', option.id)}
-                    />
-                    <Label htmlFor={`ethnicity-${option.id}`} className="text-sm font-normal">
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Body Type</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {bodyTypeOptions.map((option) => (
-                  <div key={option.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`body-${option.id}`}
-                      checked={filters.bodyType.includes(option.id)}
-                      onCheckedChange={() => handleFilterToggle('bodyType', option.id)}
-                    />
-                    <Label htmlFor={`body-${option.id}`} className="text-sm font-normal">
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-          
-          {/* Services Tab */}
-          <TabsContent value="services" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Sliders className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Service Type</Label>
-              </div>
-              <RadioGroup
-                value={filters.escortType}
-                onValueChange={(value) => onUpdate({ escortType: value as EnhancedEscortFiltersProps['filters']['escortType'] })}
+            {/* Physical Attributes Section */}
+            <div className="mb-6">
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={() => toggleSection('physical')}
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="all" id="all-types" />
-                  <Label htmlFor="all-types" className="text-sm font-normal">All Types</Label>
+                <h4 className="font-medium">Physical Attributes</h4>
+                {expandedSection === 'physical' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </div>
+              
+              {expandedSection === 'physical' && (
+                <div className="mt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label>Gender</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {genderOptions.map(gender => (
+                        <Badge
+                          key={gender}
+                          variant={filters.gender.includes(gender) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleFilterValue('gender', gender)}
+                        >
+                          {gender}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Orientation</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {orientationOptions.map(orientation => (
+                        <Badge
+                          key={orientation}
+                          variant={filters.orientation.includes(orientation) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleFilterValue('orientation', orientation)}
+                        >
+                          {orientation}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Height (cm): {filters.height[0]} - {filters.height[1]} cm</Label>
+                    <Slider
+                      min={140}
+                      max={200}
+                      step={1}
+                      value={[filters.height[0], filters.height[1]]}
+                      onValueChange={handleHeightRangeChange}
+                      className="py-4"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Weight (kg): {filters.weight[0]} - {filters.weight[1]} kg</Label>
+                    <Slider
+                      min={40}
+                      max={120}
+                      step={1}
+                      value={[filters.weight[0], filters.weight[1]]}
+                      onValueChange={handleWeightRangeChange}
+                      className="py-4"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Hair Color</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {hairColors.map(color => (
+                        <Badge
+                          key={color}
+                          variant={filters.hairColor.includes(color) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleFilterValue('hairColor', color)}
+                        >
+                          {color}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Eye Color</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {eyeColors.map(color => (
+                        <Badge
+                          key={color}
+                          variant={filters.eyeColor.includes(color) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleFilterValue('eyeColor', color)}
+                        >
+                          {color}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Ethnicity</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {ethnicities.map(ethnicity => (
+                        <Badge
+                          key={ethnicity}
+                          variant={filters.ethnicity.includes(ethnicity) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleFilterValue('ethnicity', ethnicity)}
+                        >
+                          {ethnicity}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Body Type</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {bodyTypes.map(bodyType => (
+                        <Badge
+                          key={bodyType}
+                          variant={filters.bodyType.includes(bodyType) ? "default" : "outline"}
+                          className="cursor-pointer"
+                          onClick={() => toggleFilterValue('bodyType', bodyType)}
+                        >
+                          {bodyType}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="verified" id="verified-escorts" />
-                  <Label htmlFor="verified-escorts" className="text-sm font-normal">Verified Only</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="ai" id="ai-escorts" />
-                  <Label htmlFor="ai-escorts" className="text-sm font-normal">AI Models</Label>
-                </div>
-              </RadioGroup>
+              )}
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Sliders className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Services</Label>
+            <Separator className="my-4" />
+            
+            {/* Services Section */}
+            <div className="mb-6">
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={() => toggleSection('services')}
+              >
+                <h4 className="font-medium">Services</h4>
+                {expandedSection === 'services' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {commonServices.map((service) => (
-                  <div key={service.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={service.id}
-                      checked={filters.serviceTypes.includes(service.id)}
-                      onCheckedChange={() => handleServiceToggle(service.id)}
-                    />
-                    <Label htmlFor={service.id} className="text-sm font-normal">
-                      {service.label}
-                    </Label>
+              
+              {expandedSection === 'services' && (
+                <div className="mt-4">
+                  <div className="flex flex-wrap gap-2">
+                    {serviceOptions.map(service => (
+                      <Badge
+                        key={service}
+                        variant={filters.serviceTypes.includes(service) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => toggleFilterValue('serviceTypes', service)}
+                      >
+                        {service}
+                      </Badge>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Languages className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Languages</Label>
+            <Separator className="my-4" />
+            
+            {/* Availability Section */}
+            <div className="mb-6">
+              <div 
+                className="flex justify-between items-center cursor-pointer" 
+                onClick={() => toggleSection('availability')}
+              >
+                <h4 className="font-medium">Availability</h4>
+                {expandedSection === 'availability' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {languageOptions.map((language) => (
-                  <div key={language.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`lang-${language.id}`}
-                      checked={filters.language.includes(language.id)}
-                      onCheckedChange={() => handleFilterToggle('language', language.id)}
-                    />
-                    <Label htmlFor={`lang-${language.id}`} className="text-sm font-normal">
-                      {language.label}
-                    </Label>
+              
+              {expandedSection === 'availability' && (
+                <div className="mt-4">
+                  <Label className="mb-2 block">Days Available</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {availabilityDays.map(day => (
+                      <Badge
+                        key={day}
+                        variant={filters.availability.days.includes(day) ? "default" : "outline"}
+                        className="cursor-pointer capitalize"
+                        onClick={() => toggleAvailability('days', day)}
+                      >
+                        {day}
+                      </Badge>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-          
-          {/* Availability Tab */}
-          <TabsContent value="availability" className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Available Days</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {dayOptions.map((day) => (
-                  <div key={day.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`day-${day.id}`}
-                      checked={filters.availability.days.includes(day.id)}
-                      onCheckedChange={() => handleAvailabilityToggle('days', day.id)}
-                    />
-                    <Label htmlFor={`day-${day.id}`} className="text-sm font-normal">
-                      {day.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
             
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-sm">Available Hours</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {hourOptions.map((hour) => (
-                  <div key={hour.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`hour-${hour.id}`}
-                      checked={filters.availability.hours.includes(hour.id)}
-                      onCheckedChange={() => handleAvailabilityToggle('hours', hour.id)}
-                    />
-                    <Label htmlFor={`hour-${hour.id}`} className="text-sm font-normal">
-                      {hour.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center justify-between mt-8">
+              <Button variant="outline" onClick={resetFilters}>
+                Clear All
+              </Button>
+              
+              <Button 
+                onClick={applyFilters} 
+                disabled={isFiltering}
+                className="min-w-28"
+              >
+                {isFiltering ? 'Applying...' : 'Apply Filters'}
+              </Button>
             </div>
-          </TabsContent>
-        </Tabs>
-        
-        <div className="pt-4 flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            onClick={onClear}
-          >
-            Reset
-          </Button>
-          <Button 
-            onClick={onApply}
-          >
-            Apply Filters
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 

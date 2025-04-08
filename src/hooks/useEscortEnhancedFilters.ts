@@ -2,34 +2,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
+import { EnhancedEscortFilters } from '@/types/escortTypes';
 
-interface EnhancedFilters {
-  location: string;
-  serviceTypes: string[];
-  priceRange: [number, number];
-  gender: string[];
-  orientation: string[];
-  ageRange: [number, number];
-  rating: number;
-  verified: boolean;
-  availableNow: boolean;
-  escortType: "verified" | "ai" | "provisional" | "all";
-  language: string[];
-  height: [number, number];
-  weight: [number, number];
-  hairColor: string[];
-  eyeColor: string[];
-  ethnicity: string[];
-  bodyType: string[];
-  availability: {
-    days: string[];
-    hours: string[];
-  };
-  sortBy: string;
-  useBoostSorting: boolean;
-}
-
-const defaultFilters: EnhancedFilters = {
+const defaultFilters: EnhancedEscortFilters = {
   location: '',
   serviceTypes: [],
   priceRange: [0, 1000],
@@ -57,24 +32,24 @@ const defaultFilters: EnhancedFilters = {
 
 export const useEscortEnhancedFilters = () => {
   const { state, loadEscorts, updateFilters: updateContextFilters } = useEscortContext();
-  const [filters, setFilters] = useState<EnhancedFilters>(defaultFilters);
+  const [filters, setFilters] = useState<EnhancedEscortFilters>(defaultFilters);
   const [isFiltering, setIsFiltering] = useState(false);
   
   // Initialize filters from context when component mounts
   useEffect(() => {
     setFilters(prev => ({
       ...prev,
-      location: state.filters.location,
-      serviceTypes: state.filters.serviceTypes,
-      priceRange: state.filters.priceRange,
-      gender: state.filters.gender,
-      orientation: state.filters.orientation,
-      ageRange: state.filters.ageRange,
-      rating: state.filters.rating,
-      verified: state.filters.verified,
-      availableNow: state.filters.availableNow,
-      escortType: state.filters.escortType,
-      language: state.filters.language,
+      location: state.filters.location || '',
+      serviceTypes: state.filters.serviceTypes || [],
+      priceRange: state.filters.priceRange || [0, 1000],
+      gender: state.filters.gender || [],
+      orientation: state.filters.orientation || [],
+      ageRange: state.filters.ageRange || [21, 50],
+      rating: state.filters.rating || 0,
+      verified: state.filters.verified || false,
+      availableNow: state.filters.availableNow || false,
+      escortType: state.filters.escortType || "all",
+      language: state.filters.language || [],
       useBoostSorting: escortsNeuralService.getConfig().orderByBoost
     }));
   }, [
@@ -102,7 +77,7 @@ export const useEscortEnhancedFilters = () => {
   }, [filters.useBoostSorting]);
   
   // Update filters
-  const updateFilters = useCallback((newFilters: Partial<EnhancedFilters>) => {
+  const updateFilters = useCallback((newFilters: Partial<EnhancedEscortFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   }, []);
   
@@ -141,7 +116,7 @@ export const useEscortEnhancedFilters = () => {
   }, [filters, updateContextFilters, loadEscorts]);
   
   // Toggle a filter value in an array
-  const toggleFilterValue = useCallback((fieldName: keyof EnhancedFilters, value: string) => {
+  const toggleFilterValue = useCallback((fieldName: keyof EnhancedEscortFilters, value: string) => {
     setFilters(prev => {
       const currentValues = prev[fieldName] as string[];
       const exists = currentValues.includes(value);
