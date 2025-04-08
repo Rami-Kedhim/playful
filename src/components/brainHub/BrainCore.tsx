@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { brainHubAutoDevOpsManager } from '../../services/neural/BrainHubAutoDevOpsManager';
 
@@ -10,8 +11,7 @@ const BrainCore: React.FC<BrainCoreProps> = ({ initialRequestType }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Example of how to call a method in brainHubAutoDevOpsManager
-      // Assuming processRequest takes an object with 'type' and 'data' properties
+      // Use the processRequest method with the correct structure
       const requestData = {
         type: initialRequestType,
         data: { /* Your request-specific data here */ }

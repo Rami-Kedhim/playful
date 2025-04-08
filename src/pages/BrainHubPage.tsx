@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -127,7 +126,7 @@ const BrainHubPage: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="brain-core">
-          <BrainCore />
+          <BrainCore initialRequestType="analysis" />
         </TabsContent>
         
         <TabsContent value="analytics">

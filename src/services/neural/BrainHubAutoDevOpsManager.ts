@@ -1,4 +1,3 @@
-
 import { brainHub } from './HermesOxumBrainHub';
 
 // Type definitions for AutoDevOps components
@@ -279,6 +278,22 @@ export class ${params.description.replace(/\s+/g, '')} {
     
     this.logAction('deploy', 'Code deployed successfully', fileName);
     return true;
+  }
+
+  // Add missing processRequest method
+  public processRequest(request: { type: string, data: any }): Promise<string> {
+    console.log(`Processing request of type: ${request.type}`, request.data);
+    
+    switch (request.type) {
+      case 'analysis':
+        return this.analyzeMissingComponents(request.data);
+      case 'generation':
+        return this.generateCode(request.data);
+      case 'deployment':
+        return this.deployComponent(request.data);
+      default:
+        return Promise.resolve(`Unknown request type: ${request.type}`);
+    }
   }
 }
 

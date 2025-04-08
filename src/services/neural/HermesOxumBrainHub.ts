@@ -1,4 +1,3 @@
-
 export interface BrainHubConfig {
   autonomyEnabled: boolean;
   autonomyLevel: number;
@@ -9,7 +8,6 @@ export interface BrainHubConfig {
   developmentMode: boolean;
   persistenceEnabled: boolean;
   systemStatus: 'active' | 'maintenance' | 'offline';
-  // Add missing properties referenced in the codebase
   geoLegalFilteringEnabled: boolean;
   neuroEmotionEnabled: boolean;
   predictiveModulationEnabled: boolean;
@@ -19,28 +17,40 @@ export interface BrainHubConfig {
   robotics: Record<string, boolean>;
 }
 
-export interface PsychologyModel {
-  emotionRecognition: number;
-  sentimentAnalysis: number;
-  personalityMapping: number;
+export interface PsychologyModel extends Record<string, boolean> {
+  cognitiveBehavioral: boolean;
+  psychoanalytic: boolean;
+  humanistic: boolean;
+  evolutionary: boolean;
+  social: boolean;
+  developmental: boolean;
 }
 
-export interface PhysicsModel {
-  temporalConsistency: number;
-  spatialAwareness: number;
-  causalityTracking: number;
+export interface PhysicsModel extends Record<string, boolean> {
+  newtonian: boolean;
+  quantum: boolean;
+  relativity: boolean;
+  thermodynamics: boolean;
+  electromagnetism: boolean;
+  fluidDynamics: boolean;
 }
 
-export interface EconomicsModel {
-  valueOptimization: number;
-  resourceAllocation: number;
-  marketPrediction: number;
+export interface EconomicsModel extends Record<string, boolean> {
+  microeconomics: boolean;
+  macroeconomics: boolean;
+  behavioral: boolean;
+  international: boolean;
+  financial: boolean;
+  monetaryPolicy: boolean;
 }
 
-export interface RoboticsModel {
-  movementPrecision: number;
-  environmentMapping: number;
-  objectInteraction: number;
+export interface RoboticsModel extends Record<string, boolean> {
+  motorControl: boolean;
+  sensorFusion: boolean;
+  machineVision: boolean;
+  pathPlanning: boolean;
+  humanoidDynamics: boolean;
+  swarmIntelligence: boolean;
 }
 
 export class HermesOxumBrainHub {
@@ -54,33 +64,40 @@ export class HermesOxumBrainHub {
     developmentMode: true,
     persistenceEnabled: true,
     systemStatus: 'active',
-    // Add the missing property initializations
     geoLegalFilteringEnabled: true,
     neuroEmotionEnabled: false,
     predictiveModulationEnabled: true,
     psychology: {
-      emotionalAnalysis: true,
-      personalityModeling: true,
-      behaviourPrediction: false,
-      sentimentAnalysis: true
+      cognitiveBehavioral: true,
+      psychoanalytic: true,
+      humanistic: true,
+      evolutionary: true,
+      social: true,
+      developmental: true
     },
     physics: {
-      collisionDetection: true,
-      gravitationalEffects: false,
-      fluidDynamics: false,
-      particleSystems: true
+      newtonian: true,
+      quantum: false,
+      relativity: false,
+      thermodynamics: true,
+      electromagnetism: false,
+      fluidDynamics: true
     },
     economics: {
-      dynamicPricing: true,
-      demandForecasting: true,
-      marketSimulation: false,
-      transactionAnalysis: true
+      microeconomics: true,
+      macroeconomics: true,
+      behavioral: true,
+      international: true,
+      financial: true,
+      monetaryPolicy: true
     },
     robotics: {
-      inverseKinematics: false,
+      motorControl: false,
+      sensorFusion: true,
+      machineVision: true,
       pathPlanning: true,
-      sensorIntegration: true,
-      controlSystems: true
+      humanoidDynamics: true,
+      swarmIntelligence: true
     }
   };
   
@@ -103,12 +120,10 @@ export class HermesOxumBrainHub {
   
   private memoryStore: Record<string, any> = {};
   
-  // Logging methods
   logError(message: string | Record<string, any>, type = 'general', severity = 'normal'): void {
     const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
     console.error(`[BRAIN HUB ERROR][${type.toUpperCase()}][${severity}]: ${messageStr}`);
     
-    // Store in error log
     this.errorLogs.push({
       timestamp: Date.now(),
       type,
@@ -116,7 +131,6 @@ export class HermesOxumBrainHub {
       severity
     });
     
-    // Trigger error handling system if severe
     if (severity === 'critical') {
       this.triggerErrorRecovery(type);
     }
@@ -134,13 +148,10 @@ export class HermesOxumBrainHub {
     });
   }
   
-  // Error recovery methods
   triggerErrorRecovery(type: string): void {
     console.warn(`[BRAIN HUB] Triggering error recovery for ${type}`);
-    // Recovery logic would go here in a full implementation
   }
   
-  // Configuration methods
   getConfig(): BrainHubConfig {
     return { ...this.config };
   }
@@ -150,7 +161,6 @@ export class HermesOxumBrainHub {
     this.notifyObservers();
   }
   
-  // Autonomy methods
   setAutonomy(enabled: boolean): void {
     this.config.autonomyEnabled = enabled;
     this.notifyObservers();
@@ -180,7 +190,6 @@ export class HermesOxumBrainHub {
     };
   }
   
-  // System status methods
   getSystemStatus() {
     return {
       cpuUtilization: 45 + Math.random() * 15,
@@ -193,7 +202,6 @@ export class HermesOxumBrainHub {
     };
   }
   
-  // Memory methods
   storeInMemory(key: string, value?: any): any {
     if (value !== undefined) {
       this.memoryStore[key] = value;
@@ -205,7 +213,6 @@ export class HermesOxumBrainHub {
     return this.memoryStore[key];
   }
   
-  // Observer pattern methods
   addObserver(callback: (state: any) => void): void {
     this.observers.push(callback);
   }
@@ -230,10 +237,7 @@ export class HermesOxumBrainHub {
     });
   }
   
-  // Model methods (from HermesOxumNeuralHub)
   getModels(): any[] {
-    // Since these methods are being used but were probably in the NeuralHub,
-    // we'll provide stub implementations here to fix the errors
     return [];
   }
   
@@ -245,7 +249,6 @@ export class HermesOxumBrainHub {
     // Stub implementation
   }
   
-  // Request processing methods
   processRequest(request: { 
     type: string; 
     data: any; 
@@ -255,15 +258,12 @@ export class HermesOxumBrainHub {
     } 
   }): { success: boolean; data?: any; error?: string } {
     try {
-      // Simple implementation for now
       if (request.type === 'ai_chat') {
-        // Process AI chat request
         return {
           success: true,
           data: request.data
         };
       } else if (request.type === 'content_boost') {
-        // Process content boost request
         return {
           success: true,
           data: {
@@ -272,7 +272,6 @@ export class HermesOxumBrainHub {
           }
         };
       } else {
-        // Default case
         return {
           success: true,
           data: request.data
@@ -287,13 +286,10 @@ export class HermesOxumBrainHub {
     }
   }
   
-  // Query processing (used in scrapers)
   processQuery(moduleType: string, queryParams: any): Promise<any> {
-    // Simple implementation
     return Promise.resolve([]);
   }
   
-  // Decision logs
   getDecisionLogs(): Array<{
     timestamp: number,
     context: string,
@@ -305,5 +301,4 @@ export class HermesOxumBrainHub {
   }
 }
 
-// Export a singleton instance
 export const brainHub = new HermesOxumBrainHub();
