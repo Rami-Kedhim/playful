@@ -25,7 +25,7 @@ const CreatorDetail = lazy(() => import('./pages/CreatorDetail'));
 const AIProfiles = lazy(() => import("./pages/AIProfiles"));
 const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
-const BrainHubPage = lazy(() => import('./pages/BrainHubPage')); // Add import for BrainHubPage
+const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -73,7 +73,6 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         
-        {/* Semi-public routes - can be viewed publicly but some features require auth */}
         <Route path="/metaverse" element={
           <AppLayout>
             <MetaversePage />
@@ -98,13 +97,13 @@ const AppRoutes: React.FC = () => {
           </AppLayout>
         } />
         
-        <Route path="/livestreams" element={
+        <Route path="/escorts/live" element={
           <AppLayout>
             <EscortLiveStreams />
           </AppLayout>
         } />
         
-        <Route path="/livestreams/:id" element={
+        <Route path="/escorts/live/:id" element={
           <AppLayout>
             <EscortLiveStreamDetail />
           </AppLayout>
@@ -122,7 +121,7 @@ const AppRoutes: React.FC = () => {
           </AppLayout>
         } />
         
-        <Route path="/ai-companions" element={
+        <Route path="/ai-profiles" element={
           <AppLayout>
             <AIProfiles />
           </AppLayout>
@@ -140,7 +139,6 @@ const AppRoutes: React.FC = () => {
           </AppLayout>
         } />
         
-        {/* Add Brain Hub route - protected as it's an advanced feature */}
         <Route path="/brain-hub" element={
           <ProtectedRoute>
             <AppLayout>
@@ -149,8 +147,12 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         
-        {/* Catch-all route for 404s */}
-        <Route path="*" element={<NotFound />} />
+        {/* 404 route */}
+        <Route path="*" element={
+          <AppLayout>
+            <NotFound />
+          </AppLayout>
+        } />
       </RouterRoutes>
     </Suspense>
   );
