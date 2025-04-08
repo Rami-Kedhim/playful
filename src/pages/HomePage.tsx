@@ -110,6 +110,9 @@ const HomePage = () => {
   const { user, isAuthenticated } = useAuth();
   const [searchLocation, setSearchLocation] = useState("");
   
+  // Extract username from user metadata if available
+  const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+  
   return (
     <>
       <Helmet>
@@ -119,7 +122,7 @@ const HomePage = () => {
       
       {isAuthenticated && user && (
         <div className="container mx-auto px-4 pt-6">
-          <WelcomeAlert username={user.username || 'User'} />
+          <WelcomeAlert username={username} />
         </div>
       )}
       
