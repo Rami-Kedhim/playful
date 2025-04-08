@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, CheckCircle, Clock, Zap } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Zap, Brain } from 'lucide-react';
+import TrainingProgressDetails from './TrainingProgressDetails';
 
 interface NeuralSystemsPanelProps {
   models: NeuralModel[];
@@ -18,6 +19,7 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
   const [activeTab, setActiveTab] = useState('models');
   const [activeModels, setActiveModels] = useState<NeuralModel[]>([]);
   const [trainingJobs, setTrainingJobs] = useState<TrainingProgress[]>([]);
+  const [selectedTrainingJob, setSelectedTrainingJob] = useState<string | null>(null);
   
   // Set up periodic updates for training progress
   useEffect(() => {
@@ -45,6 +47,15 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
     try {
       const jobs = neuralHub.getActiveTrainingJobs();
       setTrainingJobs(jobs);
+      
+      // If no selected job but we have jobs, select the first one
+      if (!selectedTrainingJob && jobs.length > 0) {
+        setSelectedTrainingJob(jobs[0].modelId);
+      }
+      // If selected job no longer exists, reset selection
+      else if (selectedTrainingJob && !jobs.find(job => job.modelId === selectedTrainingJob)) {
+        setSelectedTrainingJob(jobs.length > 0 ? jobs[0].modelId : null);
+      }
     } catch (error) {
       console.error('Failed to fetch training jobs:', error);
     }
@@ -64,6 +75,7 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
         // Switch to training tab
         setActiveTab('training');
         updateTrainingJobs();
+        setSelectedTrainingJob(modelId);
       }
     } catch (error) {
       console.error('Failed to start training:', error);
@@ -108,12 +120,20 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
         return <Badge className="bg-blue-500">In Progress</Badge>;
       case 'failed':
         return <Badge className="bg-red-500">Failed</Badge>;
+      case 'stopped':
+        return <Badge className="bg-amber-500">Stopped</Badge>;
       case 'pending':
       case 'preparing':
         return <Badge variant="secondary">Preparing</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+  
+  // Find model name by id
+  const getModelName = (modelId: string): string => {
+    const model = models.find(m => m.id === modelId);
+    return model ? model.name : "Unknown Model";
   };
   
   return (
@@ -190,69 +210,76 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
               <p className="text-sm">Select a model and click "Train Model" to start</p>
             </div>
           ) : (
-            trainingJobs.map(job => (
-              <Card key={job.modelId}>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <CardTitle className="text-base">
-                        {models.find(m => m.id === job.modelId)?.name || 'Unknown Model'}
-                      </CardTitle>
-                      <div className="flex items-center mt-1">
+            <div className="space-y-6">
+              {trainingJobs.length > 1 && (
+                <div className="flex flex-wrap gap-2">
+                  {trainingJobs.map(job => (
+                    <Button 
+                      key={job.modelId}
+                      variant={selectedTrainingJob === job.modelId ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedTrainingJob(job.modelId)}
+                    >
+                      {getModelName(job.modelId)}
+                      {job.status === 'running' && (
+                        <span className="ml-2 w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              
+              {selectedTrainingJob && (
+                <div>
+                  {trainingJobs
+                    .filter(job => job.modelId === selectedTrainingJob)
+                    .map(job => (
+                      <TrainingProgressDetails 
+                        key={job.modelId}
+                        trainingJob={job}
+                        onStopTraining={handleStopTraining}
+                        modelName={getModelName(job.modelId)}
+                      />
+                    ))}
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {trainingJobs.map(job => (
+                  <Card 
+                    key={job.modelId}
+                    className={`cursor-pointer hover:border-primary transition-colors ${
+                      selectedTrainingJob === job.modelId ? 'border-primary' : ''
+                    }`}
+                    onClick={() => setSelectedTrainingJob(job.modelId)}
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-base">
+                          {getModelName(job.modelId)}
+                        </CardTitle>
                         {renderTrainingStatus(job.status)}
                       </div>
-                    </div>
-                    
-                    {['running', 'training', 'preparing'].includes(job.status) && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleStopTraining(job.modelId)}
-                      >
-                        Stop Training
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Progress</span>
-                        <span>{job.progress}%</span>
-                      </div>
-                      <Progress value={job.progress} />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <span className="text-xs text-muted-foreground">Current Accuracy</span>
-                        <div className="font-medium">{Math.round(job.accuracy * 100)}%</div>
-                      </div>
-                      <div>
-                        <span className="text-xs text-muted-foreground">Started</span>
-                        <div className="font-medium">
-                          {new Date(job.startTime).toLocaleTimeString()}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span>Progress</span>
+                            <span>{job.progress}%</span>
+                          </div>
+                          <Progress value={job.progress} className="h-1.5" />
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span>Epoch {job.currentEpoch}/{job.totalEpochs}</span>
+                          <span>Acc: {Math.round(job.accuracy * 100)}%</span>
                         </div>
                       </div>
-                    </div>
-                    
-                    {job.message && (
-                      <div className="text-sm border-l-4 border-blue-500 pl-3 py-1">
-                        {job.message}
-                      </div>
-                    )}
-                    
-                    {job.error && (
-                      <div className="flex items-start text-sm text-red-500 bg-red-50 p-2 rounded">
-                        <AlertTriangle className="h-4 w-4 mr-2 mt-0.5" />
-                        <span>{job.error}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           )}
         </TabsContent>
         
