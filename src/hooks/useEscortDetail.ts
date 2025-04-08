@@ -1,99 +1,99 @@
 
-import { useState, useEffect } from 'react';
-import { Escort } from '@/types/escort';
+import { useState, useEffect, useCallback } from 'react';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
-import { useFavorites } from '@/contexts/FavoritesContext';
+import { Escort } from '@/types/escort';
+import { useToast } from '@/components/ui/use-toast';
 import { useWallet } from '@/hooks/useWallet';
 
+/**
+ * Hook for detailed escort profile interactions
+ */
 export const useEscortDetail = (escortId?: string) => {
-  const { getEscortById, state } = useEscortContext();
+  const { getEscortById } = useEscortContext();
+  const { toast } = useToast();
+  const { wallet } = useWallet();
+  
   const [escort, setEscort] = useState<Escort | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isFavorite } = useFavorites();
-  const { wallet, deductBalance } = useWallet();
+  const [isFavorite, setIsFavorite] = useState(false);
   
-  // For booking functionality
-  const [isBookingAvailable, setIsBookingAvailable] = useState(false);
-  const [isMessagingAvailable, setIsMessagingAvailable] = useState(false);
-  
-  // Fetch escort details on mount or when ID changes
+  // Load escort data
   useEffect(() => {
-    const fetchEscortDetails = async () => {
-      if (!escortId) {
-        setEscort(null);
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const fetchedEscort = await getEscortById(escortId);
-        
-        if (fetchedEscort) {
-          setEscort(fetchedEscort);
-          
-          // Check availability of booking and messaging based on wallet balance
-          if (wallet) {
-            const hourlyRate = fetchedEscort.rates?.hourly || fetchedEscort.price || 0;
-            setIsBookingAvailable(wallet.balance >= hourlyRate);
-            setIsMessagingAvailable(wallet.balance >= 10); // Messaging costs 10 Lucoins
-          }
-        } else {
-          setError('Escort not found');
-        }
-      } catch (err) {
-        console.error('Error fetching escort details:', err);
-        setError('Failed to load escort details');
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!escortId) {
+      setError("Escort ID is required");
+      setLoading(false);
+      return;
+    }
     
-    fetchEscortDetails();
-  }, [escortId, wallet?.balance]);
+    try {
+      const foundEscort = getEscortById(escortId);
+      if (foundEscort) {
+        setEscort(foundEscort);
+        
+        // Check if escort is favorited (in a real app, fetch from API)
+        setIsFavorite(Math.random() > 0.6);
+        
+        setError(null);
+      } else {
+        setError("Escort not found");
+        setEscort(null);
+      }
+    } catch (err) {
+      console.error("Error loading escort details:", err);
+      setError("Failed to load escort details");
+      setEscort(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [escortId, getEscortById]);
   
   // Handle booking request
-  const handleBook = async () => {
-    if (!escort) return false;
+  const handleBookingRequest = useCallback((startTime: Date, endTime: Date, serviceType: string) => {
+    if (!escort) return;
     
-    const bookingCost = escort.rates?.hourly || escort.price || 100;
+    // Calculate estimated price based on duration and rates
+    const durationHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+    const estimatedPrice = Math.round(durationHours * (escort.rates?.hourly || 200));
     
-    if (wallet?.balance < bookingCost) {
+    // Check wallet balance
+    if (!wallet || wallet.balance < estimatedPrice) {
+      toast({
+        title: "Insufficient funds",
+        description: "Please add more funds to your wallet",
+        variant: "destructive",
+      });
       return false;
     }
     
-    // Deduct Lucoins for booking
-    const success = await deductBalance(bookingCost, `Booking with ${escort.name}`);
-    return success;
-  };
+    toast({
+      title: "Booking request sent!",
+      description: `Your booking request with ${escort.name} has been sent`,
+    });
+    
+    return true;
+  }, [escort, wallet, toast]);
   
-  // Handle message request
-  const handleMessage = async () => {
-    if (!escort) return false;
+  // Toggle favorite status
+  const toggleFavorite = useCallback(() => {
+    setIsFavorite(current => !current);
     
-    const messageCost = 10; // 10 Lucoins to start a conversation
-    
-    if (wallet?.balance < messageCost) {
-      return false;
-    }
-    
-    // Deduct Lucoins for messaging
-    const success = await deductBalance(messageCost, `Message to ${escort.name}`);
-    return success;
-  };
+    toast({
+      title: isFavorite ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite 
+        ? `${escort?.name} removed from your favorites` 
+        : `${escort?.name} added to your favorites`,
+    });
+  }, [escort, isFavorite, toast]);
   
   return {
     escort,
     loading,
     error,
-    isFavorite: escort ? isFavorite(escort.id) : false,
-    isBookingAvailable,
-    isMessagingAvailable,
-    handleBook,
-    handleMessage
+    isFavorite,
+    toggleFavorite,
+    handleBookingRequest,
+    canBook: !!wallet && wallet.balance >= (escort?.rates?.hourly || 200)
   };
 };
 

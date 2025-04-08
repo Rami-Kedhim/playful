@@ -1,51 +1,47 @@
 
 import React from "react";
 import { Helmet } from "react-helmet-async";
-import MainLayout from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Settings } from "lucide-react";
+import { useNotifications } from "@/contexts/NotificationsContext";
 import { LivecamsModule } from "@/modules/livecams/LivecamsModule";
-import useLivecams from "@/hooks/useLivecams";
+import { useLivecamContext } from "@/modules/livecams/providers/LivecamProvider";
+import MainLayout from "@/components/layout/MainLayout";
 import LivecamFilters from "@/components/livecams/LivecamFilters";
 import LivecamGrid from "@/components/livecams/LivecamGrid";
+import LiveTrendingBar from "@/components/livecams/LiveTrendingBar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Brain, Settings, SlidersHorizontal } from "lucide-react";
 import { livecamsNeuralService } from "@/services/neural/modules/LivecamsNeuralService";
 
 const Livecams: React.FC = () => {
   return (
     <LivecamsModule>
-      <LivecamsPageContent />
+      <LivecamPageContent />
     </LivecamsModule>
   );
 };
 
-const LivecamsPageContent: React.FC = () => {
-  const { 
-    livecams, 
-    loading, 
-    error, 
-    filters, 
-    totalCount,
-    hasMore,
-    fetchLivecams, 
-    updateFilters,
-    resetFilters,
-    loadMore
-  } = useLivecams();
+const LivecamPageContent: React.FC = () => {
+  const { state, loadLivecams, updateFilters } = useLivecamContext();
+  const { showInfo } = useNotifications();
   
   const handleRefresh = () => {
-    fetchLivecams(true); // Force refresh
+    loadLivecams(true); // Force refresh with neural processing
+    if (showInfo) showInfo("Refreshing Data", "Getting the latest livestreams");
   };
   
   const neuralStatus = livecamsNeuralService.isEnabled() 
     ? `Neural processing active (${livecamsNeuralService.getConfig().autonomyLevel}%)`
     : "Neural processing disabled";
   
+  // Only show trending section if we have live streams
+  const hasLiveStreams = state.livecams.some(livecam => livecam.isLive);
+  
   return (
     <>
       <Helmet>
-        <title>Live Cams | Watch Live Webcam Streams</title>
-        <meta name="description" content="Watch live webcam shows from models around the world. Interactive streams, HD quality, and real-time chat." />
+        <title>Live Cams | Watch Live Streams</title>
+        <meta name="description" content="Watch live cam streams from top models. Interactive live broadcasts available now." />
       </Helmet>
       
       <MainLayout>
@@ -61,7 +57,7 @@ const LivecamsPageContent: React.FC = () => {
                   </span>
                 )}
               </div>
-              <p className="text-muted-foreground">Watch live webcam shows from models around the world</p>
+              <p className="text-muted-foreground">Watch live interactive streams</p>
             </div>
             <div className="flex gap-2">
               <Button 
@@ -69,24 +65,29 @@ const LivecamsPageContent: React.FC = () => {
                 size="sm"
                 className="flex items-center gap-1"
                 onClick={() => updateFilters({ 
-                  sortBy: filters.sortBy === 'recommended' ? 'viewers' : 'recommended' 
+                  showOffline: !state.filters.showOffline
                 })}
               >
-                <Settings className="h-4 w-4" />
-                {filters.sortBy === 'recommended' ? 'Neural' : 'Standard'} Sorting
+                <SlidersHorizontal className="h-4 w-4" />
+                {state.filters.showOffline ? 'Hide' : 'Show'} Offline
               </Button>
-              <Button onClick={handleRefresh} disabled={loading}>
-                {loading ? "Refreshing..." : "Refresh"}
+              <Button onClick={handleRefresh} disabled={state.isLoading}>
+                {state.isLoading ? "Refreshing..." : "Refresh"}
               </Button>
             </div>
           </div>
           
+          {hasLiveStreams && !state.isLoading && (
+            <div className="mb-8">
+              <LiveTrendingBar livecams={state.featuredLivecams} />
+            </div>
+          )}
+          
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-1">
               <LivecamFilters 
-                filters={filters} 
+                filters={state.filters} 
                 onFilterChange={updateFilters}
-                onResetFilters={resetFilters}
               />
               
               <div className="mt-4 text-xs text-muted-foreground">
@@ -95,25 +96,9 @@ const LivecamsPageContent: React.FC = () => {
             </div>
             
             <div className="lg:col-span-3">
-              {!loading && !error && livecams.length > 0 && (
-                <div className="mb-4 flex justify-between items-center">
-                  <p className="text-sm text-muted-foreground">
-                    Showing {livecams.length} of {totalCount} models
-                  </p>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => updateFilters({ status: filters.status === 'live' ? 'all' : 'live' })}
-                  >
-                    {filters.status === 'live' ? 'Show All' : 'Show Live Only'}
-                  </Button>
-                </div>
-              )}
-              
-              {error ? (
+              {state.error ? (
                 <div className="p-4 bg-red-500/10 border border-red-500 rounded-md text-center mb-6">
-                  <p className="text-red-500">Error: {error}</p>
+                  <p className="text-red-500">Error: {state.error}</p>
                   <Button 
                     variant="outline" 
                     onClick={handleRefresh}
@@ -122,8 +107,8 @@ const LivecamsPageContent: React.FC = () => {
                     Try Again
                   </Button>
                 </div>
-              ) : loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              ) : state.isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {Array(6).fill(0).map((_, i) => (
                     <div key={i} className="rounded-lg overflow-hidden">
                       <Skeleton className="w-full aspect-video" />
@@ -135,20 +120,16 @@ const LivecamsPageContent: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <LivecamGrid 
-                  livecams={livecams} 
-                  hasMore={hasMore}
-                  onLoadMore={loadMore}
-                />
+                <LivecamGrid livecams={state.livecams} />
               )}
               
-              {!loading && livecams.length === 0 && !error && (
+              {!state.isLoading && state.livecams.length === 0 && !state.error && (
                 <div className="text-center py-12">
-                  <p className="text-lg font-medium">No livecams found matching your criteria</p>
+                  <p className="text-lg font-medium">No livestreams found matching your criteria</p>
                   <p className="text-muted-foreground">Try adjusting your filters</p>
                   <Button 
                     variant="outline" 
-                    onClick={resetFilters}
+                    onClick={() => window.location.reload()}
                     className="mt-4"
                   >
                     Reset All Filters

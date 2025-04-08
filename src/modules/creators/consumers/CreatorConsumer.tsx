@@ -21,8 +21,8 @@ export const CreatorConsumer: React.FC<CreatorConsumerProps> = ({
     if (isNeuralInitialized) {
       // Configure neural service based on user's wallet balance
       if (wallet && creatorsNeuralService) {
-        const premiumMode = wallet.balance > 100;
-        creatorsNeuralService.updateConfig({
+        const premiumMode = (wallet.balance > 100);
+        creatorsNeuralService.configure({
           resourceAllocation: premiumMode ? 50 : 30,
           priority: premiumMode ? 80 : 45
         });
@@ -31,7 +31,7 @@ export const CreatorConsumer: React.FC<CreatorConsumerProps> = ({
       // Refresh creators with neural processing
       loadCreators(true);
     }
-  }, [isNeuralInitialized, wallet?.balance]);
+  }, [isNeuralInitialized, wallet?.balance, loadCreators]);
   
   return <>{children}</>;
 };

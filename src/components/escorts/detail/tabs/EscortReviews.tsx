@@ -1,166 +1,153 @@
 
-import React, { useState } from "react";
-import { Escort } from "@/types/escort";
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import StarRating from "@/components/ui/StarRating";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { useWallet } from "@/hooks/useWallet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { Rating } from "@/components/ui/rating";
+import { Escort } from "@/types/escort";
+import { useWallet } from '@/hooks/useWallet';
 
 interface EscortReviewsProps {
   escort: Escort;
+  reviews?: Array<{
+    id: string;
+    reviewerId: string;
+    reviewerName: string;
+    rating: number;
+    comment: string;
+    date: Date;
+  }>;
 }
 
-interface Review {
-  id: string;
-  username: string;
-  rating: number;
-  date: string;
-  text: string;
-  likes: number;
-  userLiked: boolean;
-}
-
-const EscortReviews: React.FC<EscortReviewsProps> = ({ escort }) => {
-  const { user } = useAuth();
+const EscortReviews: React.FC<EscortReviewsProps> = ({ escort, reviews: propReviews }) => {
+  const { toast } = useToast();
   const { wallet } = useWallet();
+  const [newRating, setNewRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Mock reviews data
-  const mockReviews: Review[] = [
+  // Sample reviews if none provided
+  const reviews = propReviews || [
     {
-      id: "1",
-      username: "JohnD",
+      id: '1',
+      reviewerId: 'user-1',
+      reviewerName: 'John',
       rating: 5,
-      date: "2023-10-15",
-      text: "Amazing experience! She was punctual, charming, and absolutely beautiful. Can't wait to see her again!",
-      likes: 12,
-      userLiked: false,
+      comment: 'Absolutely amazing experience! Very professional and friendly. Highly recommend!',
+      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     },
     {
-      id: "2",
-      username: "Michael87",
+      id: '2',
+      reviewerId: 'user-2',
+      reviewerName: 'Michael',
       rating: 4,
-      date: "2023-09-22",
-      text: "Great companion for my business dinner. Very intelligent and engaging conversation. Highly recommended.",
-      likes: 8,
-      userLiked: false,
-    },
-    {
-      id: "3",
-      username: "Robert_K",
-      rating: 5,
-      date: "2023-08-30",
-      text: "Exceeded all expectations. She's truly one of a kind and made our date night unforgettable.",
-      likes: 15,
-      userLiked: false,
-    },
+      comment: 'Great company and conversation. Will definitely book again soon.',
+      date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+    }
   ];
   
-  const [reviews, setReviews] = useState<Review[]>(mockReviews);
-  const [showWriteReview, setShowWriteReview] = useState(false);
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }).format(date);
+  };
   
-  const canWriteReview = !!user?.id && (wallet?.balance || 0) >= 5;
-  
-  const toggleLike = (reviewId: string) => {
-    setReviews(prevReviews => 
-      prevReviews.map(review => {
-        if (review.id === reviewId) {
-          return {
-            ...review,
-            likes: review.userLiked ? review.likes - 1 : review.likes + 1,
-            userLiked: !review.userLiked
-          };
-        }
-        return review;
-      })
-    );
+  const handleSubmitReview = () => {
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsSubmitting(false);
+      toast({
+        title: "Review submitted",
+        description: "Thank you for your feedback!"
+      });
+      
+      setComment('');
+      setNewRating(5);
+    }, 1000);
   };
   
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <div className="text-4xl font-bold mr-3">{escort.rating.toFixed(1)}</div>
-            <div>
-              <StarRating rating={escort.rating} size={18} />
-              <div className="text-sm text-muted-foreground">{escort.reviews || reviews.length} reviews</div>
-            </div>
+    <ScrollArea className="h-[500px] pr-4">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold">Client Reviews</h3>
+            <p className="text-sm text-muted-foreground">{reviews.length} verified reviews</p>
           </div>
           
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => setShowWriteReview(!showWriteReview)}
-            disabled={!canWriteReview}
-          >
-            Write a Review
-          </Button>
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-lg">{escort.rating || 5.0}</span>
+            <Rating value={escort.rating || 5} readOnly />
+          </div>
         </div>
         
-        {!canWriteReview && (
-          <div className="mb-4 p-3 bg-muted rounded-md text-sm text-muted-foreground">
-            You need at least 5 Lucoins in your wallet to write a review.
-          </div>
-        )}
-        
-        {showWriteReview && canWriteReview && (
-          <div className="mb-6 p-4 border rounded-md">
-            <h3 className="font-medium mb-2">Write a Review</h3>
-            <p className="text-xs text-muted-foreground mb-3">
-              This will cost 5 Lucoins from your wallet
-            </p>
-            {/* Review form would be here */}
-            <div className="flex justify-end gap-2 mt-3">
+        <Card>
+          <CardContent className="p-6">
+            <h4 className="font-medium mb-4">Write a Review</h4>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm text-muted-foreground">Your rating:</span>
+              <Rating value={newRating} onChange={setNewRating} />
+            </div>
+            
+            <Textarea
+              placeholder="Share your experience..."
+              className="mb-4 resize-none"
+              rows={4}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+            
+            <div className="flex justify-between items-center">
+              <p className="text-xs text-muted-foreground">
+                Only verified clients can leave reviews
+              </p>
               <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setShowWriteReview(false)}
+                onClick={handleSubmitReview}
+                disabled={isSubmitting || !comment || !wallet}
               >
-                Cancel
-              </Button>
-              <Button size="sm">
-                Submit (5 ⓛ)
+                {isSubmitting ? 'Submitting...' : 'Submit Review'}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+        
+        {reviews.length > 0 ? (
+          <div className="space-y-4">
+            {reviews.map(review => (
+              <Card key={review.id}>
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 className="font-medium">{review.reviewerName}</h4>
+                      <div className="flex items-center gap-2">
+                        <Rating value={review.rating} readOnly size="sm" />
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(review.date)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm">{review.comment}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        ) : (
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-muted-foreground">No reviews yet</p>
+            </CardContent>
+          </Card>
         )}
-        
-        <div className="space-y-4 mt-6">
-          {reviews.map(review => (
-            <div key={review.id} className="border-b border-border pb-4">
-              <div className="flex justify-between">
-                <div className="font-semibold">{review.username}</div>
-                <div className="text-sm text-muted-foreground">{review.date}</div>
-              </div>
-              
-              <div className="flex my-1">
-                <StarRating rating={review.rating} size={14} />
-              </div>
-              
-              <p className="text-sm my-2">{review.text}</p>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={`text-xs ${review.userLiked ? 'text-primary' : 'text-muted-foreground'}`}
-                onClick={() => toggleLike(review.id)}
-              >
-                <ThumbsUp size={14} className="mr-1" fill={review.userLiked ? "currentColor" : "none"} />
-                Helpful ({review.likes})
-              </Button>
-            </div>
-          ))}
-        </div>
-        
-        {(escort.reviews || reviews.length) > 3 && (
-          <Button variant="ghost" className="w-full mt-4">
-            See All {escort.reviews || reviews.length} Reviews
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </ScrollArea>
   );
 };
 

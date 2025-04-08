@@ -1,59 +1,77 @@
 
-import { BaseNeuralService } from './BaseNeuralService';
+import { BaseNeuralService } from '../types/neuralHub';
+
+interface CreatorsNeuralConfig {
+  resourcePriority?: 'low' | 'medium' | 'high';
+  userId?: string;
+  contentFiltering?: boolean;
+  autonomyLevel?: number;
+  resourceAllocation?: number;
+  priority?: number;
+}
 
 /**
- * Creators Neural Service
- * Specialized neural service for content creators platform functionality
+ * Neural service for the Content Creators module
+ * Integrates with the Brain Hub for enhanced creator content processing
  */
-export class CreatorsNeuralService extends BaseNeuralService {
-  constructor(moduleId: string) {
-    super(moduleId, 'creators');
-    // Set default config specific to creators module
+export class CreatorsNeuralService implements BaseNeuralService {
+  public moduleId: string;
+  public config: CreatorsNeuralConfig;
+  
+  constructor(moduleId: string = 'creators-neural') {
+    this.moduleId = moduleId;
     this.config = {
+      resourcePriority: 'medium',
+      contentFiltering: true,
+      autonomyLevel: 70,
+      resourceAllocation: 50,
+      priority: 60
+    };
+  }
+  
+  /**
+   * Initialize the neural service and register with the Brain Hub
+   */
+  public async initialize(): Promise<void> {
+    console.log(`Initializing ${this.moduleId} with Brain Hub`);
+    // In a real implementation, this would register with Brain Hub
+    return Promise.resolve();
+  }
+  
+  /**
+   * Gracefully shut down the neural service
+   */
+  public async shutdown(): Promise<void> {
+    console.log(`Shutting down ${this.moduleId}`);
+    return Promise.resolve();
+  }
+  
+  /**
+   * Update neural service configuration
+   */
+  public configure(config: Partial<CreatorsNeuralConfig>): void {
+    this.config = { 
       ...this.config,
-      priority: 65,
-      autonomyLevel: 50,
-      resourceAllocation: 35
+      ...config 
     };
+    console.log(`${this.moduleId} configured:`, this.config);
   }
-
+  
   /**
-   * Get Creators specific capabilities
+   * Check if the neural service is enabled
    */
-  getCapabilities(): string[] {
-    return [
-      'content-analysis',
-      'monetization-optimization',
-      'audience-targeting',
-      'trend-detection',
-      'engagement-prediction'
-    ];
+  public isEnabled(): boolean {
+    return true;
   }
-
+  
   /**
-   * Process content optimization suggestions
-   * @param contentData Content data to analyze
-   * @returns Optimization suggestions
+   * Get current config
    */
-  getContentOptimizations(contentData: any): any {
-    if (!this.config.enabled) {
-      return { error: 'Service disabled' };
-    }
-
-    console.log(`Analyzing content with ${this.moduleId}, autonomy: ${this.config.autonomyLevel}%`);
-    
-    // Return simulated optimization data
-    return {
-      suggestions: [
-        'Optimize post timing for better engagement',
-        'Add more interactive elements to increase retention',
-        'Target specific audience segments based on previous engagement'
-      ],
-      engagementScore: Math.random() * 0.5 + 0.5,
-      potentialRevenueIncrease: Math.random() * 0.3 + 0.1
-    };
+  public getConfig(): CreatorsNeuralConfig {
+    return this.config;
   }
 }
 
-// Create a default instance
-export const creatorsNeuralService = new CreatorsNeuralService('creators-primary');
+// Create singleton instance for the application
+export const creatorsNeuralService = new CreatorsNeuralService();
+export default creatorsNeuralService;

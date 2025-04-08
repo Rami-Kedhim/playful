@@ -1,121 +1,101 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, CalendarDays, CalendarClock, CalendarIcon, PlaneTakeoff } from "lucide-react";
 import { Escort } from "@/types/escort";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface EscortRatesProps {
   escort: Escort;
 }
 
 const EscortRates: React.FC<EscortRatesProps> = ({ escort }) => {
-  // Default rates if not provided
-  const defaultHourly = escort.rates?.hourly || escort.price || 200;
+  const rates = escort.rates || {};
   
-  const rates = {
-    hourly: defaultHourly,
-    twoHours: escort.rates?.twoHours || defaultHourly * 1.8,
-    threeHours: escort.rates?.threeHours || defaultHourly * 2.5,
-    dinner: escort.rates?.dinner || defaultHourly * 3,
-    overnight: escort.rates?.overnight || defaultHourly * 5,
-    weekend: escort.rates?.weekend || defaultHourly * 10,
-    travel: escort.rates?.travel || defaultHourly * 2 + " per day"
-  };
+  // Only show rates that exist in the escort data
+  const availableRates = [
+    { name: "1 Hour", value: rates.hourly },
+    { name: "2 Hours", value: rates.twoHours },
+    { name: "Overnight", value: rates.overnight },
+    { name: "Weekend", value: rates.weekend }
+  ].filter(rate => rate.value !== undefined);
+  
+  if (availableRates.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <p className="text-muted-foreground">No rate information available</p>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-sm text-muted-foreground mb-4">
-          The following rates are for companionship time only. Any additional services should be discussed in person.
-        </p>
+    <ScrollArea className="h-[500px]">
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-6">Standard Rates</h3>
+            
+            <div className="space-y-4">
+              {availableRates.map((rate, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <span className="text-muted-foreground">{rate.name}</span>
+                  <span className="text-xl font-semibold">${rate.value}</span>
+                </div>
+              ))}
+            </div>
+            
+            {escort.rates && (
+              <div className="mt-6 p-4 bg-muted/30 rounded-md">
+                <h4 className="font-medium mb-2">Notes</h4>
+                <p className="text-sm text-muted-foreground">
+                  Rates are subject to change for outcall services or special requests. 
+                  Please inquire directly for specific pricing information.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
         
-        <div className="space-y-4">
-          <div className="flex items-start justify-between border-b pb-3">
-            <div className="flex items-center">
-              <Clock className="h-5 w-5 mr-3 text-primary" />
-              <div>
-                <h3 className="font-medium">1 Hour</h3>
-                <p className="text-sm text-muted-foreground">Standard visit</p>
-              </div>
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Payment Methods</h3>
+            <ul className="list-disc list-inside space-y-2">
+              <li className="text-muted-foreground">Cash (preferred)</li>
+              <li className="text-muted-foreground">Bank transfer (for regular clients)</li>
+              <li className="text-muted-foreground">Cryptocurrency (BTC, ETH, LUCOINS)</li>
+            </ul>
+            
+            <div className="mt-6 p-4 bg-muted/30 rounded-md">
+              <p className="text-sm text-muted-foreground">
+                All payments must be received at the beginning of our appointment.
+                Deposits may be required for new clients or extended bookings.
+              </p>
             </div>
-            <div className="text-xl font-semibold">${rates.hourly}</div>
-          </div>
-          
-          <div className="flex items-start justify-between border-b pb-3">
-            <div className="flex items-center">
-              <Clock className="h-5 w-5 mr-3 text-primary" />
-              <div>
-                <h3 className="font-medium">2 Hours</h3>
-                <p className="text-sm text-muted-foreground">Extended visit</p>
-              </div>
-            </div>
-            <div className="text-xl font-semibold">${rates.twoHours}</div>
-          </div>
-          
-          <div className="flex items-start justify-between border-b pb-3">
-            <div className="flex items-center">
-              <Clock className="h-5 w-5 mr-3 text-primary" />
-              <div>
-                <h3 className="font-medium">3 Hours</h3>
-                <p className="text-sm text-muted-foreground">Longer session</p>
-              </div>
-            </div>
-            <div className="text-xl font-semibold">${rates.threeHours}</div>
-          </div>
-          
-          <div className="flex items-start justify-between border-b pb-3">
-            <div className="flex items-center">
-              <CalendarClock className="h-5 w-5 mr-3 text-primary" />
-              <div>
-                <h3 className="font-medium">Dinner Date</h3>
-                <p className="text-sm text-muted-foreground">4-5 hours with dinner</p>
-              </div>
-            </div>
-            <div className="text-xl font-semibold">${rates.dinner}</div>
-          </div>
-          
-          <div className="flex items-start justify-between border-b pb-3">
-            <div className="flex items-center">
-              <CalendarDays className="h-5 w-5 mr-3 text-primary" />
-              <div>
-                <h3 className="font-medium">Overnight</h3>
-                <p className="text-sm text-muted-foreground">10-12 hours, until morning</p>
-              </div>
-            </div>
-            <div className="text-xl font-semibold">${rates.overnight}</div>
-          </div>
-          
-          <div className="flex items-start justify-between border-b pb-3">
-            <div className="flex items-center">
-              <CalendarIcon className="h-5 w-5 mr-3 text-primary" />
-              <div>
-                <h3 className="font-medium">Weekend</h3>
-                <p className="text-sm text-muted-foreground">Friday to Sunday</p>
-              </div>
-            </div>
-            <div className="text-xl font-semibold">${rates.weekend}</div>
-          </div>
-          
-          <div className="flex items-start justify-between">
-            <div className="flex items-center">
-              <PlaneTakeoff className="h-5 w-5 mr-3 text-primary" />
-              <div>
-                <h3 className="font-medium">Travel Companion</h3>
-                <p className="text-sm text-muted-foreground">Plus expenses</p>
-              </div>
-            </div>
-            <div className="text-xl font-semibold">{rates.travel}</div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
         
-        <div className="mt-6 p-3 bg-muted rounded-md">
-          <h3 className="font-medium mb-1">Payment Methods</h3>
-          <p className="text-sm text-muted-foreground">
-            Cash, crypto, and Lucoins accepted. Other payment methods may be available upon request.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">Cancellation Policy</h3>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                • 24+ hours: Full refund of any deposit
+              </p>
+              <p className="text-sm text-muted-foreground">
+                • 12-24 hours: 50% of deposit retained
+              </p>
+              <p className="text-sm text-muted-foreground">
+                • Less than 12 hours: No refund of deposit
+              </p>
+              <p className="text-sm text-muted-foreground">
+                • No-show: Blacklisted for future bookings
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </ScrollArea>
   );
 };
 

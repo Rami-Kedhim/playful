@@ -1,48 +1,55 @@
 
 /**
- * Neural model interface
+ * BaseNeuralService - Abstract base for all neural service implementations 
+ * providing standard interface for Brain Hub integration
+ */
+export interface BaseNeuralService {
+  moduleId: string;
+  initialize(): Promise<void>;
+  shutdown(): Promise<void>;
+  configure(config: any): void;
+}
+
+/**
+ * Neural Model interface representing a model in the Neural Hub system
  */
 export interface NeuralModel {
   id: string;
   name: string;
   version: string;
   capabilities: string[];
-  specialization?: string[];
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
     accuracy: number;
-    latency: number;
-    resourceUsage: number;
-    [key: string]: number;
+    latency: number; // in milliseconds
+    resourceUsage: number; // 0-1 scale
   };
   createdAt: Date;
   updatedAt: Date;
-  [key: string]: any;
 }
 
 /**
- * Neural model parameters
+ * Neural Model parameters for configuration
  */
 export interface ModelParameters {
-  learningRate?: number;
-  batchSize?: number;
-  epochs?: number;
-  optimizerType?: string;
-  dropout?: number;
-  activationFunction?: string;
-  embeddingSize?: number;
-  hiddenLayers?: number[];
-  decayConstant?: number;
-  growthFactor?: number;
-  cyclePeriod?: number;
-  harmonicCount?: number;
-  bifurcationPoint?: number;
-  attractorStrength?: number;
-  [key: string]: any;
+  learningRate: number;
+  batchSize: number;
+  epochs: number;
+  optimizerType: string;
+  dropout: number;
+  activationFunction: string;
+  embeddingSize: number;
+  hiddenLayers: number[];
+  decayConstant: number;
+  growthFactor: number;
+  cyclePeriod: number;
+  harmonicCount: number;
+  bifurcationPoint: number;
+  attractorStrength: number;
 }
 
 /**
- * System health metrics
+ * System health metrics for monitoring
  */
 export interface SystemHealthMetrics {
   cpuUtilization: number;
@@ -58,11 +65,10 @@ export interface SystemHealthMetrics {
   userEngagement: number;
   economicBalance: number;
   lastUpdated: Date;
-  [key: string]: any;
 }
 
 /**
- * Training progress interface
+ * Training progress tracking
  */
 export interface TrainingProgress {
   modelId: string;
@@ -70,12 +76,7 @@ export interface TrainingProgress {
   currentEpoch: number;
   totalEpochs: number;
   currentAccuracy: number;
-  targetAccuracy: number;
-  estimatedCompletionTime: Date;
-  status: 'running' | 'completed' | 'failed' | 'stopped';
-  // Adding missing properties that are used in NeuralSystemsPanel
-  progress: number;
-  accuracy: number;
-  message?: string;
-  error?: string;
+  validationAccuracy: number;
+  estimatedTimeRemaining: number; // seconds
+  status: 'starting' | 'training' | 'validating' | 'completed' | 'failed';
 }

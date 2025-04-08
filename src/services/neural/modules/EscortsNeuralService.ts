@@ -1,55 +1,77 @@
 
-import { BaseNeuralService } from './BaseNeuralService';
+import { BaseNeuralService } from '../types/neuralHub';
+
+interface EscortsNeuralConfig {
+  resourcePriority?: 'low' | 'medium' | 'high';
+  userId?: string;
+  regionFiltering?: boolean;
+  autonomyLevel?: number;
+  resourceAllocation?: number;
+  priority?: number;
+}
 
 /**
- * Escorts Neural Service
- * Specialized neural service for escort platform functionality
+ * Neural service for the Escorts module
+ * Integrates with the Brain Hub for enhanced escort profile processing
  */
-export class EscortsNeuralService extends BaseNeuralService {
-  constructor(moduleId: string) {
-    super(moduleId, 'escorts');
-    // Set default config specific to escorts module
+export class EscortsNeuralService implements BaseNeuralService {
+  public moduleId: string;
+  public config: EscortsNeuralConfig;
+  
+  constructor(moduleId: string = 'escorts-neural') {
+    this.moduleId = moduleId;
     this.config = {
+      resourcePriority: 'medium',
+      regionFiltering: true,
+      autonomyLevel: 60,
+      resourceAllocation: 40,
+      priority: 50
+    };
+  }
+  
+  /**
+   * Initialize the neural service and register with the Brain Hub
+   */
+  public async initialize(): Promise<void> {
+    console.log(`Initializing ${this.moduleId} with Brain Hub`);
+    // In a real implementation, this would register with Brain Hub
+    return Promise.resolve();
+  }
+  
+  /**
+   * Gracefully shut down the neural service
+   */
+  public async shutdown(): Promise<void> {
+    console.log(`Shutting down ${this.moduleId}`);
+    return Promise.resolve();
+  }
+  
+  /**
+   * Update neural service configuration
+   */
+  public configure(config: Partial<EscortsNeuralConfig>): void {
+    this.config = { 
       ...this.config,
-      priority: 60,
-      autonomyLevel: 40,
-      resourceAllocation: 30
+      ...config 
     };
+    console.log(`${this.moduleId} configured:`, this.config);
   }
-
+  
   /**
-   * Get Escorts specific capabilities
+   * Check if the neural service is enabled
    */
-  getCapabilities(): string[] {
-    return [
-      'verification-support',
-      'profile-matching',
-      'geo-awareness',
-      'safety-monitoring',
-      'content-filtering'
-    ];
+  public isEnabled(): boolean {
+    return true;
   }
-
+  
   /**
-   * Process escort profile recommendations
-   * @param userPreferences User preferences for recommendation
-   * @returns Recommendation data
+   * Get current config
    */
-  getRecommendations(userPreferences: any): any {
-    if (!this.config.enabled) {
-      return { error: 'Service disabled' };
-    }
-
-    console.log(`Generating recommendations with ${this.moduleId}, autonomy: ${this.config.autonomyLevel}%`);
-    
-    // Return simulated recommendations
-    return {
-      recommendations: ['profile-1', 'profile-2', 'profile-3'],
-      matchScore: Math.random() * 0.4 + 0.6,
-      regionOptimized: true
-    };
+  public getConfig(): EscortsNeuralConfig {
+    return this.config;
   }
 }
 
-// Create a default instance
-export const escortsNeuralService = new EscortsNeuralService('escorts-primary');
+// Create singleton instance for the application
+export const escortsNeuralService = new EscortsNeuralService();
+export default escortsNeuralService;

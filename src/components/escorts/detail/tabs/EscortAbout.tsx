@@ -1,72 +1,190 @@
 
 import React from 'react';
-import { Escort } from "@/types/escort";
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Escort } from "@/types/escort";
 
 interface EscortAboutProps {
   escort: Escort;
 }
 
 const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
-  // Fake data for presentation if not provided in the escort object
-  const details = {
-    height: escort.height || "168 cm",
-    weight: escort.weight || "54 kg",
-    measurements: escort.measurements || "34-24-36",
-    languages: escort.languages || ["English"],
-    available: escort.availability?.days?.join(", ") || "Monday to Friday",
-    hairColor: escort.hairColor || "Blonde",
-    eyeColor: escort.eyeColor || "Blue",
-    ethnicity: escort.ethnicity || "Caucasian",
+  const { t } = useTranslation();
+  
+  // Format measurements as string for display
+  const formatMeasurements = (measurements: { bust: number; waist: number; hips: number; } | undefined) => {
+    if (!measurements) return 'N/A';
+    return `${measurements.bust}-${measurements.waist}-${measurements.hips}`;
   };
   
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="grid grid-cols-2 gap-y-3 text-sm">
-          <div className="text-muted-foreground">Age</div>
-          <div>{escort.age} years</div>
-          
-          <div className="text-muted-foreground">Gender</div>
-          <div className="capitalize">{escort.gender || "Not specified"}</div>
-          
-          <div className="text-muted-foreground">Sexual Orientation</div>
-          <div className="capitalize">{escort.sexualOrientation || "Not specified"}</div>
-          
-          <div className="text-muted-foreground">Height</div>
-          <div>{details.height}</div>
-          
-          <div className="text-muted-foreground">Weight</div>
-          <div>{details.weight}</div>
-          
-          <div className="text-muted-foreground">Measurements</div>
-          <div>{details.measurements}</div>
-          
-          <div className="text-muted-foreground">Hair Color</div>
-          <div>{details.hairColor}</div>
-          
-          <div className="text-muted-foreground">Eye Color</div>
-          <div>{details.eyeColor}</div>
-          
-          <div className="text-muted-foreground">Ethnicity</div>
-          <div>{details.ethnicity}</div>
-          
-          <div className="text-muted-foreground">Languages</div>
-          <div>{details.languages.join(", ")}</div>
-          
-          <div className="text-muted-foreground">Availability</div>
-          <div>{details.available}</div>
-        </div>
-        
-        <h3 className="font-semibold mt-6 mb-2">About Me</h3>
-        <p className="text-sm text-muted-foreground">
-          {escort.bio || escort.description || `I'm a fun-loving, adventurous companion looking for genuine connections. 
-          I enjoy both quiet evenings and exciting adventures. Let's create unforgettable 
-          memories together in ${escort.location}. I provide high-class companionship services 
-          and prioritize discretion and comfort.`}
-        </p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold mb-4">{t('About Me')}</h3>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">
+            {escort.bio || escort.description || 
+              `I am a sophisticated companion offering an unforgettable experience. My warm personality and attention to detail ensure our time together will be remarkable and memorable.`
+            }
+          </p>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold mb-4">{t('Physical Attributes')}</h3>
+          <div className="grid grid-cols-2 gap-y-4">
+            <div>
+              <p className="text-sm font-medium">{t('Age')}</p>
+              <p className="text-sm text-muted-foreground">{escort.age}</p>
+            </div>
+            
+            <div>
+              <p className="text-sm font-medium">{t('Gender')}</p>
+              <p className="text-sm text-muted-foreground capitalize">{escort.gender}</p>
+            </div>
+            
+            {escort.height && (
+              <div>
+                <p className="text-sm font-medium">{t('Height')}</p>
+                <p className="text-sm text-muted-foreground">{escort.height} cm</p>
+              </div>
+            )}
+            
+            {escort.weight && (
+              <div>
+                <p className="text-sm font-medium">{t('Weight')}</p>
+                <p className="text-sm text-muted-foreground">{escort.weight} kg</p>
+              </div>
+            )}
+            
+            {escort.measurements && (
+              <div>
+                <p className="text-sm font-medium">{t('Measurements')}</p>
+                <p className="text-sm text-muted-foreground">{formatMeasurements(escort.measurements)}</p>
+              </div>
+            )}
+            
+            {escort.hairColor && (
+              <div>
+                <p className="text-sm font-medium">{t('Hair Color')}</p>
+                <p className="text-sm text-muted-foreground capitalize">{escort.hairColor}</p>
+              </div>
+            )}
+            
+            {escort.eyeColor && (
+              <div>
+                <p className="text-sm font-medium">{t('Eye Color')}</p>
+                <p className="text-sm text-muted-foreground capitalize">{escort.eyeColor}</p>
+              </div>
+            )}
+            
+            {escort.ethnicity && (
+              <div>
+                <p className="text-sm font-medium">{t('Ethnicity')}</p>
+                <p className="text-sm text-muted-foreground capitalize">{escort.ethnicity}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      {escort.services && escort.services.length > 0 && (
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">{t('Services')}</h3>
+            <div className="flex flex-wrap gap-2">
+              {escort.services.map((service, index) => (
+                <div key={index} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs">
+                  {service}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {escort.languages && escort.languages.length > 0 && (
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">{t('Languages')}</h3>
+            <div className="flex flex-wrap gap-2">
+              {escort.languages.map((language, index) => (
+                <div key={index} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs">
+                  {language}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {escort.availability && (
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">{t('Availability')}</h3>
+            
+            {escort.availability.days && escort.availability.days.length > 0 && (
+              <div className="mb-4">
+                <p className="text-sm font-medium mb-2">{t('Days')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {escort.availability.days.map((day, index) => (
+                    <div key={index} className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs capitalize">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {escort.availability.hours && (
+              <div>
+                <p className="text-sm font-medium mb-2">{t('Hours')}</p>
+                <p className="text-sm text-muted-foreground">{escort.availability.hours}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      
+      {escort.contactInfo && (
+        <Card className="border-primary/20">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">{t('Contact Information')}</h3>
+            <div className="space-y-3">
+              {escort.contactInfo.phone && (
+                <div>
+                  <p className="text-sm font-medium">{t('Phone')}</p>
+                  <p className="text-sm">{escort.contactInfo.phone}</p>
+                </div>
+              )}
+              
+              {escort.contactInfo.email && (
+                <div>
+                  <p className="text-sm font-medium">{t('Email')}</p>
+                  <p className="text-sm">{escort.contactInfo.email}</p>
+                </div>
+              )}
+              
+              {escort.contactInfo.website && (
+                <div>
+                  <p className="text-sm font-medium">{t('Website')}</p>
+                  <a 
+                    href={escort.contactInfo.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline"
+                  >
+                    {escort.contactInfo.website}
+                  </a>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 

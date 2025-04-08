@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/contexts/NotificationsContext";
 import { CreatorsModule } from "@/modules/creators/CreatorsModule";
-import useCreators from "@/hooks/useCreators";
+import { useCreatorContext } from "@/modules/creators/providers/CreatorProvider";
 import MainLayout from "@/components/layout/MainLayout";
 import CreatorFilters from "@/components/creators/CreatorFilters";
 import CreatorGrid from "@/components/creators/CreatorGrid";
@@ -21,11 +21,11 @@ const Creators: React.FC = () => {
 };
 
 const CreatorPageContent: React.FC = () => {
-  const { creators, loading, error, fetchCreators, filters, updateFilters } = useCreators();
+  const { state, loadCreators, updateFilters } = useCreatorContext();
   const { showInfo } = useNotifications();
   
   const handleRefresh = () => {
-    fetchCreators(true); // Force refresh
+    loadCreators(true); // Force refresh with neural processing
     if (showInfo) showInfo("Refreshing Data", "Getting the latest content creators");
   };
   
@@ -61,14 +61,14 @@ const CreatorPageContent: React.FC = () => {
                 size="sm"
                 className="flex items-center gap-1"
                 onClick={() => updateFilters({ 
-                  sortBy: filters.sortBy === 'recommended' ? 'mostSubscribers' : 'recommended' 
+                  sortBy: state.filters.sortBy === 'recommended' ? 'mostSubscribers' : 'recommended' 
                 })}
               >
                 <SlidersHorizontal className="h-4 w-4" />
-                {filters.sortBy === 'recommended' ? 'Neural' : 'Standard'} Sorting
+                {state.filters.sortBy === 'recommended' ? 'Neural' : 'Standard'} Sorting
               </Button>
-              <Button onClick={handleRefresh} disabled={loading}>
-                {loading ? "Refreshing..." : "Refresh"}
+              <Button onClick={handleRefresh} disabled={state.isLoading}>
+                {state.isLoading ? "Refreshing..." : "Refresh"}
               </Button>
             </div>
           </div>
@@ -76,7 +76,7 @@ const CreatorPageContent: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-1">
               <CreatorFilters 
-                filters={filters} 
+                filters={state.filters} 
                 onFilterChange={updateFilters}
               />
               
@@ -86,9 +86,9 @@ const CreatorPageContent: React.FC = () => {
             </div>
             
             <div className="lg:col-span-3">
-              {error ? (
+              {state.error ? (
                 <div className="p-4 bg-red-500/10 border border-red-500 rounded-md text-center mb-6">
-                  <p className="text-red-500">Error: {error}</p>
+                  <p className="text-red-500">Error: {state.error}</p>
                   <Button 
                     variant="outline" 
                     onClick={handleRefresh}
@@ -97,7 +97,7 @@ const CreatorPageContent: React.FC = () => {
                     Try Again
                   </Button>
                 </div>
-              ) : loading ? (
+              ) : state.isLoading ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {Array(8).fill(0).map((_, i) => (
                     <div key={i} className="rounded-lg overflow-hidden">
@@ -110,10 +110,10 @@ const CreatorPageContent: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <CreatorGrid creators={creators} />
+                <CreatorGrid creators={state.creators} />
               )}
               
-              {!loading && creators.length === 0 && !error && (
+              {!state.isLoading && state.creators.length === 0 && !state.error && (
                 <div className="text-center py-12">
                   <p className="text-lg font-medium">No creators found matching your criteria</p>
                   <p className="text-muted-foreground">Try adjusting your filters</p>

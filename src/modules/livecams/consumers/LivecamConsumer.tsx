@@ -21,8 +21,8 @@ export const LivecamConsumer: React.FC<LivecamConsumerProps> = ({
     if (isNeuralInitialized) {
       // Configure neural service based on user's wallet balance
       if (wallet && livecamsNeuralService) {
-        const premiumMode = wallet.balance > 100;
-        livecamsNeuralService.updateConfig({
+        const premiumMode = (wallet.balance > 100);
+        livecamsNeuralService.configure({
           resourceAllocation: premiumMode ? 60 : 40,
           priority: premiumMode ? 85 : 50
         });
@@ -31,7 +31,7 @@ export const LivecamConsumer: React.FC<LivecamConsumerProps> = ({
       // Refresh livecams with neural processing
       loadLivecams(true);
     }
-  }, [isNeuralInitialized, wallet?.balance]);
+  }, [isNeuralInitialized, wallet?.balance, loadLivecams]);
   
   return <>{children}</>;
 };

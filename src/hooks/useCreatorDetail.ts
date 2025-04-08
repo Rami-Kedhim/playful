@@ -1,93 +1,119 @@
 
-import { useState, useEffect } from 'react';
-import { Creator } from '@/hooks/useCreators';
+import { useState, useEffect, useCallback } from 'react';
 import { useCreatorContext } from '@/modules/creators/providers/CreatorProvider';
-import { useFavorites } from '@/contexts/FavoritesContext';
+import { Creator } from './useCreators';
+import { useToast } from '@/components/ui/use-toast';
 import { useWallet } from '@/hooks/useWallet';
 
+/**
+ * Hook for detailed creator profile interactions
+ */
 export const useCreatorDetail = (creatorId?: string) => {
-  const { getCreatorById, state } = useCreatorContext();
+  const { getCreatorById } = useCreatorContext();
+  const { toast } = useToast();
+  const { wallet } = useWallet();
+  
   const [creator, setCreator] = useState<Creator | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isFavorite } = useFavorites();
-  const { wallet, deductBalance } = useWallet();
-  
-  // For subscription functionality
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [canSubscribe, setCanSubscribe] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   
-  // Fetch creator details on mount or when ID changes
+  // Load creator data
   useEffect(() => {
-    const fetchCreatorDetails = async () => {
-      if (!creatorId) {
-        setCreator(null);
-        setLoading(false);
-        return;
-      }
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const fetchedCreator = await getCreatorById(creatorId);
+    if (!creatorId) {
+      setError("Creator ID is required");
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const foundCreator = getCreatorById(creatorId);
+      if (foundCreator) {
+        setCreator(foundCreator);
         
-        if (fetchedCreator) {
-          setCreator(fetchedCreator);
-          
-          // Check subscription status based on wallet balance
-          if (wallet) {
-            // For demo, we'll simulate subscription status
-            setIsSubscribed(Math.random() > 0.7);
-            setCanSubscribe(wallet.balance >= fetchedCreator.price);
-          }
-        } else {
-          setError('Creator not found');
-        }
-      } catch (err) {
-        console.error('Error fetching creator details:', err);
-        setError('Failed to load creator details');
-      } finally {
-        setLoading(false);
+        // Check if user is subscribed (in a real app, fetch from API)
+        setIsSubscribed(Math.random() > 0.7); 
+        
+        // Check if creator is favorited (in a real app, fetch from API)
+        setIsFavorite(Math.random() > 0.6);
+        
+        setError(null);
+      } else {
+        setError("Creator not found");
+        setCreator(null);
       }
-    };
-    
-    fetchCreatorDetails();
-  }, [creatorId, wallet?.balance]);
+    } catch (err) {
+      console.error("Error loading creator details:", err);
+      setError("Failed to load creator details");
+      setCreator(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [creatorId, getCreatorById]);
   
-  // Handle subscription
-  const handleSubscribe = async () => {
-    if (!creator) return false;
+  // Handle subscribe action
+  const handleSubscribe = useCallback(() => {
+    if (!creator) return;
     
-    if (wallet?.balance < creator.price) {
-      return false;
+    // Check wallet balance
+    if (!wallet || wallet.balance < creator.price) {
+      toast({
+        title: "Insufficient funds",
+        description: "Please add more funds to your wallet",
+        variant: "destructive",
+      });
+      return;
     }
     
-    // Deduct Lucoins for subscription
-    const success = await deductBalance(creator.price, `Subscription to ${creator.name}`);
-    if (success) {
-      setIsSubscribed(true);
-    }
-    return success;
-  };
+    toast({
+      title: "Subscription successful!",
+      description: `You are now subscribed to ${creator.name}`,
+    });
+    
+    setIsSubscribed(true);
+  }, [creator, wallet, toast]);
   
-  // Handle sending tip
-  const handleSendTip = async (amount: number) => {
-    if (!creator || wallet?.balance < amount) {
-      return false;
+  // Handle sending tips
+  const handleSendTip = useCallback((amount: number) => {
+    if (!creator) return;
+    
+    // Check wallet balance
+    if (!wallet || wallet.balance < amount) {
+      toast({
+        title: "Insufficient funds",
+        description: "Please add more funds to your wallet",
+        variant: "destructive",
+      });
+      return;
     }
     
-    // Deduct Lucoins for tip
-    return await deductBalance(amount, `Tip to ${creator.name}`);
-  };
+    toast({
+      title: "Tip sent!",
+      description: `You sent ${amount} LUCOINS to ${creator.name}`,
+    });
+  }, [creator, wallet, toast]);
+  
+  // Toggle favorite status
+  const toggleFavorite = useCallback(() => {
+    setIsFavorite(current => !current);
+    
+    toast({
+      title: isFavorite ? "Removed from favorites" : "Added to favorites",
+      description: isFavorite 
+        ? `${creator?.name} removed from your favorites` 
+        : `${creator?.name} added to your favorites`,
+    });
+  }, [creator, isFavorite, toast]);
   
   return {
     creator,
     loading,
     error,
-    isFavorite: creator ? isFavorite(creator.id) : false,
     isSubscribed,
-    canSubscribe,
+    isFavorite,
+    toggleFavorite,
+    canSubscribe: !!wallet && wallet.balance >= (creator?.price || 0),
     handleSubscribe,
     handleSendTip
   };

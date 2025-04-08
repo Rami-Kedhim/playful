@@ -3,13 +3,12 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/contexts/NotificationsContext";
-import UnifiedServiceGrid from "@/components/unified/UnifiedServiceGrid";
 import { EscortsModule } from "@/modules/escorts/EscortsModule";
-import useEscorts from "@/hooks/useEscorts";
+import { useEscortContext } from "@/modules/escorts/providers/EscortProvider";
 import MainLayout from "@/components/layout/MainLayout";
-import EscortFilters from "@/components/escorts/EscortFilters";
+import EscortGrid from "@/components/escorts/EscortGrid";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Settings } from "lucide-react";
+import { Brain, Settings, SlidersHorizontal } from "lucide-react";
 import { escortsNeuralService } from "@/services/neural/modules/EscortsNeuralService";
 
 const Escorts: React.FC = () => {
@@ -21,12 +20,12 @@ const Escorts: React.FC = () => {
 };
 
 const EscortPageContent: React.FC = () => {
-  const { escorts, loading, error, fetchEscorts, filters, updateFilters } = useEscorts();
+  const { state, loadEscorts, updateFilters } = useEscortContext();
   const { showInfo } = useNotifications();
   
   const handleRefresh = () => {
-    fetchEscorts(true); // Force refresh
-    if (showInfo) showInfo("Refreshing Data", "Getting the latest service providers");
+    loadEscorts(true); // Force refresh with neural processing
+    if (showInfo) showInfo("Refreshing Data", "Getting the latest escorts");
   };
   
   const neuralStatus = escortsNeuralService.isEnabled() 
@@ -36,8 +35,8 @@ const EscortPageContent: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Premium Adult Service Directory | Find Verified Companions</title>
-        <meta name="description" content="Browse our premium directory of verified adult service providers. Find companions, content creators, and livecam performers." />
+        <title>Premium Escorts | Find Your Perfect Companion</title>
+        <meta name="description" content="Browse our curated selection of premium escorts. Find your perfect companion for any occasion." />
       </Helmet>
       
       <MainLayout>
@@ -45,7 +44,7 @@ const EscortPageContent: React.FC = () => {
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold">Service Directory</h1>
+                <h1 className="text-3xl font-bold">Escorts</h1>
                 {escortsNeuralService.isEnabled() && (
                   <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full flex items-center">
                     <Brain className="h-3 w-3 mr-1" />
@@ -53,7 +52,7 @@ const EscortPageContent: React.FC = () => {
                   </span>
                 )}
               </div>
-              <p className="text-muted-foreground">Find companions, content creators, and live cam performers</p>
+              <p className="text-muted-foreground">Find your perfect companion</p>
             </div>
             <div className="flex gap-2">
               <Button 
@@ -61,75 +60,26 @@ const EscortPageContent: React.FC = () => {
                 size="sm"
                 className="flex items-center gap-1"
                 onClick={() => updateFilters({ 
-                  sortBy: filters.sortBy === 'recommended' ? 'rating' : 'recommended' 
+                  location: state.filters.location === 'global' ? '' : 'global' 
                 })}
               >
-                <Settings className="h-4 w-4" />
-                {filters.sortBy === 'recommended' ? 'Neural' : 'Standard'} Sorting
+                <SlidersHorizontal className="h-4 w-4" />
+                {state.filters.location === 'global' ? 'Local' : 'Global'} Search
               </Button>
-              <Button onClick={handleRefresh} disabled={loading}>
-                {loading ? "Refreshing..." : "Refresh"}
+              <Button onClick={handleRefresh} disabled={state.isLoading}>
+                {state.isLoading ? "Refreshing..." : "Refresh"}
               </Button>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1">
-              <EscortFilters 
-                filters={filters} 
-                onFilterChange={updateFilters}
-              />
-              
-              <div className="mt-4 text-xs text-muted-foreground">
-                {neuralStatus}
-              </div>
-            </div>
-            
-            <div className="lg:col-span-3">
-              {error ? (
-                <div className="p-4 bg-red-500/10 border border-red-500 rounded-md text-center mb-6">
-                  <p className="text-red-500">Error: {error}</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleRefresh}
-                    className="mt-2"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              ) : loading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {Array(6).fill(0).map((_, i) => (
-                    <div key={i} className="rounded-lg overflow-hidden">
-                      <Skeleton className="w-full h-52" />
-                      <div className="p-3">
-                        <Skeleton className="w-2/3 h-5 mb-2" />
-                        <Skeleton className="w-1/2 h-4" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <UnifiedServiceGrid 
-                  providers={escorts}
-                  isLoading={loading}
-                />
-              )}
-              
-              {!loading && escorts.length === 0 && !error && (
-                <div className="text-center py-12">
-                  <p className="text-lg font-medium">No escorts found matching your criteria</p>
-                  <p className="text-muted-foreground">Try adjusting your filters</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.location.reload()}
-                    className="mt-4"
-                  >
-                    Reset All Filters
-                  </Button>
-                </div>
-              )}
-            </div>
+          <EscortGrid 
+            escorts={state.escorts} 
+            loading={state.isLoading}
+            error={state.error}
+          />
+          
+          <div className="mt-4 text-xs text-muted-foreground">
+            {neuralStatus}
           </div>
         </div>
       </MainLayout>

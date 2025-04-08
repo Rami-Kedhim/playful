@@ -21,8 +21,8 @@ export const EscortConsumer: React.FC<EscortConsumerProps> = ({
     if (isNeuralInitialized) {
       // Configure neural service based on user's wallet balance
       if (wallet && escortsNeuralService) {
-        const premiumMode = wallet.balance > 100;
-        escortsNeuralService.updateConfig({
+        const premiumMode = (wallet.balance > 100);
+        escortsNeuralService.configure({
           resourceAllocation: premiumMode ? 50 : 25,
           priority: premiumMode ? 80 : 40
         });
@@ -31,7 +31,7 @@ export const EscortConsumer: React.FC<EscortConsumerProps> = ({
       // Refresh escorts with neural processing
       loadEscorts(true);
     }
-  }, [isNeuralInitialized, wallet?.balance]);
+  }, [isNeuralInitialized, wallet?.balance, loadEscorts]);
   
   return <>{children}</>;
 };
