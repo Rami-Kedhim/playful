@@ -26,6 +26,7 @@ const AIProfiles = lazy(() => import("./pages/AIProfiles"));
 const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
+const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -143,6 +144,14 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <AppLayout>
               <BrainHubPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/nsfw-image-generator" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <NSFWImageGeneratorPage />
             </AppLayout>
           </ProtectedRoute>
         } />

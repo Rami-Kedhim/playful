@@ -5,7 +5,7 @@
  
 // Main hub and services
 export { neuralHub } from './HermesOxumNeuralHub';
-export { brainHub } from './HermesOxumBrainHub';
+export { brainHub, type BrainHubConfig, type PsychologyModel, type PhysicsModel, type EconomicsModel, type RoboticsModel } from './HermesOxumBrainHub';
 
 // Neural Service Registry and base implementations
 export { 
@@ -45,15 +45,6 @@ export type {
   NeuralModel,
   TrainingProgress 
 } from './types/neuralHub';
-
-// From HermesOxumBrainHub.ts
-export type { 
-  BrainHubConfig, 
-  PsychologyModel, 
-  PhysicsModel, 
-  EconomicsModel, 
-  RoboticsModel 
-} from './HermesOxumBrainHub';
 
 // Utility functions
 export { 

@@ -22,16 +22,16 @@ export const useEscorts = () => {
   const clearAllFilters = useCallback(() => {
     const emptyFilters = {
       location: '',
-      serviceTypes: [],
-      priceRange: [0, 1000],
-      gender: [],
-      orientation: [],
-      ageRange: [18, 99],
+      serviceTypes: [] as string[],
+      priceRange: [0, 1000] as [number, number],
+      gender: [] as string[],
+      orientation: [] as string[],
+      ageRange: [18, 99] as [number, number],
       rating: 0,
       verified: false,
       availableNow: false,
-      escortType: "all",
-      language: [],
+      escortType: "all" as "all" | "verified" | "ai" | "provisional",
+      language: [] as string[],
     };
     
     setCurrentFilters(emptyFilters);

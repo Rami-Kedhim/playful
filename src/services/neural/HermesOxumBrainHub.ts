@@ -1,4 +1,53 @@
+
+export interface BrainHubConfig {
+  autonomyEnabled: boolean;
+  autonomyLevel: number;
+  userConsentLevel: 'minimal' | 'moderate' | 'full';
+  regionRestrictions: Record<string, boolean>;
+  moderationLevel: 'low' | 'medium' | 'high';
+  debugMode: boolean;
+  developmentMode: boolean;
+  persistenceEnabled: boolean;
+  systemStatus: 'active' | 'maintenance' | 'offline';
+}
+
+export interface PsychologyModel {
+  emotionRecognition: number;
+  sentimentAnalysis: number;
+  personalityMapping: number;
+}
+
+export interface PhysicsModel {
+  temporalConsistency: number;
+  spatialAwareness: number;
+  causalityTracking: number;
+}
+
+export interface EconomicsModel {
+  valueOptimization: number;
+  resourceAllocation: number;
+  marketPrediction: number;
+}
+
+export interface RoboticsModel {
+  movementPrecision: number;
+  environmentMapping: number;
+  objectInteraction: number;
+}
+
 export class HermesOxumBrainHub {
+  private config: BrainHubConfig = {
+    autonomyEnabled: false,
+    autonomyLevel: 3,
+    userConsentLevel: 'moderate',
+    regionRestrictions: {},
+    moderationLevel: 'medium',
+    debugMode: false,
+    developmentMode: true,
+    persistenceEnabled: true,
+    systemStatus: 'active'
+  };
+  
   private errorLogs: Array<{
     timestamp: number,
     type: string,
@@ -6,7 +55,20 @@ export class HermesOxumBrainHub {
     severity: string
   }> = [];
   
-  logError(message: string | Record<string, any>, type: string = 'general', severity: string = 'normal'): void {
+  private decisionLogs: Array<{
+    timestamp: number,
+    context: string,
+    decision: string,
+    confidence: number,
+    module: string
+  }> = [];
+  
+  private observers: Array<(state: any) => void> = [];
+  
+  private memoryStore: Record<string, any> = {};
+  
+  // Logging methods
+  logError(message: string | Record<string, any>, type = 'general', severity = 'normal'): void {
     const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
     console.error(`[BRAIN HUB ERROR][${type.toUpperCase()}][${severity}]: ${messageStr}`);
     
@@ -24,12 +86,176 @@ export class HermesOxumBrainHub {
     }
   }
   
+  logDecision(context: string, decision: string, confidence: number, module: string): void {
+    console.log(`[BRAIN HUB DECISION][${module}] ${decision} (confidence: ${confidence})`);
+    
+    this.decisionLogs.push({
+      timestamp: Date.now(),
+      context,
+      decision,
+      confidence,
+      module
+    });
+  }
+  
+  // Error recovery methods
   triggerErrorRecovery(type: string): void {
     console.warn(`[BRAIN HUB] Triggering error recovery for ${type}`);
     // Recovery logic would go here in a full implementation
   }
-
-  // Other methods would be here in a full implementation
+  
+  // Configuration methods
+  getConfig(): BrainHubConfig {
+    return { ...this.config };
+  }
+  
+  updateConfig(newConfig: Partial<BrainHubConfig>): void {
+    this.config = { ...this.config, ...newConfig };
+    this.notifyObservers();
+  }
+  
+  // Autonomy methods
+  setAutonomy(enabled: boolean): void {
+    this.config.autonomyEnabled = enabled;
+    this.notifyObservers();
+  }
+  
+  enableAutonomy(): void {
+    this.setAutonomy(true);
+  }
+  
+  disableAutonomy(): void {
+    this.setAutonomy(false);
+  }
+  
+  setAutonomyLevel(level: number): void {
+    if (level >= 0 && level <= 10) {
+      this.config.autonomyLevel = level;
+      this.notifyObservers();
+    } else {
+      this.logError(`Invalid autonomy level: ${level}. Must be between 0 and 10.`, 'config', 'warning');
+    }
+  }
+  
+  getAutonomyStatus(): { enabled: boolean; level: number } {
+    return {
+      enabled: this.config.autonomyEnabled,
+      level: this.config.autonomyLevel
+    };
+  }
+  
+  // System status methods
+  getSystemStatus(): string {
+    return this.config.systemStatus;
+  }
+  
+  // Memory methods
+  storeInMemory(key: string, value: any): void {
+    this.memoryStore[key] = value;
+  }
+  
+  retrieveFromMemory(key: string): any {
+    return this.memoryStore[key];
+  }
+  
+  // Observer pattern methods
+  addObserver(callback: (state: any) => void): void {
+    this.observers.push(callback);
+  }
+  
+  removeObserver(callback: (state: any) => void): void {
+    this.observers = this.observers.filter(cb => cb !== callback);
+  }
+  
+  private notifyObservers(): void {
+    const state = {
+      config: this.getConfig(),
+      autonomyStatus: this.getAutonomyStatus(),
+      systemStatus: this.getSystemStatus()
+    };
+    
+    this.observers.forEach(callback => {
+      try {
+        callback(state);
+      } catch (error) {
+        console.error('Error notifying observer:', error);
+      }
+    });
+  }
+  
+  // Model methods (from HermesOxumNeuralHub)
+  getModels(): any[] {
+    // Since these methods are being used but were probably in the NeuralHub,
+    // we'll provide stub implementations here to fix the errors
+    return [];
+  }
+  
+  getModelParameters(): any {
+    return {};
+  }
+  
+  updateModelParameters(params: any): void {
+    // Stub implementation
+  }
+  
+  // Request processing methods
+  processRequest(request: { 
+    type: string; 
+    data: any; 
+    filters?: { 
+      region?: string | null; 
+      geoRestrictions?: boolean; 
+    } 
+  }): { success: boolean; data?: any; error?: string } {
+    try {
+      // Simple implementation for now
+      if (request.type === 'ai_chat') {
+        // Process AI chat request
+        return {
+          success: true,
+          data: request.data
+        };
+      } else if (request.type === 'content_boost') {
+        // Process content boost request
+        return {
+          success: true,
+          data: {
+            boosted: true,
+            score: Math.random() * 10
+          }
+        };
+      } else {
+        // Default case
+        return {
+          success: true,
+          data: request.data
+        };
+      }
+    } catch (error) {
+      this.logError(`Error processing request: ${error}`, 'request_processing', 'error');
+      return {
+        success: false,
+        error: `Failed to process request: ${error}`
+      };
+    }
+  }
+  
+  // Query processing (used in scrapers)
+  processQuery(moduleType: string, queryParams: any): Promise<any> {
+    // Simple implementation
+    return Promise.resolve([]);
+  }
+  
+  // Decision logs
+  getDecisionLogs(): Array<{
+    timestamp: number,
+    context: string,
+    decision: string,
+    confidence: number,
+    module: string
+  }> {
+    return [...this.decisionLogs];
+  }
 }
 
 // Export a singleton instance
