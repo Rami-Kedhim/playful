@@ -9,6 +9,7 @@ import {
   TrainingProgress 
 } from './types/neuralHub';
 import { initializeDefaultModels } from './models/neuralModels';
+import { initializeDefaultParameters, validateModelParameters } from './models/modelParameters';
 import { simulateMetricsUpdate, generateSimulatedResponse } from './utils/neuralHubUtils';
 import { TrainingManager } from './training/trainingManager';
 
@@ -33,15 +34,7 @@ class HermesOxumNeuralHub {
       lastUpdated: new Date()
     };
     
-    this.modelParameters = {
-      decayConstant: 0.2,
-      growthFactor: 1.5,
-      cyclePeriod: 24,
-      harmonicCount: 3,
-      bifurcationPoint: 0.6,
-      attractorStrength: 0.4
-    };
-    
+    this.modelParameters = initializeDefaultParameters();
     this.trainingManager = new TrainingManager();
     this.initializeModels();
   }
@@ -66,21 +59,13 @@ class HermesOxumNeuralHub {
   
   // Method to update model parameters
   updateModelParameters(params: ModelParameters): void {
-    this.modelParameters = { ...params };
+    this.modelParameters = validateModelParameters({ ...params });
     console.log('Model parameters updated:', this.modelParameters);
   }
   
   // Method to reset system
   resetSystem(): void {
-    this.modelParameters = {
-      decayConstant: 0.2,
-      growthFactor: 1.5,
-      cyclePeriod: 24,
-      harmonicCount: 3,
-      bifurcationPoint: 0.6,
-      attractorStrength: 0.4
-    };
-    
+    this.modelParameters = initializeDefaultParameters();
     console.log('System reset to default parameters');
   }
   
