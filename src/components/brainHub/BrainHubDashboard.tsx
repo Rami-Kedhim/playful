@@ -11,7 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/components/ui/use-toast";
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import AutonomyModulesPanel from './AutonomyModulesPanel';
+import SecurityModulesPanel from './SecurityModulesPanel';
 import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
+import securityEngine from '@/services/neural/BrainHubSecurityEngine';
 import {
   Brain,
   BarChart,
@@ -26,7 +28,8 @@ import {
   CheckCircle,
   XCircle,
   PlayCircle,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react';
 
 // Interface for module capabilities
@@ -149,6 +152,13 @@ const BrainHubDashboard: React.FC = () => {
     return new Date(timestamp).toLocaleString();
   };
   
+  // Initialize security monitoring if it's not already active
+  useEffect(() => {
+    if (securityEngine && !securityEngine.getMonitoringStatus()) {
+      securityEngine.startMonitoring();
+    }
+  }, []);
+  
   return (
     <div className="container py-8">
       <div className="flex justify-between items-center mb-8">
@@ -181,7 +191,7 @@ const BrainHubDashboard: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-6 mb-8">
+        <TabsList className="grid grid-cols-7 mb-8">
           <TabsTrigger value="status">
             <BarChart className="h-4 w-4 mr-2" />
             System Status
@@ -193,6 +203,10 @@ const BrainHubDashboard: React.FC = () => {
           <TabsTrigger value="autonomy">
             <Zap className="h-4 w-4 mr-2" />
             Autonomy
+          </TabsTrigger>
+          <TabsTrigger value="security">
+            <Shield className="h-4 w-4 mr-2" />
+            Security
           </TabsTrigger>
           <TabsTrigger value="ai-providers">
             <MessageSquare className="h-4 w-4 mr-2" />
@@ -363,6 +377,28 @@ const BrainHubDashboard: React.FC = () => {
                     <span className="text-sm">Active</span>
                   </div>
                 </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <Shield className="h-5 w-5 mr-2 text-primary" />
+                    <span>Security Engine</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                    <span className="text-sm">Active</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <Zap className="h-5 w-5 mr-2 text-primary" />
+                    <span>Autonomy Engine</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className={`h-2 w-2 rounded-full ${autonomyStatus.enabled ? 'bg-emerald-500' : 'bg-amber-500'} mr-2`}></div>
+                    <span className="text-sm">{autonomyStatus.enabled ? 'Active' : 'Paused'}</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -396,6 +432,10 @@ const BrainHubDashboard: React.FC = () => {
         
         <TabsContent value="autonomy" className="space-y-6">
           <AutonomyModulesPanel />
+        </TabsContent>
+        
+        <TabsContent value="security" className="space-y-6">
+          <SecurityModulesPanel />
         </TabsContent>
         
         <TabsContent value="ai-providers" className="space-y-6">
