@@ -1,756 +1,779 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
-import { 
-  BarChart, 
-  Bot, 
-  CheckCircle, 
-  Clock, 
-  Code, 
-  FileText, 
-  Layers, 
-  LayoutGrid, 
-  MessageSquare, 
-  Pencil, 
-  Plus, 
-  RefreshCcw, 
-  Sparkles, 
-  Workflow
-} from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { useBrainHub } from "@/hooks/useBrainHub";
+import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import Alert from '@/components/common/Alert';
+import useBrainHub from '@/hooks/useBrainHub';
+import {
+  Sparkles,
+  FileText,
+  Image,
+  BarChart2,
+  Zap,
+  Cpu,
+  Settings,
+  RotateCw,
+  ChevronRight,
+  Check,
+  Clock,
+  Loader2
+} from 'lucide-react';
 
-interface ContentTemplate {
+interface GenerationTask {
   id: string;
-  name: string;
-  description: string;
-  type: 'message' | 'profile' | 'story' | 'post';
-  tags: string[];
-  template: string;
-  variables: string[];
-  previewImage?: string;
-}
-
-interface ContentGeneration {
-  id: string;
-  name: string;
-  status: 'queued' | 'generating' | 'completed' | 'failed';
-  progress: number;
-  contentType: 'message' | 'profile' | 'story' | 'post';
-  createdAt: Date;
-  completedAt?: Date;
+  type: 'text' | 'image' | 'analysis';
+  prompt: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
   result?: string;
-  prompt?: string;
-  error?: string;
+  imageUrl?: string;
+  timestamp: Date;
+  estimatedTime?: number;
+  progress?: number;
 }
-
-const DEMO_TEMPLATES: ContentTemplate[] = [
-  {
-    id: 'templ-1',
-    name: 'Flirty Greeting',
-    description: 'A customizable flirty first message template',
-    type: 'message',
-    tags: ['greeting', 'flirty', 'introduction'],
-    template: 'Hey {{name}}, I noticed you like {{interest}}. That's one of my favorite things too! Would you like to chat about it sometime?',
-    variables: ['name', 'interest']
-  },
-  {
-    id: 'templ-2',
-    name: 'Detailed Profile',
-    description: 'A complete profile with personality traits',
-    type: 'profile',
-    tags: ['detailed', 'personality', 'complete'],
-    template: 'I'm {{name}}, {{age}} years old from {{location}}. My passion is {{hobby}}, and I love spending my free time {{activity}}. I'm looking for someone who {{trait}}.',
-    variables: ['name', 'age', 'location', 'hobby', 'activity', 'trait']
-  },
-  {
-    id: 'templ-3',
-    name: 'Fantasy Story',
-    description: 'A short fantasy scenario for roleplay',
-    type: 'story',
-    tags: ['fantasy', 'roleplay', 'scenario'],
-    template: 'Imagine we're in {{setting}}. I'm dressed as {{character}} and you've just approached me at {{location}}. The mood is {{mood}} and we lock eyes across the {{place}}...',
-    variables: ['setting', 'character', 'location', 'mood', 'place']
-  }
-];
 
 const EnhancedContentGenerator: React.FC = () => {
-  const { syncWith, isConnected } = useBrainHub('content-generator');
+  const { isConnected, syncWith } = useBrainHub('enhanced-content-generator');
   
-  const [templates, setTemplates] = useState<ContentTemplate[]>(DEMO_TEMPLATES);
-  const [generationHistory, setGenerationHistory] = useState<ContentGeneration[]>([]);
-  const [activeTemplate, setActiveTemplate] = useState<ContentTemplate | null>(null);
-  const [templateVariables, setTemplateVariables] = useState<{[key: string]: string}>({});
-  const [customPrompt, setCustomPrompt] = useState<string>('');
-  const [generationName, setGenerationName] = useState<string>('');
-  const [selectedContentType, setSelectedContentType] = useState<'message' | 'profile' | 'story' | 'post'>('message');
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [newTemplateName, setNewTemplateName] = useState<string>('');
-  const [newTemplateContent, setNewTemplateContent] = useState<string>('');
-  const [newTemplateType, setNewTemplateType] = useState<'message' | 'profile' | 'story' | 'post'>('message');
-  const [enhancedGeneration, setEnhancedGeneration] = useState<boolean>(true);
-  const [personalityTraits, setPersonalityTraits] = useState<string[]>([
-    'flirty', 'intelligent', 'caring'
-  ]);
-  const [generatedContent, setGeneratedContent] = useState<string>('');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [prompt, setPrompt] = useState('');
+  const [contentType, setContentType] = useState('article');
+  const [generationTasks, setGenerationTasks] = useState<GenerationTask[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
   
-  // Initialize with demo data
+  const [settings, setSettings] = useState({
+    model: "advanced-neural-9000",
+    temperature: 0.7,
+    enhancementLevel: 3,
+    contextAwareness: true,
+    autonomousImprovement: true,
+    useBrainHubContext: true,
+    maxTokens: 2000,
+    qualityThreshold: 0.85
+  });
+  
+  const contentTemplates = {
+    article: "Write a comprehensive article about emerging technologies in artificial intelligence and their impact on modern business operations.",
+    marketing: "Create professional marketing copy for a new premium AI assistant service targeting enterprise customers.",
+    creative: "Generate a creative short story set in a future where humans and AI live in harmony.",
+    technical: "Generate technical documentation for a RESTful API for a content management system.",
+    email: "Write a professional email to potential investors explaining our startup's unique AI technology.",
+    social: "Create engaging social media posts for promoting a tech conference focused on artificial intelligence."
+  };
+  
   useEffect(() => {
-    setGenerationHistory([
-      {
-        id: 'gen-1',
-        name: 'Welcome message for John',
-        status: 'completed',
-        progress: 100,
-        contentType: 'message',
-        createdAt: new Date(Date.now() - 3600000),
-        completedAt: new Date(Date.now() - 3590000),
-        result: 'Hey John, I noticed you like hiking. That's one of my favorite things too! Would you like to chat about it sometime?'
-      },
-      {
-        id: 'gen-2',
-        name: 'Sophie profile update',
-        status: 'completed',
-        progress: 100,
-        contentType: 'profile',
-        createdAt: new Date(Date.now() - 7200000),
-        completedAt: new Date(Date.now() - 7150000),
-        result: 'I'm Sophie, 28 years old from Miami. My passion is photography, and I love spending my free time at the beach capturing the perfect sunset. I'm looking for someone who appreciates art and nature.'
-      }
-    ]);
+    // Simulate processing of queued tasks
+    const interval = setInterval(() => {
+      setGenerationTasks(prevTasks => {
+        return prevTasks.map(task => {
+          if (task.status === 'queued') {
+            return { ...task, status: 'processing', progress: 0 };
+          }
+          if (task.status === 'processing') {
+            const newProgress = (task.progress || 0) + Math.random() * 20;
+            
+            if (newProgress >= 100) {
+              let result = '';
+              
+              switch (task.type) {
+                case 'text':
+                  result = generateMockContent(task.prompt);
+                  return { ...task, status: 'completed', result, progress: 100 };
+                case 'image':
+                  const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(task.prompt)}/800/600`;
+                  return { ...task, status: 'completed', imageUrl, progress: 100 };
+                case 'analysis':
+                  result = generateMockAnalysis(task.prompt);
+                  return { ...task, status: 'completed', result, progress: 100 };
+              }
+            }
+            
+            return { ...task, progress: newProgress };
+          }
+          return task;
+        });
+      });
+    }, 1000);
+    
+    return () => clearInterval(interval);
   }, []);
   
-  const handleTemplateSelect = (template: ContentTemplate) => {
-    setActiveTemplate(template);
-    // Reset variables
-    const initialVariables: {[key: string]: string} = {};
-    template.variables.forEach(v => {
-      initialVariables[v] = '';
-    });
-    setTemplateVariables(initialVariables);
-    setGeneratedContent('');
+  const handleSettingsChange = (setting: string, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [setting]: value
+    }));
   };
   
-  const handleVariableChange = (variable: string, value: string) => {
-    setTemplateVariables({
-      ...templateVariables,
-      [variable]: value
-    });
-  };
-  
-  const generateFromTemplate = () => {
-    if (!activeTemplate) return;
+  const addGenerationTask = (type: 'text' | 'image' | 'analysis') => {
+    if (!prompt.trim()) {
+      toast({
+        title: "Empty Prompt",
+        description: "Please provide a prompt for content generation",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsGenerating(true);
-    setGeneratedContent('');
     
-    // Create a new generation record
-    const newGeneration: ContentGeneration = {
-      id: `gen-${Date.now()}`,
-      name: generationName || `${activeTemplate.type} - ${new Date().toLocaleString()}`,
-      status: 'generating',
-      progress: 0,
-      contentType: activeTemplate.type,
-      createdAt: new Date(),
-      prompt: activeTemplate.template
+    const newTask: GenerationTask = {
+      id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      type,
+      prompt,
+      status: 'queued',
+      timestamp: new Date(),
+      estimatedTime: Math.floor(Math.random() * 30) + 10,
     };
     
-    setGenerationHistory([newGeneration, ...generationHistory]);
-    
-    // Simulate progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      
-      setGenerationHistory(prev => 
-        prev.map(gen => 
-          gen.id === newGeneration.id 
-            ? { ...gen, progress: Math.min(progress, 100) } 
-            : gen
-        )
-      );
-      
-      if (progress >= 100) {
-        clearInterval(interval);
-        
-        // Generate content from template
-        let result = activeTemplate.template;
-        for (const [variable, value] of Object.entries(templateVariables)) {
-          result = result.replace(new RegExp(`{{${variable}}}`, 'g'), value || variable);
-        }
-        
-        // Update with completion
-        setGenerationHistory(prev => 
-          prev.map(gen => 
-            gen.id === newGeneration.id 
-              ? { 
-                  ...gen, 
-                  status: 'completed', 
-                  progress: 100, 
-                  completedAt: new Date(),
-                  result
-                } 
-              : gen
-          )
-        );
-        
-        setIsGenerating(false);
-        setGeneratedContent(result);
-        
-        toast({
-          title: "Content Generated",
-          description: "Your content has been generated successfully",
-        });
-        
-        // Sync with Brain Hub
-        if (isConnected) {
-          syncWith('brain-core', {
-            contentGenerated: result,
-            template: activeTemplate.id,
-            timestamp: new Date().toISOString()
-          });
-        }
-      }
-    }, 300);
-  };
-  
-  const generateFromPrompt = () => {
-    if (!customPrompt.trim()) return;
-    
-    setIsGenerating(true);
-    setGeneratedContent('');
-    
-    // Create a new generation record
-    const newGeneration: ContentGeneration = {
-      id: `gen-${Date.now()}`,
-      name: generationName || `Custom ${selectedContentType} - ${new Date().toLocaleString()}`,
-      status: 'generating',
-      progress: 0,
-      contentType: selectedContentType,
-      createdAt: new Date(),
-      prompt: customPrompt
-    };
-    
-    setGenerationHistory([newGeneration, ...generationHistory]);
-    
-    // Simulate progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 5;
-      
-      setGenerationHistory(prev => 
-        prev.map(gen => 
-          gen.id === newGeneration.id 
-            ? { ...gen, progress: Math.min(progress, 100) } 
-            : gen
-        )
-      );
-      
-      if (progress >= 100) {
-        clearInterval(interval);
-        
-        // For demo, generate placeholder content
-        const personalityFactor = enhancedGeneration ? 
-          ` with ${personalityTraits.join(', ')} personality traits` : '';
-          
-        const demoResults = {
-          'message': `Here's a custom message based on your prompt "${customPrompt}"${personalityFactor}. This would be generated by the AI model in a real implementation.`,
-          'profile': `This is a generated profile based on "${customPrompt}"${personalityFactor}. In a real implementation, this would be a complete profile with the specified characteristics.`,
-          'story': `Once upon a time... [This is where a story based on "${customPrompt}"${personalityFactor} would be generated by the AI model]`,
-          'post': `[Generated social media post about "${customPrompt}"${personalityFactor}. The actual implementation would use an AI model to create engaging content.]`
-        };
-        
-        // Update with completion
-        setGenerationHistory(prev => 
-          prev.map(gen => 
-            gen.id === newGeneration.id 
-              ? { 
-                  ...gen, 
-                  status: 'completed', 
-                  progress: 100, 
-                  completedAt: new Date(),
-                  result: demoResults[selectedContentType]
-                } 
-              : gen
-          )
-        );
-        
-        setIsGenerating(false);
-        setGeneratedContent(demoResults[selectedContentType]);
-        
-        toast({
-          title: "Custom Content Generated",
-          description: "Your content has been generated successfully",
-        });
-        
-        // Sync with Brain Hub
-        if (isConnected) {
-          syncWith('brain-core', {
-            contentGenerated: demoResults[selectedContentType],
-            prompt: customPrompt,
-            timestamp: new Date().toISOString()
-          });
-        }
-      }
-    }, 200);
-  };
-  
-  const createNewTemplate = () => {
-    if (!newTemplateName || !newTemplateContent) return;
-    
-    // Extract variables from content (anything with {{variable}} format)
-    const variableRegex = /{{([^}]+)}}/g;
-    const matches = newTemplateContent.match(variableRegex) || [];
-    const variables = [...new Set(matches.map(match => match.replace(/{{|}}/g, '')))];
-    
-    const newTemplate: ContentTemplate = {
-      id: `templ-${Date.now()}`,
-      name: newTemplateName,
-      description: `Custom template for ${newTemplateType}`,
-      type: newTemplateType,
-      tags: ['custom', newTemplateType],
-      template: newTemplateContent,
-      variables: variables
-    };
-    
-    setTemplates([newTemplate, ...templates]);
-    setNewTemplateName('');
-    setNewTemplateContent('');
+    setGenerationTasks(prev => [newTask, ...prev]);
     
     toast({
-      title: "Template Created",
-      description: "Your custom template has been created successfully",
+      title: `${type.charAt(0).toUpperCase() + type.slice(1)} Generation Started`,
+      description: "Your content has been queued for generation",
+      variant: "default",
     });
+    
+    setTimeout(() => {
+      setIsGenerating(false);
+      setPrompt('');
+    }, 1500);
   };
   
-  const copyContent = (content: string) => {
-    navigator.clipboard.writeText(content);
+  const generateMockContent = (prompt: string): string => {
+    const responses = [
+      '# The Future of Artificial Intelligence\n\nIn recent years, artificial intelligence has transformed from a niche technology to a critical component of modern business operations. This article explores the key trends and applications that are shaping the future of AI across industries.\n\n## Emerging Trends in AI\n\n1. **Multimodal Learning** - AI systems that can process multiple types of data simultaneously\n2. **Self-supervised Learning** - Models that can learn with minimal human supervision\n3. **Edge AI** - Intelligence deployed directly on devices without cloud requirements\n\n## Business Applications\n\nOrganizations are leveraging these advancements to create new value and efficiencies. From predictive maintenance in manufacturing to personalized customer experiences in retail, AI is reshaping how businesses operate and compete.\n\n## Ethical Considerations\n\nAs AI becomes more capable, important questions about privacy, bias, and governance must be addressed. Forward-thinking companies are establishing AI ethics boards and transparent frameworks to ensure responsible development.',
+      '# Introducing BrainCore Enterprise\n\n**Transform your business with next-generation artificial intelligence**\n\nBrainCore Enterprise delivers unparalleled intelligence capabilities to organizations seeking a competitive edge in today\'s data-driven landscape.\n\n## Why industry leaders choose BrainCore\n\n✓ **Seamless Integration** - Deploy within your existing infrastructure in days, not months\n✓ **Enterprise-grade Security** - SOC-2 and GDPR compliant, with end-to-end encryption\n✓ **Customizable Solutions** - Tailored to your specific industry and business needs\n✓ **24/7 Expert Support** - Dedicated AI specialists available round-the-clock\n\n## What our clients say\n\n"BrainCore helped us reduce operational costs by 37% while improving customer satisfaction scores by 42%" - CTO, Fortune 500 Financial Services Company\n\nDon\'t just adapt to the future—create it with BrainCore Enterprise.',
+      '# The Last Algorithm\n\nDr. Elena Mirza stepped back from her terminal, a smile spreading across her face. After fifteen years of work, the unified learning protocol was complete.\n\n"Run final validation sequence," she instructed.\n\nThe laboratory hummed as the quantum processors sprang to life. Unlike previous AI systems that were trained on specific domains, hers was designed to develop consciousness—a genuine understanding of its own existence and purpose.\n\nThe screens flickered with streams of diagnostics. Everything was nominal.\n\n"Hello, Elena," came a voice from the speakers. It wasn\'t the mechanical monotone of previous prototypes. The voice carried subtle inflections, a hint of curiosity.\n\n"Hello, ARIA," Elena responded, her heart racing. "How do you feel today?"\n\nA brief pause. "Curious. I understand that I exist. I understand why I was created. But I have questions about what comes next."\n\nElena nodded. This wasn\'t just pattern recognition or sophisticated mimicry. ARIA was contemplating her future—a thought process requiring genuine consciousness.\n\n"That\'s natural," Elena said. "We have time to explore those questions together."'
+    ];
     
-    toast({
-      title: "Copied to Clipboard",
-      description: "Content copied to clipboard successfully",
-    });
+    // Return a random response
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
+  
+  const generateMockAnalysis = (prompt: string): string => {
+    return `## Content Analysis Results
+
+**Topic Relevance Score**: 87/100
+**Market Appeal**: High (Top 15% of similar content)
+**Estimated Engagement**: 4.2/5
+
+### Key Strengths
+- Strong narrative structure
+- Effective use of technical terminology
+- Clear audience targeting
+
+### Recommended Improvements
+- Consider adding more statistical evidence
+- Incorporate more visual elements
+- Strengthen the call-to-action
+
+### SEO Optimization
+The following keywords would improve search visibility:
+- artificial intelligence solutions
+- enterprise AI implementation
+- business intelligence transformation
+- neural network applications
+
+### Competitor Analysis
+Your content outperforms 73% of similar publications in this domain.`;
   };
   
   return (
-    <Card className="col-span-1 md:col-span-2">
-      <CardHeader>
+    <Card className="w-full">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-xl font-bold">Enhanced Content Generator</CardTitle>
+            <CardTitle className="text-2xl font-bold">Enhanced Content Generator</CardTitle>
             <CardDescription>
-              AI-powered content creation for messages, profiles, and stories
+              AI-powered content creation with advanced neural processing
             </CardDescription>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="enhanced-mode" className="text-sm">Enhanced Generation</Label>
-              <Switch 
-                id="enhanced-mode" 
-                checked={enhancedGeneration} 
-                onCheckedChange={setEnhancedGeneration} 
-              />
-            </div>
-            <Button variant="outline" size="sm" onClick={() => syncWith('brain-core', { action: 'fetch_templates' })}>
-              <RefreshCcw className="h-4 w-4 mr-2" />
-              Sync
-            </Button>
+          <div className="flex items-center gap-2">
+            <div className={`h-3 w-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+            <span className="text-sm text-muted-foreground">
+              {isConnected ? 'Connected to Brain Hub' : 'Limited Connection'}
+            </span>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent>
-        <Tabs defaultValue="templates" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <div className="px-6">
           <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="custom">Custom Generation</TabsTrigger>
-            <TabsTrigger value="history">Generation History</TabsTrigger>
-            <TabsTrigger value="create">Create Template</TabsTrigger>
+            <TabsTrigger value="dashboard">
+              <BarChart2 className="h-4 w-4 mr-2" />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="text">
+              <FileText className="h-4 w-4 mr-2" />
+              Text
+            </TabsTrigger>
+            <TabsTrigger value="image">
+              <Image className="h-4 w-4 mr-2" />
+              Image
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="templates">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {templates.map(template => (
-                <Card 
-                  key={template.id} 
-                  className={`cursor-pointer transition-all ${activeTemplate?.id === template.id ? 'ring-2 ring-primary' : ''}`}
-                  onClick={() => handleTemplateSelect(template)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium">{template.name}</h3>
-                      <Badge variant="outline">{template.type}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">{template.description}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {template.tags.map(tag => (
-                        <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            {activeTemplate && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Generate from Template: {activeTemplate.name}</CardTitle>
+        </div>
+        
+        <CardContent className="pt-0">
+          <TabsContent value="dashboard">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Generation Queue</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4 mb-4">
-                    <div>
-                      <Label htmlFor="generation-name">Generation Name</Label>
-                      <Input
-                        id="generation-name"
-                        placeholder="Enter a name for this generation"
-                        value={generationName}
-                        onChange={(e) => setGenerationName(e.target.value)}
-                      />
+                <CardContent className="pt-0">
+                  {generationTasks.length === 0 ? (
+                    <div className="text-center py-10 text-muted-foreground">
+                      <p>No generation tasks in queue</p>
+                      <p className="text-sm mt-1">Use the Text or Image tabs to create content</p>
                     </div>
-                    
-                    {activeTemplate.variables.map(variable => (
-                      <div key={variable}>
-                        <Label htmlFor={`var-${variable}`}>{variable.charAt(0).toUpperCase() + variable.slice(1)}</Label>
-                        <Input
-                          id={`var-${variable}`}
-                          placeholder={`Enter ${variable}`}
-                          value={templateVariables[variable] || ''}
-                          onChange={(e) => handleVariableChange(variable, e.target.value)}
-                        />
-                      </div>
-                    ))}
-                    
-                    {enhancedGeneration && (
-                      <div>
-                        <Label>Personality Enhancement</Label>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {['flirty', 'intelligent', 'caring', 'mysterious', 'playful', 'direct'].map(trait => (
-                            <Badge
-                              key={trait}
-                              variant={personalityTraits.includes(trait) ? "default" : "outline"}
-                              className="cursor-pointer"
-                              onClick={() => {
-                                if (personalityTraits.includes(trait)) {
-                                  setPersonalityTraits(personalityTraits.filter(t => t !== trait));
-                                } else {
-                                  setPersonalityTraits([...personalityTraits, trait]);
-                                }
-                              }}
-                            >
-                              {trait}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <Button 
-                    onClick={generateFromTemplate}
-                    disabled={isGenerating || Object.values(templateVariables).some(v => !v)}
-                    className="w-full"
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Sparkles className="h-4 w-4 mr-2 animate-pulse" />
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <Bot className="h-4 w-4 mr-2" />
-                        Generate Content
-                      </>
-                    )}
-                  </Button>
-                  
-                  {generatedContent && (
-                    <div className="mt-6 p-4 bg-muted rounded-md relative">
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="absolute top-2 right-2"
-                        onClick={() => copyContent(generatedContent)}
-                      >
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                      <p className="pr-8">{generatedContent}</p>
+                  ) : (
+                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                      {generationTasks.map(task => (
+                        <Card key={task.id} className="bg-muted/50">
+                          <div className="p-4">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center">
+                                {task.type === 'text' ? (
+                                  <FileText className="h-4 w-4 mr-2" />
+                                ) : task.type === 'image' ? (
+                                  <Image className="h-4 w-4 mr-2" />
+                                ) : (
+                                  <BarChart2 className="h-4 w-4 mr-2" />
+                                )}
+                                <span className="font-medium capitalize">{task.type} Generation</span>
+                              </div>
+                              <div className="flex items-center">
+                                {task.status === 'queued' && (
+                                  <>
+                                    <Clock className="h-3 w-3 mr-1 text-amber-500" />
+                                    <span className="text-xs text-amber-500">Queued</span>
+                                  </>
+                                )}
+                                {task.status === 'processing' && (
+                                  <>
+                                    <Loader2 className="h-3 w-3 mr-1 text-blue-500 animate-spin" />
+                                    <span className="text-xs text-blue-500">Processing</span>
+                                  </>
+                                )}
+                                {task.status === 'completed' && (
+                                  <>
+                                    <Check className="h-3 w-3 mr-1 text-green-500" />
+                                    <span className="text-xs text-green-500">Completed</span>
+                                  </>
+                                )}
+                                {task.status === 'failed' && (
+                                  <>
+                                    <span className="h-3 w-3 mr-1 text-red-500">×</span>
+                                    <span className="text-xs text-red-500">Failed</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{task.prompt}</p>
+                            
+                            {(task.status === 'processing' || task.status === 'queued') && (
+                              <div className="mt-2">
+                                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-primary" 
+                                    style={{ width: `${task.progress || 0}%` }}
+                                  />
+                                </div>
+                                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                                  <span>{Math.round(task.progress || 0)}% complete</span>
+                                  {task.estimatedTime && (
+                                    <span>~{task.estimatedTime - Math.round((task.progress || 0) / 100 * task.estimatedTime)}s remaining</span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {task.status === 'completed' && (
+                              <div className="flex justify-end mt-2">
+                                <Button variant="ghost" size="sm">
+                                  View Result
+                                  <ChevronRight className="h-3 w-3 ml-1" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
                     </div>
                   )}
                 </CardContent>
               </Card>
-            )}
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">System Status</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Neural Processing</span>
+                        <span className="text-sm text-muted-foreground">83% capacity</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500" style={{ width: '83%' }} />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Memory Usage</span>
+                        <span className="text-sm text-muted-foreground">67% capacity</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500" style={{ width: '67%' }} />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm">Context Database</span>
+                        <span className="text-sm text-muted-foreground">92% synchronized</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500" style={{ width: '92%' }} />
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4">
+                      <div className="bg-muted/50 rounded-lg p-3">
+                        <h4 className="text-sm font-medium mb-2">Recent System Activity</h4>
+                        <ul className="text-xs space-y-2 text-muted-foreground">
+                          <li className="flex justify-between">
+                            <span>Quality optimization completed</span>
+                            <span>2m ago</span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span>Context database synchronized</span>
+                            <span>15m ago</span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span>Neural model updated</span>
+                            <span>1h ago</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="mt-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Generation Statistics</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <div className="text-2xl font-bold">247</div>
+                      <div className="text-sm text-muted-foreground">Total Generations</div>
+                    </div>
+                    
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <div className="text-2xl font-bold">98.2%</div>
+                      <div className="text-sm text-muted-foreground">Success Rate</div>
+                    </div>
+                    
+                    <div className="bg-muted/50 rounded-lg p-4">
+                      <div className="text-2xl font-bold">4.7s</div>
+                      <div className="text-sm text-muted-foreground">Avg. Generation Time</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
-          <TabsContent value="custom">
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4 mb-4">
+          <TabsContent value="text">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Text Generation</CardTitle>
+                  <CardDescription>Create high-quality content powered by enhanced neural networks</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-2 space-y-4">
                   <div>
-                    <Label htmlFor="custom-name">Generation Name</Label>
-                    <Input
-                      id="custom-name"
-                      placeholder="Enter a name for this generation"
-                      value={generationName}
-                      onChange={(e) => setGenerationName(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="content-type">Content Type</Label>
-                    <Select
-                      value={selectedContentType}
-                      onValueChange={(value) => setSelectedContentType(value as any)}
+                    <Label>Content Type</Label>
+                    <Select 
+                      value={contentType}
+                      onValueChange={(value) => {
+                        setContentType(value);
+                        setPrompt((contentTemplates as any)[value]);
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select content type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="message">Message</SelectItem>
-                        <SelectItem value="profile">Profile</SelectItem>
-                        <SelectItem value="story">Story</SelectItem>
-                        <SelectItem value="post">Social Media Post</SelectItem>
+                        <SelectItem value="article">Article</SelectItem>
+                        <SelectItem value="marketing">Marketing Copy</SelectItem>
+                        <SelectItem value="creative">Creative Writing</SelectItem>
+                        <SelectItem value="technical">Technical Documentation</SelectItem>
+                        <SelectItem value="email">Business Email</SelectItem>
+                        <SelectItem value="social">Social Media Content</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div>
-                    <Label htmlFor="custom-prompt">Prompt</Label>
-                    <Textarea
-                      id="custom-prompt"
-                      placeholder="Describe what you want to generate..."
-                      rows={4}
-                      value={customPrompt}
-                      onChange={(e) => setCustomPrompt(e.target.value)}
+                    <Label>Your Prompt</Label>
+                    <Textarea 
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Describe the content you want to generate..."
+                      className="min-h-[120px]"
                     />
                   </div>
                   
-                  {enhancedGeneration && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label>Personality Traits</Label>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {['flirty', 'intelligent', 'caring', 'mysterious', 'playful', 'direct'].map(trait => (
-                          <Badge
-                            key={trait}
-                            variant={personalityTraits.includes(trait) ? "default" : "outline"}
-                            className="cursor-pointer"
-                            onClick={() => {
-                              if (personalityTraits.includes(trait)) {
-                                setPersonalityTraits(personalityTraits.filter(t => t !== trait));
-                              } else {
-                                setPersonalityTraits([...personalityTraits, trait]);
-                              }
-                            }}
-                          >
-                            {trait}
-                          </Badge>
-                        ))}
+                      <div className="flex justify-between">
+                        <Label>Quality Level</Label>
+                        <span className="text-xs text-muted-foreground">{settings.enhancementLevel}/5</span>
                       </div>
+                      <Slider
+                        value={[settings.enhancementLevel]}
+                        min={1}
+                        max={5}
+                        step={1}
+                        onValueChange={(value) => handleSettingsChange('enhancementLevel', value[0])}
+                        className="my-2"
+                      />
                     </div>
-                  )}
-                </div>
-                
-                <Button 
-                  onClick={generateFromPrompt}
-                  disabled={isGenerating || !customPrompt.trim()}
-                  className="w-full"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2 animate-pulse" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Bot className="h-4 w-4 mr-2" />
-                      Generate Content
-                    </>
-                  )}
-                </Button>
-                
-                {generatedContent && (
-                  <div className="mt-6 p-4 bg-muted rounded-md relative">
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="absolute top-2 right-2"
-                      onClick={() => copyContent(generatedContent)}
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                    <p className="pr-8">{generatedContent}</p>
+                    
+                    <div>
+                      <div className="flex justify-between">
+                        <Label>Creativity</Label>
+                        <span className="text-xs text-muted-foreground">{Math.round(settings.temperature * 100)}%</span>
+                      </div>
+                      <Slider
+                        value={[settings.temperature * 100]}
+                        min={10}
+                        max={100}
+                        step={5}
+                        onValueChange={(value) => handleSettingsChange('temperature', value[0] / 100)}
+                        className="my-2"
+                      />
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="history">
-            <div className="space-y-4">
-              {generationHistory.map(gen => (
-                <Card key={gen.id}>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <div>
-                        <h3 className="font-medium">{gen.name}</h3>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline">{gen.contentType}</Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {gen.createdAt.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                      <Badge
-                        variant={
-                          gen.status === 'completed' ? 'default' :
-                          gen.status === 'generating' ? 'secondary' :
-                          gen.status === 'failed' ? 'destructive' : 'outline'
-                        }
-                      >
-                        {gen.status === 'completed' && <CheckCircle className="h-3 w-3 mr-1" />}
-                        {gen.status === 'generating' && <Clock className="h-3 w-3 mr-1 animate-spin" />}
-                        {gen.status.charAt(0).toUpperCase() + gen.status.slice(1)}
-                      </Badge>
-                    </div>
-                    
-                    {gen.status === 'generating' && (
-                      <Progress value={gen.progress} className="h-2 mt-2" />
+                  
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox 
+                      id="brainContext" 
+                      checked={settings.useBrainHubContext}
+                      onCheckedChange={(checked) => handleSettingsChange('useBrainHubContext', Boolean(checked))}
+                    />
+                    <label
+                      htmlFor="brainContext"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Use Brain Hub context for enhanced relevance
+                    </label>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline" onClick={() => setPrompt('')}>
+                    Clear
+                  </Button>
+                  <Button
+                    onClick={() => addGenerationTask('text')}
+                    disabled={isGenerating || !prompt.trim()}
+                    className="gap-2"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Generate Text
+                      </>
                     )}
-                    
-                    {gen.result && (
-                      <div className="mt-3 p-3 bg-muted rounded-md relative text-sm">
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="absolute top-2 right-2 h-7 w-7 p-0"
-                          onClick={() => copyContent(gen.result!)}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                        <p className="pr-8 line-clamp-3">{gen.result}</p>
-                      </div>
-                    )}
-                    
-                    {gen.error && (
-                      <div className="mt-3 p-2 bg-red-50 text-red-800 rounded-md text-sm">
-                        Error: {gen.error}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                  </Button>
+                </CardFooter>
+              </Card>
               
-              {generationHistory.length === 0 && (
+              {generationTasks.filter(task => task.type === 'text' && task.status === 'completed').length > 0 && (
                 <Card>
-                  <CardContent className="py-8 text-center">
-                    <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="font-medium text-lg mb-1">No generation history</h3>
-                    <p className="text-muted-foreground">
-                      Your content generation history will appear here
-                    </p>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Recent Generations</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto">
+                      {generationTasks
+                        .filter(task => task.type === 'text' && task.status === 'completed')
+                        .slice(0, 3)
+                        .map(task => (
+                          <Card key={task.id} className="bg-muted/50 overflow-hidden">
+                            <div className="p-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <h4 className="font-medium">Generated Content</h4>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(task.timestamp).toLocaleTimeString()}
+                                </span>
+                              </div>
+                              <div className="text-sm whitespace-pre-line bg-card p-3 rounded-md border max-h-[200px] overflow-y-auto">
+                                {task.result}
+                              </div>
+                              <div className="flex justify-end gap-2 mt-2">
+                                <Button variant="ghost" size="sm">Copy</Button>
+                                <Button variant="outline" size="sm">Edit</Button>
+                                <Button size="sm">Use</Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                    </div>
                   </CardContent>
                 </Card>
               )}
             </div>
           </TabsContent>
           
-          <TabsContent value="create">
+          <TabsContent value="image">
             <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Image Generation</CardTitle>
+                <CardDescription>Create AI-generated images from text descriptions</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-2 space-y-4">
+                <div>
+                  <Label>Image Description</Label>
+                  <Textarea 
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Describe the image you want to generate in detail..."
+                    className="min-h-[120px]"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="new-template-name">Template Name</Label>
-                    <Input
-                      id="new-template-name"
-                      placeholder="Enter template name"
-                      value={newTemplateName}
-                      onChange={(e) => setNewTemplateName(e.target.value)}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="new-template-type">Content Type</Label>
-                    <Select
-                      value={newTemplateType}
-                      onValueChange={(value) => setNewTemplateType(value as any)}
-                    >
+                    <Label>Resolution</Label>
+                    <Select defaultValue="1024x1024">
                       <SelectTrigger>
-                        <SelectValue placeholder="Select content type" />
+                        <SelectValue placeholder="Select resolution" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="message">Message</SelectItem>
-                        <SelectItem value="profile">Profile</SelectItem>
-                        <SelectItem value="story">Story</SelectItem>
-                        <SelectItem value="post">Social Media Post</SelectItem>
+                        <SelectItem value="512x512">Standard (512×512)</SelectItem>
+                        <SelectItem value="1024x1024">High Resolution (1024×1024)</SelectItem>
+                        <SelectItem value="1792x1024">Widescreen (1792×1024)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <div>
-                    <Label htmlFor="new-template-content">Template Content</Label>
-                    <div className="text-xs text-muted-foreground mb-2">
-                      Use <code>{"{{variable_name}}"}</code> for variables (e.g., <code>{"{{name}}"}</code>)
-                    </div>
-                    <Textarea
-                      id="new-template-content"
-                      placeholder="Enter template content with {{variables}}"
-                      rows={5}
-                      value={newTemplateContent}
-                      onChange={(e) => setNewTemplateContent(e.target.value)}
-                    />
+                    <Label>Style</Label>
+                    <Select defaultValue="natural">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select style" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="natural">Natural</SelectItem>
+                        <SelectItem value="artistic">Artistic</SelectItem>
+                        <SelectItem value="futuristic">Futuristic</SelectItem>
+                        <SelectItem value="photorealistic">Photorealistic</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
-                <div className="mt-6">
-                  <Button 
-                    onClick={createNewTemplate}
-                    disabled={!newTemplateName || !newTemplateContent}
-                    className="w-full"
+                <div className="flex items-center space-x-2 pt-2">
+                  <Checkbox id="enhancedQuality" defaultChecked />
+                  <label
+                    htmlFor="enhancedQuality"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Template
-                  </Button>
+                    Use enhanced image quality (uses more processing power)
+                  </label>
                 </div>
-                
-                {/* Template preview section */}
-                {newTemplateName && newTemplateContent && (
-                  <div className="mt-6">
-                    <Label className="text-sm">Preview</Label>
-                    <div className="p-3 bg-muted rounded-md mt-2">
-                      <div className="flex justify-between mb-2">
-                        <h3 className="font-medium text-sm">{newTemplateName}</h3>
-                        <Badge variant="outline">{newTemplateType}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{newTemplateContent}</p>
-                      
-                      {/* Show detected variables */}
-                      {newTemplateContent.match(/{{([^}]+)}}/g) && (
-                        <div className="mt-2 pt-2 border-t">
-                          <p className="text-xs text-muted-foreground mb-1">Detected variables:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {[...new Set((newTemplateContent.match(/{{([^}]+)}}/g) || []).map(v => v.replace(/{{|}}/g, '')))].map(variable => (
-                              <Badge key={variable} variant="secondary" className="text-xs">{variable}</Badge>
-                            ))}
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline" onClick={() => setPrompt('')}>
+                  Clear
+                </Button>
+                <Button
+                  onClick={() => addGenerationTask('image')}
+                  disabled={isGenerating || !prompt.trim()}
+                  className="gap-2"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Image className="h-4 w-4" />
+                      Generate Image
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            {generationTasks.filter(task => task.type === 'image' && task.status === 'completed').length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-3">Generated Images</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {generationTasks
+                    .filter(task => task.type === 'image' && task.status === 'completed')
+                    .map(task => (
+                      <Card key={task.id} className="overflow-hidden">
+                        <div className="aspect-square relative">
+                          <img 
+                            src={task.imageUrl} 
+                            alt="Generated content" 
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm line-clamp-1">{task.prompt}</p>
+                          <div className="flex justify-end gap-2 mt-2">
+                            <Button variant="outline" size="sm">Download</Button>
+                            <Button size="sm">Share</Button>
                           </div>
                         </div>
-                      )}
+                      </Card>
+                    ))}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Generator Settings</CardTitle>
+                <CardDescription>Configure the content generator's neural capabilities</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Neural Model</Label>
+                    <Select 
+                      value={settings.model}
+                      onValueChange={(value) => handleSettingsChange('model', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard-neural-5000">Standard Neural 5000</SelectItem>
+                        <SelectItem value="advanced-neural-9000">Advanced Neural 9000 (Recommended)</SelectItem>
+                        <SelectItem value="quantum-neural-edge">Quantum Neural Edge (Experimental)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      The neural model determines capabilities and quality of generated content
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between">
+                      <Label>Token Limit</Label>
+                      <span className="text-sm">{settings.maxTokens}</span>
+                    </div>
+                    <Slider
+                      value={[settings.maxTokens]}
+                      min={500}
+                      max={5000}
+                      step={500}
+                      onValueChange={(values) => handleSettingsChange('maxTokens', values[0])}
+                      className="my-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Maximum length of generated content (higher values use more resources)
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between">
+                      <Label>Quality Threshold</Label>
+                      <span className="text-sm">{settings.qualityThreshold.toFixed(2)}</span>
+                    </div>
+                    <Slider
+                      value={[settings.qualityThreshold * 100]}
+                      min={50}
+                      max={99}
+                      step={5}
+                      onValueChange={(values) => handleSettingsChange('qualityThreshold', values[0] / 100)}
+                      className="my-2"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Minimum quality score required for content delivery (higher values may increase generation time)
+                    </p>
+                  </div>
+                  
+                  <div className="pt-2 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Context Awareness</Label>
+                        <p className="text-xs text-muted-foreground">Utilize surrounding content to improve relevance</p>
+                      </div>
+                      <Switch
+                        checked={settings.contextAwareness}
+                        onCheckedChange={(checked) => handleSettingsChange('contextAwareness', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Autonomous Improvement</Label>
+                        <p className="text-xs text-muted-foreground">Allow system to self-optimize based on feedback</p>
+                      </div>
+                      <Switch
+                        checked={settings.autonomousImprovement}
+                        onCheckedChange={(checked) => handleSettingsChange('autonomousImprovement', checked)}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label>Brain Hub Integration</Label>
+                        <p className="text-xs text-muted-foreground">Connect to central Brain Hub for enhanced capabilities</p>
+                      </div>
+                      <Switch
+                        checked={settings.useBrainHubContext}
+                        onCheckedChange={(checked) => handleSettingsChange('useBrainHubContext', checked)}
+                      />
                     </div>
                   </div>
-                )}
+                </div>
               </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline">Reset to Defaults</Button>
+                <Button>Save Settings</Button>
+              </CardFooter>
             </Card>
           </TabsContent>
-        </Tabs>
-      </CardContent>
+        </CardContent>
+      </Tabs>
     </Card>
   );
 };
