@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,9 +47,9 @@ const AuthPage = () => {
       return;
     }
     
-    const { error } = await signIn(email, password);
-    if (error) {
-      setError(error.message);
+    const result = await signIn(email, password);
+    if (!result.success && result.error) {
+      setError(result.error);
     }
     setIsLoading(false);
   };
@@ -72,9 +71,9 @@ const AuthPage = () => {
       return;
     }
     
-    const { error } = await signUp(email, password, username || email.split('@')[0]);
-    if (error) {
-      setError(error.message);
+    const result = await signUp(email, password, username || email.split('@')[0]);
+    if (!result.success && result.error) {
+      setError(result.error);
     }
     setIsLoading(false);
   };

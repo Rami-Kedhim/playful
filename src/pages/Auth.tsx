@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,14 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/hooks/auth/useAuth";
+import { useAuth } from "@/hooks/auth/useAuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import StandardPageLayout from "@/components/layout/StandardPageLayout";
 
 const Auth = () => {
-  const { login, register, resetPassword, isAuthenticated, isLoading, error, clearError } = useAuth();
+  const { login, register, isAuthenticated, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -83,11 +82,13 @@ const Auth = () => {
       return;
     }
     
-    const success = await resetPassword(resetEmail);
-    if (success) {
-      setShowForgotPassword(false);
-      setFormError(null);
-    }
+    toast({
+      title: "Password reset",
+      description: "This functionality is not implemented yet. If you need to reset your password, please contact support.",
+    });
+    setShowForgotPassword(false);
+    setFormError(null);
+    return true; // To maintain the same return signature
   };
   
   // Render forgot password form
