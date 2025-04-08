@@ -8,7 +8,7 @@ export const useUserContext = () => {
 
   useEffect(() => {
     if (user) {
-      const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+      const displayName = user.username || user.email?.split('@')[0] || 'User';
       
       let context = `The user's name is ${displayName}. `;
       

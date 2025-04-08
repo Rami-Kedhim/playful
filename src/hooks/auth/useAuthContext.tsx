@@ -3,31 +3,57 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/use-toast';
-import { UserProfile } from '@/types/auth';
+import { UserProfile, AuthUser, AuthResult } from '@/types/auth';
 
 type AuthContextType = {
-  user: User | null;
+  user: AuthUser | null;
   session: Session | null;
   profile: UserProfile | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, username: string) => Promise<{ error: any, data: any }>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signUp: (email: string, password: string, username?: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (email: string, password: string, username?: string) => Promise<AuthResult>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   checkRole: (role: string) => boolean;
   userRoles: string[];
   refreshProfile: () => Promise<void>;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
+  error: string | null;
+  clearError: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper to convert Supabase User to our AuthUser type
+const convertToAuthUser = (user: User | null): AuthUser | null => {
+  if (!user) return null;
+  
+  return {
+    id: user.id,
+    email: user.email || '',
+    username: user.user_metadata?.username,
+    profileImageUrl: user.user_metadata?.avatar_url,
+    lucoinsBalance: user.user_metadata?.lucoin_balance || 0,
+    role: user.user_metadata?.role,
+    avatarUrl: user.user_metadata?.avatar_url,
+    app_metadata: user.app_metadata,
+    user_metadata: user.user_metadata,
+    aud: user.aud,
+    created_at: user.created_at
+  };
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   // Function to refresh the user profile data
   const refreshProfile = async () => {
@@ -72,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         // Only synchronous updates here
         setSession(session);
-        setUser(session?.user ?? null);
+        setUser(session?.user ? convertToAuthUser(session.user) : null);
         
         if (session?.user) {
           // If user is logged in, fetch their roles
@@ -100,7 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Then check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(session?.user ? convertToAuthUser(session.user) : null);
       
       if (session?.user) {
         // If user is logged in, fetch their roles
@@ -127,29 +153,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
     try {
+      setError(null);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      return { error: null };
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
+      setError(error.message);
       toast({
         title: "Login failed",
         description: error.message,
         variant: "destructive",
       });
-      return { error };
+      return { success: false, error: error.message };
     }
   };
 
-  const signUp = async (email: string, password: string, username: string) => {
+  const login = signIn; // Alias for backward compatibility
+
+  const signUp = async (email: string, password: string, username?: string): Promise<AuthResult> => {
     try {
+      setError(null);
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
           data: {
-            username,
+            username: username || email.split('@')[0],
+            role: 'user',
           }
         }
       });
@@ -161,25 +193,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Please check your email to verify your account.",
       });
       
-      return { data, error: null };
-    } catch (error) {
+      return { success: true };
+    } catch (error: any) {
+      setError(error.message);
       toast({
         title: "Registration failed",
         description: error.message,
         variant: "destructive",
       });
-      return { data: null, error };
+      return { success: false, error: error.message };
     }
   };
 
+  const register = signUp; // Alias for backward compatibility
+
   const signOut = async () => {
     try {
+      setError(null);
       await supabase.auth.signOut();
       toast({
         title: "Logged out",
         description: "You have been logged out successfully.",
       });
-    } catch (error) {
+    } catch (error: any) {
+      setError(error.message);
       toast({
         title: "Error",
         description: "Failed to log out.",
@@ -187,10 +224,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
   };
+
+  const logout = signOut; // Alias for backward compatibility
   
   // Function to update password
   const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
     try {
+      setError(null);
       // First verify old password is correct (if not empty, for password reset flow)
       if (oldPassword) {
         const { error } = await supabase.auth.signInWithPassword({
@@ -225,7 +265,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Password has been updated successfully",
       });
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      setError(error.message);
       toast({
         title: "Error",
         description: "Failed to update password",
@@ -234,6 +275,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
   };
+
+  // Function to update user profile
+  const updateUserProfile = async (userData: Partial<AuthUser>): Promise<boolean> => {
+    try {
+      setError(null);
+      if (!user) return false;
+      
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          ...user.user_metadata,
+          ...userData
+        }
+      });
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  const clearError = () => setError(null);
 
   return (
     <AuthContext.Provider
@@ -245,11 +322,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signUp,
         signOut,
+        login,
+        register,
+        logout,
         isAuthenticated: !!user,
         checkRole,
         userRoles,
         refreshProfile,
         updatePassword,
+        updateUserProfile,
+        error,
+        clearError,
       }}
     >
       {children}

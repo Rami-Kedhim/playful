@@ -9,7 +9,7 @@ export const useUserContext = () => {
   useEffect(() => {
     // Generate context about the user that can be used by the AI
     if (user) {
-      const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+      const displayName = user.username || user.email?.split('@')[0] || 'User';
       
       let context = `The user's name is ${displayName}. `;
       

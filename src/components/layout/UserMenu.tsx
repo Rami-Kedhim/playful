@@ -17,8 +17,8 @@ const UserMenu = () => {
   const { user, isAuthenticated, signOut } = useAuth();
   
   const getUserInitials = () => {
-    if (user?.user_metadata?.username) {
-      return user.user_metadata.username.substring(0, 2).toUpperCase();
+    if (user?.username) {
+      return user.username.substring(0, 2).toUpperCase();
     }
     
     if (user?.email) {
@@ -46,14 +46,14 @@ const UserMenu = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.user_metadata?.username || "User"} />
+            <AvatarImage src={user?.profileImageUrl} alt={user?.username || "User"} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem className="font-medium">
-          {user?.user_metadata?.username || user?.email}
+          {user?.username || user?.email}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

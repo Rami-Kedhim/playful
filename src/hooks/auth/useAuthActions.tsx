@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { AuthResult } from '@/types/auth';
+import { useAuth } from './useAuthContext';
 
 export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { refreshProfile } = useAuth();
   
   /**
    * Log in a user with email and password
@@ -99,43 +101,16 @@ export const useAuthActions = () => {
     }
   };
 
-  /**
-   * Sign in with a third-party provider (OAuth)
-   */
-  const signInWithProvider = async (provider: 'google' | 'facebook' | 'twitter' | 'github'): Promise<AuthResult> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-      
-      if (error) throw error;
-      
-      // This generally won't return directly as it redirects to the provider
-      return { success: true };
-    } catch (error: any) {
-      const errorMessage = error.message || `Failed to sign in with ${provider}`;
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
   const clearError = () => setError(null);
   
   return {
     login,
     register,
     logout,
-    signInWithProvider,
     isLoading,
     error,
     clearError,
   };
 };
+
+export default useAuthActions;

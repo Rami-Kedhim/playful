@@ -111,7 +111,7 @@ const HomePage = () => {
   const [searchLocation, setSearchLocation] = useState("");
   
   // Extract username from user metadata if available
-  const username = user?.user_metadata?.username || user?.email?.split('@')[0] || 'User';
+  const username = user?.username || user?.email?.split('@')[0] || 'User';
   
   return (
     <>
