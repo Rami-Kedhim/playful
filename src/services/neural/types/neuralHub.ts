@@ -73,4 +73,9 @@ export interface TrainingProgress {
   targetAccuracy: number;
   estimatedCompletionTime: Date;
   status: 'running' | 'completed' | 'failed' | 'stopped';
+  // Adding missing properties that are used in NeuralSystemsPanel
+  progress: number;
+  accuracy: number;
+  message?: string;
+  error?: string;
 }

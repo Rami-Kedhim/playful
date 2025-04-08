@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,37 +41,28 @@ const NeuralModuleRegistration: React.FC<NeuralModuleRegistrationProps> = ({ onR
       
       switch (moduleType) {
         case 'escorts':
-          service = new EscortsNeuralService(moduleId, {
-            priority,
-            autonomyLevel,
-            enabled: true
-          });
+          service = new EscortsNeuralService(moduleId);
           break;
         case 'creators':
-          service = new CreatorsNeuralService(moduleId, {
-            priority,
-            autonomyLevel,
-            enabled: true
-          });
+          service = new CreatorsNeuralService(moduleId);
           break;
         case 'livecams':
-          service = new LivecamsNeuralService(moduleId, {
-            priority,
-            autonomyLevel,
-            enabled: true
-          });
+          service = new LivecamsNeuralService(moduleId);
           break;
         case 'ai-companion':
-          service = new AICompanionNeuralService(moduleId, {
-            priority,
-            autonomyLevel,
-            enabled: true
-          });
+          service = new AICompanionNeuralService(moduleId);
           break;
         default:
           setError('Invalid module type');
           return;
       }
+      
+      // Update the service config after creation
+      service.updateConfig({
+        priority,
+        autonomyLevel,
+        enabled: true
+      });
       
       // Register the service
       const success = neuralServiceRegistry.registerService(service);
