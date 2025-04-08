@@ -1,7 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import FilterBadge from "./filters/FilterBadge";
 import getServiceTypeName from "./filters/ServiceTypeBadgeLabel";
+import { Users, Video, FilterX } from "lucide-react";
 
 export interface AppliedFiltersProps {
   searchQuery: string;
@@ -55,7 +55,6 @@ const AppliedFilters = ({
   setServiceTypeFilter
 }: AppliedFiltersProps) => {
   
-  // Only render if there are filters applied
   const hasActiveFilters = 
     searchQuery || 
     location || 
@@ -72,6 +71,20 @@ const AppliedFilters = ({
   if (!hasActiveFilters) {
     return null;
   }
+  
+  const getServiceTypeIcon = () => {
+    if (serviceTypeFilter === "in-person") return <Users className="h-3 w-3" />;
+    if (serviceTypeFilter === "virtual") return <Video className="h-3 w-3" />;
+    if (serviceTypeFilter === "both") {
+      return (
+        <div className="flex items-center space-x-0.5">
+          <Users className="h-3 w-3" />
+          <Video className="h-3 w-3" />
+        </div>
+      );
+    }
+    return null;
+  };
   
   return (
     <div className="flex flex-wrap gap-2 mb-6">
@@ -152,15 +165,17 @@ const AppliedFilters = ({
         <FilterBadge 
           label={getServiceTypeName(serviceTypeFilter)}
           onRemove={() => setServiceTypeFilter("")}
+          icon={getServiceTypeIcon()}
         />
       )}
       
       <Button 
-        variant="ghost" 
+        variant="outline" 
         size="sm" 
         onClick={clearFilters}
-        className="h-full ml-auto"
+        className="h-7 ml-auto flex items-center gap-1"
       >
+        <FilterX className="h-3.5 w-3.5" />
         Clear all
       </Button>
     </div>
