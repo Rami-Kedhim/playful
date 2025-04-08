@@ -4,7 +4,7 @@ import SearchFilter from "./SearchFilter";
 import LocationFilter from "./LocationFilter";
 import PriceRangeFilter from "./PriceRangeFilter";
 import CheckboxGroup from "./CheckboxGroup";
-import ServiceTypeFilter from "./ServiceTypeFilter";
+import ServiceTypeRadioFilter from "./ServiceTypeRadioFilter";
 import AgeRangeFilter from "./AgeRangeFilter";
 import RatingFilter from "./RatingFilter";
 import AvailabilityFilter from "./AvailabilityFilter";
@@ -88,7 +88,7 @@ const MobileFilterContent = ({
           
           <div className="space-y-2">
             <h3 className="text-sm font-medium">Service Type</h3>
-            <ServiceTypeFilter
+            <ServiceTypeRadioFilter
               serviceTypeFilter={serviceTypeFilter}
               setServiceTypeFilter={setServiceTypeFilter}
             />

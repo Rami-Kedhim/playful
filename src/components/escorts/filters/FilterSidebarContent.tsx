@@ -6,16 +6,11 @@ import LocationFilter from "./LocationFilter";
 import PriceRangeFilter from "./PriceRangeFilter";
 import AgeRangeFilter from "./AgeRangeFilter";
 import RatingFilter from "./RatingFilter";
-import ServiceTypeFilter from "./ServiceTypeFilter";
 import CheckboxGroup from "./CheckboxGroup";
+import ServiceTypeRadioFilter from "./ServiceTypeRadioFilter";
 import AvailabilityFilter from "./AvailabilityFilter";
 import HeightRangeFilter from "./HeightRangeFilter";
 import WeightRangeFilter from "./WeightRangeFilter";
-import LanguageFilter from "./LanguageFilter";
-import HairColorFilter from "./HairColorFilter";
-import EyeColorFilter from "./EyeColorFilter";
-import EthnicityFilter from "./EthnicityFilter";
-import BodyTypeFilter from "./BodyTypeFilter";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface FilterSidebarContentProps {
@@ -142,9 +137,9 @@ const FilterSidebarContent = ({
         
         <div className="space-y-4">
           <h3 className="text-sm font-medium">Service Types</h3>
-          <ServiceTypeFilter
-            selectedServices={selectedServices}
-            toggleService={toggleService}
+          <ServiceTypeRadioFilter
+            serviceTypeFilter={serviceTypeFilter}
+            setServiceTypeFilter={setServiceTypeFilter}
           />
         </div>
         
@@ -186,24 +181,14 @@ const FilterSidebarContent = ({
                   setWeightRange={setWeightRange}
                 />
                 
-                <BodyTypeFilter
-                  selectedBodyTypes={selectedBodyTypes}
-                  toggleBodyType={toggleBodyType}
-                />
-                
-                <HairColorFilter
-                  selectedHairColors={selectedHairColors}
-                  toggleHairColor={toggleHairColor}
-                />
-                
-                <EyeColorFilter
-                  selectedEyeColors={selectedEyeColors}
-                  toggleEyeColor={toggleEyeColor}
-                />
-                
-                <EthnicityFilter
-                  selectedEthnicities={selectedEthnicities}
-                  toggleEthnicity={toggleEthnicity}
+                {/* Display service types with CheckboxGroup */}
+                <CheckboxGroup
+                  title="Services"
+                  items={services}
+                  selectedItems={selectedServices}
+                  toggleItem={toggleService}
+                  formatItem={(option) => option}
+                  idPrefix="service"
                 />
               </div>
             </AccordionContent>
@@ -231,20 +216,6 @@ const FilterSidebarContent = ({
                   toggleItem={toggleOrientation}
                   formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
                   idPrefix="orientation"
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-          
-          <AccordionItem value="languages">
-            <AccordionTrigger className="text-sm font-medium py-2">
-              Languages
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-2 pt-2">
-                <LanguageFilter
-                  selectedLanguages={selectedLanguages}
-                  toggleLanguage={toggleLanguage}
                 />
               </div>
             </AccordionContent>
