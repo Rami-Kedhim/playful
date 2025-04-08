@@ -30,7 +30,12 @@ export class TrainingManager {
       currentAccuracy: baseAccuracy,
       targetAccuracy,
       estimatedCompletionTime: new Date(Date.now() + totalEpochs * 60 * 1000), // Estimate 1 minute per epoch
-      status: 'running'
+      status: 'running',
+      // Add the missing properties required by the TrainingProgress interface
+      progress: 0, // Start with 0% progress
+      accuracy: baseAccuracy, // Initialize accuracy with the base value
+      message: 'Training initialized', // Add an initial message
+      error: undefined // No error initially
     };
     
     this.trainingJobs.set(modelId, trainingJob);
@@ -56,6 +61,7 @@ export class TrainingManager {
     }
     
     trainingJob.status = 'stopped';
+    trainingJob.message = 'Training stopped by user';
     console.log(`Stopped training model ${modelId} at epoch ${trainingJob.currentEpoch}`);
     
     return true;
@@ -94,16 +100,33 @@ export class TrainingManager {
       
       job.currentEpoch += 1;
       
+      // Update progress percentage based on completed epochs
+      job.progress = Math.round((job.currentEpoch / job.totalEpochs) * 100);
+      
       // Simulate accuracy improvements with diminishing returns
       const accuracyGain = (job.targetAccuracy - job.currentAccuracy) * 
         (Math.random() * 0.1 + 0.05); // Random progress between 5-15% of remaining gap
       job.currentAccuracy = Math.min(job.targetAccuracy, job.currentAccuracy + accuracyGain);
+      job.accuracy = job.currentAccuracy; // Update the accuracy property
       
-      console.log(`Model ${modelId}: Epoch ${job.currentEpoch}/${job.totalEpochs}, accuracy: ${job.currentAccuracy.toFixed(4)}`);
+      // Update message based on progress
+      if (job.progress < 25) {
+        job.message = 'Initial training phase';
+      } else if (job.progress < 50) {
+        job.message = 'Building neural pathways';
+      } else if (job.progress < 75) {
+        job.message = 'Optimizing parameters';
+      } else {
+        job.message = 'Finalizing model';
+      }
+      
+      console.log(`Model ${modelId}: Epoch ${job.currentEpoch}/${job.totalEpochs}, accuracy: ${job.currentAccuracy.toFixed(4)}, progress: ${job.progress}%`);
       
       // Check if training is complete
       if (job.currentEpoch >= job.totalEpochs || job.currentAccuracy >= job.targetAccuracy) {
         job.status = 'completed';
+        job.progress = 100;
+        job.message = `Training completed with final accuracy: ${job.currentAccuracy.toFixed(4)}`;
         console.log(`Training completed for model ${modelId}, final accuracy: ${job.currentAccuracy.toFixed(4)}`);
         return;
       }
