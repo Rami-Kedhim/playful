@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -96,7 +95,6 @@ const NeuralSystemsPanel = () => {
         
         <CardContent className="p-0">
           <TabsContent value="overview" className="p-4 pt-0 space-y-4">
-            {/* Health Summary */}
             {analytics && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -368,8 +366,8 @@ const NeuralSystemsPanel = () => {
                           <div>
                             <div className="text-sm font-medium">Expected Completion</div>
                             <div className="text-sm">
-                              {job.expectedCompletionTime 
-                                ? job.expectedCompletionTime.toLocaleString() 
+                              {job.estimatedCompletionTime 
+                                ? job.estimatedCompletionTime.toLocaleString() 
                                 : 'Unknown'}
                             </div>
                           </div>

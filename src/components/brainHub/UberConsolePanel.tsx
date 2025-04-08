@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -231,7 +230,7 @@ const UberConsolePanel: React.FC = () => {
               <h3 className="text-sm font-medium mt-6 mb-3">System Alerts</h3>
               <div className="space-y-2">
                 {systemAlerts.map(alert => (
-                  <Alert key={alert.id} variant={alert.level === 'error' ? 'destructive' : 'outline'}>
+                  <Alert key={alert.id} variant={alert.level === 'error' ? 'destructive' : 'default'}>
                     <div className="flex justify-between">
                       <AlertDescription>
                         {alert.message}

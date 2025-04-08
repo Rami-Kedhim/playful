@@ -177,7 +177,7 @@ const SystemDiagnostics: React.FC = () => {
             {performance?.recommendations && (
               <div className="space-y-2">
                 {performance.recommendations.map((recommendation, index) => (
-                  <Alert key={index} variant="outline" className="py-2">
+                  <Alert key={index} variant="default" className="py-2">
                     <div className="flex justify-between">
                       <div className="flex items-center">
                         <Cpu className="h-4 w-4 mr-2" />

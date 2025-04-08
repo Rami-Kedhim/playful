@@ -8,7 +8,7 @@ import {
   NeuralModel, 
   TrainingProgress 
 } from './types/neuralHub';
-import { initializeDefaultModels } from './models/neuralModels';
+import { createBaseNeuralModels } from './models/neuralModels';
 import { initializeDefaultParameters, validateModelParameters } from './models/modelParameters';
 import { simulateMetricsUpdate, generateSimulatedResponse } from './utils/neuralHubUtils';
 import { TrainingManager } from './training/trainingManager';
@@ -40,7 +40,7 @@ class HermesOxumNeuralHub {
   }
   
   private initializeModels() {
-    this.models = initializeDefaultModels();
+    this.models = createBaseNeuralModels();
   }
   
   // Observer pattern methods
@@ -58,8 +58,12 @@ class HermesOxumNeuralHub {
   }
   
   // Method to update model parameters
-  updateModelParameters(params: ModelParameters): void {
-    this.modelParameters = validateModelParameters({ ...params });
+  updateModelParameters(params: Partial<ModelParameters>): void {
+    this.modelParameters = { ...this.modelParameters, ...params };
+    const validation = validateModelParameters(this.modelParameters);
+    if (!validation.valid) {
+      console.warn('Invalid model parameters:', validation.issues);
+    }
     console.log('Model parameters updated:', this.modelParameters);
   }
   
@@ -160,8 +164,14 @@ class HermesOxumNeuralHub {
       return model;
     });
     
-    // Update training progress
-    const completedModelIds = this.trainingManager.updateTrainingProgress(this.models);
+    // Get completed training jobs
+    const completedModelIds: string[] = [];
+    
+    this.trainingManager.getActiveTrainingJobs().forEach(job => {
+      if (job.status === 'completed') {
+        completedModelIds.push(job.modelId);
+      }
+    });
     
     // Update completed models to active status
     if (completedModelIds.length > 0) {
