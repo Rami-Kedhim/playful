@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
-import { BrainHubHealth, BrainHubHealthStatus } from '@/types/brainHubHealth';
-import { brainHub, neuralHub } from '@/services/neural';
 
-/**
- * Hook for monitoring Brain Hub health metrics
- */
-export const useBrainHubHealth = () => {
+import { useState, useEffect, useCallback } from 'react';
+import { BrainHubHealth, BrainHubAnalytics } from '@/types/brainHubHealth';
+import { checkBrainHubHealth } from '@/services/brainHubHealth/healthCheckService';
+import { updateBrainHubAnalytics } from '@/services/brainHubHealth/analyticsService';
+
+export const useBrainHubHealth = (monitoringInterval = 30000) => {
   const [health, setHealth] = useState<BrainHubHealth>({
     status: 'unknown',
     metrics: {
@@ -18,86 +17,27 @@ export const useBrainHubHealth = () => {
     errors: []
   });
   
-  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState<BrainHubAnalytics>({
+    dailyOperations: 0,
+    averageResponseTime: 0,
+    errorRate: 0,
+    utilizationTrend: [],
+    recommendations: []
+  });
   
-  const checkHealth = async () => {
-    setLoading(true);
+  const [loading, setLoading] = useState(true);
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  
+  const checkHealth = useCallback(() => {
     try {
-      // Get system status from Brain Hub
-      const systemStatus = brainHub.getSystemStatus();
-      
-      // Get neural health metrics
-      const neuralMetrics = neuralHub.getHealthMetrics();
-      
-      // Determine overall status
-      let status: BrainHubHealthStatus = 'good';
-      const warnings: string[] = [];
-      const errors: string[] = [];
-      
-      // Check CPU usage
-      if (systemStatus.cpuUsage > 80) {
-        status = 'error';
-        errors.push('Critical CPU usage detected');
-      } else if (systemStatus.cpuUsage > 60) {
-        if (status === 'good') status = 'warning';
-        warnings.push('High CPU usage detected');
-      }
-      
-      // Check memory usage
-      if (systemStatus.memoryUsage > 85) {
-        status = 'error';
-        errors.push('Critical memory usage detected');
-      } else if (systemStatus.memoryUsage > 70) {
-        if (status === 'good') status = 'warning';
-        warnings.push('High memory usage detected');
-      }
-      
-      // Other checks
-      if (neuralMetrics.errorRate > 0.1) {
-        status = 'error';
-        errors.push(`High neural error rate: ${(neuralMetrics.errorRate * 100).toFixed(1)}%`);
-      } else if (neuralMetrics.errorRate > 0.01) {
-        if (status === 'good') status = 'warning';
-        warnings.push(`Elevated neural error rate: ${(neuralMetrics.errorRate * 100).toFixed(1)}%`);
-      }
-      
-      if (neuralMetrics.stability < 0.5) {
-        status = 'error';
-        errors.push('Neural system stability critical');
-      } else if (neuralMetrics.stability < 0.7) {
-        if (status === 'good') status = 'warning';
-        warnings.push('Neural system stability degraded');
-      }
-      
-      // Generate message based on status
-      let message = '';
-      if (status === 'good') {
-        message = 'All systems operating normally';
-      } else if (status === 'warning') {
-        message = 'System operating with warnings';
-      } else if (status === 'error') {
-        message = 'System experiencing critical issues';
-      }
-      
-      setHealth({
-        status,
-        message,
-        metrics: {
-          cpuUsage: systemStatus.cpuUsage,
-          memoryUsage: systemStatus.memoryUsage,
-          requestsPerMinute: systemStatus.requestsPerMinute,
-          lastOptimized: systemStatus.lastOptimized,
-          neuralMetrics
-        },
-        warnings,
-        errors
-      });
-      
+      const healthStatus = checkBrainHubHealth();
+      setHealth(healthStatus);
+      return healthStatus;
     } catch (error) {
-      console.error('Failed to check Brain Hub health:', error);
-      setHealth({
+      console.error('Error checking brain hub health:', error);
+      const errorHealth: BrainHubHealth = {
         status: 'error',
-        message: 'Failed to retrieve system health',
+        message: 'Failed to retrieve system health data',
         metrics: {
           cpuUsage: 0,
           memoryUsage: 0,
@@ -105,30 +45,67 @@ export const useBrainHubHealth = () => {
           lastOptimized: Date.now(),
         },
         warnings: [],
-        errors: ['Unable to connect to Brain Hub monitoring system']
-      });
-    } finally {
-      setLoading(false);
+        errors: ['Connection error to Brain Hub service']
+      };
+      setHealth(errorHealth);
+      return errorHealth;
     }
-  };
+  }, []);
   
-  // Check health on mount and set up an interval
-  useEffect(() => {
-    checkHealth();
+  const updateAnalytics = useCallback(() => {
+    try {
+      const analyticsData = updateBrainHubAnalytics();
+      setAnalytics(analyticsData);
+      return analyticsData;
+    } catch (error) {
+      console.error('Error updating brain hub analytics:', error);
+      return null;
+    }
+  }, []);
+  
+  const startMonitoring = useCallback(() => {
+    setIsMonitoring(true);
     
+    // Do initial checks
+    checkHealth();
+    updateAnalytics();
+    setLoading(false);
+    
+    // Set up interval for monitoring
     const intervalId = setInterval(() => {
       checkHealth();
-    }, 30000); // Check every 30 seconds
+      updateAnalytics();
+    }, monitoringInterval);
     
+    // Return cleanup function
     return () => {
       clearInterval(intervalId);
+      setIsMonitoring(false);
     };
+  }, [checkHealth, updateAnalytics, monitoringInterval]);
+  
+  const stopMonitoring = useCallback(() => {
+    setIsMonitoring(false);
   }, []);
+  
+  // Start monitoring on mount
+  useEffect(() => {
+    const cleanup = startMonitoring();
+    
+    return () => {
+      cleanup();
+    };
+  }, [startMonitoring]);
   
   return {
     health,
+    analytics,
     loading,
-    checkHealth
+    isMonitoring,
+    startMonitoring,
+    stopMonitoring,
+    checkHealth,
+    updateAnalytics
   };
 };
 

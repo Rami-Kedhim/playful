@@ -1,64 +1,71 @@
 
-import { brainHub, neuralHub, SystemHealthMetrics } from '@/services/neural';
+import { brainHub, neuralHub } from '@/services/neural';
 import { BrainHubHealth, BrainHubHealthStatus } from '@/types/brainHubHealth';
 
+/**
+ * Performs a comprehensive check of Brain Hub health status
+ * @returns The current health status of the Brain Hub
+ */
 export function checkBrainHubHealth(): BrainHubHealth {
   try {
+    // Get system status from Brain Hub
     const systemStatus = brainHub.getSystemStatus();
     
-    let neuralMetrics: SystemHealthMetrics | undefined = undefined;
-    try {
-      neuralMetrics = neuralHub.getHealthMetrics();
-    } catch (error) {
-      console.warn("Neural hub metrics unavailable", error);
-    }
+    // Get neural health metrics
+    const neuralMetrics = neuralHub.getHealthMetrics();
     
-    const enhancedMetrics = brainHub.getEnhancedSystemMetrics();
-    
+    // Determine overall status
+    let status: BrainHubHealthStatus = 'good';
     const warnings: string[] = [];
     const errors: string[] = [];
     
+    // Check CPU usage
     if (systemStatus.cpuUsage > 80) {
-      warnings.push(`High CPU usage: ${systemStatus.cpuUsage}%`);
+      status = 'error';
+      errors.push('Critical CPU usage detected');
+    } else if (systemStatus.cpuUsage > 60) {
+      if (status === 'good') status = 'warning';
+      warnings.push('High CPU usage detected');
     }
     
+    // Check memory usage
     if (systemStatus.memoryUsage > 85) {
-      warnings.push(`High memory usage: ${systemStatus.memoryUsage}%`);
+      status = 'error';
+      errors.push('Critical memory usage detected');
+    } else if (systemStatus.memoryUsage > 70) {
+      if (status === 'good') status = 'warning';
+      warnings.push('High memory usage detected');
     }
     
-    if (systemStatus.requestsPerMinute > 150) {
-      warnings.push(`High request rate: ${systemStatus.requestsPerMinute} requests/minute`);
+    // Check neural system metrics
+    if (neuralMetrics.errorRate > 0.1) {
+      status = 'error';
+      errors.push(`High neural error rate: ${(neuralMetrics.errorRate * 100).toFixed(1)}%`);
+    } else if (neuralMetrics.errorRate > 0.01) {
+      if (status === 'good') status = 'warning';
+      warnings.push(`Elevated neural error rate: ${(neuralMetrics.errorRate * 100).toFixed(1)}%`);
     }
     
-    if (neuralMetrics && neuralMetrics.stability < 0.7) {
-      warnings.push(`Low neural stability: ${(neuralMetrics.stability * 100).toFixed(1)}%`);
+    if (neuralMetrics.stability < 0.5) {
+      status = 'error';
+      errors.push('Neural system stability critical');
+    } else if (neuralMetrics.stability < 0.7) {
+      if (status === 'good') status = 'warning';
+      warnings.push('Neural system stability degraded');
     }
     
-    if (systemStatus.cpuUsage > 95) {
-      errors.push(`Critical CPU usage: ${systemStatus.cpuUsage}%`);
-    }
-    
-    if (systemStatus.memoryUsage > 95) {
-      errors.push(`Critical memory usage: ${systemStatus.memoryUsage}%`);
-    }
-    
-    if (enhancedMetrics.predictive?.optimizationOpportunities) {
-      warnings.push(...enhancedMetrics.predictive.optimizationOpportunities);
-    }
-    
-    let overallStatus: BrainHubHealthStatus = 'good';
-    let message: string | undefined = undefined;
-    
-    if (errors.length > 0) {
-      overallStatus = 'error';
-      message = `${errors.length} critical issue${errors.length > 1 ? 's' : ''} detected`;
-    } else if (warnings.length > 0) {
-      overallStatus = 'warning';
-      message = `${warnings.length} warning${warnings.length > 1 ? 's' : ''} detected`;
+    // Generate message based on status
+    let message = '';
+    if (status === 'good') {
+      message = 'All systems operating normally';
+    } else if (status === 'warning') {
+      message = 'System operating with warnings';
+    } else if (status === 'error') {
+      message = 'System experiencing critical issues';
     }
     
     return {
-      status: overallStatus,
+      status,
       message,
       metrics: {
         cpuUsage: systemStatus.cpuUsage,
@@ -70,20 +77,19 @@ export function checkBrainHubHealth(): BrainHubHealth {
       warnings,
       errors
     };
-    
   } catch (error) {
-    console.error("Error checking Brain Hub health", error);
+    console.error('Failed to check Brain Hub health:', error);
     return {
       status: 'error',
-      message: 'Failed to check Brain Hub health',
-      errors: ['Health check failure: ' + (error instanceof Error ? error.message : String(error))],
+      message: 'Failed to retrieve system health',
       metrics: {
         cpuUsage: 0,
         memoryUsage: 0,
         requestsPerMinute: 0,
-        lastOptimized: Date.now()
+        lastOptimized: Date.now(),
       },
-      warnings: []
+      warnings: [],
+      errors: ['Unable to connect to Brain Hub monitoring system']
     };
   }
 }

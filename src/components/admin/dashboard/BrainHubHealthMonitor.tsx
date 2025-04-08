@@ -1,18 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCcw, Activity, Server, Clock, Brain, AlertTriangle } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { RefreshCcw, Brain, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
+import BrainHubMetrics from '@/components/brainHub/BrainHubMetrics';
 import Alert from '@/components/common/Alert';
 
 const BrainHubHealthMonitor: React.FC = () => {
-  const { health, analytics, isMonitoring, checkHealth, updateAnalytics } = useBrainHubHealth();
+  const { health, analytics, checkHealth, updateAnalytics } = useBrainHubHealth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +63,7 @@ const BrainHubHealthMonitor: React.FC = () => {
       case 'warning':
         return 'bg-yellow-500';
       case 'critical':
+      case 'error':
         return 'bg-red-500';
       default:
         return 'bg-blue-500';
@@ -133,43 +133,11 @@ const BrainHubHealthMonitor: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <div className="flex items-center text-xs">
-                <Activity className="h-3 w-3 mr-1" />
-                <span>CPU Usage</span>
-              </div>
-              <span className="text-xs">{health.metrics.cpuUsage}%</span>
-            </div>
-            <Progress value={health.metrics.cpuUsage} className="h-1.5" />
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <div className="flex items-center text-xs">
-                <Server className="h-3 w-3 mr-1" />
-                <span>Memory Usage</span>
-              </div>
-              <span className="text-xs">{health.metrics.memoryUsage}%</span>
-            </div>
-            <Progress value={health.metrics.memoryUsage} className="h-1.5" />
-          </div>
-          
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <div className="flex items-center text-xs">
-                <Clock className="h-3 w-3 mr-1" />
-                <span>Response Time</span>
-              </div>
-              <span className="text-xs">{analytics.averageResponseTime} ms</span>
-            </div>
-            <Progress 
-              value={Math.min(analytics.averageResponseTime / 10, 100)} 
-              className="h-1.5" 
-            />
-          </div>
-        </div>
+        <BrainHubMetrics
+          cpuUsage={health.metrics.cpuUsage}
+          memoryUsage={health.metrics.memoryUsage}
+          responseTime={analytics.averageResponseTime}
+        />
 
         <div className="mt-4 text-xs">
           <div className="flex justify-between mb-2">
