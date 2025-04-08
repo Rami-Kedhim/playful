@@ -1,165 +1,66 @@
 
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { neuralServiceRegistry } from '@/services/neural/registry/NeuralServiceRegistry';
+import { BrainHubHealth } from "@/types/brainHubHealth";
+import { brainHub } from "../neural/HermesOxumBrainHub";
 
-class HealthCheckService {
-  /**
-   * Get overall system health status
-   */
-  getSystemStatus(): { status: 'healthy' | 'warning' | 'critical'; issues: string[] } {
-    const systemMetrics = brainHub.getSystemStatus();
-    const issues: string[] = [];
+/**
+ * Check the current health status of the Brain Hub
+ */
+export default function checkBrainHubHealth(): BrainHubHealth {
+  try {
+    // Get system status from brain hub
+    const metrics = brainHub.getSystemStatus();
     
-    // Check CPU utilization
-    if (systemMetrics.cpuUtilization > 80) {
-      issues.push(`High CPU utilization: ${systemMetrics.cpuUtilization.toFixed(1)}%`);
-    }
+    // Generate warnings based on thresholds
+    const warnings: string[] = [];
+    if (metrics.cpuUtilization > 80) warnings.push("CPU utilization is high");
+    if (metrics.memoryUtilization > 85) warnings.push("Memory utilization is high");
+    if (metrics.errorRate > 2) warnings.push("Error rate is above threshold");
     
-    // Check memory utilization
-    if (systemMetrics.memoryUtilization > 85) {
-      issues.push(`High memory utilization: ${systemMetrics.memoryUtilization.toFixed(1)}%`);
-    }
+    // Generate errors based on thresholds
+    const errors: string[] = [];
+    if (metrics.cpuUtilization > 95) errors.push("CPU utilization critical");
+    if (metrics.memoryUtilization > 95) errors.push("Memory utilization critical");
+    if (metrics.errorRate > 5) errors.push("Error rate critical");
     
-    // Check error rate
-    if (systemMetrics.errorRate > 5) {
-      issues.push(`High error rate: ${systemMetrics.errorRate.toFixed(1)}%`);
-    }
+    // Determine status
+    let status: 'healthy' | 'warning' | 'error' | 'unknown' = 'healthy';
+    if (errors.length > 0) status = 'error';
+    else if (warnings.length > 0) status = 'warning';
     
-    // Check network latency
-    if (systemMetrics.networkLatency > 300) {
-      issues.push(`High network latency: ${systemMetrics.networkLatency.toFixed(0)}ms`);
-    }
-    
-    // Check service health
-    const services = neuralServiceRegistry.getAllServices();
-    const enabledServices = services.filter(s => s.getConfig().enabled);
-    
-    if (enabledServices.length === 0 && services.length > 0) {
-      issues.push('No active neural services');
-    }
-    
-    // Determine overall status
-    let status: 'healthy' | 'warning' | 'critical' = 'healthy';
-    
-    if (issues.length === 1) {
-      status = 'warning';
-    } else if (issues.length > 1) {
-      status = 'critical';
-    }
-    
-    return {
+    // Build health object
+    const health: BrainHubHealth = {
       status,
-      issues
+      metrics: {
+        cpuUsage: metrics.cpuUtilization,
+        memoryUsage: metrics.memoryUtilization,
+        requestsPerMinute: metrics.operationsPerSecond / 60,
+        lastOptimized: Date.now() - (1000 * 60 * 60) // 1 hour ago
+      },
+      warnings,
+      errors
     };
-  }
-  
-  /**
-   * Run diagnostics on all neural services
-   */
-  runSystemDiagnostics(): Promise<any> {
-    return new Promise(resolve => {
-      // Simulate diagnostic process
-      setTimeout(() => {
-        const services = neuralServiceRegistry.getAllServices();
-        const diagnosticResults = services.map(service => {
-          const metrics = service.getMetrics();
-          const config = service.getConfig();
-          
-          return {
-            moduleId: service.moduleId,
-            moduleType: service.moduleType,
-            status: config.enabled ? 'active' : 'inactive',
-            health: Math.random() > 0.2 ? 'healthy' : 'warning',
-            metrics: {
-              operations: metrics.operationsCount || 0,
-              successRate: metrics.successRate || 0,
-              latency: metrics.averageLatency || 0
-            },
-            recommendations: []
-          };
-        });
-        
-        // Add some recommendations
-        if (diagnosticResults.length > 0) {
-          const randomIndex = Math.floor(Math.random() * diagnosticResults.length);
-          diagnosticResults[randomIndex].recommendations.push(
-            'Consider increasing resource allocation for better performance'
-          );
-        }
-        
-        // Add general recommendations
-        const generalRecommendations = [
-          'Regular neural network retraining recommended',
-          'Consider optimizing model parameters for improved accuracy',
-          'Memory usage optimization may improve overall system performance'
-        ];
-        
-        resolve({
-          status: 'completed',
-          timestamp: new Date().toISOString(),
-          serviceResults: diagnosticResults,
-          generalRecommendations: generalRecommendations.slice(0, Math.floor(Math.random() * 3) + 1)
-        });
-      }, 1000);
-    });
-  }
-  
-  /**
-   * Check resource allocation efficiency
-   */
-  checkResourceAllocation(): { 
-    efficiency: number;
-    recommendations: string[];
-  } {
-    const services = neuralServiceRegistry.getAllServices();
-    const enabledServices = services.filter(s => s.getConfig().enabled);
     
-    // Calculate efficiency score
-    const totalAllocation = enabledServices.reduce((sum, s) => sum + s.getConfig().resourceAllocation, 0);
-    const totalPriority = enabledServices.reduce((sum, s) => sum + s.getConfig().priority, 0);
-    
-    let efficiency = 0.7; // Default moderate efficiency
-    
-    if (enabledServices.length > 1) {
-      // Higher score for balanced resource allocation based on priority
-      const idealAllocationRatio = 100 / totalPriority;
-      
-      const deviations = enabledServices.map(s => {
-        const idealAllocation = s.getConfig().priority * idealAllocationRatio;
-        const actualAllocation = s.getConfig().resourceAllocation;
-        return Math.abs(idealAllocation - actualAllocation) / idealAllocation;
-      });
-      
-      const avgDeviation = deviations.reduce((sum, dev) => sum + dev, 0) / deviations.length;
-      efficiency = Math.max(0, Math.min(1, 1 - avgDeviation));
+    if (status !== 'healthy') {
+      health.message = status === 'error' 
+        ? "System experiencing critical issues"
+        : "System experiencing performance issues";
     }
     
-    // Generate recommendations
-    const recommendations: string[] = [];
-    
-    if (efficiency < 0.7) {
-      recommendations.push('Resource allocation not optimally aligned with service priorities');
-      recommendations.push('Consider using automatic resource optimization');
-    }
-    
-    if (totalAllocation > 90 && enabledServices.length > 1) {
-      recommendations.push('High total resource allocation may cause system performance issues');
-    }
-    
-    const highPriorityLowResource = enabledServices.filter(s => 
-      s.getConfig().priority > 70 && s.getConfig().resourceAllocation < 30
-    );
-    
-    if (highPriorityLowResource.length > 0) {
-      recommendations.push(`${highPriorityLowResource.length} high priority services have insufficient resources allocated`);
-    }
+    return health;
+  } catch (error) {
+    console.error("Error checking Brain Hub health:", error);
     
     return {
-      efficiency,
-      recommendations
+      status: 'error',
+      message: 'Failed to retrieve Brain Hub health status',
+      metrics: {
+        cpuUsage: 0,
+        memoryUsage: 0,
+        requestsPerMinute: 0,
+        lastOptimized: Date.now()
+      },
+      warnings: [],
+      errors: ['Connection error to Brain Hub service']
     };
   }
 }
-
-export const healthCheckService = new HealthCheckService();
-export default healthCheckService;

@@ -1,18 +1,12 @@
 
-import { SystemHealthMetrics } from '@/services/neural';
-
-export type BrainHubHealthStatus = 'good' | 'warning' | 'error' | 'unknown';
-
 export interface BrainHubHealth {
-  status: BrainHubHealthStatus;
+  status: 'healthy' | 'warning' | 'error' | 'unknown';
   message?: string;
   metrics: {
     cpuUsage: number;
     memoryUsage: number;
     requestsPerMinute: number;
     lastOptimized: number;
-    neuralMetrics?: SystemHealthMetrics;
-    [key: string]: any; // Allow additional metrics
   };
   warnings: string[];
   errors: string[];
@@ -23,8 +17,10 @@ export interface BrainHubAnalytics {
   averageResponseTime: number;
   errorRate: number;
   utilizationTrend: {
-    timestamp: string;
-    value: number;
+    timestamp: number;
+    cpuUsage: number;
+    memoryUsage: number;
+    operations: number;
   }[];
   recommendations: string[];
 }

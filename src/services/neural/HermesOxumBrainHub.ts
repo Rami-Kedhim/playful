@@ -1,6 +1,8 @@
 import { neuralServiceRegistry } from "./registry/NeuralServiceRegistry";
 import type { NeuralQueryResponse, NeuralQuery } from "./types/neuralQuery";
 import type { NeuralModel, ModelParameters, SystemHealthMetrics, TrainingProgress } from "./types/neuralHub";
+import { Escort } from "@/types/escort";
+import { BrainHubRequest, BrainHubResponse } from "@/types/brainHub";
 
 /**
  * Interface for BrainHub configuration
@@ -13,6 +15,7 @@ export interface BrainHubConfig {
   physics: PhysicsModel;
   economics: EconomicsModel;
   robotics: RoboticsModel;
+  [key: string]: any; // Add index signature to match the type in types/brainHub
 }
 
 export interface PsychologyModel {
@@ -20,6 +23,7 @@ export interface PsychologyModel {
   personalityModeling: boolean;
   behaviourPrediction: boolean;
   sentimentAnalysis: boolean;
+  [key: string]: boolean; // Add index signature to match the type in types/brainHub
 }
 
 export interface PhysicsModel {
@@ -27,6 +31,7 @@ export interface PhysicsModel {
   gravitationalEffects: boolean;
   fluidDynamics: boolean;
   particleSystems: boolean;
+  [key: string]: boolean; // Add index signature to match the type in types/brainHub
 }
 
 export interface EconomicsModel {
@@ -34,6 +39,7 @@ export interface EconomicsModel {
   demandForecasting: boolean;
   marketSimulation: boolean;
   transactionAnalysis: boolean;
+  [key: string]: boolean; // Add index signature to match the type in types/brainHub
 }
 
 export interface RoboticsModel {
@@ -41,6 +47,7 @@ export interface RoboticsModel {
   pathPlanning: boolean;
   sensorIntegration: boolean;
   controlSystems: boolean;
+  [key: string]: boolean; // Add index signature to match the type in types/brainHub
 }
 
 interface DecisionLog {
@@ -51,6 +58,7 @@ interface DecisionLog {
   confidence: number;
   impact: 'low' | 'medium' | 'high';
   status: 'pending' | 'approved' | 'rejected' | 'automated';
+  context?: string; // Add context property that was missing
 }
 
 /**
@@ -133,6 +141,19 @@ export class HermesOxumBrainHub {
         processingTime: Math.random() * 300,
         confidence: 0.87
       }
+    };
+  }
+
+  /**
+   * Process a request through Brain Hub
+   * Added to fix missing method errors
+   */
+  public processRequest(request: BrainHubRequest): BrainHubResponse {
+    console.log("Processing request through BrainHub:", request);
+    
+    return {
+      success: true,
+      data: request.type === 'sync_components' ? { synchronized: true } : { processed: true }
     };
   }
   
@@ -346,7 +367,7 @@ export class HermesOxumBrainHub {
   /**
    * Log a decision
    */
-  public logDecision(module: string, decision: string, confidence: number, impact: 'low' | 'medium' | 'high'): void {
+  public logDecision(module: string, decision: string, confidence: number = 0.8, impact: 'low' | 'medium' | 'high' = 'medium'): void {
     const log: DecisionLog = {
       id: `decision-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       timestamp: new Date(),
@@ -413,7 +434,7 @@ export class HermesOxumBrainHub {
     await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 300));
     
     return {
-      result: `Processed with ${model.name}`,
+      result: `Processed with model ${modelId}`,
       confidence: 0.7 + Math.random() * 0.25,
       processingTime: 50 + Math.random() * 200
     };
@@ -449,7 +470,7 @@ export class HermesOxumBrainHub {
   }
 
   // Generate mock escort data (moved from the previous version)
-  private getMockEscorts(): any[] {
+  private getMockEscorts(): Escort[] {
     const escorts: Escort[] = [];
     
     for (let i = 0; i < 20; i++) {

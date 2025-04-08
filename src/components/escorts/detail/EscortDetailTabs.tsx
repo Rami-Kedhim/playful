@@ -92,27 +92,15 @@ const EscortDetailTabs: React.FC<EscortDetailTabsProps> = ({ escort }) => {
       </TabsContent>
       
       <TabsContent value="rates">
-        <Card>
-          <CardContent className="pt-6">
-            <EscortRates rates={escort.rates || {}} />
-          </CardContent>
-        </Card>
+        <EscortRates escort={escort} />
       </TabsContent>
       
       <TabsContent value="services">
-        <Card>
-          <CardContent className="pt-6">
-            <EscortServices services={escort.services || []} />
-          </CardContent>
-        </Card>
+        <EscortServices escort={escort} />
       </TabsContent>
       
       <TabsContent value="reviews">
-        <Card>
-          <CardContent className="pt-6">
-            <EscortReviews escortId={escort.id} rating={escort.rating} reviewCount={escort.reviews} />
-          </CardContent>
-        </Card>
+        <EscortReviews escort={escort} />
       </TabsContent>
     </Tabs>
   );

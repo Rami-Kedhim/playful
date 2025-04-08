@@ -1,3 +1,8 @@
 
-export { checkBrainHubHealth } from './healthCheckService';
-export { updateBrainHubAnalytics } from './analyticsService';
+import checkBrainHubHealth from './healthCheckService';
+import updateBrainHubAnalytics from './analyticsService';
+
+export {
+  checkBrainHubHealth,
+  updateBrainHubAnalytics
+};

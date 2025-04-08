@@ -1,8 +1,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { BrainHubHealth, BrainHubAnalytics } from '@/types/brainHubHealth';
-import { checkBrainHubHealth } from '@/services/brainHubHealth/healthCheckService';
-import { updateBrainHubAnalytics } from '@/services/brainHubHealth/analyticsService';
+import checkBrainHubHealth from '@/services/brainHubHealth/healthCheckService';
+import updateBrainHubAnalytics from '@/services/brainHubHealth/analyticsService';
 
 /**
  * Hook for accessing Brain Hub health information and analytics

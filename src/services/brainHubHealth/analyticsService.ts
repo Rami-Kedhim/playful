@@ -1,95 +1,110 @@
 
-import { neuralServiceRegistry } from '@/services/neural/registry/NeuralServiceRegistry';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-import type { SystemHealthMetrics } from '@/services/neural/types/neuralHub';
+import { BrainHubAnalytics } from "@/types/brainHubHealth";
+import { brainHub } from "../neural/HermesOxumBrainHub";
+import { neuralServiceRegistry } from "../neural/registry/NeuralServiceRegistry";
 
-export class AnalyticsService {
-  /**
-   * Get analytics data from all neural services
-   */
-  getServiceMetrics(): any[] {
+/**
+ * Generate analytics for the Brain Hub
+ */
+export default function updateBrainHubAnalytics(): BrainHubAnalytics {
+  try {
+    // Get metrics from brain hub and services
+    const metrics = brainHub.getSystemStatus();
     const services = neuralServiceRegistry.getAllServices();
     
-    return services.map(service => {
-      const metrics = service.getMetrics();
-      return {
-        moduleId: service.moduleId,
-        moduleType: service.moduleType,
-        metrics: {
-          // Safely access properties with defaults
-          operationsCount: metrics.operationsCount || 0,
-          successRate: metrics.successRate || 100,
-          averageLatency: metrics.averageLatency || 0,
-          ...metrics
-        },
-        config: service.getConfig()
-      };
+    // Calculate total operations
+    let totalOperations = 0;
+    services.forEach(service => {
+      const serviceMetrics = service.getMetrics();
+      totalOperations += serviceMetrics.operationsCount || 0;
     });
-  }
-  
-  /**
-   * Get system health metrics
-   */
-  getSystemHealth(): SystemHealthMetrics {
-    return brainHub.getSystemStatus();
-  }
-  
-  /**
-   * Get aggregate system metrics
-   */
-  getAggregateMetrics(): any {
-    const serviceMetrics = this.getServiceMetrics();
-    const systemHealth = this.getSystemHealth();
     
-    const totalOperations = serviceMetrics.reduce((total, service) => 
-      total + (service.metrics.operationsCount || 0), 0);
+    // Generate mock trend data
+    const utilizationTrend = generateMockTrendData();
     
-    const averageSuccessRate = serviceMetrics.length > 0 
-      ? serviceMetrics.reduce((total, service) => 
-          total + (service.metrics.successRate || 0), 0) / serviceMetrics.length
-      : 0;
-      
-    const averageLatency = serviceMetrics.length > 0 
-      ? serviceMetrics.reduce((total, service) => 
-          total + (service.metrics.averageLatency || 0), 0) / serviceMetrics.length
-      : 0;
+    // Generate recommendations based on metrics
+    const recommendations = generateRecommendations(metrics);
     
     return {
-      totalOperations,
-      averageSuccessRate,
-      averageLatency,
-      activeServices: serviceMetrics.filter(s => s.config.enabled).length,
-      totalServices: serviceMetrics.length,
-      systemHealth
+      dailyOperations: totalOperations,
+      averageResponseTime: metrics.responseTime,
+      errorRate: metrics.errorRate,
+      utilizationTrend,
+      recommendations
     };
-  }
-  
-  /**
-   * Get performance trend over time
-   * (Simulated data for demo purposes)
-   */
-  getPerformanceTrend(days: number = 7): any[] {
-    const trend = [];
-    const now = new Date();
+  } catch (error) {
+    console.error("Error updating Brain Hub analytics:", error);
     
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(now);
-      date.setDate(date.getDate() - i);
-      
-      trend.push({
-        date: date.toISOString().split('T')[0],
-        operations: Math.floor(Math.random() * 10000) + 5000,
-        latency: Math.floor(Math.random() * 100) + 50,
-        successRate: 95 + (Math.random() * 5),
-        cpuUsage: Math.floor(Math.random() * 40) + 30,
-        memoryUsage: Math.floor(Math.random() * 30) + 40
-      });
-    }
-    
-    return trend;
+    return {
+      dailyOperations: 0,
+      averageResponseTime: 0,
+      errorRate: 0,
+      utilizationTrend: [],
+      recommendations: ["System analytics unavailable - please check connection"]
+    };
   }
 }
 
-export const analyticsService = new AnalyticsService();
+/**
+ * Generate mock trend data for visualization
+ */
+function generateMockTrendData() {
+  const now = Date.now();
+  const trend = [];
+  
+  // Generate data points for the last 24 hours (hourly)
+  for (let i = 0; i < 24; i++) {
+    const timestamp = now - (23 - i) * 3600000;
+    const cpuBase = 30 + Math.sin(i / 3) * 15; // Sinusoidal pattern
+    const memoryBase = 40 + Math.cos(i / 4) * 10; // Cosinusoidal pattern
+    const operationsBase = 1000 + Math.sin(i / 2) * 500; // Higher frequency sin
+    
+    trend.push({
+      timestamp,
+      cpuUsage: cpuBase + Math.random() * 10,
+      memoryUsage: memoryBase + Math.random() * 15,
+      operations: Math.max(0, operationsBase + (Math.random() - 0.5) * 200)
+    });
+  }
+  
+  return trend;
+}
 
-export default analyticsService;
+/**
+ * Generate intelligent recommendations based on system health
+ */
+function generateRecommendations(metrics: any): string[] {
+  const recommendations = [];
+  
+  // CPU recommendations
+  if (metrics.cpuUtilization > 75) {
+    recommendations.push("Consider scaling out neural processing capacity to reduce CPU load");
+  }
+  
+  // Memory recommendations
+  if (metrics.memoryUtilization > 80) {
+    recommendations.push("Memory utilization is high - consider optimizing caching strategy");
+  }
+  
+  // Error rate recommendations
+  if (metrics.errorRate > 1.5) {
+    recommendations.push("Increased error rate detected - review error logs for patterns");
+  }
+  
+  // Response time recommendations
+  if (metrics.responseTime > 150) {
+    recommendations.push("High response latency - consider response time optimization");
+  }
+  
+  // Balance recommendations
+  if (metrics.stability < 85) {
+    recommendations.push("System stability below optimal threshold - consider maintenance");
+  }
+  
+  // Add at least one recommendation if none were generated
+  if (recommendations.length === 0) {
+    recommendations.push("All systems operating within optimal parameters");
+  }
+  
+  return recommendations;
+}
