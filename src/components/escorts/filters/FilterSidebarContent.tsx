@@ -1,13 +1,22 @@
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import SearchFilter from "./SearchFilter";
 import LocationFilter from "./LocationFilter";
 import PriceRangeFilter from "./PriceRangeFilter";
-import CheckboxGroup from "./CheckboxGroup";
-import ServiceTypeFilter from "./ServiceTypeFilter";
 import AgeRangeFilter from "./AgeRangeFilter";
 import RatingFilter from "./RatingFilter";
+import ServiceTypeFilter from "./ServiceTypeFilter";
+import CheckboxGroup from "./CheckboxGroup";
 import AvailabilityFilter from "./AvailabilityFilter";
+import HeightRangeFilter from "./HeightRangeFilter";
+import WeightRangeFilter from "./WeightRangeFilter";
+import LanguageFilter from "./LanguageFilter";
+import HairColorFilter from "./HairColorFilter";
+import EyeColorFilter from "./EyeColorFilter";
+import EthnicityFilter from "./EthnicityFilter";
+import BodyTypeFilter from "./BodyTypeFilter";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface FilterSidebarContentProps {
   searchQuery: string;
@@ -25,14 +34,34 @@ interface FilterSidebarContentProps {
   toggleGender: (gender: string) => void;
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
-  ageRange: [number, number];
-  setAgeRange: (range: number[]) => void;
-  ratingMin: number;
-  setRatingMin: (rating: number) => void;
-  availableNow: boolean;
-  setAvailableNow: (available: boolean) => void;
+  ageRange?: [number, number];
+  setAgeRange?: (range: number[]) => void;
+  ratingMin?: number;
+  setRatingMin?: (rating: number) => void;
+  availableNow?: boolean;
+  setAvailableNow?: (available: boolean) => void;
   serviceTypeFilter: "in-person" | "virtual" | "both" | "";
   setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
+  
+  // Added new filter props
+  heightRange?: [number, number];
+  setHeightRange?: (range: number[]) => void;
+  weightRange?: [number, number];
+  setWeightRange?: (range: number[]) => void;
+  selectedLanguages?: string[];
+  toggleLanguage?: (language: string) => void;
+  selectedHairColors?: string[];
+  toggleHairColor?: (hairColor: string) => void;
+  selectedEyeColors?: string[];
+  toggleEyeColor?: (eyeColor: string) => void;
+  selectedEthnicities?: string[];
+  toggleEthnicity?: (ethnicity: string) => void;
+  selectedBodyTypes?: string[];
+  toggleBodyType?: (bodyType: string) => void;
+  selectedDays?: string[];
+  toggleDay?: (day: string) => void;
+  selectedHours?: string[];
+  toggleHour?: (hour: string) => void;
 }
 
 const FilterSidebarContent = ({
@@ -44,124 +73,185 @@ const FilterSidebarContent = ({
   setPriceRange,
   verifiedOnly,
   setVerifiedOnly,
+  selectedServices,
+  toggleService,
+  services,
   selectedGenders,
   toggleGender,
   selectedOrientations,
   toggleOrientation,
-  ageRange,
-  setAgeRange,
-  ratingMin,
-  setRatingMin,
-  availableNow,
-  setAvailableNow,
+  ageRange = [18, 60],
+  setAgeRange = () => {},
+  ratingMin = 0,
+  setRatingMin = () => {},
+  availableNow = false,
+  setAvailableNow = () => {},
   serviceTypeFilter,
-  setServiceTypeFilter
+  setServiceTypeFilter,
+  
+  // New filter props with defaults
+  heightRange = [140, 200],
+  setHeightRange = () => {},
+  weightRange = [40, 120],
+  setWeightRange = () => {},
+  selectedLanguages = [],
+  toggleLanguage = () => {},
+  selectedHairColors = [],
+  toggleHairColor = () => {},
+  selectedEyeColors = [],
+  toggleEyeColor = () => {},
+  selectedEthnicities = [],
+  toggleEthnicity = () => {},
+  selectedBodyTypes = [],
+  toggleBodyType = () => {},
+  selectedDays = [],
+  toggleDay = () => {},
+  selectedHours = [],
+  toggleHour = () => {}
 }: FilterSidebarContentProps) => {
-  const genders = ["male", "female", "transgender", "non-binary"];
+  const genders = ["male", "female", "non-binary", "transgender"];
   const orientations = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
   
   return (
-    <Accordion type="multiple" defaultValue={["search", "serviceType", "location", "price", "availability"]}>
-      <AccordionItem value="search">
-        <AccordionTrigger>Search</AccordionTrigger>
-        <AccordionContent>
-          <SearchFilter 
-            searchQuery={searchQuery} 
-            setSearchQuery={setSearchQuery} 
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="serviceType">
-        <AccordionTrigger>Service Type</AccordionTrigger>
-        <AccordionContent>
+    <ScrollArea className="h-[calc(100vh-180px)] pr-4">
+      <div className="space-y-6">
+        <SearchFilter 
+          searchQuery={searchQuery} 
+          setSearchQuery={setSearchQuery} 
+        />
+        
+        <LocationFilter 
+          location={location} 
+          setLocation={setLocation} 
+        />
+        
+        <Separator />
+        
+        <AvailabilityFilter
+          verifiedOnly={verifiedOnly}
+          setVerifiedOnly={setVerifiedOnly}
+          availableNow={availableNow}
+          setAvailableNow={setAvailableNow}
+          selectedDays={selectedDays}
+          toggleDay={toggleDay}
+          selectedHours={selectedHours}
+          toggleHour={toggleHour}
+        />
+        
+        <Separator />
+        
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium">Service Types</h3>
           <ServiceTypeFilter
-            serviceTypeFilter={serviceTypeFilter}
-            setServiceTypeFilter={setServiceTypeFilter}
+            selectedServices={selectedServices}
+            toggleService={toggleService}
           />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="location">
-        <AccordionTrigger>Location</AccordionTrigger>
-        <AccordionContent>
-          <LocationFilter 
-            location={location} 
-            setLocation={setLocation} 
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="price">
-        <AccordionTrigger>Price Range</AccordionTrigger>
-        <AccordionContent>
-          <PriceRangeFilter 
-            priceRange={priceRange} 
-            setPriceRange={setPriceRange} 
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="availability">
-        <AccordionTrigger>Availability</AccordionTrigger>
-        <AccordionContent>
-          <AvailabilityFilter
-            verifiedOnly={verifiedOnly}
-            setVerifiedOnly={setVerifiedOnly}
-            availableNow={availableNow}
-            setAvailableNow={setAvailableNow}
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="age">
-        <AccordionTrigger>Age</AccordionTrigger>
-        <AccordionContent>
-          <AgeRangeFilter
-            ageRange={ageRange}
-            setAgeRange={setAgeRange}
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="rating">
-        <AccordionTrigger>Rating</AccordionTrigger>
-        <AccordionContent>
-          <RatingFilter
-            ratingMin={ratingMin}
-            setRatingMin={setRatingMin}
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="gender">
-        <AccordionTrigger>Gender</AccordionTrigger>
-        <AccordionContent>
-          <CheckboxGroup 
-            title="Gender"
-            items={genders}
-            selectedItems={selectedGenders}
-            toggleItem={toggleGender}
-            formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
-            idPrefix="gender"
-          />
-        </AccordionContent>
-      </AccordionItem>
-      
-      <AccordionItem value="orientation">
-        <AccordionTrigger>Sexual Orientation</AccordionTrigger>
-        <AccordionContent>
-          <CheckboxGroup 
-            title="Sexual Orientation"
-            items={orientations}
-            selectedItems={selectedOrientations}
-            toggleItem={toggleOrientation}
-            formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
-            idPrefix="orientation"
-          />
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        </div>
+        
+        <Separator />
+        
+        <PriceRangeFilter 
+          priceRange={priceRange} 
+          setPriceRange={setPriceRange} 
+        />
+        
+        <Separator />
+        
+        <AgeRangeFilter
+          ageRange={ageRange}
+          setAgeRange={setAgeRange}
+        />
+        
+        <RatingFilter
+          ratingMin={ratingMin}
+          setRatingMin={setRatingMin}
+        />
+        
+        <Separator />
+        
+        <Accordion type="multiple" className="w-full">
+          <AccordionItem value="attributes">
+            <AccordionTrigger className="text-sm font-medium py-2">
+              Physical Attributes
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-6 pt-2">
+                <HeightRangeFilter
+                  heightRange={heightRange}
+                  setHeightRange={setHeightRange}
+                />
+                
+                <WeightRangeFilter
+                  weightRange={weightRange}
+                  setWeightRange={setWeightRange}
+                />
+                
+                <BodyTypeFilter
+                  selectedBodyTypes={selectedBodyTypes}
+                  toggleBodyType={toggleBodyType}
+                />
+                
+                <HairColorFilter
+                  selectedHairColors={selectedHairColors}
+                  toggleHairColor={toggleHairColor}
+                />
+                
+                <EyeColorFilter
+                  selectedEyeColors={selectedEyeColors}
+                  toggleEyeColor={toggleEyeColor}
+                />
+                
+                <EthnicityFilter
+                  selectedEthnicities={selectedEthnicities}
+                  toggleEthnicity={toggleEthnicity}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          
+          <AccordionItem value="gender-orientation">
+            <AccordionTrigger className="text-sm font-medium py-2">
+              Gender & Orientation
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-6 pt-2">
+                <CheckboxGroup
+                  title="Gender"
+                  items={genders}
+                  selectedItems={selectedGenders}
+                  toggleItem={toggleGender}
+                  formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+                  idPrefix="gender"
+                />
+                
+                <CheckboxGroup
+                  title="Sexual Orientation"
+                  items={orientations}
+                  selectedItems={selectedOrientations}
+                  toggleItem={toggleOrientation}
+                  formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
+                  idPrefix="orientation"
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          
+          <AccordionItem value="languages">
+            <AccordionTrigger className="text-sm font-medium py-2">
+              Languages
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2 pt-2">
+                <LanguageFilter
+                  selectedLanguages={selectedLanguages}
+                  toggleLanguage={toggleLanguage}
+                />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+    </ScrollArea>
   );
 };
 

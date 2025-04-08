@@ -1,7 +1,6 @@
 
-import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface MobileFilterHeaderProps {
   setShowFilters: (show: boolean) => void;
@@ -9,20 +8,16 @@ interface MobileFilterHeaderProps {
 
 const MobileFilterHeader = ({ setShowFilters }: MobileFilterHeaderProps) => {
   return (
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <div>
-        <CardTitle className="text-lg font-semibold">Filters</CardTitle>
-        <CardDescription className="text-sm">Refine your search results</CardDescription>
-      </div>
-      <Button
-        variant="ghost"
-        size="icon"
+    <div className="flex items-center justify-between p-4 border-b">
+      <h2 className="font-medium text-lg">Filter Escorts</h2>
+      <Button 
+        variant="ghost" 
+        size="icon" 
         onClick={() => setShowFilters(false)}
-        className="h-8 w-8"
       >
-        <X size={18} />
+        <X className="h-5 w-5" />
       </Button>
-    </CardHeader>
+    </div>
   );
 };
 

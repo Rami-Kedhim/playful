@@ -141,3 +141,19 @@ export const ESCORT_BODY_TYPE_OPTIONS = [
   'curvy',
   'plus-size'
 ];
+
+// Common languages spoken by escorts
+export const ESCORT_LANGUAGE_OPTIONS = [
+  'english',
+  'spanish',
+  'french',
+  'german',
+  'italian',
+  'russian',
+  'chinese',
+  'japanese',
+  'arabic',
+  'portuguese',
+  'hindi',
+  'korean'
+];
