@@ -25,6 +25,7 @@ const CreatorDetail = lazy(() => import('./pages/CreatorDetail'));
 const AIProfiles = lazy(() => import("./pages/AIProfiles"));
 const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
+const BrainHubPage = lazy(() => import('./pages/BrainHubPage')); // Add import for BrainHubPage
 
 // Loading component
 const LoadingFallback = () => (
@@ -137,6 +138,15 @@ const AppRoutes: React.FC = () => {
           <AppLayout>
             <LivecamDetail />
           </AppLayout>
+        } />
+        
+        {/* Add Brain Hub route - protected as it's an advanced feature */}
+        <Route path="/brain-hub" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BrainHubPage />
+            </AppLayout>
+          </ProtectedRoute>
         } />
         
         {/* Catch-all route for 404s */}
