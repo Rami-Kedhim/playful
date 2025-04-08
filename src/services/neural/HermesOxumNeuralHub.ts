@@ -1,4 +1,3 @@
-
 // Hermes Oxum Neural Hub - Advanced neural network system for intelligent decision making
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,7 +9,17 @@ export interface SystemHealthMetrics {
   errorRate: number; // 0-1
   stability: number; // 0-1
   userEngagement: number; // 0-1
+  economicBalance: number; // 0-1
   lastUpdated: Date;
+}
+
+export interface ModelParameters {
+  decayConstant: number;
+  growthFactor: number;
+  cyclePeriod: number;
+  harmonicCount: number;
+  bifurcationPoint: number;
+  attractorStrength: number;
 }
 
 export interface NeuralModel {
@@ -45,6 +54,8 @@ class HermesOxumNeuralHub {
   private healthMetrics: SystemHealthMetrics;
   private trainingJobs: Map<string, TrainingProgress> = new Map();
   private predictionCache: Map<string, any> = new Map();
+  private observers: ((metrics: SystemHealthMetrics) => void)[] = [];
+  private modelParameters: ModelParameters;
   
   constructor() {
     this.healthMetrics = {
@@ -55,7 +66,17 @@ class HermesOxumNeuralHub {
       errorRate: 0.002,
       stability: 0.98,
       userEngagement: 0.76,
+      economicBalance: 0.82,
       lastUpdated: new Date()
+    };
+    
+    this.modelParameters = {
+      decayConstant: 0.2,
+      growthFactor: 1.5,
+      cyclePeriod: 24,
+      harmonicCount: 3,
+      bifurcationPoint: 0.6,
+      attractorStrength: 0.4
     };
     
     this.initializeModels();
@@ -142,6 +163,57 @@ class HermesOxumNeuralHub {
     ];
   }
   
+  // Observer pattern methods
+  addObserver(callback: (metrics: SystemHealthMetrics) => void): void {
+    this.observers.push(callback);
+  }
+  
+  removeObserver(callback: (metrics: SystemHealthMetrics) => void): void {
+    this.observers = this.observers.filter(obs => obs !== callback);
+  }
+  
+  // Method to get model parameters
+  getModelParameters(): ModelParameters {
+    return { ...this.modelParameters };
+  }
+  
+  // Method to update model parameters
+  updateModelParameters(params: ModelParameters): void {
+    this.modelParameters = { ...params };
+    console.log('Model parameters updated:', this.modelParameters);
+  }
+  
+  // Method to reset system
+  resetSystem(): void {
+    this.modelParameters = {
+      decayConstant: 0.2,
+      growthFactor: 1.5,
+      cyclePeriod: 24,
+      harmonicCount: 3,
+      bifurcationPoint: 0.6,
+      attractorStrength: 0.4
+    };
+    
+    console.log('System reset to default parameters');
+  }
+  
+  // Apply boost to content
+  applyBoostToContent(
+    contentId: string,
+    contentType: 'profile' | 'post' | 'video' | 'livecam' | 'event' | 'metaverse',
+    boostScore: number,
+    region?: string,
+    language?: string
+  ): number {
+    // In a real implementation, this would apply advanced neural models to boost content visibility
+    const baseBoost = boostScore;
+    const neuralMultiplier = 1.2; // Enhanced by neural processing
+    
+    console.log(`Applied neural boost to ${contentType} content: ${contentId}`);
+    
+    return baseBoost * neuralMultiplier;
+  }
+  
   // Get all available models
   getModels(): NeuralModel[] {
     return [...this.models];
@@ -183,8 +255,19 @@ class HermesOxumNeuralHub {
       errorRate: Math.max(0.001, Math.min(0.05, this.healthMetrics.errorRate + (Math.random() - 0.5) * 0.005)),
       stability: Math.max(0.7, Math.min(1.0, this.healthMetrics.stability + (Math.random() - 0.5) * 0.03)),
       userEngagement: Math.max(0.5, Math.min(0.95, this.healthMetrics.userEngagement + (Math.random() - 0.5) * 0.02)),
+      economicBalance: Math.max(0.6, Math.min(1.0, this.healthMetrics.economicBalance + (Math.random() - 0.5) * 0.04)),
       lastUpdated: now
     };
+    
+    // Notify all observers
+    const metricsSnapshot = { ...this.healthMetrics };
+    this.observers.forEach(callback => {
+      try {
+        callback(metricsSnapshot);
+      } catch (e) {
+        console.error('Error in observer callback:', e);
+      }
+    });
     
     // Update model statuses occasionally
     if (Math.random() > 0.8) {
