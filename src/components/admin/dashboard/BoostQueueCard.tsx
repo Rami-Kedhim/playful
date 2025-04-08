@@ -9,6 +9,8 @@ import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertCircle, RefreshCcw, Settings } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import LoadingIndicator from '@/components/common/LoadingIndicator';
+import Alert from '@/components/common/Alert';
 
 interface BoostQueueCardProps {
   isFairRotationEnabled: boolean;
@@ -26,57 +28,113 @@ const BoostQueueCard: React.FC<BoostQueueCardProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [isConfiguring, setIsConfiguring] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Generate queue data simulation
   const generateQueueData = () => {
     setIsUpdating(true);
+    setError(null);
     
     // Simulate API call
     setTimeout(() => {
-      // Generate new queue size (between 200-300)
-      const newQueueSize = Math.floor(Math.random() * 100) + 200;
-      
-      // Calculate AI and real based on ratio
-      const newAiModels = Math.floor(newQueueSize * aiRealRatio / 100);
-      const newRealEscorts = newQueueSize - newAiModels;
-      
-      setQueueSize(newQueueSize);
-      setAiModels(newAiModels);
-      setRealEscorts(newRealEscorts);
-      setIsUpdating(false);
-      
-      toast({
-        title: "Queue Updated",
-        description: `New queue size: ${newQueueSize} profiles`,
-      });
+      try {
+        // Simulate random failure (10% chance)
+        if (Math.random() < 0.1) {
+          throw new Error("Failed to fetch queue data");
+        }
+        
+        // Generate new queue size (between 200-300)
+        const newQueueSize = Math.floor(Math.random() * 100) + 200;
+        
+        // Calculate AI and real based on ratio
+        const newAiModels = Math.floor(newQueueSize * aiRealRatio / 100);
+        const newRealEscorts = newQueueSize - newAiModels;
+        
+        setQueueSize(newQueueSize);
+        setAiModels(newAiModels);
+        setRealEscorts(newRealEscorts);
+        
+        toast({
+          title: "Queue Updated",
+          description: `New queue size: ${newQueueSize} profiles`,
+          variant: "success",
+        });
+      } catch (err: any) {
+        console.error("Error generating queue data:", err);
+        setError(err.message || "An error occurred while updating queue data");
+        
+        toast({
+          title: "Update Failed",
+          description: err.message || "Failed to update queue data",
+          variant: "destructive",
+        });
+      } finally {
+        setIsUpdating(false);
+        setIsLoading(false);
+      }
     }, 800);
   };
   
   // Apply AI/Real ratio
   const applyRatio = () => {
-    // Recalculate based on current queue size but new ratio
-    const newAiModels = Math.floor(queueSize * aiRealRatio / 100);
-    const newRealEscorts = queueSize - newAiModels;
-    
-    setAiModels(newAiModels);
-    setRealEscorts(newRealEscorts);
-    setIsConfiguring(false);
-    
-    toast({
-      title: "Queue Ratio Updated",
-      description: `AI: ${aiRealRatio}%, Real: ${100 - aiRealRatio}%`,
-    });
+    try {
+      // Validate ratio
+      if (aiRealRatio < 0 || aiRealRatio > 100) {
+        throw new Error("Ratio must be between 0-100%");
+      }
+      
+      // Recalculate based on current queue size but new ratio
+      const newAiModels = Math.floor(queueSize * aiRealRatio / 100);
+      const newRealEscorts = queueSize - newAiModels;
+      
+      setAiModels(newAiModels);
+      setRealEscorts(newRealEscorts);
+      setIsConfiguring(false);
+      
+      toast({
+        title: "Queue Ratio Updated",
+        description: `AI: ${aiRealRatio}%, Real: ${100 - aiRealRatio}%`,
+        variant: "success",
+      });
+    } catch (err: any) {
+      console.error("Error applying ratio:", err);
+      setError(err.message || "Failed to apply ratio");
+      
+      toast({
+        title: "Update Failed",
+        description: err.message || "Failed to update ratio",
+        variant: "destructive",
+      });
+    }
   };
   
   // Toggle queue active state
   const toggleQueueActive = () => {
-    setIsActive(!isActive);
-    
-    toast({
-      title: isActive ? "Queue Paused" : "Queue Activated",
-      description: isActive ? "The boost queue has been paused" : "The boost queue is now active",
-    });
+    try {
+      setIsActive(!isActive);
+      
+      toast({
+        title: isActive ? "Queue Paused" : "Queue Activated",
+        description: isActive ? "The boost queue has been paused" : "The boost queue is now active",
+        variant: isActive ? "warning" : "success",
+      });
+    } catch (err: any) {
+      console.error("Error toggling queue state:", err);
+      setError(err.message || "Failed to toggle queue state");
+      
+      toast({
+        title: "Action Failed",
+        description: "Failed to change queue state",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Dismiss error message
+  const handleDismissError = () => {
+    setError(null);
   };
   
   // Initialize data on mount
@@ -86,15 +144,40 @@ const BoostQueueCard: React.FC<BoostQueueCardProps> = ({
   
   // Toggle fair rotation
   const handleFairRotationToggle = (checked: boolean) => {
-    setIsFairRotationEnabled(checked);
-    
-    toast({
-      title: checked ? "Fair Rotation Enabled" : "Fair Rotation Disabled",
-      description: checked 
-        ? "Boost queue will now prioritize fair distribution" 
-        : "Boost queue will follow standard allocation rules",
-    });
+    try {
+      setIsFairRotationEnabled(checked);
+      
+      toast({
+        title: checked ? "Fair Rotation Enabled" : "Fair Rotation Disabled",
+        description: checked 
+          ? "Boost queue will now prioritize fair distribution" 
+          : "Boost queue will follow standard allocation rules",
+        variant: "success",
+      });
+    } catch (err: any) {
+      console.error("Error toggling fair rotation:", err);
+      setError(err.message || "Failed to toggle fair rotation");
+      
+      toast({
+        title: "Action Failed",
+        description: "Failed to change fair rotation setting",
+        variant: "destructive",
+      });
+    }
   };
+  
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Boost Queue Size</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4 pb-4">
+          <LoadingIndicator size="sm" text="Loading queue data..." centered />
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card>
@@ -125,6 +208,16 @@ const BoostQueueCard: React.FC<BoostQueueCardProps> = ({
         </div>
       </CardHeader>
       <CardContent>
+        {error && (
+          <Alert
+            variant="destructive"
+            message={error}
+            onClose={handleDismissError}
+            className="mb-4"
+            showIcon
+          />
+        )}
+        
         <div className="flex items-center justify-between">
           <div className="text-2xl font-bold">{queueSize}</div>
           <Badge 
@@ -155,7 +248,7 @@ const BoostQueueCard: React.FC<BoostQueueCardProps> = ({
                   step={5}
                 />
               </div>
-              <Button size="sm" onClick={applyRatio} className="w-full text-xs">
+              <Button size="sm" onClick={applyRatio} className="w-full text-xs" disabled={isUpdating}>
                 Apply Ratio
               </Button>
             </div>
@@ -172,6 +265,7 @@ const BoostQueueCard: React.FC<BoostQueueCardProps> = ({
                       id="fair-rotation" 
                       checked={isFairRotationEnabled} 
                       onCheckedChange={handleFairRotationToggle} 
+                      disabled={isUpdating}
                     />
                     <Label htmlFor="fair-rotation">Fair rotation enabled</Label>
                   </div>
