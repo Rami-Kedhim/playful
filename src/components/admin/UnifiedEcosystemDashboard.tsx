@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, LineChart, Line } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
+import EcosystemStatsCards from './dashboard/EcosystemStatsCards';
+import ConversionFlowChart from './dashboard/ConversionFlowChart';
+import RevenueBreakdownChart from './dashboard/RevenueBreakdownChart';
+import DailyTrafficChart from './dashboard/DailyTrafficChart';
 
 // Mock data
 const conversionData = [
@@ -46,67 +48,7 @@ const UnifiedEcosystemDashboard: React.FC = () => {
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total AI Models
-            </CardTitle>
-            <CardDescription>Active profiles</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2,854</div>
-            <p className="text-xs text-muted-foreground">
-              +12% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Verified Escorts
-            </CardTitle>
-            <CardDescription>Active profiles</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">743</div>
-            <p className="text-xs text-muted-foreground">
-              +5% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Conversion Rate
-            </CardTitle>
-            <CardDescription>AI to real bookings</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">14.3%</div>
-            <p className="text-xs text-muted-foreground">
-              +2.5% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Monthly Revenue
-            </CardTitle>
-            <CardDescription>Combined ecosystem</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$421,354</div>
-            <p className="text-xs text-muted-foreground">
-              +18% from last month
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <EcosystemStatsCards />
       
       <Tabs defaultValue="overview">
         <TabsList>
@@ -116,82 +58,15 @@ const UnifiedEcosystemDashboard: React.FC = () => {
         </TabsList>
         
         <TabsContent value="overview" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Conversion Flow</CardTitle>
-              <CardDescription>
-                AI model users converting to real escort bookings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={conversionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="ai" stackId="1" stroke="#8884d8" fill="#8884d8" name="AI Engagements" />
-                    <Area type="monotone" dataKey="real" stackId="2" stroke="#82ca9d" fill="#82ca9d" name="Real Bookings" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <ConversionFlowChart conversionData={conversionData} />
         </TabsContent>
         
         <TabsContent value="revenue" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenue Breakdown</CardTitle>
-              <CardDescription>
-                Revenue distribution across ecosystem components
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="ai_content" stackId="a" fill="#8884d8" name="AI Content" />
-                    <Bar dataKey="ai_boost" stackId="a" fill="#aa84d8" name="AI Boost" />
-                    <Bar dataKey="real_booking" stackId="a" fill="#82ca9d" name="Real Bookings" />
-                    <Bar dataKey="real_content" stackId="a" fill="#aaca9d" name="Real Content" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <RevenueBreakdownChart revenueData={revenueData} />
         </TabsContent>
         
         <TabsContent value="ecology" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Daily Traffic Pattern</CardTitle>
-              <CardDescription>
-                Hourly activity distribution between AI and real profiles
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={ecologyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="ai_profile_views" stroke="#8884d8" name="AI Profile Views" />
-                    <Line type="monotone" dataKey="real_escort_views" stroke="#82ca9d" name="Real Escort Views" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <DailyTrafficChart ecologyData={ecologyData} />
         </TabsContent>
       </Tabs>
     </div>

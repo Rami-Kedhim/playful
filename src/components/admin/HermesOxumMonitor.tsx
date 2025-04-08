@@ -1,16 +1,14 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { AlertCircle, Zap, Brain, Activity } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, Zap, Brain } from 'lucide-react';
 import { hermesOxumEngine } from '@/services/boost/HermesOxumEngine';
+import SystemLoadCard from './dashboard/SystemLoadCard';
+import BoostQueueCard from './dashboard/BoostQueueCard';
+import TimeImpactCard from './dashboard/TimeImpactCard';
+import PerformanceMetricsChart from './dashboard/PerformanceMetricsChart';
+import BoostDistributionChart from './dashboard/BoostDistributionChart';
 
 // Mock data
 const performanceData = [
@@ -77,84 +75,15 @@ const HermesOxumMonitor: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center">
-              <Activity className="mr-2 h-4 w-4" />
-              System Load
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold">{systemLoad}%</span>
-                <Badge className={systemLoad > 80 ? "bg-red-500" : systemLoad > 60 ? "bg-amber-500" : "bg-green-500"}>
-                  {systemLoad > 80 ? "High" : systemLoad > 60 ? "Moderate" : "Optimal"}
-                </Badge>
-              </div>
-              
-              <Slider
-                value={[systemLoad]}
-                max={100}
-                step={1}
-                onValueChange={handleSystemLoadChange}
-                className="py-4"
-              />
-              
-              <p className="text-xs text-muted-foreground">
-                Current system load affects recommendation quality and distribution fairness
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Boost Queue Size
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">243</div>
-              <Badge variant="outline">Active</Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              96 AI models, 147 real escorts in queue
-            </p>
-            <div className="mt-4">
-              <div className="flex items-center space-x-2">
-                <Switch 
-                  id="fair-rotation" 
-                  checked={isFairRotationEnabled} 
-                  onCheckedChange={setIsFairRotationEnabled} 
-                />
-                <Label htmlFor="fair-rotation">Fair rotation enabled</Label>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Time-Based Impact
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">78%</div>
-              <Badge className="bg-green-500">Peak Time</Badge>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Current time-of-day visibility multiplier
-            </p>
-            <div className="mt-4">
-              <Label className="text-xs">Peak hours adjustment</Label>
-              <Input type="time" className="mt-1" defaultValue="20:00" />
-            </div>
-          </CardContent>
-        </Card>
+        <SystemLoadCard 
+          systemLoad={systemLoad}
+          handleSystemLoadChange={handleSystemLoadChange}
+        />
+        <BoostQueueCard
+          isFairRotationEnabled={isFairRotationEnabled}
+          setIsFairRotationEnabled={setIsFairRotationEnabled}
+        />
+        <TimeImpactCard />
       </div>
       
       <Alert>
@@ -166,53 +95,8 @@ const HermesOxumMonitor: React.FC = () => {
       </Alert>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Metrics</CardTitle>
-            <CardDescription>
-              Hermes vs Oxum engine efficiency over time
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="hermes" stroke="#8884d8" name="Hermes (Visibility)" />
-                  <Line type="monotone" dataKey="oxum" stroke="#82ca9d" name="Oxum (Fairness)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Boost Distribution</CardTitle>
-            <CardDescription>
-              AI vs Real profile boost allocation
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={boostDistributionData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="ai" fill="#8884d8" name="AI Models" />
-                  <Bar dataKey="real" fill="#82ca9d" name="Real Escorts" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <PerformanceMetricsChart performanceData={performanceData} />
+        <BoostDistributionChart boostDistributionData={boostDistributionData} />
       </div>
     </div>
   );
