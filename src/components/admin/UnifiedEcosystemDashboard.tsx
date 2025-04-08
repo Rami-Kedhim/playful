@@ -2,11 +2,12 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Brain } from 'lucide-react';
 import EcosystemStatsCards from './dashboard/EcosystemStatsCards';
 import ConversionFlowChart from './dashboard/ConversionFlowChart';
 import RevenueBreakdownChart from './dashboard/RevenueBreakdownChart';
 import DailyTrafficChart from './dashboard/DailyTrafficChart';
+import BrainHubHealthMonitor from './dashboard/BrainHubHealthMonitor';
 
 // Mock data
 const conversionData = [
@@ -55,6 +56,10 @@ const UnifiedEcosystemDashboard: React.FC = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="revenue">Revenue</TabsTrigger>
           <TabsTrigger value="ecology">Ecosystem Ecology</TabsTrigger>
+          <TabsTrigger value="brainhub">
+            <Brain className="h-4 w-4 mr-2" />
+            BrainHub
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-6">
@@ -67,6 +72,26 @@ const UnifiedEcosystemDashboard: React.FC = () => {
         
         <TabsContent value="ecology" className="space-y-6">
           <DailyTrafficChart ecologyData={ecologyData} />
+        </TabsContent>
+        
+        <TabsContent value="brainhub" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <BrainHubHealthMonitor />
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">BrainHub AI System</h3>
+              <p className="text-muted-foreground">
+                The BrainHub AI system powers our ecosystem intelligence and optimization processes.
+                It continuously monitors platform performance, user engagement, and revenue metrics
+                to provide actionable insights and automate optimization tasks.
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                <li>Autonomous decision making and optimization</li>
+                <li>Performance analysis and trend detection</li>
+                <li>Predictive analytics for user behavior</li>
+                <li>Real-time monitoring and alerting</li>
+              </ul>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

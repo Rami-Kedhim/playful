@@ -9,6 +9,7 @@ import BoostQueueCard from './dashboard/BoostQueueCard';
 import TimeImpactCard from './dashboard/TimeImpactCard';
 import PerformanceMetricsChart from './dashboard/PerformanceMetricsChart';
 import BoostDistributionChart from './dashboard/BoostDistributionChart';
+import BrainHubHealthMonitor from './dashboard/BrainHubHealthMonitor';
 
 // Mock data
 const performanceData = [
@@ -74,7 +75,7 @@ const HermesOxumMonitor: React.FC = () => {
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <SystemLoadCard 
           systemLoad={systemLoad}
           handleSystemLoadChange={handleSystemLoadChange}
@@ -97,6 +98,11 @@ const HermesOxumMonitor: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PerformanceMetricsChart performanceData={performanceData} />
         <BoostDistributionChart boostDistributionData={boostDistributionData} />
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <BrainHubHealthMonitor />
+        {/* Future expansion spot for another monitoring component */}
       </div>
     </div>
   );
