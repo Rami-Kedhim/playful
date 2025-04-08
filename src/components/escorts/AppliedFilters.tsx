@@ -1,7 +1,9 @@
+
 import { Button } from "@/components/ui/button";
 import FilterBadge from "./filters/FilterBadge";
-import getServiceTypeName from "./filters/ServiceTypeBadgeLabel";
+import { getServiceTypeName, ServiceTypeFilter } from "./filters/ServiceTypeBadgeLabel";
 import { Users, Video, FilterX } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface AppliedFiltersProps {
   searchQuery: string;
@@ -25,8 +27,8 @@ export interface AppliedFiltersProps {
   setRatingMin: (value: number) => void;
   availableNow: boolean;
   setAvailableNow: (value: boolean) => void;
-  serviceTypeFilter: "in-person" | "virtual" | "both" | "";
-  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
+  serviceTypeFilter: ServiceTypeFilter;
+  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
 }
 
 const AppliedFilters = ({
@@ -73,11 +75,11 @@ const AppliedFilters = ({
   }
   
   const getServiceTypeIcon = () => {
-    if (serviceTypeFilter === "in-person") return <Users className="h-3 w-3" />;
-    if (serviceTypeFilter === "virtual") return <Video className="h-3 w-3" />;
+    if (serviceTypeFilter === "in-person") return <Users className="h-3 w-3 text-primary" />;
+    if (serviceTypeFilter === "virtual") return <Video className="h-3 w-3 text-primary" />;
     if (serviceTypeFilter === "both") {
       return (
-        <div className="flex items-center space-x-0.5">
+        <div className="flex items-center space-x-0.5 text-primary">
           <Users className="h-3 w-3" />
           <Video className="h-3 w-3" />
         </div>
@@ -85,13 +87,31 @@ const AppliedFilters = ({
     }
     return null;
   };
+
+  const filtersCount = [
+    searchQuery ? 1 : 0,
+    location ? 1 : 0,
+    verifiedOnly ? 1 : 0,
+    selectedServices.length,
+    selectedGenders.length,
+    selectedOrientations.length,
+    (ageRange[0] > 18 || ageRange[1] < 60) ? 1 : 0,
+    ratingMin > 0 ? 1 : 0,
+    availableNow ? 1 : 0,
+    serviceTypeFilter ? 1 : 0
+  ].reduce((a, b) => a + b, 0);
   
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <div className={cn(
+      "flex flex-wrap gap-2 mb-6",
+      "transition-all duration-200 ease-in-out",
+      filtersCount > 0 ? "opacity-100" : "opacity-0"
+    )}>
       {searchQuery && (
         <FilterBadge 
           label={`Search: ${searchQuery}`}
           onRemove={() => setSearchQuery("")}
+          variant="secondary"
         />
       )}
       
@@ -99,6 +119,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label={`Location: ${location}`}
           onRemove={() => setLocation("")}
+          variant="secondary"
         />
       )}
       
@@ -106,6 +127,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label="Verified Only"
           onRemove={() => setVerifiedOnly(false)}
+          variant="secondary"
         />
       )}
       
@@ -113,6 +135,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label={`Price: ${priceRange[0]}-${priceRange[1]} LC`}
           onRemove={() => setPriceRange([0, 1000])}
+          variant="secondary"
         />
       )}
       
@@ -121,6 +144,7 @@ const AppliedFilters = ({
           key={service}
           label={service}
           onRemove={() => toggleService(service)}
+          variant="secondary"
         />
       ))}
       
@@ -129,6 +153,7 @@ const AppliedFilters = ({
           key={gender}
           label={gender.charAt(0).toUpperCase() + gender.slice(1)}
           onRemove={() => toggleGender(gender)}
+          variant="secondary"
         />
       ))}
       
@@ -137,6 +162,7 @@ const AppliedFilters = ({
           key={orientation}
           label={orientation.charAt(0).toUpperCase() + orientation.slice(1)}
           onRemove={() => toggleOrientation(orientation)}
+          variant="secondary"
         />
       ))}
       
@@ -144,6 +170,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label={`Age: ${ageRange[0]}-${ageRange[1]}`}
           onRemove={() => setAgeRange([18, 60])}
+          variant="secondary"
         />
       )}
       
@@ -151,6 +178,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label={`Rating: ${ratingMin}+`}
           onRemove={() => setRatingMin(0)}
+          variant="secondary"
         />
       )}
       
@@ -158,6 +186,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label="Available Now"
           onRemove={() => setAvailableNow(false)}
+          variant="secondary"
         />
       )}
       
@@ -166,6 +195,7 @@ const AppliedFilters = ({
           label={getServiceTypeName(serviceTypeFilter)}
           onRemove={() => setServiceTypeFilter("")}
           icon={getServiceTypeIcon()}
+          variant="secondary"
         />
       )}
       
@@ -173,7 +203,7 @@ const AppliedFilters = ({
         variant="outline" 
         size="sm" 
         onClick={clearFilters}
-        className="h-7 ml-auto flex items-center gap-1"
+        className="h-7 ml-auto flex items-center gap-1 bg-background"
       >
         <FilterX className="h-3.5 w-3.5" />
         Clear all
