@@ -13,7 +13,7 @@ interface SystemHealthPanelProps {
 const SystemHealthPanel: React.FC<SystemHealthPanelProps> = ({ className = '' }) => {
   const { health, checkHealth } = useBrainHubHealth();
   
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: BrainHubHealthStatus) => {
     switch (status) {
       case 'good':
         return <CircleCheck className="w-10 h-10 text-green-500" />;

@@ -1,7 +1,7 @@
 
 import { SystemHealthMetrics } from '@/services/neural';
 
-export type BrainHubHealthStatus = string;
+export type BrainHubHealthStatus = 'good' | 'warning' | 'error' | 'unknown';
 
 export interface BrainHubHealth {
   status: BrainHubHealthStatus;

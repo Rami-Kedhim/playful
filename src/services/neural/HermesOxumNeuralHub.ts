@@ -1,296 +1,112 @@
-/**
- * Hermes Oxum Neural Hub - Advanced neural network system for intelligent decision making
- */
-import { 
-  SystemHealthMetrics, 
-  ModelParameters, 
-  NeuralModel, 
-  TrainingProgress 
-} from './types/neuralHub';
-import { createBaseNeuralModels } from './models/neuralModels';
-import { initializeDefaultParameters, validateModelParameters, calculateSystemEfficiency } from './models/modelParameters';
-import { simulateMetricsUpdate, generateSimulatedResponse } from './utils/neuralHubUtils';
-import { TrainingManager } from './training/trainingManager';
+
+import { NeuralModel } from './types/neuralHub';
 
 class HermesOxumNeuralHub {
   private models: NeuralModel[] = [];
-  private healthMetrics: SystemHealthMetrics;
-  private predictionCache: Map<string, any> = new Map();
-  private observers: ((metrics: SystemHealthMetrics) => void)[] = [];
-  private modelParameters: ModelParameters;
-  private trainingManager: TrainingManager;
   
   constructor() {
-    this.healthMetrics = {
-      load: 0.2,
-      memoryUtilization: 0.3,
-      operationsPerSecond: 1200,
-      responseTime: 45,
-      errorRate: 0.002,
-      stability: 0.98,
-      userEngagement: 0.76,
-      economicBalance: 0.82,
-      lastUpdated: new Date()
-    };
-    
-    this.modelParameters = initializeDefaultParameters();
-    this.trainingManager = new TrainingManager();
-    this.initializeModels();
+    // Initialize with some default models
+    this.models = [
+      {
+        id: 'model-1',
+        name: 'Neural Semantic Analyzer',
+        version: '1.0.0',
+        capabilities: ['text-understanding', 'sentiment-analysis'],
+        status: 'active',
+        performance: {
+          accuracy: 0.92,
+          latency: 120,
+          resourceUsage: 0.5
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'model-2',
+        name: 'Visual Recognition Engine',
+        version: '2.1.0',
+        capabilities: ['object-detection', 'image-classification'],
+        status: 'active',
+        performance: {
+          accuracy: 0.87,
+          latency: 180,
+          resourceUsage: 0.65
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'model-3',
+        name: 'Autonomous Decision Module',
+        version: '0.9.5',
+        capabilities: ['decision-making', 'prediction'],
+        status: 'inactive',
+        performance: {
+          accuracy: 0.81,
+          latency: 150,
+          resourceUsage: 0.75
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
   }
-  
-  private initializeModels() {
-    this.models = createBaseNeuralModels();
-  }
-  
-  // Observer pattern methods
-  addObserver(callback: (metrics: SystemHealthMetrics) => void): void {
-    this.observers.push(callback);
-  }
-  
-  removeObserver(callback: (metrics: SystemHealthMetrics) => void): void {
-    this.observers = this.observers.filter(obs => obs !== callback);
-  }
-  
-  // Method to get model parameters
-  getModelParameters(): ModelParameters {
-    return { ...this.modelParameters };
-  }
-  
-  // Method to update model parameters
-  updateModelParameters(params: Partial<ModelParameters>): void {
-    this.modelParameters = { ...this.modelParameters, ...params };
-    const validation = validateModelParameters(this.modelParameters);
-    if (!validation.valid) {
-      console.warn('Invalid model parameters:', validation.issues);
-    }
-    console.log('Model parameters updated:', this.modelParameters);
-  }
-  
-  // Method to validate model parameters
-  validateModelParameters(params: ModelParameters): { valid: boolean, issues: string[] } {
-    return validateModelParameters(params);
-  }
-  
-  // Method to calculate system efficiency
-  calculateSystemEfficiency(): number {
-    return calculateSystemEfficiency(this.modelParameters);
-  }
-  
-  // Method to reset system
-  resetSystem(): void {
-    this.modelParameters = initializeDefaultParameters();
-    console.log('System reset to default parameters');
-  }
-  
-  // Apply boost to content
-  applyBoostToContent(
-    contentId: string,
-    contentType: 'profile' | 'post' | 'video' | 'livecam' | 'event' | 'metaverse',
-    boostScore: number,
-    region?: string,
-    language?: string
-  ): number {
-    // In a real implementation, this would apply advanced neural models to boost content visibility
-    const baseBoost = boostScore;
-    const neuralMultiplier = 1.2; // Enhanced by neural processing
-    
-    console.log(`Applied neural boost to ${contentType} content: ${contentId}`);
-    
-    return baseBoost * neuralMultiplier;
-  }
-  
-  // Get all available models
+
   getModels(): NeuralModel[] {
     return [...this.models];
   }
-  
-  // Get a specific model by ID
-  getModel(modelId: string): NeuralModel | undefined {
-    return this.models.find(m => m.id === modelId);
-  }
-  
-  // Get models by capability
-  getModelsByCapability(capability: string): NeuralModel[] {
-    return this.models.filter(m => 
-      m.capabilities.includes(capability) && m.status === 'active'
-    );
-  }
-  
-  // Get system health metrics
-  getHealthMetrics(): SystemHealthMetrics {
-    // Update metrics with simulated changes
-    this.updateHealthMetrics();
-    return {...this.healthMetrics};
-  }
-  
-  // Update health metrics with simulated changes
-  private updateHealthMetrics() {
-    // Update health metrics
-    this.healthMetrics = simulateMetricsUpdate(this.healthMetrics);
+
+  calculateSystemEfficiency(): number {
+    // Calculate a weighted efficiency score based on active models
+    const activeModels = this.models.filter(model => model.status === 'active');
     
-    // Notify all observers
-    const metricsSnapshot = { ...this.healthMetrics };
-    this.observers.forEach(callback => {
-      try {
-        callback(metricsSnapshot);
-      } catch (e) {
-        console.error('Error in observer callback:', e);
-      }
-    });
+    if (activeModels.length === 0) return 0;
     
-    // Update model statuses occasionally
-    if (Math.random() > 0.8) {
-      this.updateModelStatuses();
-    }
-  }
-  
-  // Update model statuses based on simulated events
-  private updateModelStatuses() {
-    this.models = this.models.map(model => {
-      // Small chance to change status
-      if (Math.random() > 0.9) {
-        const statuses: NeuralModel['status'][] = ['active', 'training', 'inactive', 'error'];
-        const currentIndex = statuses.indexOf(model.status);
-        let newIndex;
-        
-        // Higher chance of becoming active if not active
-        if (model.status !== 'active' && Math.random() > 0.7) {
-          newIndex = 0; // active
-        } else {
-          // Random status but with lower probability of error
-          newIndex = Math.floor(Math.random() * (Math.random() > 0.8 ? 4 : 3));
-        }
-        
-        // Don't update to the same status
-        if (newIndex !== currentIndex) {
-          return {
-            ...model,
-            status: statuses[newIndex]
-          };
-        }
-      }
+    // Calculate weighted average of performance metrics
+    const totalEfficiency = activeModels.reduce((sum, model) => {
+      // Higher accuracy is better, lower latency and resource usage is better
+      const efficiency = (
+        model.performance.accuracy * 0.5 + 
+        (1 - model.performance.latency / 500) * 0.25 + 
+        (1 - model.performance.resourceUsage) * 0.25
+      );
       
-      return model;
-    });
+      return sum + efficiency;
+    }, 0);
     
-    // Get completed training jobs
-    const completedModelIds: string[] = [];
-    
-    this.trainingManager.getActiveTrainingJobs().forEach(job => {
-      if (job.status === 'completed') {
-        completedModelIds.push(job.modelId);
-      }
-    });
-    
-    // Update completed models to active status
-    if (completedModelIds.length > 0) {
-      this.models = this.models.map(model => {
-        if (completedModelIds.includes(model.id)) {
-          const trainingProgress = this.trainingManager.getTrainingProgress(model.id);
-          return {
-            ...model,
-            status: 'active',
-            performance: trainingProgress ? {
-              ...model.performance,
-              accuracy: trainingProgress.accuracy
-            } : model.performance
-          };
-        }
-        return model;
-      });
-    }
+    // Return as percentage (0-100)
+    return Math.round((totalEfficiency / activeModels.length) * 100);
   }
   
-  // Get training progress for a model
-  getTrainingProgress(modelId: string): TrainingProgress | undefined {
-    return this.trainingManager.getTrainingProgress(modelId);
-  }
-  
-  // Get active training jobs
-  getActiveTrainingJobs(): TrainingProgress[] {
-    return this.trainingManager.getActiveTrainingJobs();
-  }
-  
-  // Start training a model
-  startTraining(modelId: string, trainingConfig: any = {}): boolean {
-    const modelIndex = this.models.findIndex(m => m.id === modelId);
-    if (modelIndex === -1) return false;
+  validateModelParameters(parameters: Record<string, any>): { valid: boolean; errors?: string[] } {
+    // Validate the model parameters
+    const errors: string[] = [];
     
-    // Check if model can be trained
-    if (this.models[modelIndex].status === 'training') {
-      return false; // Already training
+    // Check if required parameters exist
+    if (!parameters.learningRate) {
+      errors.push('Learning rate is required');
+    } else if (parameters.learningRate <= 0 || parameters.learningRate > 1) {
+      errors.push('Learning rate must be between 0 and 1');
     }
     
-    // Update model status
-    this.models[modelIndex].status = 'training';
-    
-    // Create training job
-    const success = this.trainingManager.startTraining(
-      modelId,
-      this.models[modelIndex].performance.accuracy,
-      trainingConfig
-    );
-    
-    return success;
-  }
-  
-  // Stop training a model
-  stopTraining(modelId: string): boolean {
-    const modelIndex = this.models.findIndex(m => m.id === modelId);
-    if (modelIndex === -1) return false;
-    
-    // Check if model is training
-    if (this.models[modelIndex].status !== 'training') {
-      return false; // Not training
+    if (!parameters.batchSize) {
+      errors.push('Batch size is required');
+    } else if (parameters.batchSize < 1) {
+      errors.push('Batch size must be at least 1');
     }
     
-    // Update model status
-    this.models[modelIndex].status = 'inactive';
-    
-    // Remove training job
-    return this.trainingManager.stopTraining(modelId);
-  }
-  
-  // Run inference with a specific model
-  async runInference(modelId: string, input: any): Promise<any> {
-    const model = this.models.find(m => m.id === modelId);
-    if (!model) throw new Error(`Model ${modelId} not found`);
-    if (model.status !== 'active') throw new Error(`Model ${modelId} is not active`);
-    
-    // Create a cache key based on model and input
-    const cacheKey = `${modelId}:${JSON.stringify(input)}`;
-    
-    // Check cache first
-    if (this.predictionCache.has(cacheKey)) {
-      return this.predictionCache.get(cacheKey);
+    if (!parameters.epochs) {
+      errors.push('Number of epochs is required');
+    } else if (parameters.epochs < 1) {
+      errors.push('Number of epochs must be at least 1');
     }
     
-    // In a real system, this would run actual inference
-    // For demo purposes, we'll simulate a delay based on model complexity
-    const inferenceTimeMs = model.performance.latency + (Math.random() * 50);
-    await new Promise(resolve => setTimeout(resolve, inferenceTimeMs));
-    
-    // Simulate a response
-    const response = generateSimulatedResponse(
-      model.name, 
-      model.capabilities, 
-      model.performance.latency,
-      input
-    );
-    
-    // Cache the result
-    this.predictionCache.set(cacheKey, response);
-    
-    // Limit cache size
-    if (this.predictionCache.size > 100) {
-      // Remove oldest entries
-      const keys = Array.from(this.predictionCache.keys());
-      this.predictionCache.delete(keys[0]);
-    }
-    
-    return response;
+    return {
+      valid: errors.length === 0,
+      errors: errors.length > 0 ? errors : undefined
+    };
   }
 }
 
-// Singleton instance
 export const neuralHub = new HermesOxumNeuralHub();
+export type { NeuralModel };
