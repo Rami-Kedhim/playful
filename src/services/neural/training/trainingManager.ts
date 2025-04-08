@@ -1,97 +1,152 @@
 
+/**
+ * Training Manager - Manages the training lifecycle of neural models
+ */
 import { TrainingProgress } from '../types/neuralHub';
 
 export class TrainingManager {
   private trainingJobs: Map<string, TrainingProgress> = new Map();
   
-  // Get training progress for a specific model
-  getTrainingProgress(modelId: string): TrainingProgress | undefined {
-    return this.trainingJobs.get(modelId);
+  constructor() {
+    console.log('Training Manager initialized');
   }
   
-  // Get all active training jobs
+  /**
+   * Get active training jobs
+   */
   getActiveTrainingJobs(): TrainingProgress[] {
     return Array.from(this.trainingJobs.values());
   }
   
-  // Start training for a model
-  startTraining(modelId: string, currentAccuracy: number, config: any = {}): boolean {
+  /**
+   * Get training progress for a specific model
+   */
+  getTrainingProgress(modelId: string): TrainingProgress | undefined {
+    return this.trainingJobs.get(modelId);
+  }
+  
+  /**
+   * Start training a model
+   */
+  startTraining(modelId: string, baseAccuracy: number, trainingConfig: any = {}): boolean {
+    // Check if model is already training
     if (this.trainingJobs.has(modelId)) {
-      return false; // Already training
+      const existingJob = this.trainingJobs.get(modelId);
+      if (existingJob && ['pending', 'running', 'preparing', 'training'].includes(existingJob.status)) {
+        console.log(`Model ${modelId} is already being trained`);
+        return false;
+      }
     }
     
-    const startTime = new Date();
-    const estimatedCompletionTime = new Date(
-      startTime.getTime() + (Math.random() * 1000000 + 500000)
-    );
-    
-    const progress: TrainingProgress = {
+    // Create new training job
+    const trainingJob: TrainingProgress = {
       modelId,
-      status: 'running',
+      status: 'preparing',
       progress: 0,
-      accuracy: currentAccuracy,
-      startTime,
-      estimatedCompletionTime,
-      trainingConfig: config
+      accuracy: baseAccuracy,
+      startTime: new Date(),
+      estimatedCompletionTime: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
+      trainingConfig,
+      message: 'Preparing training environment'
     };
     
-    this.trainingJobs.set(modelId, progress);
+    // Store training job
+    this.trainingJobs.set(modelId, trainingJob);
     
-    // Simulate training progress in background
-    this.simulateTrainingProgress(modelId, currentAccuracy);
+    // Start training process simulation
+    this.simulateTraining(modelId);
     
     return true;
   }
   
-  // Stop training for a model
+  /**
+   * Stop training a model
+   */
   stopTraining(modelId: string): boolean {
-    if (!this.trainingJobs.has(modelId)) {
-      return false; // Not training
+    const trainingJob = this.trainingJobs.get(modelId);
+    if (!trainingJob) {
+      return false;
     }
     
-    this.trainingJobs.delete(modelId);
+    // Update status
+    trainingJob.status = 'failed';
+    trainingJob.message = 'Training manually stopped';
+    this.trainingJobs.set(modelId, trainingJob);
+    
     return true;
   }
   
-  // Simulate training progress for demo purposes
-  private simulateTrainingProgress(modelId: string, startAccuracy: number): void {
-    let progress = 0;
-    const targetAccuracy = Math.min(0.99, startAccuracy + 0.05 + Math.random() * 0.1);
+  /**
+   * Simulate training process
+   * In a real system, this would be replaced with actual training logic
+   */
+  private simulateTraining(modelId: string): void {
+    const updateInterval = 2000; // Update every 2 seconds
+    const totalSteps = 100;
     
-    const interval = setInterval(() => {
-      if (!this.trainingJobs.has(modelId)) {
-        clearInterval(interval);
-        return;
-      }
+    // Update status to preparing
+    let job = this.trainingJobs.get(modelId);
+    if (!job) return;
+    
+    // Update status after 2 seconds
+    setTimeout(() => {
+      job = this.trainingJobs.get(modelId);
+      if (!job || job.status === 'failed') return;
       
-      progress += Math.random() * 5;
-      const currentProgress = this.trainingJobs.get(modelId);
+      job.status = 'training';
+      job.message = 'Training in progress';
+      job.progress = 5;
+      this.trainingJobs.set(modelId, job);
       
-      if (!currentProgress) {
-        clearInterval(interval);
-        return;
-      }
-      
-      if (progress >= 100) {
-        // Training completed
-        this.trainingJobs.set(modelId, {
-          ...currentProgress,
-          status: 'completed',
-          progress: 100,
-          accuracy: targetAccuracy
-        });
-        clearInterval(interval);
-        return;
-      }
-      
-      // Calculate interpolated accuracy based on progress
-      const currentAccuracy = startAccuracy + (targetAccuracy - startAccuracy) * (progress / 100);
-      
-      this.trainingJobs.set(modelId, {
-        ...currentProgress,
-        progress,
-        accuracy: currentAccuracy
-      });
-    }, 1000 + Math.random() * 2000); // Random update interval
+      // Start progress updates
+      let currentStep = 1;
+      const progressInterval = setInterval(() => {
+        job = this.trainingJobs.get(modelId);
+        if (!job || job.status === 'failed') {
+          clearInterval(progressInterval);
+          return;
+        }
+        
+        currentStep++;
+        const newProgress = Math.min(Math.floor((currentStep / totalSteps) * 100), 99);
+        
+        // Update job with progress
+        job.progress = newProgress;
+        
+        // Simulate accuracy improvements
+        if (currentStep % 10 === 0) {
+          const accuracyImprovement = Math.random() * 0.05;
+          job.accuracy = Math.min(job.accuracy + accuracyImprovement, 0.99);
+          job.message = `Training epoch ${currentStep / 10} completed, accuracy: ${job.accuracy.toFixed(4)}`;
+        }
+        
+        this.trainingJobs.set(modelId, job);
+        
+        // Complete training when all steps are done
+        if (currentStep >= totalSteps) {
+          clearInterval(progressInterval);
+          
+          // Set final status
+          job = this.trainingJobs.get(modelId);
+          if (!job) return;
+          
+          job.status = 'evaluating';
+          job.message = 'Evaluating model performance';
+          job.progress = 99;
+          this.trainingJobs.set(modelId, job);
+          
+          // Complete after 2 more seconds
+          setTimeout(() => {
+            job = this.trainingJobs.get(modelId);
+            if (!job) return;
+            
+            job.status = 'completed';
+            job.progress = 100;
+            job.message = `Training completed with accuracy: ${job.accuracy.toFixed(4)}`;
+            this.trainingJobs.set(modelId, job);
+          }, 2000);
+        }
+      }, updateInterval);
+    }, 2000);
   }
 }

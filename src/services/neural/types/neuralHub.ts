@@ -53,7 +53,7 @@ export interface NeuralModel {
 
 export interface TrainingProgress {
   modelId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'preparing' | 'training' | 'evaluating';
   progress: number; // 0-100
   accuracy: number;
   startTime: Date;

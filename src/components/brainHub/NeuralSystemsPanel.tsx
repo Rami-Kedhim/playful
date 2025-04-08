@@ -1,468 +1,408 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Loader2, AlertCircle, RefreshCw, Activity, Lightbulb, Zap } from 'lucide-react';
-import { useNeuralAnalytics } from '@/hooks/useNeuralAnalytics';
-import { neuralHub } from '@/services/neural';
+import React, { useState, useEffect } from 'react';
+import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { NeuralModel, TrainingProgress } from '@/services/neural/types/neuralHub';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle,
+  CardFooter
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { 
+  AlertCircle, 
+  CheckCircle, 
+  Gauge, 
+  Clock, 
+  Activity,
+  Zap, 
+  Settings,
+  BarChart,
+  Brain,
+  Loader2
+} from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Separator } from '@/components/ui/separator';
 
-const NeuralSystemsPanel = () => {
-  const {
-    analytics,
-    forecast,
-    trainingJobs,
-    loading,
-    error,
-    refreshData,
-    startModelTraining,
-    stopModelTraining
-  } = useNeuralAnalytics();
+interface NeuralSystemsPanelProps {
+  models: NeuralModel[];
+  advancedMode: boolean;
+}
+
+const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advancedMode }) => {
+  const [selectedModel, setSelectedModel] = useState<NeuralModel | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isTraining, setIsTraining] = useState(false);
+  const [trainingJobs, setTrainingJobs] = useState<TrainingProgress[]>([]);
   
-  const [activeTab, setActiveTab] = useState("overview");
-  const [refreshing, setRefreshing] = useState(false);
+  useEffect(() => {
+    // Fetch training jobs periodically
+    const fetchTrainingJobs = () => {
+      const jobs = neuralHub.getActiveTrainingJobs();
+      setTrainingJobs(jobs);
+      
+      // Check if any model is training
+      setIsTraining(jobs.some(job => 
+        ['pending', 'running', 'preparing', 'training', 'evaluating'].includes(job.status)
+      ));
+    };
+    
+    fetchTrainingJobs(); // Initial fetch
+    
+    // Set up interval for polling
+    const intervalId = setInterval(fetchTrainingJobs, 2000);
+    
+    // Cleanup
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
   
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refreshData();
-    setTimeout(() => setRefreshing(false), 600);
+  const handleViewDetails = (model: NeuralModel) => {
+    setSelectedModel(model);
+    setIsDetailsOpen(true);
   };
   
-  if (error) {
-    return (
-      <Alert variant="destructive" className="mb-4">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
-  }
-  
-  if (loading && !analytics) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Loading neural systems data...</span>
-      </div>
-    );
-  }
-  
-  const healthColorMap = {
-    high: "text-green-500",
-    medium: "text-amber-500",
-    low: "text-red-500"
+  const handleStartTraining = (model: NeuralModel) => {
+    neuralHub.startTraining(model.id, {
+      optimizerType: 'adam',
+      learningRate: 0.001,
+      batchSize: 32,
+      epochs: 20
+    });
   };
   
-  const getHealthColor = (value: number) => {
-    if (value >= 0.8) return healthColorMap.high;
-    if (value >= 0.6) return healthColorMap.medium;
-    return healthColorMap.low;
+  const handleStopTraining = (modelId: string) => {
+    neuralHub.stopTraining(modelId);
   };
   
-  const getHealthStatus = (value: number) => {
-    if (value >= 0.8) return "Good";
-    if (value >= 0.6) return "Fair";
-    return "Poor";
+  const renderStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Active</Badge>;
+      case 'training':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Training</Badge>;
+      case 'inactive':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Inactive</Badge>;
+      case 'error':
+        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Error</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+  
+  const getTrainingProgress = (modelId: string): TrainingProgress | undefined => {
+    return trainingJobs.find(job => job.modelId === modelId);
   };
   
   return (
-    <Card className="w-full mb-6">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div>
-          <CardTitle className="text-xl font-bold">Neural Systems</CardTitle>
-          <CardDescription>
-            Advanced neural network monitoring and analytics
-          </CardDescription>
-        </div>
-        
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
-          {refreshing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
-          Refresh
-        </Button>
-      </CardHeader>
-      
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-        <div className="px-6">
-          <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="models">Models</TabsTrigger>
-            <TabsTrigger value="training">Training</TabsTrigger>
-            <TabsTrigger value="forecast">Forecast</TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <CardContent className="p-0">
-          <TabsContent value="overview" className="p-4 pt-0 space-y-4">
-            {analytics && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Health Score</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col items-center">
-                        <div className={`text-2xl font-bold ${getHealthColor(analytics.summary.overallHealth)}`}>
-                          {Math.round(analytics.summary.overallHealth * 100)}%
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {getHealthStatus(analytics.summary.overallHealth)}
-                        </span>
-                      </div>
-                      <Progress 
-                        value={analytics.summary.overallHealth * 100} 
-                        className="h-2 mt-2" 
-                      />
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Issues</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between">
-                        <div className="flex flex-col items-center">
-                          <span className="text-xl font-bold text-red-500">
-                            {analytics.summary.criticalIssues}
-                          </span>
-                          <span className="text-xs text-muted-foreground">Critical</span>
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <span className="text-xl font-bold text-amber-500">
-                            {analytics.summary.warnings}
-                          </span>
-                          <span className="text-xs text-muted-foreground">Warnings</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Response Time</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col items-center">
-                        <div className="text-2xl font-bold">
-                          {analytics.trends.length > 0 && 
-                            Math.round(analytics.trends[analytics.trends.length - 1].responseTime)}
-                          <span className="text-sm font-normal">ms</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          Average response time
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Prediction Accuracy</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-col items-center">
-                        <div className="text-2xl font-bold text-green-500">
-                          {(analytics.predictionAccuracy * 100).toFixed(1)}%
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          Last 24 hours
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {models.map((model) => {
+          const trainingProgress = getTrainingProgress(model.id);
+          const isModelTraining = trainingProgress && 
+            ['pending', 'running', 'preparing', 'training', 'evaluating'].includes(trainingProgress.status);
+          
+          return (
+            <Card key={model.id} className="overflow-hidden h-full">
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg">{model.name}</CardTitle>
+                  {renderStatusBadge(model.status)}
                 </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <div className="lg:col-span-2">
-                    <Card className="h-full">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">System Load & Stability</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="h-72">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={analytics.trends}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis 
-                                dataKey="timestamp" 
-                                tickFormatter={(value) => new Date(value).toLocaleTimeString()} 
-                              />
-                              <YAxis />
-                              <Tooltip 
-                                formatter={(value, name) => [
-                                  name === 'load' ? `${(Number(value) * 100).toFixed(1)}%` : 
-                                  name === 'stability' ? `${(Number(value) * 100).toFixed(1)}%` : value,
-                                  name === 'load' ? 'System Load' : 
-                                  name === 'stability' ? 'Stability' : name
-                                ]}
-                                labelFormatter={(value) => new Date(value).toLocaleString()}
-                              />
-                              <Line 
-                                type="monotone" 
-                                dataKey="load" 
-                                stroke="#8884d8" 
-                                name="load"
-                                activeDot={{ r: 8 }} 
-                              />
-                              <Line 
-                                type="monotone" 
-                                dataKey="stability" 
-                                stroke="#82ca9d" 
-                                name="stability" 
-                              />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
+                <CardDescription className="line-clamp-2">
+                  {model.capabilities.join(', ')}
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="pb-2">
+                <div className="grid grid-cols-2 gap-y-2 text-sm">
+                  <div className="flex items-center gap-1">
+                    <Gauge className="h-4 w-4 text-slate-500" />
+                    <span>Accuracy:</span>
+                  </div>
+                  <div className="text-right font-medium">
+                    {Math.round(model.performance.accuracy * 100)}%
                   </div>
                   
-                  <Card className="h-full">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Recommendations</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-2">
-                        {analytics.summary.recommendations.map((rec, i) => (
-                          <li key={i} className="flex items-start">
-                            <Lightbulb className="h-5 w-5 mr-2 text-amber-500 flex-shrink-0 mt-0.5" />
-                            <span className="text-sm">{rec}</span>
-                          </li>
-                        ))}
-                        {analytics.summary.recommendations.length === 0 && (
-                          <li className="text-sm text-muted-foreground">
-                            No recommendations at this time
-                          </li>
-                        )}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
-              </>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="models" className="p-4 pt-0">
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                {neuralHub.getModels().map(model => (
-                  <Card key={model.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <CardTitle className="text-base">{model.name}</CardTitle>
-                          <CardDescription>v{model.version}</CardDescription>
-                        </div>
-                        <Badge 
-                          className={
-                            model.status === 'active' ? 'bg-green-500' :
-                            model.status === 'training' ? 'bg-blue-500' :
-                            model.status === 'error' ? 'bg-red-500' :
-                            'bg-slate-500'
-                          }
-                        >
-                          {model.status}
-                        </Badge>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4 text-slate-500" />
+                    <span>Latency:</span>
+                  </div>
+                  <div className="text-right font-medium">
+                    {model.performance.latency}ms
+                  </div>
+                  
+                  {advancedMode && (
+                    <>
+                      <div className="flex items-center gap-1">
+                        <Activity className="h-4 w-4 text-slate-500" />
+                        <span>Resources:</span>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <div className="text-sm font-medium">Accuracy</div>
-                          <div className="text-2xl">{(model.performance.accuracy * 100).toFixed(1)}%</div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">Latency</div>
-                          <div className="text-2xl">{model.performance.latency}<span className="text-sm">ms</span></div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium">Throughput</div>
-                          <div className="text-2xl">{model.performance.throughput || 'N/A'}</div>
-                        </div>
+                      <div className="text-right font-medium">
+                        {Math.round(model.performance.resourceUsage * 100)}%
                       </div>
                       
-                      <div className="mt-4">
-                        <div className="text-sm font-medium mb-1">Capabilities</div>
-                        <div className="flex flex-wrap gap-1">
-                          {model.capabilities.map(cap => (
-                            <Badge key={cap} variant="outline">{cap}</Badge>
-                          ))}
-                        </div>
+                      <div className="flex items-center gap-1">
+                        <Zap className="h-4 w-4 text-slate-500" />
+                        <span>Throughput:</span>
                       </div>
-                    </CardContent>
-                    <CardFooter className="border-t bg-muted/50 py-2">
-                      <div className="flex justify-end w-full gap-2">
-                        <Button 
-                          size="sm"
-                          variant="outline"
-                          disabled={model.status === 'training'}
-                          onClick={() => startModelTraining(model.id)}
-                        >
-                          {model.status === 'training' ? 'Training...' : 'Train'}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="default"
-                          disabled={model.status !== 'active'}
-                        >
-                          Run
-                        </Button>
+                      <div className="text-right font-medium">
+                        {model.performance.throughput}/s
                       </div>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="training" className="p-4 pt-0">
-            <div className="space-y-4">
-              {trainingJobs.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No active training jobs
+                    </>
+                  )}
                 </div>
-              ) : (
-                trainingJobs.map(job => (
-                  <Card key={job.modelId}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <CardTitle className="text-base">
-                            {neuralHub.getModel(job.modelId)?.name || job.modelId}
-                          </CardTitle>
-                          <CardDescription>Training in progress</CardDescription>
-                        </div>
-                        <Badge className={
-                          job.status === 'pending' ? 'bg-slate-500' :
-                          job.status === 'running' ? 'bg-blue-500' :
-                          job.status === 'completed' ? 'bg-green-500' :
-                          'bg-red-500'
-                        }>
-                          {job.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium">Progress</span>
-                            <span className="text-sm">{job.progress.toFixed(1)}%</span>
-                          </div>
-                          <Progress value={job.progress} className="h-2" />
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-sm font-medium">Start Time</div>
-                            <div className="text-sm">
-                              {job.startTime.toLocaleString()}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">Expected Completion</div>
-                            <div className="text-sm">
-                              {job.estimatedCompletionTime
-                                ? job.estimatedCompletionTime.toLocaleString() 
-                                : 'Unknown'}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <div className="text-sm font-medium">Current Accuracy</div>
-                          <div className="text-lg font-semibold">
-                            {(job.accuracy * 100).toFixed(1)}%
-                          </div>
-                        </div>
-                        
-                        {job.message && (
-                          <div className="text-sm italic text-muted-foreground">{job.message}</div>
-                        )}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="border-t bg-muted/50 py-2">
-                      <div className="flex justify-end w-full gap-2">
-                        <Button 
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => stopModelTraining(job.modelId)}
-                          disabled={job.status === 'completed' || job.status === 'failed'}
-                        >
-                          Cancel Training
-                        </Button>
-                      </div>
-                    </CardFooter>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="forecast" className="p-4 pt-0">
-            <Card className="w-full">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">7-Day Performance Forecast</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={forecast}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="period" 
-                      />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value, name) => [
-                          name === 'load' ? `${(Number(value) * 100).toFixed(1)}%` : 
-                          name === 'stability' ? `${(Number(value) * 100).toFixed(1)}%` : 
-                          name === 'errorRate' ? `${(Number(value) * 100).toFixed(3)}%` : 
-                          `${value}ms`,
-                          name === 'load' ? 'System Load' : 
-                          name === 'stability' ? 'Stability' : 
-                          name === 'errorRate' ? 'Error Rate' : 
-                          'Response Time'
-                        ]}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="load" 
-                        name="load"
-                        stroke="#8884d8" 
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="stability" 
-                        name="stability"
-                        stroke="#82ca9d" 
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="errorRate" 
-                        name="errorRate"
-                        stroke="#ff7300" 
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="responseTime" 
-                        name="responseTime"
-                        stroke="#0088aa" 
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                
+                {isModelTraining && trainingProgress && (
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Training Progress:</span>
+                      <span>{trainingProgress.progress}%</span>
+                    </div>
+                    <Progress value={trainingProgress.progress} />
+                  </div>
+                )}
               </CardContent>
+              
+              <CardFooter className="flex justify-between pt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleViewDetails(model)}
+                >
+                  View Details
+                </Button>
+                
+                {model.status === 'training' || isModelTraining ? (
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => handleStopTraining(model.id)}
+                  >
+                    Stop Training
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    onClick={() => handleStartTraining(model)}
+                  >
+                    Start Training
+                  </Button>
+                )}
+              </CardFooter>
             </Card>
-          </TabsContent>
-        </CardContent>
-      </Tabs>
-    </Card>
+          );
+        })}
+      </div>
+      
+      {/* Training Status Overview */}
+      {isTraining && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Active Training Jobs</CardTitle>
+            <CardDescription>
+              Monitor the progress of all active neural model training jobs
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[180px]">
+              <div className="space-y-4">
+                {trainingJobs
+                  .filter(job => ['pending', 'running', 'preparing', 'training', 'evaluating'].includes(job.status))
+                  .map((job) => {
+                    const model = models.find(m => m.id === job.modelId);
+                    return (
+                      <div key={job.modelId} className="space-y-2">
+                        <div className="flex justify-between">
+                          <div className="font-medium">{model?.name || job.modelId}</div>
+                          <div className="text-sm">
+                            {job.status === 'pending' && 'Pending...'}
+                            {job.status === 'preparing' && 'Preparing environment...'}
+                            {job.status === 'training' && 'Training...'}
+                            {job.status === 'evaluating' && 'Evaluating...'}
+                            {job.status === 'completed' && 'Completed'}
+                            {job.status === 'failed' && 'Failed'}
+                          </div>
+                        </div>
+                        <Progress value={job.progress} className="h-2" />
+                        <div className="text-xs text-muted-foreground">
+                          {job.message ? job.message : `Progress: ${job.progress}% - Current accuracy: ${(job.accuracy * 100).toFixed(2)}%`}
+                        </div>
+                        <Separator className="my-2" />
+                      </div>
+                    );
+                })}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Model Details Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        {selectedModel && (
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                {selectedModel.name}
+                {renderStatusBadge(selectedModel.status)}
+              </DialogTitle>
+              <DialogDescription>
+                {`Version ${selectedModel.version}`}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="capabilities">
+                <AccordionTrigger>Capabilities</AccordionTrigger>
+                <AccordionContent>
+                  <ul className="list-disc pl-4 space-y-1">
+                    {selectedModel.capabilities.map((capability, i) => (
+                      <li key={i} className="text-sm">{capability}</li>
+                    ))}
+                  </ul>
+                  
+                  {selectedModel.specialization && (
+                    <>
+                      <div className="font-semibold mt-4 mb-2">Specializations</div>
+                      <ul className="list-disc pl-4 space-y-1">
+                        {selectedModel.specialization.map((spec, i) => (
+                          <li key={i} className="text-sm">{spec}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="performance">
+                <AccordionTrigger>Performance Metrics</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <div className="text-sm font-semibold">Accuracy</div>
+                      <div className="text-2xl font-bold">
+                        {Math.round(selectedModel.performance.accuracy * 100)}%
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="text-sm font-semibold">Latency</div>
+                      <div className="text-2xl font-bold">
+                        {selectedModel.performance.latency} ms
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="text-sm font-semibold">Resource Usage</div>
+                      <div className="text-2xl font-bold">
+                        {Math.round(selectedModel.performance.resourceUsage * 100)}%
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="text-sm font-semibold">Throughput</div>
+                      <div className="text-2xl font-bold">
+                        {selectedModel.performance.throughput} ops/s
+                      </div>
+                    </div>
+                    
+                    {advancedMode && selectedModel.performance.precision !== undefined && (
+                      <>
+                        <div className="space-y-1">
+                          <div className="text-sm font-semibold">Precision</div>
+                          <div className="text-2xl font-bold">
+                            {Math.round(selectedModel.performance.precision * 100)}%
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="text-sm font-semibold">Recall</div>
+                          <div className="text-2xl font-bold">
+                            {selectedModel.performance.recall ? 
+                              Math.round(selectedModel.performance.recall * 100) : '–'}%
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="text-sm font-semibold">F1 Score</div>
+                          <div className="text-2xl font-bold">
+                            {selectedModel.performance.f1Score ? 
+                              Math.round(selectedModel.performance.f1Score * 100) : '–'}%
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  <div className="mt-4 text-xs text-muted-foreground">
+                    Last evaluation: {selectedModel.performance.lastEvaluation ? 
+                      new Date(selectedModel.performance.lastEvaluation).toLocaleString() : 
+                      'Unknown'}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              
+              {advancedMode && (
+                <AccordionItem value="metadata">
+                  <AccordionTrigger>Metadata</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
+                      <div className="font-semibold">ID:</div>
+                      <div>{selectedModel.id}</div>
+                      
+                      <div className="font-semibold">Created:</div>
+                      <div>{new Date(selectedModel.createdAt).toLocaleString()}</div>
+                      
+                      <div className="font-semibold">Updated:</div>
+                      <div>{new Date(selectedModel.updatedAt).toLocaleString()}</div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+            
+            <DialogFooter className="mt-4">
+              {selectedModel.status === 'training' || 
+               getTrainingProgress(selectedModel.id)?.status === 'training' ? (
+                <Button 
+                  variant="destructive" 
+                  onClick={() => handleStopTraining(selectedModel.id)}
+                >
+                  Stop Training
+                </Button>
+              ) : (
+                <Button 
+                  variant="default" 
+                  onClick={() => {
+                    handleStartTraining(selectedModel);
+                    setIsDetailsOpen(false);
+                  }}
+                >
+                  Start Training
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
+    </>
   );
 };
 
