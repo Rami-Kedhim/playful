@@ -27,7 +27,9 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  ScatterChart,
+  Scatter
 } from 'recharts';
 import {
   BarChart2,
