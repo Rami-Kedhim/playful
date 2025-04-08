@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,12 +9,13 @@ import {
   BarChart3, TrendingUp, AlertCircle, Globe, DollarSign, 
   Users, LineChart, PieChart, Calendar, Lightbulb, Zap
 } from 'lucide-react';
-import businessIntelligence, { 
+import businessIntelligence from '@/services/neural/BrainHubBusinessIntelligence';
+import { 
   RevenueMetric, 
   EngagementMetric, 
   PlatformInsight, 
   RegionalPerformance 
-} from '@/services/neural/BrainHubBusinessIntelligence';
+} from '@/services/neural/types/businessIntelligence';
 
 const BusinessIntelligencePanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -27,19 +27,16 @@ const BusinessIntelligencePanel: React.FC = () => {
   const [isRunningAnalysis, setIsRunningAnalysis] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
 
-  // Initialize data on mount
   useEffect(() => {
     refreshAllData();
     
-    // Set up interval to refresh dashboard data
     const interval = setInterval(() => {
       setDashboardData(businessIntelligence.getDashboardSummary());
-    }, 30000); // Every 30 seconds
+    }, 30000);
     
     return () => clearInterval(interval);
   }, []);
-  
-  // Refresh all data
+
   const refreshAllData = () => {
     setDashboardData(businessIntelligence.getDashboardSummary());
     setRevenueMetrics(businessIntelligence.getRevenueMetrics());
@@ -47,8 +44,7 @@ const BusinessIntelligencePanel: React.FC = () => {
     setInsights(businessIntelligence.getInsights());
     setRegionalData(businessIntelligence.getRegionalPerformance() as Record<string, RegionalPerformance>);
   };
-  
-  // Run autonomous analysis
+
   const runAnalysis = async () => {
     setIsRunningAnalysis(true);
     
@@ -62,7 +58,6 @@ const BusinessIntelligencePanel: React.FC = () => {
           description: `Generated ${result.insightsGenerated} new insights`,
         });
         
-        // Refresh our data
         refreshAllData();
       } else {
         toast({
@@ -82,8 +77,7 @@ const BusinessIntelligencePanel: React.FC = () => {
       setIsRunningAnalysis(false);
     }
   };
-  
-  // Format currency
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -91,13 +85,11 @@ const BusinessIntelligencePanel: React.FC = () => {
       minimumFractionDigits: 2
     }).format(amount);
   };
-  
-  // Format date
+
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
-  
-  // Get impact badge
+
   const getImpactBadge = (impact: string) => {
     switch (impact) {
       case 'critical':
@@ -111,8 +103,7 @@ const BusinessIntelligencePanel: React.FC = () => {
         return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Low</Badge>;
     }
   };
-  
-  // Get insight type icon
+
   const getInsightTypeIcon = (type: string) => {
     switch (type) {
       case 'trend':
@@ -127,8 +118,7 @@ const BusinessIntelligencePanel: React.FC = () => {
         return <LineChart className="h-5 w-5" />;
     }
   };
-  
-  // Loading state
+
   if (!dashboardData) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -139,7 +129,7 @@ const BusinessIntelligencePanel: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       <Card>
@@ -189,7 +179,6 @@ const BusinessIntelligencePanel: React.FC = () => {
               </TabsTrigger>
             </TabsList>
             
-            {/* Dashboard Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Card>
@@ -213,7 +202,6 @@ const BusinessIntelligencePanel: React.FC = () => {
                     <CardTitle className="text-lg">Weekly Goal Progress</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {/* This would normally be a progress bar or chart */}
                     <div className="text-3xl font-bold">67%</div>
                     <div className="w-full bg-gray-200 h-2 mt-2 rounded-full overflow-hidden">
                       <div className="h-full bg-primary" style={{width: '67%'}}></div>
@@ -340,7 +328,6 @@ const BusinessIntelligencePanel: React.FC = () => {
               </Card>
             </TabsContent>
             
-            {/* Insights Tab */}
             <TabsContent value="insights" className="space-y-4">
               <div className="flex justify-between items-center">
                 <div className="flex gap-2">
@@ -442,7 +429,6 @@ const BusinessIntelligencePanel: React.FC = () => {
               </div>
             </TabsContent>
             
-            {/* Revenue Tab */}
             <TabsContent value="revenue" className="space-y-4">
               <div className="flex justify-between items-center">
                 <div className="flex gap-2">
@@ -569,7 +555,6 @@ const BusinessIntelligencePanel: React.FC = () => {
               </Card>
             </TabsContent>
             
-            {/* Regional Tab */}
             <TabsContent value="regional" className="space-y-6">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">Regional Performance</h3>
