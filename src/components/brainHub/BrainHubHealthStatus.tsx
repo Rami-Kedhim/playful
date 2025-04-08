@@ -43,8 +43,8 @@ const BrainHubHealthStatus: React.FC = () => {
             <Activity className="h-5 w-5 mr-2" />
             <span>Brain Hub Health</span>
             <Badge variant={
-              health.status === 'good' ? 'default' : 
-              health.status === 'warning' ? 'warning' : 'destructive'
+              health.status === 'good' ? 'success' : 
+              health.status === 'warning' ? 'secondary' : 'destructive'
             }>
               {health.status.toUpperCase()}
             </Badge>
