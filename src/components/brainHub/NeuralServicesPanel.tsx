@@ -12,11 +12,17 @@ import {
   CreatorsNeuralService,
   LivecamsNeuralService
 } from "@/services/neural";
+import { NeuralModel } from '@/services/neural/types/neuralHub';
 import NeuralModuleRegistration from './NeuralModuleRegistration';
 import NeuralServiceCard from './NeuralServiceCard';
 import EmptyServiceState from './EmptyServiceState';
 
-const NeuralServicesPanel: React.FC = () => {
+interface NeuralServicesPanelProps {
+  models?: NeuralModel[];
+  advancedMode?: boolean;
+}
+
+const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: providedModels, advancedMode = false }) => {
   const { 
     services, 
     loading, 
