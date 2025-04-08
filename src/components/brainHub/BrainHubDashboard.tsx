@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -12,6 +13,9 @@ import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import AutonomyModulesPanel from './AutonomyModulesPanel';
 import SecurityModulesPanel from './SecurityModulesPanel';
 import BusinessIntelligencePanel from './BusinessIntelligencePanel';
+import EconomicManagementPanel from './EconomicManagementPanel';
+import ContentGenerationPanel from './ContentGenerationPanel';
+import StrategicPlanningPanel from './StrategicPlanningPanel';
 import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
 import securityEngine from '@/services/neural/BrainHubSecurityEngine';
 import {
@@ -31,12 +35,11 @@ import {
   Zap,
   Shield,
   DollarSign,
-  Lightbulb
+  Lightbulb,
+  FileText,
+  GitBranch,
+  Target
 } from 'lucide-react';
-
-interface ModuleCapabilities {
-  [key: string]: boolean;
-}
 
 const BrainHubDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("status");
@@ -91,6 +94,7 @@ const BrainHubDashboard: React.FC = () => {
     toast({
       title: "Autonomy Level Updated",
       description: `Brain Hub autonomy level set to ${level}%`,
+      variant: "success",
     });
   };
   
@@ -112,6 +116,7 @@ const BrainHubDashboard: React.FC = () => {
       description: autonomyStatus.enabled 
         ? "Brain Hub will now operate in manual mode" 
         : `Brain Hub will now operate autonomously at ${autonomyStatus.level}% autonomy level`,
+      variant: "success",
     });
   };
   
@@ -121,6 +126,7 @@ const BrainHubDashboard: React.FC = () => {
     toast({
       title: `Capability ${enabled ? 'Enabled' : 'Disabled'}`,
       description: `${category}.${capability} is now ${enabled ? 'active' : 'inactive'}`,
+      variant: "success",
     });
   };
   
@@ -135,6 +141,7 @@ const BrainHubDashboard: React.FC = () => {
     toast({
       title: "Provider Recommendation",
       description: `Recommended provider: ${result.provider} (${result.reason})`,
+      variant: "success",
     });
   };
   
@@ -180,7 +187,7 @@ const BrainHubDashboard: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-8 mb-8">
+        <TabsList className="grid grid-cols-11 mb-8">
           <TabsTrigger value="status">
             <BarChart className="h-4 w-4 mr-2" />
             System Status
@@ -200,6 +207,18 @@ const BrainHubDashboard: React.FC = () => {
           <TabsTrigger value="intelligence">
             <Lightbulb className="h-4 w-4 mr-2" />
             Intelligence
+          </TabsTrigger>
+          <TabsTrigger value="economic">
+            <DollarSign className="h-4 w-4 mr-2" />
+            Economic
+          </TabsTrigger>
+          <TabsTrigger value="content">
+            <FileText className="h-4 w-4 mr-2" />
+            Content
+          </TabsTrigger>
+          <TabsTrigger value="strategic">
+            <Target className="h-4 w-4 mr-2" />
+            Strategic
           </TabsTrigger>
           <TabsTrigger value="ai-providers">
             <MessageSquare className="h-4 w-4 mr-2" />
@@ -392,6 +411,39 @@ const BrainHubDashboard: React.FC = () => {
                     <span className="text-sm">{autonomyStatus.enabled ? 'Active' : 'Paused'}</span>
                   </div>
                 </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <DollarSign className="h-5 w-5 mr-2 text-primary" />
+                    <span>Economic Engine</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                    <span className="text-sm">Active</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <FileText className="h-5 w-5 mr-2 text-primary" />
+                    <span>Content Engine</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                    <span className="text-sm">Active</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <Target className="h-5 w-5 mr-2 text-primary" />
+                    <span>Strategic Engine</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                    <span className="text-sm">Active</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -433,6 +485,18 @@ const BrainHubDashboard: React.FC = () => {
         
         <TabsContent value="intelligence" className="space-y-6">
           <BusinessIntelligencePanel />
+        </TabsContent>
+        
+        <TabsContent value="economic" className="space-y-6">
+          <EconomicManagementPanel />
+        </TabsContent>
+        
+        <TabsContent value="content" className="space-y-6">
+          <ContentGenerationPanel />
+        </TabsContent>
+        
+        <TabsContent value="strategic" className="space-y-6">
+          <StrategicPlanningPanel />
         </TabsContent>
         
         <TabsContent value="ai-providers" className="space-y-6">
@@ -633,6 +697,7 @@ const BrainHubDashboard: React.FC = () => {
                       description: checked 
                         ? "Content will be filtered based on regional restrictions"
                         : "No regional content filtering will be applied",
+                      variant: "success",
                     });
                   }}
                 />
@@ -655,6 +720,7 @@ const BrainHubDashboard: React.FC = () => {
                       description: checked 
                         ? "Emotional context will be analyzed for better responses"
                         : "No emotional context analysis will be performed",
+                      variant: "success",
                     });
                   }}
                 />
@@ -677,6 +743,7 @@ const BrainHubDashboard: React.FC = () => {
                       description: checked 
                         ? "Algorithms will be enhanced with predictive models"
                         : "No predictive enhancements will be applied",
+                      variant: "success",
                     });
                   }}
                 />
@@ -688,5 +755,10 @@ const BrainHubDashboard: React.FC = () => {
     </div>
   );
 };
+
+// Define interface for module capabilities
+interface ModuleCapabilities {
+  [key: string]: boolean;
+}
 
 export default BrainHubDashboard;
