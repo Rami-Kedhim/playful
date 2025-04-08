@@ -26,6 +26,13 @@ export interface ModelParameters {
   activationFunction: string;   // Activation function used
   embeddingSize?: number;       // Optional embedding size
   hiddenLayers?: number[];      // Optional array of hidden layer sizes
+  // Extended parameters for advanced models
+  decayConstant?: number;       // Decay constant for optimization
+  growthFactor?: number;        // Growth factor for adaptive algorithms
+  cyclePeriod?: number;         // Cycle period for oscillating parameters
+  harmonicCount?: number;       // Number of harmonics in wave functions
+  bifurcationPoint?: number;    // Bifurcation point for chaos theory models
+  attractorStrength?: number;   // Strength of attractor in dynamic systems
 }
 
 // Neural model performance metrics
@@ -46,6 +53,7 @@ export interface NeuralModel {
   version: string;              // Version string
   description: string;          // Description of the model's purpose
   capabilities: string[];       // List of capabilities of this model
+  specialization?: string[];    // Areas of specialization
   parameters: ModelParameters;  // Model parameters
   performance: ModelPerformance;// Performance metrics
   status: 'active' | 'inactive' | 'training' | 'error'; // Current status
@@ -64,7 +72,10 @@ export interface TrainingProgress {
   accuracy: number;             // Current training accuracy
   loss: number;                 // Current loss value
   estimatedCompletionTime?: Date;  // Estimated completion time
-  status: 'running' | 'paused' | 'completed' | 'failed';  // Training status
+  status: 'running' | 'paused' | 'completed' | 'failed' | 'preparing' | 'training' | 'evaluating';  // Training status
+  progress?: number;            // Progress percentage (0-100)
+  epoch?: number;               // Current epoch number
+  message?: string;             // Status message
 }
 
 // Inference request

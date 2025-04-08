@@ -32,9 +32,9 @@ class NeuralService {
         taskWords.some(word => cap.toLowerCase().includes(word))
       );
       
-      const hasMatchingSpecialization = model.specialization.some(spec => 
+      const hasMatchingSpecialization = model.specialization?.some(spec => 
         taskWords.some(word => spec.toLowerCase().includes(word))
-      );
+      ) || false;
       
       return hasMatchingCapability || hasMatchingSpecialization;
     });
@@ -53,36 +53,36 @@ class NeuralService {
     switch (goal) {
       case 'speed':
         // Optimize for faster processing
-        optimizedParams.decayConstant = 0.3;
-        optimizedParams.cyclePeriod = 12;
-        optimizedParams.harmonicCount = 2;
+        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.3;
+        if (optimizedParams.cyclePeriod !== undefined) optimizedParams.cyclePeriod = 12;
+        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 2;
         break;
         
       case 'accuracy':
         // Optimize for accuracy
-        optimizedParams.decayConstant = 0.15;
-        optimizedParams.growthFactor = 1.8;
-        optimizedParams.harmonicCount = 5;
-        optimizedParams.bifurcationPoint = 0.7;
+        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.15;
+        if (optimizedParams.growthFactor !== undefined) optimizedParams.growthFactor = 1.8;
+        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 5;
+        if (optimizedParams.bifurcationPoint !== undefined) optimizedParams.bifurcationPoint = 0.7;
         break;
         
       case 'efficiency':
         // Optimize for resource efficiency
-        optimizedParams.decayConstant = 0.25;
-        optimizedParams.growthFactor = 1.2;
-        optimizedParams.cyclePeriod = 18;
-        optimizedParams.harmonicCount = 2;
-        optimizedParams.attractorStrength = 0.5;
+        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.25;
+        if (optimizedParams.growthFactor !== undefined) optimizedParams.growthFactor = 1.2;
+        if (optimizedParams.cyclePeriod !== undefined) optimizedParams.cyclePeriod = 18;
+        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 2;
+        if (optimizedParams.attractorStrength !== undefined) optimizedParams.attractorStrength = 0.5;
         break;
         
       case 'balance':
         // Balanced approach
-        optimizedParams.decayConstant = 0.2;
-        optimizedParams.growthFactor = 1.5;
-        optimizedParams.cyclePeriod = 24;
-        optimizedParams.harmonicCount = 3;
-        optimizedParams.bifurcationPoint = 0.6;
-        optimizedParams.attractorStrength = 0.6;
+        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.2;
+        if (optimizedParams.growthFactor !== undefined) optimizedParams.growthFactor = 1.5;
+        if (optimizedParams.cyclePeriod !== undefined) optimizedParams.cyclePeriod = 24;
+        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 3;
+        if (optimizedParams.bifurcationPoint !== undefined) optimizedParams.bifurcationPoint = 0.6;
+        if (optimizedParams.attractorStrength !== undefined) optimizedParams.attractorStrength = 0.6;
         break;
     }
     

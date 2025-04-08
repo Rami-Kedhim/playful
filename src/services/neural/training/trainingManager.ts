@@ -36,9 +36,13 @@ export class TrainingManager {
       progress: 0,
       status: 'preparing',
       startTime: new Date(),
-      expectedCompletionTime: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes from now
+      estimatedCompletionTime: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes from now
       accuracy: baseAccuracy,
-      message: 'Preparing training environment'
+      message: 'Preparing training environment',
+      currentEpoch: 0,
+      totalEpochs: 10,
+      loss: 1.0,
+      epoch: 0
     };
     
     this.trainingJobs.set(modelId, newJob);
@@ -77,76 +81,68 @@ export class TrainingManager {
   }
   
   /**
-   * Simulate progress updates for all training jobs
-   * @returns Array of completed model IDs
+   * Simulate progress updates for active training jobs
+   * This creates realistic-looking training progress
    */
-  updateTrainingProgress(models: any[]): string[] {
-    const completedModelIds: string[] = [];
-    
-    // Update each training job
-    for (const [modelId, job] of this.trainingJobs.entries()) {
-      // Skip completed or failed jobs
+  private simulateTrainingProgress(): void {
+    // For each training job
+    this.trainingJobs.forEach((job, modelId) => {
+      // Don't update completed or failed jobs
       if (job.status === 'completed' || job.status === 'failed') {
-        continue;
+        return;
       }
       
-      // Update status based on progress
-      if (job.progress < 10) {
+      // Random progress increment between 1% and 5%
+      const progressIncrement = Math.random() * 4 + 1;
+      let newProgress = Math.min(100, (job.progress || 0) + progressIncrement);
+      
+      if (newProgress < 10) {
         job.status = 'preparing';
-        job.message = 'Preparing training environment';
-      } else if (job.progress < 90) {
+        job.message = 'Initializing training environment';
+        job.progress = newProgress;
+      } else if (newProgress < 90) {
         job.status = 'training';
-        job.epoch = Math.floor(job.progress / 5);
-        job.loss = 0.5 - (job.progress / 200);
-        job.message = `Training epoch ${job.epoch}, loss: ${job.loss.toFixed(4)}`;
-      } else if (job.progress < 100) {
+        job.epoch = Math.floor((newProgress / 100) * job.totalEpochs);
+        job.currentEpoch = job.epoch;
+        job.progress = newProgress;
+        job.message = `Training epoch ${job.epoch}/${job.totalEpochs}`;
+        job.loss = Math.max(0.1, 1 - (job.progress / 200));
+        job.accuracy = Math.min(0.99, job.accuracy + (Math.random() * 0.02));
+      } else if (newProgress < 95) {
         job.status = 'evaluating';
         job.message = 'Evaluating model performance';
       } else {
         job.status = 'completed';
         job.message = 'Training completed successfully';
-        completedModelIds.push(modelId);
       }
       
-      // Increase progress
-      job.progress = Math.min(100, job.progress + 5 + Math.random() * 10);
-      
-      // Update accuracy (slowly improve during training)
-      if (job.progress > 20 && job.progress < 95) {
-        // Find the model in the models array
-        const model = models.find(m => m.id === modelId);
-        if (model) {
-          const maxAccuracy = Math.min(0.99, model.performance.accuracy + 0.1);
-          const progressFactor = job.progress / 100;
-          job.accuracy = model.performance.accuracy + (maxAccuracy - model.performance.accuracy) * progressFactor;
-        }
+      // 5% chance of failure during training
+      if (job.status === 'training' && Math.random() < 0.05 && job.progress < 80) {
+        job.status = 'failed';
+        job.message = 'Training failed: Diverging loss detected';
+        return;
       }
-    }
-    
-    // Clean up completed jobs after some time
-    this.trainingJobs.forEach((job, id) => {
-      if (job.status === 'completed' && job.progress === 100 && 
-          Date.now() - job.startTime.getTime() > 5 * 60 * 1000) { // 5 minutes after completion
-        this.trainingJobs.delete(id);
+      
+      // Update completion time estimation
+      if (job.progress < 100) {
+        // Remaining percentage
+        const remaining = 100 - job.progress;
+        // Time taken so far
+        const timeElapsedMs = Date.now() - job.startTime.getTime();
+        // Estimated time per percentage point
+        const msPerPercent = timeElapsedMs / job.progress;
+        // Estimated remaining time
+        const remainingTimeMs = remaining * msPerPercent;
+        
+        job.estimatedCompletionTime = new Date(Date.now() + remainingTimeMs);
       }
     });
-    
-    return completedModelIds;
   }
   
   /**
-   * Simulate training progress updates
+   * Clean up resources when the manager is destroyed
    */
-  private simulateTrainingProgress() {
-    // This would be replaced with actual training updates in a real system
-    // For now, we'll just increment progress for each job
-    this.updateTrainingProgress([]);
-  }
-  
-  /**
-   * Cleanup resources when this class is no longer needed
-   */
-  dispose() {
+  destroy(): void {
     if (this.trainingIntervalId) {
       clearInterval(this.trainingIntervalId);
       this.trainingIntervalId = null;
