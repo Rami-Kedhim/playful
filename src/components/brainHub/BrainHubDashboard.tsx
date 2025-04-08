@@ -1,106 +1,98 @@
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Toggle } from "@/components/ui/toggle";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { 
-  Brain, 
-  Settings, 
-  Activity, 
-  BarChart, 
-  AlertCircle, 
-  CheckCircle, 
-  Database, 
-  RefreshCw,
-  Sliders,
-  Bot,
-  User,
-  Rocket
-} from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
-import { brainHub } from "@/services/neural/HermesOxumBrainHub";
+import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import {
+  Brain,
+  BarChart,
+  Settings,
+  Lock,
+  MessageSquare,
+  Database,
+  Globe,
+  UserCheck,
+  AlertTriangle,
+  Cpu,
+  CheckCircle,
+  XCircle,
+  PlayCircle
+} from 'lucide-react';
+
+// Interface for module capabilities
+interface ModuleCapabilities {
+  [key: string]: boolean;
+}
 
 const BrainHubDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [autonomyEnabled, setAutonomyEnabled] = useState(false);
-  const [autonomyLevel, setAutonomyLevel] = useState(0);
-  const [systemStatus, setSystemStatus] = useState({
-    cpuUsage: 0,
-    memoryUsage: 0,
-    requestsPerMinute: 0,
-    lastOptimized: 0
-  });
-  const [capabilities, setCapabilities] = useState<any>({});
-  const [configExpanded, setConfigExpanded] = useState(false);
-  const [decisionLogs, setDecisionLogs] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("status");
+  const [brainHubConfig, setBrainHubConfig] = useState(brainHub.getConfig());
+  const [systemStatus, setSystemStatus] = useState(brainHub.getSystemStatus());
+  const [autonomyStatus, setAutonomyStatus] = useState(brainHub.getAutonomyStatus());
+  const [capabilities, setCapabilities] = useState(brainHub.getCapabilities());
+  const [decisionLogs, setDecisionLogs] = useState<{timestamp: number, decision: string, context: any}[]>([]);
+  
+  // For provider testing
   const [testRegion, setTestRegion] = useState("global");
   const [testNSFW, setTestNSFW] = useState(false);
   const [testQuality, setTestQuality] = useState<'basic' | 'premium'>('basic');
-  const [recommendedProvider, setRecommendedProvider] = useState<any>(null);
+  const [providerResult, setProviderResult] = useState<any>(null);
 
-  // Initialize data from Brain Hub
+  // Update system status periodically
   useEffect(() => {
-    // Get autonomy status
-    const autonomyStatus = brainHub.getAutonomyStatus();
-    setAutonomyEnabled(autonomyStatus.enabled);
-    setAutonomyLevel(autonomyStatus.level);
-    
-    // Get system status
-    setSystemStatus(brainHub.getSystemStatus());
-    
-    // Get capabilities
-    setCapabilities(brainHub.getCapabilities());
-    
-    // Get decision logs
-    setDecisionLogs(brainHub.getDecisionLogs(10));
-    
-    // Refresh data every 10 seconds
     const interval = setInterval(() => {
       setSystemStatus(brainHub.getSystemStatus());
-      setDecisionLogs(brainHub.getDecisionLogs(10));
-    }, 10000);
+    }, 5000);
     
     return () => clearInterval(interval);
   }, []);
-
-  // Update Brain Hub autonomy settings
-  const handleAutonomyChange = (enabled: boolean) => {
-    brainHub.setAutonomy(enabled, autonomyLevel);
-    setAutonomyEnabled(enabled);
+  
+  // Fetch decision logs periodically
+  useEffect(() => {
+    const fetchLogs = () => {
+      setDecisionLogs(brainHub.getDecisionLogs());
+    };
     
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 10000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  // Handle autonomy level change
+  const handleAutonomyChange = (value: number[]) => {
+    const level = value[0];
+    brainHub.setAutonomy(autonomyStatus.enabled, level);
+    setAutonomyStatus(brainHub.getAutonomyStatus());
     toast({
-      title: enabled ? "Brain Hub Autonomy Enabled" : "Brain Hub Autonomy Disabled",
-      description: `Autonomy level: ${autonomyLevel}%`,
+      title: "Autonomy Level Updated",
+      description: `Brain Hub autonomy level set to ${level}%`,
     });
   };
   
-  // Update autonomy level
-  const handleAutonomyLevelChange = (value: number[]) => {
-    const level = value[0];
-    brainHub.setAutonomy(autonomyEnabled, level);
-    setAutonomyLevel(level);
+  // Toggle autonomy
+  const toggleAutonomy = () => {
+    brainHub.setAutonomy(!autonomyStatus.enabled, autonomyStatus.level);
+    setAutonomyStatus(brainHub.getAutonomyStatus());
+    toast({
+      title: autonomyStatus.enabled ? "Autonomy Disabled" : "Autonomy Enabled",
+      description: autonomyStatus.enabled 
+        ? "Brain Hub will now operate in manual mode" 
+        : `Brain Hub will now operate autonomously at ${autonomyStatus.level}% autonomy level`,
+    });
   };
   
-  // Toggle capabilities
+  // Toggle capability
   const toggleCapability = (category: string, capability: string, enabled: boolean) => {
     brainHub.toggleCapability(category as any, capability as any, enabled);
-    
-    // Update local state
-    setCapabilities(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [capability]: enabled
-      }
-    }));
-    
+    setCapabilities(brainHub.getCapabilities());
     toast({
       title: `Capability ${enabled ? 'Enabled' : 'Disabled'}`,
       description: `${category}.${capability} is now ${enabled ? 'active' : 'inactive'}`,
@@ -115,45 +107,66 @@ const BrainHubDashboard: React.FC = () => {
       quality: testQuality
     });
     
-    setRecommendedProvider(result);
+    setProviderResult(result);
+    toast({
+      title: "Provider Recommendation",
+      description: `Recommended provider: ${result.provider} (${result.reason})`,
+    });
   };
-
+  
+  // Format timestamp to readable date
+  const formatTimestamp = (timestamp: number) => {
+    return new Date(timestamp).toLocaleString();
+  };
+  
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container py-8">
+      <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-2">
-          <Brain className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">Brain Hub Control Center</h1>
+          <Brain className="h-10 w-10 text-primary" />
+          <h1 className="text-3xl font-bold">HERMES-OXUM Brain Hub</h1>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <Badge variant={autonomyEnabled ? "default" : "outline"} className="py-1 px-3">
-            {autonomyEnabled ? `Autonomy: ${autonomyLevel}%` : "Manual Mode"}
-          </Badge>
-          <Button variant="outline" size="sm" onClick={() => setSystemStatus(brainHub.getSystemStatus())}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh Status
+        <div className="flex items-center gap-2">
+          <div className={`px-3 py-1 rounded-full flex items-center gap-2 ${
+            autonomyStatus.enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+          }`}>
+            {autonomyStatus.enabled 
+              ? <CheckCircle className="h-4 w-4" /> 
+              : <XCircle className="h-4 w-4" />
+            }
+            <span className="font-medium">
+              {autonomyStatus.enabled 
+                ? `Autonomous (${autonomyStatus.level}%)` 
+                : 'Manual Control'
+              }
+            </span>
+          </div>
+          <Button
+            variant={autonomyStatus.enabled ? "destructive" : "default"}
+            onClick={toggleAutonomy}
+          >
+            {autonomyStatus.enabled ? 'Disable Autonomy' : 'Enable Autonomy'}
           </Button>
         </div>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-5 md:w-[600px]">
-          <TabsTrigger value="overview">
-            <Activity className="h-4 w-4 mr-2" />
-            Overview
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-5 mb-8">
+          <TabsTrigger value="status">
+            <BarChart className="h-4 w-4 mr-2" />
+            System Status
           </TabsTrigger>
           <TabsTrigger value="capabilities">
-            <Sliders className="h-4 w-4 mr-2" />
+            <Cpu className="h-4 w-4 mr-2" />
             Capabilities
           </TabsTrigger>
-          <TabsTrigger value="intelligence">
-            <Bot className="h-4 w-4 mr-2" />
-            AI Models
+          <TabsTrigger value="ai-providers">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            AI Providers
           </TabsTrigger>
-          <TabsTrigger value="logs">
+          <TabsTrigger value="decisions">
             <Database className="h-4 w-4 mr-2" />
-            Decision Logs
+            Decision Log
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
@@ -161,392 +174,400 @@ const BrainHubDashboard: React.FC = () => {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <TabsContent value="status" className="space-y-6">
+          <div className="grid grid-cols-4 gap-4">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">System Load</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="pb-2">
+                <CardTitle>CPU Usage</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{systemStatus.cpuUsage}%</div>
-                <p className="text-xs text-muted-foreground">CPU Utilization</p>
-                <div className="mt-2 h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div className="text-3xl font-bold">{systemStatus.cpuUsage}%</div>
+                <div className="w-full bg-gray-200 h-2 mt-2 rounded-full overflow-hidden">
                   <div 
-                    className={`h-full ${systemStatus.cpuUsage > 70 ? 'bg-destructive' : 'bg-primary'}`}
-                    style={{ width: `${systemStatus.cpuUsage}%` }}
-                  />
+                    className={`h-full ${
+                      systemStatus.cpuUsage > 80 ? 'bg-red-500' : 
+                      systemStatus.cpuUsage > 60 ? 'bg-amber-500' : 
+                      'bg-emerald-500'
+                    }`} 
+                    style={{width: `${systemStatus.cpuUsage}%`}}
+                  ></div>
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Memory Usage</CardTitle>
-                <Database className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="pb-2">
+                <CardTitle>Memory Usage</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{systemStatus.memoryUsage}%</div>
-                <p className="text-xs text-muted-foreground">RAM Utilization</p>
-                <div className="mt-2 h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div className="text-3xl font-bold">{systemStatus.memoryUsage}%</div>
+                <div className="w-full bg-gray-200 h-2 mt-2 rounded-full overflow-hidden">
                   <div 
-                    className={`h-full ${systemStatus.memoryUsage > 80 ? 'bg-destructive' : 'bg-primary'}`}
-                    style={{ width: `${systemStatus.memoryUsage}%` }}
-                  />
+                    className={`h-full ${
+                      systemStatus.memoryUsage > 80 ? 'bg-red-500' : 
+                      systemStatus.memoryUsage > 60 ? 'bg-amber-500' : 
+                      'bg-emerald-500'
+                    }`} 
+                    style={{width: `${systemStatus.memoryUsage}%`}}
+                  ></div>
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Request Rate</CardTitle>
-                <BarChart className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="pb-2">
+                <CardTitle>Requests/min</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{systemStatus.requestsPerMinute}</div>
-                <p className="text-xs text-muted-foreground">Requests per minute</p>
+                <div className="text-3xl font-bold">{systemStatus.requestsPerMinute}</div>
+                <div className="text-sm text-muted-foreground">
+                  Last optimized: {new Date(systemStatus.lastOptimized).toLocaleTimeString()}
+                </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Autonomy Status</CardTitle>
-                <Brain className="h-4 w-4 text-muted-foreground" />
+              <CardHeader className="pb-2">
+                <CardTitle>Autonomy</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{autonomyEnabled ? 'Enabled' : 'Disabled'}</div>
-                <p className="text-xs text-muted-foreground">Level: {autonomyLevel}%</p>
-                <div className="mt-4 flex items-center space-x-2">
-                  <Switch
-                    checked={autonomyEnabled}
-                    onCheckedChange={handleAutonomyChange}
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`text-3xl font-bold ${autonomyStatus.enabled ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    {autonomyStatus.level}%
+                  </div>
+                  <Switch 
+                    checked={autonomyStatus.enabled}
+                    onCheckedChange={toggleAutonomy}
                   />
-                  <Label>Toggle Autonomy</Label>
                 </div>
+                <Slider
+                  value={[autonomyStatus.level]}
+                  min={0}
+                  max={100}
+                  step={5}
+                  onValueChange={handleAutonomyChange}
+                  disabled={!autonomyStatus.enabled}
+                />
               </CardContent>
             </Card>
           </div>
           
           <Card>
             <CardHeader>
-              <CardTitle>Autonomy Control</CardTitle>
+              <CardTitle>Service Status</CardTitle>
+              <CardDescription>Real-time status of all Brain Hub services</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Autonomy Level: {autonomyLevel}%</Label>
-                  <span className={autonomyLevel > 70 ? 'text-destructive' : 'text-muted-foreground'}>
-                    {autonomyLevel < 30 ? 'Conservative' : autonomyLevel < 70 ? 'Balanced' : 'Aggressive'}
-                  </span>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <Brain className="h-5 w-5 mr-2 text-primary" />
+                    <span>Core Processing</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                    <span className="text-sm">Active</span>
+                  </div>
                 </div>
-                <Slider
-                  value={[autonomyLevel]}
-                  min={0}
-                  max={100}
-                  step={5}
-                  onValueChange={handleAutonomyLevelChange}
-                  disabled={!autonomyEnabled}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Controls how much the Brain Hub can act without human oversight. Higher values allow more autonomous decisions.
-                </p>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <Globe className="h-5 w-5 mr-2 text-primary" />
+                    <span>Geo-Legal Filtering</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                    <span className="text-sm">Active</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <MessageSquare className="h-5 w-5 mr-2 text-primary" />
+                    <span>Neuro-Emotion Engine</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                    <span className="text-sm">Active</span>
+                  </div>
+                </div>
               </div>
-              
-              {autonomyLevel > 70 && (
-                <Alert variant="warning">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>High Autonomy Warning</AlertTitle>
-                  <AlertDescription>
-                    At this level, Brain Hub will make significant decisions with minimal human oversight. 
-                    Monitor system logs closely.
-                  </AlertDescription>
-                </Alert>
-              )}
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="capabilities" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
+        <TabsContent value="capabilities" className="space-y-6">
+          {Object.entries(capabilities).map(([category, moduleCapabilities]) => (
+            <Card key={category}>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Project Management
-                </CardTitle>
+                <CardTitle className="capitalize">{category.replace(/([A-Z])/g, ' $1')}</CardTitle>
+                <CardDescription>Toggle individual capabilities in this module</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {capabilities.projectManagement && Object.entries(capabilities.projectManagement).map(([key, value]: [string, any]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</p>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(moduleCapabilities as ModuleCapabilities).map(([capability, enabled]) => (
+                    <div key={capability} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center">
+                        <span className="capitalize">{capability.replace(/([A-Z])/g, ' $1')}</span>
+                      </div>
+                      <Switch 
+                        checked={enabled}
+                        onCheckedChange={(checked) => toggleCapability(category, capability, checked)}
+                      />
                     </div>
-                    <Switch 
-                      checked={value} 
-                      onCheckedChange={(enabled) => toggleCapability('projectManagement', key, enabled)}
-                    />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart className="h-5 w-5" />
-                  Platform Optimization
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {capabilities.platformOptimization && Object.entries(capabilities.platformOptimization).map(([key, value]: [string, any]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</p>
-                    </div>
-                    <Switch 
-                      checked={value} 
-                      onCheckedChange={(enabled) => toggleCapability('platformOptimization', key, enabled)}
-                    />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  User Intelligence
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {capabilities.userIntelligence && Object.entries(capabilities.userIntelligence).map(([key, value]: [string, any]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</p>
-                    </div>
-                    <Switch 
-                      checked={value} 
-                      onCheckedChange={(enabled) => toggleCapability('userIntelligence', key, enabled)}
-                    />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Rocket className="h-5 w-5" />
-                  Growth Engagement
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {capabilities.growthEngagement && Object.entries(capabilities.growthEngagement).map(([key, value]: [string, any]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</p>
-                    </div>
-                    <Switch 
-                      checked={value} 
-                      onCheckedChange={(enabled) => toggleCapability('growthEngagement', key, enabled)}
-                    />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+          ))}
         </TabsContent>
         
-        <TabsContent value="intelligence" className="space-y-4">
+        <TabsContent value="ai-providers" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>AI Provider Recommendation Test</CardTitle>
+              <CardTitle>AI Provider Recommendation Tester</CardTitle>
+              <CardDescription>Test how provider selection works in different scenarios</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>User Region</Label>
-                  <Input 
-                    value={testRegion} 
-                    onChange={(e) => setTestRegion(e.target.value)}
-                    placeholder="e.g., us, eu, global"
-                  />
+                  <Label htmlFor="testRegion">User Region</Label>
+                  <Select value={testRegion} onValueChange={setTestRegion}>
+                    <SelectTrigger id="testRegion">
+                      <SelectValue placeholder="Select region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="global">Global</SelectItem>
+                      <SelectItem value="us">United States</SelectItem>
+                      <SelectItem value="eu">European Union</SelectItem>
+                      <SelectItem value="uk">United Kingdom</SelectItem>
+                      <SelectItem value="ca">Canada</SelectItem>
+                      <SelectItem value="au">Australia</SelectItem>
+                      <SelectItem value="jp">Japan</SelectItem>
+                      <SelectItem value="br">Brazil</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label>Content Type</Label>
-                  <div className="flex items-center space-x-2 pt-2">
+                  <Label htmlFor="testQuality">Quality Tier</Label>
+                  <Select 
+                    value={testQuality} 
+                    onValueChange={(value) => setTestQuality(value as 'basic' | 'premium')}
+                  >
+                    <SelectTrigger id="testQuality">
+                      <SelectValue placeholder="Select quality" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="basic">Basic</SelectItem>
+                      <SelectItem value="premium">Premium</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2 flex items-end">
+                  <div className="flex items-center space-x-2">
                     <Switch 
+                      id="testNSFW"
                       checked={testNSFW}
                       onCheckedChange={setTestNSFW}
                     />
-                    <span>NSFW Content</span>
+                    <Label htmlFor="testNSFW">NSFW Content</Label>
+                  </div>
+                </div>
+              </div>
+              
+              <Button onClick={testProviderRecommendation} className="w-full">
+                Test Provider Selection
+              </Button>
+              
+              {providerResult && (
+                <div className="mt-4 p-4 border rounded-lg bg-muted/50">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Provider</p>
+                      <p className="font-medium">{providerResult.provider}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Reason</p>
+                      <p className="font-medium">{providerResult.reason}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">NSFW Allowed</p>
+                      <p className="font-medium">{providerResult.nsfwAllowed ? 'Yes' : 'No'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Available AI Providers</CardTitle>
+              <CardDescription>Connected AI providers and their capabilities</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold mr-3">O</div>
+                    <div>
+                      <h4 className="font-medium">OpenAI</h4>
+                      <p className="text-sm text-muted-foreground">Safe, compliant content generation</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Connected</div>
+                    <CheckCircle className="h-5 w-5 text-green-500" />
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label>Account Quality</Label>
-                  <div className="flex items-center space-x-4 pt-2">
-                    <Toggle
-                      pressed={testQuality === 'basic'}
-                      onPressedChange={() => setTestQuality('basic')}
-                      variant="outline"
-                    >
-                      Basic
-                    </Toggle>
-                    <Toggle
-                      pressed={testQuality === 'premium'}
-                      onPressedChange={() => setTestQuality('premium')}
-                      variant="outline"
-                    >
-                      Premium
-                    </Toggle>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold mr-3">N</div>
+                    <div>
+                      <h4 className="font-medium">Nomi</h4>
+                      <p className="text-sm text-muted-foreground">Premium NSFW conversation engine</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs">API Key Required</div>
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold mr-3">K</div>
+                    <div>
+                      <h4 className="font-medium">KoboldAI</h4>
+                      <p className="text-sm text-muted-foreground">Standard NSFW content generation</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs">API Key Required</div>
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
                   </div>
                 </div>
               </div>
-              
-              <Button onClick={testProviderRecommendation}>
-                Test Provider Recommendation
-              </Button>
-              
-              {recommendedProvider && (
-                <Alert className={recommendedProvider.nsfwAllowed ? "border-amber-500" : "border-green-500"}>
-                  {recommendedProvider.nsfwAllowed ? 
-                    <AlertCircle className="h-4 w-4 text-amber-500" /> : 
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  }
-                  <AlertTitle>Recommended Provider: {recommendedProvider.provider}</AlertTitle>
-                  <AlertDescription>
-                    <p>Reason: {recommendedProvider.reason}</p>
-                    <p>NSFW Content: {recommendedProvider.nsfwAllowed ? "Allowed" : "Not Allowed"}</p>
-                  </AlertDescription>
-                </Alert>
-              )}
             </CardContent>
+            <CardFooter className="border-t pt-4 flex justify-between">
+              <Button variant="outline">Refresh Status</Button>
+              <Button variant="default">Connect New Provider</Button>
+            </CardFooter>
           </Card>
         </TabsContent>
         
-        <TabsContent value="logs" className="space-y-4">
+        <TabsContent value="decisions" className="space-y-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Decision Logs</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => setDecisionLogs(brainHub.getDecisionLogs(10))}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
+            <CardHeader>
+              <CardTitle>Decision Log</CardTitle>
+              <CardDescription>Historical record of decisions made by Brain Hub</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {decisionLogs.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">No decision logs available</p>
-                ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {decisionLogs.length > 0 ? (
                   decisionLogs.map((log, index) => (
-                    <div key={index} className="border rounded-md p-3 space-y-1">
+                    <div key={index} className="p-3 border rounded-lg">
                       <div className="flex justify-between">
-                        <Badge variant="outline">{log.decision}</Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(log.timestamp).toLocaleString()}
-                        </span>
+                        <span className="font-medium capitalize">{log.decision.replace(/_/g, ' ')}</span>
+                        <span className="text-sm text-muted-foreground">{formatTimestamp(log.timestamp)}</span>
                       </div>
-                      <p className="text-sm truncate">
-                        {JSON.stringify(log.context).substring(0, 100)}
-                        {JSON.stringify(log.context).length > 100 ? '...' : ''}
-                      </p>
+                      <div className="mt-1 text-sm">
+                        <pre className="whitespace-pre-wrap bg-muted p-2 rounded text-xs overflow-hidden">
+                          {JSON.stringify(log.context, null, 2)}
+                        </pre>
+                      </div>
                     </div>
                   ))
+                ) : (
+                  <div className="text-center p-8 text-muted-foreground">
+                    No decisions have been logged yet
+                  </div>
                 )}
               </div>
             </CardContent>
+            <CardFooter className="border-t pt-4 flex justify-end">
+              <Button variant="outline" onClick={() => setDecisionLogs(brainHub.getDecisionLogs())}>
+                Refresh Log
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
         
-        <TabsContent value="settings" className="space-y-4">
+        <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Brain Hub Configuration</CardTitle>
+              <CardTitle>System Configuration</CardTitle>
+              <CardDescription>Configure core Brain Hub settings</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Geo-Legal Filtering</Label>
-                  <Switch checked={true} disabled />
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Geo-Legal Filtering</h4>
+                  <p className="text-sm text-muted-foreground">Enable region-specific content filtering</p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Ensures content complies with regional legal requirements.
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Neuro-Emotion Processing</Label>
-                  <Switch checked={true} disabled />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Enables emotional context detection in AI interactions.
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Predictive Modulation</Label>
-                  <Switch checked={false} disabled />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Advanced algorithm adjustment based on predictive models.
-                </p>
-              </div>
-              
-              <Button variant="outline" onClick={() => setConfigExpanded(!configExpanded)}>
-                {configExpanded ? "Hide Advanced Config" : "Show Advanced Config"}
-              </Button>
-              
-              {configExpanded && (
-                <div className="mt-4 border rounded-md p-4 space-y-4">
-                  <h3 className="text-lg font-medium">Advanced Configuration</h3>
-                  <p className="text-sm text-muted-foreground">
-                    These settings require administrative approval to modify.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Psychology Model</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Emotional Analysis</span>
-                          <Switch checked={true} disabled />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Personality Modeling</span>
-                          <Switch checked={true} disabled />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Behaviour Prediction</span>
-                          <Switch checked={false} disabled />
-                        </div>
-                      </div>
-                    </div>
+                <Switch 
+                  checked={brainHubConfig.geoLegalFilteringEnabled}
+                  onCheckedChange={(checked) => {
+                    const newConfig = { ...brainHubConfig, geoLegalFilteringEnabled: checked };
+                    brainHub.updateConfig(newConfig);
+                    setBrainHubConfig(newConfig);
                     
-                    <div>
-                      <h4 className="font-medium mb-2">Economics Model</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Dynamic Pricing</span>
-                          <Switch checked={true} disabled />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Demand Forecasting</span>
-                          <Switch checked={true} disabled />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">Market Simulation</span>
-                          <Switch checked={false} disabled />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    toast({
+                      title: checked ? "Geo-Legal Filtering Enabled" : "Geo-Legal Filtering Disabled",
+                      description: checked 
+                        ? "Content will be filtered based on regional restrictions"
+                        : "No regional content filtering will be applied",
+                    });
+                  }}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Neuro-Emotion Processing</h4>
+                  <p className="text-sm text-muted-foreground">Enable emotional context analysis</p>
                 </div>
-              )}
+                <Switch 
+                  checked={brainHubConfig.neuroEmotionEnabled}
+                  onCheckedChange={(checked) => {
+                    const newConfig = { ...brainHubConfig, neuroEmotionEnabled: checked };
+                    brainHub.updateConfig(newConfig);
+                    setBrainHubConfig(newConfig);
+                    
+                    toast({
+                      title: checked ? "Neuro-Emotion Processing Enabled" : "Neuro-Emotion Processing Disabled",
+                      description: checked 
+                        ? "Emotional context will be analyzed for better responses"
+                        : "No emotional context analysis will be performed",
+                    });
+                  }}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium">Predictive Modulation</h4>
+                  <p className="text-sm text-muted-foreground">Enable predictive algorithm enhancements</p>
+                </div>
+                <Switch 
+                  checked={brainHubConfig.predictiveModulationEnabled}
+                  onCheckedChange={(checked) => {
+                    const newConfig = { ...brainHubConfig, predictiveModulationEnabled: checked };
+                    brainHub.updateConfig(newConfig);
+                    setBrainHubConfig(newConfig);
+                    
+                    toast({
+                      title: checked ? "Predictive Modulation Enabled" : "Predictive Modulation Disabled",
+                      description: checked 
+                        ? "Algorithms will be enhanced with predictive models"
+                        : "No predictive enhancements will be applied",
+                    });
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

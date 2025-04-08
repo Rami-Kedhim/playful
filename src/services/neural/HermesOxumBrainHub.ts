@@ -124,7 +124,8 @@ class HermesOxumBrainHub {
     enabled: boolean
   ): boolean {
     if (this.capabilities[category] && capability in this.capabilities[category]) {
-      this.capabilities[category][capability] = enabled;
+      // Fix the TypeScript error by using type assertion
+      (this.capabilities[category] as any)[capability] = enabled;
       this.logDecision('capability_toggle', { category, capability, enabled });
       return true;
     }
