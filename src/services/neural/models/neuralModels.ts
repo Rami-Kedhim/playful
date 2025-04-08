@@ -1,6 +1,6 @@
 
 // Update the neural models to fix string vs string[] type issues
-// We're just focusing on fixing the type errors here
+// We're focusing on fixing the type errors here
 
 export const fixNeuralModelsTypes = () => {
   // Convert string to string[] for categories fields

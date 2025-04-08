@@ -31,7 +31,7 @@ export interface LivecamModel {
     viewerCount: number;
     status: 'active' | 'inactive' | 'private';
   };
-  // Adding missing properties from error messages
+  // Adding missing properties that were causing errors
   status?: 'live' | 'offline' | 'away';
   isPopular?: boolean;
   previewUrl?: string;
