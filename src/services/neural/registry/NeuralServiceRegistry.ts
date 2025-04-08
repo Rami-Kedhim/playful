@@ -1,4 +1,3 @@
-
 import { brainHub } from '../HermesOxumBrainHub';
 
 /**
@@ -27,6 +26,7 @@ export interface NeuralService {
   processFeedback(feedback: any): void;
   getMetrics(): Record<string, any>;
   getCapabilities(): string[];
+  updateConfig(config: Partial<NeuralServiceConfig>): void; // Added missing method
 }
 
 /**
