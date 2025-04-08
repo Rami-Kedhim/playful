@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import BrainHubDashboard from '@/components/brainHub/BrainHubDashboard';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
 
 const BrainHubPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -14,6 +15,13 @@ const BrainHubPage: React.FC = () => {
     
     // Example: Configure basic capabilities
     brainHub.toggleCapability('userIntelligence', 'emotionalClassification', true);
+    
+    // Initialize the autonomy engine with the same settings as the Brain Hub
+    const autonomyStatus = brainHub.getAutonomyStatus();
+    autonomyEngine.setAutonomyLevel(autonomyStatus.level);
+    if (autonomyStatus.enabled) {
+      autonomyEngine.start();
+    }
     
     // Simulate loading time
     setTimeout(() => setIsLoading(false), 500);

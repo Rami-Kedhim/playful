@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import AutonomyModulesPanel from './AutonomyModulesPanel';
+import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
 import {
   Brain,
   BarChart,
@@ -23,7 +25,8 @@ import {
   Cpu,
   CheckCircle,
   XCircle,
-  PlayCircle
+  PlayCircle,
+  Zap
 } from 'lucide-react';
 
 // Interface for module capabilities
@@ -38,6 +41,7 @@ const BrainHubDashboard: React.FC = () => {
   const [autonomyStatus, setAutonomyStatus] = useState(brainHub.getAutonomyStatus());
   const [capabilities, setCapabilities] = useState(brainHub.getCapabilities());
   const [decisionLogs, setDecisionLogs] = useState<{timestamp: number, decision: string, context: any}[]>([]);
+  const [enhancedSystemMetrics, setEnhancedSystemMetrics] = useState<any>(null);
   
   // For provider testing
   const [testRegion, setTestRegion] = useState("global");
@@ -49,6 +53,15 @@ const BrainHubDashboard: React.FC = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setSystemStatus(brainHub.getSystemStatus());
+      
+      // Try to get enhanced metrics if available
+      try {
+        if (typeof brainHub.getEnhancedSystemMetrics === 'function') {
+          setEnhancedSystemMetrics(brainHub.getEnhancedSystemMetrics());
+        }
+      } catch (e) {
+        console.log('Enhanced metrics not available');
+      }
     }, 5000);
     
     return () => clearInterval(interval);
@@ -70,6 +83,12 @@ const BrainHubDashboard: React.FC = () => {
   const handleAutonomyChange = (value: number[]) => {
     const level = value[0];
     brainHub.setAutonomy(autonomyStatus.enabled, level);
+    
+    // Also update the autonomy engine if available
+    if (autonomyEngine) {
+      autonomyEngine.setAutonomyLevel(level);
+    }
+    
     setAutonomyStatus(brainHub.getAutonomyStatus());
     toast({
       title: "Autonomy Level Updated",
@@ -79,7 +98,18 @@ const BrainHubDashboard: React.FC = () => {
   
   // Toggle autonomy
   const toggleAutonomy = () => {
-    brainHub.setAutonomy(!autonomyStatus.enabled, autonomyStatus.level);
+    const newState = !autonomyStatus.enabled;
+    brainHub.setAutonomy(newState, autonomyStatus.level);
+    
+    // Also toggle the autonomy engine if available
+    if (autonomyEngine) {
+      if (newState) {
+        autonomyEngine.start();
+      } else {
+        autonomyEngine.stop();
+      }
+    }
+    
     setAutonomyStatus(brainHub.getAutonomyStatus());
     toast({
       title: autonomyStatus.enabled ? "Autonomy Disabled" : "Autonomy Enabled",
@@ -151,7 +181,7 @@ const BrainHubDashboard: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5 mb-8">
+        <TabsList className="grid grid-cols-6 mb-8">
           <TabsTrigger value="status">
             <BarChart className="h-4 w-4 mr-2" />
             System Status
@@ -159,6 +189,10 @@ const BrainHubDashboard: React.FC = () => {
           <TabsTrigger value="capabilities">
             <Cpu className="h-4 w-4 mr-2" />
             Capabilities
+          </TabsTrigger>
+          <TabsTrigger value="autonomy">
+            <Zap className="h-4 w-4 mr-2" />
+            Autonomy
           </TabsTrigger>
           <TabsTrigger value="ai-providers">
             <MessageSquare className="h-4 w-4 mr-2" />
@@ -192,6 +226,11 @@ const BrainHubDashboard: React.FC = () => {
                     style={{width: `${systemStatus.cpuUsage}%`}}
                   ></div>
                 </div>
+                {enhancedSystemMetrics && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Predicted: {enhancedSystemMetrics.predictive.predictedLoadIn1Hour.toFixed(1)}% in 1hr
+                  </div>
+                )}
               </CardContent>
             </Card>
             
@@ -211,6 +250,11 @@ const BrainHubDashboard: React.FC = () => {
                     style={{width: `${systemStatus.memoryUsage}%`}}
                   ></div>
                 </div>
+                {enhancedSystemMetrics && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Predicted: {enhancedSystemMetrics.predictive.predictedMemoryIn1Hour.toFixed(1)}% in 1hr
+                  </div>
+                )}
               </CardContent>
             </Card>
             
@@ -223,6 +267,11 @@ const BrainHubDashboard: React.FC = () => {
                 <div className="text-sm text-muted-foreground">
                   Last optimized: {new Date(systemStatus.lastOptimized).toLocaleTimeString()}
                 </div>
+                {enhancedSystemMetrics && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Predicted: {enhancedSystemMetrics.predictive.predictedRequestsIn1Hour.toFixed(1)} in 1hr
+                  </div>
+                )}
               </CardContent>
             </Card>
             
@@ -251,6 +300,29 @@ const BrainHubDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+          
+          {enhancedSystemMetrics && enhancedSystemMetrics.predictive.optimizationOpportunities.length > 0 && (
+            <Card className="border-amber-200 bg-amber-50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-amber-800 flex items-center">
+                  <AlertTriangle className="mr-2 h-5 w-5" />
+                  Optimization Opportunities
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="list-disc pl-5 space-y-1">
+                  {enhancedSystemMetrics.predictive.optimizationOpportunities.map((opportunity: string, index: number) => (
+                    <li key={index} className="text-amber-800">{opportunity}</li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter className="border-t border-amber-200 pt-2">
+                <Button variant="outline" className="text-amber-800 border-amber-300 hover:bg-amber-100">
+                  Apply Optimizations
+                </Button>
+              </CardFooter>
+            </Card>
+          )}
           
           <Card>
             <CardHeader>
@@ -320,6 +392,10 @@ const BrainHubDashboard: React.FC = () => {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+        
+        <TabsContent value="autonomy" className="space-y-6">
+          <AutonomyModulesPanel />
         </TabsContent>
         
         <TabsContent value="ai-providers" className="space-y-6">
