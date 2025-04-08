@@ -1,101 +1,205 @@
 
-import { SystemHealthMetrics } from '@/services/neural';
+import { 
+  NeuralAnalyticsReport, 
+  PerformanceTrend, 
+  AdvancedMetric,
+  DistributionItem,
+  ModelPerformance
+} from '../types/neuralAnalytics';
+import { neuralHub } from '../HermesOxumNeuralHub';
 
-export interface PerformanceTrend {
-  timestamp: Date;
-  load: number;
-  responseTime: number;
-  errorRate: number;
-  memoryUsage: number;
-}
-
-export interface NeuralAnalyticsReport {
-  timestamp: Date;
-  summary: {
-    operationsCompleted: number;
-    averageResponseTime: number;
-    errorRate: number;
-    recommendations: string[];
-  };
-  trends: PerformanceTrend[];
-  systemHealth: SystemHealthMetrics;
-}
-
-export function generateNeuralAnalytics(): NeuralAnalyticsReport {
-  // In a real app, this would pull data from a backend service
-  // For now, we'll generate mock data
-  
-  const trends: PerformanceTrend[] = [];
+/**
+ * Generate analytics report for neural systems
+ * @returns Analytics report with performance metrics, usage distributions, and forecasts
+ */
+export const generateNeuralAnalytics = (): NeuralAnalyticsReport => {
+  const models = neuralHub.getModels();
   const now = new Date();
   
-  // Generate trend data for the past 24 hours
-  for (let i = 0; i < 24; i++) {
-    const timestamp = new Date(now.getTime() - (23 - i) * 60 * 60 * 1000);
-    trends.push({
-      timestamp,
-      load: Math.random() * 0.5 + 0.3, // 30-80% load
-      responseTime: Math.random() * 200 + 100, // 100-300ms
-      errorRate: Math.random() * 0.02, // 0-2%
-      memoryUsage: Math.random() * 0.4 + 0.4, // 40-80%
-    });
-  }
+  // Calculate averages from active models
+  const activeModels = models.filter(m => m.status === 'active');
+  const avgAccuracy = activeModels.reduce((acc, model) => acc + model.performance.accuracy, 0) / 
+                     (activeModels.length || 1);
+  const avgLatency = activeModels.reduce((acc, model) => acc + model.performance.latency, 0) / 
+                    (activeModels.length || 1);
   
-  // Calculate averages for the summary
-  const avgResponseTime = trends.reduce((sum, t) => sum + t.responseTime, 0) / trends.length;
-  const avgErrorRate = trends.reduce((sum, t) => sum + t.errorRate, 0) / trends.length;
+  // Model performance metrics
+  const modelPerformance: ModelPerformance[] = models.map(model => ({
+    id: model.id,
+    name: model.name,
+    version: model.version,
+    metrics: {
+      accuracy: model.performance.accuracy,
+      latency: model.performance.latency,
+      efficiency: 0.65 + Math.random() * 0.25, // Simulated efficiency
+      usageRate: 0.3 + Math.random() * 0.6, // Simulated usage rate
+      targetLatency: model.performance.latency * 0.8 // Target is 20% better than current
+    }
+  }));
   
-  const recommendations = [
-    "Optimize neural pathway configurations to improve response time",
-    "Consider scaling computational resources during peak usage periods",
-    "Implement enhanced error handling for edge case scenarios",
-    "Schedule regular system optimization during off-peak hours"
+  // Generate service type distribution data
+  const serviceTypeDistribution: DistributionItem[] = [
+    { name: 'AI Companion', value: 35 + Math.random() * 10 },
+    { name: 'Escorts', value: 20 + Math.random() * 15 },
+    { name: 'Creators', value: 25 + Math.random() * 15 },
+    { name: 'Livecams', value: 15 + Math.random() * 10 }
   ];
   
-  // Filter recommendations randomly to make them seem dynamic
-  const filteredRecommendations = recommendations.filter(() => Math.random() > 0.3);
+  // Normalize to 100%
+  const totalDistribution = serviceTypeDistribution.reduce((sum, item) => sum + item.value, 0);
+  serviceTypeDistribution.forEach(item => {
+    item.value = (item.value / totalDistribution) * 100;
+  });
+  
+  // Generate resource allocation data
+  const resourceAllocation: DistributionItem[] = [
+    { name: 'Inference', value: 45 + Math.random() * 10 },
+    { name: 'Training', value: 25 + Math.random() * 10 },
+    { name: 'Data Processing', value: 15 + Math.random() * 5 },
+    { name: 'Monitoring', value: 10 + Math.random() * 5 },
+    { name: 'Other', value: 5 + Math.random() * 5 }
+  ];
+  
+  // Normalize to 100%
+  const totalAllocation = resourceAllocation.reduce((sum, item) => sum + item.value, 0);
+  resourceAllocation.forEach(item => {
+    item.value = (item.value / totalAllocation) * 100;
+  });
+  
+  // Generate daily usage trend
+  const dailyUsageTrend = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // Generate rising trend with some randomness
+    const baseOps = 500 + (i * 50);
+    const operations = baseOps + (Math.random() * 100 - 50);
+    const activeModels = Math.floor(3 + (i * 0.3) + (Math.random() * 2 - 1));
+    
+    return {
+      date: dateStr,
+      operations,
+      activeModels
+    };
+  });
+  
+  // Generate advanced metrics
+  const advancedMetrics: AdvancedMetric[] = [
+    {
+      name: 'Semantic Coherence Index',
+      value: (0.82 + Math.random() * 0.1).toFixed(4),
+      description: 'Measures consistency and logical flow in generated responses'
+    },
+    {
+      name: 'Neural Circuit Efficiency',
+      value: (0.75 + Math.random() * 0.15).toFixed(4),
+      description: 'Ratio of computational effort to output quality'
+    },
+    {
+      name: 'Memory Utilization',
+      value: `${Math.floor(60 + Math.random() * 30)}%`,
+      description: 'Percentage of available memory used during peak operations'
+    },
+    {
+      name: 'Inference Cache Hit Rate',
+      value: `${Math.floor(70 + Math.random() * 25)}%`,
+      description: 'Percentage of inferences resolved from cache without recomputation'
+    },
+    {
+      name: 'Model Drift Factor',
+      value: (0.03 + Math.random() * 0.07).toFixed(4),
+      description: 'Rate at which model accuracy degrades over time without retraining'
+    },
+    {
+      name: 'Network Propagation Delay',
+      value: `${Math.floor(15 + Math.random() * 10)}ms`,
+      description: 'Average time for neural signals to propagate through the network'
+    }
+  ];
+  
+  // Generate correlation matrix
+  const metrics = ['Accuracy', 'Latency', 'Efficiency', 'Usage', 'Resources'];
+  const correlationMatrix = {
+    metrics,
+    values: [
+      [1.0, -0.72, 0.85, 0.63, 0.58], // Accuracy correlations
+      [-0.72, 1.0, -0.65, -0.41, 0.76], // Latency correlations
+      [0.85, -0.65, 1.0, 0.53, 0.42], // Efficiency correlations
+      [0.63, -0.41, 0.53, 1.0, 0.37], // Usage correlations
+      [0.58, 0.76, 0.42, 0.37, 1.0]  // Resources correlations
+    ]
+  };
+  
+  // Generate system recommendations based on data
+  const recommendations = [
+    'Increase training frequency for the Escort Cognitive model to improve classification accuracy',
+    'Optimize memory usage in AI Companion models to reduce response latency by ~15%',
+    'Consider upgrading neural pathway connections between Livecams and Content Creator services',
+    'Implement automated circuit pruning to improve overall system efficiency',
+    'Add more nodes to the semantic understanding cluster to handle increased user volume'
+  ];
   
   return {
-    timestamp: now,
-    summary: {
-      operationsCompleted: Math.floor(Math.random() * 50000) + 10000,
-      averageResponseTime: avgResponseTime,
-      errorRate: avgErrorRate,
-      recommendations: filteredRecommendations.length > 0 ? filteredRecommendations : [recommendations[0]]
+    operationalMetrics: {
+      totalOperations: Math.floor(dailyUsageTrend[6].operations * 24), // Estimate daily ops
+      operationsChange: 8.3 + (Math.random() * 6 - 3), // Weekly change percent
+      averageAccuracy: avgAccuracy,
+      accuracyChange: 2.1 + (Math.random() * 2 - 1), // Weekly change percent
+      averageResponseTime: avgLatency,
+      responseTimeChange: -3.5 + (Math.random() * 6 - 3), // Negative is good
+      errorRate: 0.02 + (Math.random() * 0.02), // 2-4% error rate
+      errorRateChange: -0.5 + (Math.random() * 2 - 1) // Weekly change percent
     },
-    trends,
-    systemHealth: {
-      load: Math.random() * 0.6 + 0.2,
-      memoryUtilization: Math.random() * 0.5 + 0.3,
-      networkLatency: Math.random() * 50 + 20,
-      errorFrequency: Math.random() * 0.01,
-      uptime: Math.floor(Math.random() * 100) + 120,
-      cpuUtilization: Math.random() * 0.6 + 0.2,
-      operationsPerSecond: Math.floor(Math.random() * 10000) + 5000,
-      responseTime: Math.random() * 100 + 50,
-      errorRate: Math.random() * 0.05,
-      stability: Math.random() * 0.3 + 0.7,
-      userEngagement: Math.random() * 0.4 + 0.5,
-      economicBalance: Math.random() * 0.5 + 0.5,
-      lastUpdated: now
-    }
+    modelPerformance,
+    usageMetrics: {
+      serviceTypeDistribution,
+      resourceAllocation,
+      dailyUsageTrend
+    },
+    recommendations,
+    advancedMetrics,
+    correlationMatrix
   };
-}
+};
 
-export function generatePerformanceForecast(days: number): PerformanceTrend[] {
-  const forecast: PerformanceTrend[] = [];
-  const now = new Date();
+/**
+ * Generate performance forecast data
+ * @param days Number of days to forecast
+ * @returns Array of daily forecast data points
+ */
+export const generatePerformanceForecast = (days: number = 7): PerformanceTrend[] => {
+  const report = generateNeuralAnalytics();
+  const lastOperations = report.usageMetrics.dailyUsageTrend[6].operations;
+  const operationsGrowthRate = report.operationalMetrics.operationsChange / 100;
+  const accuracyGrowthRate = report.operationalMetrics.accuracyChange / 100;
   
-  // Generate forecasted data for the specified number of days
-  for (let i = 0; i < days; i++) {
-    const timestamp = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
-    forecast.push({
-      timestamp,
-      load: Math.random() * 0.5 + 0.3, // 30-80% load
-      responseTime: Math.random() * 200 + 100, // 100-300ms
-      errorRate: Math.random() * 0.02, // 0-2%
-      memoryUsage: Math.random() * 0.4 + 0.4, // 40-80%
-    });
-  }
-  
-  return forecast;
-}
+  return Array.from({ length: days }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() + i + 1); // Forecast starts tomorrow
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // Apply growth rates with some randomness
+    const operationsFactor = Math.pow(1 + (operationsGrowthRate / 7), i + 1);
+    const operations = Math.floor(lastOperations * operationsFactor * (1 + (Math.random() * 0.1 - 0.05)));
+    
+    const accuracyFactor = Math.pow(1 + (accuracyGrowthRate / 7), i + 1);
+    const accuracy = Math.min(
+      98, // Cap at 98%
+      Math.floor(report.operationalMetrics.averageAccuracy * 100 * accuracyFactor * (1 + (Math.random() * 0.02 - 0.01)))
+    );
+    
+    // Efficiency tends to improve with accuracy but with more random factors
+    const efficiency = Math.min(
+      95, // Cap at 95%
+      Math.floor(70 + (i * 1.5) + (Math.random() * 5 - 2.5))
+    );
+    
+    return {
+      date: dateStr,
+      operations,
+      accuracy,
+      efficiency
+    };
+  });
+};

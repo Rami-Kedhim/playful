@@ -4,10 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Brain, Info, Settings } from 'lucide-react';
+import { Brain, Info, Settings, ChartBar } from 'lucide-react';
 import SuperlativeBrainHub from '@/components/brainHub/SuperlativeBrainHub';
 import BrainCore from '@/components/brainHub/BrainCore';
 import NeuralServicesPanel from '@/components/brainHub/NeuralServicesPanel';
+import NeuralAnalyticsPanel from '@/components/brainHub/NeuralAnalyticsPanel';
 import NeuralModuleRegistration from '@/components/brainHub/NeuralModuleRegistration';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import { NeuralModel } from '@/services/neural/types/neuralHub';
@@ -130,9 +131,7 @@ const BrainHubPage: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="analytics">
-          <div className="p-8 text-center text-muted-foreground">
-            Analytics dashboard coming soon.
-          </div>
+          <NeuralAnalyticsPanel advancedMode={advancedMode} />
         </TabsContent>
       </Tabs>
     </div>
