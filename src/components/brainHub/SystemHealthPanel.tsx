@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
-import { BrainHubHealthStatus } from '@/types/brainHubHealth';
 import { CircleCheck, AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 import PersistenceControls from './PersistenceControls';
 
@@ -13,9 +12,9 @@ interface SystemHealthPanelProps {
 const SystemHealthPanel: React.FC<SystemHealthPanelProps> = ({ className = '' }) => {
   const { health, checkHealth } = useBrainHubHealth();
   
-  const getStatusIcon = (status: BrainHubHealthStatus) => {
+  const getStatusIcon = (status: 'healthy' | 'warning' | 'error' | 'unknown') => {
     switch (status) {
-      case 'good':
+      case 'healthy':
         return <CircleCheck className="w-10 h-10 text-green-500" />;
       case 'warning':
         return <AlertTriangle className="w-10 h-10 text-yellow-500" />;
@@ -44,14 +43,19 @@ const SystemHealthPanel: React.FC<SystemHealthPanelProps> = ({ className = '' })
             </div>
           </div>
           <div className="mt-6 space-y-2">
-            {Object.entries(health.metrics).map(([name, value], index) => (
-              <div key={index} className="flex justify-between items-center">
-                <span className="text-sm">{name}</span>
-                <span className="text-sm font-medium">
-                  {typeof value === 'number' ? value : JSON.stringify(value)}
-                </span>
-              </div>
-            ))}
+            {Object.entries(health.metrics).map(([name, value]) => {
+              // Skip neuralMetrics as we display it separately
+              if (name === 'neuralMetrics') return null;
+              
+              return (
+                <div key={name} className="flex justify-between items-center">
+                  <span className="text-sm">{name}</span>
+                  <span className="text-sm font-medium">
+                    {typeof value === 'number' ? value : JSON.stringify(value)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

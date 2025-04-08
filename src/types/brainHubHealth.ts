@@ -7,6 +7,10 @@ export interface BrainHubHealth {
     memoryUsage: number;
     requestsPerMinute: number;
     lastOptimized: number;
+    neuralMetrics?: {
+      stability: number;
+      userEngagement: number;
+    };
   };
   warnings: string[];
   errors: string[];

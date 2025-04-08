@@ -31,7 +31,7 @@ const ModuleActivityMonitor: React.FC = () => {
   // Initial events load
   useEffect(() => {
     // Get decision logs from the Brain Hub
-    const decisions = brainHub.getDecisionLogs(10);
+    const decisions = brainHub.getDecisionLogs();
     
     // Get recent autonomy decisions
     const autonomyDecisions = autonomyEngine.getRecentDecisions(10);
@@ -43,7 +43,7 @@ const ModuleActivityMonitor: React.FC = () => {
       module: 'Brain Hub Core',
       type: 'info',
       message: `Decision: ${decision.decision}`,
-      details: JSON.stringify(decision.context)
+      details: decision.context ? JSON.stringify(decision.context) : undefined
     }));
     
     const autonomyEvents: ActivityEvent[] = autonomyDecisions.map(decision => ({

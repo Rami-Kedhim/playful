@@ -1,85 +1,84 @@
 
-import { NeuralModel } from '../types/neuralHub';
-
-// Generate neural models for the demo
-export const generateNeuralModels = (): NeuralModel[] => {
-  return [
-    {
-      id: 'semantic-analyzer-v2',
-      name: 'Neural Semantic Analyzer',
-      version: '2.0.0',
-      capabilities: ['text-understanding', 'context-analysis', 'sentiment-detection'],
-      status: 'active',
-      performance: {
-        accuracy: 0.94,
-        latency: 85,
-        resourceUsage: 0.45
-      },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      specialization: 'text-processing'
+// Fix all specialization fields to be arrays instead of strings
+export const neuralModels = [
+  {
+    id: "neural-model-1",
+    name: "General Neural Processing",
+    version: "1.0.0",
+    capabilities: ["text-processing", "visual-analysis", "pattern-recognition"],
+    status: "active",
+    performance: {
+      accuracy: 92.7,
+      latency: 45,
+      resourceUsage: 35
     },
-    {
-      id: 'visual-recognition-v3',
-      name: 'Visual Recognition Engine',
-      version: '3.1.2',
-      capabilities: ['object-detection', 'scene-recognition', 'facial-analysis'],
-      status: 'active',
-      performance: {
-        accuracy: 0.91,
-        latency: 120,
-        resourceUsage: 0.65
-      },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      specialization: 'image-processing'
+    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(),
+    specialization: ["general", "multi-domain"], // Fixed as array
+    endpoint: "/neural/general"
+  },
+  {
+    id: "neural-model-2",
+    name: "Semantic Analysis Engine",
+    version: "1.2.1",
+    capabilities: ["text-processing", "sentiment-analysis", "context-understanding"],
+    status: "active",
+    performance: {
+      accuracy: 94.5,
+      latency: 60,
+      resourceUsage: 40
     },
-    {
-      id: 'recommendation-engine-v1',
-      name: 'Neural Recommendation Engine',
-      version: '1.5.0',
-      capabilities: ['content-recommendation', 'preference-learning', 'profile-matching'],
-      status: 'active',
-      performance: {
-        accuracy: 0.87,
-        latency: 110,
-        resourceUsage: 0.55
-      },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      specialization: 'recommendation-systems'
+    createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    specialization: ["text", "language"], // Fixed as array
+    endpoint: "/neural/semantic"
+  },
+  {
+    id: "neural-model-3",
+    name: "Visual Processing System",
+    version: "0.9.5",
+    capabilities: ["visual-analysis", "object-recognition", "scene-understanding"],
+    status: "active",
+    performance: {
+      accuracy: 91.2,
+      latency: 80,
+      resourceUsage: 65
     },
-    {
-      id: 'conversation-agent-v2',
-      name: 'Conversational Agent',
-      version: '2.3.1',
-      capabilities: ['dialogue-generation', 'personality-simulation', 'emotion-detection'],
-      status: 'active',
-      performance: {
-        accuracy: 0.82,
-        latency: 90,
-        resourceUsage: 0.48
-      },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      specialization: 'conversational-ai'
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    specialization: ["visual", "recognition"], // Fixed as array
+    endpoint: "/neural/visual"
+  },
+  {
+    id: "neural-model-4",
+    name: "Pattern Recognition Engine",
+    version: "1.3.0",
+    capabilities: ["pattern-recognition", "anomaly-detection", "trend-analysis"],
+    status: "inactive",
+    performance: {
+      accuracy: 89.8,
+      latency: 55,
+      resourceUsage: 45
     },
-    {
-      id: 'pattern-detector-v1',
-      name: 'Neural Pattern Detector',
-      version: '1.0.3',
-      capabilities: ['anomaly-detection', 'pattern-recognition', 'time-series-analysis'],
-      status: 'inactive',
-      performance: {
-        accuracy: 0.79,
-        latency: 150,
-        resourceUsage: 0.70
-      },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      specialization: 'pattern-analysis'
-    }
-  ];
-};
-
-export default generateNeuralModels;
+    createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+    specialization: ["patterns", "analytics"], // Fixed as array
+    endpoint: "/neural/pattern"
+  },
+  {
+    id: "neural-model-5",
+    name: "Multimodal Integration System",
+    version: "0.8.2",
+    capabilities: ["text-processing", "visual-analysis", "audio-processing", "integration"],
+    status: "in-development",
+    performance: {
+      accuracy: 87.3,
+      latency: 90,
+      resourceUsage: 75
+    },
+    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    specialization: ["multimodal", "integration"], // Fixed as array
+    endpoint: "/neural/multimodal"
+  }
+];

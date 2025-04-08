@@ -367,7 +367,13 @@ export class HermesOxumBrainHub {
   /**
    * Log a decision
    */
-  public logDecision(module: string, decision: string, confidence: number = 0.8, impact: 'low' | 'medium' | 'high' = 'medium'): void {
+  public logDecision(
+    module: string, 
+    decision: string, 
+    confidence: number = 0.8, 
+    impact: 'low' | 'medium' | 'high' = 'medium',
+    context?: string | Record<string, any>
+  ): void {
     const log: DecisionLog = {
       id: `decision-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       timestamp: new Date(),
@@ -375,7 +381,8 @@ export class HermesOxumBrainHub {
       decision,
       confidence,
       impact,
-      status: this.autonomyLevel > 70 ? 'automated' : 'pending'
+      status: this.autonomyLevel > 70 ? 'automated' : 'pending',
+      context
     };
     
     this.decisionLogs.unshift(log);

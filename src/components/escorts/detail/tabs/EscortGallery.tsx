@@ -1,110 +1,113 @@
 
-import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
+import { PlayCircle } from 'lucide-react';
 
 export interface EscortGalleryProps {
   images: string[];
-  videos?: { id: string; url: string; thumbnail: string; title: string }[];
+  videos: Array<{ id: string; url: string; thumbnail: string; title: string }>;
 }
 
-const EscortGallery = ({ images, videos = [] }: EscortGalleryProps) => {
+const EscortGallery: React.FC<EscortGalleryProps> = ({ images, videos }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handleOpenImage = (image: string, index: number) => {
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  
+  const openImage = (image: string) => {
     setSelectedImage(image);
-    setCurrentIndex(index);
   };
-
-  const handleNext = () => {
-    if (currentIndex < images.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setSelectedImage(images[currentIndex + 1]);
-    }
+  
+  const closeImage = () => {
+    setSelectedImage(null);
   };
-
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setSelectedImage(images[currentIndex - 1]);
-    }
+  
+  const openVideo = (videoUrl: string) => {
+    setSelectedVideo(videoUrl);
   };
-
+  
+  const closeVideo = () => {
+    setSelectedVideo(null);
+  };
+  
   return (
-    <div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {images.map((image, index) => (
-          <Card 
-            key={index}
-            className="overflow-hidden cursor-pointer"
-            onClick={() => handleOpenImage(image, index)}
-          >
-            <div className="aspect-square">
+    <>
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {images.map((image, index) => (
+            <div 
+              key={`image-${index}`}
+              className="aspect-square rounded-md overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => openImage(image)}
+            >
               <img 
                 src={image} 
-                alt={`Gallery ${index + 1}`} 
+                alt={`Gallery image ${index + 1}`} 
                 className="w-full h-full object-cover"
               />
             </div>
-          </Card>
-        ))}
-
-        {videos && videos.length > 0 && videos.map((video) => (
-          <Card key={video.id} className="overflow-hidden">
-            <div className="aspect-square relative group">
-              <img 
-                src={video.thumbnail} 
-                alt={video.title} 
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="outline" className="text-white border-white">
-                  Play Video
-                </Button>
+          ))}
+        </div>
+      )}
+      
+      {videos.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {videos.map((video) => (
+            <Card
+              key={video.id}
+              className="overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => openVideo(video.url)}
+            >
+              <div className="relative aspect-video">
+                <img 
+                  src={video.thumbnail} 
+                  alt={video.title} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <PlayCircle className="w-12 h-12 text-white" />
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <Dialog 
-        open={selectedImage !== null} 
-        onOpenChange={(open) => !open && setSelectedImage(null)}
-      >
-        <DialogContent className="max-w-4xl p-0 bg-transparent border-none">
-          <div className="relative">
+              <div className="p-2">
+                <h4 className="text-sm font-medium line-clamp-1">{video.title}</h4>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+      
+      {images.length === 0 && videos.length === 0 && (
+        <p className="text-center text-muted-foreground py-8">No gallery content available</p>
+      )}
+      
+      {/* Image lightbox */}
+      <Dialog open={!!selectedImage} onOpenChange={closeImage}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          {selectedImage && (
             <img 
-              src={selectedImage || ''} 
-              alt="Full size gallery" 
-              className="w-full h-full object-contain max-h-[80vh]"
+              src={selectedImage} 
+              alt="Gallery preview" 
+              className="w-full h-auto object-contain"
             />
-            
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-              onClick={handlePrevious}
-              disabled={currentIndex === 0}
-            >
-              <ChevronLeftIcon className="h-6 w-6" />
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white"
-              onClick={handleNext}
-              disabled={currentIndex === images.length - 1}
-            >
-              <ChevronRightIcon className="h-6 w-6" />
-            </Button>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
-    </div>
+      
+      {/* Video player */}
+      <Dialog open={!!selectedVideo} onOpenChange={closeVideo}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          {selectedVideo && (
+            <div className="aspect-video w-full">
+              <video 
+                src={selectedVideo}
+                controls
+                autoPlay
+                className="w-full h-full"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

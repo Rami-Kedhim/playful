@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,7 +14,7 @@ const BrainHubAnalytics: React.FC = () => {
   // Format utilization trend data for charts
   const utilizationData = analytics.utilizationTrend.map(item => ({
     time: new Date(item.timestamp).toLocaleTimeString(),
-    utilization: (item.value * 100).toFixed(1),
+    utilization: (item.cpuUsage * 100).toFixed(1),
   }));
 
   // Prepare trend data for recommendations chart

@@ -29,15 +29,17 @@ const BrainHubHealthStatus: React.FC = () => {
   const { toast } = useToast();
   
   const statusColors = {
-    good: 'bg-green-500',
+    healthy: 'bg-green-500',
     warning: 'bg-yellow-500',
     error: 'bg-red-500',
+    unknown: 'bg-gray-500',
   };
   
   const statusIcons = {
-    good: <CheckCircle className="h-5 w-5 text-green-500" />,
+    healthy: <CheckCircle className="h-5 w-5 text-green-500" />,
     warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
     error: <AlertCircle className="h-5 w-5 text-red-500" />,
+    unknown: <AlertCircle className="h-5 w-5 text-gray-500" />,
   };
 
   const handleRefresh = () => {
@@ -78,8 +80,9 @@ const BrainHubHealthStatus: React.FC = () => {
             <Activity className="h-5 w-5 mr-2" />
             <span>Brain Hub Health</span>
             <Badge variant={
-              health.status === 'good' ? 'success' : 
-              health.status === 'warning' ? 'secondary' : 'destructive'
+              health.status === 'healthy' ? 'success' : 
+              health.status === 'warning' ? 'secondary' : 
+              health.status === 'error' ? 'destructive' : 'outline'
             }>
               {health.status.toUpperCase()}
             </Badge>

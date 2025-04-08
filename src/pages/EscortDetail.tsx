@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -26,7 +25,6 @@ const EscortDetail = () => {
     canBook
   } = useEscortDetail(id);
   
-  // This is a fallback if there was an error or the escort wasn't found
   if (error || (!loading && !escort)) {
     return (
       <MainLayout>
@@ -50,7 +48,6 @@ const EscortDetail = () => {
     );
   }
   
-  // Loading state
   if (loading) {
     return (
       <MainLayout>
@@ -82,7 +79,6 @@ const EscortDetail = () => {
   const isBookingAvailable = canBook && !escort.isAI;
   const isMessagingAvailable = true;
   
-  // Calculate verification badge display
   const getVerificationBadge = () => {
     if (escort.verified) {
       return (
@@ -107,7 +103,6 @@ const EscortDetail = () => {
         </Button>
         
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Left column - Photos */}
           <div className="md:w-2/5 space-y-6">
             <EscortGallery 
               images={escort.gallery || [escort.imageUrl]} 
@@ -133,7 +128,6 @@ const EscortDetail = () => {
             )}
           </div>
           
-          {/* Right column - Details */}
           <div className="md:w-3/5">
             <div className="mb-6">
               <div className="flex items-center justify-between mb-1">
@@ -167,7 +161,6 @@ const EscortDetail = () => {
               </div>
             </div>
             
-            {/* Action buttons */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               {isBookingAvailable && (
                 <Button onClick={handleBook}>
@@ -187,7 +180,6 @@ const EscortDetail = () => {
               )}
             </div>
             
-            {/* Tabs for different sections */}
             <Tabs defaultValue="about" className="mt-6">
               <TabsList className="w-full justify-start">
                 <TabsTrigger value="about">About</TabsTrigger>
@@ -206,17 +198,17 @@ const EscortDetail = () => {
                   orientation={escort.sexualOrientation}
                   languages={escort.languages}
                   ethnicity={escort.ethnicity}
-                  height={escort.height}
-                  weight={escort.weight}
-                  hairColor={escort.hairColor}
-                  eyeColor={escort.eyeColor}
-                  measurements={escort.measurements}
+                  height={escort.height ? String(escort.height) : "Not specified"}
+                  weight={escort.weight ? String(escort.weight) : "Not specified"}
+                  physique={escort.physique 
+                    ? `${escort.physique.bust}-${escort.physique.waist}-${escort.physique.hips}` 
+                    : "Not specified"}
                   tags={escort.tags}
                 />
               </TabsContent>
               
               <TabsContent value="rates">
-                <EscortRates rates={escort.rates || {}} />
+                <EscortRates escort={escort} />
               </TabsContent>
               
               <TabsContent value="services">

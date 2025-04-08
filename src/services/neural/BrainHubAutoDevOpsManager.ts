@@ -1,4 +1,3 @@
-
 import { brainHub } from "./HermesOxumBrainHub";
 import { toast } from "@/components/ui/use-toast";
 
@@ -79,11 +78,13 @@ export class BrainHubAutoDevOpsManager {
     this.humanReviewRequired = this.autonomyLevel < 70;
     
     // Log this decision in the Brain Hub
-    brainHub.logDecision('autodevops_autonomy_update', {
-      previousLevel: this.autonomyLevel,
-      newLevel: level,
-      humanReviewRequired: this.humanReviewRequired
-    });
+    brainHub.logDecision(
+      'AutoDevOps', 
+      `Autonomy level changed from ${this.autonomyLevel} to ${level}`,
+      0.9,
+      'medium',
+      { previousLevel: this.autonomyLevel, newLevel: level, humanReviewRequired: level < 70 }
+    );
     
     toast({
       title: "AutoDevOps Autonomy Updated",
@@ -489,11 +490,13 @@ export default ${request.description.split(' ').map(word => word.charAt(0).toUpp
     this.deploymentHistory.push(deploymentResult);
     
     // Log this action in Brain Hub
-    brainHub.logDecision('autodevops_deployment', {
-      fileName,
-      componentType: codeResult.language,
-      timestamp: deploymentResult.timestamp
-    });
+    brainHub.logDecision(
+      'AutoDevOps', 
+      `Code deployed: ${fileName}`, 
+      0.95,
+      'high',
+      { fileName, componentType: codeResult.language, timestamp: Date.now() }
+    );
     
     toast({
       title: "Deployment Successful",
@@ -543,11 +546,13 @@ export default ${request.description.split(' ').map(word => word.charAt(0).toUpp
     });
     
     // Log this decision in Brain Hub
-    brainHub.logDecision('autodevops_rejection', {
-      fileName,
-      reason,
-      timestamp: Date.now()
-    });
+    brainHub.logDecision(
+      'AutoDevOps', 
+      `Code rejected: ${fileName}`, 
+      0.9,
+      'medium',
+      { fileName, reason, timestamp: Date.now() }
+    );
   }
   
   /**

@@ -42,20 +42,6 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
                 </p>
               </div>
             </div>
-            
-            {availability.exceptions && availability.exceptions.length > 0 && (
-              <div className="mt-6">
-                <h4 className="font-medium mb-2">Special Dates</h4>
-                <ul className="space-y-2">
-                  {availability.exceptions.map((exception, index) => (
-                    <li key={index} className="flex justify-between">
-                      <span>{exception.date}</span>
-                      <span>{exception.available ? (exception.customHours || availability.hours) : 'Not available'}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </>
         ) : (
           <p className="text-gray-600">No availability information provided.</p>
