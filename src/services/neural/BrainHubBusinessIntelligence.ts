@@ -1,4 +1,3 @@
-
 // Business Intelligence service for Brain Hub
 import { v4 as uuidv4 } from 'uuid';
 
@@ -632,8 +631,8 @@ class BrainHubBusinessIntelligence {
         id: uuidv4(),
         title: randomTitle,
         description: `An anomaly has been detected in recent system metrics that requires attention. This pattern deviates significantly from historical trends.`,
-        insightType: 'anomaly' as const,
-        impact: 'high' as const,
+        insightType: 'anomaly',  // This is now valid as it's in the PlatformInsight interface
+        impact: 'high',          // This is now valid as it's in the PlatformInsight interface
         confidence: 0.85,
         source: 'anomaly_detection',
         timestamp: Date.now(),

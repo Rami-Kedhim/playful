@@ -27,7 +27,7 @@ export const ServiceCategories = {
   BRAIN_HUB: 'brain-hub'
 };
 
-interface Breadcrumb {
+export interface Breadcrumb {
   label: string;
   path: string;
 }
@@ -71,4 +71,3 @@ export const getBreadcrumbsFromPath = (path: string): Breadcrumb[] => {
 
   return breadcrumbs;
 };
-
