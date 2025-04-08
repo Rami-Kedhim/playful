@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import { ArrowUp, ArrowDown, Zap, TrendingUp, History, RefreshCw, DollarSign, Settings, Save, BarChart2, PieChart as PieChartIcon } from "lucide-react";
+import { ArrowUp, ArrowDown, Zap, TrendingUp, History, RefreshCw, DollarSign, Settings, Save, BarChart2, PieChart as PieChartIcon, ArrowRight } from "lucide-react";
 import { useBrainHub } from '@/hooks/useBrainHub';
 
 // Types
@@ -243,8 +242,7 @@ const AdvancedPricingEngine: React.FC = () => {
     
     toast({
       title: "Price Updated",
-      description: `The price has been updated to $${newPrice}`,
-      duration: 3000,
+      description: `The price has been updated to $${newPrice}`
     });
   };
   
@@ -257,8 +255,7 @@ const AdvancedPricingEngine: React.FC = () => {
     
     toast({
       title: active ? "Rule Activated" : "Rule Deactivated",
-      description: `The pricing rule has been ${active ? 'activated' : 'deactivated'}`,
-      duration: 3000,
+      description: `The pricing rule has been ${active ? 'activated' : 'deactivated'}`
     });
   };
   
@@ -276,8 +273,7 @@ const AdvancedPricingEngine: React.FC = () => {
     
     toast({
       title: "Optimization Applied",
-      description: `The suggested price of $${optimization.suggestedPrice} has been applied`,
-      duration: 3000,
+      description: `The suggested price of $${optimization.suggestedPrice} has been applied`
     });
   };
 
@@ -343,8 +339,7 @@ const AdvancedPricingEngine: React.FC = () => {
     
     toast({
       title: "Synced with Brain Core",
-      description: "Pricing data has been shared with the central brain hub",
-      duration: 3000,
+      description: "Pricing data has been shared with the central brain hub"
     });
   };
 

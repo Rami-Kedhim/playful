@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,6 @@ import {
 } from 'lucide-react';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 
-// Define data interfaces
 interface MarketInsight {
   id: string;
   category: string;
@@ -86,21 +84,17 @@ const AdvancedAnalytics: React.FC = () => {
   const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Generate mock data on component mount
   useEffect(() => {
     loadData();
   }, []);
 
-  // Load data based on selected time range
   useEffect(() => {
     loadTimeSeriesData();
   }, [timeRange]);
   
-  // Load all data
   const loadData = () => {
     setLoading(true);
     
-    // Generate market insights
     const mockInsights: MarketInsight[] = [
       {
         id: '1',
@@ -150,7 +144,6 @@ const AdvancedAnalytics: React.FC = () => {
     ];
     setInsights(mockInsights);
     
-    // Generate predictions
     const mockPredictions: Prediction[] = [
       {
         id: '1',
@@ -195,7 +188,6 @@ const AdvancedAnalytics: React.FC = () => {
     ];
     setPredictions(mockPredictions);
     
-    // Generate user segments
     const mockSegments: ClusterData[] = [
       {
         id: '1',
@@ -260,7 +252,6 @@ const AdvancedAnalytics: React.FC = () => {
     ];
     setSegments(mockSegments);
     
-    // Generate geo performance data
     const mockGeoData: GeoPerformance[] = [
       {
         country: 'United States',
@@ -317,7 +308,6 @@ const AdvancedAnalytics: React.FC = () => {
     loadTimeSeriesData();
   };
   
-  // Load time series data
   const loadTimeSeriesData = () => {
     let days: number;
     switch (timeRange) {
@@ -334,7 +324,6 @@ const AdvancedAnalytics: React.FC = () => {
         days = 90;
     }
     
-    // Generate time series data
     const mockTimeSeriesData: TimeSeriesData[] = [];
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -345,9 +334,7 @@ const AdvancedAnalytics: React.FC = () => {
       const dateString = currentDate.toISOString().split('T')[0];
       
       let baseUsers = 400 + (i * 5);
-      // Add weekly pattern
       baseUsers += (currentDate.getDay() === 5 || currentDate.getDay() === 6) ? 100 : 0;
-      // Add some randomness
       baseUsers += Math.floor(Math.random() * 50);
       
       const conversionRate = 8 + (Math.random() * 3);
@@ -361,7 +348,6 @@ const AdvancedAnalytics: React.FC = () => {
       });
     }
     
-    // Add predictions for the future
     const lastRealData = mockTimeSeriesData[mockTimeSeriesData.length - 1];
     const predictionDays = 30;
     
@@ -388,12 +374,10 @@ const AdvancedAnalytics: React.FC = () => {
     setLoading(false);
   };
   
-  // Format number with commas
   const formatNumber = (num: number): string => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
   
-  // Generate insights
   const generateNewInsights = () => {
     toast({
       title: "Generating New Insights",
@@ -421,7 +405,6 @@ const AdvancedAnalytics: React.FC = () => {
     }, 2500);
   };
   
-  // Get chart data for the selected metric
   const getChartData = () => {
     if (selectedMetric === 'revenue') {
       return timeSeriesData.map(item => ({
@@ -444,12 +427,11 @@ const AdvancedAnalytics: React.FC = () => {
     }
   };
   
-  // Format Y-axis ticks
-  const formatYAxis = (value: number) => {
+  const formatYAxis = (value: number): string => {
     if (selectedMetric === 'revenue') {
       return value >= 1000 ? `$${(value / 1000).toFixed(0)}k` : `$${value}`;
     } else if (selectedMetric === 'users') {
-      return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value;
+      return value >= 1000 ? `${(value / 1000).toFixed(0)}k` : String(value);
     } else {
       return `${value.toFixed(1)}%`;
     }
