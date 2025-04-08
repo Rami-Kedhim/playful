@@ -26,10 +26,21 @@ export type {
 // Utility functions
 export { 
   calculateSystemEfficiency, 
-  validateModelParameters 
+  validateModelParameters,
+  initializeDefaultParameters 
 } from './models/modelParameters';
 
 export { 
   simulateMetricsUpdate, 
   generateSimulatedResponse 
 } from './utils/neuralHubUtils';
+
+// Metrics and reporting
+export { 
+  neuralMetrics,
+  type MetricsHistory,
+  type PerformanceReport 
+} from './reporting/neuralMetrics';
+
+// Training management
+export { TrainingManager } from './training/trainingManager';

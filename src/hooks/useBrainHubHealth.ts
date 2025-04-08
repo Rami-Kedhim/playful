@@ -1,6 +1,8 @@
+
 import { useState, useEffect } from 'react';
-import { brainHub } from '@/services/neural/HermesOxumBrainHub';
+import { brainHub } from '@/services/neural';
 import { neuralHub, SystemHealthMetrics } from '@/services/neural';
+import { neuralMetrics, generateNeuralAnalytics } from '@/services/neural/reporting/neuralAnalytics';
 
 export type BrainHubHealthStatus = 'good' | 'warning' | 'error';
 
@@ -18,6 +20,17 @@ export interface BrainHubHealth {
   errors: string[];
 }
 
+export interface BrainHubAnalytics {
+  dailyOperations: number;
+  averageResponseTime: number;
+  errorRate: number;
+  utilizationTrend: {
+    timestamp: string;
+    value: number;
+  }[];
+  recommendations: string[];
+}
+
 export function useBrainHubHealth() {
   const [health, setHealth] = useState<BrainHubHealth>({
     status: 'good',
@@ -29,6 +42,14 @@ export function useBrainHubHealth() {
     },
     warnings: [],
     errors: []
+  });
+  
+  const [analytics, setAnalytics] = useState<BrainHubAnalytics>({
+    dailyOperations: 0,
+    averageResponseTime: 0,
+    errorRate: 0,
+    utilizationTrend: [],
+    recommendations: []
   });
 
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -47,13 +68,19 @@ export function useBrainHubHealth() {
     setIsMonitoring(true);
     
     checkHealth();
+    updateAnalytics();
     
-    const interval = setInterval(() => {
+    const healthInterval = setInterval(() => {
       checkHealth();
     }, 10000);
     
+    const analyticsInterval = setInterval(() => {
+      updateAnalytics();
+    }, 30000);
+    
     return () => {
-      clearInterval(interval);
+      clearInterval(healthInterval);
+      clearInterval(analyticsInterval);
       setIsMonitoring(false);
     };
   };
@@ -141,13 +168,43 @@ export function useBrainHubHealth() {
       }));
     }
   };
+  
+  const updateAnalytics = () => {
+    try {
+      // Get neural analytics
+      const neuralReport = generateNeuralAnalytics();
+      
+      // Get performance report from metrics
+      const dailyReport = neuralMetrics.generatePerformanceReport('daily');
+      
+      // Create utilization trend from neural trends
+      const utilizationTrend = neuralReport.trends.map(trend => ({
+        timestamp: trend.timestamp.toISOString(),
+        value: trend.load
+      }));
+      
+      // Update analytics state
+      setAnalytics({
+        dailyOperations: dailyReport.totalOperations,
+        averageResponseTime: dailyReport.averageResponseTime,
+        errorRate: dailyReport.errorRate,
+        utilizationTrend,
+        recommendations: neuralReport.summary.recommendations
+      });
+      
+    } catch (error) {
+      console.error("Error updating Brain Hub analytics", error);
+    }
+  };
 
   return {
     health,
+    analytics,
     isMonitoring,
     startMonitoring,
     stopMonitoring,
-    checkHealth
+    checkHealth,
+    updateAnalytics
   };
 }
 
