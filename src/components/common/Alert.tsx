@@ -64,9 +64,14 @@ const Alert: React.FC<AlertProps> = ({
   const { icon: variantIcon, className: variantClassName } = variantProps[variant];
   const selectedIcon = icon ?? variantIcon;
 
+  // Map the variant to one that the ui/alert component supports
+  const mappedVariant = variant === 'info' || variant === 'default' ? 'default' : 
+                        variant === 'destructive' ? 'destructive' :
+                        variant; // This now works because we've added 'warning' and 'success' to the alert variants
+
   return (
     <AlertComponent
-      variant={variant === 'default' ? 'default' : 'destructive'}
+      variant={mappedVariant}
       className={cn(variantClassName, className)}
     >
       <div className="flex">

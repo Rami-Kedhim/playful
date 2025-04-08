@@ -7,7 +7,7 @@ export interface Toast {
   title?: string;
   description?: string;
   action?: React.ReactNode;
-  variant?: "default" | "destructive";
+  variant?: "default" | "destructive" | "warning" | "success";
 }
 
 interface ToastContextType {
