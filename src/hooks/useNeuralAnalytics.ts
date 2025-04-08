@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { 
   generateNeuralAnalytics, 
-  generatePerformanceForecast,
-  NeuralAnalyticsReport,
-  PerformanceTrend 
+  generatePerformanceForecast
 } from '@/services/neural/reporting/neuralAnalytics';
+import { 
+  NeuralAnalyticsReport, 
+  PerformanceTrend 
+} from '@/services/neural/types/neuralAnalytics';
 
 export function useNeuralAnalytics(updateFrequencyMs = 30000) {
   const [analyticsData, setAnalyticsData] = useState<NeuralAnalyticsReport | null>(null);
