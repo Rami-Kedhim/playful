@@ -23,6 +23,21 @@ export {
   AICompanionNeuralService 
 } from './modules/AICompanionNeuralService';
 
+export {
+  escortsNeuralService,
+  EscortsNeuralService
+} from './modules/EscortsNeuralService';
+
+export {
+  creatorsNeuralService,
+  CreatorsNeuralService
+} from './modules/CreatorsNeuralService';
+
+export {
+  livecamsNeuralService,
+  LivecamsNeuralService
+} from './modules/LivecamsNeuralService';
+
 // Types
 export type { 
   SystemHealthMetrics, 

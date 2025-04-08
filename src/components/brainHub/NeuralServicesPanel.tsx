@@ -6,10 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Brain, Power, Activity, RefreshCw, Zap } from "lucide-react";
+import { AlertCircle, Brain, Power, Activity, RefreshCw, Zap, Plus } from "lucide-react";
 import { useNeuralRegistry } from "@/hooks/useNeuralRegistry";
-import { AICompanionNeuralService } from "@/services/neural/modules/AICompanionNeuralService";
-import { NeuralServiceConfig } from "@/services/neural/registry/NeuralServiceRegistry";
+import { 
+  AICompanionNeuralService,
+  EscortsNeuralService,
+  CreatorsNeuralService,
+  LivecamsNeuralService,
+  neuralServiceRegistry
+} from "@/services/neural";
+import NeuralModuleRegistration from './NeuralModuleRegistration';
 
 const NeuralServicesPanel: React.FC = () => {
   const { 
@@ -17,28 +23,17 @@ const NeuralServicesPanel: React.FC = () => {
     loading, 
     error, 
     loadServices, 
-    registerService, 
     optimizeResources,
     getServicesByType 
   } = useNeuralRegistry();
   
   const [activeTab, setActiveTab] = useState('ai-companion');
+  const [showRegistration, setShowRegistration] = useState(false);
   
   useEffect(() => {
-    // Check if AI Companion service is already registered
-    const companions = getServicesByType('ai-companion');
-    
-    if (companions.length === 0) {
-      // Register AI Companion service if not already registered
-      const service = new AICompanionNeuralService('ai-companion-primary', {
-        enabled: true,
-        priority: 75,
-        autonomyLevel: 70
-      });
-      
-      registerService(service);
-    }
-  }, [registerService, getServicesByType]);
+    // Initial load of services
+    loadServices();
+  }, [loadServices]);
   
   const handleOptimize = () => {
     optimizeResources();
@@ -106,6 +101,14 @@ const NeuralServicesPanel: React.FC = () => {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Neural Services</h3>
         <div className="space-x-2">
+          <Button 
+            size="sm" 
+            variant={showRegistration ? "default" : "outline"} 
+            onClick={() => setShowRegistration(!showRegistration)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {showRegistration ? 'Hide Registration' : 'Register Service'}
+          </Button>
           <Button size="sm" variant="outline" onClick={loadServices}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
@@ -116,6 +119,10 @@ const NeuralServicesPanel: React.FC = () => {
           </Button>
         </div>
       </div>
+      
+      {showRegistration && (
+        <NeuralModuleRegistration onRegistered={loadServices} />
+      )}
       
       {error && (
         <Alert variant="destructive">
@@ -147,7 +154,8 @@ const NeuralServicesPanel: React.FC = () => {
                   <p>No AI Companion neural services registered</p>
                   <Button onClick={() => {
                     const service = new AICompanionNeuralService('ai-companion-primary');
-                    registerService(service);
+                    neuralServiceRegistry.registerService(service);
+                    loadServices();
                   }}>
                     <Power className="mr-2 h-4 w-4" />
                     Register Service
@@ -158,42 +166,66 @@ const NeuralServicesPanel: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="escorts">
-            <Card className="p-8 text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <Activity className="h-12 w-12 text-muted-foreground" />
-                <p>Escorts neural service not yet implemented</p>
-                <Button disabled>
-                  <Power className="mr-2 h-4 w-4" />
-                  Register Service
-                </Button>
-              </div>
-            </Card>
+            {getServicesByType('escorts').length > 0 ? (
+              getServicesByType('escorts').map(renderServiceCard)
+            ) : (
+              <Card className="p-8 text-center">
+                <div className="flex flex-col items-center space-y-4">
+                  <Activity className="h-12 w-12 text-muted-foreground" />
+                  <p>No Escorts neural services registered</p>
+                  <Button onClick={() => {
+                    const service = new EscortsNeuralService('escorts-primary');
+                    neuralServiceRegistry.registerService(service);
+                    loadServices();
+                  }}>
+                    <Power className="mr-2 h-4 w-4" />
+                    Register Service
+                  </Button>
+                </div>
+              </Card>
+            )}
           </TabsContent>
           
           <TabsContent value="creators">
-            <Card className="p-8 text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <Activity className="h-12 w-12 text-muted-foreground" />
-                <p>Content Creators neural service not yet implemented</p>
-                <Button disabled>
-                  <Power className="mr-2 h-4 w-4" />
-                  Register Service
-                </Button>
-              </div>
-            </Card>
+            {getServicesByType('creators').length > 0 ? (
+              getServicesByType('creators').map(renderServiceCard)
+            ) : (
+              <Card className="p-8 text-center">
+                <div className="flex flex-col items-center space-y-4">
+                  <Activity className="h-12 w-12 text-muted-foreground" />
+                  <p>No Content Creators neural services registered</p>
+                  <Button onClick={() => {
+                    const service = new CreatorsNeuralService('creators-primary');
+                    neuralServiceRegistry.registerService(service);
+                    loadServices();
+                  }}>
+                    <Power className="mr-2 h-4 w-4" />
+                    Register Service
+                  </Button>
+                </div>
+              </Card>
+            )}
           </TabsContent>
           
           <TabsContent value="livecams">
-            <Card className="p-8 text-center">
-              <div className="flex flex-col items-center space-y-4">
-                <Activity className="h-12 w-12 text-muted-foreground" />
-                <p>Livecams neural service not yet implemented</p>
-                <Button disabled>
-                  <Power className="mr-2 h-4 w-4" />
-                  Register Service
-                </Button>
-              </div>
-            </Card>
+            {getServicesByType('livecams').length > 0 ? (
+              getServicesByType('livecams').map(renderServiceCard)
+            ) : (
+              <Card className="p-8 text-center">
+                <div className="flex flex-col items-center space-y-4">
+                  <Activity className="h-12 w-12 text-muted-foreground" />
+                  <p>No Livecams neural services registered</p>
+                  <Button onClick={() => {
+                    const service = new LivecamsNeuralService('livecams-primary');
+                    neuralServiceRegistry.registerService(service);
+                    loadServices();
+                  }}>
+                    <Power className="mr-2 h-4 w-4" />
+                    Register Service
+                  </Button>
+                </div>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       )}
