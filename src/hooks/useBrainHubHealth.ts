@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { BrainHubHealth, BrainHubAnalytics } from '@/types/brainHubHealth';
+import { BrainHubHealth, BrainHubAnalytics, BrainHubHealthStatus } from '@/types/brainHubHealth';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { updateBrainHubAnalytics } from '@/services/brainHubHealth/analyticsService';
 
@@ -34,7 +34,7 @@ export function useBrainHubHealth(monitoringInterval = 30000) {
       const enhancedMetrics = brainHub.getEnhancedSystemMetrics?.();
       
       // Determine overall health status
-      let status: 'good' | 'warning' | 'error' = 'good';
+      let status: BrainHubHealthStatus = 'good';
       const warnings: string[] = [];
       const errors: string[] = [];
       
