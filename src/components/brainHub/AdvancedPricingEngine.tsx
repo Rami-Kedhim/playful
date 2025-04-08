@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,11 +60,8 @@ const AdvancedPricingEngine: React.FC = () => {
   const [competitiveAnalysisEnabled, setCompetitiveAnalysisEnabled] = useState<boolean>(true);
   const [seasonalAdjustmentsEnabled, setSeasonalAdjustmentsEnabled] = useState<boolean>(true);
   
-  // Load initial data
   useEffect(() => {
-    // Simulate API call to load data
     const loadPricePoints = async () => {
-      // In a real app, this would be fetched from a backend API
       const mockPricePoints: PricePoint[] = [
         {
           id: 'chat-1',
@@ -139,7 +135,6 @@ const AdvancedPricingEngine: React.FC = () => {
       
       setPricePoints(mockPricePoints);
 
-      // Load pricing rules
       const mockPricingRules: PricingRule[] = [
         {
           id: 'rule-1',
@@ -181,7 +176,6 @@ const AdvancedPricingEngine: React.FC = () => {
       
       setPricingRules(mockPricingRules);
 
-      // Load optimizations
       const mockOptimizations: PriceOptimization[] = [
         {
           id: 'opt-1',
@@ -218,7 +212,6 @@ const AdvancedPricingEngine: React.FC = () => {
     loadPricePoints();
   }, []);
   
-  // Handle price change
   const handlePriceChange = (pricePointId: string, newPrice: number) => {
     setPricePoints(pricePoints.map(point => 
       point.id === pricePointId 
@@ -232,7 +225,6 @@ const AdvancedPricingEngine: React.FC = () => {
     });
   };
   
-  // Handle rule toggle
   const handleRuleToggle = (ruleId: string, active: boolean) => {
     setPricingRules(pricingRules.map(rule => 
       rule.id === ruleId 
@@ -246,19 +238,16 @@ const AdvancedPricingEngine: React.FC = () => {
     });
   };
   
-  // Apply optimization
   const applyOptimization = (optimizationId: string) => {
     const optimization = optimizations.find(opt => opt.id === optimizationId);
     if (!optimization) return;
     
-    // Find the related price point and update its price
     setPricePoints(pricePoints.map(point => 
       point.itemType === optimization.itemType 
         ? { ...point, currentPrice: optimization.suggestedPrice } 
         : point
     ));
     
-    // Remove the applied optimization
     setOptimizations(optimizations.filter(opt => opt.id !== optimizationId));
     
     toast({
@@ -268,7 +257,6 @@ const AdvancedPricingEngine: React.FC = () => {
     });
   };
 
-  // Get chart data for pricing history
   const getPricingHistoryData = () => {
     const filteredPoints = pricePoints
       .filter(point => selectedItemType === 'all' || point.itemType === selectedItemType)
@@ -276,7 +264,6 @@ const AdvancedPricingEngine: React.FC = () => {
     
     if (filteredPoints.length === 0) return [];
 
-    // Aggregate data by date
     const formattedData = filteredPoints[0].history.map((historyPoint, index) => {
       const date = historyPoint.date.toLocaleDateString();
       const entry: any = { date };
@@ -297,16 +284,13 @@ const AdvancedPricingEngine: React.FC = () => {
     return formattedData;
   };
   
-  // Run price optimization simulation
   const runOptimization = () => {
     toast({
       title: "Optimization Running",
       description: "The pricing optimization engine is analyzing market data...",
     });
     
-    // Simulate API call delay
     setTimeout(() => {
-      // Generate a new optimization
       const newOptimization: PriceOptimization = {
         id: `opt-${Date.now()}`,
         itemType: 'voice_message',
@@ -577,7 +561,6 @@ const AdvancedPricingEngine: React.FC = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                // Reset price to base price
                                 handlePriceChange(point.id, point.basePrice);
                               }}
                             >
