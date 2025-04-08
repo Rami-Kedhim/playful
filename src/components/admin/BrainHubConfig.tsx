@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
-import { BrainHubConfig as BrainHubConfigType, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/types/brainHub';
+import { BrainHubConfig as BrainHubConfigType } from '@/services/neural/HermesOxumBrainHub';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AcademicModelTabProps<T extends Record<string, boolean>> { 
@@ -64,20 +64,19 @@ const BrainHubConfig: React.FC = () => {
   const [newRegion, setNewRegion] = useState('');
   
   const handleAcademicModelToggle = (model: keyof BrainHubConfigType, key: string, value: boolean) => {
-    const updatedConfig = { ...config };
-    
-    // Use appropriate type casting based on the model
-    if (model === 'psychology') {
-      (updatedConfig.psychology as Record<string, boolean>)[key] = value;
-    } else if (model === 'physics') {
-      (updatedConfig.physics as Record<string, boolean>)[key] = value;
-    } else if (model === 'economics') {
-      (updatedConfig.economics as Record<string, boolean>)[key] = value;
-    } else if (model === 'robotics') {
-      (updatedConfig.robotics as Record<string, boolean>)[key] = value;
-    }
-    
-    setConfig(updatedConfig);
+    setConfig(prev => {
+      const updatedConfig = { ...prev };
+      if (model === 'psychology' && updatedConfig.psychology) {
+        (updatedConfig.psychology as Record<string, boolean>)[key] = value;
+      } else if (model === 'physics' && updatedConfig.physics) {
+        (updatedConfig.physics as Record<string, boolean>)[key] = value;
+      } else if (model === 'economics' && updatedConfig.economics) {
+        (updatedConfig.economics as Record<string, boolean>)[key] = value;
+      } else if (model === 'robotics' && updatedConfig.robotics) {
+        (updatedConfig.robotics as Record<string, boolean>)[key] = value;
+      }
+      return updatedConfig;
+    });
   };
   
   const handleFeatureToggle = (key: keyof BrainHubConfigType, value: boolean) => {

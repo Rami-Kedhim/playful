@@ -9,6 +9,14 @@ export interface BrainHubConfig {
   developmentMode: boolean;
   persistenceEnabled: boolean;
   systemStatus: 'active' | 'maintenance' | 'offline';
+  // Add missing properties referenced in the codebase
+  geoLegalFilteringEnabled: boolean;
+  neuroEmotionEnabled: boolean;
+  predictiveModulationEnabled: boolean;
+  psychology: Record<string, boolean>;
+  physics: Record<string, boolean>;
+  economics: Record<string, boolean>;
+  robotics: Record<string, boolean>;
 }
 
 export interface PsychologyModel {
@@ -45,7 +53,35 @@ export class HermesOxumBrainHub {
     debugMode: false,
     developmentMode: true,
     persistenceEnabled: true,
-    systemStatus: 'active'
+    systemStatus: 'active',
+    // Add the missing property initializations
+    geoLegalFilteringEnabled: true,
+    neuroEmotionEnabled: false,
+    predictiveModulationEnabled: true,
+    psychology: {
+      emotionalAnalysis: true,
+      personalityModeling: true,
+      behaviourPrediction: false,
+      sentimentAnalysis: true
+    },
+    physics: {
+      collisionDetection: true,
+      gravitationalEffects: false,
+      fluidDynamics: false,
+      particleSystems: true
+    },
+    economics: {
+      dynamicPricing: true,
+      demandForecasting: true,
+      marketSimulation: false,
+      transactionAnalysis: true
+    },
+    robotics: {
+      inverseKinematics: false,
+      pathPlanning: true,
+      sensorIntegration: true,
+      controlSystems: true
+    }
   };
   
   private errorLogs: Array<{
@@ -145,13 +181,24 @@ export class HermesOxumBrainHub {
   }
   
   // System status methods
-  getSystemStatus(): string {
-    return this.config.systemStatus;
+  getSystemStatus() {
+    return {
+      cpuUtilization: 45 + Math.random() * 15,
+      memoryUtilization: 62 + Math.random() * 10,
+      operationsPerSecond: 1200 + Math.random() * 300,
+      errorRate: 0.5 + Math.random() * 1.5,
+      responseTime: 120 + Math.random() * 30,
+      stability: 85 + Math.random() * 10,
+      status: this.config.systemStatus
+    };
   }
   
   // Memory methods
-  storeInMemory(key: string, value: any): void {
-    this.memoryStore[key] = value;
+  storeInMemory(key: string, value?: any): any {
+    if (value !== undefined) {
+      this.memoryStore[key] = value;
+    }
+    return this.memoryStore[key];
   }
   
   retrieveFromMemory(key: string): any {

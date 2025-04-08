@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 interface BrainHubState {
   userPreferences: Record<string, any>;
@@ -34,6 +34,7 @@ export function useBrainHubPersistence(): UseBrainHubPersistenceResult {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Save the current Brain Hub state to the user profile
   const saveState = async (): Promise<boolean> => {
