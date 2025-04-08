@@ -1,51 +1,28 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import BrainHubDashboard from '@/components/brainHub/BrainHubDashboard';
 import BrainHubError from '@/components/brainHub/BrainHubError';
+import BrainHubProtected from '@/components/brainHub/BrainHubProtected';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import autonomyEngine from '@/services/neural/BrainHubAutonomyEngine';
 import securityEngine from '@/services/neural/BrainHubSecurityEngine';
-import { useAuth } from '@/hooks/auth/useAuthContext';
 import { toast } from "@/components/ui/use-toast";
 import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
-import { BrainHubHealthStatus } from '@/types/brainHubHealth';
 
 const BrainHubPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [initErrors, setInitErrors] = useState<string[]>([]);
-  const { isAuthenticated, checkRole } = useAuth();
   const { health, startMonitoring } = useBrainHubHealth();
-  const navigate = useNavigate();
   
-  // Check if user has permission to access Brain Hub
+  // Initialize Brain Hub
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/auth', { state: { from: '/brain-hub' } });
-      return;
-    }
-    
-    // Check if user has admin role
-    const hasAdminAccess = checkRole('admin') || checkRole('moderator');
-    if (!hasAdminAccess) {
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to access Brain Hub",
-        variant: "destructive"
-      });
-      navigate('/');
-      return;
-    }
-    
-    // Initialize Brain Hub
     initializeBrainHub();
     
     // Start health monitoring
     startMonitoring();
-    
-  }, [isAuthenticated, navigate, checkRole, startMonitoring]);
+  }, [startMonitoring]);
 
   // Initialize Brain Hub systems
   const initializeBrainHub = async () => {
@@ -175,14 +152,16 @@ const BrainHubPage: React.FC = () => {
   }
 
   return (
-    <MainLayout
-      title="Brain Hub"
-      description="Unified control and monitoring of autonomous AI systems"
-      hideNavbar={false}
-      containerClass="container mx-auto px-4"
-    >
-      <BrainHubDashboard />
-    </MainLayout>
+    <BrainHubProtected requiredAccess="viewer">
+      <MainLayout
+        title="Brain Hub"
+        description="Unified control and monitoring of autonomous AI systems"
+        hideNavbar={false}
+        containerClass="container mx-auto px-4"
+      >
+        <BrainHubDashboard />
+      </MainLayout>
+    </BrainHubProtected>
   );
 };
 

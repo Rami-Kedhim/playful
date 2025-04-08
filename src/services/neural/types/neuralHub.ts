@@ -1,4 +1,3 @@
-
 // Define neural hub types
 
 export interface SystemHealthMetrics {
@@ -61,4 +60,18 @@ export interface TrainingProgress {
   error?: string;
   message?: string;
   trainingConfig?: any;
+}
+
+/**
+ * Interfaces for the Neural Hub state persistence
+ */
+export interface BrainHubUserState {
+  userPreferences: Record<string, any>;
+  lastActiveModels: string[];
+  autonomySettings: {
+    enabled: boolean;
+    level: number;
+  };
+  uiConfiguration: Record<string, any>;
+  lastSaved: string;
 }
