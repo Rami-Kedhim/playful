@@ -10,17 +10,18 @@ export const initializeDefaultParameters = (): ModelParameters => {
     batchSize: 32,
     epochs: 10,
     optimizerType: 'adam',
-    dropout: 0.2,
-    activationFunction: 'relu',
-    embeddingSize: 256,
-    hiddenLayers: [128, 64],
     // Extended parameters
     decayConstant: 0.2,
     growthFactor: 1.5,
     cyclePeriod: 24,
     harmonicCount: 3,
     bifurcationPoint: 0.6,
-    attractorStrength: 0.7
+    attractorStrength: 0.7,
+    // Optional parameters that match our interface
+    dropout: 0.2,
+    activationFunction: 'relu',
+    embeddingSize: 256,
+    hiddenLayers: [128, 64]
   };
 };
 
@@ -37,7 +38,7 @@ export const validateModelParameters = (params: ModelParameters): { valid: boole
   if (params.epochs < 1) 
     issues.push('Epochs must be positive');
   
-  if (params.dropout < 0 || params.dropout >= 1) 
+  if (params.dropout !== undefined && (params.dropout < 0 || params.dropout >= 1)) 
     issues.push('Dropout must be between 0 and 1');
     
   // Validate extended parameters

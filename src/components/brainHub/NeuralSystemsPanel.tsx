@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -77,6 +78,7 @@ const NeuralSystemsPanel = () => {
             Advanced neural network monitoring and analytics
           </CardDescription>
         </div>
+        
         <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
           {refreshing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1" />}
           Refresh
@@ -280,7 +282,7 @@ const NeuralSystemsPanel = () => {
                         </div>
                         <div>
                           <div className="text-sm font-medium">Throughput</div>
-                          <div className="text-2xl">{model.performance.throughput}</div>
+                          <div className="text-2xl">{model.performance.throughput || 'N/A'}</div>
                         </div>
                       </div>
                       
@@ -336,9 +338,8 @@ const NeuralSystemsPanel = () => {
                           <CardDescription>Training in progress</CardDescription>
                         </div>
                         <Badge className={
-                          job.status === 'preparing' ? 'bg-slate-500' :
-                          job.status === 'training' ? 'bg-blue-500' :
-                          job.status === 'evaluating' ? 'bg-amber-500' :
+                          job.status === 'pending' ? 'bg-slate-500' :
+                          job.status === 'running' ? 'bg-blue-500' :
                           job.status === 'completed' ? 'bg-green-500' :
                           'bg-red-500'
                         }>
@@ -366,7 +367,7 @@ const NeuralSystemsPanel = () => {
                           <div>
                             <div className="text-sm font-medium">Expected Completion</div>
                             <div className="text-sm">
-                              {job.estimatedCompletionTime 
+                              {job.estimatedCompletionTime
                                 ? job.estimatedCompletionTime.toLocaleString() 
                                 : 'Unknown'}
                             </div>

@@ -18,6 +18,10 @@ export interface ModelParameters {
   batchSize: number;
   epochs: number;
   optimizerType: string;
+  dropout?: number;
+  activationFunction?: string;
+  embeddingSize?: number;
+  hiddenLayers?: number[];
   decayConstant?: number;
   growthFactor?: number;
   cyclePeriod?: number;
@@ -37,6 +41,10 @@ export interface NeuralModel {
     accuracy: number;
     latency: number;
     resourceUsage: number;
+    throughput?: number;
+    precision?: number;
+    recall?: number;
+    f1Score?: number;
     lastEvaluation?: Date;
   };
   createdAt: Date;
@@ -51,5 +59,6 @@ export interface TrainingProgress {
   startTime: Date;
   estimatedCompletionTime?: Date;
   error?: string;
+  message?: string;
   trainingConfig?: any;
 }

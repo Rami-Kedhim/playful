@@ -2,8 +2,8 @@
 /**
  * Neural Analytics - Advanced analytics for neural system performance
  */
-import { neuralMetrics, PerformanceReport } from './neuralMetrics';
-import { SystemHealthMetrics, NeuralModel } from '../types/neuralHub';
+import { neuralMetrics } from './neuralMetrics';
+import { SystemHealthMetrics } from '../types/neuralHub';
 import { neuralHub } from '../HermesOxumNeuralHub';
 
 export interface PerformanceTrend {
@@ -104,7 +104,7 @@ export function generateNeuralAnalytics(): NeuralAnalyticsReport {
       // Simulated performance metrics with small variations
       const baseAccuracy = model.performance.accuracy;
       const baseLatency = model.performance.latency;
-      const baseThroughput = model.performance.throughput;
+      const baseThroughput = model.performance.throughput || 500; // Default if throughput is undefined
       
       accuracy.push(baseAccuracy + (Math.random() - 0.5) * 0.05);
       latency.push(baseLatency + (Math.random() - 0.5) * 20);
