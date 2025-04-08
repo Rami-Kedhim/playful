@@ -1,53 +1,91 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { LivecamModel } from '@/types/livecams';
-import { User, TrendingUp, Eye } from 'lucide-react';
+import { TrendingUp, Users, Heart } from 'lucide-react';
+import { LivecamModel } from '@/types/livecam';
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 interface LiveTrendingBarProps {
-  trendingModels: LivecamModel[];
+  trendingCams: LivecamModel[];
+  title?: string;
+  loading?: boolean;
 }
 
-const LiveTrendingBar: React.FC<LiveTrendingBarProps> = ({ trendingModels }) => {
-  return (
-    <div className="mb-6 overflow-hidden">
-      <div className="flex items-center gap-2 mb-3">
-        <TrendingUp className="h-4 w-4 text-primary" />
-        <h3 className="font-medium">Trending Now</h3>
-      </div>
-      
-      <div className="overflow-x-auto pb-3">
-        <div className="flex gap-2">
-          {trendingModels.map(model => (
-            <a 
-              key={model.id}
-              href={`/livecams/${model.id}`}
-              className="flex-shrink-0 group relative"
-            >
-              <div className="w-48 h-24 rounded-md overflow-hidden border border-border group-hover:border-primary transition-colors">
-                <img 
-                  src={model.thumbnailUrl} 
-                  alt={model.name} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute inset-0 flex flex-col justify-between p-2">
-                <Badge className="self-start bg-rose-500 text-white">LIVE</Badge>
-                <div className="bg-black/60 rounded p-1 text-xs text-white self-end flex items-center">
-                  <Eye className="h-3 w-3 mr-1" />
-                  {model.viewerCount}
-                </div>
-              </div>
-              <div className="mt-1">
-                <div className="text-sm font-medium truncate">{model.name}</div>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <User className="h-3 w-3 mr-1" />
-                  {model.room}
-                </div>
-              </div>
-            </a>
+const LiveTrendingBar: React.FC<LiveTrendingBarProps> = ({ 
+  trendingCams, 
+  title = "Trending Now",
+  loading = false 
+}) => {
+  if (loading) {
+    return (
+      <div className="mb-8">
+        <div className="flex items-center mb-4">
+          <div className="w-40 h-6 bg-gray-200 animate-pulse rounded-md"></div>
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="min-w-[220px] bg-gray-100 animate-pulse rounded-lg h-[120px]"></div>
           ))}
         </div>
+      </div>
+    );
+  }
+  
+  if (!trendingCams || trendingCams.length === 0) {
+    return null;
+  }
+  
+  return (
+    <div className="mb-8">
+      <div className="flex items-center mb-4">
+        <TrendingUp className="text-red-500 mr-2" />
+        <h2 className="text-xl font-bold">{title}</h2>
+      </div>
+      
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {trendingCams.map(cam => (
+          <Link to={`/livecams/${cam.id}`} key={cam.id}>
+            <Card className="min-w-[220px] hover:shadow-md transition-shadow">
+              <div className="relative h-[120px]">
+                <img 
+                  src={cam.thumbnailUrl || "https://via.placeholder.com/220x120"} 
+                  alt={cam.name}
+                  className="w-full h-full object-cover"
+                />
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                
+                {cam.status === 'live' && (
+                  <Badge 
+                    className={cn(
+                      "absolute top-2 right-2",
+                      cam.status === 'live' ? "bg-red-500" : "bg-gray-500"
+                    )}
+                  >
+                    {cam.status === 'live' ? 'LIVE' : 'OFFLINE'}
+                  </Badge>
+                )}
+                
+                <div className="absolute bottom-2 left-3">
+                  <h3 className="text-white font-medium">{cam.name}</h3>
+                  <div className="flex text-white/80 text-xs items-center">
+                    <Users className="h-3 w-3 mr-1" />
+                    <span>{cam.viewerCount || 0}</span>
+                  </div>
+                </div>
+                
+                {cam.isPopular && (
+                  <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded flex items-center">
+                    <Heart className="h-3 w-3 mr-1" />
+                    <span>Popular</span>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </Link>
+        ))}
       </div>
     </div>
   );

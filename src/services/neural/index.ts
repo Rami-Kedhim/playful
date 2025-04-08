@@ -46,6 +46,7 @@ export type {
   TrainingProgress 
 } from './types/neuralHub';
 
+// From HermesOxumBrainHub.ts
 export type { 
   BrainHubConfig, 
   PsychologyModel, 

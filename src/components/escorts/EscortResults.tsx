@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -39,7 +38,7 @@ const EscortResults = ({
   }, [currentPage]);
   
   // Combined loading state (either from props or local state)
-  const loading = isLoading || localLoading;
+  const loading = isLoading || false;
   
   // This handles loading state for when filters are applied
   if (loading) {
@@ -103,7 +102,6 @@ const EscortResults = ({
             gender={escort.gender}
             sexualOrientation={escort.sexualOrientation}
             availableNow={escort.availableNow || false}
-            // Convert string lastActive to a Date object if it exists
             lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
             responseRate={escort.responseRate}
           />

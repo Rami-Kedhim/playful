@@ -34,9 +34,13 @@ const moreEscortProfiles: Escort[] = [
     languages: ["English", "Spanish"],
     lastActive: "2023-07-01T12:30:00Z",
     responseRate: 98,
-    height: "5'8\"",
-    weight: "125 lbs",
-    measurements: "34C-24-36",
+    height: 173, // Fixed: convert to number
+    weight: 57, // Fixed: convert to number
+    measurements: {
+      bust: 34,
+      waist: 24,
+      hips: 36
+    }, // Fixed: convert to object
     hairColor: "Blonde",
     eyeColor: "Blue",
     ethnicity: "Caucasian",
@@ -47,7 +51,17 @@ const moreEscortProfiles: Escort[] = [
       weekend: 4500
     },
     profileType: "verified",
-    avatar_url: "https://via.placeholder.com/150x150?text=Jessica"
+    avatar_url: "https://via.placeholder.com/150x150?text=Jessica",
+    contactInfo: {
+      email: "jessica@example.com",
+      phone: "+1234567890",
+      website: "https://example.com/jessica"
+    },
+    availability: {
+      days: ["monday", "wednesday", "friday"],
+      hours: "10:00-22:00"
+    },
+    featured: true
   },
   {
     id: "escort-1002",
@@ -81,9 +95,13 @@ const moreEscortProfiles: Escort[] = [
     languages: ["English", "Spanish", "Portuguese"],
     lastActive: "2023-07-03T09:15:00Z",
     responseRate: 85,
-    height: "5'6\"",
-    weight: "120 lbs",
-    measurements: "32C-24-34",
+    height: 168, // Fixed: convert to number
+    weight: 54, // Fixed: convert to number
+    measurements: {
+      bust: 32,
+      waist: 24,
+      hips: 34
+    }, // Fixed: convert to object
     hairColor: "Brown",
     eyeColor: "Brown",
     ethnicity: "Latina",
@@ -94,7 +112,16 @@ const moreEscortProfiles: Escort[] = [
       weekend: 3500
     },
     featured: false,
-    profileType: "provisional"
+    profileType: "provisional",
+    contactInfo: {
+      email: "elena@example.com",
+      phone: "+1234567890",
+      website: "https://example.com/elena"
+    },
+    availability: {
+      days: ["tuesday", "thursday", "saturday"],
+      hours: "12:00-22:00"
+    }
   },
   {
     id: "escort-1003",
@@ -137,7 +164,23 @@ const moreEscortProfiles: Escort[] = [
       weekend: 2000
     },
     featured: false,
-    profileType: "ai"
+    profileType: "ai",
+    contactInfo: {
+      email: "sophia@example.com",
+      phone: "+1234567890",
+      website: "https://example.com/sophia"
+    },
+    availability: {
+      days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+      hours: "00:00-23:59"
+    },
+    height: 170, // Fixed: convert to number
+    weight: 55, // Fixed: convert to number
+    measurements: {
+      bust: 34,
+      waist: 24,
+      hips: 36
+    }
   },
   {
     id: "escort-1004",
@@ -171,8 +214,8 @@ const moreEscortProfiles: Escort[] = [
     languages: ["English", "French"],
     lastActive: "2023-07-02T21:10:00Z",
     responseRate: 92,
-    height: "6'2\"",
-    weight: "190 lbs",
+    height: 188,
+    weight: 86,
     ethnicity: "Mixed",
     hairColor: "Black",
     eyeColor: "Brown",
@@ -183,7 +226,21 @@ const moreEscortProfiles: Escort[] = [
       weekend: 5000
     },
     featured: true,
-    profileType: "verified"
+    profileType: "verified",
+    contactInfo: {
+      email: "marcus@example.com",
+      phone: "+1234567890",
+      website: "https://example.com/marcus"
+    },
+    availability: {
+      days: ["wednesday", "thursday", "friday", "saturday"],
+      hours: "18:00-02:00"
+    },
+    measurements: {
+      bust: 42,
+      waist: 32,
+      hips: 38
+    }
   }
 ];
 

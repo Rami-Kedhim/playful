@@ -12,7 +12,7 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
-  specialization?: string; // Adding specialization property
+  specialization?: string[]; // Changed to string array
 }
 
 export interface ModelParameters {

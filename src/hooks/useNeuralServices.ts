@@ -1,48 +1,50 @@
 
-import { useEffect, useState } from 'react';
-import { BaseNeuralService } from '@/services/neural/types/neuralHub';
+import { useState, useEffect } from 'react';
+import { BaseNeuralService } from '@/services/neural/modules/BaseNeuralService';
 
-/**
- * Hook to initialize and manage neural services integration with Brain Hub
- */
-export const useNeuralServices = (neuralService: BaseNeuralService) => {
+export function useNeuralServices(service: BaseNeuralService) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Initialize the service
   useEffect(() => {
+    let mounted = true;
+
     const initializeService = async () => {
       try {
         setIsLoading(true);
-        // Initialize the neural service with Brain Hub
-        await neuralService.initialize();
-        setIsInitialized(true);
-        setError(null);
-      } catch (err) {
-        console.error("Failed to initialize neural service:", err);
-        setError(err instanceof Error ? err.message : "Unknown error initializing neural service");
-        setIsInitialized(false);
+        const success = await service.initialize();
+        
+        if (mounted) {
+          setIsInitialized(success);
+          setError(null);
+        }
+      } catch (err: any) {
+        if (mounted) {
+          console.error(`Failed to initialize ${service.moduleId}:`, err);
+          setError(err.message || 'Failed to initialize neural service');
+        }
       } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     initializeService();
 
-    // Cleanup function
+    // Cleanup on unmount
     return () => {
-      // Attempt to gracefully shutdown the neural service
-      try {
-        neuralService.shutdown();
-      } catch (err) {
-        console.error("Error during neural service shutdown:", err);
-      }
+      mounted = false;
     };
-  }, [neuralService]);
+  }, [service]);
 
   return {
     isInitialized,
     isLoading,
     error
   };
-};
+}
+
+export default useNeuralServices;

@@ -32,9 +32,11 @@ class NeuralService {
         taskWords.some(word => cap.toLowerCase().includes(word))
       );
       
-      const hasMatchingSpecialization = model.specialization?.some(spec => 
-        taskWords.some(word => spec.toLowerCase().includes(word))
-      ) || false;
+      // Check specialization if it exists
+      const hasMatchingSpecialization = model.specialization ? 
+        model.specialization.some(spec => 
+          taskWords.some(word => spec.toLowerCase().includes(word))
+        ) : false;
       
       return hasMatchingCapability || hasMatchingSpecialization;
     });

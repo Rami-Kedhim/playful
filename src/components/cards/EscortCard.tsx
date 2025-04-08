@@ -1,104 +1,121 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Rating } from '@/components/ui/rating';
-import { Escort } from '@/types/escort';
-import { Link } from 'react-router-dom';
-import { MapPin, Clock, Star } from 'lucide-react';
-import ProfileTypeBadge from '../escorts/profile/ProfileTypeBadge';
+import { CheckCircle, Clock, Star } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
-interface EscortCardProps {
-  escort: Escort;
-  featured?: boolean;
-  className?: string;
+export interface EscortCardProps {
+  id: string;
+  name: string;
+  age: number;
+  location: string;
+  rating: number;
+  reviews: number;
+  tags: string[];
+  imageUrl: string;
+  price: number;
+  verified: boolean;
+  gender: string;
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  lastActive?: Date;
+  responseRate?: number;
 }
 
-const EscortCard: React.FC<EscortCardProps> = ({ escort, featured = false, className = '' }) => {
+const EscortCard: React.FC<EscortCardProps> = ({
+  id,
+  name,
+  age,
+  location,
+  rating,
+  reviews,
+  tags,
+  imageUrl,
+  price,
+  verified,
+  gender,
+  sexualOrientation,
+  availableNow,
+  lastActive,
+  responseRate
+}) => {
   return (
-    <Card 
-      className={`overflow-hidden h-full transition-all hover:shadow-md ${featured ? 'border-primary/30' : ''} ${className}`}
-    >
-      <Link to={`/escort/${escort.id}`} className="block h-full">
+    <Link to={`/escorts/${id}`}>
+      <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
         <div className="relative">
-          <img 
-            src={escort.imageUrl || escort.avatar_url} 
-            alt={escort.name}
-            className="w-full aspect-[3/4] object-cover"
-          />
-          
-          <div className="absolute top-2 right-2 flex flex-col gap-1.5">
-            {/* Profile type badge - addressing profile type differentiation issue */}
-            <ProfileTypeBadge type={escort.profileType || 'provisional'} />
-
-            {/* Show available now badge if escort is available */}
-            {escort.availableNow && (
-              <Badge className="bg-green-500">
-                Available Now
-              </Badge>
-            )}
-            
-            {/* Show boosted badge if escort has boost level */}
-            {(escort.boostLevel && escort.boostLevel > 0) && (
-              <Badge className="bg-yellow-500/90">
-                <Star className="h-3 w-3 mr-1 fill-current" />
-                Boosted
-              </Badge>
-            )}
+          <div className="aspect-[3/4] overflow-hidden">
+            <img 
+              src={imageUrl || "https://via.placeholder.com/300x400"} 
+              alt={name}
+              className="object-cover w-full h-full"
+            />
           </div>
           
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent p-3 text-white">
-            <h3 className="font-semibold text-lg mb-0.5">
-              {escort.name}, {escort.age}
-            </h3>
-            
-            <div className="flex items-center text-sm text-white/90">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span>{escort.location}</span>
+          {verified && (
+            <Badge className="absolute top-2 right-2 bg-green-500 text-white border-0">
+              <CheckCircle className="h-3 w-3 mr-1" /> Verified
+            </Badge>
+          )}
+          
+          {availableNow && (
+            <Badge className="absolute top-2 left-2 bg-blue-500 text-white border-0">
+              Available Now
+            </Badge>
+          )}
+          
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+            <div className="text-white font-medium">
+              {name}, {age}
+            </div>
+            <div className="text-white/80 text-sm flex items-center">
+              <span>{location}</span>
             </div>
           </div>
         </div>
         
-        <CardContent className="p-3">
+        <CardContent className="p-4">
           <div className="flex justify-between items-center mb-2">
             <div className="flex items-center">
-              <Rating 
-                value={escort.rating} 
-                readOnly 
-                size="sm" 
-              />
-              <span className="ml-1 text-sm text-muted-foreground">
-                ({escort.reviews})
-              </span>
+              <Star className="h-4 w-4 text-yellow-400 mr-1" />
+              <span className="font-medium">{rating.toFixed(1)}</span>
+              <span className="text-gray-500 text-sm ml-1">({reviews})</span>
             </div>
-            
-            <div className="text-sm text-secondary-foreground font-semibold">
-              {escort.rates.hourly} LC/hr
-            </div>
+            <span className="font-bold text-green-600">${price}/hr</span>
           </div>
           
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {escort.services.slice(0, 3).map((service, idx) => (
-              <Badge key={idx} variant="outline" className="text-xs font-normal">
-                {service}
+          <div className="flex flex-wrap gap-1 mb-3">
+            {tags.slice(0, 3).map((tag, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {tag}
               </Badge>
             ))}
-            {escort.services.length > 3 && (
-              <Badge variant="outline" className="text-xs font-normal">
-                +{escort.services.length - 3}
+            {tags.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{tags.length - 3} more
               </Badge>
             )}
           </div>
           
-          <div className="flex items-center text-xs text-muted-foreground">
-            <Clock className="h-3 w-3 mr-1" />
-            {escort.availability.days.length === 7 
-              ? "Available every day" 
-              : `Available ${escort.availability.days.length} days/week`}
-          </div>
+          {lastActive && (
+            <div className="text-gray-500 text-xs flex items-center mt-2">
+              <Clock className="h-3 w-3 mr-1" />
+              {availableNow 
+                ? 'Online now'
+                : `Active ${formatDistanceToNow(lastActive, { addSuffix: true })}`
+              }
+            </div>
+          )}
+          
+          {responseRate !== undefined && (
+            <div className="text-gray-500 text-xs mt-1">
+              Response rate: {responseRate}%
+            </div>
+          )}
         </CardContent>
-      </Link>
-    </Card>
+      </Card>
+    </Link>
   );
 };
 

@@ -1,41 +1,73 @@
 
 import { BaseNeuralService } from './BaseNeuralService';
-import { ModuleType } from '../registry/NeuralServiceRegistry';
+import { NeuralServiceConfig } from '../types/neuralConfig';
+
+export interface LivecamsNeuralConfig extends NeuralServiceConfig {
+  qualityOptimizationEnabled: boolean;
+  audienceMatchingEnabled: boolean;
+  dynamicRecommendationEnabled: boolean;
+}
 
 export class LivecamsNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
     super(moduleId, 'livecams');
+    
+    // Initialize with livecams-specific configuration
+    this.config = {
+      enabled: true,
+      priority: 70,
+      autonomyLevel: 60,
+      resourceAllocation: 50,
+      boostingEnabled: true,
+      boostingAlgorithm: 'ViewerBoostAlgorithm',
+      orderByBoost: true,
+      qualityOptimizationEnabled: true,
+      audienceMatchingEnabled: true,
+      dynamicRecommendationEnabled: true
+    } as LivecamsNeuralConfig;
   }
-
-  getCapabilities(): string[] {
+  
+  override getCapabilities(): string[] {
     return [
-      'livecam-recommendation',
-      'user-matching',
-      'traffic-optimization',
-      'performance-prediction',
-      'content-categorization'
+      'stream-quality-optimization',
+      'audience-matching',
+      'real-time-recommendations',
+      'traffic-management',
+      'engagement-tracking'
     ];
   }
+
+  // Check if service is enabled
+  isEnabled(): boolean {
+    return this.config.enabled;
+  }
   
-  // Additional methods specific to livecams service
-  predictViewership(livecamData: any): any {
-    // Implementation would predict viewership patterns
+  // Optimize streaming parameters
+  optimizeStreamQuality(streamData: any, connectionData: any): any {
+    // Implementation would optimize streaming quality
     return {
-      peakHours: ['20:00', '21:00', '22:00', '23:00'],
-      estimatedAudience: Math.floor(Math.random() * 1000) + 200,
-      audienceRetention: 0.65,
-      recommendedStreamLength: 120 // minutes
+      recommendedSettings: {
+        resolution: Math.random() > 0.5 ? '1080p' : '720p',
+        bitrate: Math.floor(Math.random() * 3000) + 2000,
+        fps: Math.random() > 0.7 ? 60 : 30
+      },
+      potentialViewerIncrease: Math.floor(Math.random() * 30) + 5
     };
   }
   
-  optimizeStreamSettings(userData: any, networkData: any): any {
-    // Implementation would optimize stream settings
-    return {
-      recommendedResolution: '1080p',
-      recommendedBitrate: 4500,
-      recommendedFramerate: 30,
-      recommendedAudioSettings: { codec: 'AAC', bitrate: 128 }
-    };
+  // Generate personalized recommendations
+  generateRecommendations(userId: string, viewHistory: any[]): any[] {
+    // Implementation would generate personalized recommendations
+    return Array.from({ length: 5 }, (_, i) => ({
+      livecamId: `cam-${Math.floor(Math.random() * 1000)}`,
+      matchScore: Math.random() * 100,
+      reason: 'Based on your viewing history'
+    }));
+  }
+  
+  // Alias configure to updateConfig for backwards compatibility
+  configure(config: Partial<LivecamsNeuralConfig>): void {
+    this.updateConfig(config);
   }
 }
 

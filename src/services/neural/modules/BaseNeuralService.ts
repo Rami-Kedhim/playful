@@ -1,92 +1,61 @@
 
 import { NeuralService, NeuralServiceConfig, ModuleType } from '../registry/NeuralServiceRegistry';
 
-/**
- * Base implementation of the Neural Service interface
- * Provides common functionality for all neural services
- */
 export abstract class BaseNeuralService implements NeuralService {
-  moduleId: string;
-  moduleType: ModuleType;
-  config: NeuralServiceConfig;
-  private isInitialized: boolean = false;
+  readonly moduleId: string;
+  readonly moduleType: ModuleType;
+  protected isInitialized: boolean = false;
+  
+  // Make config public to align with NeuralService interface
+  public config: NeuralServiceConfig = {
+    enabled: true,
+    priority: 50,
+    autonomyLevel: 50,
+    resourceAllocation: 50,
+    boostingEnabled: false,
+    boostingAlgorithm: '',
+    orderByBoost: false
+  };
 
   constructor(moduleId: string, moduleType: ModuleType) {
     this.moduleId = moduleId;
     this.moduleType = moduleType;
-    this.config = {
-      enabled: false,
-      priority: 50,
-      autonomyLevel: 30,
-      resourceAllocation: 25,
-      boostingEnabled: false,
-      orderByBoost: false
-    };
   }
 
-  /**
-   * Initialize the neural service
-   */
   async initialize(): Promise<boolean> {
-    try {
-      console.log(`Initializing ${this.moduleType} neural service: ${this.moduleId}`);
-      this.isInitialized = true;
-      return true;
-    } catch (error) {
-      console.error(`Failed to initialize ${this.moduleId}:`, error);
-      return false;
-    }
+    // Base implementation
+    this.isInitialized = true;
+    return true;
   }
 
-  /**
-   * Process feedback for continuous improvement
-   * @param feedback Feedback data for the service
-   */
   processFeedback(feedback: any): void {
+    // Base implementation
     console.log(`Processing feedback for ${this.moduleId}:`, feedback);
   }
 
-  /**
-   * Get service metrics for monitoring
-   * @returns Record containing metrics data
-   */
   getMetrics(): Record<string, any> {
+    // Base implementation
     return {
-      moduleId: this.moduleId,
-      moduleType: this.moduleType,
-      enabled: this.config.enabled,
-      autonomyLevel: this.config.autonomyLevel,
-      resourceAllocation: this.config.resourceAllocation,
-      operationsCount: Math.floor(Math.random() * 10000),
-      successRate: Math.random() * 0.3 + 0.7,
-      lastActivity: new Date().toISOString(),
-      status: this.config.enabled ? 'active' : 'inactive'
+      operationsCount: 0,
+      successRate: 100,
+      averageLatency: 0
     };
   }
 
-  /**
-   * Get capabilities of this neural service
-   * @returns Array of capability strings
-   */
-  abstract getCapabilities(): string[];
+  getCapabilities(): string[] {
+    // Base implementation - should be overridden by subclasses
+    return [];
+  }
 
-  /**
-   * Get current configuration
-   * @returns The current service configuration
-   */
+  updateConfig(config: Partial<NeuralServiceConfig>): void {
+    this.config = { ...this.config, ...config };
+  }
+
   getConfig(): NeuralServiceConfig {
     return this.config;
   }
-
-  /**
-   * Update service configuration
-   * @param config Partial configuration to update
-   */
-  updateConfig(config: Partial<NeuralServiceConfig>): void {
-    this.config = {
-      ...this.config,
-      ...config
-    };
-    console.log(`Updated ${this.moduleId} configuration:`, this.config);
+  
+  isEnabled(): boolean {
+    return this.config.enabled;
   }
 }
