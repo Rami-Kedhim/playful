@@ -1,3 +1,4 @@
+
 import { BrainHubConfig, BrainHubRequest, BrainHubResponse, PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel } from '@/types/brainHub';
 
 // Enhanced Brain Hub Service with advanced capabilities
@@ -47,6 +48,8 @@ class HermesOxumBrainHub {
     requestsPerMinute: 0,
     lastOptimized: Date.now()
   };
+  
+  private observers: ((data: any) => void)[] = [];
   
   private capabilities = {
     projectManagement: {
@@ -101,11 +104,93 @@ class HermesOxumBrainHub {
     this.logDecision('autonomy_change', { enabled, level });
   }
   
+  // Added method for get/enable/disable/setLevel
+  enableAutonomy(): void {
+    this.setAutonomy(true, this.autonomyLevel);
+  }
+  
+  disableAutonomy(): void {
+    this.setAutonomy(false, this.autonomyLevel);
+  }
+  
+  setAutonomyLevel(level: number): void {
+    this.setAutonomy(this.autonomyEnabled, level);
+  }
+  
   getAutonomyStatus(): { enabled: boolean, level: number } {
     return {
       enabled: this.autonomyEnabled,
       level: this.autonomyLevel
     };
+  }
+  
+  // Observer pattern methods
+  addObserver(callback: (data: any) => void): void {
+    this.observers.push(callback);
+  }
+  
+  removeObserver(callback: (data: any) => void): void {
+    this.observers = this.observers.filter(obs => obs !== callback);
+  }
+  
+  // Added methods for model parameters
+  getModelParameters(): Record<string, any> {
+    return {
+      learningRate: 0.001,
+      batchSize: 32,
+      epochs: 10,
+      optimizerType: 'adam',
+      dropout: 0.2,
+      activationFunction: 'relu'
+    };
+  }
+  
+  updateModelParameters(params: Record<string, any>): void {
+    console.log('Model parameters updated:', params);
+    // In a real implementation, this would update the parameters
+  }
+  
+  // Added method for getting models
+  getModels() {
+    return [
+      {
+        id: 'model-1',
+        name: 'Semantic Analysis',
+        version: '1.0.0',
+        capabilities: ['text-classification', 'sentiment-analysis'],
+        status: 'active',
+        performance: {
+          accuracy: 0.92,
+          latency: 120,
+          resourceUsage: 0.5
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: 'model-2',
+        name: 'Image Recognition',
+        version: '2.1.0',
+        capabilities: ['object-detection', 'scene-classification'],
+        status: 'inactive',
+        performance: {
+          accuracy: 0.85,
+          latency: 200,
+          resourceUsage: 0.7
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+  }
+  
+  // Method for storing/retrieving data in memory
+  storeInMemory(key: string, data?: any): any {
+    if (data === undefined) {
+      return this.internalMemory.get(key);
+    }
+    this.internalMemory.set(key, data);
+    return data;
   }
   
   toggleCapability<K extends keyof typeof this.capabilities>(
@@ -123,14 +208,6 @@ class HermesOxumBrainHub {
   
   getCapabilities() {
     return JSON.parse(JSON.stringify(this.capabilities));
-  }
-  
-  storeInMemory(key: string, data: any): void {
-    this.internalMemory.set(key, data);
-  }
-  
-  retrieveFromMemory(key: string): any {
-    return this.internalMemory.get(key);
   }
   
   logDecision(type: string, context: any): void {

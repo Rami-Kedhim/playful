@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useBrainHubHealth } from '@/hooks/useBrainHubHealth';
@@ -10,11 +11,11 @@ interface SystemHealthPanelProps {
 }
 
 const SystemHealthPanel: React.FC<SystemHealthPanelProps> = ({ className = '' }) => {
-  const { health, refreshHealth } = useBrainHubHealth();
+  const { health, checkHealth } = useBrainHubHealth();
   
-  const getStatusIcon = (status: BrainHubHealthStatus['status']) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy':
+      case 'good':
         return <CircleCheck className="w-10 h-10 text-green-500" />;
       case 'warning':
         return <AlertTriangle className="w-10 h-10 text-yellow-500" />;
@@ -43,14 +44,11 @@ const SystemHealthPanel: React.FC<SystemHealthPanelProps> = ({ className = '' })
             </div>
           </div>
           <div className="mt-6 space-y-2">
-            {health.metrics.map((metric, index) => (
+            {Object.entries(health.metrics).map(([name, value], index) => (
               <div key={index} className="flex justify-between items-center">
-                <span className="text-sm">{metric.name}</span>
-                <span className={`text-sm font-medium ${
-                  metric.status === 'healthy' ? 'text-green-500' : 
-                  metric.status === 'warning' ? 'text-yellow-500' : 'text-red-500'
-                }`}>
-                  {metric.value}
+                <span className="text-sm">{name}</span>
+                <span className="text-sm font-medium">
+                  {typeof value === 'number' ? value : JSON.stringify(value)}
                 </span>
               </div>
             ))}
@@ -61,7 +59,6 @@ const SystemHealthPanel: React.FC<SystemHealthPanelProps> = ({ className = '' })
       {/* Add the Persistence Controls component */}
       <div className="space-y-6">
         <PersistenceControls />
-        {/* Other small components can be added here */}
       </div>
     </div>
   );

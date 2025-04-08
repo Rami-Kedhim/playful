@@ -1,7 +1,8 @@
 
+import { brainHub, neuralHub, SystemHealthMetrics } from '@/services/neural';
+import { BrainHubAnalytics } from '@/types/brainHubHealth';
 import { generateNeuralAnalytics } from '@/services/neural/reporting/neuralAnalytics';
 import { neuralMetrics } from '@/services/neural/reporting/neuralMetrics';
-import { BrainHubAnalytics } from '@/types/brainHubHealth';
 
 export function updateBrainHubAnalytics(): BrainHubAnalytics {
   try {

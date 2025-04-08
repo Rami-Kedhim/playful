@@ -1,127 +1,179 @@
-
-import { SystemHealthMetrics } from '../types/neuralHub';
+/**
+ * Neural Metrics Service - Collects and reports metrics for neural systems
+ */
 
 export interface MetricsHistory {
   timestamp: Date;
-  metrics: SystemHealthMetrics;
+  metrics: Record<string, number>;
 }
 
 export interface PerformanceReport {
   totalOperations: number;
   averageResponseTime: number;
   errorRate: number;
-  peakLoad: number;
-  stability: number;
+  peakMemoryUsage: number;
+  topModels: Array<{
+    modelId: string;
+    usage: number;
+    accuracy: number;
+  }>;
 }
 
 class NeuralMetricsService {
-  private history: MetricsHistory[] = [];
+  private metricsHistory: MetricsHistory[] = [];
+  private lastCollected: Date = new Date();
   
   constructor() {
     // Initialize with some sample data
+    this.initializeSampleData();
+  }
+  
+  private initializeSampleData() {
     const now = new Date();
-    for (let i = 0; i < 24; i++) {
-      const timestamp = new Date(now.getTime() - (i * 60 * 60 * 1000));
-      this.history.push({
-        timestamp,
-        metrics: this.generateSampleMetrics()
+    
+    // Generate sample data for the past 7 days
+    for (let i = 7; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(now.getDate() - i);
+      
+      this.metricsHistory.push({
+        timestamp: date,
+        metrics: {
+          operationsPerSecond: 1000 + (Math.random() * 500),
+          responseTimeMs: 50 + (Math.random() * 30),
+          errorRate: 0.001 + (Math.random() * 0.005),
+          memoryUsagePercent: 40 + (Math.random() * 20),
+          cpuUsagePercent: 30 + (Math.random() * 30),
+          activeConnections: 100 + (Math.random() * 50),
+          modelsInUse: 3 + Math.floor(Math.random() * 3)
+        }
       });
     }
+    
+    this.lastCollected = now;
   }
   
-  private generateSampleMetrics(): SystemHealthMetrics {
-    return {
-      load: 0.2 + Math.random() * 0.5,
-      memoryUtilization: 0.3 + Math.random() * 0.4,
-      operationsPerSecond: 800 + Math.random() * 500,
-      responseTime: 30 + Math.random() * 30,
-      errorRate: 0.001 + Math.random() * 0.01,
-      stability: 0.9 + Math.random() * 0.09,
-      userEngagement: 0.6 + Math.random() * 0.3,
-      economicBalance: 0.7 + Math.random() * 0.2,
-      lastUpdated: new Date()
-    };
-  }
-  
-  recordMetrics(metrics: SystemHealthMetrics): void {
-    this.history.push({
-      timestamp: new Date(),
-      metrics
+  /**
+   * Collect current metrics from the system
+   */
+  collectMetrics() {
+    const now = new Date();
+    
+    // In a real implementation, this would collect actual metrics
+    // For now, we'll generate simulated metrics
+    this.metricsHistory.push({
+      timestamp: now,
+      metrics: {
+        operationsPerSecond: 1000 + (Math.random() * 500),
+        responseTimeMs: 50 + (Math.random() * 30),
+        errorRate: 0.001 + (Math.random() * 0.005),
+        memoryUsagePercent: 40 + (Math.random() * 20),
+        cpuUsagePercent: 30 + (Math.random() * 30),
+        activeConnections: 100 + (Math.random() * 50),
+        modelsInUse: 3 + Math.floor(Math.random() * 3)
+      }
     });
     
-    // Limit history size
-    if (this.history.length > 720) { // Keep about 30 days at hourly records
-      this.history = this.history.slice(-720);
+    // Keep only the last 1000 metrics records
+    if (this.metricsHistory.length > 1000) {
+      this.metricsHistory = this.metricsHistory.slice(-1000);
     }
-  }
-  
-  getHistory(hours: number = 24): MetricsHistory[] {
-    const cutoff = new Date();
-    cutoff.setHours(cutoff.getHours() - hours);
     
-    return this.history.filter(item => item.timestamp >= cutoff);
+    this.lastCollected = now;
   }
   
+  /**
+   * Get all collected metrics
+   */
+  getAllMetrics() {
+    return [...this.metricsHistory];
+  }
+  
+  /**
+   * Get metrics within a specific time range
+   */
+  getMetricsByTimeRange(startTime: Date, endTime: Date) {
+    return this.metricsHistory.filter(
+      item => item.timestamp >= startTime && item.timestamp <= endTime
+    );
+  }
+  
+  /**
+   * Get the most recent metrics
+   */
+  getLatestMetrics() {
+    if (this.metricsHistory.length === 0) {
+      return null;
+    }
+    return this.metricsHistory[this.metricsHistory.length - 1];
+  }
+  
+  /**
+   * Generate a performance report for a specific time period
+   */
   generatePerformanceReport(period: 'hourly' | 'daily' | 'weekly' | 'monthly'): PerformanceReport {
-    let hours: number;
+    let metrics: MetricsHistory[];
+    const now = new Date();
     
+    // Filter metrics based on the requested period
     switch (period) {
       case 'hourly':
-        hours = 1;
+        const oneHourAgo = new Date(now);
+        oneHourAgo.setHours(now.getHours() - 1);
+        metrics = this.getMetricsByTimeRange(oneHourAgo, now);
         break;
       case 'daily':
-        hours = 24;
+        const oneDayAgo = new Date(now);
+        oneDayAgo.setDate(now.getDate() - 1);
+        metrics = this.getMetricsByTimeRange(oneDayAgo, now);
         break;
       case 'weekly':
-        hours = 24 * 7;
+        const oneWeekAgo = new Date(now);
+        oneWeekAgo.setDate(now.getDate() - 7);
+        metrics = this.getMetricsByTimeRange(oneWeekAgo, now);
         break;
       case 'monthly':
-        hours = 24 * 30;
+        const oneMonthAgo = new Date(now);
+        oneMonthAgo.setMonth(now.getMonth() - 1);
+        metrics = this.getMetricsByTimeRange(oneMonthAgo, now);
         break;
+      default:
+        metrics = this.getAllMetrics();
     }
     
-    const relevantHistory = this.getHistory(hours);
+    // Calculate aggregates
+    const totalOperations = metrics.reduce(
+      (sum, item) => sum + item.metrics.operationsPerSecond, 0
+    );
     
-    if (relevantHistory.length === 0) {
-      return {
-        totalOperations: 0,
-        averageResponseTime: 0,
-        errorRate: 0,
-        peakLoad: 0,
-        stability: 1
-      };
-    }
+    const averageResponseTime = metrics.reduce(
+      (sum, item) => sum + item.metrics.responseTimeMs, 0
+    ) / Math.max(1, metrics.length);
     
-    // Calculate average values
-    let totalOps = 0;
-    let totalResponseTime = 0;
-    let totalErrorRate = 0;
-    let peakLoad = 0;
-    let averageStability = 0;
+    const averageErrorRate = metrics.reduce(
+      (sum, item) => sum + item.metrics.errorRate, 0
+    ) / Math.max(1, metrics.length);
     
-    relevantHistory.forEach(item => {
-      totalOps += item.metrics.operationsPerSecond;
-      totalResponseTime += item.metrics.responseTime;
-      totalErrorRate += item.metrics.errorRate;
-      peakLoad = Math.max(peakLoad, item.metrics.load);
-      averageStability += item.metrics.stability;
-    });
+    const peakMemoryUsage = Math.max(
+      ...metrics.map(item => item.metrics.memoryUsagePercent)
+    );
     
-    const count = relevantHistory.length;
-    const operationsPerSecond = totalOps / count;
-    
-    // Adjust for the time period
-    const secondsInPeriod = hours * 60 * 60;
-    const totalOperations = Math.round(operationsPerSecond * secondsInPeriod);
+    // Simulate top models data
+    const topModels = [
+      { modelId: 'semantic-analysis-1', usage: 42, accuracy: 0.92 },
+      { modelId: 'image-recognition-2', usage: 28, accuracy: 0.85 },
+      { modelId: 'nlp-processing-3', usage: 17, accuracy: 0.78 }
+    ];
     
     return {
       totalOperations,
-      averageResponseTime: totalResponseTime / count,
-      errorRate: totalErrorRate / count,
-      peakLoad,
-      stability: averageStability / count
+      averageResponseTime,
+      errorRate: averageErrorRate,
+      peakMemoryUsage,
+      topModels
     };
   }
 }
 
+// Singleton instance
 export const neuralMetrics = new NeuralMetricsService();

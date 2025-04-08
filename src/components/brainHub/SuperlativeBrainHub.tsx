@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
-import { NeuralModel, SystemHealthMetrics } from '@/services/neural/types/neuralHub';
+import { NeuralModel } from '@/services/neural/types/neuralHub';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
@@ -15,19 +15,10 @@ const SuperlativeBrainHub: React.FC = () => {
   const [activeTab, setActiveTab] = useState('neural-systems');
   const [advancedMode, setAdvancedMode] = useState(false);
   const [models, setModels] = useState<NeuralModel[]>([]);
-  const [healthMetrics, setHealthMetrics] = useState<SystemHealthMetrics | null>(null);
-
+  
   useEffect(() => {
     // Initialize models
     setModels(neuralHub.getModels());
-    
-    // Initialize health metrics
-    setHealthMetrics(neuralHub.getHealthMetrics());
-    
-    // Subscribe to health metrics updates
-    neuralHub.addObserver((metrics) => {
-      setHealthMetrics(metrics);
-    });
     
     // Set up regular polling for model updates
     const intervalId = setInterval(() => {
@@ -75,12 +66,7 @@ const SuperlativeBrainHub: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="system-health" className="space-y-4">
-          {healthMetrics && (
-            <SystemHealthPanel 
-              metrics={healthMetrics}
-              advancedMode={advancedMode}
-            />
-          )}
+          <SystemHealthPanel />
         </TabsContent>
         
         <TabsContent value="configuration" className="space-y-4">
