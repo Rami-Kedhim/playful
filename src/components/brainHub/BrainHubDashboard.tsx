@@ -8,6 +8,10 @@ import StrategicPlanningPanel from './StrategicPlanningPanel';
 import BusinessIntelligencePanel from './BusinessIntelligencePanel';
 import ContentGenerationPanel from './ContentGenerationPanel';
 import AutoDevOpsPanel from './AutoDevOpsPanel';
+import BrainCore from './BrainCore';
+import AdvancedPricingEngine from './AdvancedPricingEngine';
+import AdvancedAnalytics from './AdvancedAnalytics';
+import EnhancedContentGenerator from './EnhancedContentGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const BrainHubDashboard: React.FC = () => {
@@ -22,13 +26,16 @@ const BrainHubDashboard: React.FC = () => {
         <TabsList className="w-full">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="modules">Modules</TabsTrigger>
+          <TabsTrigger value="braincore">Brain Core</TabsTrigger>
           <TabsTrigger value="devops">AutoDevOps</TabsTrigger>
-          <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-          <TabsTrigger value="economic">Economic</TabsTrigger>
+          <TabsTrigger value="economics">Economics</TabsTrigger>
+          <TabsTrigger value="contentgen">Content Generation</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <BrainCore />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             <ModuleActivityMonitor />
             <AutonomyModulesPanel />
             <SecurityModulesPanel />
@@ -43,22 +50,25 @@ const BrainHubDashboard: React.FC = () => {
             <ContentGenerationPanel />
           </div>
         </TabsContent>
+
+        <TabsContent value="braincore" className="mt-6">
+          <BrainCore />
+        </TabsContent>
         
         <TabsContent value="devops" className="mt-6">
           <AutoDevOpsPanel />
         </TabsContent>
-        
-        <TabsContent value="intelligence" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <BusinessIntelligencePanel />
-            <StrategicPlanningPanel />
-          </div>
+
+        <TabsContent value="economics" className="mt-6">
+          <AdvancedPricingEngine />
         </TabsContent>
         
-        <TabsContent value="economic" className="mt-6">
-          <div className="grid grid-cols-1 gap-6">
-            <EconomicManagementPanel />
-          </div>
+        <TabsContent value="contentgen" className="mt-6">
+          <EnhancedContentGenerator />
+        </TabsContent>
+        
+        <TabsContent value="analytics" className="mt-6">
+          <AdvancedAnalytics />
         </TabsContent>
       </Tabs>
     </div>
