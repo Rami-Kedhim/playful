@@ -275,6 +275,3 @@ class HermesOxumNeuralHub {
 
 // Singleton instance
 export const neuralHub = new HermesOxumNeuralHub();
-
-// Re-export types
-export type { SystemHealthMetrics, ModelParameters, NeuralModel, TrainingProgress };

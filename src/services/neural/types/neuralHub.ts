@@ -1,52 +1,53 @@
 
 /**
- * Type definitions for the Neural Hub system
+ * Neural Hub Types
  */
 
 export interface SystemHealthMetrics {
-  load: number; // 0-1
-  memoryUtilization: number; // 0-1
-  operationsPerSecond: number;
-  responseTime: number; // milliseconds
-  errorRate: number; // 0-1
-  stability: number; // 0-1
-  userEngagement: number; // 0-1
-  economicBalance: number; // 0-1
-  lastUpdated: Date;
+  load: number; // Current system load (0-1)
+  memoryUtilization: number; // Memory usage (0-1)
+  operationsPerSecond: number; // Operations processed per second
+  responseTime: number; // Average response time in ms
+  errorRate: number; // Error rate (0-1)
+  stability: number; // System stability metric (0-1)
+  userEngagement: number; // User engagement metric (0-1)
+  economicBalance: number; // Economic balance metric (0-1)
+  lastUpdated: Date; // Last metrics update timestamp
 }
 
 export interface ModelParameters {
-  decayConstant: number;
-  growthFactor: number;
-  cyclePeriod: number;
-  harmonicCount: number;
-  bifurcationPoint: number;
-  attractorStrength: number;
+  decayConstant: number; // Controls how quickly visibility decays
+  growthFactor: number; // Multiplier for growth calculations
+  cyclePeriod: number; // Number of hours in a cycle
+  harmonicCount: number; // Number of harmonics to use in calculations
+  bifurcationPoint: number; // Point at which behavior changes
+  attractorStrength: number; // How strongly the attractor affects the system
 }
 
 export interface NeuralModel {
   id: string;
   name: string;
-  description: string;
   version: string;
-  status: 'active' | 'training' | 'inactive' | 'error';
-  parameters: number; // millions
-  specialization: string[];
+  status: 'active' | 'inactive' | 'training' | 'error';
   capabilities: string[];
+  specialization: string[];
   performance: {
-    accuracy: number; // 0-1
-    latency: number; // milliseconds
-    throughput: number; // requests per second
+    accuracy: number;
+    latency: number;
+    throughput: number;
   };
+  lastUpdate: Date;
+  trainingData?: string;
 }
 
 export interface TrainingProgress {
   modelId: string;
-  epoch: number;
-  totalEpochs: number;
+  progress: number; // 0-100
+  status: 'preparing' | 'training' | 'evaluating' | 'completed' | 'failed';
+  startTime: Date;
+  expectedCompletionTime?: Date;
   accuracy: number;
-  loss: number;
-  startedAt: Date;
-  estimatedCompletion: Date;
-  progress: number; // 0-1
+  loss?: number;
+  epoch?: number;
+  message?: string;
 }

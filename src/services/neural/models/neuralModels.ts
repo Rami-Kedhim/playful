@@ -1,89 +1,84 @@
 
 /**
- * Neural models initialization and management
+ * Neural Models - Default models initialization and management
  */
 import { NeuralModel } from '../types/neuralHub';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Initialize default neural models
+ * @returns Array of default neural models
  */
 export function initializeDefaultModels(): NeuralModel[] {
   return [
     {
-      id: uuidv4(),
-      name: 'HermesGPT-Core',
-      description: 'General purpose language model for application integration',
-      version: '2.4.1',
+      id: 'content-moderator-v2',
+      name: 'Content Moderator',
+      version: '2.1.0',
       status: 'active',
-      parameters: 12500,
-      specialization: ['natural-language-processing', 'text-generation', 'conversation'],
-      capabilities: ['chat', 'content-generation', 'translation', 'summarization'],
-      performance: {
-        accuracy: 0.92,
-        latency: 120,
-        throughput: 35
-      }
-    },
-    {
-      id: uuidv4(),
-      name: 'OxumVision',
-      description: 'Visual understanding and generation model',
-      version: '1.8.0',
-      status: 'active',
-      parameters: 8700,
-      specialization: ['computer-vision', 'image-processing', 'multimedia'],
-      capabilities: ['image-recognition', 'object-detection', 'scene-understanding'],
-      performance: {
-        accuracy: 0.89,
-        latency: 180,
-        throughput: 22
-      }
-    },
-    {
-      id: uuidv4(),
-      name: 'NexusEmbed',
-      description: 'Vector embedding generator for semantic understanding',
-      version: '3.1.2',
-      status: 'active',
-      parameters: 1800,
-      specialization: ['embeddings', 'similarity-search', 'document-indexing'],
-      capabilities: ['document-retrieval', 'semantic-search', 'clustering'],
+      capabilities: ['content-moderation', 'text-classification', 'image-classification'],
+      specialization: ['harmful-content-detection', 'nsfw-detection', 'spam-detection'],
       performance: {
         accuracy: 0.95,
-        latency: 15,
-        throughput: 250
-      }
+        latency: 120,
+        throughput: 500
+      },
+      lastUpdate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago
     },
     {
-      id: uuidv4(),
-      name: 'BehaviorPredict',
-      description: 'User behavior prediction and content recommendation',
-      version: '2.0.5',
+      id: 'user-personality-analyzer',
+      name: 'Personality Analyzer',
+      version: '1.3.0',
       status: 'active',
-      parameters: 4200,
-      specialization: ['recommendation', 'personalization', 'behavior-analysis'],
-      capabilities: ['content-recommendation', 'preference-prediction', 'trend-analysis'],
+      capabilities: ['user-analysis', 'personality-prediction', 'preference-modeling'],
+      specialization: ['behavior-prediction', 'interest-mapping'],
       performance: {
         accuracy: 0.87,
-        latency: 65,
-        throughput: 180
-      }
+        latency: 350,
+        throughput: 120
+      },
+      lastUpdate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) // 14 days ago
     },
     {
-      id: uuidv4(),
-      name: 'HermesGPT-Expert',
-      description: 'Advanced specialized language model for expert domains',
-      version: '1.2.0',
-      status: 'training',
-      parameters: 38000,
-      specialization: ['expert-knowledge', 'reasoning', 'domain-adaptation'],
-      capabilities: ['complex-reasoning', 'domain-expertise', 'technical-writing'],
+      id: 'recommendation-engine-pro',
+      name: 'Recommendation Engine Pro',
+      version: '3.0.1',
+      status: 'active',
+      capabilities: ['recommendations', 'content-matching', 'preference-analysis'],
+      specialization: ['profile-matching', 'content-recommendation'],
       performance: {
-        accuracy: 0.94,
-        latency: 350,
-        throughput: 12
-      }
+        accuracy: 0.91,
+        latency: 180,
+        throughput: 320
+      },
+      lastUpdate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+    },
+    {
+      id: 'engagement-optimizer',
+      name: 'Engagement Optimizer',
+      version: '1.2.1',
+      status: 'training',
+      capabilities: ['engagement-analysis', 'messaging-optimization', 'response-prediction'],
+      specialization: ['message-timing', 'content-engagement'],
+      performance: {
+        accuracy: 0.84,
+        latency: 200,
+        throughput: 240
+      },
+      lastUpdate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+    },
+    {
+      id: 'fraud-detector-advanced',
+      name: 'Fraud Detector',
+      version: '2.4.2',
+      status: 'active',
+      capabilities: ['fraud-detection', 'anomaly-detection', 'pattern-recognition'],
+      specialization: ['payment-fraud', 'account-takeover', 'bot-detection'],
+      performance: {
+        accuracy: 0.97,
+        latency: 300,
+        throughput: 150
+      },
+      lastUpdate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) // 10 days ago
     }
   ];
 }
