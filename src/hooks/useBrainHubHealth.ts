@@ -42,7 +42,7 @@ export function useBrainHubHealth(monitoringInterval = 30000) {
         status = 'error';
         errors.push('Critical CPU utilization detected');
       } else if (systemStatus.cpuUsage > 60) {
-        if (status !== 'error') status = 'warning';
+        status = status === 'good' ? 'warning' : status;
         warnings.push('High CPU utilization detected');
       }
       
@@ -50,14 +50,14 @@ export function useBrainHubHealth(monitoringInterval = 30000) {
         status = 'error';
         errors.push('Critical memory utilization detected');
       } else if (systemStatus.memoryUsage > 70) {
-        if (status === 'good') status = 'warning';
+        status = status === 'good' ? 'warning' : status;
         warnings.push('High memory utilization detected');
       }
       
       // Check optimization age
       const hoursSinceOptimization = (Date.now() - systemStatus.lastOptimized) / (1000 * 60 * 60);
       if (hoursSinceOptimization > 48) {
-        if (status === 'good') status = 'warning';
+        status = status === 'good' ? 'warning' : status;
         warnings.push('System optimization is overdue');
       }
       
