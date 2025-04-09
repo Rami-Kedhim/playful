@@ -4,8 +4,9 @@ import { useLocation } from 'react-router-dom';
 import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
-import { Shield } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Shield, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
+import VerificationBadge from './VerificationBadge';
 
 const VerificationContainer = () => {
   const location = useLocation();
@@ -52,24 +53,66 @@ const VerificationContainer = () => {
         </TabsContent>
       </Tabs>
       
-      <Card className="mt-8 bg-muted/30">
-        <CardContent className="pt-6">
-          <h3 className="font-medium mb-3">Why Verification Matters</h3>
-          <ul className="space-y-2">
-            {[
-              'Builds trust with potential clients and partners',
-              'Improves your visibility in search results',
-              'Helps maintain a safe and reliable community',
-              'Unlocks premium features and boosted rankings'
-            ].map((item, index) => (
-              <li key={index} className="flex items-start text-sm text-muted-foreground">
-                <span className="text-primary mr-2">•</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle className="text-base">Why Verification Matters</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {[
+                'Builds trust with potential clients and partners',
+                'Improves your visibility in search results',
+                'Helps maintain a safe and reliable community',
+                'Unlocks premium features and boosted rankings'
+              ].map((item, index) => (
+                <li key={index} className="flex items-start text-sm text-muted-foreground">
+                  <span className="text-primary mr-2">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center">
+              <Info className="h-4 w-4 mr-2 text-blue-500" />
+              Verification Levels
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <VerificationBadge level="basic" size="sm" showTooltip={false} />
+                <span className="ml-2 text-sm">Basic Verification</span>
+              </div>
+              <span className="text-xs text-muted-foreground">ID Verification</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <VerificationBadge level="enhanced" size="sm" showTooltip={false} />
+                <span className="ml-2 text-sm">Enhanced Verification</span>
+              </div>
+              <span className="text-xs text-muted-foreground">ID + Contact Verification</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <VerificationBadge level="premium" size="sm" showTooltip={false} />
+                <span className="ml-2 text-sm">Premium Verification</span>
+              </div>
+              <span className="text-xs text-muted-foreground">ID + In-person Verification</span>
+            </div>
+            
+            <p className="text-xs text-muted-foreground border-t border-border pt-3 mt-3">
+              Higher verification levels increase trust and visibility on the platform.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

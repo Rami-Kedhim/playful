@@ -2,17 +2,19 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, CheckCircle, AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
+import { RefreshCw, AlertTriangle } from 'lucide-react';
 import { VerificationRequest } from '@/types/escort';
 import { 
   calculateVerificationProgress, 
   getVerificationStatusMessage, 
   getVerificationStatusTitle,
-  getEstimatedCompletionTime
+  getEstimatedCompletionTime,
+  isVerificationInProgress
 } from '@/utils/verification/assessmentProgress';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
+import VerificationStatusIndicator from './status/VerificationStatusIndicator';
+import VerificationTimeline from './status/VerificationTimeline';
 
 interface VerificationProgressProps {
   verificationRequest?: VerificationRequest | null;
@@ -82,34 +84,6 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   const statusTitle = getVerificationStatusTitle(verificationRequest.status);
   const estimatedTime = getEstimatedCompletionTime(verificationRequest.status);
   
-  const getStatusIcon = () => {
-    switch (verificationRequest.status) {
-      case 'approved':
-        return <CheckCircle className="h-5 w-5 mr-2 text-green-500" />;
-      case 'rejected':
-        return <XCircle className="h-5 w-5 mr-2 text-destructive" />;
-      case 'in_review':
-        return <Clock className="h-5 w-5 mr-2 text-blue-500 animate-pulse" />;
-      case 'pending':
-      default:
-        return <Clock className="h-5 w-5 mr-2 text-amber-500" />;
-    }
-  };
-  
-  const getStatusBadge = () => {
-    switch (verificationRequest.status) {
-      case 'approved':
-        return <Badge className="bg-green-500">Approved</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
-      case 'in_review':
-        return <Badge variant="outline" className="bg-blue-500/20 text-blue-500 border-blue-500/30">In Review</Badge>;
-      case 'pending':
-      default:
-        return <Badge variant="outline" className="bg-amber-500/20 text-amber-500 border-amber-500/30">Pending</Badge>;
-    }
-  };
-
   const submittedDate = new Date(verificationRequest.submittedAt).toLocaleDateString();
   const updatedDate = verificationRequest.updatedAt 
     ? new Date(verificationRequest.updatedAt).toLocaleDateString() 
@@ -128,12 +102,11 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="flex items-center text-lg">
-            {getStatusIcon()}
             {statusTitle}
           </CardTitle>
-          {getStatusBadge()}
+          <VerificationStatusIndicator status={verificationRequest.status} />
         </div>
-        {(verificationRequest.status === 'pending' || verificationRequest.status === 'in_review') && (
+        {isVerificationInProgress(verificationRequest.status) && (
           <CardDescription className="mt-2">
             {timeRemaining || `Estimated completion time: ${estimatedTime}`}
           </CardDescription>
@@ -144,9 +117,13 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
           <Progress value={progressValue} className="h-2" />
         </div>
         
-        <p className="text-sm text-muted-foreground mb-2">{statusMessage}</p>
+        <p className="text-sm text-muted-foreground mb-6">{statusMessage}</p>
         
-        <div className="bg-muted/50 p-3 rounded-md text-sm mt-4">
+        <div className="bg-muted/30 p-4 rounded-md mb-6">
+          <VerificationTimeline verificationRequest={verificationRequest} />
+        </div>
+        
+        <div className="bg-muted/50 p-3 rounded-md text-sm">
           <div className="flex justify-between mb-1">
             <span className="text-muted-foreground">Submitted:</span>
             <span>{submittedDate}</span>

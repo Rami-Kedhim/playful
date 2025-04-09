@@ -22,10 +22,14 @@ export {
 export {
   calculateVerificationProgress,
   getVerificationStatusMessage,
+  getVerificationStatusTitle,
+  getEstimatedCompletionTime,
   isVerificationInProgress
 } from './assessmentProgress';
 
 export type { 
   VerificationEligibilityResponse,
-  VerificationSubmissionResponse 
-} from './requestSubmission';
+  VerificationSubmissionResponse,
+  VerificationChecks,
+  VerificationStatusResponse
+} from './types';
