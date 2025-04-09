@@ -1,14 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BaseNeuralService } from '@/services/neural/modules/BaseNeuralService';
 
 export function useNeuralServices(service: BaseNeuralService) {
-  // Guard against React not being initialized
-  if (typeof React === 'undefined' || !React) {
-    console.error('React is not defined in useNeuralServices');
-    return { isInitialized: false, isLoading: false, error: 'React not initialized' };
-  }
-
+  // No need to check for React being defined since we're importing it properly
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
