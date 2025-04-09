@@ -1,9 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import FilterBadge from "./filters/FilterBadge";
-import { getServiceTypeName, ServiceTypeFilter } from "./filters/ServiceTypeBadgeLabel";
-import { Users, Video, FilterX } from "lucide-react";
+import { getServiceTypeBadgeLabel, ServiceTypeFilter } from "./filters/ServiceTypeBadgeLabel";
+import { FilterX } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ServiceTypeIcon from "./filters/ServiceTypeIcon";
 
 export interface AppliedFiltersProps {
   searchQuery: string;
@@ -73,20 +74,6 @@ const AppliedFilters = ({
   if (!hasActiveFilters) {
     return null;
   }
-  
-  const getServiceTypeIcon = () => {
-    if (serviceTypeFilter === "in-person") return <Users className="h-3 w-3 text-primary" />;
-    if (serviceTypeFilter === "virtual") return <Video className="h-3 w-3 text-primary" />;
-    if (serviceTypeFilter === "both") {
-      return (
-        <div className="flex items-center space-x-0.5 text-primary">
-          <Users className="h-3 w-3" />
-          <Video className="h-3 w-3" />
-        </div>
-      );
-    }
-    return null;
-  };
 
   const filtersCount = [
     searchQuery ? 1 : 0,
@@ -192,9 +179,9 @@ const AppliedFilters = ({
       
       {serviceTypeFilter && (
         <FilterBadge 
-          label={getServiceTypeName(serviceTypeFilter)}
+          label={getServiceTypeBadgeLabel(serviceTypeFilter)}
           onRemove={() => setServiceTypeFilter("")}
-          icon={getServiceTypeIcon()}
+          icon={<ServiceTypeIcon type={serviceTypeFilter} size={14} />}
           variant="secondary"
         />
       )}

@@ -1,8 +1,9 @@
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { Users, Video, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { ServiceTypeFilter, getServiceTypeInfo } from "./ServiceTypeBadgeLabel";
+import ServiceTypeIcon from "./ServiceTypeIcon";
 import { cn } from "@/lib/utils";
 
 interface ServiceTypeRadioFilterProps {
@@ -34,7 +35,7 @@ const ServiceTypeRadioFilter = ({
           )}
         >
           <RadioGroupItem id="service-type-in-person" value="in-person" className="sr-only" />
-          <Users className="h-4 w-4 text-primary" />
+          <ServiceTypeIcon type="in-person" size={16} />
           <div className="flex-1">
             <div className="font-medium">{getServiceTypeInfo("in-person").name}</div>
             <div className="text-xs text-muted-foreground">{getServiceTypeInfo("in-person").description}</div>
@@ -55,7 +56,7 @@ const ServiceTypeRadioFilter = ({
           )}
         >
           <RadioGroupItem id="service-type-virtual" value="virtual" className="sr-only" />
-          <Video className="h-4 w-4 text-primary" />
+          <ServiceTypeIcon type="virtual" size={16} />
           <div className="flex-1">
             <div className="font-medium">{getServiceTypeInfo("virtual").name}</div>
             <div className="text-xs text-muted-foreground">{getServiceTypeInfo("virtual").description}</div>
@@ -76,10 +77,7 @@ const ServiceTypeRadioFilter = ({
           )}
         >
           <RadioGroupItem id="service-type-both" value="both" className="sr-only" />
-          <div className="flex h-4 w-4 items-center justify-center space-x-0.5 text-primary">
-            <Users className="h-3 w-3" />
-            <Video className="h-3 w-3 ml-0.5" />
-          </div>
+          <ServiceTypeIcon type="both" size={16} />
           <div className="flex-1">
             <div className="font-medium">{getServiceTypeInfo("both").name}</div>
             <div className="text-xs text-muted-foreground">{getServiceTypeInfo("both").description}</div>
@@ -100,7 +98,7 @@ const ServiceTypeRadioFilter = ({
           )}
         >
           <RadioGroupItem id="service-type-none" value="" className="sr-only" />
-          <div className="h-4 w-4 flex items-center justify-center text-primary">•</div>
+          <div className="h-4 w-4 flex items-center justify-center text-muted-foreground">•</div>
           <div className="flex-1">
             <div className="font-medium">No Preference</div>
             <div className="text-xs text-muted-foreground">Show all service types</div>

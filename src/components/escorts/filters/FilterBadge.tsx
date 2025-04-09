@@ -8,23 +8,26 @@ interface FilterBadgeProps {
   onRemove: () => void;
   icon?: React.ReactNode;
   variant?: "default" | "outline" | "secondary";
+  className?: string;
 }
 
 const FilterBadge = ({ 
   label, 
   onRemove, 
   icon,
-  variant = "outline" 
+  variant = "outline",
+  className
 }: FilterBadgeProps) => {
   return (
     <Badge 
       variant={variant} 
       className={cn(
-        "flex items-center gap-1 px-2 py-1 h-7 transition-colors",
-        "hover:bg-accent hover:text-accent-foreground"
+        "flex items-center gap-1.5 px-2 py-1 h-7 transition-colors",
+        "hover:bg-accent hover:text-accent-foreground",
+        className
       )}
     >
-      {icon && <span className="mr-1">{icon}</span>}
+      {icon && <span className="flex items-center justify-center">{icon}</span>}
       <span className="text-xs font-medium">{label}</span>
       <button
         onClick={(e) => {
