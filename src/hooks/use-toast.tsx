@@ -1,6 +1,6 @@
 
 import React from "react";
-import { toast as sonnerToast, type ToastOptions as SonnerToastOptions } from "sonner";
+import { toast as sonnerToast, type Toast as SonnerToast } from "sonner";
 
 // Types for toast
 export interface Toast {
@@ -11,7 +11,7 @@ export interface Toast {
   variant?: "default" | "destructive" | "warning" | "success";
 }
 
-type ToastOptionsType = SonnerToastOptions & {
+type ToastOptionsType = Omit<SonnerToast, "id"> & {
   variant?: "default" | "destructive" | "warning" | "success";
 };
 

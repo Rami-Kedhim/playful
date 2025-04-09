@@ -5,7 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useThemeToggle } from '@/hooks/useThemeToggle';
-import { Toaster } from '@/components/ui/toaster';
+import { ToastProvider } from '@/providers/toast-provider';
 import { cn } from '@/lib/utils';
 import PageTransition from './PageTransition';
 import '@/styles/reveal-animations.css';
@@ -59,7 +59,7 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
         </PageTransition>
       </AnimatePresence>
       <Footer />
-      <Toaster />
+      <ToastProvider />
     </div>
   );
 };
