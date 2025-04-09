@@ -59,7 +59,6 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
         </PageTransition>
       </AnimatePresence>
       <Footer />
-      <ToastProvider />
     </div>
   );
 };
