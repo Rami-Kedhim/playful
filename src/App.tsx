@@ -14,7 +14,6 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <ToastProvider />
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
           <Route 
@@ -42,6 +41,7 @@ function App() {
             } 
           />
         </Routes>
+        <ToastProvider />
       </Router>
     </AuthProvider>
   );
