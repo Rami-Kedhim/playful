@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VerificationRequest } from '@/types/escort';
+import { calculateVerificationProgress, getVerificationStatusMessage } from '@/utils/verification';
 
 interface VerificationProgressProps {
   verificationRequest?: VerificationRequest | null;
@@ -36,37 +37,45 @@ const VerificationProgress = ({ verificationRequest, error }: VerificationProgre
     return null;
   }
 
-  const getProgressDetails = () => {
+  const progressValue = calculateVerificationProgress(verificationRequest.status);
+  const statusMessage = getVerificationStatusMessage(verificationRequest.status);
+  
+  const getStatusIcon = () => {
     switch (verificationRequest.status) {
       case 'approved':
-        return {
-          title: 'Verification Approved',
-          icon: <CheckCircle className="h-5 w-5 mr-2 text-green-500" />,
-          progressValue: 100,
-          badge: <Badge className="bg-green-500">Approved</Badge>,
-          message: 'Your verification has been approved. Your profile now shows as verified to other users.'
-        };
+        return <CheckCircle className="h-5 w-5 mr-2 text-green-500" />;
       case 'rejected':
-        return {
-          title: 'Verification Rejected',
-          icon: <XCircle className="h-5 w-5 mr-2 text-destructive" />,
-          progressValue: 100,
-          badge: <Badge variant="destructive">Rejected</Badge>,
-          message: 'Your verification was not approved. Please check your documents and try again.'
-        };
+        return <XCircle className="h-5 w-5 mr-2 text-destructive" />;
       case 'pending':
       default:
-        return {
-          title: 'Verification In Progress',
-          icon: <Clock className="h-5 w-5 mr-2 text-amber-500" />,
-          progressValue: 33,
-          badge: <Badge variant="outline" className="bg-amber-500/20 text-amber-500 border-amber-500/30">Pending</Badge>,
-          message: 'Your verification is being processed. This typically takes 24-48 hours.'
-        };
+        return <Clock className="h-5 w-5 mr-2 text-amber-500" />;
+    }
+  };
+  
+  const getStatusBadge = () => {
+    switch (verificationRequest.status) {
+      case 'approved':
+        return <Badge className="bg-green-500">Approved</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive">Rejected</Badge>;
+      case 'pending':
+      default:
+        return <Badge variant="outline" className="bg-amber-500/20 text-amber-500 border-amber-500/30">Pending</Badge>;
+    }
+  };
+  
+  const getStatusTitle = () => {
+    switch (verificationRequest.status) {
+      case 'approved':
+        return 'Verification Approved';
+      case 'rejected':
+        return 'Verification Rejected';
+      case 'pending':
+      default:
+        return 'Verification In Progress';
     }
   };
 
-  const details = getProgressDetails();
   const submittedDate = new Date(verificationRequest.submittedAt).toLocaleDateString();
 
   return (
@@ -74,18 +83,18 @@ const VerificationProgress = ({ verificationRequest, error }: VerificationProgre
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="flex items-center text-lg">
-            {details.icon}
-            {details.title}
+            {getStatusIcon()}
+            {getStatusTitle()}
           </CardTitle>
-          {details.badge}
+          {getStatusBadge()}
         </div>
       </CardHeader>
       <CardContent>
         <div className="my-4">
-          <Progress value={details.progressValue} className="h-2" />
+          <Progress value={progressValue} className="h-2" />
         </div>
         
-        <p className="text-sm text-muted-foreground mb-2">{details.message}</p>
+        <p className="text-sm text-muted-foreground mb-2">{statusMessage}</p>
         
         <div className="bg-muted/50 p-3 rounded-md text-sm mt-4">
           <div className="flex justify-between mb-1">
