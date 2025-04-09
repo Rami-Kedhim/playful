@@ -2,14 +2,14 @@
 import { VerificationStatus } from "@/types/escort";
 
 /**
- * Calculate the progress percentage based on verification status
+ * Calculate verification progress percentage based on status
  */
 export const calculateVerificationProgress = (status: VerificationStatus): number => {
   switch (status) {
     case 'pending':
-      return 50;
+      return 30;
     case 'in_review':
-      return 75;
+      return 60;
     case 'approved':
       return 100;
     case 'rejected':
@@ -20,46 +20,25 @@ export const calculateVerificationProgress = (status: VerificationStatus): numbe
 };
 
 /**
- * Get a user-friendly message describing the verification status
+ * Get user-friendly status message based on verification status
  */
 export const getVerificationStatusMessage = (status: VerificationStatus): string => {
   switch (status) {
     case 'pending':
-      return 'Your verification has been submitted and is awaiting review. Please check back later.';
+      return 'Your verification request has been submitted and is in the queue for review. We\'ll notify you once it begins processing.';
     case 'in_review':
-      return 'Your verification is currently being reviewed by our team. This typically takes 24-48 hours.';
+      return 'Our team is currently reviewing your verification documents. We\'ll update you once the review is complete.';
     case 'approved':
-      return 'Your identity has been successfully verified. Your profile now has verified status.';
+      return 'Congratulations! Your identity has been successfully verified. You now have full access to all platform features.';
     case 'rejected':
-      return 'Your verification was not approved. Please review the feedback and submit new documents if needed.';
+      return 'Unfortunately, your verification request was not approved. Please review the reason below and submit a new request with the necessary corrections.';
     default:
-      return 'No verification information available.';
+      return 'Unknown verification status.';
   }
 };
 
 /**
- * Check if a verification request is currently in progress
- */
-export const isVerificationInProgress = (status: VerificationStatus): boolean => {
-  return status === 'pending' || status === 'in_review';
-};
-
-/**
- * Get the estimated completion time based on status
- */
-export const getEstimatedCompletionTime = (status: VerificationStatus): string => {
-  switch (status) {
-    case 'pending':
-      return '24-48 hours';
-    case 'in_review':
-      return '24 hours';
-    default:
-      return 'N/A';
-  }
-};
-
-/**
- * Get a suitable title for the current verification status
+ * Get appropriate status title based on verification status
  */
 export const getVerificationStatusTitle = (status: VerificationStatus): string => {
   switch (status) {
@@ -74,4 +53,28 @@ export const getVerificationStatusTitle = (status: VerificationStatus): string =
     default:
       return 'Verification Status';
   }
+};
+
+/**
+ * Get estimated completion time based on verification status
+ */
+export const getEstimatedCompletionTime = (status: VerificationStatus): string => {
+  switch (status) {
+    case 'pending':
+      return '24-48 hours';
+    case 'in_review':
+      return '12-24 hours';
+    case 'approved':
+    case 'rejected':
+      return 'Completed';
+    default:
+      return 'Unknown';
+  }
+};
+
+/**
+ * Check if verification is currently in progress
+ */
+export const isVerificationInProgress = (status: VerificationStatus): boolean => {
+  return status === 'pending' || status === 'in_review';
 };
