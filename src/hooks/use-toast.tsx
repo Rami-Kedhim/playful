@@ -14,7 +14,7 @@ interface ToastContextType {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, "id">) => void;
   removeToast: (id: string) => void;
-  toast: (props: Omit<Toast, "id">) => void; // Add the toast function to the context
+  toast: (props: Omit<Toast, "id">) => void; // Toast function directly in context
 }
 
 const ToastContext = createContext<ToastContextType>({
@@ -58,6 +58,8 @@ export function ToastProvider({ children }: ToastProviderProps) {
       toast: toastFunction 
     }}>
       {children}
+      
+      {/* Optional: add a toast renderer here if needed */}
     </ToastContext.Provider>
   );
 }

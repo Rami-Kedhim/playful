@@ -40,7 +40,8 @@ export function useAuthPerformance() {
         description: "You have been logged in successfully",
       });
       
-      return { success: true, user: data.user };
+      // Return success without including user object in AuthResult
+      return { success: true };
     } catch (error: any) {
       const errorMessage = error.message || "Login failed. Please check your credentials.";
       setError(errorMessage);

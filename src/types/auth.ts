@@ -11,6 +11,7 @@ export type DatabaseGender = 'male' | 'female' | 'other';
 export interface AuthResult {
   success: boolean;
   error?: string | null;
+  user?: AuthUser | null; // Optional user field
 }
 
 // Type for the authentication user
