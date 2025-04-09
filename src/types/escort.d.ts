@@ -28,7 +28,7 @@ export interface VerificationRequest {
   userId: string;
   status: VerificationStatus;
   submittedAt: string;
-  updatedAt?: string; // Added updatedAt as optional property
+  updatedAt?: string; // Explicitly defined as optional property
   documents: VerificationDocument[];
   rejectionReason?: string;
 }

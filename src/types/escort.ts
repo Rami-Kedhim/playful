@@ -86,6 +86,7 @@ export interface VerificationRequest {
   status: VerificationStatus;
   submittedAt: string;
   reviewedAt?: string;
+  updatedAt?: string; // Explicitly add the updatedAt property
   documents: VerificationDocument[];
   rejectionReason?: string;
   expiresAt?: string;
