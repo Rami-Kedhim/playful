@@ -1,5 +1,5 @@
 
-import { VerificationRequest, VerificationStatus, VerificationDocument } from "@/types/escort";
+import { VerificationRequest, VerificationStatus, VerificationDocument, VerificationLevel } from "@/types/escort";
 
 /**
  * Check if a verification request is pending
@@ -55,6 +55,7 @@ export const createVerificationRequest = async (
     id: `verification-${Date.now()}`,
     userId,
     status: 'pending',
+    verificationLevel: 'none', // Add the required verificationLevel property, starting with 'none'
     documents: documents,
     submittedAt: new Date().toISOString()
   };
