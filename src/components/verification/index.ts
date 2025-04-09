@@ -6,6 +6,7 @@ import VerificationProgress from './VerificationProgress';
 import VerificationStatus from './VerificationStatus';
 import VerificationStatusIndicator from './status/VerificationStatusIndicator';
 import VerificationTimeline from './status/VerificationTimeline';
+import VerificationFlowSteps from './VerificationFlowSteps';
 
 export {
   VerificationBadge,
@@ -14,7 +15,8 @@ export {
   VerificationProgress,
   VerificationStatus,
   VerificationStatusIndicator,
-  VerificationTimeline
+  VerificationTimeline,
+  VerificationFlowSteps
 };
 
 export default VerificationStatus;

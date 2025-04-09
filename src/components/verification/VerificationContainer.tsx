@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
+import VerificationFlowSteps from './VerificationFlowSteps';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Shield, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
@@ -37,6 +38,11 @@ const VerificationContainer = () => {
       <p className="text-muted-foreground mb-6">
         Complete verification to enhance trust and access all platform features
       </p>
+      
+      <VerificationFlowSteps 
+        status={activeTab === "submit" ? "pending" : "in_review"} 
+        className="mb-6"
+      />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
