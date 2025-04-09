@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -9,8 +8,7 @@ import {
 import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 import BoostStatus from "./BoostStatus";
 import BoostAnalytics from "./BoostAnalytics";
-// Direct import from hooks to avoid circular dependencies
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 interface BoostManagerContainerProps {
   creatorId: string;
@@ -55,7 +53,6 @@ const BoostManagerContainer = ({
     fetchBoostPackages();
   }, [fetchBoostPackages]);
   
-  // Wrapper for analytics data to match the expected interface
   const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
     return await getBoostAnalytics();
   };
