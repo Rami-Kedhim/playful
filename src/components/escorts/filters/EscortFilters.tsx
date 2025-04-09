@@ -1,188 +1,148 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Slider } from '@/components/ui/slider';
-import { Filter, X } from 'lucide-react';
+import React from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { SearchInput } from "@/components/ui/search-input";
+import LocationFilter from "./LocationFilter";
+import PriceRangeFilter from "./PriceRangeFilter";
+import ServicesFilter from "./ServicesFilter";
+import GenderFilter from "./GenderFilter";
+import OrientationFilter from "./OrientationFilter";
+import AgeRangeFilter from "./AgeRangeFilter";
+import VerifiedFilter from "./VerifiedFilter";
+import ServiceTypeFilter from "./ServiceTypeFilter";
+import RatingFilter from "./RatingFilter";
+import AvailabilityFilter from "./AvailabilityFilter";
 
 interface EscortFiltersProps {
-  filters: {
-    location: string;
-    serviceTypes: string[];
-    priceRange: [number, number];
-    gender: string[];
-    orientation: string[];
-    ageRange: [number, number];
-    rating: number;
-    verified: boolean;
-    availableNow: boolean;
-    escortType: "verified" | "ai" | "provisional" | "all";
-    language: string[];
-  };
-  onUpdate: (filters: Partial<EscortFiltersProps['filters']>) => void;
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+  location: string;
+  setLocation: (value: string) => void;
+  priceRange: [number, number];
+  setPriceRange: (values: number[]) => void;
+  verifiedOnly: boolean;
+  setVerifiedOnly: (value: boolean) => void;
+  selectedServices: string[];
+  toggleService: (service: string) => void;
+  services: string[];
+  selectedGenders: string[];
+  toggleGender: (gender: string) => void;
+  selectedOrientations: string[];
+  toggleOrientation: (orientation: string) => void;
+  ageRange: [number, number];
+  setAgeRange: (values: number[]) => void;
+  ratingMin: number;
+  setRatingMin: (value: number) => void;
+  availableNow: boolean;
+  setAvailableNow: (value: boolean) => void;
+  serviceTypeFilter: "" | "in-person" | "virtual" | "both";
+  setServiceTypeFilter: (value: "" | "in-person" | "virtual" | "both") => void;
   onApply: () => void;
   onClear: () => void;
 }
 
-const EscortFilters: React.FC<EscortFiltersProps> = ({ 
-  filters, 
-  onUpdate, 
-  onApply, 
-  onClear 
-}) => {
-  const commonServices = [
-    { id: 'gfe', label: 'GFE' },
-    { id: 'massage', label: 'Massage' },
-    { id: 'overnight', label: 'Overnight' },
-    { id: 'dinner-date', label: 'Dinner Date' },
-    { id: 'travel', label: 'Travel Companion' }
-  ];
-  
-  const handleServiceToggle = (service: string) => {
-    const updatedServices = filters.serviceTypes.includes(service)
-      ? filters.serviceTypes.filter(s => s !== service)
-      : [...filters.serviceTypes, service];
-      
-    onUpdate({ serviceTypes: updatedServices });
-  };
-  
-  const handlePriceRangeChange = (values: number[]) => {
-    onUpdate({ priceRange: [values[0], values[1]] as [number, number] });
-  };
-  
+const EscortFilters = ({
+  searchQuery,
+  setSearchQuery,
+  location,
+  setLocation,
+  priceRange,
+  setPriceRange,
+  verifiedOnly,
+  setVerifiedOnly,
+  selectedServices,
+  toggleService,
+  services,
+  selectedGenders,
+  toggleGender,
+  selectedOrientations,
+  toggleOrientation,
+  ageRange,
+  setAgeRange,
+  ratingMin,
+  setRatingMin,
+  availableNow,
+  setAvailableNow,
+  serviceTypeFilter,
+  setServiceTypeFilter,
+  onApply,
+  onClear,
+}: EscortFiltersProps) => {
   return (
-    <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg flex items-center">
-          <Filter className="mr-2 h-4 w-4" />
-          Filters
-        </CardTitle>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onClear}
-          className="h-8 text-xs flex items-center"
-        >
-          <X className="h-3 w-3 mr-1" />
-          Clear All
-        </Button>
-      </CardHeader>
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-medium">Filter Escorts</h3>
+        <Button variant="ghost" size="sm" onClick={onClear}>Clear All</Button>
+      </div>
       
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="location" className="text-sm">Location</Label>
-          <Input
-            id="location"
-            placeholder="City or area..."
-            value={filters.location}
-            onChange={(e) => onUpdate({ location: e.target.value })}
-            className="h-8"
+      <ScrollArea className="h-[500px] pr-4">
+        <div className="space-y-6">
+          <SearchInput
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search escorts..."
+            className="w-full"
           />
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm">Price Range (per hour)</Label>
-          <div className="pt-2 px-1">
-            <Slider
-              defaultValue={[filters.priceRange[0], filters.priceRange[1]]}
-              min={0}
-              max={1000}
-              step={50}
-              value={[filters.priceRange[0], filters.priceRange[1]]}
-              onValueChange={handlePriceRangeChange}
-            />
-            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-              <span>${filters.priceRange[0]}</span>
-              <span>${filters.priceRange[1]}+</span>
-            </div>
+          
+          <LocationFilter location={location} setLocation={setLocation} />
+          
+          <Separator />
+          
+          <AgeRangeFilter ageRange={ageRange} setAgeRange={setAgeRange} />
+          
+          <Separator />
+          
+          <PriceRangeFilter priceRange={priceRange} setPriceRange={setPriceRange} />
+          
+          <Separator />
+          
+          <ServiceTypeFilter 
+            serviceTypeFilter={serviceTypeFilter} 
+            setServiceTypeFilter={setServiceTypeFilter} 
+          />
+          
+          <Separator />
+          
+          <GenderFilter
+            selectedGenders={selectedGenders}
+            toggleGender={toggleGender}
+          />
+          
+          <Separator />
+          
+          <OrientationFilter
+            selectedOrientations={selectedOrientations}
+            toggleOrientation={toggleOrientation}
+          />
+          
+          <Separator />
+          
+          <ServicesFilter
+            selectedServices={selectedServices}
+            toggleService={toggleService}
+            services={services}
+          />
+          
+          <Separator />
+          
+          <RatingFilter ratingMin={ratingMin} setRatingMin={setRatingMin} />
+          
+          <Separator />
+          
+          <div className="space-y-4">
+            <VerifiedFilter verifiedOnly={verifiedOnly} setVerifiedOnly={setVerifiedOnly} />
+            
+            <AvailabilityFilter availableNow={availableNow} setAvailableNow={setAvailableNow} />
           </div>
         </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm">Verification</Label>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="verified"
-              checked={filters.verified}
-              onCheckedChange={(checked) => onUpdate({ verified: !!checked })}
-            />
-            <label htmlFor="verified" className="text-sm font-normal">
-              Verified Only
-            </label>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm">Availability</Label>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="availableNow"
-              checked={filters.availableNow}
-              onCheckedChange={(checked) => onUpdate({ availableNow: !!checked })}
-            />
-            <label htmlFor="availableNow" className="text-sm font-normal">
-              Available Now
-            </label>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm">Service Type</Label>
-          <RadioGroup
-            value={filters.escortType}
-            onValueChange={(value) => onUpdate({ escortType: value as EscortFiltersProps['filters']['escortType'] })}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="all" id="all-types" />
-              <Label htmlFor="all-types" className="text-sm font-normal">All Types</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="verified" id="verified-escorts" />
-              <Label htmlFor="verified-escorts" className="text-sm font-normal">Verified Only</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="ai" id="ai-escorts" />
-              <Label htmlFor="ai-escorts" className="text-sm font-normal">AI Models</Label>
-            </div>
-          </RadioGroup>
-        </div>
-        
-        <div className="space-y-2">
-          <Label className="text-sm">Services</Label>
-          <div className="grid grid-cols-2 gap-2">
-            {commonServices.map((service) => (
-              <div key={service.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={service.id}
-                  checked={filters.serviceTypes.includes(service.id)}
-                  onCheckedChange={() => handleServiceToggle(service.id)}
-                />
-                <Label htmlFor={service.id} className="text-sm font-normal">
-                  {service.label}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="pt-4 flex justify-end gap-2">
-          <Button 
-            variant="outline" 
-            onClick={() => onClear()}
-          >
-            Reset
-          </Button>
-          <Button 
-            onClick={() => onApply()}
-          >
-            Apply Filters
-          </Button>
-        </div>
-      </CardContent>
+      </ScrollArea>
+      
+      <div className="mt-4 pt-4 border-t">
+        <Button onClick={onApply} className="w-full">Apply Filters</Button>
+      </div>
     </Card>
   );
 };

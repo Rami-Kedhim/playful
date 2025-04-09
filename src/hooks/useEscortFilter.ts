@@ -1,18 +1,10 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFilterResults } from "@/hooks/escort-filters/useFilterResults";
 import { Escort } from "@/types/escort";
-import { EscortFilterState, EscortFilterActions } from "@/types/escortFilters";
+import { EscortFilterState, EscortFilterActions, EscortFilterHook } from "@/types/escortFilters";
 
-// Define the EscortFilterHook interface that extends the state and actions
-export interface EscortFilterHook extends EscortFilterState, EscortFilterActions {
-  filteredEscorts: Escort[];
-  sortedEscorts: Escort[];
-  paginatedEscorts: Escort[];
-  totalPages: number;
-}
-
-export interface UseEscortFilterProps {
+interface UseEscortFilterProps {
   escorts: Escort[];
 }
 
@@ -33,7 +25,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilter
   const [ageRange, setAgeRange] = useState<[number, number]>([21, 50]);
   const [ratingMin, setRatingMin] = useState<number>(0);
   const [availableNow, setAvailableNow] = useState<boolean>(false);
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<"in-person" | "virtual" | "both" | "">("");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<"" | "in-person" | "virtual" | "both">("");
   
   // Combined filter state for useFilterResults hook
   const filters = {
@@ -67,49 +59,44 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilter
   }, [isFiltering]);
   
   // Handle price range change from slider component
-  const handlePriceRangeChange = (values: number[]) => {
+  const handlePriceRangeChange = useCallback((values: number[]) => {
     setPriceRange([values[0], values[1]]);
-  };
+  }, []);
   
   // Handle age range change from slider component
-  const handleAgeRangeChange = (values: number[]) => {
+  const handleAgeRangeChange = useCallback((values: number[]) => {
     setAgeRange([values[0], values[1]]);
-  };
+  }, []);
   
   // Toggle service selection
-  const toggleService = (service: string) => {
+  const toggleService = useCallback((service: string) => {
     setSelectedServices(prev => 
       prev.includes(service)
         ? prev.filter(item => item !== service)
         : [...prev, service]
     );
-  };
+  }, []);
   
   // Toggle gender selection
-  const toggleGender = (gender: string) => {
+  const toggleGender = useCallback((gender: string) => {
     setSelectedGenders(prev => 
       prev.includes(gender)
         ? prev.filter(item => item !== gender)
         : [...prev, gender]
     );
-  };
+  }, []);
   
   // Toggle orientation selection
-  const toggleOrientation = (orientation: string) => {
+  const toggleOrientation = useCallback((orientation: string) => {
     setSelectedOrientations(prev => 
       prev.includes(orientation)
         ? prev.filter(item => item !== orientation)
         : [...prev, orientation]
     );
-  };
-  
-  // Set service type filter with proper type
-  const setServiceTypeFilterSafe = (type: "" | "in-person" | "virtual" | "both") => {
-    setServiceTypeFilter(type);
-  };
+  }, []);
   
   // Clear all filters
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchQuery("");
     setLocation("");
     setPriceRange([0, 500]);
@@ -123,7 +110,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilter
     setRatingMin(0);
     setAvailableNow(false);
     setServiceTypeFilter("");
-  };
+  }, []);
   
   return {
     // Filter state
@@ -160,7 +147,7 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilter
     handleAgeRangeChange,
     setRatingMin,
     setAvailableNow,
-    setServiceTypeFilter: setServiceTypeFilterSafe,
+    setServiceTypeFilter,
     setIsLoading,
     clearFilters,
     
@@ -171,3 +158,5 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilter
     totalPages
   };
 };
+
+export default useEscortFilter;

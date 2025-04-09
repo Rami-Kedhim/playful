@@ -1,62 +1,42 @@
 
-import { ESCORT_SERVICE_TYPES } from "@/types/escortTypes";
-import { Checkbox } from "@/components/ui/checkbox";
+import React from "react";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ServiceTypeFilterProps {
-  selectedServices: string[];
-  toggleService: (service: string) => void;
+  serviceTypeFilter: "" | "in-person" | "virtual" | "both";
+  setServiceTypeFilter: (value: "" | "in-person" | "virtual" | "both") => void;
 }
 
-const ServiceTypeFilter = ({ selectedServices, toggleService }: ServiceTypeFilterProps) => {
-  const [showAll, setShowAll] = useState(false);
-  
-  // Show only the first 6 services initially
-  const displayServices = showAll ? ESCORT_SERVICE_TYPES : ESCORT_SERVICE_TYPES.slice(0, 6);
-  
+const ServiceTypeFilter = ({ 
+  serviceTypeFilter, 
+  setServiceTypeFilter 
+}: ServiceTypeFilterProps) => {
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-1 gap-2">
-        {displayServices.map((service) => (
-          <div key={service} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`service-${service.replace(/\s+/g, '-').toLowerCase()}`}
-              checked={selectedServices.includes(service)}
-              onCheckedChange={() => toggleService(service)}
-            />
-            <Label 
-              htmlFor={`service-${service.replace(/\s+/g, '-').toLowerCase()}`}
-              className="text-sm cursor-pointer"
-            >
-              {service}
-            </Label>
-          </div>
-        ))}
-      </div>
-      
-      {ESCORT_SERVICE_TYPES.length > 6 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full text-xs flex items-center justify-center mt-1"
-          onClick={() => setShowAll(!showAll)}
-        >
-          {showAll ? (
-            <>
-              <ChevronUp className="h-3 w-3 mr-1" />
-              Show less
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-3 w-3 mr-1" />
-              Show all services
-            </>
-          )}
-        </Button>
-      )}
+      <Label className="text-sm font-medium">Service Type</Label>
+      <RadioGroup 
+        value={serviceTypeFilter} 
+        onValueChange={(value) => setServiceTypeFilter(value as "" | "in-person" | "virtual" | "both")}
+        className="grid grid-cols-1 gap-2"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="" id="service-all" />
+          <Label htmlFor="service-all" className="cursor-pointer">All Services</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="in-person" id="service-in-person" />
+          <Label htmlFor="service-in-person" className="cursor-pointer">In-Person Only</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="virtual" id="service-virtual" />
+          <Label htmlFor="service-virtual" className="cursor-pointer">Virtual Only</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="both" id="service-both" />
+          <Label htmlFor="service-both" className="cursor-pointer">Both In-Person & Virtual</Label>
+        </div>
+      </RadioGroup>
     </div>
   );
 };
