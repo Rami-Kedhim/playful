@@ -10,6 +10,7 @@ interface ServiceTypeIconProps {
   size?: number;
   withLabel?: boolean;
   isSelected?: boolean;
+  withBackground?: boolean;
 }
 
 const ServiceTypeIcon = ({ 
@@ -17,7 +18,8 @@ const ServiceTypeIcon = ({
   className, 
   size = 16, 
   withLabel = false,
-  isSelected = false
+  isSelected = false,
+  withBackground = false
 }: ServiceTypeIconProps) => {
   // Get the appropriate icon based on service type
   const renderIcon = () => {
@@ -40,6 +42,17 @@ const ServiceTypeIcon = ({
 
   // Simple icon-only version
   if (!withLabel) {
+    if (withBackground) {
+      return (
+        <div className={cn(
+          "flex items-center justify-center rounded-full bg-primary/10 p-1",
+          isSelected && "bg-primary/20",
+          className
+        )}>
+          {renderIcon()}
+        </div>
+      );
+    }
     return renderIcon();
   }
 
@@ -59,7 +72,16 @@ const ServiceTypeIcon = ({
       isSelected && "font-medium",
       className
     )}>
-      {renderIcon()}
+      {withBackground ? (
+        <div className={cn(
+          "flex items-center justify-center rounded-full bg-primary/10 p-1",
+          isSelected && "bg-primary/20"
+        )}>
+          {renderIcon()}
+        </div>
+      ) : (
+        renderIcon()
+      )}
       <span>{getLabel()}</span>
       {isSelected && <Check size={size} className="text-primary ml-1" />}
     </div>

@@ -11,6 +11,7 @@ interface FilterBadgeProps {
   variant?: "default" | "outline" | "secondary";
   className?: string;
   showTooltip?: boolean;
+  tooltipContent?: string;
 }
 
 const FilterBadge = ({ 
@@ -19,7 +20,8 @@ const FilterBadge = ({
   icon,
   variant = "outline",
   className,
-  showTooltip = false
+  showTooltip = false,
+  tooltipContent
 }: FilterBadgeProps) => {
   const badge = (
     <Badge 
@@ -54,7 +56,7 @@ const FilterBadge = ({
           {badge}
         </TooltipTrigger>
         <TooltipContent side="top">
-          <p>Remove filter: {label}</p>
+          <p>{tooltipContent || `Remove filter: ${label}`}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
