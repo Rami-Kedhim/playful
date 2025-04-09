@@ -13,11 +13,12 @@ export function useNeuralServices(service: BaseNeuralService) {
 
     const initializeService = async () => {
       try {
+        setIsLoading(true);
+        
         if (!service) {
           throw new Error('Neural service not provided');
         }
         
-        setIsLoading(true);
         const success = await service.initialize();
         
         if (mounted) {

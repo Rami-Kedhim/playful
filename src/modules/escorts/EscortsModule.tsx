@@ -11,8 +11,7 @@ import { EscortProvider } from './providers/EscortProvider';
  */
 export const EscortsModule: React.FC<{children: React.ReactNode}> = ({ children }) => {
   // Initialize neural services with error handling
-  const services = useNeuralServices(escortsNeuralService);
-  const isInitialized = services?.isInitialized || false;
+  const { isInitialized } = useNeuralServices(escortsNeuralService);
 
   return (
     <EscortProvider>
