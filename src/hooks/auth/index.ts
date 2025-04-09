@@ -7,15 +7,20 @@ import { usePasswordManagement } from './usePasswordManagement';
 import { useProfileManagement } from './useProfileManagement';
 import { useRole } from './useRole';
 import { useAuthentication } from './useAuthentication';
+import { useAuthPerformance } from './useAuthPerformance';
 
 // Export all authentication related hooks from a single file
-export { useAuth, AuthProvider } from "./useAuthContext";
-export { useAuthState } from "./useAuthState";
-export { useAuthActions } from "./useAuthActions";
-export { usePasswordManagement } from "./usePasswordManagement";
-export { useProfileManagement } from "./useProfileManagement";
-export { useRole } from "./useRole";
-export { useAuthentication } from "./useAuthentication";
+export { 
+  useAuth, 
+  AuthProvider,
+  useAuthState,
+  useAuthActions,
+  usePasswordManagement,
+  useProfileManagement,
+  useRole,
+  useAuthentication,
+  useAuthPerformance
+};
 
 // Export a default object with all hooks
 const authHooks = {
@@ -26,7 +31,8 @@ const authHooks = {
   usePasswordManagement,
   useProfileManagement,
   useRole,
-  useAuthentication
+  useAuthentication,
+  useAuthPerformance
 };
 
 export default authHooks;

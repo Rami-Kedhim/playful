@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, DollarSign, MapPin } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Escort } from '@/types/escort';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 interface BookingDialogProps {
   escort: Escort;
@@ -24,6 +24,8 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState<string | null>(null);
   const [duration, setDuration] = useState<string>("1hour");
+  const [message, setMessage] = useState<string>("");
+  const { toast } = useToast();
   
   // Generate available time slots
   const availableTimeSlots = ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"];
@@ -58,16 +60,35 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
   
   const handleSubmit = () => {
     if (!date || !timeSlot) {
+      toast({
+        title: "Incomplete booking",
+        description: "Please select both date and time for your booking",
+        variant: "destructive"
+      });
       return;
     }
     
     // Here you would submit the booking
+    toast({
+      title: "Booking Submitted",
+      description: `Your booking with ${escort.name} has been scheduled for ${format(date, "PP")} at ${timeSlot}`,
+    });
+    
     onBookNow();
     onClose();
   };
   
+  // Reset form when dialog closes
+  const handleDialogClose = () => {
+    setDate(undefined);
+    setTimeSlot(null);
+    setDuration("1hour");
+    setMessage("");
+    onClose();
+  };
+  
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="max-w-md sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Book an Appointment</DialogTitle>
@@ -138,6 +159,8 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
             <Textarea 
               placeholder="Any special requests or notes for your appointment..."
               className="resize-none"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               aria-label="Additional requests"
             />
           </div>
@@ -183,7 +206,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
         </div>
         
         <DialogFooter className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
           <Button 
             onClick={handleSubmit}
             disabled={!date || !timeSlot}

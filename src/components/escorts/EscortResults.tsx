@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -38,7 +39,7 @@ const EscortResults = ({
   }, [currentPage]);
   
   // Combined loading state (either from props or local state)
-  const loading = isLoading || false;
+  const loading = isLoading || localLoading;
   
   // This handles loading state for when filters are applied
   if (loading) {
