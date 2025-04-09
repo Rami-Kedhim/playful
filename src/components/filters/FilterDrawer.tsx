@@ -1,6 +1,11 @@
 
 import React, { ReactNode } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
@@ -22,10 +27,10 @@ export function FilterDrawer({
   onClear
 }: FilterDrawerProps) {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[300px] sm:w-[350px] pt-10 flex flex-col">
-        <SheetHeader className="mb-6 flex items-start justify-between">
-          <SheetTitle>{title}</SheetTitle>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="right-0 left-auto h-full max-w-[300px] sm:max-w-[350px] p-0">
+        <DialogHeader className="px-6 pt-10 flex items-start justify-between">
+          <DialogTitle>{title}</DialogTitle>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -35,15 +40,15 @@ export function FilterDrawer({
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </Button>
-        </SheetHeader>
+        </DialogHeader>
         
         <div className="flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto py-4">
+          <div className="flex-1 overflow-y-auto py-4 px-6">
             {children}
           </div>
           
           {(onApply || onClear) && (
-            <div className="border-t pt-4 pb-2 sticky bottom-0 bg-background mt-auto">
+            <div className="border-t pt-4 pb-2 px-6 sticky bottom-0 bg-background mt-auto">
               <div className="flex gap-2">
                 {onClear && (
                   <Button 
@@ -67,8 +72,8 @@ export function FilterDrawer({
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
 

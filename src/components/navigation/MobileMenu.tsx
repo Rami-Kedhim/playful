@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/auth/useAuthContext";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { AppRoutes } from "@/utils/navigation";
@@ -49,20 +49,21 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ open, onOpenChange }) => {
   ];
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="flex flex-col w-[70vw] sm:w-[350px] px-2">
-        <SheetHeader className="text-left px-4 py-2">
-          <div className="flex justify-between items-center">
-            <SheetTitle>{t('nav.menu')}</SheetTitle>
-            <Button variant="ghost" size="icon" onClick={closeMenu} className="rounded-full">
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className="left-0 right-auto h-full w-[70vw] sm:w-[350px] p-0" 
+        hideCloseButton={true}
+      >
+        <div className="flex justify-between items-center px-6 py-4">
+          <h2 className="font-semibold text-lg">{t('nav.menu')}</h2>
+          <Button variant="ghost" size="icon" onClick={closeMenu} className="rounded-full">
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
         
         <Separator className="my-2" />
         
-        <div className="flex-1 overflow-auto py-2 px-4">
+        <div className="flex-1 overflow-auto py-2 px-6">
           {/* Main navigation */}
           <nav className="space-y-1">
             {navItems.map((item) => {
@@ -203,8 +204,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ open, onOpenChange }) => {
             </div>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };
 
