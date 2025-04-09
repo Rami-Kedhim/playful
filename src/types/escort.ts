@@ -84,13 +84,14 @@ export interface VerificationRequest {
   id: string;
   userId: string;
   status: VerificationStatus;
+  verificationLevel: VerificationLevel; // Added this property
   submittedAt: string;
   reviewedAt?: string;
-  updatedAt?: string; // Explicitly add the updatedAt property
+  updatedAt?: string;
   documents: VerificationDocument[];
   rejectionReason?: string;
   expiresAt?: string;
-  escortId?: string; // Added to fix errors
+  escortId?: string;
 }
 
 export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired' | 'in_review';

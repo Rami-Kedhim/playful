@@ -14,7 +14,7 @@ export interface VerificationRequest {
   id: string;
   userId: string;
   status: VerificationStatus;
-  verificationLevel?: VerificationLevel;
+  verificationLevel: VerificationLevel;
   documents: VerificationDocument[];
   submittedAt: string;
   updatedAt?: string;
