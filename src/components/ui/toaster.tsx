@@ -1,11 +1,9 @@
 
-import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, type ToastProps } from "@/components/ui/toast"
-import { useState, useEffect } from "react"
-
-import { useToast } from "@/hooks/use-toast"
+import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, type ToastProps } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts } = useToast();
 
   return (
     <ToastProvider>

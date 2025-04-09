@@ -17,29 +17,23 @@ const Auth = () => {
   const location = useLocation();
   const { toast } = useToast();
   
-  // Get the return URL from location state or default to homepage
   const from = location.state?.from?.pathname || "/";
-  
-  // Determine which tab to show based on URL
   const initialTab = location.pathname.includes("register") ? "register" : "login";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   
-  // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [resetEmail, setResetEmail] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   
-  // If user is already authenticated, redirect to the return URL
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate, from]);
   
-  // Clear any authentication errors when component unmounts or route changes
   useEffect(() => {
     return () => {
       clearError();
@@ -88,10 +82,9 @@ const Auth = () => {
     });
     setShowForgotPassword(false);
     setFormError(null);
-    return true; // To maintain the same return signature
+    return true;
   };
   
-  // Render forgot password form
   if (showForgotPassword) {
     return (
       <StandardPageLayout hideNavbar={false} hideFooter={false} showHeader={false}>
