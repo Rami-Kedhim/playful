@@ -103,8 +103,53 @@ const EscortsContent = () => {
       {/* Filter Panel */}
       {showFilters && (
         <EscortFilters 
-          filters={filters} 
-          onUpdate={updateFilters}
+          location={filters.location || ""}
+          setLocation={(location) => updateFilters({ location })}
+          priceRange={filters.priceRange || [0, 1000]}
+          setPriceRange={(range) => updateFilters({ priceRange: range as [number, number] })}
+          serviceType={filters.serviceTypeFilter || ""}
+          setServiceType={(type) => updateFilters({ serviceTypeFilter: type })}
+          selectedServices={filters.selectedServices || []}
+          toggleService={(service) => {
+            const currentServices = [...(filters.selectedServices || [])];
+            const index = currentServices.indexOf(service);
+            if (index >= 0) {
+              currentServices.splice(index, 1);
+            } else {
+              currentServices.push(service);
+            }
+            updateFilters({ selectedServices: currentServices });
+          }}
+          selectedGenders={filters.gender || []}
+          toggleGender={(gender) => {
+            const currentGenders = [...(filters.gender || [])];
+            const index = currentGenders.indexOf(gender);
+            if (index >= 0) {
+              currentGenders.splice(index, 1);
+            } else {
+              currentGenders.push(gender);
+            }
+            updateFilters({ gender: currentGenders });
+          }}
+          selectedOrientations={filters.orientation || []}
+          toggleOrientation={(orientation) => {
+            const currentOrientations = [...(filters.orientation || [])];
+            const index = currentOrientations.indexOf(orientation);
+            if (index >= 0) {
+              currentOrientations.splice(index, 1);
+            } else {
+              currentOrientations.push(orientation);
+            }
+            updateFilters({ orientation: currentOrientations });
+          }}
+          ageRange={filters.ageRange || [18, 99]}
+          setAgeRange={(range) => updateFilters({ ageRange: range as [number, number] })}
+          ratingMin={filters.rating || 0}
+          setRatingMin={(rating) => updateFilters({ rating })}
+          availableNow={filters.availableNow || false}
+          setAvailableNow={(available) => updateFilters({ availableNow: available })}
+          verifiedOnly={filters.verified || false}
+          setVerifiedOnly={(verified) => updateFilters({ verified })}
           onApply={() => {
             applyCurrentFilters();
             setShowFilters(false);
@@ -113,6 +158,7 @@ const EscortsContent = () => {
             clearAllFilters();
             setShowFilters(false);
           }}
+          onUpdate={updateFilters}
         />
       )}
     </div>

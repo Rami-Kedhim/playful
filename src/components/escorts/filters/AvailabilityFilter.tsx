@@ -2,20 +2,28 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Clock, Shield } from "lucide-react";
+import { Clock, Shield, Calendar } from "lucide-react";
 
 interface AvailabilityFilterProps {
   availableNow: boolean;
   setAvailableNow: (value: boolean) => void;
   verifiedOnly?: boolean;
   setVerifiedOnly?: (value: boolean) => void;
+  selectedDays?: string[];
+  toggleDay?: (day: string) => void;
+  selectedHours?: string[];
+  toggleHour?: (hour: string) => void;
 }
 
 const AvailabilityFilter = ({ 
   availableNow, 
   setAvailableNow, 
   verifiedOnly = false, 
-  setVerifiedOnly 
+  setVerifiedOnly,
+  selectedDays = [],
+  toggleDay = () => {},
+  selectedHours = [],
+  toggleHour = () => {}
 }: AvailabilityFilterProps) => {
   return (
     <div className="space-y-4">
@@ -46,6 +54,17 @@ const AvailabilityFilter = ({
             checked={verifiedOnly}
             onCheckedChange={setVerifiedOnly}
           />
+        </div>
+      )}
+
+      {/* Day selection could be added here if needed */}
+      {selectedDays && selectedDays.length > 0 && toggleDay && (
+        <div className="mt-2">
+          <div className="flex items-center space-x-2 mb-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Label className="text-sm font-medium">Available Days</Label>
+          </div>
+          {/* Days selector UI would go here */}
         </div>
       )}
     </div>

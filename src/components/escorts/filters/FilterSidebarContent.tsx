@@ -7,7 +7,7 @@ import PriceRangeFilter from "./PriceRangeFilter";
 import AgeRangeFilter from "./AgeRangeFilter";
 import RatingFilter from "./RatingFilter";
 import CheckboxGroup from "./CheckboxGroup";
-import ServiceTypeRadioFilter from "./ServiceTypeRadioFilter";
+import ServiceTypeFilter from "./ServiceTypeFilter";
 import AvailabilityFilter from "./AvailabilityFilter";
 import HeightRangeFilter from "./HeightRangeFilter";
 import WeightRangeFilter from "./WeightRangeFilter";
@@ -123,10 +123,10 @@ const FilterSidebarContent = ({
         <Separator />
         
         <AvailabilityFilter
+          availableNow={availableNow || false}
+          setAvailableNow={setAvailableNow || (() => {})}
           verifiedOnly={verifiedOnly}
           setVerifiedOnly={setVerifiedOnly}
-          availableNow={availableNow}
-          setAvailableNow={setAvailableNow}
           selectedDays={selectedDays}
           toggleDay={toggleDay}
           selectedHours={selectedHours}

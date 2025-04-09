@@ -13,10 +13,14 @@ import OrientationFilter from "./OrientationFilter";
 import RatingFilter from "./RatingFilter";
 import AvailabilityFilter from "./AvailabilityFilter";
 
-export interface EscortFiltersProps {
+interface EscortFiltersProps {
   onApply: () => void;
   onClear: () => void;
   onUpdate: (filters: any) => void;
+  
+  // Filter state props
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
   location: string;
   setLocation: (location: string) => void;
   priceRange: [number, number];
@@ -37,12 +41,29 @@ export interface EscortFiltersProps {
   setAvailableNow: (available: boolean) => void;
   verifiedOnly: boolean;
   setVerifiedOnly: (verified: boolean) => void;
+  
+  // Optional: Unified filter object (for compatibility with other components)
+  filters?: {
+    location?: string;
+    serviceTypes?: string[];
+    priceRange?: [number, number];
+    gender?: string[];
+    orientation?: string[];
+    ageRange?: [number, number];
+    rating?: number;
+    verified?: boolean;
+    availableNow?: boolean;
+    escortType?: "verified" | "ai" | "provisional" | "all";
+    language?: string[];
+  };
 }
 
 const EscortFilters = ({
   onApply,
   onClear,
   onUpdate,
+  searchQuery = "",
+  setSearchQuery = () => {},
   location,
   setLocation,
   priceRange,
@@ -62,7 +83,8 @@ const EscortFilters = ({
   availableNow,
   setAvailableNow,
   verifiedOnly,
-  setVerifiedOnly
+  setVerifiedOnly,
+  filters
 }: EscortFiltersProps) => {
   const [activeTab, setActiveTab] = useState("basic");
   
@@ -77,6 +99,17 @@ const EscortFilters = ({
         
         <CardContent className="pt-6">
           <TabsContent value="basic" className="space-y-4">
+            {setSearchQuery && (
+              <div className="space-y-2">
+                <Label>Search</Label>
+                <SearchInput
+                  placeholder="Search escorts..."
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                />
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="location">Location</Label>
               <SearchInput
