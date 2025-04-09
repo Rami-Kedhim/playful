@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { ChatHeader } from "./";
 import { ChatMessageList } from "./";
 import { ChatInputArea } from "./";
@@ -193,6 +193,7 @@ const LivecamChatContainer: React.FC<LivecamChatContainerProps> = ({
     toast({
       title: "Tip Sent!",
       description: `You tipped ${streamOwnerName} $${amount}`,
+      variant: "success"
     });
     
     if (onTipSent) {

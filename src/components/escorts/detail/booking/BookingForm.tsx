@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Escort } from "@/types/escort";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 import { bookingFormSchema, BookingFormData, BookingFormValues } from "./types";
 import { BookingCalendar } from "./";
@@ -38,6 +40,11 @@ const BookingForm = ({ escort, isOpen, onClose, onSubmit }: BookingFormProps) =>
 
   const handleSubmit = (data: BookingFormValues) => {
     onSubmit(data as BookingFormData);
+    toast({
+      title: "Booking request sent",
+      description: `Your booking request with ${escort.name} has been submitted.`,
+      variant: "success",
+    });
     form.reset();
     setStep('form');
     onClose();

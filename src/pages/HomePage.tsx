@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
@@ -13,6 +13,7 @@ import MetaverseSection from "@/components/home/MetaverseSection";
 import WelcomeAlert from "@/components/layout/WelcomeAlert";
 import { useAuth } from "@/hooks/auth/useAuthContext";
 import { Helmet } from "react-helmet-async";
+import { toast } from "@/hooks/use-toast";
 
 // Sample data for featured profiles
 const featuredEscorts = [
@@ -112,6 +113,15 @@ const HomePage = () => {
   
   // Extract username from user metadata if available
   const username = user?.username || user?.email?.split('@')[0] || 'User';
+  
+  // Show a welcome toast when the component mounts
+  useEffect(() => {
+    toast({
+      title: "Welcome to Oxum",
+      description: "Find your perfect match today!",
+      variant: "success",
+    });
+  }, []);
   
   return (
     <>
