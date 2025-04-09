@@ -1,18 +1,29 @@
 
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { ReactNode } from "react";
 
 interface FilterBadgeProps {
   label: string;
   onRemove: () => void;
+  variant?: "default" | "secondary" | "outline" | "destructive";
+  className?: string;
+  icon?: ReactNode;
 }
 
-const FilterBadge = ({ label, onRemove }: FilterBadgeProps) => {
+const FilterBadge = ({ 
+  label, 
+  onRemove, 
+  variant = "secondary", 
+  className = "",
+  icon 
+}: FilterBadgeProps) => {
   return (
     <Badge 
-      variant="secondary" 
-      className="flex items-center gap-1 pl-2 pr-1 py-1"
+      variant={variant} 
+      className={`flex items-center gap-1 pl-2 pr-1 py-1 ${className}`}
     >
+      {icon && <span className="mr-1">{icon}</span>}
       <span>{label}</span>
       <button
         onClick={onRemove}

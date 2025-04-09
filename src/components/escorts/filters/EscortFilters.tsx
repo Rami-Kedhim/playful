@@ -1,61 +1,56 @@
 
-import React from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchInput } from "@/components/ui/search-input";
-import LocationFilter from "./LocationFilter";
-import PriceRangeFilter from "./PriceRangeFilter";
+import { RangeSlider } from "@/components/ui/range-slider";
+import { Label } from "@/components/ui/label";
+import ServiceTypeFilter from "./ServiceTypeFilter";
 import ServicesFilter from "./ServicesFilter";
 import GenderFilter from "./GenderFilter";
 import OrientationFilter from "./OrientationFilter";
-import AgeRangeFilter from "./AgeRangeFilter";
-import VerifiedFilter from "./VerifiedFilter";
-import ServiceTypeFilter from "./ServiceTypeFilter";
 import RatingFilter from "./RatingFilter";
 import AvailabilityFilter from "./AvailabilityFilter";
 
-interface EscortFiltersProps {
-  searchQuery: string;
-  setSearchQuery: (value: string) => void;
+export interface EscortFiltersProps {
+  onApply: () => void;
+  onClear: () => void;
+  onUpdate: (filters: any) => void;
   location: string;
-  setLocation: (value: string) => void;
+  setLocation: (location: string) => void;
   priceRange: [number, number];
-  setPriceRange: (values: number[]) => void;
-  verifiedOnly: boolean;
-  setVerifiedOnly: (value: boolean) => void;
+  setPriceRange: (range: [number, number]) => void;
+  serviceType: "" | "in-person" | "virtual" | "both";
+  setServiceType: (type: "" | "in-person" | "virtual" | "both") => void;
   selectedServices: string[];
   toggleService: (service: string) => void;
-  services: string[];
   selectedGenders: string[];
   toggleGender: (gender: string) => void;
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
   ageRange: [number, number];
-  setAgeRange: (values: number[]) => void;
+  setAgeRange: (range: [number, number]) => void;
   ratingMin: number;
-  setRatingMin: (value: number) => void;
+  setRatingMin: (rating: number) => void;
   availableNow: boolean;
-  setAvailableNow: (value: boolean) => void;
-  serviceTypeFilter: "" | "in-person" | "virtual" | "both";
-  setServiceTypeFilter: (value: "" | "in-person" | "virtual" | "both") => void;
-  onApply: () => void;
-  onClear: () => void;
+  setAvailableNow: (available: boolean) => void;
+  verifiedOnly: boolean;
+  setVerifiedOnly: (verified: boolean) => void;
 }
 
 const EscortFilters = ({
-  searchQuery,
-  setSearchQuery,
+  onApply,
+  onClear,
+  onUpdate,
   location,
   setLocation,
   priceRange,
   setPriceRange,
-  verifiedOnly,
-  setVerifiedOnly,
+  serviceType,
+  setServiceType,
   selectedServices,
   toggleService,
-  services,
   selectedGenders,
   toggleGender,
   selectedOrientations,
@@ -66,83 +61,104 @@ const EscortFilters = ({
   setRatingMin,
   availableNow,
   setAvailableNow,
-  serviceTypeFilter,
-  setServiceTypeFilter,
-  onApply,
-  onClear,
+  verifiedOnly,
+  setVerifiedOnly
 }: EscortFiltersProps) => {
+  const [activeTab, setActiveTab] = useState("basic");
+  
   return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">Filter Escorts</h3>
-        <Button variant="ghost" size="sm" onClick={onClear}>Clear All</Button>
-      </div>
-      
-      <ScrollArea className="h-[500px] pr-4">
-        <div className="space-y-6">
-          <SearchInput
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search escorts..."
-            className="w-full"
-          />
-          
-          <LocationFilter location={location} setLocation={setLocation} />
-          
-          <Separator />
-          
-          <AgeRangeFilter ageRange={ageRange} setAgeRange={setAgeRange} />
-          
-          <Separator />
-          
-          <PriceRangeFilter priceRange={priceRange} setPriceRange={setPriceRange} />
-          
-          <Separator />
-          
-          <ServiceTypeFilter 
-            serviceTypeFilter={serviceTypeFilter} 
-            setServiceTypeFilter={setServiceTypeFilter} 
-          />
-          
-          <Separator />
-          
-          <GenderFilter
-            selectedGenders={selectedGenders}
-            toggleGender={toggleGender}
-          />
-          
-          <Separator />
-          
-          <OrientationFilter
-            selectedOrientations={selectedOrientations}
-            toggleOrientation={toggleOrientation}
-          />
-          
-          <Separator />
-          
-          <ServicesFilter
-            selectedServices={selectedServices}
-            toggleService={toggleService}
-            services={services}
-          />
-          
-          <Separator />
-          
-          <RatingFilter ratingMin={ratingMin} setRatingMin={setRatingMin} />
-          
-          <Separator />
-          
-          <div className="space-y-4">
-            <VerifiedFilter verifiedOnly={verifiedOnly} setVerifiedOnly={setVerifiedOnly} />
+    <Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="basic">Basic</TabsTrigger>
+          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
+        </TabsList>
+        
+        <CardContent className="pt-6">
+          <TabsContent value="basic" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <SearchInput
+                placeholder="City, Country"
+                value={location}
+                onChange={setLocation}
+              />
+            </div>
             
-            <AvailabilityFilter availableNow={availableNow} setAvailableNow={setAvailableNow} />
-          </div>
-        </div>
-      </ScrollArea>
-      
-      <div className="mt-4 pt-4 border-t">
-        <Button onClick={onApply} className="w-full">Apply Filters</Button>
-      </div>
+            <ServiceTypeFilter 
+              serviceTypeFilter={serviceType} 
+              setServiceTypeFilter={setServiceType} 
+            />
+            
+            <div className="space-y-2">
+              <Label>Price Range (Lucoin)</Label>
+              <RangeSlider
+                min={0}
+                max={1000}
+                step={10}
+                value={priceRange}
+                onValueChange={setPriceRange}
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{priceRange[0]} LC</span>
+                <span>{priceRange[1]} LC</span>
+              </div>
+            </div>
+            
+            <AvailabilityFilter 
+              availableNow={availableNow} 
+              setAvailableNow={setAvailableNow}
+              verifiedOnly={verifiedOnly}
+              setVerifiedOnly={setVerifiedOnly}
+            />
+          </TabsContent>
+          
+          <TabsContent value="advanced" className="space-y-4">
+            <div className="space-y-2">
+              <Label>Age Range</Label>
+              <RangeSlider 
+                min={18}
+                max={99}
+                step={1}
+                value={ageRange}
+                onValueChange={setAgeRange}
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{ageRange[0]} years</span>
+                <span>{ageRange[1]} years</span>
+              </div>
+            </div>
+            
+            <GenderFilter 
+              selectedGenders={selectedGenders} 
+              onChange={toggleGender} 
+            />
+            
+            <OrientationFilter 
+              selectedOrientations={selectedOrientations} 
+              onChange={toggleOrientation} 
+            />
+            
+            <RatingFilter 
+              ratingMin={ratingMin} 
+              setRatingMin={setRatingMin} 
+            />
+          </TabsContent>
+          
+          <TabsContent value="features" className="space-y-4">
+            <ServicesFilter 
+              selectedServices={selectedServices} 
+              onChange={toggleService} 
+            />
+          </TabsContent>
+        </CardContent>
+        
+        <CardFooter className="flex justify-between">
+          <Button variant="outline" onClick={onClear}>Clear All</Button>
+          <Button onClick={onApply}>Apply Filters</Button>
+        </CardFooter>
+      </Tabs>
     </Card>
   );
 };
