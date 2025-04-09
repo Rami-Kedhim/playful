@@ -1,20 +1,16 @@
 
-import { VerificationRequest, VerificationStatus } from "@/types/escort";
+import { VerificationRequest, VerificationStatus } from '@/types/escort';
 
 /**
- * Calculate the verification progress as a percentage
+ * Calculate percentage of verification progress
  */
-export const calculateVerificationProgress = (request: VerificationRequest): number => {
-  switch (request.status) {
+export const calculateVerificationProgress = (status: VerificationStatus): number => {
+  switch (status) {
     case 'pending':
-      return 25;
-    case 'in_review':
       return 50;
     case 'approved':
       return 100;
     case 'rejected':
-      return 100;
-    case 'expired':
       return 100;
     default:
       return 0;
@@ -22,28 +18,25 @@ export const calculateVerificationProgress = (request: VerificationRequest): num
 };
 
 /**
- * Get a user-friendly message about the verification status
+ * Get a user-friendly message for a verification status
  */
-export const getVerificationStatusMessage = (request: VerificationRequest): string => {
-  switch (request.status) {
+export const getVerificationStatusMessage = (status: VerificationStatus): string => {
+  switch (status) {
     case 'pending':
-      return 'Your verification is pending review. This typically takes 24-48 hours.';
-    case 'in_review':
-      return 'Your verification is being reviewed by our team.';
+      return 'Your verification is being reviewed. This typically takes 24-48 hours.';
     case 'approved':
-      return 'Your verification has been approved. Your profile now shows as verified.';
+      return 'Your identity has been verified. Your profile now displays a verified badge.';
     case 'rejected':
-      return 'Your verification was not approved. Please check your documents and try again.';
-    case 'expired':
-      return 'Your verification has expired. Please submit a new verification request.';
+      return 'Your verification was rejected. Please check the rejection reason and submit again.';
     default:
-      return 'Unknown verification status.';
+      return 'Submit your verification documents to get verified.';
   }
 };
 
 /**
- * Check if verification is in progress (pending or in_review)
+ * Check if a verification is currently in progress
  */
-export const isVerificationInProgress = (request: VerificationRequest): boolean => {
-  return request.status === 'pending' || request.status === 'in_review';
+export const isVerificationInProgress = (request?: VerificationRequest | null): boolean => {
+  if (!request) return false;
+  return request.status === 'pending';
 };

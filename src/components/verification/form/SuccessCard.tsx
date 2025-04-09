@@ -1,49 +1,59 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Clock } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
-const SuccessCard = () => {
+interface SuccessCardProps {
+  title?: string;
+  description?: string;
+  onDashboardClick?: () => void;
+}
+
+const SuccessCard = ({ 
+  title = "Verification Submitted Successfully", 
+  description = "Your identity verification documents have been submitted and will be reviewed within 24-48 hours. We will notify you once the review is complete.",
+  onDashboardClick
+}: SuccessCardProps) => {
   const navigate = useNavigate();
-
+  
+  const handleDashboardClick = () => {
+    if (onDashboardClick) {
+      onDashboardClick();
+    } else {
+      navigate('/dashboard');
+    }
+  };
+  
   return (
-    <Card className="border-green-200">
-      <CardHeader className="bg-green-50 dark:bg-green-900/20 border-b border-green-200">
-        <div className="flex items-center space-x-2">
-          <CheckCircle className="h-6 w-6 text-green-500" />
-          <CardTitle className="text-green-700 dark:text-green-300">Verification Submitted</CardTitle>
+    <Card className="border-green-100 bg-green-50/50">
+      <CardHeader className="text-center pb-2">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+          <CheckCircle className="h-6 w-6 text-green-600" />
         </div>
+        <CardTitle className="text-xl">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="pt-6 space-y-4">
-        <div className="flex flex-col items-center text-center space-y-2 py-4">
-          <div className="rounded-full bg-green-100 p-3 dark:bg-green-900/30">
-            <CheckCircle className="h-8 w-8 text-green-500" />
-          </div>
-          <h3 className="text-xl font-medium">Documents Received</h3>
-          <p className="text-muted-foreground max-w-md">
-            Your verification documents have been submitted successfully. Our team will review them within 24-48 hours.
-          </p>
-        </div>
-
-        <div className="bg-muted p-4 rounded-md flex items-start space-x-3">
-          <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
-          <div>
-            <h4 className="font-medium">What happens next?</h4>
-            <p className="text-sm text-muted-foreground">
-              You will receive a notification once your documents have been reviewed. 
-              You can check the status of your verification at any time in your profile settings.
-            </p>
-          </div>
-        </div>
+      <CardContent className="text-center pb-2">
+        <ul className="mb-4 space-y-2 text-sm">
+          <li className="flex items-center justify-center">
+            <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
+            <span>Your documents are being securely processed</span>
+          </li>
+          <li className="flex items-center justify-center">
+            <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
+            <span>You will receive an email when verification is complete</span>
+          </li>
+          <li className="flex items-center justify-center">
+            <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
+            <span>You can check verification status in your dashboard</span>
+          </li>
+        </ul>
       </CardContent>
-      <CardFooter className="flex flex-col sm:flex-row gap-3 sm:justify-end border-t pt-4">
-        <Button variant="outline" onClick={() => navigate('/profile')}>
-          Go to Profile
-        </Button>
-        <Button onClick={() => navigate('/')}>
-          Return to Home
+      <CardFooter className="flex justify-center">
+        <Button onClick={handleDashboardClick}>
+          Go to Dashboard
         </Button>
       </CardFooter>
     </Card>

@@ -33,10 +33,12 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
       // Mock submission delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
+      console.log("Form submitted with data:", data);
+      
       toast({
         title: "Verification submitted",
         description: "Your documents have been submitted for verification.",
-        variant: "success",
+        variant: "default",
       });
       
       onSubmitSuccess();
