@@ -1,5 +1,4 @@
 
-
 export interface Escort {
   id: string;
   name: string;
@@ -29,7 +28,7 @@ export interface VerificationRequest {
   userId: string;
   status: VerificationStatus;
   submittedAt: string;
-  updatedAt?: string;
+  updatedAt?: string; // Added updatedAt as optional property
   documents: VerificationDocument[];
   rejectionReason?: string;
 }
