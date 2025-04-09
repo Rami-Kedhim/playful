@@ -27,6 +27,8 @@ export {
   isVerificationInProgress
 } from './assessmentProgress';
 
+export { getVerificationLevel } from './levelCalculation';
+
 export type { 
   VerificationEligibilityResponse,
   VerificationSubmissionResponse,
