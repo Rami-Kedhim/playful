@@ -14,6 +14,7 @@ export { useToast, toast } from "@/hooks/use-toast.tsx";
 
 // Extended toast function with additional features
 export const enhancedToast = (props: ToastProps) => {
-  const { toast } = useToast();
-  return toast(props);
+  // Import directly to avoid circular reference
+  const { toast: toastFn } = require("@/hooks/use-toast.tsx").useToast();
+  return toastFn(props);
 };
