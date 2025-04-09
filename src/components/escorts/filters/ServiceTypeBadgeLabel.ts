@@ -7,8 +7,10 @@ export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "";
 
 export interface ServiceTypeInfo {
   name: string;
-  description?: string;
-  badgeLabel?: string; // Shorter text for badges
+  description: string;
+  badgeLabel: string; // Shorter text for badges
+  filterLabel: string; // Used in filter UI
+  tooltip?: string; // Optional tooltip description
 }
 
 /**
@@ -16,10 +18,10 @@ export interface ServiceTypeInfo {
  */
 export const getServiceTypeName = (type: ServiceTypeFilter): string => {
   switch(type) {
-    case "in-person": return "In-Person Services Only";
-    case "virtual": return "Virtual Services Only";
-    case "both": return "Both In-Person & Virtual";
-    default: return "";
+    case "in-person": return "In-Person Services";
+    case "virtual": return "Virtual Services";
+    case "both": return "In-Person & Virtual";
+    default: return "All Services";
   }
 };
 
@@ -42,26 +44,35 @@ export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => 
   switch(type) {
     case "in-person": 
       return {
-        name: "In-Person Services Only",
+        name: "In-Person Services",
         description: "Escorts who offer face-to-face meetings",
-        badgeLabel: "In-Person"
+        badgeLabel: "In-Person",
+        filterLabel: "In-Person Only",
+        tooltip: "Filter escorts who provide in-person services only"
       };
     case "virtual": 
       return {
-        name: "Virtual Services Only",
+        name: "Virtual Services",
         description: "Online content and virtual experiences",
-        badgeLabel: "Virtual"
+        badgeLabel: "Virtual",
+        filterLabel: "Virtual Only",
+        tooltip: "Filter escorts who provide virtual services only"
       };
     case "both": 
       return {
         name: "Both In-Person & Virtual",
         description: "Escorts who offer both in-person and virtual services",
-        badgeLabel: "In-Person & Virtual"
+        badgeLabel: "Both Services",
+        filterLabel: "Both Services",
+        tooltip: "Filter escorts who provide both in-person and virtual services"
       };
     default: 
       return {
-        name: "",
-        description: ""
+        name: "All Services",
+        description: "No preference on service type",
+        badgeLabel: "All Services",
+        filterLabel: "No Preference",
+        tooltip: "Show all service types"
       };
   }
 };

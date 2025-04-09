@@ -2,6 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface FilterBadgeProps {
   label: string;
@@ -9,6 +10,7 @@ interface FilterBadgeProps {
   icon?: React.ReactNode;
   variant?: "default" | "outline" | "secondary";
   className?: string;
+  showTooltip?: boolean;
 }
 
 const FilterBadge = ({ 
@@ -16,9 +18,10 @@ const FilterBadge = ({
   onRemove, 
   icon,
   variant = "outline",
-  className
+  className,
+  showTooltip = false
 }: FilterBadgeProps) => {
-  return (
+  const badge = (
     <Badge 
       variant={variant} 
       className={cn(
@@ -40,6 +43,21 @@ const FilterBadge = ({
         <X size={12} />
       </button>
     </Badge>
+  );
+
+  if (!showTooltip) return badge;
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {badge}
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>Remove filter: {label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
