@@ -1,59 +1,42 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-interface SuccessCardProps {
-  title?: string;
-  description?: string;
-  onDashboardClick?: () => void;
-}
-
-const SuccessCard = ({ 
-  title = "Verification Submitted Successfully", 
-  description = "Your identity verification documents have been submitted and will be reviewed within 24-48 hours. We will notify you once the review is complete.",
-  onDashboardClick
-}: SuccessCardProps) => {
+const SuccessCard = () => {
   const navigate = useNavigate();
-  
-  const handleDashboardClick = () => {
-    if (onDashboardClick) {
-      onDashboardClick();
-    } else {
-      navigate('/dashboard');
-    }
-  };
-  
+
   return (
-    <Card className="border-green-100 bg-green-50/50">
-      <CardHeader className="text-center pb-2">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-          <CheckCircle className="h-6 w-6 text-green-600" />
+    <Card className="text-center">
+      <CardHeader>
+        <div className="mx-auto bg-green-100 dark:bg-green-900/20 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-2">
+          <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-500" />
         </div>
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle className="text-xl">Verification Submitted Successfully</CardTitle>
+        <CardDescription>
+          Your verification documents have been submitted and are now being reviewed
+        </CardDescription>
       </CardHeader>
-      <CardContent className="text-center pb-2">
-        <ul className="mb-4 space-y-2 text-sm">
-          <li className="flex items-center justify-center">
-            <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
-            <span>Your documents are being securely processed</span>
-          </li>
-          <li className="flex items-center justify-center">
-            <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
-            <span>You will receive an email when verification is complete</span>
-          </li>
-          <li className="flex items-center justify-center">
-            <div className="mr-2 h-1.5 w-1.5 rounded-full bg-green-500"></div>
-            <span>You can check verification status in your dashboard</span>
-          </li>
-        </ul>
+      
+      <CardContent className="pb-6">
+        <div className="bg-muted/50 rounded-md p-4 my-4 text-sm">
+          <h4 className="font-medium mb-2">What happens next?</h4>
+          <ol className="list-decimal pl-5 space-y-2">
+            <li>Our team will review your documents (usually within 24-48 hours)</li>
+            <li>You'll receive a notification when your verification status is updated</li>
+            <li>Once approved, your profile will receive a verified badge</li>
+          </ol>
+        </div>
       </CardContent>
+      
       <CardFooter className="flex justify-center">
-        <Button onClick={handleDashboardClick}>
-          Go to Dashboard
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/verification', { state: { tab: 'status' } })}
+        >
+          View Verification Status
         </Button>
       </CardFooter>
     </Card>

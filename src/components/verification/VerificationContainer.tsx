@@ -1,12 +1,21 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
 const VerificationContainer = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>("status");
+  
+  // Check if we have a tab in the location state to handle redirects
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
   
   const handleStartVerification = () => {
     setActiveTab("submit");
@@ -32,7 +41,7 @@ const VerificationContainer = () => {
         </TabsContent>
         
         <TabsContent value="submit" className="mt-6">
-          <VerificationForm />
+          <VerificationForm onSubmissionComplete={handleVerificationSuccess} />
         </TabsContent>
       </Tabs>
       

@@ -11,11 +11,17 @@ import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
+import SuccessCard from './SuccessCard';
 import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
 
-const VerificationForm = () => {
+interface VerificationFormProps {
+  onSubmissionComplete?: () => void;
+}
+
+const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
@@ -41,8 +47,11 @@ const VerificationForm = () => {
         variant: "default",
       });
       
-      // We don't need the onSubmitSuccess anymore as we'll handle navigation elsewhere
-      // If needed, use a context or other state management solution to coordinate between components
+      setSubmitted(true);
+      
+      if (onSubmissionComplete) {
+        onSubmissionComplete();
+      }
     } catch (error) {
       console.error("Verification submission error:", error);
       setSubmissionError("Failed to submit verification. Please try again.");
@@ -56,6 +65,10 @@ const VerificationForm = () => {
       setIsSubmitting(false);
     }
   };
+  
+  if (submitted) {
+    return <SuccessCard />;
+  }
   
   return (
     <Card>
