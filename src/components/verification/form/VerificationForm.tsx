@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { DocumentTypeSelect } from './DocumentTypeSelect';
-import { DocumentImageUpload } from './DocumentImageUpload';
-import { SubmitButton } from './SubmitButton';
-import { SubmissionAlert } from './SubmissionAlert';
+// Fix imports to use default imports instead of named imports
+import DocumentTypeSelect from './DocumentTypeSelect';
+import DocumentImageUpload from './DocumentImageUpload';
+import SubmitButton from './SubmitButton';
+import SubmissionAlert from './SubmissionAlert';
 import { verificationFormSchema, VerificationFormValues, handleFileChange } from '../utils/formUtils';
 
 const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) => {
@@ -66,7 +67,10 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             {submissionError && (
-              <SubmissionAlert type="error" message={submissionError} />
+              <SubmissionAlert 
+                type="error" 
+                message={submissionError} 
+              />
             )}
             
             <DocumentTypeSelect form={form} />
@@ -76,7 +80,7 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
               fieldName="documentFrontImage"
               label="Front of ID"
               description="Upload a clear photo of the front of your ID"
-              onChange={(e) => handleFileChange(e, form.setValue('documentFrontImage'))}
+              onChange={(e) => handleFileChange(e, form, 'documentFrontImage')}
             />
             
             <DocumentImageUpload 
@@ -84,7 +88,7 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
               fieldName="documentBackImage"
               label="Back of ID (Optional)"
               description="Upload a clear photo of the back of your ID if applicable"
-              onChange={(e) => handleFileChange(e, form.setValue('documentBackImage'))}
+              onChange={(e) => handleFileChange(e, form, 'documentBackImage')}
               optional
             />
             
@@ -93,7 +97,7 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
               fieldName="selfieImage"
               label="Selfie with ID"
               description="Take a selfie holding your ID next to your face"
-              onChange={(e) => handleFileChange(e, form.setValue('selfieImage'))}
+              onChange={(e) => handleFileChange(e, form, 'selfieImage')}
             />
           </CardContent>
           

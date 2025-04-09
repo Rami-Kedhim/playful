@@ -1,5 +1,6 @@
 
 import { z } from 'zod';
+import { UseFormReturn } from 'react-hook-form';
 
 // Constants
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -40,9 +41,13 @@ export const verificationFormSchema = z.object({
 
 export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
 
-// Utility function to handle file change events
-export const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+// Updated utility function to handle file change events with the correct parameters
+export const handleFileChange = (
+  e: React.ChangeEvent<HTMLInputElement>, 
+  form: UseFormReturn<VerificationFormValues>, 
+  fieldName: keyof VerificationFormValues
+) => {
   if (e.target.files && e.target.files[0]) {
-    field.onChange(e.target.files[0]);
+    form.setValue(fieldName, e.target.files[0], { shouldValidate: true });
   }
 };
