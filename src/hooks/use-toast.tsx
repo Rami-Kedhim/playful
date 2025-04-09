@@ -37,11 +37,9 @@ export const toast = ({
 
 // Export a hook for components that need to use toast
 export const useToast = () => {
-  const toasts: Toast[] = [];
-
   return {
     toast,
-    toasts,
+    toasts: [] as Toast[],
     addToast: toast,
     removeToast: (id: string) => {},
   };
