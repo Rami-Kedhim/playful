@@ -5,20 +5,43 @@ import { EscortsModule } from '@/modules/escorts/EscortsModule';
 import PersonasPage from '@/pages/Personas';
 import ProfilePage from '@/pages/ProfilePage';
 import PersonaProfile from '@/pages/PersonaProfile';
-// Import other pages as needed
+import AuthPage from '@/pages/AuthPage';
+import { AuthProvider } from '@/hooks/auth/useAuthContext';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 function App() {
   return (
-    <Router>
-      <EscortsModule>
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/" element={<PersonasPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/persona/:username" element={<PersonaProfile />} />
-          {/* Add more routes as needed */}
+          <Route path="/auth" element={<AuthPage />} />
+          <Route 
+            path="/" 
+            element={
+              <EscortsModule>
+                <PersonasPage />
+              </EscortsModule>
+            } 
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/persona/:username" 
+            element={
+              <EscortsModule>
+                <PersonaProfile />
+              </EscortsModule>
+            } 
+          />
         </Routes>
-      </EscortsModule>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 
