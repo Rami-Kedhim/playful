@@ -1,11 +1,41 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BaseNeuralService } from '@/services/neural/modules/BaseNeuralService';
 
+/**
+ * Custom hook for initializing and managing neural services
+ * @param service The neural service to initialize
+ * @returns Status and control functions for the neural service
+ */
 export function useNeuralServices(service: BaseNeuralService) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Function to reinitialize the service if needed
+  const reinitialize = useCallback(async () => {
+    if (!service) {
+      setError('Neural service not provided');
+      setIsLoading(false);
+      return false;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const success = await service.initialize();
+      setIsInitialized(success);
+      
+      return success;
+    } catch (err: any) {
+      console.error(`Failed to reinitialize neural service:`, err);
+      setError(err?.message || 'Failed to reinitialize neural service');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [service]);
 
   // Initialize the service
   useEffect(() => {
@@ -49,7 +79,8 @@ export function useNeuralServices(service: BaseNeuralService) {
   return {
     isInitialized,
     isLoading,
-    error
+    error,
+    reinitialize
   };
 }
 
