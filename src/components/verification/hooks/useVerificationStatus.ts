@@ -2,47 +2,79 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { VerificationRequest } from '@/types/escort';
-import { useEscortVerification } from '@/hooks/escort/useEscortVerification';
 
-export const useVerificationStatus = () => {
-  const { user } = useAuth();
+export function useVerificationStatus() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
-  
-  const { checkVerificationStatus } = useEscortVerification((id, updates) => Promise.resolve(null));
-  
+  const { user } = useAuth();
+
   useEffect(() => {
-    const fetchVerificationStatus = async () => {
-      if (!user?.id) return;
-      
+    async function fetchVerificationStatus() {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const status = await checkVerificationStatus(user.id);
-        
-        if (status) {
-          const newRequest: VerificationRequest = {
-            id: 'mock-request-id',
-            userId: user.id,
-            status: status,
-            documents: [],
-            submittedAt: new Date().toISOString(),
-            // Fixed issue by removing escortId from here
-          };
-          setVerificationRequest(newRequest);
-        }
-        
         setError(null);
+        
+        // For demonstration purposes, we're using a mocked verification request
+        // In a real app, this would be a fetch call to your API
+        // const response = await fetch(`/api/verification/${user.id}`);
+        // const data = await response.json();
+        
+        // Mock data for testing the UI
+        const mockVerificationData: VerificationRequest = {
+          id: 'mock-verification-1',
+          userId: user.id,
+          status: Math.random() > 0.7 ? 'pending' : Math.random() > 0.5 ? 'in_review' : Math.random() > 0.3 ? 'approved' : 'rejected',
+          submittedAt: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
+          updatedAt: new Date().toISOString(),
+          documents: [
+            {
+              id: 'doc-1',
+              type: 'id_card',
+              fileUrl: '/mock-id-front.jpg',
+              uploadedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+              status: 'pending'
+            }
+          ],
+          rejectionReason: Math.random() > 0.7 ? 'Documents unclear or incomplete' : undefined
+        };
+
+        setTimeout(() => {
+          setVerificationRequest(mockVerificationData);
+          setLoading(false);
+        }, 800); // Simulate network delay
       } catch (err) {
-        console.error("Error fetching verification status:", err);
-        setError("Failed to fetch verification status. Please try again later.");
-      } finally {
+        console.error('Error fetching verification status:', err);
+        setError('Failed to load verification status. Please try again later.');
         setLoading(false);
       }
-    };
-    
-    fetchVerificationStatus();
-  }, [user, checkVerificationStatus]);
+    }
 
-  return { loading, error, verificationRequest };
-};
+    fetchVerificationStatus();
+  }, [user]);
+
+  const refetchVerificationStatus = () => {
+    setLoading(true);
+    // Reset status and re-fetch
+    setVerificationRequest(null);
+    setError(null);
+    
+    // Implementation would call the actual API in a real app
+    setTimeout(() => {
+      setLoading(false);
+      setError(null);
+    }, 800);
+  };
+
+  return {
+    loading,
+    error,
+    verificationRequest,
+    refetchVerificationStatus
+  };
+}
