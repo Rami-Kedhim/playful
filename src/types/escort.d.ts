@@ -1,3 +1,4 @@
+
 export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 
