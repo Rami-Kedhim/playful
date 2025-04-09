@@ -18,8 +18,8 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     age: escort.age || 0,
     ethnicity: escort.ethnicity || '',
     tags: [...(escort.tags || []), ...(escort.services || [])],
-    createdAt: escort.createdAt ? new Date(escort.createdAt) : new Date(),
-    updatedAt: escort.updatedAt ? new Date(escort.updatedAt) : new Date(),
+    createdAt: new Date(),  // Default to current date if not provided
+    updatedAt: new Date(),  // Default to current date if not provided
   };
   
   // Extract role flags
@@ -50,13 +50,13 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     acceptsTips: true,
     subscriptionPrice: escort.subscriptionPrice,
     unlockingPrice: escort.price,
-    boostingActive: escort.boostLevel > 0
+    boostingActive: escort.boostLevel ? escort.boostLevel > 0 : false
   };
   
   // Extract system metadata
   const systemMetadata: SystemMetadata = {
     source: escort.isScraped ? 'scraped' : escort.isAI ? 'ai_generated' : 'manual',
-    lastSynced: escort.lastSynced ? new Date(escort.lastSynced) : undefined,
+    lastSynced: undefined,  // No direct mapping available
     aiPersonality: escort.isAI ? 'friendly' : undefined,
     aiMood: escort.isAI ? 'happy' : undefined,
     aiEngine: escort.isAI ? 'GPT' : undefined,
