@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { Clock, CheckCircle, AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
 import { VerificationRequest } from '@/types/escort';
 import { 
   calculateVerificationProgress, 
@@ -12,6 +12,7 @@ import {
   getVerificationStatusTitle,
   getEstimatedCompletionTime
 } from '@/utils/verification/assessmentProgress';
+import { toast } from '@/hooks/use-toast';
 
 interface VerificationProgressProps {
   verificationRequest?: VerificationRequest | null;
@@ -20,6 +21,37 @@ interface VerificationProgressProps {
 }
 
 const VerificationProgress = ({ verificationRequest, error, onRetry }: VerificationProgressProps) => {
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Calculate time until expiration if applicable
+    if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'in_review') {
+      const updateRemainingTime = () => {
+        const estimatedCompletionMs = new Date(verificationRequest.submittedAt).getTime() + 48 * 60 * 60 * 1000; // 48 hours
+        const now = Date.now();
+        const diffMs = estimatedCompletionMs - now;
+        
+        if (diffMs <= 0) {
+          setTimeRemaining('Estimated completion time passed');
+          return;
+        }
+        
+        const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        setTimeRemaining(`${diffHrs}h ${diffMins}m remaining`);
+      };
+      
+      // Update immediately and then every minute
+      updateRemainingTime();
+      const interval = setInterval(updateRemainingTime, 60 * 1000);
+      
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [verificationRequest]);
+  
   if (error) {
     return (
       <Card>
@@ -33,7 +65,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
           <p className="text-sm text-muted-foreground">{error}</p>
           {onRetry && (
             <Button className="w-full mt-4" variant="outline" onClick={onRetry}>
-              Try Again
+              <RefreshCw className="h-4 w-4 mr-2" /> Try Again
             </Button>
           )}
         </CardContent>
@@ -79,10 +111,17 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   };
 
   const submittedDate = new Date(verificationRequest.submittedAt).toLocaleDateString();
-  // Check if updatedAt exists before trying to use it
   const updatedDate = verificationRequest.updatedAt 
     ? new Date(verificationRequest.updatedAt).toLocaleDateString() 
     : null;
+
+  const handleCancelVerification = () => {
+    // In a real app, this would make an API call to cancel the verification
+    toast({
+      title: "Verification Cancelled",
+      description: "Your verification request has been cancelled.",
+    });
+  };
 
   return (
     <Card>
@@ -94,9 +133,9 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
           </CardTitle>
           {getStatusBadge()}
         </div>
-        {verificationRequest.status === 'pending' && (
+        {(verificationRequest.status === 'pending' || verificationRequest.status === 'in_review') && (
           <CardDescription className="mt-2">
-            Estimated completion time: {estimatedTime}
+            {timeRemaining || `Estimated completion time: ${estimatedTime}`}
           </CardDescription>
         )}
       </CardHeader>
@@ -137,6 +176,28 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
                 <p className="text-sm text-muted-foreground">{verificationRequest.rejectionReason}</p>
               </div>
             )}
+          </div>
+        )}
+        
+        {verificationRequest.status === 'pending' && (
+          <Button 
+            variant="outline" 
+            className="w-full mt-4" 
+            onClick={handleCancelVerification}
+          >
+            Cancel Verification Request
+          </Button>
+        )}
+        
+        {verificationRequest.status === 'approved' && (
+          <div className="mt-4 p-3 border border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800 rounded-md">
+            <div className="flex items-center">
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+              <h4 className="text-sm font-medium">Your profile is now verified!</h4>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Your verification badge is now displayed on your profile and you have access to all premium features.
+            </p>
           </div>
         )}
       </CardContent>

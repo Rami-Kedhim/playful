@@ -1,78 +1,72 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Shield, ShieldCheck, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Shield, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
-import { VerificationLevel } from '@/types/escort';
 
 interface VerificationBadgeProps {
-  level: VerificationLevel;
-  className?: string;
+  level: 'none' | 'basic' | 'enhanced' | 'premium';
+  size?: 'sm' | 'md' | 'lg';
   showTooltip?: boolean;
 }
 
-const VerificationBadge = ({ level, className = '', showTooltip = true }: VerificationBadgeProps) => {
+const VerificationBadge = ({ level, size = 'md', showTooltip = true }: VerificationBadgeProps) => {
+  if (level === 'none') return null;
+  
   const getBadgeContent = () => {
+    const iconSize = size === 'sm' ? 'h-3 w-3 mr-1' : size === 'lg' ? 'h-5 w-5 mr-2' : 'h-4 w-4 mr-1';
+    
     switch (level) {
-      case 'premium':
-        return {
-          icon: <Shield className="h-4 w-4 mr-1" />,
-          text: 'Premium Verified',
-          description: 'This profile has completed our most rigorous verification process including government ID, photo verification, and background check.',
-          variant: 'default' as const,
-          color: 'bg-primary text-primary-foreground'
-        };
-      case 'enhanced':
-        return {
-          icon: <CheckCircle className="h-4 w-4 mr-1" />,
-          text: 'Enhanced Verification',
-          description: 'This profile has verified their identity with government ID and photo verification.',
-          variant: 'outline' as const,
-          color: 'bg-green-500/20 text-green-500 border-green-500/30'
-        };
       case 'basic':
-        return {
-          icon: <Clock className="h-4 w-4 mr-1" />,
-          text: 'Basic Verification',
-          description: 'This profile has completed initial verification steps but has not completed the full process.',
-          variant: 'outline' as const,
-          color: 'bg-blue-500/20 text-blue-500 border-blue-500/30'
-        };
+        return (
+          <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30">
+            <Shield className={iconSize} /> Verified
+          </Badge>
+        );
+      case 'enhanced':
+        return (
+          <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/30">
+            <ShieldCheck className={iconSize} /> Enhanced Verified
+          </Badge>
+        );
+      case 'premium':
+        return (
+          <Badge className="bg-gradient-to-r from-amber-500 to-purple-500 border-0">
+            <CheckCircle2 className={iconSize} /> Premium Verified
+          </Badge>
+        );
       default:
-        return {
-          icon: <AlertTriangle className="h-4 w-4 mr-1" />,
-          text: 'Not Verified',
-          description: 'This profile has not been verified. Exercise caution when interacting.',
-          variant: 'outline' as const,
-          color: 'bg-amber-500/20 text-amber-500 border-amber-500/30'
-        };
+        return null;
     }
   };
-
-  const content = getBadgeContent();
   
-  const badge = (
-    <Badge 
-      variant={content.variant} 
-      className={`flex items-center ${content.color} ${className}`}
-    >
-      {content.icon}
-      {content.text}
-    </Badge>
-  );
-
-  if (!showTooltip) {
-    return badge;
-  }
-
+  const getTooltipContent = () => {
+    switch (level) {
+      case 'basic':
+        return 'This profile has completed basic identity verification';
+      case 'enhanced':
+        return 'This profile has completed enhanced verification with additional security checks';
+      case 'premium':
+        return 'This profile has our highest level of verification with premium security features';
+      default:
+        return '';
+    }
+  };
+  
+  const badge = getBadgeContent();
+  
+  if (!badge) return null;
+  
+  if (!showTooltip) return badge;
+  
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           {badge}
         </TooltipTrigger>
-        <TooltipContent className="max-w-xs">
-          <p>{content.description}</p>
+        <TooltipContent>
+          <p>{getTooltipContent()}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
