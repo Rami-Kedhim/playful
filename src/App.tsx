@@ -1,19 +1,23 @@
 
 import React from 'react';
-import { ThemeProvider } from '@/components/theme-provider';
-import AppRouter from './routes';
-import { AuthProvider } from './hooks/auth/useAuthContext';
-import { Toaster } from '@/components/ui/toaster';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { EscortsModule } from '@/modules/escorts/EscortsModule';
+import PersonasPage from '@/pages/Personas';
+import ProfilePage from '@/pages/ProfilePage';
+// Import other pages as needed
 
-const App: React.FC = () => {
+function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="app-theme">
-      <AuthProvider>
-        <AppRouter />
-        <Toaster />
-      </AuthProvider>
-    </ThemeProvider>
+    <Router>
+      <EscortsModule>
+        <Routes>
+          <Route path="/" element={<PersonasPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          {/* Add more routes as needed */}
+        </Routes>
+      </EscortsModule>
+    </Router>
   );
-};
+}
 
 export default App;
