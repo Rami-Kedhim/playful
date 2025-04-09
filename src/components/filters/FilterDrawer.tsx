@@ -28,7 +28,10 @@ export function FilterDrawer({
 }: FilterDrawerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="right-0 left-auto h-full max-w-[300px] sm:max-w-[350px] p-0">
+      <DialogContent 
+        className="right-0 left-auto h-full max-w-[300px] sm:max-w-[350px] p-0"
+        hideCloseButton
+      >
         <DialogHeader className="px-6 pt-10 flex items-start justify-between">
           <DialogTitle>{title}</DialogTitle>
           <Button 

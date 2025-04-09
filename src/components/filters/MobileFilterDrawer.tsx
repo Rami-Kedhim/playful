@@ -27,7 +27,10 @@ export function MobileFilterDrawer({
 }: MobileFilterDrawerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bottom-0 top-auto h-[80vh] sm:h-[70vh] p-0 sm:max-w-full">
+      <DialogContent 
+        className="bottom-0 top-auto h-[80vh] sm:h-[70vh] p-0 sm:max-w-full"
+        hideCloseButton
+      >
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
