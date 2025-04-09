@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader } from 'lucide-react';
+import { Loader, Clock } from 'lucide-react';
 
 const VerificationStatusLoading = () => {
   return (
@@ -13,11 +13,17 @@ const VerificationStatusLoading = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="py-6 flex justify-center items-center">
-          <div className="space-y-4">
-            <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4 animate-pulse"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px] mb-2.5 animate-pulse"></div>
-            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5 animate-pulse"></div>
+        <div className="py-6 flex flex-col items-center justify-center space-y-4">
+          <Clock className="h-12 w-12 text-muted-foreground animate-pulse" />
+          
+          <p className="text-sm text-muted-foreground text-center">
+            Please wait while we retrieve your verification status...
+          </p>
+          
+          <div className="space-y-3 w-full max-w-md">
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full animate-pulse"></div>
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 w-3/4 mx-auto animate-pulse"></div>
+            <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 w-1/2 mx-auto animate-pulse"></div>
           </div>
         </div>
       </CardContent>

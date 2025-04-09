@@ -3,12 +3,18 @@ import React, { useState } from 'react';
 import VerificationForm from './VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 
 const VerificationContainer = () => {
   const [activeTab, setActiveTab] = useState<string>("status");
   
   const handleStartVerification = () => {
     setActiveTab("submit");
+  };
+
+  const handleVerificationSuccess = () => {
+    // Return to status tab after successful submission
+    setActiveTab("status");
   };
   
   return (
@@ -26,19 +32,21 @@ const VerificationContainer = () => {
         </TabsContent>
         
         <TabsContent value="submit" className="mt-6">
-          <VerificationForm />
+          <VerificationForm onSubmitSuccess={handleVerificationSuccess} />
         </TabsContent>
       </Tabs>
       
-      <div className="mt-8 text-sm text-muted-foreground">
-        <h3 className="font-medium mb-2">Why is verification important?</h3>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Increases trust with potential clients</li>
-          <li>Improves your visibility in search results</li>
-          <li>Helps maintain a safe and reliable community</li>
-          <li>Allows access to premium features and boosted rankings</li>
-        </ul>
-      </div>
+      <Card className="mt-8 bg-muted/30">
+        <CardContent className="pt-6">
+          <h3 className="font-medium mb-2">Why is verification important?</h3>
+          <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+            <li>Increases trust with potential clients</li>
+            <li>Improves your visibility in search results</li>
+            <li>Helps maintain a safe and reliable community</li>
+            <li>Allows access to premium features and boosted rankings</li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 };

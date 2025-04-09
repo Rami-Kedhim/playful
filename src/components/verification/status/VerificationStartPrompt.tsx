@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, ArrowRight } from 'lucide-react';
+import { Shield, ArrowRight, CheckCircle } from 'lucide-react';
 
 interface VerificationStartPromptProps {
   onStartVerification?: () => void;
@@ -13,8 +13,8 @@ const VerificationStartPrompt = ({ onStartVerification }: VerificationStartPromp
     <Card className="border-2 border-dashed">
       <CardHeader>
         <div className="flex justify-center mb-4">
-          <div className="rounded-full p-3 bg-primary/10">
-            <Shield className="h-6 w-6 text-primary" />
+          <div className="rounded-full p-4 bg-primary/10">
+            <Shield className="h-8 w-8 text-primary" />
           </div>
         </div>
         <CardTitle className="text-center">Not Yet Verified</CardTitle>
@@ -23,24 +23,39 @@ const VerificationStartPrompt = ({ onStartVerification }: VerificationStartPromp
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-2 mb-6">
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 h-2 w-2 rounded-full bg-primary"></div>
-            <span className="text-sm">Get a verified badge on your profile</span>
-          </li>
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 h-2 w-2 rounded-full bg-primary"></div>
-            <span className="text-sm">Receive priority in search results</span>
-          </li>
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 h-2 w-2 rounded-full bg-primary"></div>
-            <span className="text-sm">Build trust with potential clients</span>
-          </li>
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 h-2 w-2 rounded-full bg-primary"></div>
-            <span className="text-sm">Access premium features and tools</span>
-          </li>
-        </ul>
+        <div className="space-y-4 mb-6">
+          <div className="flex items-start">
+            <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium">Get a verified badge</h4>
+              <p className="text-sm text-muted-foreground">Build trust with a verified profile badge</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start">
+            <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium">Priority in search results</h4>
+              <p className="text-sm text-muted-foreground">Appear higher in search rankings</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start">
+            <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium">Access premium features</h4>
+              <p className="text-sm text-muted-foreground">Unlock exclusive tools and opportunities</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start">
+            <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5" />
+            <div>
+              <h4 className="text-sm font-medium">Increased client trust</h4>
+              <p className="text-sm text-muted-foreground">Clients are more likely to choose verified profiles</p>
+            </div>
+          </div>
+        </div>
       </CardContent>
       <CardFooter>
         <Button className="w-full" onClick={onStartVerification}>
