@@ -1,72 +1,90 @@
 
-import React from "react";
+import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Clock, Shield, Calendar } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AvailabilityFilterProps {
   availableNow: boolean;
-  setAvailableNow: (value: boolean) => void;
-  verifiedOnly?: boolean;
-  setVerifiedOnly?: (value: boolean) => void;
+  setAvailableNow: (available: boolean) => void;
+  verifiedOnly: boolean;
+  setVerifiedOnly: (verified: boolean) => void;
   selectedDays?: string[];
   toggleDay?: (day: string) => void;
   selectedHours?: string[];
   toggleHour?: (hour: string) => void;
 }
 
-const AvailabilityFilter = ({ 
-  availableNow, 
-  setAvailableNow, 
-  verifiedOnly = false, 
+const AvailabilityFilter = ({
+  availableNow,
+  setAvailableNow,
+  verifiedOnly,
   setVerifiedOnly,
   selectedDays = [],
   toggleDay = () => {},
   selectedHours = [],
   toggleHour = () => {}
 }: AvailabilityFilterProps) => {
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const timeSlots = ["Morning", "Afternoon", "Evening", "Late Night"];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <Label htmlFor="available-now" className="text-sm font-medium cursor-pointer">
-            Available Now
-          </Label>
-        </div>
-        <Switch
-          id="available-now"
-          checked={availableNow}
-          onCheckedChange={setAvailableNow}
-        />
-      </div>
-      
-      {setVerifiedOnly && (
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Shield className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="verified-only" className="text-sm font-medium cursor-pointer">
-              Verified Only
-            </Label>
-          </div>
-          <Switch
-            id="verified-only"
+          <Label htmlFor="available-now" className="text-sm font-normal">Available Now</Label>
+          <Switch 
+            id="available-now" 
+            checked={availableNow}
+            onCheckedChange={setAvailableNow}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="verified-only" className="text-sm font-normal">Verified Only</Label>
+          <Switch 
+            id="verified-only" 
             checked={verifiedOnly}
             onCheckedChange={setVerifiedOnly}
           />
         </div>
-      )}
+      </div>
 
-      {/* Day selection could be added here if needed */}
-      {selectedDays && selectedDays.length > 0 && toggleDay && (
-        <div className="mt-2">
-          <div className="flex items-center space-x-2 mb-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <Label className="text-sm font-medium">Available Days</Label>
-          </div>
-          {/* Days selector UI would go here */}
+      {/* Days availability */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Available Days</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {daysOfWeek.map(day => (
+            <div key={day} className="flex items-center space-x-2">
+              <Checkbox 
+                id={`day-${day.toLowerCase()}`}
+                checked={selectedDays.includes(day)} 
+                onCheckedChange={() => toggleDay(day)}
+              />
+              <Label htmlFor={`day-${day.toLowerCase()}`} className="text-sm font-normal">{day}</Label>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
+
+      {/* Hours availability */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Available Hours</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {timeSlots.map(slot => (
+            <div key={slot} className="flex items-center space-x-2">
+              <Checkbox 
+                id={`time-${slot.toLowerCase().replace(' ', '-')}`}
+                checked={selectedHours.includes(slot)} 
+                onCheckedChange={() => toggleHour(slot)}
+              />
+              <Label htmlFor={`time-${slot.toLowerCase().replace(' ', '-')}`} className="text-sm font-normal">{slot}</Label>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
