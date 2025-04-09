@@ -41,21 +41,6 @@ interface EscortFiltersProps {
   setAvailableNow: (available: boolean) => void;
   verifiedOnly: boolean;
   setVerifiedOnly: (verified: boolean) => void;
-  
-  // Optional: Unified filter object (for compatibility with other components)
-  filters?: {
-    location?: string;
-    serviceTypes?: string[];
-    priceRange?: [number, number];
-    gender?: string[];
-    orientation?: string[];
-    ageRange?: [number, number];
-    rating?: number;
-    verified?: boolean;
-    availableNow?: boolean;
-    escortType?: "verified" | "ai" | "provisional" | "all";
-    language?: string[];
-  };
 }
 
 const EscortFilters = ({
@@ -84,7 +69,6 @@ const EscortFilters = ({
   setAvailableNow,
   verifiedOnly,
   setVerifiedOnly,
-  filters
 }: EscortFiltersProps) => {
   const [activeTab, setActiveTab] = useState("basic");
   

@@ -137,7 +137,7 @@ const FilterSidebarContent = ({
         
         <div className="space-y-4">
           <h3 className="text-sm font-medium">Service Types</h3>
-          <ServiceTypeRadioFilter
+          <ServiceTypeFilter
             serviceTypeFilter={serviceTypeFilter}
             setServiceTypeFilter={setServiceTypeFilter}
           />

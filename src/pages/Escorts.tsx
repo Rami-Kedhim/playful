@@ -31,6 +31,13 @@ const EscortsContent = () => {
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
+
+  // Extract values from filters for compatibility with EscortFilters component
+  const serviceType = filters.serviceTypes && filters.serviceTypes.length === 1 
+    ? filters.serviceTypes[0] as "" | "in-person" | "virtual" | "both"
+    : "";
+  
+  const selectedServices = filters.serviceTypes || [];
   
   return (
     <div className="container mx-auto py-8 px-4">
@@ -107,18 +114,18 @@ const EscortsContent = () => {
           setLocation={(location) => updateFilters({ location })}
           priceRange={filters.priceRange || [0, 1000]}
           setPriceRange={(range) => updateFilters({ priceRange: range as [number, number] })}
-          serviceType={filters.serviceTypeFilter || ""}
-          setServiceType={(type) => updateFilters({ serviceTypeFilter: type })}
-          selectedServices={filters.selectedServices || []}
+          serviceType={serviceType}
+          setServiceType={(type) => updateFilters({ serviceTypes: type ? [type] : [] })}
+          selectedServices={selectedServices}
           toggleService={(service) => {
-            const currentServices = [...(filters.selectedServices || [])];
+            const currentServices = [...selectedServices];
             const index = currentServices.indexOf(service);
             if (index >= 0) {
               currentServices.splice(index, 1);
             } else {
               currentServices.push(service);
             }
-            updateFilters({ selectedServices: currentServices });
+            updateFilters({ serviceTypes: currentServices });
           }}
           selectedGenders={filters.gender || []}
           toggleGender={(gender) => {
