@@ -79,6 +79,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   };
 
   const submittedDate = new Date(verificationRequest.submittedAt).toLocaleDateString();
+  // Check if updatedAt exists before trying to use it
   const updatedDate = verificationRequest.updatedAt 
     ? new Date(verificationRequest.updatedAt).toLocaleDateString() 
     : null;
