@@ -5,16 +5,20 @@ import { Escort } from '@/types/escort';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Star, Clock, CheckCircle, MapPin, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Star, Clock, CheckCircle, MapPin, Heart } from 'lucide-react';
 
 interface EscortCardProps {
   escort: Escort;
   featured?: boolean;
+  onFavoriteToggle?: (id: string) => void;
 }
 
-const EscortCard: React.FC<EscortCardProps> = ({ escort, featured = false }) => {
-  // Extract necessary properties
+const EscortCard: React.FC<EscortCardProps> = ({ 
+  escort, 
+  featured = false,
+  onFavoriteToggle
+}) => {
   const {
     id,
     name,
@@ -49,12 +53,13 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, featured = false }) => 
     }
   };
   
-  // Handle favorite toggle (would connect to actual state in real implementation)
+  // Handle favorite toggle
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();  // Prevent navigation
     e.stopPropagation(); // Prevent event bubbling
-    console.log("Favorite toggled for", name);
-    // Would handle favorite in a real app
+    if (onFavoriteToggle) {
+      onFavoriteToggle(id);
+    }
   };
 
   const cardContent = (
@@ -64,7 +69,7 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, featured = false }) => 
           <img 
             src={displayImage} 
             alt={name} 
-            className={`object-cover w-full h-full transition-transform ${featured ? 'group-hover:scale-110' : 'group-hover:scale-105'}`}
+            className={`object-cover w-full h-full transition-transform duration-300 ${featured ? 'group-hover:scale-110' : 'group-hover:scale-105'}`}
           />
         </AspectRatio>
         
@@ -147,11 +152,11 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, featured = false }) => 
 
   if (featured) {
     return (
-      <Card className="group overflow-hidden cursor-pointer hover:shadow-lg transition-all h-full">
-        <Link to={`/escorts/${id}`}>
+      <Link to={`/escorts/${id}`}>
+        <Card className="group overflow-hidden cursor-pointer hover:shadow-lg transition-all h-full">
           {cardContent}
-        </Link>
-      </Card>
+        </Card>
+      </Link>
     );
   }
 

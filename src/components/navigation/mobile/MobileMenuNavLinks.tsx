@@ -21,7 +21,7 @@ const MobileMenuNavLinks: React.FC<MobileMenuNavLinksProps> = ({ items, onItemCl
           key={item.path}
           to={item.path}
           className={({ isActive }) =>
-            `flex items-center px-2 py-3 rounded-md text-sm ${
+            `flex items-center px-6 py-3 rounded-md text-sm ${
               isActive
                 ? "bg-primary/10 text-primary font-medium"
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -29,8 +29,8 @@ const MobileMenuNavLinks: React.FC<MobileMenuNavLinksProps> = ({ items, onItemCl
           }
           onClick={onItemClick}
         >
-          {item.icon && item.icon}
-          {item.name}
+          {item.icon && <span className="mr-3">{item.icon}</span>}
+          <span>{item.name}</span>
         </NavLink>
       ))}
     </nav>

@@ -28,7 +28,7 @@ const MobileMenuUserSection: React.FC<MobileMenuUserSectionProps> = ({
   
   return (
     <div className="mt-6">
-      <p className="px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+      <p className="px-6 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
         {t('nav.user')}
       </p>
       <div className="space-y-1">
@@ -37,7 +37,7 @@ const MobileMenuUserSection: React.FC<MobileMenuUserSectionProps> = ({
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center px-2 py-3 rounded-md text-sm ${
+              `flex items-center px-6 py-3 rounded-md text-sm ${
                 isActive
                   ? "bg-primary/10 text-primary font-medium"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -45,17 +45,17 @@ const MobileMenuUserSection: React.FC<MobileMenuUserSectionProps> = ({
             }
             onClick={onItemClick}
           >
-            {item.icon}
-            {item.name}
+            <span className="mr-3">{item.icon}</span>
+            <span>{item.name}</span>
           </NavLink>
         ))}
         
         <button
-          className="flex items-center w-full px-2 py-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50"
+          className="flex items-center w-full px-6 py-3 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50"
           onClick={onLogout}
         >
-          <LogOut className="h-4 w-4 mr-2" />
-          {t('auth.logout')}
+          <LogOut className="h-4 w-4 mr-3" />
+          <span>{t('auth.logout')}</span>
         </button>
       </div>
     </div>
