@@ -8,11 +8,13 @@ import PersonaProfile from '@/pages/PersonaProfile';
 import AuthPage from '@/pages/AuthPage';
 import { AuthProvider } from '@/hooks/auth/useAuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import { ToastProvider } from '@/providers/toast-provider';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ToastProvider />
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
           <Route 

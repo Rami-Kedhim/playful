@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React from "react";
+import { toast as sonnerToast, type ToastOptions as SonnerToastOptions } from "sonner";
 
 // Types for toast
 export interface Toast {
@@ -10,124 +11,38 @@ export interface Toast {
   variant?: "default" | "destructive" | "warning" | "success";
 }
 
-interface ToastContextType {
-  toasts: Toast[];
-  addToast: (toast: Omit<Toast, "id">) => void;
-  removeToast: (id: string) => void;
-  toast: (props: Omit<Toast, "id">) => void; // Toast function directly in context
-}
-
-const ToastContext = createContext<ToastContextType>({
-  toasts: [],
-  addToast: () => {},
-  removeToast: () => {},
-  toast: () => {},
-});
-
-interface ToastProviderProps {
-  children: React.ReactNode;
-}
-
-export function ToastProvider({ children }: ToastProviderProps) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const addToast = (toast: Omit<Toast, "id">) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, ...toast }]);
-
-    // Auto remove toast after 5 seconds
-    setTimeout(() => {
-      removeToast(id);
-    }, 5000);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  // Create the toast function directly within the provider
-  const toastFunction = (props: Omit<Toast, "id">) => {
-    addToast(props);
-  };
-
-  // Set up global access to the toast function
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      (window as any).__TOAST_ADD_FUNCTION__ = addToast;
-      (window as any).__TOAST_REMOVE_FUNCTION__ = removeToast;
-      
-      // Add a marker element to indicate toast context is available
-      const markerElement = document.getElementById("toast-context-element") || document.createElement("div");
-      markerElement.id = "toast-context-element";
-      markerElement.dataset.hasToastContext = "true";
-      markerElement.style.display = "none";
-      if (!document.getElementById("toast-context-element")) {
-        document.body.appendChild(markerElement);
-      }
-    }
-    
-    return () => {
-      if (typeof window !== "undefined") {
-        (window as any).__TOAST_ADD_FUNCTION__ = null;
-        (window as any).__TOAST_REMOVE_FUNCTION__ = null;
-        const markerElement = document.getElementById("toast-context-element");
-        if (markerElement) {
-          markerElement.remove();
-        }
-      }
-    };
-  }, []);
-
-  return (
-    <ToastContext.Provider value={{ 
-      toasts, 
-      addToast, 
-      removeToast,
-      toast: toastFunction 
-    }}>
-      {children}
-      
-      {/* Optional: add a toast renderer here if needed */}
-    </ToastContext.Provider>
-  );
-}
-
-export function useToast() {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
-  }
-  return context;
-}
-
-// Create a standalone toast function that doesn't require hooks
-export const toast = (props: Omit<Toast, "id">) => {
-  // Check if we're in a browser environment
-  if (typeof window === "undefined") {
-    console.warn("Toast called in non-browser environment");
-    return;
-  }
-  
-  // Try to find the ToastContext in the global scope
-  const toastContextElement = document.getElementById("toast-context-element");
-  
-  if (!toastContextElement || !toastContextElement.dataset.hasToastContext) {
-    console.error("toast was called before ToastProvider was mounted");
-    return;
-  }
-  
-  // Access the global addToast function
-  const addToast = (window as any).__TOAST_ADD_FUNCTION__;
-  if (typeof addToast === "function") {
-    addToast(props);
-  } else {
-    console.error("Toast function not available");
-  }
+type ToastOptionsType = SonnerToastOptions & {
+  variant?: "default" | "destructive" | "warning" | "success";
 };
 
-// Set up global access to the toast function
-if (typeof window !== "undefined") {
-  // Will be set by the ToastProvider when it mounts
-  (window as any).__TOAST_ADD_FUNCTION__ = null;
-  (window as any).__TOAST_REMOVE_FUNCTION__ = null;
-}
+// Create a standalone toast function
+export const toast = ({
+  title,
+  description,
+  variant = "default",
+  ...props
+}: Omit<Toast, "id"> & ToastOptionsType) => {
+  return sonnerToast(title as string, {
+    description,
+    className: variant === "destructive" 
+      ? "bg-destructive text-destructive-foreground border-destructive" 
+      : variant === "warning"
+      ? "bg-yellow-50 text-yellow-800 dark:bg-yellow-950/50 dark:text-yellow-200 border-yellow-500/30"
+      : variant === "success"
+      ? "bg-green-50 text-green-800 dark:bg-green-950/50 dark:text-green-200 border-green-500/30" 
+      : undefined,
+    ...props,
+  });
+};
+
+// Export a hook for components that need to use toast
+export const useToast = () => {
+  const toasts: Toast[] = [];
+
+  return {
+    toast,
+    toasts,
+    addToast: toast,
+    removeToast: (id: string) => {},
+  };
+};
