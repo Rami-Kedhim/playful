@@ -13,7 +13,7 @@ import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
 
-const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) => {
+const VerificationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   
@@ -41,7 +41,8 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
         variant: "default",
       });
       
-      onSubmitSuccess();
+      // We don't need the onSubmitSuccess anymore as we'll handle navigation elsewhere
+      // If needed, use a context or other state management solution to coordinate between components
     } catch (error) {
       console.error("Verification submission error:", error);
       setSubmissionError("Failed to submit verification. Please try again.");

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import VerificationForm from './VerificationForm';
+import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,7 +32,7 @@ const VerificationContainer = () => {
         </TabsContent>
         
         <TabsContent value="submit" className="mt-6">
-          <VerificationForm onSubmitSuccess={handleVerificationSuccess} />
+          <VerificationForm />
         </TabsContent>
       </Tabs>
       
