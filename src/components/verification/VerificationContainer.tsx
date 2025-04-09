@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import VerificationFlowSteps from './VerificationFlowSteps';
+import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Shield, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
@@ -45,9 +46,10 @@ const VerificationContainer = () => {
       />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="status">Verification Status</TabsTrigger>
           <TabsTrigger value="submit">Submit Verification</TabsTrigger>
+          <TabsTrigger value="upgrade">Upgrade Level</TabsTrigger>
         </TabsList>
         
         <TabsContent value="status" className="mt-6">
@@ -56,6 +58,10 @@ const VerificationContainer = () => {
         
         <TabsContent value="submit" className="mt-6">
           <VerificationForm onSubmissionComplete={handleVerificationSuccess} />
+        </TabsContent>
+
+        <TabsContent value="upgrade" className="mt-6">
+          <VerificationLevelUpgrade />
         </TabsContent>
       </Tabs>
       

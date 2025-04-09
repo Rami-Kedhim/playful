@@ -7,6 +7,9 @@ import VerificationStatus from './VerificationStatus';
 import VerificationStatusIndicator from './status/VerificationStatusIndicator';
 import VerificationTimeline from './status/VerificationTimeline';
 import VerificationFlowSteps from './VerificationFlowSteps';
+import VerificationLevelOptions from './level/VerificationLevelOptions';
+import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
+import VerificationLevelRequirements from './level/VerificationLevelRequirements';
 
 export {
   VerificationBadge,
@@ -16,7 +19,10 @@ export {
   VerificationStatus,
   VerificationStatusIndicator,
   VerificationTimeline,
-  VerificationFlowSteps
+  VerificationFlowSteps,
+  VerificationLevelOptions,
+  VerificationLevelUpgrade,
+  VerificationLevelRequirements
 };
 
 export default VerificationStatus;

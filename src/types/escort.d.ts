@@ -1,9 +1,32 @@
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  fileUrl: string;
+  uploadedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  status: VerificationStatus;
+  verificationLevel?: VerificationLevel;
+  documents: VerificationDocument[];
+  submittedAt: string;
+  updatedAt?: string;
+  rejectionReason?: string;
+}
 
 export interface Escort {
   id: string;
   name: string;
-  age: number;
-  location: string;
+  age?: number;
+  location?: string;
+  verified?: boolean;
+  verificationLevel?: VerificationLevel;
   price: number;
   description: string;
   images: string[];
@@ -14,26 +37,6 @@ export interface Escort {
   updated_at: string;
   userId: string;
 }
-
-export interface VerificationDocument {
-  id: string;
-  type: string;
-  fileUrl: string;
-  uploadedAt: string;
-  status: string;
-}
-
-export interface VerificationRequest {
-  id: string;
-  userId: string;
-  status: VerificationStatus;
-  submittedAt: string;
-  updatedAt?: string; // Explicitly defined as optional property
-  documents: VerificationDocument[];
-  rejectionReason?: string;
-}
-
-export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 
 export interface UserProfile {
   id: string;
