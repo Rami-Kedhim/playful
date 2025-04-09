@@ -11,7 +11,7 @@ import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
-import { verificationFormSchema, VerificationFormValues, handleFileChange } from '../utils/formUtils';
+import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
 
 const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,7 +80,6 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
               fieldName="documentFrontImage"
               label="Front of ID"
               description="Upload a clear photo of the front of your ID"
-              onChange={(e) => handleFileChange(e, form, 'documentFrontImage')}
             />
             
             <DocumentImageUpload 
@@ -88,7 +87,6 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
               fieldName="documentBackImage"
               label="Back of ID (Optional)"
               description="Upload a clear photo of the back of your ID if applicable"
-              onChange={(e) => handleFileChange(e, form, 'documentBackImage')}
               optional
             />
             
@@ -97,7 +95,6 @@ const VerificationForm = ({ onSubmitSuccess }: { onSubmitSuccess: () => void }) 
               fieldName="selfieImage"
               label="Selfie with ID"
               description="Take a selfie holding your ID next to your face"
-              onChange={(e) => handleFileChange(e, form, 'selfieImage')}
             />
           </CardContent>
           

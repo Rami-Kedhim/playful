@@ -32,7 +32,7 @@ const DocumentImageUpload = ({
               <Input
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
-                onChange={(e) => handleFileChange(e, field)}
+                onChange={(e) => handleFileChange(e, form, fieldName)}
                 className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-primary/10 file:text-primary"
               />
               {field.value && (
