@@ -50,6 +50,34 @@ export function ToastProvider({ children }: ToastProviderProps) {
     addToast(props);
   };
 
+  // Set up global access to the toast function
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__TOAST_ADD_FUNCTION__ = addToast;
+      (window as any).__TOAST_REMOVE_FUNCTION__ = removeToast;
+      
+      // Add a marker element to indicate toast context is available
+      const markerElement = document.getElementById("toast-context-element") || document.createElement("div");
+      markerElement.id = "toast-context-element";
+      markerElement.dataset.hasToastContext = "true";
+      markerElement.style.display = "none";
+      if (!document.getElementById("toast-context-element")) {
+        document.body.appendChild(markerElement);
+      }
+    }
+    
+    return () => {
+      if (typeof window !== "undefined") {
+        (window as any).__TOAST_ADD_FUNCTION__ = null;
+        (window as any).__TOAST_REMOVE_FUNCTION__ = null;
+        const markerElement = document.getElementById("toast-context-element");
+        if (markerElement) {
+          markerElement.remove();
+        }
+      }
+    };
+  }, []);
+
   return (
     <ToastContext.Provider value={{ 
       toasts, 
