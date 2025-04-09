@@ -5,7 +5,6 @@ import { AnimatePresence } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useThemeToggle } from '@/hooks/useThemeToggle';
-import { ToastProvider } from '@/providers/toast-provider';
 import { cn } from '@/lib/utils';
 import PageTransition from './PageTransition';
 import '@/styles/reveal-animations.css';
