@@ -13,6 +13,16 @@ export function useAuthPerformance() {
   const { toast } = useToast();
 
   const performLogin = async (email: string, password: string): Promise<AuthResult> => {
+    if (!email || !password) {
+      setError("Email and password are required");
+      toast({
+        title: "Login failed",
+        description: "Email and password are required",
+        variant: "destructive",
+      });
+      return { success: false, error: "Email and password are required" };
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -24,6 +34,11 @@ export function useAuthPerformance() {
       });
       
       if (error) throw error;
+      
+      toast({
+        title: "Login successful",
+        description: "You have been logged in successfully",
+      });
       
       return { success: true };
     } catch (error: any) {

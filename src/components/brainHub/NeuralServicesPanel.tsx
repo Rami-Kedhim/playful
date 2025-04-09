@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +15,7 @@ import { NeuralModel } from '@/services/neural/types/neuralHub';
 import NeuralModuleRegistration from './NeuralModuleRegistration';
 import NeuralServiceCard from './NeuralServiceCard';
 import EmptyServiceState from './EmptyServiceState';
+import { toast } from "@/components/ui/use-toast";
 
 interface NeuralServicesPanelProps {
   models?: NeuralModel[];
@@ -29,7 +29,8 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
     error, 
     loadServices, 
     optimizeResources,
-    getServicesByType 
+    getServicesByType,
+    registerService
   } = useNeuralRegistry();
   
   const [activeTab, setActiveTab] = useState('ai-companion');
@@ -37,28 +38,69 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
   
   useEffect(() => {
     // Initial load of services
-    loadServices();
+    loadServices().catch(err => {
+      console.error("Failed to load neural services:", err);
+      toast({
+        title: "Failed to load neural services",
+        description: err?.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    });
   }, [loadServices]);
   
   const handleOptimize = () => {
-    optimizeResources();
+    try {
+      optimizeResources();
+      toast({
+        title: "Resources optimized",
+        description: "Neural resources have been optimized successfully",
+      });
+    } catch (err: any) {
+      console.error("Failed to optimize neural resources:", err);
+      toast({
+        title: "Optimization failed",
+        description: err?.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    }
   };
   
   // Create default service handlers
   const createDefaultService = (moduleType: 'ai-companion' | 'escorts' | 'creators' | 'livecams') => {
-    const ServiceClass = {
-      'ai-companion': AICompanionNeuralService,
-      'escorts': EscortsNeuralService,
-      'creators': CreatorsNeuralService,
-      'livecams': LivecamsNeuralService
-    }[moduleType];
-    
-    const moduleId = `${moduleType}-primary`;
-    const service = new ServiceClass(moduleId);
-    
-    // Register and reload
-    const success = useNeuralRegistry().registerService(service);
-    if (success) loadServices();
+    try {
+      const ServiceClass = {
+        'ai-companion': AICompanionNeuralService,
+        'escorts': EscortsNeuralService,
+        'creators': CreatorsNeuralService,
+        'livecams': LivecamsNeuralService
+      }[moduleType];
+      
+      const moduleId = `${moduleType}-primary`;
+      const service = new ServiceClass(moduleId);
+      
+      // Register and reload
+      const success = registerService(service);
+      if (success) {
+        loadServices();
+        toast({
+          title: "Service registered",
+          description: `${moduleType} neural service has been registered successfully`,
+        });
+      } else {
+        toast({
+          title: "Registration failed",
+          description: "Failed to register neural service",
+          variant: "destructive"
+        });
+      }
+    } catch (err: any) {
+      console.error(`Failed to create ${moduleType} neural service:`, err);
+      toast({
+        title: "Service creation failed",
+        description: err?.message || "An unexpected error occurred",
+        variant: "destructive"
+      });
+    }
   };
   
   return (

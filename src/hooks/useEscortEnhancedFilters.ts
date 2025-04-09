@@ -68,11 +68,16 @@ export const useEscortEnhancedFilters = () => {
   
   // Update neural service config when boost sorting changes
   useEffect(() => {
-    const neuralConfig = escortsNeuralService.getConfig();
-    if (neuralConfig.orderByBoost !== filters.useBoostSorting) {
-      escortsNeuralService.updateConfig({
-        orderByBoost: filters.useBoostSorting
-      });
+    try {
+      const neuralConfig = escortsNeuralService.getConfig();
+      if (neuralConfig.orderByBoost !== filters.useBoostSorting) {
+        escortsNeuralService.updateConfig({
+          orderByBoost: filters.useBoostSorting
+        });
+      }
+    } catch (error) {
+      console.error('Error updating neural service config:', error);
+      // Continue execution even if neural service fails
     }
   }, [filters.useBoostSorting]);
   

@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -27,6 +26,7 @@ const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
+const AICompanionPage = lazy(() => import('./pages/ai-companion'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -154,6 +154,12 @@ const AppRoutes: React.FC = () => {
               <NSFWImageGeneratorPage />
             </AppLayout>
           </ProtectedRoute>
+        } />
+        
+        <Route path="/ai-companion" element={
+          <AppLayout>
+            <AICompanionPage />
+          </AppLayout>
         } />
         
         {/* 404 route */}
