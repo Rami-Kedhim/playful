@@ -1,15 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, Filter, Image, Film, FileText, Clock } from 'lucide-react';
-import ContentStatusBadge from './ContentStatusBadge';
-import ContentExpiryInfo from './ContentExpiryInfo';
-import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus, calculateRenewalCost } from '@/utils/dateUtils';
+import { TabsContent } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { Badge } from '@/components/ui/badge';
+import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus } from '@/utils/dateUtils';
+import ContentSearch from './ContentSearch';
+import ContentFilters from './ContentFilters';
+import ContentGrid from './ContentGrid';
 
 // Mock content data, in a real app this would come from an API
 const mockContent = [
@@ -137,150 +133,26 @@ const ContentGallery: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Your Content</h2>
-        <div className="flex space-x-2">
-          <div className="relative w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search content..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
-        </div>
+        <ContentSearch 
+          searchTerm={searchTerm} 
+          onSearchChange={setSearchTerm} 
+        />
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="image">
-            <Image className="h-4 w-4 mr-1" />
-            Images
-          </TabsTrigger>
-          <TabsTrigger value="video">
-            <Film className="h-4 w-4 mr-1" />
-            Videos
-          </TabsTrigger>
-          <TabsTrigger value="text">
-            <FileText className="h-4 w-4 mr-1" />
-            Text
-          </TabsTrigger>
-        </TabsList>
-        
-        <div className="flex flex-wrap gap-2 mt-4">
-          <Badge 
-            variant={statusFilter === 'all' ? "default" : "outline"}
-            className="cursor-pointer"
-            onClick={() => setStatusFilter('all')}
-          >
-            All ({statusCounts.all})
-          </Badge>
-          <Badge 
-            variant={statusFilter === 'active' ? "success" : "outline"}
-            className="cursor-pointer"
-            onClick={() => setStatusFilter('active')}
-          >
-            Active ({statusCounts.active})
-          </Badge>
-          <Badge 
-            variant={statusFilter === 'expiring' ? "default" : "outline"}
-            className="cursor-pointer bg-amber-500 hover:bg-amber-600"
-            onClick={() => setStatusFilter('expiring')}
-          >
-            <Clock className="h-3 w-3 mr-1" />
-            Expiring ({statusCounts.expiring})
-          </Badge>
-          <Badge 
-            variant={statusFilter === 'expired' ? "destructive" : "outline"}
-            className="cursor-pointer"
-            onClick={() => setStatusFilter('expired')}
-          >
-            Expired ({statusCounts.expired})
-          </Badge>
-          <Badge 
-            variant={statusFilter === 'draft' ? "secondary" : "outline"}
-            className="cursor-pointer"
-            onClick={() => setStatusFilter('draft')}
-          >
-            Draft ({statusCounts.draft})
-          </Badge>
-        </div>
-        
-        <TabsContent value={activeTab} className="mt-4">
-          {filteredContent.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                No content found. Upload some content to get started!
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredContent.map((item) => {
-                const expiresAt = calculateExpiryDate(item.createdAt);
-                const lucoinCost = calculateRenewalCost(item.status, item.type);
-                
-                return (
-                  <Card key={item.id} className="overflow-hidden">
-                    {item.type !== 'text' && (
-                      <div className="relative aspect-video bg-muted">
-                        <img 
-                          src={item.url} 
-                          alt={item.title}
-                          className="object-cover w-full h-full"
-                        />
-                        <div className="absolute top-2 right-2">
-                          <ContentStatusBadge 
-                            status={item.status as any}
-                            daysRemaining={item.status === 'expiring' ? item.daysRemaining : undefined}  
-                          />
-                        </div>
-                      </div>
-                    )}
-                    <CardContent className="p-4 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-medium">{item.title}</h3>
-                        {item.type === 'text' && (
-                          <ContentStatusBadge 
-                            status={item.status as any}
-                            daysRemaining={item.status === 'expiring' ? item.daysRemaining : undefined} 
-                          />
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Type: {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                      </p>
-                      {item.type === 'text' && (
-                        <p className="text-sm border p-2 rounded-md bg-muted/30">
-                          {item.content}
-                        </p>
-                      )}
-                      {item.status !== 'draft' && (
-                        <ContentExpiryInfo 
-                          createdAt={item.createdAt} 
-                          expiresAt={expiresAt} 
-                          onRenew={() => handleRenewContent(item.id)}
-                          lucoinCost={lucoinCost}
-                        />
-                      )}
-                      {item.status === 'draft' && (
-                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/20 rounded-md text-sm border border-gray-200 dark:border-gray-800">
-                          <span className="text-gray-600 dark:text-gray-400">
-                            Draft content - not yet published
-                          </span>
-                          <Button variant="secondary" size="sm">Publish</Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      <ContentFilters 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        statusCounts={statusCounts}
+      />
+      
+      <TabsContent value={activeTab} className="mt-4">
+        <ContentGrid 
+          content={filteredContent}
+          onRenew={handleRenewContent}
+        />
+      </TabsContent>
     </div>
   );
 };
