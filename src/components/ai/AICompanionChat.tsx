@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAICompanionWithMemory } from '@/hooks/ai-companion/useAICompanionWithMemory';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
@@ -9,6 +8,7 @@ import MinimizedChatButton from './companion-chat/MinimizedChatButton';
 import { PersonalityType } from '@/types/ai-personality';
 import { toast } from '@/components/ui/use-toast';
 import { useBrainHubAI } from '@/hooks/ai/useBrainHubAI';
+import { useOxumLearning } from '@/hooks/ai/useOxumLearning';
 
 interface AICompanionChatProps {
   companionId: string;
@@ -70,12 +70,26 @@ const AICompanionChat = ({
     }
   });
   
+  // Integrate with Oxum Learning
+  const oxumLearning = useOxumLearning({
+    componentId: `companion-${companionId}`,
+    autoSync: true,
+    culturalContext: {
+      personalityType,
+      userId
+    }
+  });
+  
   // Log connection status
   useEffect(() => {
     if (brainHubAI.isConnected) {
       console.log(`AI Companion ${companionId} connected to Brain Hub`);
     }
-  }, [brainHubAI.isConnected, companionId]);
+    
+    if (oxumLearning.isInitialized) {
+      console.log(`AI Companion ${companionId} connected to Oxum Learning System`);
+    }
+  }, [brainHubAI.isConnected, oxumLearning.isInitialized, companionId]);
   
   useEffect(() => {
     if (error) {
@@ -110,13 +124,30 @@ const AICompanionChat = ({
   const handleSendMessage = useCallback((content: string) => {
     if (!content.trim()) return;
     
-    // Process message with Brain Hub if connected
+    // Process message with both Brain Hub and Oxum Learning if available
+    let processedContent = content;
+    
+    // First try Oxum Learning for linguistic enhancement
+    if (oxumLearning.isInitialized) {
+      const oxumResult = oxumLearning.processText(content, {
+        personalityType,
+        companionId,
+        userId
+      });
+      
+      // Only use enhanced output if confidence is high enough
+      if (oxumResult.confidenceScore > 0.6) {
+        processedContent = oxumResult.enhancedOutput;
+      }
+    }
+    
+    // Then try Brain Hub for personality enhancement
     if (brainHubAI.isConnected) {
       // Try to enhance message with Brain Hub
       const result = brainHubAI.processRequest(
         "enhance_user_message",
         {
-          message: content,
+          message: processedContent,
           companionId,
           personalityType,
           userId
@@ -127,15 +158,14 @@ const AICompanionChat = ({
       brainHubAI.recordInteraction("message_sent", { messageLength: content.length });
       
       // Use enhanced message if available
-      const processedContent = result.success && result.data?.enhancedMessage 
+      processedContent = result.success && result.data?.enhancedMessage 
         ? result.data.enhancedMessage 
-        : content;
-      
-      sendMessage(processedContent);
-    } else {
-      sendMessage(content);
+        : processedContent;
     }
-  }, [sendMessage, brainHubAI, companionId, personalityType, userId]);
+    
+    // Send the final processed message
+    sendMessage(processedContent);
+  }, [sendMessage, brainHubAI, oxumLearning, companionId, personalityType, userId]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -192,6 +222,9 @@ const AICompanionChat = ({
   
   // Get the dominant emotion as a string for components that expect a string
   const dominantEmotion = emotionalState?.dominantEmotion || '';
+  
+  // Determine if Oxum learning is enhancing the experience
+  const isOxumEnhanced = oxumLearning.isInitialized;
 
   return (
     <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[550px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
@@ -230,6 +263,7 @@ const AICompanionChat = ({
         creditCost={0}
         emotionalState={dominantEmotion}
         brainHubConnected={brainHubAI.isConnected}
+        oxumLearningActive={isOxumEnhanced}
       />
 
       <AICompanionMessageList 
@@ -250,6 +284,7 @@ const AICompanionChat = ({
         disabledMessage={!hasSufficientCredits ? "Insufficient credits" : undefined}
         emotionalState={dominantEmotion}
         brainHubEnhanced={brainHubAI.isConnected}
+        oxumLearningEnhanced={isOxumEnhanced}
       />
 
       <AICompanionChatStyles />

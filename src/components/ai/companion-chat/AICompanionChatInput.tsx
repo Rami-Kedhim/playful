@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { SendHorizontal, Image, Brain } from 'lucide-react';
+import { SendHorizontal, Image, Brain, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -13,6 +13,7 @@ interface AICompanionChatInputProps {
   disabledMessage?: string;
   emotionalState?: string;
   brainHubEnhanced?: boolean;
+  oxumLearningEnhanced?: boolean;
 }
 
 const AICompanionChatInput: React.FC<AICompanionChatInputProps> = ({
@@ -23,7 +24,8 @@ const AICompanionChatInput: React.FC<AICompanionChatInputProps> = ({
   disabled = false,
   disabledMessage,
   emotionalState,
-  brainHubEnhanced = false
+  brainHubEnhanced = false,
+  oxumLearningEnhanced = false
 }) => {
   const [message, setMessage] = useState('');
 
@@ -58,11 +60,18 @@ const AICompanionChatInput: React.FC<AICompanionChatInputProps> = ({
             rows={2}
             disabled={isLoading || disabled}
           />
-          {brainHubEnhanced && (
-            <div className="absolute right-12 bottom-3 text-blue-500 opacity-70" title="Brain Hub Enhanced">
-              <Brain className="h-4 w-4" />
-            </div>
-          )}
+          <div className="absolute right-12 bottom-3 flex space-x-1">
+            {brainHubEnhanced && (
+              <div className="text-blue-500 opacity-70" title="Brain Hub Enhanced">
+                <Brain className="h-4 w-4" />
+              </div>
+            )}
+            {oxumLearningEnhanced && (
+              <div className="text-green-500 opacity-70" title="Oxum Learning Enhanced">
+                <BookOpen className="h-4 w-4" />
+              </div>
+            )}
+          </div>
           <Button
             size="sm"
             variant="ghost"
@@ -87,7 +96,7 @@ const AICompanionChatInput: React.FC<AICompanionChatInputProps> = ({
             Generate Image
           </Button>
           
-          {brainHubEnhanced && emotionalState && (
+          {(brainHubEnhanced || oxumLearningEnhanced) && emotionalState && (
             <div className="text-xs text-muted-foreground italic">
               AI mood: {emotionalState}
             </div>

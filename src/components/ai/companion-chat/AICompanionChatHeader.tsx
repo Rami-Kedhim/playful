@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, Minus, Brain } from 'lucide-react';
+import { X, Minus, Brain, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AICompanion } from '@/types/ai-companion';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ interface AICompanionChatHeaderProps {
   creditCost?: number;
   emotionalState?: string;
   brainHubConnected?: boolean;
+  oxumLearningActive?: boolean;
 }
 
 const AICompanionChatHeader: React.FC<AICompanionChatHeaderProps> = ({
@@ -23,7 +24,8 @@ const AICompanionChatHeader: React.FC<AICompanionChatHeaderProps> = ({
   credits,
   creditCost = 0,
   emotionalState,
-  brainHubConnected = false
+  brainHubConnected = false,
+  oxumLearningActive = false
 }) => {
   return (
     <div className="border-b flex items-center justify-between p-3 bg-background">
@@ -35,9 +37,10 @@ const AICompanionChatHeader: React.FC<AICompanionChatHeaderProps> = ({
               className="h-8 w-8 rounded-full object-cover"
               alt={companion.name}
             />
-            {brainHubConnected && (
+            {(brainHubConnected || oxumLearningActive) && (
               <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-blue-500 rounded-full border-2 border-background" 
-                   title="Enhanced by Brain Hub" />
+                   title={brainHubConnected && oxumLearningActive ? "Enhanced by Brain Hub & Oxum" : 
+                          brainHubConnected ? "Enhanced by Brain Hub" : "Enhanced by Oxum Learning"} />
             )}
           </div>
         ) : (
@@ -55,6 +58,12 @@ const AICompanionChatHeader: React.FC<AICompanionChatHeaderProps> = ({
               <Badge variant="outline" className="ml-1 px-1 py-0 h-4 text-[10px] bg-blue-500/10">
                 <Brain className="h-2 w-2 mr-1" />
                 Brain
+              </Badge>
+            )}
+            {oxumLearningActive && (
+              <Badge variant="outline" className="ml-1 px-1 py-0 h-4 text-[10px] bg-green-500/10">
+                <BookOpen className="h-2 w-2 mr-1" />
+                Oxum
               </Badge>
             )}
           </div>

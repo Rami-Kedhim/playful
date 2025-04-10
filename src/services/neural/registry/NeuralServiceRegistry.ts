@@ -1,109 +1,131 @@
 
-// Define module types
-export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion';
+import { BaseNeuralService } from '@/services/neural/modules/BaseNeuralService';
+import { aiCompanionNeuralService } from '@/services/neural/modules/AICompanionNeuralService';
+import { oxumLearningService } from '@/services/neural/modules/OxumLearningService';
 
-// Define neural service configuration
+export type ModuleType = 'companion' | 'content' | 'learning' | 'analytics';
+
 export interface NeuralServiceConfig {
   enabled: boolean;
-  priority: number;
-  autonomyLevel: number;
-  resourceAllocation: number;
-  boostingEnabled?: boolean;
-  boostingAlgorithm?: string;
-  orderByBoost?: boolean;
+  [key: string]: any;
 }
 
-// Define neural service interface
 export interface NeuralService {
   moduleId: string;
+  moduleName: string;
   moduleType: ModuleType;
+  description: string;
+  version: string;
   config: NeuralServiceConfig;
-  
-  // Methods
   initialize(): Promise<boolean>;
-  processFeedback(feedback: any): void;
-  getMetrics(): Record<string, any>;
-  getCapabilities(): string[];
   updateConfig(config: Partial<NeuralServiceConfig>): void;
-  getConfig(): NeuralServiceConfig;
 }
 
-// Neural Service Registry class
 class NeuralServiceRegistry {
   private services: Map<string, NeuralService> = new Map();
+  private initialized: boolean = false;
   
-  registerService(service: NeuralService): boolean {
+  constructor() {
+    // Register built-in services
+    this.registerBuiltInServices();
+  }
+  
+  /**
+   * Register built-in neural services
+   */
+  private registerBuiltInServices(): void {
+    // Register AI Companion neural service
+    this.registerService(aiCompanionNeuralService);
+    
+    // Register Oxum Learning service
+    this.registerService(oxumLearningService);
+  }
+  
+  /**
+   * Initialize all registered services
+   */
+  public async initializeAll(): Promise<boolean[]> {
+    if (this.initialized) {
+      return Array.from(this.services.values()).map(() => true);
+    }
+    
+    const initPromises = Array.from(this.services.values()).map(service => 
+      service.initialize().catch(err => {
+        console.error(`Failed to initialize service ${service.moduleId}:`, err);
+        return false;
+      })
+    );
+    
+    const results = await Promise.all(initPromises);
+    this.initialized = results.every(result => result === true);
+    
+    return results;
+  }
+  
+  /**
+   * Register a new neural service
+   */
+  public registerService(service: NeuralService): boolean {
     if (this.services.has(service.moduleId)) {
-      console.warn(`Service with ID ${service.moduleId} already exists`);
+      console.error(`Service with ID ${service.moduleId} already registered`);
       return false;
     }
     
     this.services.set(service.moduleId, service);
-    console.log(`Registered service: ${service.moduleId} (${service.moduleType})`);
     return true;
   }
   
-  unregisterService(moduleId: string): boolean {
-    if (!this.services.has(moduleId)) {
-      console.warn(`Service with ID ${moduleId} does not exist`);
+  /**
+   * Unregister a neural service
+   */
+  public unregisterService(serviceId: string): boolean {
+    if (!this.services.has(serviceId)) {
       return false;
     }
     
-    this.services.delete(moduleId);
-    console.log(`Unregistered service: ${moduleId}`);
-    return true;
+    return this.services.delete(serviceId);
   }
   
-  getService(moduleId: string): NeuralService | undefined {
-    return this.services.get(moduleId);
+  /**
+   * Get a specific service by ID
+   */
+  public getService(serviceId: string): NeuralService | undefined {
+    return this.services.get(serviceId);
   }
   
-  getAllServices(): NeuralService[] {
+  /**
+   * Get all registered services
+   */
+  public getAllServices(): NeuralService[] {
     return Array.from(this.services.values());
   }
   
-  getServicesByType(moduleType: ModuleType): NeuralService[] {
-    return this.getAllServices().filter(service => service.moduleType === moduleType);
+  /**
+   * Get services by type
+   */
+  public getServicesByType(moduleType: ModuleType): NeuralService[] {
+    return Array.from(this.services.values())
+      .filter(service => service.moduleType === moduleType);
   }
   
-  async initializeAll(): Promise<boolean[]> {
-    const initPromises = Array.from(this.services.values()).map(service => service.initialize());
-    return Promise.all(initPromises);
-  }
-  
-  optimizeResourceAllocation(): void {
-    // Simple resource allocation logic
-    const services = this.getAllServices();
-    const totalServices = services.length;
+  /**
+   * Optimize the resource allocation between services
+   */
+  public optimizeResourceAllocation(): void {
+    // In a real implementation, this would adjust resources between neural services
+    console.log('Optimizing neural service resource allocation');
     
-    if (totalServices === 0) return;
-    
-    // Sort by priority
-    const sortedServices = [...services].sort((a, b) => b.config.priority - a.config.priority);
-    
-    // Allocate resources based on priority
-    let remainingAllocation = 100;
-    let processedServices = 0;
-    
-    for (const service of sortedServices) {
-      if (processedServices === totalServices - 1) {
-        // Last service gets all remaining resources
-        service.updateConfig({ resourceAllocation: remainingAllocation });
-        break;
-      }
+    // Count services by type
+    const serviceTypes = Array.from(this.services.values())
+      .reduce((acc, service) => {
+        acc[service.moduleType] = (acc[service.moduleType] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
       
-      // Allocate based on priority weight
-      const totalPriorityWeight = sortedServices.reduce((sum, s) => sum + s.config.priority, 0);
-      const allocation = Math.floor((service.config.priority / totalPriorityWeight) * 100);
-      const cappedAllocation = Math.min(allocation, remainingAllocation);
-      
-      service.updateConfig({ resourceAllocation: cappedAllocation });
-      
-      remainingAllocation -= cappedAllocation;
-      processedServices++;
-    }
+    console.log('Service distribution:', serviceTypes);
   }
 }
 
-// Export a singleton instance
+// Export singleton instance
 export const neuralServiceRegistry = new NeuralServiceRegistry();
+export default neuralServiceRegistry;
