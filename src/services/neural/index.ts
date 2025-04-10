@@ -3,18 +3,8 @@
  * Neural system exports
  */
  
-// Main hub and services
-export { neuralHub } from './HermesOxumNeuralHub';
-export { brainHub } from './HermesOxumBrainHub';
-export type { BrainHubConfig } from './HermesOxumBrainHub';
-export { 
-  brainHubAutoDevOpsManager
-} from './BrainHubAutoDevOpsManager';
-export type { 
-  MissingComponentAnalysis, 
-  CodeGenerationResult, 
-  DeploymentResult 
-} from './BrainHubAutoDevOpsManager';
+// Main UberCore hub and services
+export { uberCore, UberCore } from './UberCore';
 
 // Neural Service Registry and base implementations
 export { 
@@ -28,7 +18,40 @@ export type {
 export { BaseNeuralService } from './modules/BaseNeuralService';
 export type { NeuralServiceConfig } from './modules/BaseNeuralService';
 
-// Module-specific neural services
+// UberCore modules
+export { 
+  oxumLearningService, 
+  OxumLearningService 
+} from './modules/OxumLearningService';
+
+export {
+  ubxEmoService,
+  UbxEmoService
+} from './modules/UbxEmoService';
+
+export {
+  ubxEthicsService,
+  UbxEthicsService
+} from './modules/UbxEthicsService';
+
+export {
+  ubxBridgeService,
+  UbxBridgeService
+} from './modules/UbxBridgeService';
+
+// Legacy modules (for backward compatibility)
+export { neuralHub } from './HermesOxumNeuralHub';
+export { brainHub } from './HermesOxumBrainHub';
+export type { BrainHubConfig } from './HermesOxumBrainHub';
+export { 
+  brainHubAutoDevOpsManager
+} from './BrainHubAutoDevOpsManager';
+export type { 
+  MissingComponentAnalysis, 
+  CodeGenerationResult, 
+  DeploymentResult 
+} from './BrainHubAutoDevOpsManager';
+
 export { 
   aiCompanionNeuralService, 
   AICompanionNeuralService 
@@ -49,11 +72,6 @@ export {
   LivecamsNeuralService
 } from './modules/LivecamsNeuralService';
 
-export {
-  oxumLearningService,
-  OxumLearningService
-} from './modules/OxumLearningService';
-
 // Types
 export type { 
   SystemHealthMetrics, 
@@ -67,7 +85,8 @@ export type {
   PsychologyModel,
   PhysicsModel,
   EconomicsModel,
-  RoboticsModel
+  RoboticsModel,
+  EmotionalState
 } from '@/types/brainHub';
 
 // Utility functions
