@@ -6,8 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Star, MapPin, Languages, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Escort } from '@/types/escort';
-import { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
-import ServiceTypeBadgeLabel from './filters/ServiceTypeBadgeLabel';
+import ServiceTypeBadgeLabel, { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
 
 interface EscortCardProps {
   escort: Escort;
