@@ -1,26 +1,24 @@
 
-/**
- * Neural Service Interface
- * Defines the common interface for all neural services in the system
- */
+import { ModuleType } from '../registry/NeuralServiceRegistry';
+
+export interface NeuralServiceConfig {
+  enabled: boolean;
+  priority?: number;
+  resourceAllocation?: number;
+  [key: string]: any;
+}
 
 export interface NeuralService {
-  // Metadata
   moduleId: string;
-  moduleType: string;
+  moduleType: ModuleType;
   moduleName: string;
   description: string;
   version: string;
-  author: string;
-  
-  // Core functionality
-  initialize(): Promise<boolean>;
-  configure(config: any): Promise<boolean>;
-  
-  // Utilities
+  config: NeuralServiceConfig;
+  updateConfig(config: Partial<NeuralServiceConfig>): void;
+  configure(options: Record<string, any>): void;
   getCapabilities(): string[];
-  getMetrics(): Record<string, number>;
+  getMetrics(): Record<string, any>;
+  initialize(): Promise<boolean>;
   isEnabled(): boolean;
 }
-
-export default NeuralService;
