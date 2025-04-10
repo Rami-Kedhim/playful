@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { ActivitySquare, Settings, MessageSquare, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ActivitySquare, Settings, MessageSquare, AlertTriangle, CheckCircle2, BarChart3 } from 'lucide-react';
 
 // Import the component tabs
 import StatusPanel from './tabs/StatusPanel';
 import InteractionPanel from './tabs/InteractionPanel';
 import ConfigurationPanel from './tabs/ConfigurationPanel';
+import NeuralMonitorPanel from './NeuralMonitorPanel';
 
 const UberCorePanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('status');
@@ -104,7 +105,7 @@ const UberCorePanel: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid grid-cols-3 w-full md:w-auto">
+            <TabsList className="grid grid-cols-4 w-full md:w-auto">
               <TabsTrigger value="status" className="flex items-center">
                 <ActivitySquare className="h-4 w-4 mr-2" />
                 <span className="hidden md:inline">System Status</span>
@@ -114,6 +115,11 @@ const UberCorePanel: React.FC = () => {
                 <MessageSquare className="h-4 w-4 mr-2" />
                 <span className="hidden md:inline">Interaction</span>
                 <span className="md:hidden">Interact</span>
+              </TabsTrigger>
+              <TabsTrigger value="monitor" className="flex items-center">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">Monitoring</span>
+                <span className="md:hidden">Monitor</span>
               </TabsTrigger>
               <TabsTrigger value="config" className="flex items-center">
                 <Settings className="h-4 w-4 mr-2" />
@@ -131,6 +137,10 @@ const UberCorePanel: React.FC = () => {
                 initialized={initialized}
                 updateStatus={updateStatus}
               />
+            </TabsContent>
+            
+            <TabsContent value="monitor" className="space-y-4">
+              <NeuralMonitorPanel />
             </TabsContent>
             
             <TabsContent value="config" className="space-y-4">
