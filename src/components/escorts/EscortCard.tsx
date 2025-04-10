@@ -3,10 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Star, Users, Monitor, MapPin, Languages, Calendar, Globe } from 'lucide-react';
+import { CheckCircle, Clock, Star, MapPin, Languages, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Escort } from '@/types/escort';
-import ServiceTypeBadgeLabel, { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
+import ServiceTypeBadgeLabel from './filters/ServiceTypeBadgeLabel';
 
 interface EscortCardProps {
   escort: Escort;
