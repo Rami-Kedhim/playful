@@ -1,78 +1,61 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Menu, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Logo from './Logo';
-import LanguageSwitcher from '../language/LanguageSwitcher';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import MobileMenu from '../navigation/MobileMenu';
-import useMobileMenu from '@/hooks/useMobileMenu';
-import DesktopNavigation from '../navigation/DesktopNavigation';
-import UserMenu from '../layout/UserMenu';
-import ServiceTypeMenu from '../navigation/ServiceTypeMenu';
+import { Button } from '@/components/ui/button';
+import { useRole } from '@/hooks/auth/useRole';
+import UserMenu from '@/components/layout/UserMenu';
+import { ModeToggle } from '@/components/ui/mode-toggle';
 
 const Navbar: React.FC = () => {
-  const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
-  const { isMobileMenuOpen, setIsMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
-  const navigate = useNavigate();
-
+  const { isAuthenticated, isLoading } = useAuth();
+  const { canAccessAdminFeatures, isEscort } = useRole();
+  
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-colors duration-300">
-      <div className="container flex h-16 items-center">
-        {/* Logo */}
-        <div className="mr-4 flex items-center">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-6 md:gap-10">
           <Link to="/" className="flex items-center space-x-2">
-            <Logo />
-          </Link>
-        </div>
-        
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex md:space-x-4">
-          <DesktopNavigation />
-          <ServiceTypeMenu />
-        </div>
-        
-        {/* Right-sided items */}
-        <div className="flex flex-1 items-center justify-end space-x-2">
-          {/* Search button */}
-          <Link to="/search" aria-label={t('search')}>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Search className="h-5 w-5" />
-              <span className="sr-only">{t('search')}</span>
-            </Button>
+            <span className="font-bold text-xl">UberEscorts</span>
           </Link>
           
-          {/* Language switcher */}
-          <LanguageSwitcher />
-          
-          {/* Theme toggle */}
-          <ThemeToggle />
-          
-          {/* Mobile menu toggle - only visible on mobile */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden rounded-full"
-            onClick={toggleMobileMenu}
-            aria-label="Toggle menu"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          
-          {/* Mobile menu */}
-          <MobileMenu open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen} />
-          
-          {/* User menu - only visible on desktop */}
-          <div className="hidden md:block">
-            <UserMenu />
+          <div className="hidden md:flex gap-6">
+            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+              Home
+            </Link>
+            
+            {isEscort() && (
+              <Link to="/escort-dashboard" className="text-sm font-medium transition-colors hover:text-primary">
+                Dashboard
+              </Link>
+            )}
+            
+            {canAccessAdminFeatures() && (
+              <Link to="/brainhub" className="text-sm font-medium transition-colors hover:text-primary">
+                BrainHub
+              </Link>
+            )}
           </div>
         </div>
+        
+        <div className="flex items-center gap-4">
+          <ModeToggle />
+          
+          {isAuthenticated ? (
+            <UserMenu />
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link to="/auth">
+                <Button variant="ghost" size="sm">Login</Button>
+              </Link>
+              <Link to="/auth">
+                <Button size="sm">Sign Up</Button>
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
-    </header>
+    </nav>
   );
 };
 
