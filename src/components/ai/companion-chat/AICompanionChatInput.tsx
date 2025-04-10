@@ -1,168 +1,99 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
+import { SendHorizontal, Image, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Image, Loader2 } from 'lucide-react';
-import { EmotionalState } from '@/types/ai-personality';
-import EmotionalStateIndicator from './EmotionalStateIndicator';
 
 interface AICompanionChatInputProps {
+  onSendMessage: (message: string) => void;
+  onGenerateImage: () => void;
   isLoading: boolean;
-  onSendMessage: (content: string) => void;
-  onGenerateImage?: (prompt: string) => void;
-  companionName?: string;
+  companionName: string;
   disabled?: boolean;
   disabledMessage?: string;
-  emotionalState?: EmotionalState | null;
+  emotionalState?: string;
+  brainHubEnhanced?: boolean;
 }
 
 const AICompanionChatInput: React.FC<AICompanionChatInputProps> = ({
-  isLoading,
   onSendMessage,
   onGenerateImage,
-  companionName = 'AI',
+  isLoading,
+  companionName,
   disabled = false,
   disabledMessage,
-  emotionalState
+  emotionalState,
+  brainHubEnhanced = false
 }) => {
   const [message, setMessage] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  // Auto-resize textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     
-    const adjustHeight = () => {
-      textarea.style.height = 'auto';
-      const newHeight = Math.min(textarea.scrollHeight, 150); // Max 150px
-      textarea.style.height = `${newHeight}px`;
-    };
+    if (!message.trim() || isLoading || disabled) return;
     
-    textarea.addEventListener('input', adjustHeight);
-    
-    // Initial adjustment
-    adjustHeight();
-    
-    return () => textarea.removeEventListener('input', adjustHeight);
-  }, []);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-  
-  const handleSend = () => {
-    if (message.trim() && !isLoading && !disabled) {
-      onSendMessage(message.trim());
-      setMessage('');
-      
-      // Reset height
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
-    }
-  };
-  
-  // Get placeholder based on emotional state
-  const getPlaceholder = (): string => {
-    if (!emotionalState) {
-      return `Message ${companionName}...`;
-    }
-    
-    const dominantEmotion = emotionalState.dominantEmotion;
-    const intensity = emotionalState.intensityLevel;
-    
-    if (intensity < 40) {
-      return `Message ${companionName}...`;
-    }
-    
-    switch (dominantEmotion) {
-      case 'joy':
-        return `${companionName} seems happy to chat with you...`;
-      case 'interest':
-        return `${companionName} is interested in what you have to say...`;
-      case 'anticipation':
-        return `${companionName} is eagerly waiting for your message...`;
-      case 'trust':
-        return `${companionName} feels comfortable with you...`;
-      case 'sadness':
-        return `${companionName} seems a bit down...`;
-      case 'fear':
-        return `${companionName} seems anxious...`;
-      case 'anger':
-        return `${companionName} seems upset...`;
-      case 'surprise':
-        return `${companionName} seems surprised by the conversation...`;
-      default:
-        return `Message ${companionName}...`;
-    }
+    onSendMessage(message);
+    setMessage('');
   };
 
+  const placeholder = isLoading
+    ? `${companionName} is typing...`
+    : `Message ${companionName}...`;
+
   return (
-    <div className="border-t p-3 bg-background">
+    <div className="p-3 border-t bg-background">
       {disabled && disabledMessage && (
-        <div className="mb-2 text-center text-xs text-red-500">
+        <div className="bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-xs p-2 mb-2 rounded-md">
           {disabledMessage}
         </div>
       )}
       
-      <div className="relative">
-        <Textarea
-          ref={textareaRef}
-          value={message}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          placeholder={getPlaceholder()}
-          className="resize-none pr-20 min-h-[40px] max-h-[150px] overflow-y-auto"
-          disabled={isLoading || disabled}
-          rows={1}
-        />
-        
-        <div className="absolute right-2 bottom-2 flex items-center space-x-2">
-          {/* Emotion indicator */}
-          {emotionalState && (
-            <div className="mr-1">
-              <EmotionalStateIndicator emotionalState={emotionalState} size="sm" />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+        <div className="relative">
+          <Textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={placeholder}
+            className="resize-none pr-12 py-3"
+            rows={2}
+            disabled={isLoading || disabled}
+          />
+          {brainHubEnhanced && (
+            <div className="absolute right-12 bottom-3 text-blue-500 opacity-70" title="Brain Hub Enhanced">
+              <Brain className="h-4 w-4" />
             </div>
           )}
-          
-          {/* Image generation button (if available) */}
-          {onGenerateImage && (
-            <Button 
-              size="icon" 
-              variant="ghost"
-              onClick={() => onGenerateImage(message)}
-              disabled={!message.trim() || isLoading || disabled}
-              className="h-8 w-8"
-            >
-              <Image className="h-4 w-4" />
-              <span className="sr-only">Generate image</span>
-            </Button>
-          )}
-          
-          {/* Send button */}
-          <Button 
-            size="icon" 
-            onClick={handleSend}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="absolute bottom-1 right-1"
             disabled={!message.trim() || isLoading || disabled}
-            className="h-8 w-8"
+            type="submit"
           >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            <span className="sr-only">Send</span>
+            <SendHorizontal className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+        
+        <div className="flex justify-between items-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={onGenerateImage}
+            disabled={isLoading || disabled}
+          >
+            <Image className="h-3 w-3 mr-1" />
+            Generate Image
+          </Button>
+          
+          {brainHubEnhanced && emotionalState && (
+            <div className="text-xs text-muted-foreground italic">
+              AI mood: {emotionalState}
+            </div>
+          )}
+        </div>
+      </form>
     </div>
   );
 };

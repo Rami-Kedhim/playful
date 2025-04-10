@@ -1,10 +1,13 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import ContentStatusBadge from './ContentStatusBadge';
 import ContentExpiryInfo from './ContentExpiryInfo';
 import { calculateExpiryDate, calculateRenewalCost } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
+import { useContentBrainHub } from '@/hooks/useContentBrainHub';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles } from 'lucide-react';
 
 interface ContentCardProps {
   item: {
@@ -16,13 +19,30 @@ interface ContentCardProps {
     content?: string;
     status: string;
     daysRemaining?: number;
+    brainHubProcessed?: boolean;
+    optimizationScore?: number;
+    recommendedActions?: string[];
   };
   onRenew: (id: string) => void;
 }
 
 const ContentCard: React.FC<ContentCardProps> = ({ item, onRenew }) => {
   const expiresAt = calculateExpiryDate(item.createdAt);
-  const lucoinCost = calculateRenewalCost(item.status, item.type);
+  const { getIntelligentRenewalCost, recordInteraction } = useContentBrainHub();
+  
+  // Try to use intelligent pricing first, fall back to standard calculation
+  const lucoinCost = getIntelligentRenewalCost(item.status, item.type);
+  
+  // Record view interaction with Brain Hub when component mounts
+  useEffect(() => {
+    recordInteraction(item.id, 'view');
+  }, [item.id, recordInteraction]);
+  
+  // Handle renew button click with Brain Hub tracking
+  const handleRenew = () => {
+    recordInteraction(item.id, 'renew');
+    onRenew(item.id);
+  };
   
   return (
     <Card key={item.id} className="overflow-hidden">
@@ -39,6 +59,15 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onRenew }) => {
               daysRemaining={item.status === 'expiring' ? item.daysRemaining : undefined}  
             />
           </div>
+          
+          {item.brainHubProcessed && item.optimizationScore && (
+            <div className="absolute top-2 left-2">
+              <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white flex items-center gap-1">
+                <Sparkles className="h-3 w-3" />
+                <span>Optimized {item.optimizationScore.toFixed(1)}</span>
+              </Badge>
+            </div>
+          )}
         </div>
       )}
       <CardContent className="p-4 space-y-2">
@@ -59,11 +88,23 @@ const ContentCard: React.FC<ContentCardProps> = ({ item, onRenew }) => {
             {item.content}
           </p>
         )}
+        
+        {item.recommendedActions && item.recommendedActions.length > 0 && (
+          <div className="text-xs p-2 rounded-md bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900">
+            <p className="font-medium mb-1 text-blue-700 dark:text-blue-300">Brain Hub Recommendations:</p>
+            <ul className="list-disc ml-4 text-muted-foreground space-y-1">
+              {item.recommendedActions.slice(0, 2).map((action, idx) => (
+                <li key={idx}>{action}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
         {item.status !== 'draft' && (
           <ContentExpiryInfo 
             createdAt={item.createdAt} 
             expiresAt={expiresAt} 
-            onRenew={() => onRenew(item.id)}
+            onRenew={handleRenew}
             lucoinCost={lucoinCost}
           />
         )}
