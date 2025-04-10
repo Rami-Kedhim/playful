@@ -1,187 +1,142 @@
 
 /**
- * Advanced mathematical functions for the HERMES Optimization System
+ * HERMES Mathematical Utility Functions
+ * 
+ * Advanced mathematical functions for the HERMES optimization system
  */
 
-/**
- * Calculate visibility decay based on exponential function
- * 
- * @param initialValue - Initial visibility value
- * @param decayConstant - Rate of decay (higher = faster decay)
- * @param timeElapsed - Time elapsed in hours
- * @returns Current visibility value
- */
-export function calculateVisibilityDecay(
+// Calculate the dynamic decay constant based on user activity patterns
+export const calculateDynamicDecayConstant = (
   initialValue: number,
-  decayConstant: number,
-  timeElapsed: number
-): number {
-  return initialValue * Math.exp(-decayConstant * timeElapsed);
-}
+  timeElapsed: number,
+  activityIntensity: number
+): number => {
+  const base = 0.1;
+  const activityFactor = Math.min(1, Math.max(0.1, activityIntensity / 100));
+  const timeFactor = Math.exp(-0.05 * timeElapsed);
+  
+  return base * (1 + initialValue * timeFactor * activityFactor);
+};
 
-/**
- * Calculate boost score based on time of day
- * 
- * @param maxEffect - Maximum boost effect
- * @param aggressionFactor - How aggressively to boost (0-1)
- * @param currentTimeValue - Current time (decimal hours, 0-24)
- * @param optimalTimeWindow - Optimal time window for maximum boost
- * @returns Boost score
- */
-export function calculateBoostScore(
-  maxEffect: number,
-  aggressionFactor: number,
-  currentTimeValue: number,
-  optimalTimeWindow: [number, number]
-): number {
-  const [windowStart, windowEnd] = optimalTimeWindow;
+// Calculate the geo-based boost multiplier
+export const calculateGeoBoostMultiplier = (
+  baseMultiplier: number,
+  geoActivityFactor: number,
+  timeOfDay: number
+): number => {
+  // Time of day effect (0-24 hours)
+  const timeEffect = Math.sin((Math.PI * (timeOfDay - 6)) / 12) * 0.2 + 1;
   
-  // Check if current time is within optimal window
-  if (currentTimeValue >= windowStart && currentTimeValue <= windowEnd) {
-    // Maximum boost during optimal window
-    return maxEffect;
-  }
+  // Geo activity impact
+  const geoEffect = Math.log10(geoActivityFactor + 1) * 0.5;
   
-  // Calculate distance from optimal window
-  let distanceFromWindow;
-  if (currentTimeValue < windowStart) {
-    distanceFromWindow = windowStart - currentTimeValue;
-  } else {
-    distanceFromWindow = currentTimeValue - windowEnd;
-  }
-  
-  // Apply distance penalty with aggression factor
-  const penalty = Math.min(1, distanceFromWindow / 6) * aggressionFactor;
-  return maxEffect * (1 - penalty);
-}
+  return baseMultiplier * timeEffect * (1 + geoEffect);
+};
 
-/**
- * Calculate geographic boost multiplier based on source and target timezones
- * 
- * @param sourceTimezone - Source timezone
- * @param targetTimezone - Target timezone
- * @returns Multiplier value (0.5-1.5)
- */
-export function calculateGeoBoostMultiplier(
-  sourceTimezone: string,
-  targetTimezone: string
-): number {
-  // This is a simplified implementation
-  // In a real system, this would use timezone offsets and population models
-  
-  // Get current hours in both timezones
-  const sourceDate = new Date();
-  const targetDate = new Date();
-  
-  // Simulate timezone offset for demo purposes
-  const sourceHour = sourceDate.getHours();
-  let targetHour;
-  
-  // Simple offset simulation
-  if (targetTimezone.includes('Europe')) {
-    targetHour = (sourceHour + 6) % 24; // Europe ahead of America
-  } else {
-    targetHour = sourceHour;
-  }
-  
-  // Calculate activity level based on local time (simplified)
-  const sourceActivity = getActivityLevel(sourceHour);
-  const targetActivity = getActivityLevel(targetHour);
-  
-  // Higher multiplier when target location has higher activity
-  return 0.5 + targetActivity;
-}
-
-/**
- * Calculate engagement factor based on user interaction patterns
- * 
- * @param viewCount - Number of profile views
- * @param clickCount - Number of interaction clicks
- * @param timeSpent - Time spent viewing the profile (minutes)
- * @returns Engagement factor (0-1)
- */
-export function calculateEngagementFactor(
-  viewCount: number,
-  clickCount: number,
+// Calculate the engagement factor
+export const calculateEngagementFactor = (
+  views: number,
+  interactions: number,
   timeSpent: number
-): number {
-  // Normalize inputs
-  const normalizedViews = Math.min(1, viewCount / 20);
-  const normalizedClicks = Math.min(1, clickCount / 5);
-  const normalizedTime = Math.min(1, timeSpent / 15);
+): number => {
+  if (views === 0) return 0;
   
-  // Weighted average of factors
-  return (normalizedViews * 0.2) + (normalizedClicks * 0.5) + (normalizedTime * 0.3);
-}
-
-/**
- * Calculate boost priority based on wait time and score
- * 
- * @param waitTimeHours - Time since last top position (hours)
- * @param currentBoostScore - Current boost score
- * @returns Priority score
- */
-export function calculateBoostPriority(
-  waitTimeHours: number,
-  currentBoostScore: number
-): number {
-  // Logarithmic wait time factor - increases priority but with diminishing returns
-  const waitFactor = Math.log10(Math.max(1, waitTimeHours) + 1) * 10;
+  const interactionRate = interactions / views;
+  const avgTimePerView = timeSpent / views;
   
-  // Score factor - higher score gets higher priority
-  const scoreFactor = currentBoostScore / 20;
+  // Sigmoid function to normalize the engagement factor between 0 and 1
+  const engagementRaw = interactionRate * avgTimePerView;
+  const engagementFactor = 1 / (1 + Math.exp(-5 * (engagementRaw - 0.5)));
   
-  return waitFactor + scoreFactor;
-}
+  return engagementFactor * 100; // Scale to percentage
+};
 
-/**
- * Get optimal time window for maximum exposure
- * 
- * @returns Tuple of [start, end] hours (0-24)
- */
-export function getOptimalTimeWindow(): [number, number] {
-  // This could be dynamically calculated based on analytics
-  // For now, return fixed optimal window (8pm - 12am)
-  return [20, 24];
-}
-
-/**
- * Helper function to calculate activity level based on hour of day
- * 
- * @param hour - Hour of day (0-23)
- * @returns Activity level (0-1)
- */
-function getActivityLevel(hour: number): number {
-  // Define peak hours (simplified model)
-  // Early morning (5-8): Low
-  // Work hours (9-17): Medium
-  // Evening (18-23): High
-  // Late night (0-4): Low-Medium
+// Calculate boost priority score
+export const calculateBoostPriority = (
+  profileScore: number,
+  timeUntilExpiration: number,
+  competitionLevel: number
+): number => {
+  // Base priority from profile score (0-100)
+  const basePriority = profileScore * 0.6;
   
-  if (hour >= 5 && hour <= 8) return 0.3;
-  if (hour >= 9 && hour <= 17) return 0.5;
-  if (hour >= 18 && hour <= 23) return 0.9;
-  return 0.4; // Late night
-}
+  // Urgency factor based on time until expiration
+  const urgencyFactor = Math.max(0, 1 - timeUntilExpiration / 24) * 25;
+  
+  // Competition adjustment
+  const competitionFactor = Math.min(competitionLevel, 10) * 1.5;
+  
+  return Math.min(100, basePriority + urgencyFactor + competitionFactor);
+};
 
-/**
- * Calculate time impact on boost effectiveness
- * 
- * @param currentHour - Current hour (0-23)
- * @returns Impact score (0-100)
- */
-export function calculateTimeImpact(currentHour: number): number {
-  // Simple model - effectiveness varies by time of day
-  // Peak during evening hours
-  if (currentHour >= 18 && currentHour <= 23) {
-    return 80 + (currentHour - 18) * 4;
+// Calculate the Laplace transform of a step response
+export const calculateLaplaceTransform = (
+  s: number, 
+  a: number
+): number => {
+  return 1 / (s * (s + a));
+};
+
+// Calculate differential equation solution using Euler method
+export const solveEulerMethod = (
+  initialValue: number,
+  timeStep: number,
+  steps: number,
+  rateFunction: (x: number, t: number) => number
+): number[] => {
+  const result: number[] = [initialValue];
+  let currentValue = initialValue;
+  
+  for (let i = 0; i < steps; i++) {
+    const time = i * timeStep;
+    const rate = rateFunction(currentValue, time);
+    currentValue += rate * timeStep;
+    result.push(currentValue);
   }
-  // Medium during day
-  else if (currentHour >= 8 && currentHour < 18) {
-    return 50 + (currentHour - 8) * 3;
-  }
-  // Low during night/early morning
-  else {
-    return 30 + Math.abs(currentHour - 3) * 5;
-  }
-}
+  
+  return result;
+};
+
+// HERMES core function: Calculate optimized boost allocation
+export const calculateOptimalBoostAllocation = (
+  availableBoost: number,
+  profiles: Array<{
+    id: string;
+    score: number;
+    competition: number;
+    timeRemaining: number;
+    currentAllocation: number;
+  }>
+): Array<{id: string; allocation: number}> => {
+  // Calculate initial priorities
+  const withPriorities = profiles.map(profile => ({
+    ...profile,
+    priority: calculateBoostPriority(
+      profile.score,
+      profile.timeRemaining,
+      profile.competition
+    )
+  }));
+  
+  // Sort by priority descending
+  const sorted = [...withPriorities].sort((a, b) => b.priority - a.priority);
+  
+  // Allocate boost proportionally to priority
+  const totalPriority = sorted.reduce((sum, p) => sum + p.priority, 0);
+  let remaining = availableBoost;
+  
+  const allocations = sorted.map(profile => {
+    if (totalPriority === 0) return { id: profile.id, allocation: 0 };
+    
+    const optimalAllocation = (profile.priority / totalPriority) * availableBoost;
+    const allocation = Math.min(remaining, optimalAllocation);
+    remaining -= allocation;
+    
+    return {
+      id: profile.id,
+      allocation
+    };
+  });
+  
+  return allocations;
+};
