@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle, AlertTriangle, Archive, Eye } from 'lucide-react';
+import { Clock, CheckCircle, AlertTriangle, Archive, Eye, FilePen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type ContentStatus = 'active' | 'expiring' | 'expired' | 'archived' | 'pending';
+export type ContentStatus = 'active' | 'expiring' | 'expired' | 'archived' | 'pending' | 'draft';
 
 interface ContentStatusBadgeProps {
   status: ContentStatus;
@@ -49,6 +49,12 @@ const ContentStatusBadge: React.FC<ContentStatusBadgeProps> = ({
           icon: <Eye className="h-3 w-3 mr-1" />,
           variant: 'default' as const,
         };
+      case 'draft':
+        return {
+          label: 'Draft',
+          icon: <FilePen className="h-3 w-3 mr-1" />,
+          variant: 'secondary' as const,
+        };
       default:
         return {
           label: 'Unknown',
@@ -64,6 +70,7 @@ const ContentStatusBadge: React.FC<ContentStatusBadgeProps> = ({
   const badgeClasses = cn(
     "flex items-center", 
     status === 'expiring' && "bg-amber-500 text-white hover:bg-amber-600",
+    status === 'expired' && "bg-red-600 text-white hover:bg-red-700",
     className
   );
 

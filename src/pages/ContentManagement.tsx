@@ -10,8 +10,9 @@ import ContentSettings from '@/components/content/ContentSettings';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Info, LockIcon, Clock } from 'lucide-react';
+import { AlertTriangle, Info, LockIcon, Clock, Coins, BarChart, Shield } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card } from '@/components/ui/card';
 
 const ContentManagementPage: React.FC = () => {
   const { user } = useAuth();
@@ -63,22 +64,46 @@ const ContentManagementPage: React.FC = () => {
             Upload and manage your content, track performance, and monetize your media.
           </p>
           
-          <Alert className="mb-6">
-            <Clock className="h-4 w-4" />
-            <AlertTitle>Content Expiration Policy</AlertTitle>
-            <AlertDescription className="space-y-2">
-              <p>
-                Photos and videos expire after 180 days of inactivity. Content can be renewed manually 
-                using Lucoin or automatically with user interactions.
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Standard content:</span> 1 LC to renew when expiring, 2 LC when expired
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Premium/Video content:</span> 2 LC to renew when expiring, 3 LC when expired
-              </p>
-            </AlertDescription>
-          </Alert>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <Card className="p-6 border-l-4 border-amber-500">
+              <div className="flex items-start space-x-4">
+                <Clock className="h-8 w-8 text-amber-500" />
+                <div>
+                  <h3 className="font-medium text-lg mb-1">Content Expiration</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Photos and videos expire after 180 days of inactivity. Use Lucoin 
+                    to renew expiring content or receive user interactions to extend automatically.
+                  </p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-6 border-l-4 border-emerald-500">
+              <div className="flex items-start space-x-4">
+                <Coins className="h-8 w-8 text-emerald-500" />
+                <div>
+                  <h3 className="font-medium text-lg mb-1">Renewal Pricing</h3>
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium">Standard content:</span> 1 LC when expiring, 2 LC when expired<br />
+                    <span className="font-medium">Premium/Video:</span> 2 LC when expiring, 3 LC when expired
+                  </p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-6 border-l-4 border-blue-500">
+              <div className="flex items-start space-x-4">
+                <Shield className="h-8 w-8 text-blue-500" />
+                <div>
+                  <h3 className="font-medium text-lg mb-1">Content Policy</h3>
+                  <p className="text-sm text-muted-foreground">
+                    All content undergoes review for compliance with our content guidelines. 
+                    Premium content requires age verification and follows stricter guidelines.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-4 mb-6">

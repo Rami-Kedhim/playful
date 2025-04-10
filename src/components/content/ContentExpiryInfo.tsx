@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { calculateDaysRemaining } from '@/utils/dateUtils';
+import { calculateDaysRemaining, formatDate } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Clock, RefreshCw } from 'lucide-react';
+import { Clock, RefreshCw, InfoCircle, Coins } from 'lucide-react';
 
 interface ContentExpiryInfoProps {
   createdAt: Date;
@@ -24,15 +24,20 @@ const ContentExpiryInfo: React.FC<ContentExpiryInfoProps> = ({
   
   if (isExpired) {
     return (
-      <div className="flex items-center justify-between p-2 bg-red-50 dark:bg-red-900/20 rounded-md text-sm">
-        <span className="flex items-center text-red-600 dark:text-red-400">
-          <Clock className="h-4 w-4 mr-1" />
-          Expired content
-        </span>
+      <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-md text-sm border border-red-200 dark:border-red-800">
+        <div className="flex flex-col">
+          <span className="flex items-center text-red-600 dark:text-red-400 font-medium">
+            <Clock className="h-4 w-4 mr-1" />
+            Expired content
+          </span>
+          <span className="text-xs text-red-500 dark:text-red-400 mt-1">
+            Expired on {formatDate(expiresAt)}
+          </span>
+        </div>
         {onRenew && (
-          <Button onClick={onRenew} variant="outline" size="sm" className="bg-red-50 dark:bg-red-900/20">
+          <Button onClick={onRenew} size="sm" className="bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/40 dark:hover:bg-red-900/60 dark:text-red-300">
             <RefreshCw className="h-3 w-3 mr-1" />
-            Renew ({lucoinCost} LC)
+            Renew <Coins className="h-3 w-3 mx-1" /> {lucoinCost} LC
           </Button>
         )}
       </div>
@@ -41,18 +46,23 @@ const ContentExpiryInfo: React.FC<ContentExpiryInfoProps> = ({
   
   if (isExpiringSoon) {
     return (
-      <div className="flex items-center justify-between p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md text-sm">
-        <span className="flex items-center text-amber-600 dark:text-amber-400">
-          <Clock className="h-4 w-4 mr-1" />
-          Expires in {daysRemaining} days
-        </span>
+      <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-900/20 rounded-md text-sm border border-amber-200 dark:border-amber-800">
+        <div className="flex flex-col">
+          <span className="flex items-center text-amber-600 dark:text-amber-400 font-medium">
+            <Clock className="h-4 w-4 mr-1" />
+            Expires in {daysRemaining} days
+          </span>
+          <span className="text-xs text-amber-500 dark:text-amber-400 mt-1">
+            Expires on {formatDate(expiresAt)}
+          </span>
+        </div>
         {onRenew && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button onClick={onRenew} variant="outline" size="sm" className="bg-amber-50 dark:bg-amber-900/20">
+                <Button onClick={onRenew} size="sm" className="bg-amber-100 hover:bg-amber-200 text-amber-600 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 dark:text-amber-300">
                   <RefreshCw className="h-3 w-3 mr-1" />
-                  Renew
+                  Renew <Coins className="h-3 w-3 mx-1" /> {lucoinCost} LC
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -65,7 +75,20 @@ const ContentExpiryInfo: React.FC<ContentExpiryInfoProps> = ({
     );
   }
   
-  return null;
+  // Show a minimal info for active content that's not expiring soon
+  return (
+    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/20 rounded-md text-sm border border-gray-200 dark:border-gray-800">
+      <div className="flex flex-col">
+        <span className="flex items-center text-gray-600 dark:text-gray-400">
+          <Clock className="h-4 w-4 mr-1" />
+          Active for {Math.floor((180 - daysRemaining) / 30)} months
+        </span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Expires on {formatDate(expiresAt)}
+        </span>
+      </div>
+    </div>
+  );
 };
 
 export default ContentExpiryInfo;
