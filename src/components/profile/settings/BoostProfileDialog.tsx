@@ -13,15 +13,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { 
-  useBoostManager,
-  formatBoostDuration 
+  useBoostManager
 } from "@/hooks/boost";
 import { 
   BoostPackageSelection, 
   BoostInfoTooltip,
   BoostActivePackage
 } from "@/components/boost";
-import { toast } from "@/components/ui/use-toast"; // Fixed import path
+import { toast } from "@/components/ui/use-toast";
+import {
+  adaptBoostStatus,
+  adaptBoostEligibility,
+  adaptBoostPackages,
+  adaptFormatBoostDuration,
+  adaptGetBoostPrice
+} from "@/hooks/boost/useBoostAdapters";
 
 interface BoostProfileDialogProps {
   onSuccess?: () => void;
@@ -44,13 +50,13 @@ const BoostProfileDialog = ({
   const profileId = user?.id;
 
   const { 
-    boostStatus, 
-    eligibility,
-    boostPackages, 
-    selectedPackage, 
-    setSelectedPackage,
+    boostStatus: managerBoostStatus, 
+    eligibility: managerEligibility,
+    boostPackages: managerBoostPackages, 
+    selectedPackage: managerSelectedPackage, 
+    setSelectedPackage: managerSetSelectedPackage,
     fetchBoostPackages, 
-    getBoostPrice, 
+    getBoostPrice: managerGetBoostPrice, 
     purchaseBoost,
     cancelBoost,
     loading,
@@ -58,6 +64,33 @@ const BoostProfileDialog = ({
     dailyBoostUsage,
     dailyBoostLimit
   } = useBoostManager(profileId);
+
+  // Adapt types to match expected interfaces
+  const boostStatus = adaptBoostStatus(managerBoostStatus);
+  const eligibility = adaptBoostEligibility(managerEligibility);
+  const boostPackages = adaptBoostPackages(managerBoostPackages);
+  const formatBoostDuration = adaptFormatBoostDuration(formatBoostDuration);
+  const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
+
+  // Handle selected package conversion
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+
+  // Update selected package when manager selected package changes
+  useEffect(() => {
+    if (managerSelectedPackage) {
+      setSelectedPackage(managerSelectedPackage.id);
+    } else {
+      setSelectedPackage(null);
+    }
+  }, [managerSelectedPackage]);
+
+  // Handle package selection
+  const handlePackageSelect = (packageId: string) => {
+    const pkg = managerBoostPackages.find(p => p.id === packageId);
+    if (pkg) {
+      managerSetSelectedPackage(pkg);
+    }
+  };
 
   // Handle controlled/uncontrolled state
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
@@ -92,7 +125,19 @@ const BoostProfileDialog = ({
       return;
     }
 
-    const success = await purchaseBoost(selectedPackage);
+    // Find the manager package object from the selected package ID
+    const packageToBoost = managerBoostPackages.find(p => p.id === selectedPackage);
+    
+    if (!packageToBoost) {
+      toast({
+        title: "Package not found",
+        description: "The selected package could not be found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const success = await purchaseBoost(packageToBoost);
     
     if (success) {
       setActiveTab("active");
@@ -154,8 +199,8 @@ const BoostProfileDialog = ({
               boostStatus={boostStatus}
               boostAnalytics={boostAnalytics}
               onCancel={handleCancel}
-              dailyBoostUsage={dailyBoostUsage || 0}
-              dailyBoostLimit={dailyBoostLimit || 4}
+              dailyBoostUsage={dailyBoostUsage}
+              dailyBoostLimit={dailyBoostLimit}
             />
           ) : (
             <>
@@ -163,7 +208,7 @@ const BoostProfileDialog = ({
                 <BoostPackageSelection
                   packages={boostPackages}
                   selectedPackage={selectedPackage}
-                  onSelectPackage={setSelectedPackage}
+                  onSelectPackage={handlePackageSelect}
                   formatBoostDuration={formatBoostDuration}
                   isLoading={loading}
                 />

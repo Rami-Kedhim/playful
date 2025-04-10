@@ -1,13 +1,21 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useBoostManager, formatBoostDuration } from "@/hooks/boost";
+import { useBoostManager } from "@/hooks/boost/useBoostManager";
 import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
 import BoostDialogHeader from "./dialog/BoostDialogHeader";
 import BoostDialogTabs from "./dialog/BoostDialogTabs";
 import BoostInfoTooltip from "./dialog/BoostInfoTooltip";
+import { 
+  adaptBoostStatus, 
+  adaptBoostEligibility,
+  adaptBoostPackages,
+  adaptFormatBoostDuration,
+  adaptGetBoostPrice
+} from "@/hooks/boost/useBoostAdapters";
 
 interface BoostDialogContainerProps {
   profileId: string;
@@ -29,13 +37,13 @@ const BoostDialogContainer = ({
   const [boostAnalytics, setBoostAnalytics] = useState<any>(null);
   
   const { 
-    boostStatus, 
-    eligibility,
-    boostPackages, 
-    selectedPackage, 
-    setSelectedPackage,
+    boostStatus: managerBoostStatus, 
+    eligibility: managerEligibility,
+    boostPackages: managerBoostPackages, 
+    selectedPackage: managerSelectedPackage, 
+    setSelectedPackage: managerSetSelectedPackage,
     fetchBoostPackages, 
-    getBoostPrice, 
+    getBoostPrice: managerGetBoostPrice, 
     purchaseBoost,
     cancelBoost,
     loading,
@@ -46,6 +54,33 @@ const BoostDialogContainer = ({
 
   // Add Hermes + Oxum integration
   const { hermesStatus: hermesBoostStatus } = useHermesOxumBoost(profileId);
+
+  // Adapt types to match expected interfaces
+  const boostStatus = adaptBoostStatus(managerBoostStatus);
+  const eligibility = adaptBoostEligibility(managerEligibility);
+  const boostPackages = adaptBoostPackages(managerBoostPackages);
+  const formatBoostDuration = adaptFormatBoostDuration(formatBoostDuration);
+  const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
+
+  // Handle selected package conversion
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+
+  // Update selected package when manager selected package changes
+  useEffect(() => {
+    if (managerSelectedPackage) {
+      setSelectedPackage(managerSelectedPackage.id);
+    } else {
+      setSelectedPackage(null);
+    }
+  }, [managerSelectedPackage]);
+
+  // Handle package selection
+  const handlePackageSelect = (packageId: string) => {
+    const pkg = managerBoostPackages.find(p => p.id === packageId);
+    if (pkg) {
+      managerSetSelectedPackage(pkg);
+    }
+  };
 
   useEffect(() => {
     if (open) {
@@ -74,7 +109,19 @@ const BoostDialogContainer = ({
       return;
     }
 
-    const success = await purchaseBoost(selectedPackage);
+    // Find the manager package object from the selected package ID
+    const packageToBoost = managerBoostPackages.find(p => p.id === selectedPackage);
+    
+    if (!packageToBoost) {
+      toast({
+        title: "Package not found",
+        description: "The selected package could not be found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const success = await purchaseBoost(packageToBoost);
     
     if (success) {
       setActiveTab("active");
@@ -110,7 +157,7 @@ const BoostDialogContainer = ({
           eligibility={eligibility}
           boostPackages={boostPackages}
           selectedPackage={selectedPackage}
-          setSelectedPackage={setSelectedPackage}
+          setSelectedPackage={handlePackageSelect}
           handlePurchase={handlePurchase}
           handleCancel={handleCancel}
           handleDialogClose={handleDialogClose}

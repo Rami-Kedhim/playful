@@ -1,4 +1,3 @@
-
 /**
  * Oxum Learning Service
  * 
@@ -18,7 +17,7 @@ export interface LearningConfig {
 export interface ProcessingResult {
   enhancedOutput: string;
   confidenceScore: number;
-  culturalContext?: Record<string, any>;
+  culturalContext: Record<string, any>;
   adaptationRecommendations?: Record<string, any>;
 }
 
@@ -40,6 +39,15 @@ export class OxumLearningService {
   }> = [];
   
   private initialized: boolean = false;
+  
+  public readonly moduleId: string = 'oxum-learning';
+  public readonly moduleType: string = 'learning';
+  public readonly moduleName: string = 'Oxum Learning';
+  public readonly description: string = 'Advanced learning service for optimizing user flows';
+  public readonly version: string = '1.0.0';
+  public readonly author: string = 'UberCore Systems';
+  public readonly license: string = 'Proprietary';
+  public readonly capabilities: string[] = ['learning', 'optimization', 'adaptation'];
   
   /**
    * Initialize Oxum Learning Service
@@ -75,7 +83,8 @@ export class OxumLearningService {
     if (!this.initialized || !this.config.enabled) {
       return {
         enhancedOutput: input,
-        confidenceScore: 0.5
+        confidenceScore: 0.5,
+        culturalContext: {}
       };
     }
     
@@ -87,7 +96,7 @@ export class OxumLearningService {
       // For demonstration, we'll return a slightly modified output
       
       // Extract cultural context if enabled
-      let culturalContext: Record<string, any> | undefined;
+      let culturalContext: Record<string, any> = {};
       if (this.config.culturalContextEnabled) {
         culturalContext = this.extractCulturalContext(context);
       }
@@ -118,7 +127,8 @@ export class OxumLearningService {
       console.error('Error processing input with Oxum:', error);
       return {
         enhancedOutput: input,
-        confidenceScore: 0.3
+        confidenceScore: 0.3,
+        culturalContext: {}
       };
     }
   }
@@ -201,6 +211,16 @@ export class OxumLearningService {
       input: pattern.input,
       timestamp: pattern.timestamp
     }));
+  }
+  
+  /**
+   * Get cultural contexts from historical data
+   * @returns Array of cultural contexts
+   */
+  public getCulturalContexts(): Record<string, any>[] {
+    return this.patternHistory.map(pattern => 
+      this.extractCulturalContext(pattern.context)
+    );
   }
   
   /**

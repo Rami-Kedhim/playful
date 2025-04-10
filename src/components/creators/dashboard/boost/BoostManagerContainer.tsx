@@ -1,14 +1,21 @@
+
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { 
-  useBoostManager, 
-  formatBoostDuration 
+  useBoostManager
 } from "@/hooks/boost";
 import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 import BoostStatus from "./BoostStatus";
 import BoostAnalytics from "./BoostAnalytics";
 import { toast } from "@/components/ui/use-toast";
+import {
+  adaptBoostStatus,
+  adaptBoostEligibility,
+  adaptBoostPackages,
+  adaptFormatBoostDuration,
+  adaptGetBoostPrice
+} from "@/hooks/boost/useBoostAdapters";
 
 interface BoostManagerContainerProps {
   creatorId: string;
@@ -33,13 +40,13 @@ const BoostManagerContainer = ({
 }: BoostManagerContainerProps) => {
   
   const {
-    boostStatus,
-    eligibility,
-    boostPackages,
-    selectedPackage,
-    setSelectedPackage,
+    boostStatus: managerBoostStatus,
+    eligibility: managerEligibility,
+    boostPackages: managerBoostPackages,
+    selectedPackage: managerSelectedPackage,
+    setSelectedPackage: managerSetSelectedPackage,
     fetchBoostPackages,
-    getBoostPrice,
+    getBoostPrice: managerGetBoostPrice,
     purchaseBoost,
     cancelBoost,
     loading,
@@ -48,6 +55,33 @@ const BoostManagerContainer = ({
     dailyBoostUsage,
     dailyBoostLimit
   } = useBoostManager(creatorId);
+  
+  // Adapt types to match expected interfaces
+  const boostStatus = adaptBoostStatus(managerBoostStatus);
+  const eligibility = adaptBoostEligibility(managerEligibility);
+  const boostPackages = adaptBoostPackages(managerBoostPackages);
+  const formatBoostDuration = adaptFormatBoostDuration(formatBoostDuration);
+  const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
+
+  // Handle selected package conversion
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+
+  // Update selected package when manager selected package changes
+  useEffect(() => {
+    if (managerSelectedPackage) {
+      setSelectedPackage(managerSelectedPackage.id);
+    } else {
+      setSelectedPackage(null);
+    }
+  }, [managerSelectedPackage]);
+
+  // Handle package selection
+  const handlePackageSelect = (packageId: string) => {
+    const pkg = managerBoostPackages.find(p => p.id === packageId);
+    if (pkg) {
+      managerSetSelectedPackage(pkg);
+    }
+  };
   
   useEffect(() => {
     fetchBoostPackages();
@@ -66,7 +100,19 @@ const BoostManagerContainer = ({
       return;
     }
     
-    const success = await purchaseBoost(selectedPackage);
+    // Find the manager package object from the selected package ID
+    const packageToBoost = managerBoostPackages.find(p => p.id === selectedPackage);
+    
+    if (!packageToBoost) {
+      toast({
+        title: "Package not found",
+        description: "The selected package could not be found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const success = await purchaseBoost(packageToBoost);
     
     if (success) {
       toast({
@@ -115,7 +161,7 @@ const BoostManagerContainer = ({
         lucoinBalance={lucoinBalance}
         boostPackages={boostPackages}
         selectedPackage={selectedPackage}
-        onSelectPackage={setSelectedPackage}
+        onSelectPackage={handlePackageSelect}
         onPurchase={handleBoostPurchase}
         onCancel={handleCancelBoost}
         getBoostPrice={getBoostPrice}

@@ -1,5 +1,6 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { oxumLearningService } from '@/services/neural/modules/OxumLearningService';
+import { oxumLearningService, ProcessingResult } from '@/services/neural/modules/OxumLearningService';
 import { useBrainHub } from '@/hooks/useBrainHub';
 
 interface OxumLearningOptions {
@@ -10,7 +11,7 @@ interface OxumLearningOptions {
 
 interface OxumLearningResult {
   enhancedOutput: string;
-  culturalContext: any;
+  culturalContext: Record<string, any>;
   confidenceScore: number;
 }
 
@@ -72,7 +73,14 @@ export const useOxumLearning = (options: OxumLearningOptions) => {
         });
       }
       
-      return result;
+      // Ensure the result has the required properties
+      const enhancedResult: OxumLearningResult = {
+        enhancedOutput: result.enhancedOutput,
+        confidenceScore: result.confidenceScore,
+        culturalContext: result.culturalContext || {} // Ensure it's never undefined
+      };
+      
+      return enhancedResult;
     } catch (err: any) {
       console.error('Error processing text with Oxum Learning:', err);
       setError(err.message || 'Failed to process text');
