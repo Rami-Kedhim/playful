@@ -354,12 +354,25 @@ const UberCorePanel: React.FC = () => {
                                 const currentStatus = uberCore.getStatus();
                                 const currentModuleStatuses = currentStatus.moduleStatuses || {};
                                 
-                                // Create enabledModules object with the updated module status
-                                const enabledModules = {};
+                                // Create enabledModules object with the proper type structure
+                                const enabledModules: {
+                                  logic: boolean;
+                                  emotional: boolean;
+                                  ethics: boolean;
+                                  bridge: boolean;
+                                } = {
+                                  logic: false,
+                                  emotional: false,
+                                  ethics: false,
+                                  bridge: false
+                                };
                                 
                                 // Copy all current module statuses
                                 Object.entries(currentModuleStatuses).forEach(([key, value]) => {
-                                  enabledModules[key] = key === module ? !enabled : !!value;
+                                  if (key === 'logic' || key === 'emotional' || key === 'ethics' || key === 'bridge') {
+                                    enabledModules[key as keyof typeof enabledModules] = 
+                                      key === module ? !enabled : !!value;
+                                  }
                                 });
                                 
                                 // Configure UberCore with the updated module statuses
