@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, RefreshCw, MessageSquare, Calendar, AlertTriangle } from 'lucide-react';
-import { formatTimePeriod } from '@/utils/dateUtils';
 
 interface ContentLifecycleInfoProps {
   className?: string;
