@@ -10,7 +10,8 @@ import ContentSettings from '@/components/content/ContentSettings';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Button } from '@/components/ui/button';
-import { LockIcon } from 'lucide-react';
+import { AlertTriangle, Info, LockIcon } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ContentManagementPage: React.FC = () => {
   const { user } = useAuth();
@@ -61,6 +62,15 @@ const ContentManagementPage: React.FC = () => {
           <p className="text-muted-foreground mb-6">
             Upload and manage your content, track performance, and monetize your media.
           </p>
+          
+          <Alert className="mb-6">
+            <Info className="h-4 w-4" />
+            <AlertTitle>Content Expiration Policy</AlertTitle>
+            <AlertDescription>
+              Photos and videos expire after 180 days of inactivity. Content can be renewed manually 
+              using Lucoin or automatically with user interactions.
+            </AlertDescription>
+          </Alert>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-4 mb-6">
