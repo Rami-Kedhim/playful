@@ -1,5 +1,10 @@
 
 import { BaseNeuralService, NeuralServiceConfig } from '../modules/BaseNeuralService';
+import { aiCompanionNeuralService } from '../modules/AICompanionNeuralService';
+import { escortsNeuralService } from '../modules/EscortsNeuralService';
+import { creatorsNeuralService } from '../modules/CreatorsNeuralService';
+import { livecamsNeuralService } from '../modules/LivecamsNeuralService';
+import { oxumLearningService } from '../modules/OxumLearningService';
 
 // Define the module types
 export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion' | 'oxum-learning' | 'learning';
@@ -29,13 +34,7 @@ class NeuralServiceRegistry {
   
   // Register default services at startup
   public registerDefaultServices() {
-    // Import all default services here
-    const { aiCompanionNeuralService } = require('../modules/AICompanionNeuralService');
-    const { escortsNeuralService } = require('../modules/EscortsNeuralService');
-    const { creatorsNeuralService } = require('../modules/CreatorsNeuralService');
-    const { livecamsNeuralService } = require('../modules/LivecamsNeuralService');
-    const { oxumLearningService } = require('../modules/OxumLearningService');
-    
+    // Services are now imported at the top using ES module imports
     // Register each service
     this.registerService(aiCompanionNeuralService);
     this.registerService(escortsNeuralService);

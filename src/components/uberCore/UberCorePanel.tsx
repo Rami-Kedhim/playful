@@ -350,15 +350,17 @@ const UberCorePanel: React.FC = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                // Use the current status to build the updated configuration
+                                // Get current status and build the configuration
                                 const currentStatus = uberCore.getStatus();
                                 const currentModuleStatuses = currentStatus.moduleStatuses || {};
                                 
                                 // Create enabledModules object with the updated module status
-                                const enabledModules = Object.entries(currentModuleStatuses).reduce((acc, [key, value]) => {
-                                  acc[key] = key === module ? !enabled : !!value;
-                                  return acc;
-                                }, {} as Record<string, boolean>);
+                                const enabledModules = {};
+                                
+                                // Copy all current module statuses
+                                Object.entries(currentModuleStatuses).forEach(([key, value]) => {
+                                  enabledModules[key] = key === module ? !enabled : !!value;
+                                });
                                 
                                 // Configure UberCore with the updated module statuses
                                 uberCore.configure({ enabledModules });
