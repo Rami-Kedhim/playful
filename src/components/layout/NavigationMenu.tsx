@@ -12,7 +12,8 @@ import {
   Menu,
   X,
   Users,
-  Home
+  Home,
+  Image
 } from 'lucide-react';
 
 export function NavigationMenu() {
@@ -63,6 +64,7 @@ export function NavigationMenu() {
           <>
             <NavItem to="/messages" icon={<MessageSquare size={18} />} label="Messages" />
             <NavItem to="/favorites" icon={<Heart size={18} />} label="Favorites" />
+            <NavItem to="/content" icon={<Image size={18} />} label="Content" />
             <NavItem to="/profile" icon={<User size={18} />} label="Profile" />
           </>
         )}
@@ -80,6 +82,7 @@ export function NavigationMenu() {
               <>
                 <NavItem to="/messages" icon={<MessageSquare size={18} />} label="Messages" />
                 <NavItem to="/favorites" icon={<Heart size={18} />} label="Favorites" />
+                <NavItem to="/content" icon={<Image size={18} />} label="Content" />
                 <NavItem to="/profile" icon={<User size={18} />} label="Profile" />
               </>
             )}

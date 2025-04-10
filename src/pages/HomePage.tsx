@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Users, Calendar, MessageCircle, Shield } from 'lucide-react';
+import { Search, Users, Calendar, MessageCircle, Shield, Image } from 'lucide-react';
 
 const HomePage = () => {
   return (
@@ -36,7 +36,7 @@ const HomePage = () => {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Our Platform Features</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <Card className="bg-card">
               <CardContent className="pt-6">
                 <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
@@ -81,6 +81,30 @@ const HomePage = () => {
                 <h3 className="text-xl font-bold mb-2">Verification</h3>
                 <p className="text-muted-foreground">
                   Trust our verification process for genuine profiles.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Premium Features</h3>
+                <p className="text-muted-foreground">
+                  Access advanced filters and features with premium subscriptions.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Image className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Content Management</h3>
+                <p className="text-muted-foreground">
+                  Create, upload and monetize digital content securely.
                 </p>
               </CardContent>
             </Card>
