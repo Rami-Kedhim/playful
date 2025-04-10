@@ -29,7 +29,8 @@ const ContentStatusBadge: React.FC<ContentStatusBadgeProps> = ({
         return {
           label: `Expiring in ${daysRemaining || '...'} days`,
           icon: <Clock className="h-3 w-3 mr-1" />,
-          variant: 'warning' as const,
+          // Changed from 'warning' to 'default' with custom colors
+          variant: 'default' as const,
         };
       case 'expired':
         return {
@@ -59,9 +60,16 @@ const ContentStatusBadge: React.FC<ContentStatusBadgeProps> = ({
   };
 
   const { label, icon, variant } = getStatusDetails();
+  
+  // Add specific styling for expiring status
+  const badgeClasses = cn(
+    "flex items-center", 
+    status === 'expiring' && "bg-amber-500 text-white hover:bg-amber-600",
+    className
+  );
 
   return (
-    <Badge variant={variant} className={cn("flex items-center", className)}>
+    <Badge variant={variant} className={badgeClasses}>
       {icon}
       <span>{label}</span>
     </Badge>
