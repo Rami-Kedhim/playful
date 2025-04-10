@@ -10,6 +10,8 @@ import AuthPage from './pages/AuthPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 import ProfilePage from './pages/ProfilePage';
+import EscortDirectoryPage from './pages/EscortDirectory';
+import EscortDetail from './pages/EscortDetail';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/access-denied" element={<AccessDeniedPage />} />
+            <Route path="/escorts" element={<EscortDirectoryPage />} />
+            <Route path="/escorts/:id" element={<EscortDetail />} />
             
             {/* Protected routes - require authentication */}
             <Route element={<ProtectedRoute />}>
@@ -46,7 +50,6 @@ function App() {
             </Route>
             
             {/* Public feature routes - these will be implemented in later phases */}
-            <Route path="/escorts" element={<ProfilePage />} /> {/* Placeholder - will be implemented later */}
             <Route path="/creators" element={<ProfilePage />} /> {/* Placeholder - will be implemented later */}
           </Routes>
           <Toaster />

@@ -1,58 +1,51 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import ServiceTypeIcon from './ServiceTypeIcon';
+import { Badge } from "@/components/ui/badge";
+import { VideoIcon, Users, Radio, CheckCircle } from 'lucide-react';
 
 export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
 
-interface ServiceTypeInfo {
+export interface ServiceTypeInfo {
+  icon: React.ReactNode;
   label: string;
-  filterLabel: string;
-  badgeLabel: string;
-  description: string;
-  color: string;
+  bgColor: string;
+  textColor: string;
 }
 
-// Service type information mapping
-const serviceTypeInfoMap: Record<ServiceTypeFilter, ServiceTypeInfo> = {
+// Map of service types to their display information
+export const serviceTypeInfoMap: Record<ServiceTypeFilter, ServiceTypeInfo> = {
+  "": {
+    icon: <CheckCircle className="h-3.5 w-3.5" />,
+    label: "All Services",
+    bgColor: "bg-gray-100",
+    textColor: "text-gray-700"
+  },
   "in-person": {
-    label: "In-Person",
-    filterLabel: "In-Person Only",
-    badgeLabel: "In-Person",
-    description: "Physical meetings and in-person services only",
-    color: "bg-indigo-500"
+    icon: <Users className="h-3.5 w-3.5" />,
+    label: "In Person",
+    bgColor: "bg-blue-100",
+    textColor: "text-blue-700"
   },
   "virtual": {
+    icon: <VideoIcon className="h-3.5 w-3.5" />,
     label: "Virtual",
-    filterLabel: "Virtual Only",
-    badgeLabel: "Virtual",
-    description: "Online services and virtual interactions only",
-    color: "bg-purple-500"
+    bgColor: "bg-purple-100",
+    textColor: "text-purple-700"
   },
   "both": {
-    label: "In-Person & Virtual",
-    filterLabel: "Both Services",
-    badgeLabel: "In-Person & Virtual",
-    description: "Offers both in-person and virtual services",
-    color: "bg-blue-500"
-  },
-  "": {
-    label: "All Services",
-    filterLabel: "All Services",
-    badgeLabel: "",
-    description: "No preference for service type",
-    color: ""
+    icon: <Radio className="h-3.5 w-3.5" />,
+    label: "Both Services",
+    bgColor: "bg-green-100",
+    textColor: "text-green-700"
   }
 };
 
-// Helper function to get service type badge label
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  return serviceTypeInfoMap[type]?.badgeLabel || "";
+export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => {
+  return serviceTypeInfoMap[type] || serviceTypeInfoMap[""];
 };
 
-// Helper function to get service type information
-export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => {
-  return serviceTypeInfoMap[type];
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  return serviceTypeInfoMap[type]?.label || "All Services";
 };
 
 interface ServiceTypeBadgeLabelProps {
@@ -60,31 +53,17 @@ interface ServiceTypeBadgeLabelProps {
 }
 
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type }) => {
-  switch (type) {
-    case "in-person":
-      return (
-        <Badge className="flex items-center gap-1 bg-indigo-500 text-white border-0">
-          <ServiceTypeIcon type="in-person" size={12} />
-          <span>In-Person</span>
-        </Badge>
-      );
-    case "virtual":
-      return (
-        <Badge className="flex items-center gap-1 bg-purple-500 text-white border-0">
-          <ServiceTypeIcon type="virtual" size={12} />
-          <span>Virtual</span>
-        </Badge>
-      );
-    case "both":
-      return (
-        <Badge className="flex items-center gap-1 bg-blue-500 text-white border-0">
-          <ServiceTypeIcon type="both" size={12} />
-          <span>In-Person & Virtual</span>
-        </Badge>
-      );
-    default:
-      return null;
-  }
+  const { icon, label, bgColor, textColor } = getServiceTypeInfo(type);
+  
+  return (
+    <Badge 
+      variant="outline" 
+      className={`flex items-center gap-1 font-normal ${bgColor} ${textColor} border-0`}
+    >
+      {icon}
+      <span>{label}</span>
+    </Badge>
+  );
 };
 
 export default ServiceTypeBadgeLabel;
