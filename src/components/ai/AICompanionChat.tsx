@@ -189,6 +189,9 @@ const AICompanionChat = ({
   }
 
   const hasSufficientCredits = userCredits === undefined || userCredits >= 0;
+  
+  // Get the dominant emotion as a string for components that expect a string
+  const dominantEmotion = emotionalState?.dominantEmotion || '';
 
   return (
     <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[550px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
@@ -225,7 +228,7 @@ const AICompanionChat = ({
         onMinimize={handleMinimize}
         credits={userCredits}
         creditCost={0}
-        emotionalState={emotionalState}
+        emotionalState={dominantEmotion}
         brainHubConnected={brainHubAI.isConnected}
       />
 
@@ -245,7 +248,7 @@ const AICompanionChat = ({
         companionName={name}
         disabled={!hasSufficientCredits}
         disabledMessage={!hasSufficientCredits ? "Insufficient credits" : undefined}
-        emotionalState={emotionalState}
+        emotionalState={dominantEmotion}
         brainHubEnhanced={brainHubAI.isConnected}
       />
 
