@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
+import { ActivitySquare, Settings, MessageSquare, AlertTriangle, CheckCircle2 } from 'lucide-react';
 
-// Import the new component tabs
+// Import the component tabs
 import StatusPanel from './tabs/StatusPanel';
 import InteractionPanel from './tabs/InteractionPanel';
 import ConfigurationPanel from './tabs/ConfigurationPanel';
@@ -15,26 +16,41 @@ const UberCorePanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('status');
   const [status, setStatus] = useState<Record<string, any>>({});
   const [initialized, setInitialized] = useState(false);
+  const [initializing, setInitializing] = useState(false);
   const { toast } = useToast();
 
   // Initialize UberCore
   useEffect(() => {
     const initCore = async () => {
-      const success = await uberCore.initialize();
-      setInitialized(success);
+      setInitializing(true);
       
-      if (success) {
-        updateStatus();
+      try {
+        const success = await uberCore.initialize();
+        setInitialized(success);
+        
+        if (success) {
+          updateStatus();
+          toast({
+            title: "UberCore Initialized",
+            description: "The neural architecture is now operational.",
+            variant: "default"
+          });
+        } else {
+          toast({
+            title: "Initialization Failed",
+            description: "Could not initialize UberCore architecture.",
+            variant: "destructive"
+          });
+        }
+      } catch (error) {
+        console.error("Error initializing UberCore:", error);
         toast({
-          title: "UberCore Initialized",
-          description: "The neural architecture is now operational."
-        });
-      } else {
-        toast({
-          title: "Initialization Failed",
-          description: "Could not initialize UberCore architecture.",
+          title: "Initialization Error",
+          description: "An unexpected error occurred during initialization.",
           variant: "destructive"
         });
+      } finally {
+        setInitializing(false);
       }
     };
     
@@ -61,30 +77,49 @@ const UberCorePanel: React.FC = () => {
   
   // Get latest status from UberCore
   const updateStatus = () => {
-    const currentStatus = uberCore.getStatus();
-    setStatus(currentStatus);
+    try {
+      const currentStatus = uberCore.getStatus();
+      setStatus(currentStatus);
+    } catch (error) {
+      console.error("Error fetching UberCore status:", error);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <Card className="border-l-4" style={{ 
+        borderLeftColor: initialized ? '#10b981' : initializing ? '#f59e0b' : '#ef4444' 
+      }}>
+        <CardHeader className="py-4">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl">UberCore Neural Architecture</CardTitle>
-              <CardDescription>Unified AI Architecture for UberEscorts Platform</CardDescription>
+              <CardTitle className="text-2xl flex items-center">
+                <ActivitySquare className="h-6 w-6 mr-2 text-primary" />
+                UberCore Neural Architecture
+              </CardTitle>
+              <CardDescription>Advanced AI Processing and Neural Network Management</CardDescription>
             </div>
-            <Badge variant={initialized ? "default" : "destructive"} className="h-6">
-              {initialized ? "Online" : "Offline"}
-            </Badge>
+            <StatusBadge status={initialized} initializing={initializing} />
           </div>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid grid-cols-3">
-              <TabsTrigger value="status">System Status</TabsTrigger>
-              <TabsTrigger value="interact">Interaction</TabsTrigger>
-              <TabsTrigger value="config">Configuration</TabsTrigger>
+            <TabsList className="grid grid-cols-3 w-full md:w-auto">
+              <TabsTrigger value="status" className="flex items-center">
+                <ActivitySquare className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">System Status</span>
+                <span className="md:hidden">Status</span>
+              </TabsTrigger>
+              <TabsTrigger value="interact" className="flex items-center">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">Interaction</span>
+                <span className="md:hidden">Interact</span>
+              </TabsTrigger>
+              <TabsTrigger value="config" className="flex items-center">
+                <Settings className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">Configuration</span>
+                <span className="md:hidden">Config</span>
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="status" className="space-y-4">
@@ -108,6 +143,30 @@ const UberCorePanel: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+// Status badge component to show system operational status
+const StatusBadge: React.FC<{status: boolean, initializing: boolean}> = ({ status, initializing }) => {
+  if (initializing) {
+    return (
+      <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700 animate-pulse">
+        <AlertTriangle className="h-3 w-3 mr-1" />
+        Initializing...
+      </Badge>
+    );
+  }
+  
+  return status ? (
+    <Badge variant="default" className="bg-green-600">
+      <CheckCircle2 className="h-3 w-3 mr-1" />
+      Online
+    </Badge>
+  ) : (
+    <Badge variant="destructive">
+      <AlertTriangle className="h-3 w-3 mr-1" />
+      Offline
+    </Badge>
   );
 };
 
