@@ -157,8 +157,9 @@ const escorts: Escort[] = [
     gender: "female",
     location: "Los Angeles, CA",
     bio: "Exotic and alluring companion with a taste for adventure. Let's explore the city and create unforgettable memories.",
-    services: ["travel", "events", "dinner date", "overnight"],
+    services: ["travel", "events", "Dinner Date", "overnight"] as ServiceType[],
     imageUrl: "https://source.unsplash.com/random/400x600/?exotic,woman",
+    profileImage: "https://source.unsplash.com/random/400x600/?exotic,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?exotic,woman",
       "https://source.unsplash.com/random/800x1200/?travel,woman",
@@ -220,7 +221,7 @@ const escorts: Escort[] = [
       photos: 0,
       videos: 0,
       live: false,
-      streams: 0
+      streams: "0"
     }
   },
   {
@@ -230,8 +231,9 @@ const escorts: Escort[] = [
     gender: "male",
     location: "Chicago, IL",
     bio: "Charming and sophisticated male escort for discerning women. I offer stimulating conversation, fine dining, and unforgettable moments.",
-    services: ["dinner date", "events", "weekend getaways", "travel companion"],
+    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"] as ServiceType[],
     imageUrl: "https://source.unsplash.com/random/400x600/?model,man",
+    profileImage: "https://source.unsplash.com/random/400x600/?model,man",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?model,man",
       "https://source.unsplash.com/random/800x1200/?elegant,man",
@@ -268,11 +270,7 @@ const escorts: Escort[] = [
     description: "I'm Carlos, a charming and sophisticated male escort based in Chicago. I offer upscale companionship services with discretion and class.",
     height: 180,
     weight: 75,
-    measurements: {
-      bust: 0,
-      waist: 0,
-      hips: 0
-    },
+    measurements: "Athletic build",
     hairColor: "Brown",
     eyeColor: "Brown",
     ethnicity: "Latino",
@@ -293,7 +291,7 @@ const escorts: Escort[] = [
       photos: 0,
       videos: 0,
       live: false,
-      streams: 0
+      streams: "0"
     }
   },
   {
@@ -303,8 +301,9 @@ const escorts: Escort[] = [
     gender: "female",
     location: "San Francisco, CA",
     bio: "Sweet and sensual Asian companion ready to fulfill your desires. Let's explore the city and create unforgettable memories.",
-    services: ["massage", "roleplay", "bdsm", "overnight"],
+    services: ["massage", "roleplay", "bdsm", "overnight"] as ServiceType[],
     imageUrl: "https://source.unsplash.com/random/400x600/?asian,woman",
+    profileImage: "https://source.unsplash.com/random/400x600/?asian,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?asian,woman",
       "https://source.unsplash.com/random/800x1200/?lingerie,asian",
@@ -366,7 +365,7 @@ const escorts: Escort[] = [
       photos: 0,
       videos: 0,
       live: false,
-      streams: 0
+      streams: "0"
     }
   },
   {
@@ -376,8 +375,9 @@ const escorts: Escort[] = [
     gender: "male",
     location: "Dallas, TX",
     bio: "Experienced and charming male escort for discerning women. I offer stimulating conversation, fine dining, and unforgettable moments.",
-    services: ["dinner date", "events", "weekend getaways", "travel companion"],
+    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"] as ServiceType[],
     imageUrl: "https://source.unsplash.com/random/400x600/?model,man",
+    profileImage: "https://source.unsplash.com/random/400x600/?model,man",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?model,man",
       "https://source.unsplash.com/random/800x1200/?elegant,man",
@@ -414,11 +414,7 @@ const escorts: Escort[] = [
     description: "I'm Javier, an experienced and charming male escort based in Dallas. I offer upscale companionship services with discretion and class.",
     height: 185,
     weight: 80,
-    measurements: {
-      bust: 0,
-      waist: 0,
-      hips: 0
-    },
+    measurements: "Athletic build",
     hairColor: "Black",
     eyeColor: "Brown",
     ethnicity: "Latino",
@@ -439,7 +435,7 @@ const escorts: Escort[] = [
       photos: 0,
       videos: 0,
       live: false,
-      streams: 0
+      streams: "0"
     }
   }
 ];
@@ -459,10 +455,12 @@ escorts.forEach(escort => {
   // Fix services capitalization issues
   if (escort.services) {
     escort.services = escort.services.map(service => {
-      // Convert to proper ServiceType format if needed
-      if (service === "dinner date") return "Dinner Date" as ServiceType;
-      if (service === "weekend getaways") return "Weekend Getaways" as ServiceType;
-      if (service === "travel companion") return "Travel Companion" as ServiceType;
+      if (typeof service === "string") {
+        // Convert to proper ServiceType format if needed
+        if (service === "Dinner Date" || service === "dinner date") return "Dinner Date" as ServiceType;
+        if (service === "Weekend Getaways" || service === "weekend getaways") return "Weekend Getaways" as ServiceType;
+        if (service === "Travel Companion" || service === "travel companion") return "Travel Companion" as ServiceType;
+      }
       return service;
     });
   }

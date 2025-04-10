@@ -1,3 +1,4 @@
+
 import { BaseScraperService } from "./baseScraperService";
 import { Escort, ServiceType } from "@/types/escort";
 import { brainHub } from "../neural/HermesOxumBrainHub";
@@ -116,7 +117,7 @@ export class EscortScraper extends BaseScraperService {
       
       const selectedServices = this.services
         .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 5) + 2) as unknown as ServiceType[];
+        .slice(0, Math.floor(Math.random() * 5) + 2) as ServiceType[];
         
       const randomPrices = {
         hourly: Math.floor(Math.random() * 200) + 150,

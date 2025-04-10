@@ -4,7 +4,7 @@ export interface Escort {
   name: string;
   location: string;
   age: number;
-  profileImage?: string;
+  profileImage: string;
   imageUrl?: string;
   avatar_url?: string;
   gender?: string;
@@ -37,7 +37,7 @@ export interface Escort {
     timeZone?: string;
     availableNow?: boolean;
     customNotes?: string;
-  } | { days?: never[]; hours?: string; };
+  };
   responseTime?: string;
   responseRate?: number;
   height?: number;

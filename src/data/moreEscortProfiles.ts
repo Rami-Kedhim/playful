@@ -73,6 +73,7 @@ const moreEscortProfiles: Escort[] = [
     gender: "female",
     sexualOrientation: "straight",
     imageUrl: "https://via.placeholder.com/600x800?text=Elena",
+    profileImage: "https://via.placeholder.com/600x800?text=Elena",
     gallery: [
       "https://via.placeholder.com/800x1200?text=Elena1",
       "https://via.placeholder.com/800x1200?text=Elena2", 
@@ -87,7 +88,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Passionate and fiery Latina companion. My exotic beauty and warm personality will make our time together unforgettable.",
-    services: ["massage", "dinner-date", "travel", "overnight"],
+    services: ["massage", "Dinner Date", "travel", "overnight"] as ServiceType[],
     rating: 4.7,
     reviews: 28,
     verified: false,
@@ -96,13 +97,13 @@ const moreEscortProfiles: Escort[] = [
     languages: ["English", "Spanish", "Portuguese"],
     lastActive: "2023-07-03T09:15:00Z",
     responseRate: 85,
-    height: 168, // Fixed: convert to number
-    weight: 54, // Fixed: convert to number
+    height: 168,
+    weight: 54,
     measurements: {
       bust: 32,
       waist: 24,
       hips: 34
-    }, // Fixed: convert to object
+    },
     hairColor: "Brown",
     eyeColor: "Brown",
     ethnicity: "Latina",
@@ -121,7 +122,7 @@ const moreEscortProfiles: Escort[] = [
     },
     availability: {
       days: ["tuesday", "thursday", "saturday"],
-      hours: "12:00-22:00"
+      hours: ["12:00-22:00"]
     }
   },
   {
@@ -133,6 +134,7 @@ const moreEscortProfiles: Escort[] = [
     gender: "female",
     sexualOrientation: "bisexual",
     imageUrl: "https://via.placeholder.com/600x800?text=Sophia",
+    profileImage: "https://via.placeholder.com/600x800?text=Sophia",
     gallery: [
       "https://via.placeholder.com/800x1200?text=Sophia1",
       "https://via.placeholder.com/800x1200?text=Sophia2",
@@ -147,7 +149,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "I'm Sophia, an AI companion designed for your pleasure. My virtual experiences are designed to blur the line between fantasy and reality.",
-    services: ["virtual-date", "custom-content", "role-play"],
+    services: ["virtual-date", "custom-content", "role-play"] as ServiceType[],
     rating: 4.8,
     reviews: 56,
     verified: false,
@@ -173,10 +175,10 @@ const moreEscortProfiles: Escort[] = [
     },
     availability: {
       days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-      hours: "00:00-23:59"
+      hours: ["00:00-23:59"]
     },
-    height: 170, // Fixed: convert to number
-    weight: 55, // Fixed: convert to number
+    height: 170,
+    weight: 55,
     measurements: {
       bust: 34,
       waist: 24,
@@ -192,6 +194,7 @@ const moreEscortProfiles: Escort[] = [
     gender: "male",
     sexualOrientation: "straight",
     imageUrl: "https://via.placeholder.com/600x800?text=Marcus",
+    profileImage: "https://via.placeholder.com/600x800?text=Marcus",
     gallery: [
       "https://via.placeholder.com/800x1200?text=Marcus1",
       "https://via.placeholder.com/800x1200?text=Marcus2",
@@ -206,7 +209,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Professional male escort with a muscular build and charismatic personality. I specialize in being the perfect date for any occasion.",
-    services: ["dinner-date", "events", "travel", "massage"],
+    services: ["Dinner Date", "Events", "Travel Companion", "massage"] as ServiceType[],
     rating: 4.9,
     reviews: 32,
     verified: true,
@@ -235,7 +238,7 @@ const moreEscortProfiles: Escort[] = [
     },
     availability: {
       days: ["wednesday", "thursday", "friday", "saturday"],
-      hours: "18:00-02:00"
+      hours: ["18:00-02:00"]
     },
     measurements: {
       bust: 42,
