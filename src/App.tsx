@@ -7,6 +7,7 @@ import PersonasPage from '@/pages/Personas';
 import ProfilePage from '@/pages/ProfilePage';
 import PersonaProfile from '@/pages/PersonaProfile';
 import AuthPage from '@/pages/AuthPage';
+import OtpVerificationPage from '@/pages/OtpVerificationPage';
 import { AuthProvider } from '@/hooks/auth/useAuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { ToastProvider } from '@/providers/toast-provider';
@@ -43,6 +44,14 @@ function App() {
               <EscortsModule>
                 <PersonaProfile />
               </EscortsModule>
+            } 
+          />
+          <Route 
+            path="/verify" 
+            element={
+              <ProtectedRoute>
+                <OtpVerificationPage />
+              </ProtectedRoute>
             } 
           />
         </Routes>
