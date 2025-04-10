@@ -2,52 +2,56 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Monitor, Users, Globe } from 'lucide-react';
-import { ServiceTypeFilter as ServiceTypeFilterValue } from './ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from "./ServiceTypeBadgeLabel";
+import ServiceTypeIcon from './ServiceTypeIcon';
 
 interface ServiceTypeFilterProps {
-  serviceTypeFilter: ServiceTypeFilterValue;
-  setServiceTypeFilter: (type: ServiceTypeFilterValue) => void;
+  serviceTypeFilter: ServiceTypeFilter;
+  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
 }
 
-const ServiceTypeFilter = ({
+const ServiceTypeRadioFilter: React.FC<ServiceTypeFilterProps> = ({
   serviceTypeFilter,
   setServiceTypeFilter
-}: ServiceTypeFilterProps) => {
+}) => {
   return (
-    <div className="space-y-2">
-      <Label className="text-sm font-medium">Service Type</Label>
-      <RadioGroup
-        value={serviceTypeFilter}
-        onValueChange={(value) => setServiceTypeFilter(value as ServiceTypeFilterValue)}
-      >
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="" id="all-types" />
-          <Label htmlFor="all-types" className="text-sm font-normal flex items-center">
-            All Types
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="in-person" id="in-person" />
-          <Label htmlFor="in-person" className="text-sm font-normal flex items-center">
-            <Users size={14} className="mr-1" /> In-Person
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="virtual" id="virtual" />
-          <Label htmlFor="virtual" className="text-sm font-normal flex items-center">
-            <Monitor size={14} className="mr-1" /> Virtual
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="both" id="both" />
-          <Label htmlFor="both" className="text-sm font-normal flex items-center">
-            <Globe size={14} className="mr-1" /> Both Services
-          </Label>
-        </div>
-      </RadioGroup>
-    </div>
+    <RadioGroup 
+      value={serviceTypeFilter} 
+      onValueChange={(value) => setServiceTypeFilter(value as ServiceTypeFilter)}
+      className="space-y-2"
+    >
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="" id="service-type-all" />
+        <Label htmlFor="service-type-all" className="flex items-center gap-1 cursor-pointer">
+          All Services
+        </Label>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="in-person" id="service-type-in-person" />
+        <Label htmlFor="service-type-in-person" className="flex items-center gap-1 cursor-pointer">
+          <ServiceTypeIcon type="in-person" size={14} />
+          <span>In-Person Only</span>
+        </Label>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="virtual" id="service-type-virtual" />
+        <Label htmlFor="service-type-virtual" className="flex items-center gap-1 cursor-pointer">
+          <ServiceTypeIcon type="virtual" size={14} />
+          <span>Virtual Only</span>
+        </Label>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="both" id="service-type-both" />
+        <Label htmlFor="service-type-both" className="flex items-center gap-1 cursor-pointer">
+          <ServiceTypeIcon type="both" size={14} />
+          <span>Both In-Person & Virtual</span>
+        </Label>
+      </div>
+    </RadioGroup>
   );
 };
 
-export default ServiceTypeFilter;
+export default ServiceTypeRadioFilter;
