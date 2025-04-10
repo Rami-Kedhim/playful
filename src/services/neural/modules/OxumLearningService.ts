@@ -5,8 +5,8 @@
  * Provides learning capabilities and cultural context adaptation
  */
 
-import { NeuralService, NeuralServiceConfig } from "../interfaces/NeuralService";
 import { ModuleType } from "../registry/NeuralServiceRegistry";
+import { NeuralServiceConfig } from "../interfaces/NeuralService";
 
 export interface ProcessingResult {
   enhancedOutput: string;
@@ -21,7 +21,7 @@ export interface LearnedPattern {
   lastObserved: Date;
 }
 
-export class OxumLearningService implements NeuralService {
+export class OxumLearningService {
   private initialized: boolean = false;
   private learnedPatterns: LearnedPattern[] = [];
   private culturalContexts: Record<string, any> = {};
@@ -34,6 +34,11 @@ export class OxumLearningService implements NeuralService {
   version: string = "1.0.0";
   author: string = "UberEscorts AI Team";
   public config: NeuralServiceConfig = { 
+    moduleId: "oxum-learning-service",
+    moduleType: "learning",
+    moduleName: "Oxum Learning Service",
+    description: "Provides learning capabilities and cultural context adaptation",
+    version: "1.0.0",
     enabled: false,
     priority: 50,
     resourceAllocation: 0

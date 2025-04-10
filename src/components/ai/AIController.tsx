@@ -56,7 +56,15 @@ const AIController: React.FC<AIControllerProps> = ({
   useEffect(() => {
     const initializeAI = async () => {
       if (!oxumLearning.isInitialized) {
-        await oxumLearning.init;
+        // Wait for initialization
+        await new Promise(resolve => {
+          const checkInit = setInterval(() => {
+            if (oxumLearning.isInitialized) {
+              clearInterval(checkInit);
+              resolve(true);
+            }
+          }, 500);
+        });
       }
       
       if (!brainHub.isConnected) {
@@ -79,7 +87,7 @@ const AIController: React.FC<AIControllerProps> = ({
       description: enabled 
         ? "All intelligent features are now active across the platform" 
         : "AI-powered features have been disabled",
-      variant: enabled ? "default" : "secondary"
+      variant: enabled ? "default" : "warning"
     });
   };
   

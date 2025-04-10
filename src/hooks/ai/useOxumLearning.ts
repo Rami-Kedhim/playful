@@ -77,7 +77,7 @@ export const useOxumLearning = (options: OxumLearningOptions) => {
       const enhancedResult: OxumLearningResult = {
         enhancedOutput: result.enhancedOutput,
         confidenceScore: result.confidenceScore,
-        culturalContext: result.culturalContext || {} // Ensure it's never undefined
+        culturalContext: result.culturalContext || {}
       };
       
       return enhancedResult;
