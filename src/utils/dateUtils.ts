@@ -32,3 +32,53 @@ export const formatDate = (date: Date): string => {
     day: 'numeric'
   }).format(date);
 };
+
+/**
+ * Determine content status based on expiration date
+ */
+export const determineContentStatus = (
+  createdAt: Date,
+  lastInteractionAt?: Date
+): 'active' | 'expiring' | 'expired' | 'archived' => {
+  const interactionDate = lastInteractionAt || createdAt;
+  const expiryDate = calculateExpiryDate(interactionDate);
+  const daysRemaining = calculateDaysRemaining(expiryDate);
+  
+  if (daysRemaining <= 0) {
+    return 'expired';
+  } else if (daysRemaining <= 30) {
+    return 'expiring';
+  } else {
+    return 'active';
+  }
+};
+
+/**
+ * Check if content is eligible for renewal
+ */
+export const isContentRenewable = (status: string): boolean => {
+  return status === 'expiring' || status === 'expired';
+};
+
+/**
+ * Calculate Lucoin cost for renewing content
+ */
+export const calculateRenewalCost = (
+  status: string, 
+  contentType: string = 'standard'
+): number => {
+  // Base cost is 1 Lucoin
+  let cost = 1;
+  
+  // Expired content costs more to renew
+  if (status === 'expired') {
+    cost = 2;
+  }
+  
+  // Premium content types cost more
+  if (contentType === 'premium' || contentType === 'video') {
+    cost += 1;
+  }
+  
+  return cost;
+};
