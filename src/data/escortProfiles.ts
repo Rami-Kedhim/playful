@@ -1,4 +1,5 @@
-import { Escort } from '@/types/escort';
+
+import { Escort, ServiceType } from '@/types/escort';
 
 const escorts: Escort[] = [
   {
@@ -10,6 +11,7 @@ const escorts: Escort[] = [
     bio: "Luxury companion for discerning gentlemen. I enjoy meaningful conversations, fine dining, and creating unforgettable moments.",
     services: ["dinner", "events", "travel", "companionship"],
     imageUrl: "https://source.unsplash.com/random/400x600/?model,woman",
+    profileImage: "https://source.unsplash.com/random/400x600/?model,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?model,woman",
       "https://source.unsplash.com/random/800x1200/?elegant,woman",
@@ -81,8 +83,9 @@ const escorts: Escort[] = [
     gender: "female",
     location: "New York, NY",
     bio: "Passionate and sensual companion ready to explore your deepest desires. Let's create unforgettable memories together.",
-    services: ["massage", "roleplay", "bdsm", "overnight"],
+    services: ["massage", "roleplay", "bdsm", "overnight"] as ServiceType[],
     imageUrl: "https://source.unsplash.com/random/400x600/?sensual,woman",
+    profileImage: "https://source.unsplash.com/random/400x600/?sensual,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?sensual,woman",
       "https://source.unsplash.com/random/800x1200/?lingerie,woman",
@@ -441,9 +444,39 @@ const escorts: Escort[] = [
   }
 ];
 
+// Add the missing profileImage to all escorts and fix service type capitalization issues
 escorts.forEach(escort => {
+  // Set profileImage from imageUrl if it doesn't exist
+  if (!escort.profileImage && escort.imageUrl) {
+    escort.profileImage = escort.imageUrl;
+  }
+  
+  // Fix profileType if it doesn't exist
   if (!escort.profileType) {
     escort.profileType = escort.verified ? 'verified' : escort.isAI ? 'ai' : 'provisional';
+  }
+  
+  // Fix services capitalization issues
+  if (escort.services) {
+    escort.services = escort.services.map(service => {
+      // Convert to proper ServiceType format if needed
+      if (service === "dinner date") return "Dinner Date" as ServiceType;
+      if (service === "weekend getaways") return "Weekend Getaways" as ServiceType;
+      if (service === "travel companion") return "Travel Companion" as ServiceType;
+      return service;
+    });
+  }
+  
+  // Fix hours to be string arrays if they are strings
+  if (escort.availability && typeof escort.availability === 'object' && 'hours' in escort.availability) {
+    if (typeof escort.availability.hours === 'string') {
+      escort.availability.hours = [escort.availability.hours];
+    }
+  }
+  
+  // Fix measurements if they are numbers
+  if (typeof escort.measurements === 'number') {
+    escort.measurements = String(escort.measurements);
   }
 });
 

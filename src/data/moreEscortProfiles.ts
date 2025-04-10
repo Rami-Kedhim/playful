@@ -1,5 +1,5 @@
 
-import { Escort } from '../types/escort';
+import { Escort, ServiceType } from '../types/escort';
 
 const moreEscortProfiles: Escort[] = [
   {
@@ -11,6 +11,7 @@ const moreEscortProfiles: Escort[] = [
     gender: "female",
     sexualOrientation: "bisexual",
     imageUrl: "https://via.placeholder.com/600x800?text=Jessica",
+    profileImage: "https://via.placeholder.com/600x800?text=Jessica",
     gallery: [
       "https://via.placeholder.com/800x1200?text=Jessica1",
       "https://via.placeholder.com/800x1200?text=Jessica2",
@@ -25,7 +26,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Luxury escort with a passion for refined experiences. Available for upscale gentlemen who appreciate the finer things in life.",
-    services: ["gfe", "dinner", "travel"],
+    services: ["gfe", "dinner", "travel"] as ServiceType[],
     rating: 4.9,
     reviews: 42,
     verified: true,
@@ -243,5 +244,31 @@ const moreEscortProfiles: Escort[] = [
     }
   }
 ];
+
+// Apply fixes to all profiles
+moreEscortProfiles.forEach(escort => {
+  // Add profileImage if missing
+  if (!escort.profileImage && escort.imageUrl) {
+    escort.profileImage = escort.imageUrl;
+  }
+  
+  // Fix availability format
+  if (escort.availability && typeof escort.availability === 'object') {
+    if ('hours' in escort.availability && typeof escort.availability.hours === 'string') {
+      escort.availability.hours = [escort.availability.hours];
+    }
+  }
+  
+  // Fix service types
+  if (escort.services) {
+    escort.services = escort.services.map(service => {
+      // Convert problematic service names to valid ServiceType
+      if (service === "dinner-date") return "Dinner Date" as ServiceType;
+      if (service === "custom-content") return "custom-content" as ServiceType;
+      if (service === "role-play") return "Role Play" as ServiceType;
+      return service;
+    });
+  }
+});
 
 export default moreEscortProfiles;

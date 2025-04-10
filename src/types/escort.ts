@@ -4,7 +4,7 @@ export interface Escort {
   name: string;
   location: string;
   age: number;
-  profileImage: string;
+  profileImage?: string;
   imageUrl?: string;
   avatar_url?: string;
   gender?: string;
@@ -62,6 +62,7 @@ export interface Escort {
   lastActive?: string | Date;
   profileType?: 'verified' | 'ai' | 'provisional';
   boostLevel?: number;
+  boostExpiry?: Date;
   isAI?: boolean;
   isScraped?: boolean;
   subscriptionPrice?: number;
