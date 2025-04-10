@@ -2,10 +2,11 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ServiceTypeFilter as ServiceTypeFilterValue } from '../../../components/escorts/filters/ServiceTypeBadgeLabel';
 
 interface ServiceTypeFilterProps {
-  serviceTypeFilter: "" | "in-person" | "virtual" | "both";
-  setServiceTypeFilter: (type: "" | "in-person" | "virtual" | "both") => void;
+  serviceTypeFilter: ServiceTypeFilterValue;
+  setServiceTypeFilter: (type: ServiceTypeFilterValue) => void;
 }
 
 const ServiceTypeFilter = ({
@@ -17,7 +18,7 @@ const ServiceTypeFilter = ({
       <Label className="text-sm font-medium">Service Type</Label>
       <RadioGroup
         value={serviceTypeFilter}
-        onValueChange={(value) => setServiceTypeFilter(value as "" | "in-person" | "virtual" | "both")}
+        onValueChange={(value) => setServiceTypeFilter(value as ServiceTypeFilterValue)}
       >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="" id="all-types" />

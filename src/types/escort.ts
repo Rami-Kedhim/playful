@@ -101,7 +101,10 @@ export type ServiceType =
   | "virtual-date"
   | "custom-content"
   | "role-play"
-  | "dinner-date";
+  | "dinner-date"
+  | "virtual"
+  | "in-person"
+  | "both";
 
 export interface ServiceCategory {
   id: string;

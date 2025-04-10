@@ -1,5 +1,5 @@
 
-import { Escort } from "@/types/escort";
+import { Escort, ServiceType } from "@/types/escort";
 import escortProfiles from "./escortProfiles";
 
 // Mock data for escort services

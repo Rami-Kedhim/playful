@@ -257,7 +257,9 @@ moreEscortProfiles.forEach(escort => {
   
   // Fix availability format
   if (escort.availability && typeof escort.availability === 'object') {
-    if ('hours' in escort.availability && typeof escort.availability.hours === 'string') {
+    if (!escort.availability.hours) {
+      escort.availability.hours = [];
+    } else if (typeof escort.availability.hours === 'string') {
       escort.availability.hours = [escort.availability.hours];
     }
   }
