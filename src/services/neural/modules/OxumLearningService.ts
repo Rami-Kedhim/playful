@@ -33,7 +33,11 @@ export class OxumLearningService implements NeuralService {
   description: string = "Provides learning capabilities and cultural context adaptation";
   version: string = "1.0.0";
   author: string = "UberEscorts AI Team";
-  public config: NeuralServiceConfig = { enabled: false };
+  public config: NeuralServiceConfig = { 
+    enabled: false,
+    priority: 50,
+    resourceAllocation: 0
+  };
   
   async initialize(): Promise<boolean> {
     if (this.initialized) {
