@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -222,7 +221,11 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
           
           {escort.availability?.hours && (
             <div className="text-xs text-muted-foreground">
-              {escort.availability.hours}
+              {typeof escort.availability === 'object' && 'hours' in escort.availability ? 
+                Array.isArray(escort.availability.hours) ? 
+                  escort.availability.hours.join(', ') : 
+                  escort.availability.hours 
+                : ''}
             </div>
           )}
         </div>
@@ -266,7 +269,11 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
                 {escort.measurements && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Measurements</span>
-                    <span>{escort.measurements.bust}-{escort.measurements.waist}-{escort.measurements.hips}</span>
+                    <span>
+                      {typeof escort.measurements === 'object' ? 
+                        `${escort.measurements.bust || '-'}-${escort.measurements.waist || '-'}-${escort.measurements.hips || '-'}` : 
+                        escort.measurements}
+                    </span>
                   </div>
                 )}
                 
@@ -309,16 +316,18 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
             )}
             
             {/* Availability days */}
-            {escort.availability?.days && escort.availability.days.length > 0 && (
+            {escort.availability && (
               <div>
                 <h3 className="text-sm font-medium mb-1 flex items-center gap-1">
                   <CalendarClock className="h-4 w-4 text-muted-foreground" />
                   Available Days
                 </h3>
                 <div className="flex flex-wrap gap-1">
-                  {escort.availability.days.map((day, idx) => (
-                    <Badge key={idx} variant="secondary" className="capitalize">{day}</Badge>
-                  ))}
+                  {typeof escort.availability === 'object' && 'days' in escort.availability && 
+                    escort.availability.days && 
+                    escort.availability.days.map((day, idx) => (
+                      <Badge key={idx} variant="secondary" className="capitalize">{day}</Badge>
+                    ))}
                 </div>
               </div>
             )}

@@ -1,11 +1,10 @@
-
 export interface Escort {
   id: string;
   name: string;
   location: string;
   age: number;
   profileImage: string;
-  imageUrl?: string;
+  imageUrl: string;
   avatar_url?: string;
   gender?: string;
   orientation?: string;
@@ -16,7 +15,7 @@ export interface Escort {
   tags?: string[];
   gallery?: string[];
   gallery_images?: string[];
-  videos?: string[];
+  videos?: (string | Video)[];
   price?: number;
   rates?: {
     hourly?: number;
@@ -31,15 +30,18 @@ export interface Escort {
   reviewCount?: number;
   reviews?: number;
   verificationLevel?: VerificationLevel;
-  availability?: string[] | {
-    days?: string[];
-    hours?: string[];
+  availability?: {
+    days: string[];
+    hours: string[];
+    timeZone?: string;
+    availableNow?: boolean;
+    customNotes?: string;
   };
   responseTime?: string;
   responseRate?: number;
-  height?: string | number;
-  weight?: string | number;
-  measurements?: string | {
+  height?: number;
+  weight?: number;
+  measurements?: {
     bust?: number;
     waist?: number;
     hips?: number;
@@ -71,6 +73,7 @@ export interface Escort {
     streams?: string;
     live?: boolean;
   };
+  gender?: string;
 }
 
 export type ServiceType = 
@@ -104,13 +107,10 @@ export interface ServiceCategory {
   services: ServiceType[];
 }
 
-// Add the missing VerificationLevel enum
 export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 
-// Add missing VerificationStatus
 export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 
-// Add missing VerificationDocument interface
 export interface VerificationDocument {
   id: string;
   type: string;
@@ -119,7 +119,6 @@ export interface VerificationDocument {
   status: 'pending' | 'approved' | 'rejected';
 }
 
-// Add missing VerificationRequest interface
 export interface VerificationRequest {
   id: string;
   userId: string;
@@ -131,24 +130,26 @@ export interface VerificationRequest {
   rejectionReason?: string;
 }
 
-// Add missing EscortFilterOptions interface
 export interface EscortFilterOptions {
   searchQuery?: string;
   location?: string;
   priceRange?: [number, number];
   verifiedOnly?: boolean;
+  services?: string[];
   selectedServices?: string[];
   sortBy?: string;
+  gender?: string[];
   selectedGenders?: string[];
+  orientation?: string[];
   selectedOrientations?: string[];
   ageRange?: [number, number];
   ratingMin?: number;
   availableNow?: boolean;
   serviceTypeFilter?: string;
   currentPage?: number;
+  languages?: string[];
 }
 
-// Add missing EscortAvailability interface
 export interface EscortAvailability {
   days: string[];
   hours: string[];
@@ -157,7 +158,6 @@ export interface EscortAvailability {
   customNotes?: string;
 }
 
-// Add missing Video interface
 export interface Video {
   id: string;
   url: string;

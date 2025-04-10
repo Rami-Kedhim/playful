@@ -1,49 +1,66 @@
 
-import { useState } from "react";
-import { Escort, EscortAvailability } from "@/types/escort";
+import { useState, useCallback } from 'react';
+import { Escort, EscortAvailability } from '@/types/escort';
 
 export const useEscortAvailability = (initialAvailability?: EscortAvailability) => {
   const [availability, setAvailability] = useState<EscortAvailability>(
-    initialAvailability || { days: [], hours: "" }
+    initialAvailability || {
+      days: [],
+      hours: [],
+      timeZone: 'UTC',
+      availableNow: false
+    }
   );
 
-  const updateAvailability = (newAvailability: Partial<EscortAvailability>) => {
-    setAvailability(prev => ({
-      ...prev,
-      ...newAvailability
-    }));
-  };
+  const toggleDay = useCallback((day: string) => {
+    setAvailability(prev => {
+      const currentDays = prev.days || [];
+      const updatedDays = currentDays.includes(day)
+        ? currentDays.filter(d => d !== day)
+        : [...currentDays, day];
 
-  const addDay = (day: string) => {
-    if (availability.days?.includes(day)) return;
-    
-    setAvailability(prev => ({
-      ...prev,
-      days: [...(prev.days || []), day]
-    }));
-  };
+      return {
+        ...prev,
+        days: updatedDays
+      };
+    });
+  }, []);
 
-  const removeDay = (day: string) => {
-    setAvailability(prev => ({
-      ...prev,
-      days: prev.days?.filter(d => d !== day) || []
-    }));
-  };
-
-  const setHours = (hours: string) => {
+  const setAvailableHours = useCallback((hours: string[]) => {
     setAvailability(prev => ({
       ...prev,
       hours
     }));
-  };
+  }, []);
+
+  const setAvailableTimeZone = useCallback((timeZone: string) => {
+    setAvailability(prev => ({
+      ...prev,
+      timeZone
+    }));
+  }, []);
+
+  const toggleAvailableNow = useCallback((availableNow: boolean) => {
+    setAvailability(prev => ({
+      ...prev,
+      availableNow
+    }));
+  }, []);
+
+  const setCustomNotes = useCallback((customNotes: string) => {
+    setAvailability(prev => ({
+      ...prev,
+      customNotes
+    }));
+  }, []);
 
   return {
     availability,
-    updateAvailability,
-    addDay,
-    removeDay,
-    setHours
+    setAvailability,
+    toggleDay,
+    setAvailableHours,
+    setAvailableTimeZone,
+    toggleAvailableNow,
+    setCustomNotes
   };
 };
-
-export default useEscortAvailability;

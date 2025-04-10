@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,11 +10,12 @@ interface EscortAboutProps {
 
 const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
   const { t } = useTranslation();
-  
+
   // Format measurements as string for display
-  const formatMeasurements = (measurements: { bust: number; waist: number; hips: number; } | undefined) => {
+  const formatMeasurements = (measurements: { bust?: number; waist?: number; hips?: number; } | string | undefined) => {
     if (!measurements) return 'N/A';
-    return `${measurements.bust}-${measurements.waist}-${measurements.hips}`;
+    if (typeof measurements === 'string') return measurements;
+    return `${measurements.bust || '-'}-${measurements.waist || '-'}-${measurements.hips || '-'}`;
   };
   
   return (
@@ -125,7 +125,8 @@ const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
           <CardContent className="p-6">
             <h3 className="font-semibold mb-4">{t('Availability')}</h3>
             
-            {escort.availability.days && escort.availability.days.length > 0 && (
+            {escort.availability && typeof escort.availability === 'object' && 'days' in escort.availability && 
+              escort.availability.days && escort.availability.days.length > 0 && (
               <div className="mb-4">
                 <p className="text-sm font-medium mb-2">{t('Days')}</p>
                 <div className="flex flex-wrap gap-2">
@@ -138,10 +139,11 @@ const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
               </div>
             )}
             
-            {escort.availability.hours && (
+            {escort.availability && typeof escort.availability === 'object' && 'hours' in escort.availability && 
+              escort.availability.hours && (
               <div>
                 <p className="text-sm font-medium mb-2">{t('Hours')}</p>
-                <p className="text-sm text-muted-foreground">{escort.availability.hours}</p>
+                <p className="text-sm text-muted-foreground">{Array.isArray(escort.availability.hours) ? escort.availability.hours.join(', ') : escort.availability.hours}</p>
               </div>
             )}
           </CardContent>

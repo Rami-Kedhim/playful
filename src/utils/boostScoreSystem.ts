@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Escort } from "@/types/escort";
 
@@ -90,8 +89,11 @@ export function calculateProfileCompletion(escort: Escort): number {
         completedWeight += weight;
       }
     } else if (field === 'availability') {
-      // Check if availability object has days
-      if (escort.availability && escort.availability.days && escort.availability.days.length > 0) {
+      // Check if availability details are provided
+      if (escort.availability && typeof escort.availability === 'object' && 
+          'days' in escort.availability && 
+          escort.availability.days && 
+          escort.availability.days.length > 0) {
         completedWeight += weight;
       }
     } else if (field === 'languages') {

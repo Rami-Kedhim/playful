@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -44,30 +43,30 @@ const EscortFilterControls: React.FC<EscortFilterControlsProps> = ({
   
   // Toggle a service selection
   const toggleService = (service: string) => {
-    const currentServices = filters.services || [];
+    const currentServices = filters.selectedServices || [];
     const updated = currentServices.includes(service)
       ? currentServices.filter(s => s !== service)
       : [...currentServices, service];
     
-    onUpdateFilter("services", updated);
+    onUpdateFilter("selectedServices", updated);
   };
   
   // Toggle a gender selection
   const toggleGender = (gender: string) => {
-    const currentGenders = filters.gender || [];
+    const currentGenders = filters.selectedGenders || [];
     const updated = currentGenders.includes(gender)
       ? currentGenders.filter(g => g !== gender)
       : [...currentGenders, gender];
     
-    onUpdateFilter("gender", updated);
+    onUpdateFilter("selectedGenders", updated);
   };
   
   // Get the count of active filters
   const getActiveFilterCount = () => {
     let count = 0;
     if (filters.location) count++;
-    if (filters.services && filters.services.length > 0) count += filters.services.length;
-    if (filters.gender && filters.gender.length > 0) count += filters.gender.length;
+    if (filters.selectedServices && filters.selectedServices.length > 0) count += filters.selectedServices.length;
+    if (filters.selectedGenders && filters.selectedGenders.length > 0) count += filters.selectedGenders.length;
     if (filters.verifiedOnly) count++;
     if (filters.languages && filters.languages.length > 0) count += filters.languages.length;
     
@@ -160,7 +159,7 @@ const EscortFilterControls: React.FC<EscortFilterControlsProps> = ({
                   <input
                     type="checkbox"
                     id={`service-${service}`}
-                    checked={(filters.services || []).includes(service)}
+                    checked={(filters.selectedServices || []).includes(service)}
                     onChange={() => toggleService(service)}
                     className="mr-2"
                   />
@@ -180,7 +179,7 @@ const EscortFilterControls: React.FC<EscortFilterControlsProps> = ({
                   <input
                     type="checkbox"
                     id={`gender-${gender}`}
-                    checked={(filters.gender || []).includes(gender)}
+                    checked={(filters.selectedGenders || []).includes(gender)}
                     onChange={() => toggleGender(gender)}
                     className="mr-2"
                   />

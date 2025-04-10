@@ -1,49 +1,94 @@
-import { Escort, Video } from "@/types/escort";
 
-/**
- * Custom hook for managing escort video-related operations
- */
-export const useVideoManagement = ({
-  updateEscortProfile
-}: {
-  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
-}) => {
-  /**
-   * Adds a video URL to the escort's profile
-   */
-  const addVideo = async (id: string, videoUrl: string, escort?: Escort | null): Promise<Escort | null> => {
-    if (!escort) {
-      console.error("Escort is null or undefined");
+import { Escort, Video } from '@/types/escort';
+import { useState, useCallback } from 'react';
+import { useToast } from '@/components/ui/use-toast';
+
+export const useVideoManagement = (updateProfile: (id: string, data: Partial<Escort>) => Promise<Escort | null>) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const { toast } = useToast();
+
+  const addVideo = useCallback(async (
+    escortId: string,
+    videoData: string | Video,
+    escortProfile?: Escort
+  ) => {
+    if (!escortProfile) return null;
+
+    setIsUploading(true);
+    try {
+      let updatedVideos: (string | Video)[] = [];
+      
+      // Add the new video to existing videos or create a new array
+      if (escortProfile.videos && Array.isArray(escortProfile.videos)) {
+        updatedVideos = [...escortProfile.videos, videoData];
+      } else {
+        updatedVideos = [videoData];
+      }
+
+      // Update the escort profile with the new videos array
+      const updatedProfile = await updateProfile(escortId, { videos: updatedVideos });
+      
+      toast({
+        title: 'Video added successfully',
+        description: 'Your video has been added to your gallery',
+      });
+      
+      return updatedProfile;
+    } catch (error) {
+      toast({
+        title: 'Error adding video',
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+        variant: 'destructive',
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  }, [updateProfile, toast]);
+
+  const removeVideo = useCallback(async (
+    escortId: string,
+    videoToRemove: string | Video,
+    escortProfile?: Escort
+  ) => {
+    if (!escortProfile) return null;
+    
+    try {
+      // Filter out the video to remove
+      const updatedVideos = escortProfile.videos ? 
+        escortProfile.videos.filter(video => {
+          if (typeof video === 'string' && typeof videoToRemove === 'string') {
+            return video !== videoToRemove;
+          }
+          
+          if (typeof video !== 'string' && typeof videoToRemove !== 'string') {
+            return video.id !== videoToRemove.id;
+          }
+          
+          return true;
+        }) : [];
+      
+      // Update the escort profile with the filtered videos array
+      const updatedProfile = await updateProfile(escortId, { videos: updatedVideos });
+      
+      toast({
+        title: 'Video removed successfully',
+        description: 'The video has been removed from your gallery',
+      });
+      
+      return updatedProfile;
+    } catch (error) {
+      toast({
+        title: 'Error removing video',
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
+        variant: 'destructive',
+      });
       return null;
     }
-    
-    const newVideo: Video = {
-      id: `video-${Date.now()}`,
-      url: videoUrl,
-      thumbnail: '', // Generate thumbnail here
-      title: 'New Video'
-    };
-    
-    const updatedVideos = [...(escort.videos || []), newVideo];
-    
-    return await updateEscortProfile(id, { videos: updatedVideos });
-  };
+  }, [updateProfile, toast]);
   
-  /**
-   * Removes a video URL from the escort's profile
-   */
-  const removeVideo = async (id: string, videoIdOrUrl: string, escort?: Escort | null): Promise<Escort | null> => {
-    if (!escort) {
-      console.error("Escort is null or undefined");
-      return null;
-    }
-    
-    const updatedVideos = (escort.videos || []).filter(video => video.id !== videoIdOrUrl && video.url !== videoIdOrUrl);
-    
-    return await updateEscortProfile(id, { videos: updatedVideos });
-  };
-
   return {
+    isUploading,
     addVideo,
     removeVideo
   };

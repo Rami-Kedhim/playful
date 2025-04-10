@@ -21,27 +21,31 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
       <h3 className="text-xl font-semibold mb-4">Availability Schedule</h3>
       
       <div className="space-y-6">
-        {availability ? (
+        {availability && typeof availability === 'object' ? (
           <>
-            <div className="flex items-start gap-4">
-              <Calendar className="h-5 w-5 text-primary mt-1" />
-              <div>
-                <h4 className="font-medium">Available Days</h4>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {formatDays(availability.days)}
-                </p>
+            {'days' in availability && availability.days && (
+              <div className="flex items-start gap-4">
+                <Calendar className="h-5 w-5 text-primary mt-1" />
+                <div>
+                  <h4 className="font-medium">Available Days</h4>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {formatDays(availability.days)}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
             
-            <div className="flex items-start gap-4">
-              <Clock className="h-5 w-5 text-primary mt-1" />
-              <div>
-                <h4 className="font-medium">Hours</h4>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {availability.hours}
-                </p>
+            {'hours' in availability && availability.hours && (
+              <div className="flex items-start gap-4">
+                <Clock className="h-5 w-5 text-primary mt-1" />
+                <div>
+                  <h4 className="font-medium">Hours</h4>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {Array.isArray(availability.hours) ? availability.hours.join(', ') : availability.hours}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </>
         ) : (
           <p className="text-gray-600">No availability information provided.</p>

@@ -28,12 +28,10 @@ const MediaSection = ({ escort }: MediaSectionProps) => {
     }
     
     return gallery.map((item, index) => {
-      // Check if item is already formatted as a MediaItem
       if (typeof item === 'object' && item !== null) {
         return item as unknown as MediaItem;
       }
       
-      // Otherwise format as MediaItem
       return {
         id: `photo-${index}`,
         url: item,
@@ -46,12 +44,10 @@ const MediaSection = ({ escort }: MediaSectionProps) => {
   const photos = formatGallery(escort.gallery || escort.gallery_images);
   
   const videos = escort.videos?.map((video, index) => {
-    // Check if video is already a complex object
     if (typeof video === 'object' && video !== null && 'url' in video) {
       return video as unknown as MediaItem;
     }
     
-    // Otherwise create a MediaItem from the string
     return {
       id: `video-${index}`,
       url: typeof video === 'string' ? video : '',
@@ -121,7 +117,6 @@ const MediaSection = ({ escort }: MediaSectionProps) => {
                 setViewerOpen(true);
               }}>
                 <AspectRatio ratio={16/9} className="bg-muted overflow-hidden rounded-md">
-                  {/* Video thumbnail */}
                   <div className="relative">
                     <img 
                       src={video.thumbnail}
@@ -166,7 +161,10 @@ const MediaSection = ({ escort }: MediaSectionProps) => {
             
             {activeTab === "videos" && currentMedia[currentMediaIndex] && (
               <video 
-                src={currentMedia[currentMediaIndex].url}
+                src={typeof currentMedia[currentMediaIndex] === 'string' ? 
+                  currentMedia[currentMediaIndex] as string : 
+                  (currentMedia[currentMediaIndex] as {url: string}).url
+                }
                 controls
                 className="max-h-[80vh] max-w-full"
               />
