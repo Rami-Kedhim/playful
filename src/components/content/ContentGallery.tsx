@@ -6,6 +6,7 @@ import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus, ca
 import ContentSearch from './ContentSearch';
 import ContentFilters from './ContentFilters';
 import ContentGrid from './ContentGrid';
+import { useContentBrainHub } from '@/hooks/useContentBrainHub';
 
 // Mock content data, in a real app this would come from an API
 const mockContent = [
@@ -57,23 +58,35 @@ const ContentGallery: React.FC = () => {
   const [content, setContent] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { toast } = useToast();
+  const { processContent, getIntelligentRenewalCost, recordInteraction } = useContentBrainHub();
 
   useEffect(() => {
     // Process mock content to calculate real status based on dates
-    const processedContent = mockContent.map(item => {
-      const expiryDate = calculateExpiryDate(item.createdAt);
-      const daysRemaining = calculateDaysRemaining(expiryDate);
-      const status = item.status === 'draft' ? 'draft' : determineContentStatus(item.createdAt);
+    const initialProcessContent = async () => {
+      const processedContent = mockContent.map(item => {
+        const expiryDate = calculateExpiryDate(item.createdAt);
+        const daysRemaining = calculateDaysRemaining(expiryDate);
+        const status = item.status === 'draft' ? 'draft' : determineContentStatus(item.createdAt);
+        
+        return {
+          ...item,
+          status,
+          daysRemaining
+        };
+      });
       
-      return {
-        ...item,
-        status,
-        daysRemaining
-      };
-    });
+      // Process content through Brain Hub for additional intelligence
+      try {
+        const brainHubEnhancedContent = await processContent(processedContent);
+        setContent(brainHubEnhancedContent);
+      } catch (error) {
+        console.error("Failed to process content with Brain Hub, using standard content:", error);
+        setContent(processedContent);
+      }
+    };
     
-    setContent(processedContent);
-  }, []);
+    initialProcessContent();
+  }, [processContent]);
 
   const filteredContent = content.filter(item => {
     // First apply search filter if any
@@ -110,9 +123,16 @@ const ContentGallery: React.FC = () => {
       })
     );
     
-    // Calculate the cost based on content type and status
+    // Find the content item
     const contentItem = content.find(item => item.id === contentId);
-    const renewalCost = contentItem ? calculateRenewalCost(contentItem.status, contentItem.type) : 1;
+    
+    // Use Brain Hub for intelligent renewal cost calculation
+    const renewalCost = contentItem ? 
+      getIntelligentRenewalCost(contentItem.status, contentItem.type) : 
+      1;
+    
+    // Record interaction with Brain Hub
+    recordInteraction(contentId, 'renew');
     
     toast({
       title: "Content Renewed",
