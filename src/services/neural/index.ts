@@ -49,6 +49,11 @@ export {
   LivecamsNeuralService
 } from './modules/LivecamsNeuralService';
 
+export {
+  oxumLearningService,
+  OxumLearningService
+} from './modules/OxumLearningService';
+
 // Types
 export type { 
   SystemHealthMetrics, 
