@@ -8,6 +8,7 @@ import ProfilePage from '@/pages/ProfilePage';
 import PersonaProfile from '@/pages/PersonaProfile';
 import AuthPage from '@/pages/AuthPage';
 import OtpVerificationPage from '@/pages/OtpVerificationPage';
+import EscortDirectory from '@/pages/EscortDirectory';
 import { AuthProvider } from '@/hooks/auth/useAuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { ToastProvider } from '@/providers/toast-provider';
@@ -21,6 +22,14 @@ function App() {
           <Route 
             path="/" 
             element={<HomePage />} 
+          />
+          <Route 
+            path="/escorts" 
+            element={
+              <EscortsModule>
+                <EscortDirectory />
+              </EscortsModule>
+            } 
           />
           <Route 
             path="/personas" 
