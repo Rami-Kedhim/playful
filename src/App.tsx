@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { EscortsModule } from '@/modules/escorts/EscortsModule';
+import HomePage from '@/pages/HomePage';
 import PersonasPage from '@/pages/Personas';
 import ProfilePage from '@/pages/ProfilePage';
 import PersonaProfile from '@/pages/PersonaProfile';
@@ -18,6 +19,10 @@ function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route 
             path="/" 
+            element={<HomePage />} 
+          />
+          <Route 
+            path="/personas" 
             element={
               <EscortsModule>
                 <PersonasPage />

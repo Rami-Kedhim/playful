@@ -1,91 +1,113 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Shield, ShieldCheck, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from "@/components/ui/badge";
+import { Shield, CheckCircle, BadgeCheck, User } from "lucide-react";
+import { VerificationLevel } from "@/types/escort";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface VerificationBadgeProps {
-  level: 'none' | 'basic' | 'enhanced' | 'premium';
-  size?: 'sm' | 'md' | 'lg';
+  level: VerificationLevel;
   showTooltip?: boolean;
+  size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-const VerificationBadge = ({ level, size = 'md', showTooltip = true, className }: VerificationBadgeProps) => {
-  if (level === 'none') return null;
-  
+const VerificationBadge = ({ 
+  level, 
+  showTooltip = true,
+  size = "md",
+  className = ""
+}: VerificationBadgeProps) => {
   const getBadgeContent = () => {
-    const sizeClasses = {
-      sm: 'text-xs py-0.5 px-1.5',
-      md: 'text-xs py-1 px-2',
-      lg: 'text-sm py-1 px-2.5',
+    const classes = {
+      sm: "text-xs py-0.5 px-1.5",
+      md: "text-sm py-1 px-2",
+      lg: "py-1.5 px-3"
     };
     
-    const iconSize = size === 'sm' ? 'h-3 w-3 mr-1' : size === 'lg' ? 'h-5 w-5 mr-2' : 'h-4 w-4 mr-1';
+    const iconSize = {
+      sm: 12,
+      md: 14,
+      lg: 16
+    };
+    
+    const sizeClass = classes[size];
+    const iconWidth = iconSize[size];
     
     switch (level) {
-      case 'basic':
+      case 'premium':
         return (
           <Badge 
-            variant="outline" 
-            className={`bg-blue-500/10 text-blue-500 border-blue-500/30 ${sizeClasses[size]} ${className || ''}`}
+            className={`bg-primary hover:bg-primary ${sizeClass} ${className}`}
           >
-            <Shield className={iconSize} /> Verified
+            <BadgeCheck className={`w-${iconWidth} h-${iconWidth} mr-1`} />
+            Premium
           </Badge>
         );
       case 'enhanced':
         return (
           <Badge 
-            variant="outline" 
-            className={`bg-green-500/10 text-green-500 border-green-500/30 ${sizeClasses[size]} ${className || ''}`}
+            className={`bg-blue-500 hover:bg-blue-600 ${sizeClass} ${className}`}
           >
-            <ShieldCheck className={iconSize} /> Enhanced Verified
+            <CheckCircle className={`w-${iconWidth} h-${iconWidth} mr-1`} />
+            Enhanced
           </Badge>
         );
-      case 'premium':
+      case 'basic':
         return (
           <Badge 
-            className={`bg-gradient-to-r from-amber-500 to-purple-500 border-0 ${sizeClasses[size]} ${className || ''}`}
+            className={`bg-green-500 hover:bg-green-600 ${sizeClass} ${className}`}
           >
-            <CheckCircle2 className={iconSize} /> Premium Verified
+            <Shield className={`w-${iconWidth} h-${iconWidth} mr-1`} />
+            Basic
           </Badge>
         );
+      case 'none':
       default:
-        return null;
+        return (
+          <Badge 
+            variant="outline" 
+            className={`text-muted-foreground ${sizeClass} ${className}`}
+          >
+            <User className={`w-${iconWidth} h-${iconWidth} mr-1`} />
+            Not Verified
+          </Badge>
+        );
     }
   };
-  
+
   const getTooltipContent = () => {
     switch (level) {
-      case 'basic':
-        return 'This profile has completed basic identity verification';
-      case 'enhanced':
-        return 'This profile has completed enhanced verification with additional security checks';
       case 'premium':
-        return 'This profile has our highest level of verification with premium security features';
+        return "Premium verification includes government ID, selfie, background check, and personal references";
+      case 'enhanced':
+        return "Enhanced verification includes government ID, selfie, and background check";
+      case 'basic':
+        return "Basic verification includes government ID and selfie verification";
+      case 'none':
       default:
-        return '';
+        return "This profile has not completed verification";
     }
   };
-  
+
   const badge = getBadgeContent();
-  
-  if (!badge) return null;
-  
-  if (!showTooltip) return badge;
-  
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {badge}
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{getTooltipContent()}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
+
+  if (showTooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {badge}
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{getTooltipContent()}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return badge;
 };
 
 export default VerificationBadge;
