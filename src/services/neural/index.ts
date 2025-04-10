@@ -17,11 +17,10 @@ export {
 export { 
   neuralServiceRegistry,
   type NeuralService,
-  type NeuralServiceConfig,
   type ModuleType
 } from './registry/NeuralServiceRegistry';
 
-export { BaseNeuralService } from './modules/BaseNeuralService';
+export { BaseNeuralService, type NeuralServiceConfig } from './modules/BaseNeuralService';
 
 // Module-specific neural services
 export { 

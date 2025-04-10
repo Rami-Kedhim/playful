@@ -50,7 +50,7 @@ export const useEscortEnhancedFilters = () => {
       availableNow: state.filters.availableNow || false,
       escortType: state.filters.escortType || "all",
       language: state.filters.language || [],
-      useBoostSorting: escortsNeuralService.getConfig().orderByBoost
+      useBoostSorting: escortsNeuralService.config.orderByBoost
     }));
   }, [
     state.filters.location,
@@ -69,7 +69,7 @@ export const useEscortEnhancedFilters = () => {
   // Update neural service config when boost sorting changes
   useEffect(() => {
     try {
-      const neuralConfig = escortsNeuralService.getConfig();
+      const neuralConfig = escortsNeuralService.config;
       if (neuralConfig.orderByBoost !== filters.useBoostSorting) {
         escortsNeuralService.updateConfig({
           orderByBoost: filters.useBoostSorting

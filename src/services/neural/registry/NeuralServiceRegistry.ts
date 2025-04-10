@@ -2,7 +2,7 @@
 import { BaseNeuralService, NeuralServiceConfig } from '../modules/BaseNeuralService';
 
 // Define the module types
-export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion' | 'oxum-learning';
+export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion' | 'oxum-learning' | 'learning';
 
 // Define the structure of a NeuralService
 export interface NeuralService {
@@ -16,6 +16,8 @@ export interface NeuralService {
   configure(options: Record<string, any>): void;
   getCapabilities(): string[];
   getMetrics(): Record<string, any>;
+  initialize(): Promise<boolean>;
+  isEnabled(): boolean;
 }
 
 class NeuralServiceRegistry {

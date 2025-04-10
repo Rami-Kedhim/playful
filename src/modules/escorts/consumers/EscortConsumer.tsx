@@ -24,7 +24,7 @@ export const EscortConsumer: React.FC<EscortConsumerProps> = ({
         const premiumMode = (wallet.balance > 100);
         
         // Apply OxumAlgorithm boost settings based on user's premium status
-        escortsNeuralService.configure({
+        escortsNeuralService.updateConfig({
           enabled: true,
           priority: premiumMode ? 80 : 40,
           autonomyLevel: premiumMode ? 70 : 40,

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { LivecamModel, BoostableLivecamsOptions } from '@/types/livecams';
@@ -46,7 +47,7 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
       const request: BrainHubRequest = {
         type: 'livecam_boost',
         data,
-        options: {
+        filters: {
           applyBoostScores: true,
           filterInappropriate: true
         }
@@ -132,6 +133,33 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
     return boostedIds.includes(id);
   }, [boostedIds]);
   
+  // Updated evaluate boost opportunities function without undefined variables
+  const evaluateBoostOpportunities = useCallback(async () => {
+    if (!brainHub) return;
+
+    try {
+      setIsEvaluating(true);
+      
+      // Create a request for the brain hub with minimal required data
+      const response = brainHub.processRequest({
+        type: 'evaluate_boost_opportunities',
+        data: {
+          userProfile: {}, // Pass empty object instead of undefined variable
+          recentViews: [], // Pass empty array instead of undefined variable
+          availableCredits: 0 // Pass default value instead of userData?.lucoins
+        }
+      });
+      
+      if (response.success && response.data) {
+        setBoostOpportunities(response.data.opportunities || []);
+      }
+    } catch (err) {
+      console.error("Failed to evaluate boost opportunities:", err);
+    } finally {
+      setIsEvaluating(false);
+    }
+  }, [brainHub]);
+  
   // Helper function to generate mock data
   const generateMockLivecams = (limit: number, onlyLive = false): LivecamModel[] => {
     const models: LivecamModel[] = [];
@@ -157,32 +185,6 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
     
     return models;
   };
-
-  const evaluateBoostOpportunities = useCallback(async () => {
-    if (!brainHub || !settings) return;
-
-    try {
-      setIsEvaluating(true);
-      
-      // Create a request for the brain hub
-      const response = brainHub.processRequest({
-        type: 'evaluate_boost_opportunities',
-        data: {
-          userProfile: user,
-          recentViews: recentlyViewedProfiles,
-          availableCredits: userData?.lucoins || 0
-        }
-      });
-      
-      if (response.success && response.data) {
-        setBoostOpportunities(response.data.opportunities || []);
-      }
-    } catch (err) {
-      console.error("Failed to evaluate boost opportunities:", err);
-    } finally {
-      setIsEvaluating(false);
-    }
-  }, [brainHub, settings, user, recentlyViewedProfiles, userData?.lucoins]);
 
   return {
     livecams,

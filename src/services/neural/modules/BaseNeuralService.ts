@@ -62,4 +62,18 @@ export class BaseNeuralService {
   public getCapabilities(): string[] {
     return [];
   }
+  
+  // Added missing methods
+  public initialize(): Promise<boolean> {
+    // Default implementation returns a successful initialization
+    return Promise.resolve(true);
+  }
+  
+  public isEnabled(): boolean {
+    return this.config.enabled;
+  }
+  
+  public getConfig(): NeuralServiceConfig {
+    return this.config;
+  }
 }

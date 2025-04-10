@@ -131,9 +131,9 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
         try {
           const neuralQuery = {
             filters: state.filters,
-            boostingEnabled: escortsNeuralService.getConfig().boostingEnabled,
-            boostingAlgorithm: escortsNeuralService.getConfig().boostingAlgorithm,
-            orderByBoost: escortsNeuralService.getConfig().orderByBoost
+            boostingEnabled: escortsNeuralService.config.boostingEnabled,
+            boostingAlgorithm: escortsNeuralService.config.boostingAlgorithm,
+            orderByBoost: escortsNeuralService.config.orderByBoost
           };
           
           processedEscorts = await neuralHub.processQuery(
@@ -144,10 +144,10 @@ export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
           processedEscorts = processedEscorts.map(escort => ({
             ...escort,
             profileType: escort.verified ? 'verified' : 
-                       escort.isAI ? 'ai' : 'provisional'
+                      escort.isAI ? 'ai' : 'provisional'
           }));
           
-          if (escortsNeuralService.getConfig().orderByBoost) {
+          if (escortsNeuralService.config.orderByBoost) {
             processedEscorts = processedEscorts.sort((a, b) => {
               const boostDiff = (b.boostLevel || 0) - (a.boostLevel || 0);
               if (boostDiff !== 0) return boostDiff;

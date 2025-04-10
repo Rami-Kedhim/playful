@@ -29,8 +29,9 @@ const CreatorPageContent: React.FC = () => {
     if (showInfo) showInfo("Refreshing Data", "Getting the latest content creators");
   };
   
-  const neuralStatus = creatorsNeuralService.isEnabled() 
-    ? `Neural processing active (${creatorsNeuralService.getConfig().autonomyLevel}%)`
+  const isEnabled = creatorsNeuralService.config.enabled;
+  const neuralStatus = isEnabled
+    ? `Neural processing active (${creatorsNeuralService.config.autonomyLevel}%)`
     : "Neural processing disabled";
   
   return (
@@ -46,7 +47,7 @@ const CreatorPageContent: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-3xl font-bold">Content Creators</h1>
-                {creatorsNeuralService.isEnabled() && (
+                {isEnabled && (
                   <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full flex items-center">
                     <Brain className="h-3 w-3 mr-1" />
                     Neural Enhanced
