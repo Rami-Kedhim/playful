@@ -3,7 +3,7 @@ import React from 'react';
 import { calculateDaysRemaining, formatDate } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Clock, RefreshCw, InfoCircle, Coins } from 'lucide-react';
+import { Clock, RefreshCw, Info, Coins } from 'lucide-react';
 
 interface ContentExpiryInfoProps {
   createdAt: Date;
