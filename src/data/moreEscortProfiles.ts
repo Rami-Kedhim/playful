@@ -265,12 +265,34 @@ moreEscortProfiles.forEach(escort => {
   // Fix service types
   if (escort.services) {
     escort.services = escort.services.map(service => {
-      // Convert problematic service names to valid ServiceType
-      if (service === "dinner-date") return "Dinner Date" as ServiceType;
-      if (service === "custom-content") return "custom-content" as ServiceType;
-      if (service === "role-play") return "Role Play" as ServiceType;
+      if (typeof service === "string") {
+        const lowerCaseService = service.toLowerCase();
+        // Convert problematic service names to valid ServiceType
+        if (lowerCaseService === "dinner-date" || lowerCaseService === "dinner date") 
+          return "Dinner Date" as ServiceType;
+          
+        if (lowerCaseService === "custom-content") 
+          return "custom-content" as ServiceType;
+          
+        if (lowerCaseService === "role-play" || lowerCaseService === "role play") 
+          return "Role Play" as ServiceType;
+          
+        if (lowerCaseService === "weekend getaways") 
+          return "Weekend Getaways" as ServiceType;
+          
+        if (lowerCaseService === "travel companion") 
+          return "Travel Companion" as ServiceType;
+          
+        if (lowerCaseService === "sensual massage") 
+          return "Sensual Massage" as ServiceType;
+      }
       return service;
     });
+  }
+  
+  // Fix measurements format if needed
+  if (escort.measurements && typeof escort.measurements === 'number') {
+    escort.measurements = String(escort.measurements);
   }
 });
 

@@ -1,4 +1,3 @@
-
 export interface Escort {
   id: string;
   name: string;
@@ -97,6 +96,7 @@ export type ServiceType =
   | "Role Play"
   | "BDSM"
   | "Overnight"
+  | "GFE"
   | "virtual-date"
   | "custom-content"
   | "role-play"

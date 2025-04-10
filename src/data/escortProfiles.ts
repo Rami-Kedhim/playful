@@ -457,12 +457,28 @@ escorts.forEach(escort => {
     escort.services = escort.services.map(service => {
       if (typeof service === "string") {
         // Convert to proper ServiceType format if needed
-        if (service.toLowerCase() === "dinner date" || service.toLowerCase() === "dinner-date") 
+        const lowerCaseService = service.toLowerCase();
+        
+        if (lowerCaseService === "dinner date" || lowerCaseService === "dinner-date") 
           return "Dinner Date" as ServiceType;
-        if (service.toLowerCase() === "weekend getaways") 
+          
+        if (lowerCaseService === "weekend getaways") 
           return "Weekend Getaways" as ServiceType;
-        if (service.toLowerCase() === "travel companion") 
+          
+        if (lowerCaseService === "travel companion") 
           return "Travel Companion" as ServiceType;
+          
+        if (lowerCaseService === "sensual massage") 
+          return "Sensual Massage" as ServiceType;
+          
+        if (lowerCaseService === "role play" || lowerCaseService === "role-play") 
+          return "Role Play" as ServiceType;
+          
+        if (lowerCaseService === "bdsm") 
+          return "BDSM" as ServiceType;
+          
+        if (lowerCaseService === "gfe") 
+          return "GFE" as ServiceType;
       }
       return service;
     });
