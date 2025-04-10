@@ -44,7 +44,7 @@ export {
 } from './modules/LivecamsNeuralService';
 
 // Types
-export { 
+export type { 
   SystemHealthMetrics, 
   ModelParameters,
   NeuralModel,
