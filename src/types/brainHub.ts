@@ -4,6 +4,7 @@ export interface PsychologyModel {
   personalityModeling: boolean;
   behaviourPrediction: boolean;
   sentimentAnalysis: boolean;
+  [key: string]: boolean;
 }
 
 export interface PhysicsModel {
@@ -11,6 +12,7 @@ export interface PhysicsModel {
   gravitationalEffects: boolean;
   fluidDynamics: boolean;
   particleSystems: boolean;
+  [key: string]: boolean;
 }
 
 export interface EconomicsModel {
@@ -18,6 +20,7 @@ export interface EconomicsModel {
   demandForecasting: boolean;
   marketSimulation: boolean;
   transactionAnalysis: boolean;
+  [key: string]: boolean;
 }
 
 export interface RoboticsModel {
@@ -25,12 +28,14 @@ export interface RoboticsModel {
   pathPlanning: boolean;
   sensorIntegration: boolean;
   controlSystems: boolean;
+  [key: string]: boolean;
 }
 
 export interface BrainHubRequest {
   type: string;
   data: any;
   filters?: Record<string, any>;
+  options?: Record<string, any>; // Add options property
 }
 
 export interface BrainHubResponse {

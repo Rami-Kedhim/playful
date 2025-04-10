@@ -6,7 +6,7 @@ export class EscortsNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
     super({
       moduleId,
-      moduleType: 'escorts',
+      moduleType: 'escorts' as ModuleType,
       moduleName: 'Escorts Neural Service',
       description: 'Provides matching and recommendation for escort services',
       version: '1.0.0',

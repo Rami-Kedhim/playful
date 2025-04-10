@@ -6,7 +6,7 @@ export class CreatorsNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
     super({
       moduleId,
-      moduleType: 'creators',
+      moduleType: 'creators' as ModuleType,
       moduleName: 'Content Creators Neural Service',
       description: 'Provides content analysis and recommendations for creators',
       version: '1.0.0',

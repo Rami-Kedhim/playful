@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { LivecamModel, BoostableLivecamsOptions } from '@/types/livecams';
@@ -9,7 +8,9 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [boostedIds, setBoostedIds] = useState<string[]>([]);
-  
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [boostOpportunities, setBoostOpportunities] = useState<any[]>([]);
+
   const fetchLivecams = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -156,7 +157,33 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
     
     return models;
   };
-  
+
+  const evaluateBoostOpportunities = useCallback(async () => {
+    if (!brainHub || !settings) return;
+
+    try {
+      setIsEvaluating(true);
+      
+      // Create a request for the brain hub
+      const response = brainHub.processRequest({
+        type: 'evaluate_boost_opportunities',
+        data: {
+          userProfile: user,
+          recentViews: recentlyViewedProfiles,
+          availableCredits: userData?.lucoins || 0
+        }
+      });
+      
+      if (response.success && response.data) {
+        setBoostOpportunities(response.data.opportunities || []);
+      }
+    } catch (err) {
+      console.error("Failed to evaluate boost opportunities:", err);
+    } finally {
+      setIsEvaluating(false);
+    }
+  }, [brainHub, settings, user, recentlyViewedProfiles, userData?.lucoins]);
+
   return {
     livecams,
     loading,
@@ -168,9 +195,10 @@ export const useBoostableLivecams = (options: BoostableLivecamsOptions = {}) => 
     totalCount: livecams.length,
     loadMore: () => {}, // No-op function for pagination
     updateFilters: () => {}, // No-op function for filters
-    cancelBoost, // Function for canceling boosts
-    isBoosted, // Function to check if boosted
-    boostedIds // Array of boosted IDs
+    cancelBoost,
+    isBoosted,
+    boostedIds,
+    evaluateBoostOpportunities
   };
 };
 

@@ -1,4 +1,3 @@
-
 import { BaseScraperService } from "./baseScraperService";
 import { Escort } from "@/types/escort";
 import { brainHub } from "../neural/HermesOxumBrainHub";
@@ -62,13 +61,7 @@ export class EscortScraper extends BaseScraperService {
       
       try {
         // Use the BrainHub to get data instead of direct scraping
-        processedEscorts = await brainHub.processQuery('escorts', {
-          type: 'escorts',
-          filters: {
-            region: this.region,
-            limit: this.limit
-          }
-        }) as Escort[];
+        processedEscorts = await this.processWithBrainHub('escorts') as Escort[];
         
         console.log(`Successfully retrieved ${processedEscorts.length} escorts from BrainHub`);
         
@@ -113,6 +106,15 @@ export class EscortScraper extends BaseScraperService {
         this.generateMockEscortData();
     } finally {
       this.isRunning = false;
+    }
+  }
+  
+  private processWithBrainHub(inputQuery: string): any {
+    try {
+      return brainHub.processQuery(inputQuery);
+    } catch (error) {
+      console.error("Error processing with BrainHub:", error);
+      return {};
     }
   }
   

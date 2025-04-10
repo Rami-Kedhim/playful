@@ -1,3 +1,4 @@
+
 import { PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel, BrainHubRequest, BrainHubResponse } from '@/types/brainHub';
 import { oxumLearningService } from '@/services/neural/modules/OxumLearningService';
 
@@ -51,6 +52,14 @@ class BrainHub {
     neuroEmotionEnabled: true,
     predictiveModulationEnabled: true
   };
+  
+  private decisionLogs: Array<{
+    type: string;
+    description: string;
+    confidence: number;
+    source: string;
+    timestamp: Date;
+  }> = [];
 
   public getModelParameters(): Record<string, any> {
     return {};
@@ -80,17 +89,30 @@ class BrainHub {
   
   public removeObserver(fn: () => void): void {}
   
-  public logDecision(decision: any): void {}
+  public logDecision(
+    type: string,
+    description: string = '',
+    confidence: number = 1.0,
+    source: string = 'system'
+  ): void {
+    this.decisionLogs.push({
+      type,
+      description,
+      confidence,
+      source,
+      timestamp: new Date(),
+    });
+  }
   
   public getDecisionLogs(): any[] {
-    return [];
+    return this.decisionLogs;
   }
   
   public getSystemStatus(): Record<string, any> {
     return {};
   }
   
-  public processQuery(query: string): any {
+  public processQuery(query: string, context?: any): any {
     return {};
   }
 

@@ -6,7 +6,7 @@ export class LivecamsNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
     super({
       moduleId,
-      moduleType: 'livecams',
+      moduleType: 'livecams' as ModuleType,
       moduleName: 'Livecams Neural Service',
       description: 'Provides streaming and content matching for live cam services',
       version: '1.0.0',

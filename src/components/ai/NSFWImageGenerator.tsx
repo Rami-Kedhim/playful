@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -106,12 +105,7 @@ const NSFWImageGenerator: React.FC = () => {
       };
       
       // Log the request through BrainHub
-      brainHub.logDecision(
-        'image_generation',
-        `Generating NSFW image with model ${values.model}`,
-        0.9,
-        'NSFWImageGenerator'
-      );
+      brainHub.logDecision('image_generation', `Generating NSFW image with model ${values.model}`);
       
       await generateImage(generationParams);
     } catch (err) {

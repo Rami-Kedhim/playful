@@ -1,4 +1,3 @@
-
 import { brainHub } from './HermesOxumBrainHub';
 
 // Type definitions for AutoDevOps components
@@ -63,6 +62,13 @@ export class BrainHubAutoDevOpsManager {
     autonomyLevel: 40,
     isAnalyzing: false
   };
+  
+  private activityLogs: Array<{
+    component: string;
+    action: string;
+    result: boolean;
+    timestamp: Date;
+  }> = [];
   
   // Log a DevOps action
   logAction(action: string, result: string, component: string): void {
@@ -233,6 +239,7 @@ export class ${params.description.replace(/\s+/g, '')} {
     });
     
     this.logAction('generate', 'Code generated', fileName);
+    this.logCodeGeneration(fileName, true, params.description);
     return fileName;
   }
   
@@ -279,6 +286,18 @@ export class ${params.description.replace(/\s+/g, '')} {
     
     this.logAction('deploy', 'Code deployed successfully', fileName);
     return true;
+  }
+
+  private logCodeGeneration(component: string, result: boolean, description: string = ''): void {
+    brainHub.logDecision('code_generation', description);
+    
+    // Record the activity in logs
+    this.activityLogs.push({
+      component,
+      action: 'generate',
+      result,
+      timestamp: new Date()
+    });
   }
 
   // Method to analyze missing components
