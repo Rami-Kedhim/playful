@@ -1,9 +1,21 @@
 
 import { NeuralService, NeuralServiceConfig, ModuleType } from '../registry/NeuralServiceRegistry';
 
+interface BaseNeuralServiceParams {
+  moduleId: string;
+  moduleType: ModuleType;
+  moduleName: string;
+  description: string;
+  version: string;
+  enabled?: boolean;
+}
+
 export abstract class BaseNeuralService implements NeuralService {
   readonly moduleId: string;
   readonly moduleType: ModuleType;
+  readonly moduleName: string;
+  readonly description: string;
+  readonly version: string;
   protected isInitialized: boolean = false;
   
   // Make config public to align with NeuralService interface
@@ -17,9 +29,16 @@ export abstract class BaseNeuralService implements NeuralService {
     orderByBoost: false
   };
 
-  constructor(moduleId: string, moduleType: ModuleType) {
-    this.moduleId = moduleId;
-    this.moduleType = moduleType;
+  constructor(params: BaseNeuralServiceParams) {
+    this.moduleId = params.moduleId;
+    this.moduleType = params.moduleType;
+    this.moduleName = params.moduleName;
+    this.description = params.description;
+    this.version = params.version;
+    
+    if (params.enabled !== undefined) {
+      this.config.enabled = params.enabled;
+    }
   }
 
   async initialize(): Promise<boolean> {

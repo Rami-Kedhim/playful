@@ -1,4 +1,3 @@
-
 import { PsychologyModel, PhysicsModel, EconomicsModel, RoboticsModel, BrainHubRequest, BrainHubResponse } from '@/types/brainHub';
 import { oxumLearningService } from '@/services/neural/modules/OxumLearningService';
 
@@ -12,6 +11,9 @@ export interface BrainHubConfig {
     culturalContextEnabled: boolean;
     linguisticProcessingEnabled: boolean;
   };
+  geoLegalFilteringEnabled: boolean;
+  neuroEmotionEnabled: boolean;
+  predictiveModulationEnabled: boolean;
 }
 
 class BrainHub {
@@ -44,8 +46,53 @@ class BrainHub {
       learningEnabled: true,
       culturalContextEnabled: true,
       linguisticProcessingEnabled: true
-    }
+    },
+    geoLegalFilteringEnabled: false,
+    neuroEmotionEnabled: true,
+    predictiveModulationEnabled: true
   };
+
+  public getModelParameters(): Record<string, any> {
+    return {};
+  }
+  
+  public getModels(): any[] {
+    return [];
+  }
+  
+  public getAutonomyStatus(): { enabled: boolean; level: number } {
+    return { enabled: false, level: 0 };
+  }
+  
+  public storeInMemory(key: string, value?: any): any {
+    return value;
+  }
+  
+  public updateModelParameters(params: any): void {}
+  
+  public enableAutonomy(): void {}
+  
+  public disableAutonomy(): void {}
+  
+  public setAutonomyLevel(level: number): void {}
+  
+  public addObserver(fn: () => void): void {}
+  
+  public removeObserver(fn: () => void): void {}
+  
+  public logDecision(decision: any): void {}
+  
+  public getDecisionLogs(): any[] {
+    return [];
+  }
+  
+  public getSystemStatus(): Record<string, any> {
+    return {};
+  }
+  
+  public processQuery(query: string): any {
+    return {};
+  }
 
   /**
    * Process a request through the Brain Hub

@@ -1,4 +1,3 @@
-
 import { BaseNeuralService } from './BaseNeuralService';
 import { hermesOxumEngine } from '@/services/boost/HermesOxumEngine';
 
@@ -14,19 +13,21 @@ export class OxumLearningService extends BaseNeuralService {
   constructor() {
     super({
       moduleId: 'oxum-learning',
-      moduleName: 'Oxum Learning System',
       moduleType: 'learning',
+      moduleName: 'Oxum Learning System',
       description: 'Enhanced linguistic diversity and cultural context learning for AI systems',
       version: '1.0.0',
-      enabled: true,
-      config: {
-        learningRate: 0.015,
-        culturalWeighting: 0.7,
-        linguisticDepth: 3,
-        contextRetention: 21,  // days
-        syncInterval: 6,      // hours
-        adaptationThreshold: 0.65
-      }
+      enabled: true
+    });
+    
+    // Set initial configuration
+    this.updateConfig({
+      learningRate: 0.015,
+      culturalWeighting: 0.7,
+      linguisticDepth: 3,
+      contextRetention: 21,  // days
+      syncInterval: 6,      // hours
+      adaptationThreshold: 0.65
     });
   }
   
@@ -243,20 +244,19 @@ export class OxumLearningService extends BaseNeuralService {
   }
   
   /**
-   * Get learned patterns
+   * Get learned patterns from the service
    */
   public getLearnedPatterns(): Record<string, number> {
     return Object.fromEntries(this.learningPatterns);
   }
   
   /**
-   * Get cultural contexts
+   * Get cultural contexts from the service
    */
   public getCulturalContexts(): Record<string, any> {
     return Object.fromEntries(this.culturalContexts);
   }
 }
 
-// Export singleton instance
+// Create and export the singleton instance
 export const oxumLearningService = new OxumLearningService();
-export default oxumLearningService;

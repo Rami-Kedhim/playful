@@ -1,24 +1,35 @@
-
 import { BaseNeuralService } from '@/services/neural/modules/BaseNeuralService';
 import { aiCompanionNeuralService } from '@/services/neural/modules/AICompanionNeuralService';
 import { oxumLearningService } from '@/services/neural/modules/OxumLearningService';
 
-export type ModuleType = 'companion' | 'content' | 'learning' | 'analytics';
+export type ModuleType = 'companion' | 'content' | 'learning' | 'analytics' | 
+                        'ai-companion' | 'escorts' | 'creators' | 'livecams';
 
 export interface NeuralServiceConfig {
   enabled: boolean;
+  priority?: number;
+  autonomyLevel?: number;
+  resourceAllocation?: number;
+  boostingEnabled?: boolean;
+  boostingAlgorithm?: string;
+  orderByBoost?: boolean;
   [key: string]: any;
 }
 
 export interface NeuralService {
   moduleId: string;
-  moduleName: string;
   moduleType: ModuleType;
+  config: NeuralServiceConfig;
+  moduleName: string;
   description: string;
   version: string;
-  config: NeuralServiceConfig;
   initialize(): Promise<boolean>;
   updateConfig(config: Partial<NeuralServiceConfig>): void;
+  getConfig(): NeuralServiceConfig;
+  isEnabled(): boolean;
+  getCapabilities?(): string[];
+  getMetrics?(): Record<string, any>;
+  processFeedback?(feedback: any): void;
 }
 
 class NeuralServiceRegistry {

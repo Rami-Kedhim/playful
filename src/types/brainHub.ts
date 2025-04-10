@@ -1,11 +1,9 @@
 
-// Core BrainHub types
 export interface PsychologyModel {
   emotionalAnalysis: boolean;
   personalityModeling: boolean;
   behaviourPrediction: boolean;
   sentimentAnalysis: boolean;
-  [key: string]: boolean;
 }
 
 export interface PhysicsModel {
@@ -13,7 +11,6 @@ export interface PhysicsModel {
   gravitationalEffects: boolean;
   fluidDynamics: boolean;
   particleSystems: boolean;
-  [key: string]: boolean;
 }
 
 export interface EconomicsModel {
@@ -21,7 +18,6 @@ export interface EconomicsModel {
   demandForecasting: boolean;
   marketSimulation: boolean;
   transactionAnalysis: boolean;
-  [key: string]: boolean;
 }
 
 export interface RoboticsModel {
@@ -29,33 +25,22 @@ export interface RoboticsModel {
   pathPlanning: boolean;
   sensorIntegration: boolean;
   controlSystems: boolean;
-  [key: string]: boolean;
 }
 
-export interface BrainHubConfig {
-  psychology: PsychologyModel;
-  physics: PhysicsModel;
-  economics: EconomicsModel;
-  robotics: RoboticsModel;
-  geoLegalFilteringEnabled: boolean;
-  neuroEmotionEnabled: boolean;
-  predictiveModulationEnabled: boolean;
-}
-
-// Request & Response types
 export interface BrainHubRequest {
   type: string;
   data: any;
-  options?: any;
-  filters?: {
-    region?: string | null;
-    geoRestrictions?: boolean;
-    [key: string]: any;
-  };
+  filters?: Record<string, any>;
 }
 
 export interface BrainHubResponse {
   success: boolean;
-  data: any;
+  data: any | null;
   error?: string;
+}
+
+export interface EmotionalState {
+  dominantEmotion: string;
+  emotionIntensity: number;
+  emotionVector: Record<string, number>;
 }

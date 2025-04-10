@@ -4,7 +4,14 @@ import { ModuleType } from '../registry/NeuralServiceRegistry';
 
 export class AICompanionNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
-    super(moduleId, 'ai-companion');
+    super({
+      moduleId,
+      moduleType: 'ai-companion',
+      moduleName: 'AI Companion Neural Service',
+      description: 'Provides conversation and personality capabilities for AI companions',
+      version: '1.0.0',
+      enabled: true
+    });
   }
 
   getCapabilities(): string[] {

@@ -45,20 +45,20 @@ export {
 } from './modules/LivecamsNeuralService';
 
 // Types
-export type { 
+export { 
   SystemHealthMetrics, 
   ModelParameters,
   NeuralModel,
   TrainingProgress 
 } from './types/neuralHub';
 
-// Export model types from HermesOxumBrainHub
+// Export model types from types/brainHub.ts
 export type {
   PsychologyModel,
   PhysicsModel,
   EconomicsModel,
   RoboticsModel
-} from './HermesOxumBrainHub';
+} from '@/types/brainHub';
 
 // Utility functions
 export { 
