@@ -5,7 +5,7 @@
  * Provides learning capabilities and cultural context adaptation
  */
 
-import { NeuralService } from "../interfaces/NeuralService";
+import { NeuralService, NeuralServiceConfig } from "../interfaces/NeuralService";
 import { ModuleType } from "../registry/NeuralServiceRegistry";
 
 export interface ProcessingResult {
@@ -33,7 +33,7 @@ export class OxumLearningService implements NeuralService {
   description: string = "Provides learning capabilities and cultural context adaptation";
   version: string = "1.0.0";
   author: string = "UberEscorts AI Team";
-  public config: any = { enabled: false };
+  public config: NeuralServiceConfig = { enabled: false };
   
   async initialize(): Promise<boolean> {
     if (this.initialized) {
@@ -136,11 +136,10 @@ export class OxumLearningService implements NeuralService {
   }
   
   // NeuralService interface methods
-  async configure(config: any): Promise<boolean> {
+  configure(options: Record<string, any>): void {
     // Apply configuration settings
-    console.log("Configuring Oxum Learning Service with:", config);
-    this.config = { ...this.config, ...config };
-    return true;
+    console.log("Configuring Oxum Learning Service with:", options);
+    this.config = { ...this.config, ...options };
   }
   
   getCapabilities(): string[] {
@@ -152,7 +151,7 @@ export class OxumLearningService implements NeuralService {
     ];
   }
   
-  getMetrics(): Record<string, number> {
+  getMetrics(): Record<string, any> {
     return {
       "patterns-learned": this.learnedPatterns.length,
       "cultural-contexts": Object.keys(this.culturalContexts).length,
@@ -166,7 +165,7 @@ export class OxumLearningService implements NeuralService {
     return this.initialized;
   }
   
-  updateConfig(config: any): void {
+  updateConfig(config: Partial<NeuralServiceConfig>): void {
     console.log("Updating Oxum Learning Service config:", config);
     this.config = { ...this.config, ...config };
   }
