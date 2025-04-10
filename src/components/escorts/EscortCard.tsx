@@ -10,9 +10,10 @@ import { Escort } from '@/types/escort';
 interface EscortCardProps {
   escort: Escort;
   className?: string;
+  featured?: boolean;
 }
 
-const EscortCard: React.FC<EscortCardProps> = ({ escort, className }) => {
+const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) => {
   const {
     id,
     name,
@@ -44,7 +45,7 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className }) => {
 
   return (
     <Link to={`/escorts/${id}`}>
-      <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${className}`}>
+      <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${className} ${featured ? 'border-primary' : ''}`}>
         <div className="relative">
           <div className="aspect-[3/4] overflow-hidden">
             <img 
@@ -63,6 +64,12 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className }) => {
           {availableNow && (
             <Badge className="absolute top-2 left-2 bg-blue-500 text-white border-0">
               Available Now
+            </Badge>
+          )}
+          
+          {featured && (
+            <Badge className="absolute bottom-2 right-2 bg-primary text-white border-0">
+              Featured
             </Badge>
           )}
           
@@ -101,7 +108,7 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className }) => {
           
           {lastActive && (
             <div className="text-gray-500 text-xs flex items-center mt-2">
-              <Clock className="h-3 w-4 mr-1" />
+              <Clock className="h-3 w-3 mr-1" />
               {availableNow 
                 ? 'Online now'
                 : `Active ${formatLastActive()}`
