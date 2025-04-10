@@ -52,7 +52,7 @@ export {
 } from './types/neuralHub';
 
 // Export model types from types/brainHub.ts
-export type {
+export type { 
   PsychologyModel,
   PhysicsModel,
   EconomicsModel,
