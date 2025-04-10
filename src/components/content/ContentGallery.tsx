@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Search, Filter, Image, Film, FileText } from 'lucide-react';
 import ContentStatusBadge from './ContentStatusBadge';
 import ContentExpiryInfo from './ContentExpiryInfo';
-import { calculateExpiryDate } from '@/utils/dateUtils';
+import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus, calculateRenewalCost } from '@/utils/dateUtils';
 import { useToast } from '@/components/ui/use-toast';
 
 // Mock content data, in a real app this would come from an API
@@ -41,8 +41,25 @@ const mockContent = [
 const ContentGallery: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [content, setContent] = useState<any[]>(mockContent);
+  const [content, setContent] = useState<any[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Process mock content to calculate real status based on dates
+    const processedContent = mockContent.map(item => {
+      const expiryDate = calculateExpiryDate(item.createdAt);
+      const daysRemaining = calculateDaysRemaining(expiryDate);
+      const status = determineContentStatus(item.createdAt);
+      
+      return {
+        ...item,
+        status,
+        daysRemaining
+      };
+    });
+    
+    setContent(processedContent);
+  }, []);
 
   const filteredContent = content.filter(item => {
     // First apply search filter if any
@@ -60,19 +77,29 @@ const ContentGallery: React.FC = () => {
       prevContent.map(item => {
         if (item.id === contentId) {
           // Reset expiry by setting createdAt to now
+          const newCreatedAt = new Date();
+          const expiryDate = calculateExpiryDate(newCreatedAt);
+          const daysRemaining = calculateDaysRemaining(expiryDate);
+          const status = determineContentStatus(newCreatedAt);
+          
           return {
             ...item,
-            createdAt: new Date(),
-            status: 'active'
+            createdAt: newCreatedAt,
+            status,
+            daysRemaining
           };
         }
         return item;
       })
     );
     
+    // Calculate the cost based on content type and status
+    const contentItem = content.find(item => item.id === contentId);
+    const renewalCost = contentItem ? calculateRenewalCost(contentItem.status, contentItem.type) : 1;
+    
     toast({
       title: "Content Renewed",
-      description: "Your content has been renewed for 180 days",
+      description: `Your content has been renewed for 180 days for ${renewalCost} LC`,
     });
   };
 
@@ -124,6 +151,7 @@ const ContentGallery: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredContent.map((item) => {
                 const expiresAt = calculateExpiryDate(item.createdAt);
+                const lucoinCost = calculateRenewalCost(item.status, item.type);
                 
                 return (
                   <Card key={item.id} className="overflow-hidden">
@@ -135,7 +163,10 @@ const ContentGallery: React.FC = () => {
                           className="object-cover w-full h-full"
                         />
                         <div className="absolute top-2 right-2">
-                          <ContentStatusBadge status={item.status as any} />
+                          <ContentStatusBadge 
+                            status={item.status as any}
+                            daysRemaining={item.status === 'expiring' ? item.daysRemaining : undefined}  
+                          />
                         </div>
                       </div>
                     )}
@@ -143,7 +174,10 @@ const ContentGallery: React.FC = () => {
                       <div className="flex justify-between items-start">
                         <h3 className="font-medium">{item.title}</h3>
                         {item.type === 'text' && (
-                          <ContentStatusBadge status={item.status as any} />
+                          <ContentStatusBadge 
+                            status={item.status as any}
+                            daysRemaining={item.status === 'expiring' ? item.daysRemaining : undefined} 
+                          />
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
@@ -158,6 +192,7 @@ const ContentGallery: React.FC = () => {
                         createdAt={item.createdAt} 
                         expiresAt={expiresAt} 
                         onRenew={() => handleRenewContent(item.id)}
+                        lucoinCost={lucoinCost}
                       />
                     </CardContent>
                   </Card>

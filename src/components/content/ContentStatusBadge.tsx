@@ -27,9 +27,8 @@ const ContentStatusBadge: React.FC<ContentStatusBadgeProps> = ({
         };
       case 'expiring':
         return {
-          label: `Expiring in ${daysRemaining || '...'} days`,
+          label: `Expiring${daysRemaining ? ` in ${daysRemaining} days` : ''}`,
           icon: <Clock className="h-3 w-3 mr-1" />,
-          // Changed from 'warning' to 'default' with custom colors
           variant: 'default' as const,
         };
       case 'expired':

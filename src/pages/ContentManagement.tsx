@@ -10,7 +10,7 @@ import ContentSettings from '@/components/content/ContentSettings';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Info, LockIcon } from 'lucide-react';
+import { AlertTriangle, Info, LockIcon, Clock } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const ContentManagementPage: React.FC = () => {
@@ -64,11 +64,19 @@ const ContentManagementPage: React.FC = () => {
           </p>
           
           <Alert className="mb-6">
-            <Info className="h-4 w-4" />
+            <Clock className="h-4 w-4" />
             <AlertTitle>Content Expiration Policy</AlertTitle>
-            <AlertDescription>
-              Photos and videos expire after 180 days of inactivity. Content can be renewed manually 
-              using Lucoin or automatically with user interactions.
+            <AlertDescription className="space-y-2">
+              <p>
+                Photos and videos expire after 180 days of inactivity. Content can be renewed manually 
+                using Lucoin or automatically with user interactions.
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Standard content:</span> 1 LC to renew when expiring, 2 LC when expired
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Premium/Video content:</span> 2 LC to renew when expiring, 3 LC when expired
+              </p>
             </AlertDescription>
           </Alert>
           
