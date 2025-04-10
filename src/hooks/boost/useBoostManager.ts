@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { AnalyticsData } from "./useBoostAnalytics";
@@ -233,7 +234,7 @@ export const useBoostManager = (profileId?: string) => {
       const engagementBase = Math.floor(Math.random() * 50) + 20;
       
       const mockData: AnalyticsData = {
-        additionalViews: Math.floor(viewsBase * 0.3),
+        additionalViews: Math.floor(viewsBase * 0.3), // Now required
         engagementIncrease: Math.floor(engagementBase * 0.4),
         rankingPosition: Math.floor(Math.random() * 5) + 1,
         effectiveness: Math.floor(Math.random() * 30) + 70,

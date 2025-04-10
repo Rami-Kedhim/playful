@@ -5,9 +5,9 @@
 import { useState, useEffect } from 'react';
 
 export interface AnalyticsData {
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
+  additionalViews: number; // Changed from optional to required
+  engagementIncrease: number;
+  rankingPosition: number;
   effectiveness?: number;
   views?: {
     withoutBoost?: number;

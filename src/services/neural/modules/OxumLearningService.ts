@@ -32,6 +32,7 @@ export class OxumLearningService implements NeuralService {
   description: string = "Provides learning capabilities and cultural context adaptation";
   version: string = "1.0.0";
   author: string = "UberEscorts AI Team";
+  public config: any = { enabled: false }; // Add config property
   
   async initialize(): Promise<boolean> {
     if (this.initialized) {
@@ -75,6 +76,7 @@ export class OxumLearningService implements NeuralService {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     this.initialized = true;
+    this.config.enabled = true;
     return true;
   }
   
@@ -136,6 +138,7 @@ export class OxumLearningService implements NeuralService {
   async configure(config: any): Promise<boolean> {
     // Apply configuration settings
     console.log("Configuring Oxum Learning Service with:", config);
+    this.config = { ...this.config, ...config };
     return true;
   }
   
@@ -164,6 +167,7 @@ export class OxumLearningService implements NeuralService {
   
   updateConfig(config: any): void {
     console.log("Updating Oxum Learning Service config:", config);
+    this.config = { ...this.config, ...config };
   }
 }
 
