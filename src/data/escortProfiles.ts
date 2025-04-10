@@ -457,9 +457,12 @@ escorts.forEach(escort => {
     escort.services = escort.services.map(service => {
       if (typeof service === "string") {
         // Convert to proper ServiceType format if needed
-        if (service === "Dinner Date" || service === "dinner date") return "Dinner Date" as ServiceType;
-        if (service === "Weekend Getaways" || service === "weekend getaways") return "Weekend Getaways" as ServiceType;
-        if (service === "Travel Companion" || service === "travel companion") return "Travel Companion" as ServiceType;
+        if (service.toLowerCase() === "dinner date" || service.toLowerCase() === "dinner-date") 
+          return "Dinner Date" as ServiceType;
+        if (service.toLowerCase() === "weekend getaways") 
+          return "Weekend Getaways" as ServiceType;
+        if (service.toLowerCase() === "travel companion") 
+          return "Travel Companion" as ServiceType;
       }
       return service;
     });
