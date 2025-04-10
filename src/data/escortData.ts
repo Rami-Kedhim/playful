@@ -1,6 +1,7 @@
 
 import { Escort, ServiceType } from "@/types/escort";
 import escortProfiles from "./escortProfiles";
+import moreEscortProfiles from "./moreEscortProfiles";
 
 // Mock data for escort services
 export const availableServices = [
@@ -18,7 +19,33 @@ export const availableServices = [
 ];
 
 // Export the escortProfiles array as escorts
-export const escorts: Escort[] = escortProfiles;
+// Merge both escort profile arrays and ensure service types are set
+const combinedEscorts = [...escortProfiles, ...moreEscortProfiles].map(escort => {
+  // Ensure each escort has service type flags
+  if (escort.serviceTypes && escort.serviceTypes.includes('in-person')) {
+    escort.providesInPersonServices = true;
+  }
+  
+  if (escort.serviceTypes && escort.serviceTypes.includes('virtual')) {
+    escort.providesVirtualContent = true;
+  }
+  
+  // If no service type is specified, default to in-person for standard escorts
+  // and virtual for AI escorts
+  if (escort.providesInPersonServices === undefined && escort.providesVirtualContent === undefined) {
+    if (escort.isAI) {
+      escort.providesVirtualContent = true;
+      escort.providesInPersonServices = false;
+    } else {
+      escort.providesInPersonServices = true;
+      escort.providesVirtualContent = escort.isAI || false;
+    }
+  }
+  
+  return escort;
+});
+
+export const escorts: Escort[] = combinedEscorts;
 
 // Helper function to get escort by ID
 export function getEscortById(id: string): Escort | undefined {

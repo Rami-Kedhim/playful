@@ -3,9 +3,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Star, Users, Monitor, MapPin, Languages, Calendar } from 'lucide-react';
+import { CheckCircle, Clock, Star, Users, Monitor, MapPin, Languages, Calendar, Globe } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Escort } from '@/types/escort';
+import ServiceTypeBadgeLabel, { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
 
 interface EscortCardProps {
   escort: Escort;
@@ -47,15 +48,15 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
   };
 
   // Determine service type for badge display
-  const getServiceType = () => {
+  const getServiceType = (): ServiceTypeFilter => {
     if (providesInPersonServices && providesVirtualContent) {
-      return { label: "In-Person & Virtual", icon: <Users size={12} className="mr-1" /> };
+      return "both";
     } else if (providesInPersonServices) {
-      return { label: "In-Person", icon: <Users size={12} className="mr-1" /> };
+      return "in-person";
     } else if (providesVirtualContent) {
-      return { label: "Virtual Only", icon: <Monitor size={12} className="mr-1" /> };
+      return "virtual";
     }
-    return null; // No service type specified
+    return "";
   };
 
   const serviceType = getServiceType();
@@ -103,9 +104,9 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
           )}
           
           {serviceType && (
-            <Badge className="absolute bottom-2 left-2 bg-indigo-500 text-white border-0 flex items-center">
-              {serviceType.icon} {serviceType.label}
-            </Badge>
+            <div className="absolute bottom-2 left-2">
+              <ServiceTypeBadgeLabel type={serviceType} />
+            </div>
           )}
           
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
