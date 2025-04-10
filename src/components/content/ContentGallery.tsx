@@ -4,11 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, Image, Film, FileText } from 'lucide-react';
+import { Search, Filter, Image, Film, FileText, Clock } from 'lucide-react';
 import ContentStatusBadge from './ContentStatusBadge';
 import ContentExpiryInfo from './ContentExpiryInfo';
 import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus, calculateRenewalCost } from '@/utils/dateUtils';
 import { useToast } from '@/components/ui/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 // Mock content data, in a real app this would come from an API
 const mockContent = [
@@ -35,6 +36,22 @@ const mockContent = [
     createdAt: new Date(Date.now() - 190 * 24 * 60 * 60 * 1000), // 190 days ago (expired)
     content: 'This is a sample biography text content.',
     status: 'expired'
+  },
+  {
+    id: '4',
+    title: 'Summer Photoshoot',
+    type: 'image',
+    createdAt: new Date(Date.now() - 175 * 24 * 60 * 60 * 1000), // 175 days ago (expiring soon)
+    url: 'https://picsum.photos/seed/image2/300/200',
+    status: 'expiring'
+  },
+  {
+    id: '5',
+    title: 'New Profile Draft',
+    type: 'image',
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    url: 'https://picsum.photos/seed/image3/300/200',
+    status: 'draft'
   }
 ];
 
@@ -42,6 +59,7 @@ const ContentGallery: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [content, setContent] = useState<any[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -49,7 +67,7 @@ const ContentGallery: React.FC = () => {
     const processedContent = mockContent.map(item => {
       const expiryDate = calculateExpiryDate(item.createdAt);
       const daysRemaining = calculateDaysRemaining(expiryDate);
-      const status = determineContentStatus(item.createdAt);
+      const status = item.status === 'draft' ? 'draft' : determineContentStatus(item.createdAt);
       
       return {
         ...item,
@@ -66,10 +84,13 @@ const ContentGallery: React.FC = () => {
     const matchesSearch = !searchTerm || 
       item.title.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Then apply tab filter
+    // Then apply tab filter (content type)
     const matchesTab = activeTab === 'all' || item.type === activeTab;
     
-    return matchesSearch && matchesTab;
+    // Then apply status filter if not "all"
+    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+    
+    return matchesSearch && matchesTab && matchesStatus;
   });
 
   const handleRenewContent = (contentId: string) => {
@@ -101,6 +122,15 @@ const ContentGallery: React.FC = () => {
       title: "Content Renewed",
       description: `Your content has been renewed for 180 days for ${renewalCost} LC`,
     });
+  };
+
+  // Count content by status
+  const statusCounts = {
+    all: content.length,
+    active: content.filter(item => item.status === 'active').length,
+    expiring: content.filter(item => item.status === 'expiring').length,
+    expired: content.filter(item => item.status === 'expired').length,
+    draft: content.filter(item => item.status === 'draft').length,
   };
 
   return (
@@ -139,6 +169,45 @@ const ContentGallery: React.FC = () => {
             Text
           </TabsTrigger>
         </TabsList>
+        
+        <div className="flex flex-wrap gap-2 mt-4">
+          <Badge 
+            variant={statusFilter === 'all' ? "default" : "outline"}
+            className="cursor-pointer"
+            onClick={() => setStatusFilter('all')}
+          >
+            All ({statusCounts.all})
+          </Badge>
+          <Badge 
+            variant={statusFilter === 'active' ? "success" : "outline"}
+            className="cursor-pointer"
+            onClick={() => setStatusFilter('active')}
+          >
+            Active ({statusCounts.active})
+          </Badge>
+          <Badge 
+            variant={statusFilter === 'expiring' ? "default" : "outline"}
+            className="cursor-pointer bg-amber-500 hover:bg-amber-600"
+            onClick={() => setStatusFilter('expiring')}
+          >
+            <Clock className="h-3 w-3 mr-1" />
+            Expiring ({statusCounts.expiring})
+          </Badge>
+          <Badge 
+            variant={statusFilter === 'expired' ? "destructive" : "outline"}
+            className="cursor-pointer"
+            onClick={() => setStatusFilter('expired')}
+          >
+            Expired ({statusCounts.expired})
+          </Badge>
+          <Badge 
+            variant={statusFilter === 'draft' ? "secondary" : "outline"}
+            className="cursor-pointer"
+            onClick={() => setStatusFilter('draft')}
+          >
+            Draft ({statusCounts.draft})
+          </Badge>
+        </div>
         
         <TabsContent value={activeTab} className="mt-4">
           {filteredContent.length === 0 ? (
@@ -188,12 +257,22 @@ const ContentGallery: React.FC = () => {
                           {item.content}
                         </p>
                       )}
-                      <ContentExpiryInfo 
-                        createdAt={item.createdAt} 
-                        expiresAt={expiresAt} 
-                        onRenew={() => handleRenewContent(item.id)}
-                        lucoinCost={lucoinCost}
-                      />
+                      {item.status !== 'draft' && (
+                        <ContentExpiryInfo 
+                          createdAt={item.createdAt} 
+                          expiresAt={expiresAt} 
+                          onRenew={() => handleRenewContent(item.id)}
+                          lucoinCost={lucoinCost}
+                        />
+                      )}
+                      {item.status === 'draft' && (
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/20 rounded-md text-sm border border-gray-200 dark:border-gray-800">
+                          <span className="text-gray-600 dark:text-gray-400">
+                            Draft content - not yet published
+                          </span>
+                          <Button variant="secondary" size="sm">Publish</Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 );

@@ -7,6 +7,7 @@ import ContentUploader from '@/components/content/ContentUploader';
 import ContentGallery from '@/components/content/ContentGallery';
 import ContentAnalytics from '@/components/content/ContentAnalytics';
 import ContentSettings from '@/components/content/ContentSettings';
+import ContentLifecycleInfo from '@/components/content/ContentLifecycleInfo';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Button } from '@/components/ui/button';
@@ -105,38 +106,55 @@ const ContentManagementPage: React.FC = () => {
             </Card>
           </div>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 mb-6">
-              <TabsTrigger value="gallery">Gallery</TabsTrigger>
-              <TabsTrigger value="upload">Upload</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+            <div className="lg:col-span-3">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid grid-cols-4 mb-6">
+                  <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                  <TabsTrigger value="upload">Upload</TabsTrigger>
+                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                  <TabsTrigger value="settings">Settings</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="gallery">
+                  <ContentGallery />
+                </TabsContent>
+                
+                <TabsContent value="upload">
+                  <ContentUploader 
+                    onSuccess={(media) => {
+                      toast({
+                        title: "Upload Successful",
+                        description: `Your ${media.type} has been uploaded and is pending review.`,
+                      });
+                      setActiveTab('gallery');
+                    }}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="analytics">
+                  <ContentAnalytics />
+                </TabsContent>
+                
+                <TabsContent value="settings">
+                  <ContentSettings />
+                </TabsContent>
+              </Tabs>
+            </div>
             
-            <TabsContent value="gallery">
-              <ContentGallery />
-            </TabsContent>
-            
-            <TabsContent value="upload">
-              <ContentUploader 
-                onSuccess={(media) => {
-                  toast({
-                    title: "Upload Successful",
-                    description: `Your ${media.type} has been uploaded and is pending review.`,
-                  });
-                  setActiveTab('gallery');
-                }}
-              />
-            </TabsContent>
-            
-            <TabsContent value="analytics">
-              <ContentAnalytics />
-            </TabsContent>
-            
-            <TabsContent value="settings">
-              <ContentSettings />
-            </TabsContent>
-          </Tabs>
+            <div className="lg:col-span-1">
+              <ContentLifecycleInfo />
+              
+              <Alert className="mt-6">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Chronos System</AlertTitle>
+                <AlertDescription>
+                  Our innovative content management system automatically manages your content lifecycle 
+                  based on user engagement. Keep your profile fresh and relevant with minimal effort.
+                </AlertDescription>
+              </Alert>
+            </div>
+          </div>
         </div>
       </MainLayout>
     </>

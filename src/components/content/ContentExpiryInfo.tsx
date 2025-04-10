@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { calculateDaysRemaining, formatDate } from '@/utils/dateUtils';
+import { calculateDaysRemaining, formatDate, formatTimePeriod } from '@/utils/dateUtils';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Clock, RefreshCw, Info, Coins } from 'lucide-react';
@@ -35,10 +35,19 @@ const ContentExpiryInfo: React.FC<ContentExpiryInfoProps> = ({
           </span>
         </div>
         {onRenew && (
-          <Button onClick={onRenew} size="sm" className="bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/40 dark:hover:bg-red-900/60 dark:text-red-300">
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Renew <Coins className="h-3 w-3 mx-1" /> {lucoinCost} LC
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={onRenew} size="sm" className="bg-red-100 hover:bg-red-200 text-red-600 dark:bg-red-900/40 dark:hover:bg-red-900/60 dark:text-red-300">
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Renew <Coins className="h-3 w-3 mx-1" /> {lucoinCost} LC
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Restore for 180 days ({lucoinCost} LC)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
     );
@@ -81,12 +90,24 @@ const ContentExpiryInfo: React.FC<ContentExpiryInfoProps> = ({
       <div className="flex flex-col">
         <span className="flex items-center text-gray-600 dark:text-gray-400">
           <Clock className="h-4 w-4 mr-1" />
-          Active for {Math.floor((180 - daysRemaining) / 30)} months
+          Active for {formatTimePeriod(180 - daysRemaining)}
         </span>
         <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Expires on {formatDate(expiresAt)}
         </span>
       </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="sm" className="px-2">
+              <Info className="h-4 w-4 text-gray-400" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs">
+            <p>Content expires automatically after 180 days of inactivity. Receive interactions or renew with Lucoins to extend.</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 };

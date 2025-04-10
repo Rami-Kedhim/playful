@@ -140,3 +140,43 @@ export const getElapsedTime = (date: Date): string => {
     }
   }
 };
+
+/**
+ * Calculate the next expiry date for content
+ */
+export const calculateNextExpiryDate = (
+  baseDate: Date = new Date(),
+  extensionDays: number = 180
+): Date => {
+  const nextExpiryDate = new Date(baseDate);
+  nextExpiryDate.setDate(nextExpiryDate.getDate() + extensionDays);
+  return nextExpiryDate;
+};
+
+/**
+ * Format a date with relative time (combines date and relative time)
+ */
+export const formatDateWithRelative = (date: Date): string => {
+  return `${formatDate(date)} (${formatRelativeTime(date)})`;
+};
+
+/**
+ * Check if a date is within the expiring warning period (e.g., 30 days)
+ */
+export const isExpiringWarningPeriod = (expiryDate: Date, warningDays: number = 30): boolean => {
+  const daysRemaining = calculateDaysRemaining(expiryDate);
+  return daysRemaining > 0 && daysRemaining <= warningDays;
+};
+
+/**
+ * Get a friendly name for the expiration status
+ */
+export const getExpirationStatusName = (status: string): string => {
+  switch(status) {
+    case 'active': return 'Active';
+    case 'expiring': return 'Expiring Soon';
+    case 'expired': return 'Expired';
+    case 'archived': return 'Archived';
+    default: return 'Unknown';
+  }
+};
