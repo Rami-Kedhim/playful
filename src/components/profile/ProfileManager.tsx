@@ -10,6 +10,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, User, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import UpcomingBookings from './UpcomingBookings';
+
+// Mock data for upcoming bookings
+const mockBookings = [
+  {
+    id: "booking123",
+    escortId: "escort1",
+    escortName: "Sophia Rose",
+    location: "Downtown",
+    date: "2025-04-15",
+    time: "7:00 PM",
+    duration: "2hours",
+    status: "confirmed",
+    price: 300
+  },
+  {
+    id: "booking456",
+    escortId: "escort2",
+    escortName: "Emma Black",
+    location: "Westside",
+    date: "2025-04-20",
+    time: "8:00 PM",
+    duration: "3hours",
+    status: "pending",
+    price: 450
+  }
+] as const;
 
 const ProfileManager: React.FC = () => {
   const { user, profile, updateUserProfile, isLoading, userRoles, refreshProfile } = useAuth();
@@ -19,6 +46,7 @@ const ProfileManager: React.FC = () => {
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('edit');
   
   useEffect(() => {
     if (user) {
@@ -75,6 +103,14 @@ const ProfileManager: React.FC = () => {
       setIsSaving(false);
     }
   };
+
+  const handleCancelBooking = (bookingId: string) => {
+    toast({
+      title: "Booking Cancelled",
+      description: `Booking ${bookingId.substring(0, 8)} has been cancelled`,
+    });
+    // In a real app, you would call an API to cancel the booking
+  };
   
   if (isLoading) {
     return (
@@ -96,10 +132,11 @@ const ProfileManager: React.FC = () => {
     <div className="container mx-auto py-8 max-w-3xl">
       <h1 className="text-3xl font-bold mb-8">Your Profile</h1>
       
-      <Tabs defaultValue="edit" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-8">
           <TabsTrigger value="edit">Edit Profile</TabsTrigger>
           <TabsTrigger value="view">View Profile</TabsTrigger>
+          <TabsTrigger value="bookings">Bookings</TabsTrigger>
         </TabsList>
         
         <TabsContent value="edit">
@@ -246,6 +283,13 @@ const ProfileManager: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="bookings">
+          <UpcomingBookings 
+            bookings={mockBookings as any} 
+            onCancelBooking={handleCancelBooking} 
+          />
         </TabsContent>
       </Tabs>
     </div>
