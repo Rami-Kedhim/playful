@@ -103,12 +103,13 @@ export function updateBoostScores(
       
       // Calculate geographic multiplier (default to 1 if no region info)
       const geoMultiplier = profile.region ? 
-        calculateGeoBoostMultiplier('America/New_York', 'Europe/Berlin') : 1;
+        calculateGeoBoostMultiplier(1, 1, currentTimeValue) : 1;
       
       // Get priority score based on wait time
       const priorityScore = calculateBoostPriority(
-        profile.timeSinceLastTop + timeElapsedHours,
-        profile.boostScore
+        profile.timeSinceLastTop,
+        profile.boostScore,
+        5 // default competition level
       );
       
       // Update the profile with new score
@@ -154,7 +155,7 @@ export function sortProfilesByScore(
     // Calculate profile metadata
     const metadata: QueueProfileMetadata = {
       geoMultiplier: profile.region ? 
-        calculateGeoBoostMultiplier('America/New_York', 'Europe/Berlin') : 1,
+        calculateGeoBoostMultiplier(1, 1, new Date().getHours()) : 1,
       priorityScore: calculateBoostPriority(profile.timeSinceLastTop, profile.boostScore),
       originalPosition: idx,
       engagementFactor: Math.min(1, profile.engagementScore / 100)

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { useBoostManager } from "@/hooks/boost/useBoostManager";
+import { useBoostManager } from "@/hooks/boost";
 import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
 import BoostDialogHeader from "./dialog/BoostDialogHeader";
 import BoostDialogTabs from "./dialog/BoostDialogTabs";
@@ -16,6 +16,7 @@ import {
   adaptFormatBoostDuration,
   adaptGetBoostPrice
 } from "@/hooks/boost/useBoostAdapters";
+import { formatBoostDuration } from "@/hooks/boost";
 
 interface BoostDialogContainerProps {
   profileId: string;
@@ -59,7 +60,7 @@ const BoostDialogContainer = ({
   const boostStatus = adaptBoostStatus(managerBoostStatus);
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
-  const formatBoostDuration = adaptFormatBoostDuration(formatBoostDuration);
+  const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
   const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
 
   // Handle selected package conversion
@@ -162,7 +163,7 @@ const BoostDialogContainer = ({
           handleCancel={handleCancel}
           handleDialogClose={handleDialogClose}
           boostAnalytics={boostAnalytics}
-          formatBoostDuration={formatBoostDuration}
+          formatBoostDuration={formatBoostDurationAdapter}
           getBoostPrice={getBoostPrice}
           loading={loading}
           dailyBoostUsage={dailyBoostUsage}

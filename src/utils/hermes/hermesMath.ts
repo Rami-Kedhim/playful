@@ -7,15 +7,25 @@
 
 // Calculate the dynamic decay constant based on user activity patterns
 export const calculateDynamicDecayConstant = (
-  initialValue: number,
-  timeElapsed: number,
-  activityIntensity: number
+  baseDecayConstant: number,
+  systemLoad: number,
+  timeElapsed: number = 0,
+  activityIntensity: number = 50
 ): number => {
   const base = 0.1;
   const activityFactor = Math.min(1, Math.max(0.1, activityIntensity / 100));
-  const timeFactor = Math.exp(-0.05 * timeElapsed);
+  const timeFactor = timeElapsed > 0 ? Math.exp(-0.05 * timeElapsed) : 1;
   
-  return base * (1 + initialValue * timeFactor * activityFactor);
+  return base * (1 + baseDecayConstant * timeFactor * activityFactor);
+};
+
+// Calculate visibility decay over time
+export const calculateVisibilityDecay = (
+  initialVisibility: number,
+  decayConstant: number,
+  timeElapsedHours: number
+): number => {
+  return initialVisibility * Math.exp(-decayConstant * timeElapsedHours);
 };
 
 // Calculate the geo-based boost multiplier
@@ -31,6 +41,47 @@ export const calculateGeoBoostMultiplier = (
   const geoEffect = Math.log10(geoActivityFactor + 1) * 0.5;
   
   return baseMultiplier * timeEffect * (1 + geoEffect);
+};
+
+// Calculate boost score based on time of day
+export const calculateBoostScore = (
+  maxBoostEffect: number,
+  aggressionFactor: number,
+  currentHour: number,
+  optimalTimeWindow: { start: number, peak: number, end: number }
+): number => {
+  const { start, peak, end } = optimalTimeWindow;
+  
+  // If within optimal window
+  if (currentHour >= start && currentHour <= end) {
+    const distFromPeak = Math.abs(currentHour - peak);
+    const windowSize = (end - start) / 2;
+    
+    // Score decreases as we move away from peak time
+    return maxBoostEffect * Math.pow(1 - (distFromPeak / windowSize), aggressionFactor);
+  }
+  
+  // Outside optimal window, calculate lower score
+  const distFromWindow = Math.min(
+    Math.abs(currentHour - start),
+    Math.abs(currentHour - end)
+  );
+  
+  return Math.max(30, maxBoostEffect * Math.exp(-distFromWindow * 0.3));
+};
+
+// Get optimal time window based on current day
+export const getOptimalTimeWindow = (): { start: number, peak: number, end: number } => {
+  const now = new Date();
+  const day = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  
+  // Weekend (Friday evening through Sunday)
+  if (day === 5 && now.getHours() >= 18 || day === 6 || day === 0) {
+    return { start: 20, peak: 22.5, end: 2 }; // 8PM to 2AM, peak at 10:30PM
+  }
+  
+  // Weekday
+  return { start: 19, peak: 21, end: 23 }; // 7PM to 11PM, peak at 9PM
 };
 
 // Calculate the engagement factor
@@ -53,15 +104,15 @@ export const calculateEngagementFactor = (
 
 // Calculate boost priority score
 export const calculateBoostPriority = (
-  profileScore: number,
-  timeUntilExpiration: number,
-  competitionLevel: number
+  timeSinceLastTop: number,
+  boostScore: number,
+  competitionLevel: number = 5
 ): number => {
-  // Base priority from profile score (0-100)
-  const basePriority = profileScore * 0.6;
+  // Base priority from boost score (0-100)
+  const basePriority = boostScore * 0.6;
   
-  // Urgency factor based on time until expiration
-  const urgencyFactor = Math.max(0, 1 - timeUntilExpiration / 24) * 25;
+  // Urgency factor based on time since last top position
+  const urgencyFactor = Math.min(25, timeSinceLastTop * 5);
   
   // Competition adjustment
   const competitionFactor = Math.min(competitionLevel, 10) * 1.5;
@@ -112,8 +163,8 @@ export const calculateOptimalBoostAllocation = (
   const withPriorities = profiles.map(profile => ({
     ...profile,
     priority: calculateBoostPriority(
-      profile.score,
       profile.timeRemaining,
+      profile.score,
       profile.competition
     )
   }));

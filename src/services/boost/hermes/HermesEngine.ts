@@ -37,7 +37,8 @@ export class HermesEngine {
     // Calculate decay based on time since boost activation
     const decayConstant = calculateDynamicDecayConstant(
       this.config.baseDecayConstant,
-      this.systemLoad
+      this.systemLoad,
+      timeElapsedHours
     );
     
     return calculateVisibilityDecay(

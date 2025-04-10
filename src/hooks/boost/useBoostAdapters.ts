@@ -95,13 +95,13 @@ function formatHoursToDuration(hours: number): string {
  * Adapter for formatBoostDuration function
  */
 export function adaptFormatBoostDuration(
-  formatFn: (hours: number) => string
+  originalFormatFn: (hours: number) => string
 ): (duration: string) => string {
   return (duration: string) => {
     // Parse HH:MM:SS to hours
     const [hours, minutes] = duration.split(':').map(Number);
     const totalHours = hours + (minutes / 60);
-    return formatFn(totalHours);
+    return originalFormatFn(totalHours);
   };
 }
 

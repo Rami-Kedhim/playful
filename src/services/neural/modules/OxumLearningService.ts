@@ -10,7 +10,7 @@ import { NeuralService } from "../interfaces/NeuralService";
 export interface ProcessingResult {
   enhancedOutput: string;
   confidenceScore: number;
-  culturalContext?: Record<string, any>;
+  culturalContext: Record<string, any>;
 }
 
 export interface LearnedPattern {
@@ -114,7 +114,7 @@ export class OxumLearningService implements NeuralService {
     return {
       enhancedOutput,
       confidenceScore,
-      culturalContext: context
+      culturalContext: context || {}
     };
   }
   
@@ -126,11 +126,17 @@ export class OxumLearningService implements NeuralService {
     return this.culturalContexts;
   }
   
+  getConfig(): {enabled: boolean} {
+    return {
+      enabled: this.initialized
+    };
+  }
+  
   // NeuralService interface methods
-  configure(config: any): Promise<boolean> {
+  async configure(config: any): Promise<boolean> {
     // Apply configuration settings
     console.log("Configuring Oxum Learning Service with:", config);
-    return Promise.resolve(true);
+    return true;
   }
   
   getCapabilities(): string[] {
@@ -147,12 +153,17 @@ export class OxumLearningService implements NeuralService {
       "patterns-learned": this.learnedPatterns.length,
       "cultural-contexts": Object.keys(this.culturalContexts).length,
       "confidence-average": 0.82,
-      "enhancement-ratio": 1.35
+      "enhancement-ratio": 1.35,
+      "enabled": this.initialized ? 1 : 0
     };
   }
   
   isEnabled(): boolean {
     return this.initialized;
+  }
+  
+  updateConfig(config: any): void {
+    console.log("Updating Oxum Learning Service config:", config);
   }
 }
 

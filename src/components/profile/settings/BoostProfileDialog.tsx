@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { 
-  useBoostManager
+  useBoostManager, formatBoostDuration
 } from "@/hooks/boost";
 import { 
   BoostPackageSelection, 
@@ -69,7 +69,7 @@ const BoostProfileDialog = ({
   const boostStatus = adaptBoostStatus(managerBoostStatus);
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
-  const formatBoostDuration = adaptFormatBoostDuration(formatBoostDuration);
+  const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
   const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
 
   // Handle selected package conversion
@@ -209,7 +209,7 @@ const BoostProfileDialog = ({
                   packages={boostPackages}
                   selectedPackage={selectedPackage}
                   onSelectPackage={handlePackageSelect}
-                  formatBoostDuration={formatBoostDuration}
+                  formatBoostDuration={formatBoostDurationAdapter}
                   isLoading={loading}
                 />
               )}

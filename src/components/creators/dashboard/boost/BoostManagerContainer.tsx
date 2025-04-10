@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { 
-  useBoostManager
+  useBoostManager, formatBoostDuration
 } from "@/hooks/boost";
 import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 import BoostStatus from "./BoostStatus";
@@ -60,7 +60,7 @@ const BoostManagerContainer = ({
   const boostStatus = adaptBoostStatus(managerBoostStatus);
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
-  const formatBoostDuration = adaptFormatBoostDuration(formatBoostDuration);
+  const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
   const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
 
   // Handle selected package conversion

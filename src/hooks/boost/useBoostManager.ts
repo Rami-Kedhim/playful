@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { AnalyticsData } from "./useBoostAnalytics";
@@ -246,14 +245,17 @@ export const useBoostManager = (profileId?: string) => {
           previous: Math.floor(viewsBase * 0.7),
           change: Math.floor(viewsBase * 0.3)
         },
-        engagement: {
+        clicks: {
           withoutBoost: Math.floor(engagementBase * 0.6),
           withBoost: engagementBase,
-          increase: Math.floor(engagementBase * 0.4)
+          increase: Math.floor(engagementBase * 0.4),
+          current: engagementBase,
+          previous: Math.floor(engagementBase * 0.6),
+          change: Math.floor(engagementBase * 0.4)
         },
         conversion: {
-          previous: Math.floor(Math.random() * 5) + 2,
           current: Math.floor(Math.random() * 10) + 5,
+          previous: Math.floor(Math.random() * 5) + 2,
           change: Math.floor(Math.random() * 40) + 10
         },
         timeData: Array.from({ length: 24 }, (_, i) => ({
@@ -287,4 +289,3 @@ export const useBoostManager = (profileId?: string) => {
     dailyBoostLimit: DAILY_BOOST_LIMIT
   };
 };
-

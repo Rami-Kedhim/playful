@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Zap, TrendingUp, BarChart } from "lucide-react";
 import { useBoostManager } from "@/hooks/boost";
-import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics"; // Import the interface directly
+import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 
 interface CreatorBoostTabProps {
   creatorId: string;
