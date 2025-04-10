@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Clock, Star } from 'lucide-react';
+import { CheckCircle, Clock, Star, Users, Monitor } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Escort } from '@/types/escort';
 
@@ -30,7 +30,9 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
     sexualOrientation,
     availableNow,
     lastActive,
-    responseRate
+    responseRate,
+    providesInPersonServices,
+    providesVirtualContent
   } = escort;
 
   const displayImage = profileImage || imageUrl || "https://via.placeholder.com/300x400";
@@ -42,6 +44,20 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
     const date = typeof lastActive === 'string' ? new Date(lastActive) : lastActive;
     return formatDistanceToNow(date, { addSuffix: true });
   };
+
+  // Determine service type for badge display
+  const getServiceType = () => {
+    if (providesInPersonServices && providesVirtualContent) {
+      return { label: "In-Person & Virtual", icon: <Users size={12} className="mr-1" /> };
+    } else if (providesInPersonServices) {
+      return { label: "In-Person", icon: <Users size={12} className="mr-1" /> };
+    } else if (providesVirtualContent) {
+      return { label: "Virtual Only", icon: <Monitor size={12} className="mr-1" /> };
+    }
+    return null; // No service type specified
+  };
+
+  const serviceType = getServiceType();
 
   return (
     <Link to={`/escorts/${id}`}>
@@ -70,6 +86,12 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
           {featured && (
             <Badge className="absolute bottom-2 right-2 bg-primary text-white border-0">
               Featured
+            </Badge>
+          )}
+          
+          {serviceType && (
+            <Badge className="absolute bottom-2 left-2 bg-indigo-500 text-white border-0 flex items-center">
+              {serviceType.icon} {serviceType.label}
             </Badge>
           )}
           
