@@ -142,7 +142,7 @@ export class EscortScraper extends BaseScraperService {
       
       const selectedServices = this.services
         .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 5) + 2);
+        .slice(0, Math.floor(Math.random() * 5) + 2) as ServiceType[];
         
       const randomPrices = {
         hourly: Math.floor(Math.random() * 200) + 150,
@@ -187,7 +187,7 @@ export class EscortScraper extends BaseScraperService {
         verified,
         rating: Math.random() * 2 + 3,
         reviews: Math.floor(Math.random() * 50),
-        tags: selectedServices,
+        tags: selectedServices.map(s => s.toString()),
         languages: ['English'],
         contactInfo: {
           email: `escort${i}@example.com`,
@@ -196,7 +196,7 @@ export class EscortScraper extends BaseScraperService {
         },
         availability: {
           days: ['monday', 'wednesday', 'friday', 'saturday'],
-          hours: '10:00-22:00'
+          hours: ['10:00-22:00']
         },
         featured: Math.random() > 0.7,
         price: randomPrices.hourly,

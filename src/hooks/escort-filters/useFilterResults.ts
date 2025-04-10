@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Escort } from "@/types/escort";
 
@@ -89,8 +88,12 @@ export const useFilterResults = (
             return false;
           }
           
-          // Check if any selected service is included in escort's services
-          return selectedServices.some(service => escort.services?.includes(service));
+          // Check if any selected service is included in escort's services 
+          // Need to convert both to strings to compare since services might include different types
+          return selectedServices.some(service => 
+            escort.services?.some(escortService => 
+              escortService.toString().toLowerCase() === service.toString().toLowerCase())
+          );
         });
       }
       

@@ -1,10 +1,11 @@
+
 export interface Escort {
   id: string;
   name: string;
   location: string;
   age: number;
   profileImage: string;
-  imageUrl: string;
+  imageUrl?: string;
   avatar_url?: string;
   gender?: string;
   orientation?: string;
@@ -36,7 +37,7 @@ export interface Escort {
     timeZone?: string;
     availableNow?: boolean;
     customNotes?: string;
-  };
+  } | { days?: never[]; hours?: string; };
   responseTime?: string;
   responseRate?: number;
   height?: number;
@@ -45,7 +46,7 @@ export interface Escort {
     bust?: number;
     waist?: number;
     hips?: number;
-  };
+  } | string;
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
@@ -73,7 +74,6 @@ export interface Escort {
     streams?: string;
     live?: boolean;
   };
-  gender?: string;
 }
 
 export type ServiceType = 

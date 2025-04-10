@@ -25,7 +25,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Luxury escort with a passion for refined experiences. Available for upscale gentlemen who appreciate the finer things in life.",
-    services: ["gfe", "dinner-date", "travel"],
+    services: ["gfe", "dinner", "travel"],
     rating: 4.9,
     reviews: 42,
     verified: true,
@@ -34,13 +34,13 @@ const moreEscortProfiles: Escort[] = [
     languages: ["English", "Spanish"],
     lastActive: "2023-07-01T12:30:00Z",
     responseRate: 98,
-    height: 173, // Fixed: convert to number
-    weight: 57, // Fixed: convert to number
+    height: 173,
+    weight: 57,
     measurements: {
       bust: 34,
       waist: 24,
       hips: 36
-    }, // Fixed: convert to object
+    },
     hairColor: "Blonde",
     eyeColor: "Blue",
     ethnicity: "Caucasian",
@@ -59,7 +59,7 @@ const moreEscortProfiles: Escort[] = [
     },
     availability: {
       days: ["monday", "wednesday", "friday"],
-      hours: "10:00-22:00"
+      hours: ["10:00-22:00"]
     },
     featured: true
   },

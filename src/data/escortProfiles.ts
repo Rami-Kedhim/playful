@@ -8,7 +8,7 @@ const escorts: Escort[] = [
     gender: "female",
     location: "Miami, FL",
     bio: "Luxury companion for discerning gentlemen. I enjoy meaningful conversations, fine dining, and creating unforgettable moments.",
-    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"],
+    services: ["dinner", "events", "travel", "companionship"],
     imageUrl: "https://source.unsplash.com/random/400x600/?model,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?model,woman",
@@ -35,7 +35,7 @@ const escorts: Escort[] = [
     },
     availability: {
       days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      hours: "7PM-2AM"
+      hours: ["7PM-2AM"]
     },
     featured: true,
     price: 300,
@@ -71,7 +71,7 @@ const escorts: Escort[] = [
       photos: 124,
       videos: 15,
       live: true,
-      streams: 3
+      streams: "3"
     }
   },
   {
@@ -81,7 +81,7 @@ const escorts: Escort[] = [
     gender: "female",
     location: "New York, NY",
     bio: "Passionate and sensual companion ready to explore your deepest desires. Let's create unforgettable memories together.",
-    services: ["Sensual Massage", "Role Play", "BDSM", "Overnight"],
+    services: ["massage", "roleplay", "bdsm", "overnight"],
     imageUrl: "https://source.unsplash.com/random/400x600/?sensual,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?sensual,woman",
@@ -108,7 +108,7 @@ const escorts: Escort[] = [
     },
     availability: {
       days: ["Monday", "Wednesday", "Thursday", "Saturday"],
-      hours: "8PM-3AM"
+      hours: ["8PM-3AM"]
     },
     featured: true,
     price: 350,
@@ -144,7 +144,7 @@ const escorts: Escort[] = [
       photos: 0,
       videos: 0,
       live: false,
-      streams: 0
+      streams: "0"
     }
   },
   {
@@ -154,7 +154,7 @@ const escorts: Escort[] = [
     gender: "female",
     location: "Los Angeles, CA",
     bio: "Exotic and alluring companion with a taste for adventure. Let's explore the city and create unforgettable memories.",
-    services: ["Travel Companion", "Events", "Dinner Date", "Overnight"],
+    services: ["travel", "events", "dinner date", "overnight"],
     imageUrl: "https://source.unsplash.com/random/400x600/?exotic,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?exotic,woman",
@@ -181,7 +181,7 @@ const escorts: Escort[] = [
     },
     availability: {
       days: ["Tuesday", "Thursday", "Friday", "Saturday", "Sunday"],
-      hours: "6PM-1AM"
+      hours: ["6PM-1AM"]
     },
     featured: false,
     price: 280,
@@ -227,7 +227,7 @@ const escorts: Escort[] = [
     gender: "male",
     location: "Chicago, IL",
     bio: "Charming and sophisticated male escort for discerning women. I offer stimulating conversation, fine dining, and unforgettable moments.",
-    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"],
+    services: ["dinner date", "events", "weekend getaways", "travel companion"],
     imageUrl: "https://source.unsplash.com/random/400x600/?model,man",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?model,man",
@@ -254,7 +254,7 @@ const escorts: Escort[] = [
     },
     availability: {
       days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      hours: "7PM-2AM"
+      hours: ["7PM-2AM"]
     },
     featured: true,
     price: 250,
@@ -300,7 +300,7 @@ const escorts: Escort[] = [
     gender: "female",
     location: "San Francisco, CA",
     bio: "Sweet and sensual Asian companion ready to fulfill your desires. Let's explore the city and create unforgettable memories.",
-    services: ["Sensual Massage", "Role Play", "BDSM", "Overnight"],
+    services: ["massage", "roleplay", "bdsm", "overnight"],
     imageUrl: "https://source.unsplash.com/random/400x600/?asian,woman",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?asian,woman",
@@ -327,7 +327,7 @@ const escorts: Escort[] = [
     },
     availability: {
       days: ["Monday", "Wednesday", "Thursday", "Saturday"],
-      hours: "8PM-3AM"
+      hours: ["8PM-3AM"]
     },
     featured: true,
     price: 320,
@@ -373,7 +373,7 @@ const escorts: Escort[] = [
     gender: "male",
     location: "Dallas, TX",
     bio: "Experienced and charming male escort for discerning women. I offer stimulating conversation, fine dining, and unforgettable moments.",
-    services: ["Dinner Date", "Events", "Weekend Getaways", "Travel Companion"],
+    services: ["dinner date", "events", "weekend getaways", "travel companion"],
     imageUrl: "https://source.unsplash.com/random/400x600/?model,man",
     gallery: [
       "https://source.unsplash.com/random/800x1200/?model,man",
@@ -400,7 +400,7 @@ const escorts: Escort[] = [
     },
     availability: {
       days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      hours: "7PM-2AM"
+      hours: ["7PM-2AM"]
     },
     featured: false,
     price: 270,
