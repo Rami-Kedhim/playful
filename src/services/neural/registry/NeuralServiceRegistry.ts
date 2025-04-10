@@ -1,4 +1,3 @@
-
 import { BaseNeuralService, NeuralServiceConfig } from '../modules/BaseNeuralService';
 import { aiCompanionNeuralService } from '../modules/AICompanionNeuralService';
 import { escortsNeuralService } from '../modules/EscortsNeuralService';
@@ -7,7 +6,7 @@ import { livecamsNeuralService } from '../modules/LivecamsNeuralService';
 import { oxumLearningService } from '../modules/OxumLearningService';
 
 // Define the module types
-export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion' | 'oxum-learning' | 'learning';
+export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion' | 'learning';
 
 // Define the structure of a NeuralService
 export interface NeuralService {

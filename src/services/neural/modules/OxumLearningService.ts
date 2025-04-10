@@ -6,6 +6,7 @@
  */
 
 import { NeuralService } from "../interfaces/NeuralService";
+import { ModuleType } from "../registry/NeuralServiceRegistry";
 
 export interface ProcessingResult {
   enhancedOutput: string;
@@ -27,7 +28,7 @@ export class OxumLearningService implements NeuralService {
   
   // NeuralService interface implementation
   moduleId: string = "oxum-learning-service";
-  moduleType: string = "learning";
+  moduleType: ModuleType = "learning";
   moduleName: string = "Oxum Learning Service";
   description: string = "Provides learning capabilities and cultural context adaptation";
   version: string = "1.0.0";
