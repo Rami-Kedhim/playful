@@ -20,6 +20,27 @@ interface UberCoreConfig {
 }
 
 /**
+ * Processing context interface to avoid TypeScript errors
+ */
+interface ProcessingContext {
+  userId: string;
+  timestamp: Date;
+  sessionId: string;
+  source?: string;
+  emotionalState?: {
+    dominantEmotion: string;
+    emotionIntensity: number;
+    emotionVector: Record<string, number>;
+  };
+  recommendedAdaptation?: {
+    tone: string;
+    visualMode: string;
+    contentPriority: string;
+  };
+  [key: string]: any; // Allow additional properties
+}
+
+/**
  * UberCore - Unified AI Architecture for UberEscorts
  * Integrates UBX_Logic, UBX_Emo, UBX_Ethics modules through UBX_Bridge
  */
@@ -190,8 +211,8 @@ class UberCore {
       await this.initialize();
     }
     
-    // Create cross-module context
-    const processingContext = {
+    // Create cross-module context with the proper type
+    const processingContext: ProcessingContext = {
       userId,
       timestamp: new Date(),
       sessionId: context?.sessionId || `session-${Date.now()}`,
