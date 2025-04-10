@@ -285,6 +285,12 @@ moreEscortProfiles.forEach(escort => {
           
         if (lowerCaseService === "sensual massage") 
           return "Sensual Massage" as ServiceType;
+          
+        if (lowerCaseService === "bdsm") 
+          return "BDSM" as ServiceType;
+          
+        if (lowerCaseService === "gfe") 
+          return "GFE" as ServiceType;
       }
       return service;
     });
