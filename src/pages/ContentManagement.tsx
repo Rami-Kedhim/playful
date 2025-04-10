@@ -17,8 +17,8 @@ const ContentManagementPage: React.FC = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('gallery');
   
-  // Check if the user is verified (in a real scenario, this would come from the user object)
-  const isVerified = user?.metadata?.isVerified || false;
+  // Use user_metadata or app_metadata instead of metadata
+  const isVerified = user?.user_metadata?.isVerified || false;
   
   if (!user) {
     return (
