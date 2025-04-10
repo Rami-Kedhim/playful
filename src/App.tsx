@@ -9,6 +9,7 @@ import { AuthProvider } from '@/hooks/auth/useAuthContext';
 import AuthPage from './pages/AuthPage';
 import RoleBasedRoute from './components/auth/RoleBasedRoute';
 import AccessDeniedPage from './pages/AccessDeniedPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             {/* Protected routes - require authentication */}
             <Route element={<RoleBasedRoute />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
             
             {/* Admin-only routes */}
@@ -30,9 +32,9 @@ function App() {
               <Route path="/brainhub" element={<BrainHubPage />} />
             </Route>
             
-            {/* Escort-only routes - will implement later */}
+            {/* Escort-only routes */}
             <Route element={<RoleBasedRoute allowedRoles={['escort', 'admin']} />}>
-              {/* <Route path="/escort-dashboard" element={<EscortDashboard />} /> */}
+              {/* Escort-specific routes will go here */}
             </Route>
           </Routes>
           <Toaster />

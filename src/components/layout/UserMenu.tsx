@@ -59,13 +59,19 @@ const UserMenu = () => {
         <DropdownMenuItem asChild>
           <Link to="/profile" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+            <span>My Profile</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link to="/settings" className="flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/notifications" className="flex items-center">
+            <Bell className="mr-2 h-4 w-4" />
+            <span>Notifications</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

@@ -9,7 +9,7 @@ import { ModeToggle } from '@/components/ui/mode-toggle';
 
 const Navbar: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
-  const { canAccessAdminFeatures, isEscort } = useRole();
+  const { canAccessAdminFeatures, isEscort, isCreator } = useRole();
   
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -24,9 +24,21 @@ const Navbar: React.FC = () => {
               Home
             </Link>
             
+            {isAuthenticated && (
+              <Link to="/profile" className="text-sm font-medium transition-colors hover:text-primary">
+                My Profile
+              </Link>
+            )}
+            
             {isEscort() && (
               <Link to="/escort-dashboard" className="text-sm font-medium transition-colors hover:text-primary">
                 Dashboard
+              </Link>
+            )}
+            
+            {isCreator() && (
+              <Link to="/creator-dashboard" className="text-sm font-medium transition-colors hover:text-primary">
+                Creator Studio
               </Link>
             )}
             
