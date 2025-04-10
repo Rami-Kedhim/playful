@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus } from '@/utils/dateUtils';
+import { calculateExpiryDate, calculateDaysRemaining, determineContentStatus, calculateRenewalCost } from '@/utils/dateUtils';
 import ContentSearch from './ContentSearch';
 import ContentFilters from './ContentFilters';
 import ContentGrid from './ContentGrid';
