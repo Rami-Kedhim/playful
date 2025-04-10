@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/use-toast';
-import { ActivitySquare, Settings, MessageSquare, AlertTriangle, CheckCircle2, BarChart3 } from 'lucide-react';
+import { ActivitySquare, Settings, MessageSquare, AlertTriangle, CheckCircle2, BarChart3, Sigma } from 'lucide-react';
 
 // Import the component tabs
 import StatusPanel from './tabs/StatusPanel';
 import InteractionPanel from './tabs/InteractionPanel';
 import ConfigurationPanel from './tabs/ConfigurationPanel';
 import NeuralMonitorPanel from './NeuralMonitorPanel';
+import HermesOptimizationPanel from './HermesOptimizationPanel';
 
 const UberCorePanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState('status');
@@ -105,7 +106,7 @@ const UberCorePanel: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid grid-cols-4 w-full md:w-auto">
+            <TabsList className="grid grid-cols-5 w-full md:w-auto">
               <TabsTrigger value="status" className="flex items-center">
                 <ActivitySquare className="h-4 w-4 mr-2" />
                 <span className="hidden md:inline">System Status</span>
@@ -120,6 +121,11 @@ const UberCorePanel: React.FC = () => {
                 <BarChart3 className="h-4 w-4 mr-2" />
                 <span className="hidden md:inline">Monitoring</span>
                 <span className="md:hidden">Monitor</span>
+              </TabsTrigger>
+              <TabsTrigger value="optimization" className="flex items-center">
+                <Sigma className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">Optimization</span>
+                <span className="md:hidden">Optimize</span>
               </TabsTrigger>
               <TabsTrigger value="config" className="flex items-center">
                 <Settings className="h-4 w-4 mr-2" />
@@ -141,6 +147,10 @@ const UberCorePanel: React.FC = () => {
             
             <TabsContent value="monitor" className="space-y-4">
               <NeuralMonitorPanel />
+            </TabsContent>
+            
+            <TabsContent value="optimization" className="space-y-4">
+              <HermesOptimizationPanel />
             </TabsContent>
             
             <TabsContent value="config" className="space-y-4">
