@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/pagination";
 import EscortCard from "@/components/cards/EscortCard";
 import { Escort } from "@/types/escort";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -112,39 +112,11 @@ const EscortResults = ({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="mt-8 flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              {currentPage > 1 && (
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    aria-label="Go to previous page" 
-                  />
-                </PaginationItem>
-              )}
-              
-              {Array.from({length: totalPages}, (_, i) => i + 1).map((pageNum) => (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink 
-                    onClick={() => setCurrentPage(pageNum)}
-                    isActive={currentPage === pageNum}
-                    aria-label={`Page ${pageNum}`}
-                  >
-                    {pageNum}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
-              {currentPage < totalPages && (
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    aria-label="Go to next page" 
-                  />
-                </PaginationItem>
-              )}
-            </PaginationContent>
-          </Pagination>
+          <Pagination 
+            totalPages={totalPages}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
     </>

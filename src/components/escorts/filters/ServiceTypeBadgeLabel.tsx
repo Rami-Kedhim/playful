@@ -10,6 +10,9 @@ export interface ServiceTypeInfo {
   label: string;
   bgColor: string;
   textColor: string;
+  // Add the missing properties
+  filterLabel: string;
+  description: string;
 }
 
 // Map of service types to their display information
@@ -18,25 +21,33 @@ export const serviceTypeInfoMap: Record<ServiceTypeFilter, ServiceTypeInfo> = {
     icon: <CheckCircle className="h-3.5 w-3.5" />,
     label: "All Services",
     bgColor: "bg-gray-100",
-    textColor: "text-gray-700"
+    textColor: "text-gray-700",
+    filterLabel: "All Services",
+    description: "Both in-person and virtual services"
   },
   "in-person": {
     icon: <Users className="h-3.5 w-3.5" />,
     label: "In Person",
     bgColor: "bg-blue-100",
-    textColor: "text-blue-700"
+    textColor: "text-blue-700",
+    filterLabel: "In-person",
+    description: "Meet face-to-face for services"
   },
   "virtual": {
     icon: <VideoIcon className="h-3.5 w-3.5" />,
     label: "Virtual",
     bgColor: "bg-purple-100",
-    textColor: "text-purple-700"
+    textColor: "text-purple-700",
+    filterLabel: "Virtual",
+    description: "Video calls and online experiences"
   },
   "both": {
     icon: <Radio className="h-3.5 w-3.5" />,
     label: "Both Services",
     bgColor: "bg-green-100",
-    textColor: "text-green-700"
+    textColor: "text-green-700",
+    filterLabel: "Both",
+    description: "Provides both in-person and virtual services"
   }
 };
 
