@@ -1,18 +1,23 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import UberCorePanel from './components/uberCore/UberCorePanel';
+import { ThemeProvider } from '@/components/theme-provider';
+import { Toaster } from '@/components/ui/toaster';
+import HomePage from './pages/HomePage';
+import BrainHubPage from './pages/BrainHubPage';
 
 function App() {
   return (
-    <Router>
-      <div className="container mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-8 text-center">UberCore Architecture</h1>
+    <ThemeProvider defaultTheme="dark">
+      <Router>
         <Routes>
-          <Route path="/" element={<UberCorePanel />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/brainhub" element={<BrainHubPage />} />
+          {/* Add additional routes as needed */}
         </Routes>
-      </div>
-    </Router>
+        <Toaster />
+      </Router>
+    </ThemeProvider>
   );
 }
 

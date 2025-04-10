@@ -1,149 +1,147 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { AIController } from '@/components/ai';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Users, Calendar, MessageCircle, Shield, Image } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useHermesInsights } from '@/hooks/useHermesInsights';
+import { useAuth } from '@/hooks/auth';
+import { Brain, Users, Video, MessageSquare, Rocket } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import LucieHermesIntegration from '@/components/home/LucieHermesIntegration';
 
-const HomePage = () => {
+const HomePage: React.FC = () => {
+  const { user } = useAuth();
+  const { insights } = useHermesInsights(user?.id);
+  
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary/20 to-primary/5 py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Welcome to UberEscorts
+    <div className="container mx-auto py-8 px-4 md:px-0">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main AI-driven features section */}
+        <div className="lg:col-span-2 space-y-6">
+          <section className="space-y-4">
+            <h1 className="text-3xl font-bold flex items-center">
+              <Brain className="mr-2 h-7 w-7 text-primary" />
+              AI-Powered Experiences
             </h1>
-            <p className="text-xl mb-8 text-muted-foreground">
-              Browse our directory of verified escorts and content creators.
-              Connect safely and securely with professionals.
+            
+            <p className="text-muted-foreground">
+              Discover personalized connections and enhanced interactions powered by our advanced neural networks.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Button asChild size="lg">
-                <Link to="/escorts">Browse Escort Directory</Link>
-              </Button>
-              <Button variant="outline" asChild size="lg">
-                <Link to="/auth">Sign In</Link>
-              </Button>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* AI Companions */}
+              <Card className="bg-gradient-to-br from-primary/5 to-background border border-primary/20 shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col h-full space-y-4">
+                    <div className="rounded-full bg-primary/10 w-12 h-12 flex items-center justify-center">
+                      <MessageSquare className="h-6 w-6 text-primary" />
+                    </div>
+                    
+                    <h3 className="text-xl font-medium">AI Companions</h3>
+                    
+                    <p className="text-sm text-muted-foreground flex-grow">
+                      Chat with intelligent virtual companions trained to provide engaging conversation and company.
+                    </p>
+                    
+                    <Button asChild variant="default" size="sm" className="w-full">
+                      <Link to="/ai-companions">
+                        Explore Companions
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Livecams */}
+              <Card className="bg-gradient-to-br from-blue-500/5 to-background border border-blue-500/20 shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col h-full space-y-4">
+                    <div className="rounded-full bg-blue-500/10 w-12 h-12 flex items-center justify-center">
+                      <Video className="h-6 w-6 text-blue-500" />
+                    </div>
+                    
+                    <h3 className="text-xl font-medium">Livecams</h3>
+                    
+                    <p className="text-sm text-muted-foreground flex-grow">
+                      Interactive live video sessions with smart content suggestions and seamless integrations.
+                    </p>
+                    
+                    <Button asChild variant="outline" size="sm" className="w-full border-blue-500/20 text-blue-500">
+                      <Link to="/livecams">
+                        Explore Livecams
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Real Escorts */}
+              <Card className="bg-gradient-to-br from-purple-500/5 to-background border border-purple-500/20 shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col h-full space-y-4">
+                    <div className="rounded-full bg-purple-500/10 w-12 h-12 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-purple-500" />
+                    </div>
+                    
+                    <h3 className="text-xl font-medium">Intelligent Matching</h3>
+                    
+                    <p className="text-sm text-muted-foreground flex-grow">
+                      Our HERMES+Oxum AI system connects you with the perfect companions based on your preferences.
+                    </p>
+                    
+                    <Button asChild variant="outline" size="sm" className="w-full border-purple-500/20 text-purple-500">
+                      <Link to="/escorts">
+                        Find Your Match
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Boost System */}
+              <Card className="bg-gradient-to-br from-amber-500/5 to-background border border-amber-500/20 shadow-sm">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col h-full space-y-4">
+                    <div className="rounded-full bg-amber-500/10 w-12 h-12 flex items-center justify-center">
+                      <Rocket className="h-6 w-6 text-amber-500" />
+                    </div>
+                    
+                    <h3 className="text-xl font-medium">Boost Your Profile</h3>
+                    
+                    <p className="text-sm text-muted-foreground flex-grow">
+                      Stand out with our AI-optimized boost system that increases your visibility at just the right times.
+                    </p>
+                    
+                    <Button asChild variant="outline" size="sm" className="w-full border-amber-500/20 text-amber-500">
+                      <Link to="/boost">
+                        Get Featured
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Platform Features</h2>
+          </section>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="bg-card">
-              <CardContent className="pt-6">
-                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Search className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Escort Directory</h3>
-                <p className="text-muted-foreground">
-                  Browse our verified escort directory with detailed profiles.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Booking System</h3>
-                <p className="text-muted-foreground">
-                  Schedule appointments easily with our organizational calendar.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <MessageCircle className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Secure Messaging</h3>
-                <p className="text-muted-foreground">
-                  Private messaging system for secure communications.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Verification</h3>
-                <p className="text-muted-foreground">
-                  Trust our verification process for genuine profiles.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Premium Features</h3>
-                <p className="text-muted-foreground">
-                  Access advanced filters and features with premium subscriptions.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="mb-4 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Image className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Content Management</h3>
-                <p className="text-muted-foreground">
-                  Create, upload and monetize digital content securely.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* AI-powered recommendations */}
+          {user && insights.recommendedProfileId && (
+            <section className="pt-4">
+              <h2 className="text-xl font-semibold mb-4">Recommended For You</h2>
+              {/* Recommendation components would go here */}
+            </section>
+          )}
         </div>
-      </section>
+        
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <AIController userId={user?.id} />
+          
+          {/* Add more AI-related sidebar components here */}
+        </div>
+      </div>
       
-      {/* Legal Notice Section */}
-      <section className="py-8 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h3 className="text-xl font-semibold mb-3">Legal Notice</h3>
-            <p className="text-muted-foreground mb-4">
-              UberEscorts only provides a connection interface and does not facilitate or earn money from real-life encounters. 
-              All services provided through our platform are for organizational purposes only.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              UberEscorts generates revenue exclusively through optional premium features such as profile boosting, 
-              subscriptions for advanced features, and AI-assisted services.
-            </p>
-          </div>
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer className="py-8 border-t">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <p className="font-semibold">© 2025 UberEscorts. All rights reserved.</p>
-            </div>
-            <div className="flex gap-4">
-              <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
-              <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
-              <Link to="/help" className="text-primary hover:underline">Help Center</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Lucie AI Assistant */}
+      <LucieHermesIntegration forceVisible={false} />
     </div>
   );
 };
