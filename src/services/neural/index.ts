@@ -5,22 +5,28 @@
  
 // Main hub and services
 export { neuralHub } from './HermesOxumNeuralHub';
-export { brainHub, type BrainHubConfig } from './HermesOxumBrainHub';
+export { brainHub } from './HermesOxumBrainHub';
+export type { BrainHubConfig } from './HermesOxumBrainHub';
 export { 
-  brainHubAutoDevOpsManager, 
-  type MissingComponentAnalysis, 
-  type CodeGenerationResult, 
-  type DeploymentResult 
+  brainHubAutoDevOpsManager
+} from './BrainHubAutoDevOpsManager';
+export type { 
+  MissingComponentAnalysis, 
+  CodeGenerationResult, 
+  DeploymentResult 
 } from './BrainHubAutoDevOpsManager';
 
 // Neural Service Registry and base implementations
 export { 
-  neuralServiceRegistry,
-  type NeuralService,
-  type ModuleType
+  neuralServiceRegistry
+} from './registry/NeuralServiceRegistry';
+export type { 
+  NeuralService,
+  ModuleType
 } from './registry/NeuralServiceRegistry';
 
-export { BaseNeuralService, type NeuralServiceConfig } from './modules/BaseNeuralService';
+export { BaseNeuralService } from './modules/BaseNeuralService';
+export type { NeuralServiceConfig } from './modules/BaseNeuralService';
 
 // Module-specific neural services
 export { 
@@ -73,9 +79,9 @@ export {
 
 // Metrics and reporting
 export { 
-  neuralMetrics,
-  type PerformanceReport
+  neuralMetrics
 } from './reporting/neuralMetrics';
+export type { PerformanceReport } from './reporting/neuralMetrics';
 
 // Training management
 export { TrainingManager } from './training/trainingManager';
