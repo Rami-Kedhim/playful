@@ -350,12 +350,20 @@ const UberCorePanel: React.FC = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                const enabledModules = {
-                                  ...uberCore.config.enabledModules,
-                                  [module]: !enabled
-                                };
+                                // Use the current status to build the updated configuration
+                                const currentStatus = uberCore.getStatus();
+                                const currentModuleStatuses = currentStatus.moduleStatuses || {};
+                                
+                                // Create enabledModules object with the updated module status
+                                const enabledModules = Object.entries(currentModuleStatuses).reduce((acc, [key, value]) => {
+                                  acc[key] = key === module ? !enabled : !!value;
+                                  return acc;
+                                }, {} as Record<string, boolean>);
+                                
+                                // Configure UberCore with the updated module statuses
                                 uberCore.configure({ enabledModules });
                                 updateStatus();
+                                
                                 toast({
                                   title: `Module ${!enabled ? 'Activated' : 'Deactivated'}`,
                                   description: `${module} module has been ${!enabled ? 'activated' : 'deactivated'}.`
