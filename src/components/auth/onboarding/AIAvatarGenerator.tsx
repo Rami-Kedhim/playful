@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,8 +21,12 @@ import {
 } from "@/components/ui/tabs";
 import {
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Coins
 } from "lucide-react";
+import UBXCostPreviewModal from './UBXCostPreviewModal';
+import UBXRechargeModal from './UBXRechargeModal';
+import useUBX from '@/hooks/useUBX';
 
 export interface AIAvatarSettings {
   gender: 'female' | 'male' | 'non-binary';
@@ -56,6 +61,13 @@ const defaultSettings: AIAvatarSettings = {
   background: 'neutral'
 };
 
+// Define generation costs based on style
+const GENERATION_COSTS = {
+  realistic: 50,
+  anime: 30,
+  artistic: 40
+};
+
 export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
   onGenerate,
   onComplete,
@@ -65,21 +77,70 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
   const [settings, setSettings] = useState<AIAvatarSettings>(defaultSettings);
   const [activeTab, setActiveTab] = useState('appearance');
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  
+  // UBX payment state
+  const [showCostModal, setShowCostModal] = useState(false);
+  const [showRechargeModal, setShowRechargeModal] = useState(false);
+  const { processTransaction, isProcessing } = useUBX();
+  
+  // Mock UBX balance for demo purposes (in a real app, get from useUBX())
+  const [ubxBalance, setUbxBalance] = useState(100);
 
   const updateSetting = (key: keyof AIAvatarSettings, value: string | number) => {
     setSettings(prev => {
       if (key === 'age') {
-        return { ...prev, [key]: value, ageRange: value };
+        // Ensure the value is a number
+        const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
+        return { ...prev, [key]: numericValue, ageRange: numericValue };
       }
       if (key === 'ageRange') {
-        return { ...prev, [key]: value, age: value };
+        // Ensure the value is a number
+        const numericValue = typeof value === 'string' ? parseInt(value, 10) : value;
+        return { ...prev, [key]: numericValue, age: numericValue };
       }
       return { ...prev, [key]: value };
     });
   };
 
-  const handleGenerate = () => {
-    onGenerate(settings);
+  // Get the cost based on selected style
+  const getGenerationCost = () => {
+    return GENERATION_COSTS[settings.style] || 30;
+  };
+
+  const handleGenerateClick = () => {
+    setShowCostModal(true);
+  };
+
+  const handleConfirmGeneration = async () => {
+    setShowCostModal(false);
+    
+    // Process the UBX transaction
+    const success = await processTransaction({
+      amount: getGenerationCost(),
+      transactionType: 'ai_avatar',
+      description: `AI avatar generation (${settings.style} style)`
+    });
+    
+    if (success) {
+      // Deduct the UBX cost (in a real app this would be handled by processTransaction)
+      setUbxBalance(prev => prev - getGenerationCost());
+      
+      // Generate the avatar
+      onGenerate(settings);
+    }
+  };
+
+  const handleRechargeRequest = () => {
+    setShowCostModal(false);
+    setShowRechargeModal(true);
+  };
+
+  const handleRechargeComplete = () => {
+    // Simulate adding UBX to balance (in a real app this would be handled by the recharge process)
+    setUbxBalance(prev => prev + 100);
+    setShowRechargeModal(false);
+    // Show the cost modal again now that the user has sufficient balance
+    setShowCostModal(true);
   };
 
   const handleComplete = () => {
@@ -97,6 +158,10 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
         <p className="text-muted-foreground">
           Customize how you want your AI-generated avatar to look
         </p>
+        <div className="flex items-center gap-2 text-sm text-primary">
+          <Coins className="h-4 w-4" />
+          <span>Your UBX Balance: {ubxBalance}</span>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -252,14 +317,20 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="realistic">Realistic</SelectItem>
-                <SelectItem value="anime">Anime</SelectItem>
-                <SelectItem value="artistic">Artistic</SelectItem>
-                <SelectItem value="casual">Casual</SelectItem>
-                <SelectItem value="professional">Professional</SelectItem>
-                <SelectItem value="elegant">Elegant</SelectItem>
+                <SelectItem value="realistic">
+                  Realistic ({GENERATION_COSTS.realistic} UBX)
+                </SelectItem>
+                <SelectItem value="anime">
+                  Anime ({GENERATION_COSTS.anime} UBX)
+                </SelectItem>
+                <SelectItem value="artistic">
+                  Artistic ({GENERATION_COSTS.artistic} UBX)
+                </SelectItem>
               </SelectContent>
             </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              Different styles have different UBX costs. Realistic images cost more to generate.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -287,7 +358,7 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
 
       <div className="space-y-4">
         <Button
-          onClick={handleGenerate}
+          onClick={handleGenerateClick}
           className="w-full"
           disabled={isGenerating}
           variant="secondary"
@@ -300,7 +371,7 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
           ) : (
             <>
               <RefreshCw className="h-4 w-4 mr-2" />
-              Generate Avatar
+              Generate Avatar ({getGenerationCost()} UBX)
             </>
           )}
         </Button>
@@ -334,6 +405,22 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
           </>
         )}
       </div>
+
+      {/* UBX Payment Modals */}
+      <UBXCostPreviewModal
+        isOpen={showCostModal}
+        onClose={() => setShowCostModal(false)}
+        onConfirm={handleConfirmGeneration}
+        onRecharge={handleRechargeRequest}
+        cost={getGenerationCost()}
+        currentBalance={ubxBalance}
+      />
+
+      <UBXRechargeModal
+        isOpen={showRechargeModal}
+        onClose={() => setShowRechargeModal(false)}
+        onRechargeComplete={handleRechargeComplete}
+      />
     </div>
   );
 };
