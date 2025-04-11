@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
-const LucoinSection = () => {
+const UBXSection = () => {
   return (
     <section className="py-16 container mx-auto px-4">
       <div className="bg-gradient-to-r from-primary/10 via-blue-500/5 to-blue-500/10 rounded-xl p-8 border border-white/5">
@@ -74,4 +74,4 @@ const LucoinSection = () => {
   );
 };
 
-export default LucoinSection;
+export default UBXSection;

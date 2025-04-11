@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { 
@@ -14,13 +15,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useLucoins, TransactionHistory } from "@/hooks/useLucoins";
+import { useUBX, TransactionHistory } from "@/hooks/useUBX";
 
-const LucoinTransactionHistory = () => {
+const UBXTransactionHistory = () => {
   const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<TransactionHistory[]>([]);
   const [search, setSearch] = useState("");
-  const { getTransactionHistory, loading } = useLucoins();
+  const { getTransactionHistory, loading } = useUBX();
 
   useEffect(() => {
     loadTransactions();
@@ -45,6 +46,7 @@ const LucoinTransactionHistory = () => {
     setFilteredTransactions(data);
   };
 
+  // Helper function to get icon for transaction type
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'purchase':
@@ -64,9 +66,12 @@ const LucoinTransactionHistory = () => {
     }
   };
 
+  // Helper function to get badge for transaction type
   const getTransactionBadge = (type: string, amount: number) => {
+    // Determine if credit or debit
     const isCredit = type.includes('receive') || amount > 0;
     
+    // Format readable transaction type
     let readableType = type.replace(/_/g, ' ');
     readableType = readableType.charAt(0).toUpperCase() + readableType.slice(1);
     
@@ -84,7 +89,7 @@ const LucoinTransactionHistory = () => {
     <Card>
       <CardHeader>
         <CardTitle className="text-xl">Transaction History</CardTitle>
-        <CardDescription>View your recent Lucoin transactions</CardDescription>
+        <CardDescription>View your recent UBX transactions</CardDescription>
         
         <div className="flex items-center gap-2 mt-4">
           <div className="relative flex-1">
@@ -141,7 +146,7 @@ const LucoinTransactionHistory = () => {
                   </div>
                 </div>
                 <div className={`text-lg font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {tx.amount > 0 ? '+' : ''}{tx.amount} LC
+                  {tx.amount > 0 ? '+' : ''}{tx.amount} UBX
                 </div>
               </div>
             ))}
@@ -152,4 +157,4 @@ const LucoinTransactionHistory = () => {
   );
 };
 
-export default LucoinTransactionHistory;
+export default UBXTransactionHistory;

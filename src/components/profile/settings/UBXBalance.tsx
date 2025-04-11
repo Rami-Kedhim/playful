@@ -3,11 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Plus } from "lucide-react";
 
-interface LucoinBalanceProps {
+interface UBXBalanceProps {
   balance: number;
 }
 
-const LucoinBalance = ({ balance }: LucoinBalanceProps) => {
+const UBXBalance = ({ balance }: UBXBalanceProps) => {
   return (
     <Card>
       <CardHeader>
@@ -49,4 +49,4 @@ const LucoinBalance = ({ balance }: LucoinBalanceProps) => {
   );
 };
 
-export default LucoinBalance;
+export default UBXBalance;

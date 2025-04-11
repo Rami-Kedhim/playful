@@ -5,9 +5,9 @@ import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw } from "lucide-react";
-import LucoinBalance from "@/components/profile/settings/LucoinBalance";
-import LucoinTransactionHistory from "@/components/profile/settings/LucoinTransactionHistory";
-import LucoinPackageDialog from "@/components/profile/settings/LucoinPackageDialog";
+import UBXBalance from "@/components/profile/settings/UBXBalance";
+import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
+import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
 import WalletConnect from "@/components/solana/WalletConnect";
 import SolanaTransactionHistory from "@/components/solana/SolanaTransactionHistory";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
@@ -15,41 +15,42 @@ import { getSolanaBalance, getSolanaPrice } from "@/services/solanaService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const Wallet = () => {
+const UpdatedWallet = () => {
   const { user, profile } = useAuth();
   const { walletAddress } = useSolanaWallet();
-  const [solBalance, setSolBalance] = useState<number | null>(null);
-  const [solanaPrice, setSolanaPrice] = useState<number | null>(null);
+  const [ftmBalance, setFtmBalance] = useState<number | null>(null);
+  const [ftmPrice, setFtmPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     if (walletAddress) {
-      loadSolanaData(walletAddress);
+      loadFantomData(walletAddress);
     } else {
-      setSolBalance(null);
+      setFtmBalance(null);
     }
   }, [walletAddress]);
   
-  const loadSolanaData = async (address: string) => {
+  const loadFantomData = async (address: string) => {
     setLoading(true);
     try {
+      // This would normally call Fantom services, but we're reusing Solana services for this demo
       const [balance, price] = await Promise.all([
         getSolanaBalance(address),
         getSolanaPrice()
       ]);
       
-      setSolBalance(balance);
-      setSolanaPrice(price);
+      setFtmBalance(balance);
+      setFtmPrice(price);
     } catch (error) {
-      console.error("Error loading Solana data:", error);
+      console.error("Error loading Fantom data:", error);
     } finally {
       setLoading(false);
     }
   };
   
-  const refreshSolanaData = () => {
+  const refreshFantomData = () => {
     if (walletAddress) {
-      loadSolanaData(walletAddress);
+      loadFantomData(walletAddress);
     }
   };
   
@@ -58,12 +59,12 @@ const Wallet = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Wallet & Transactions</h1>
+            <h1 className="text-3xl font-bold">Uber Wallet</h1>
             <p className="text-muted-foreground">Manage your UBX and transactions</p>
           </div>
           <div className="flex gap-2">
             <WalletConnect />
-            <LucoinPackageDialog />
+            <UBXPackageDialog />
           </div>
         </div>
         
@@ -93,7 +94,7 @@ const Wallet = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={refreshSolanaData}
+                  onClick={refreshFantomData}
                   disabled={loading}
                 >
                   <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -109,10 +110,10 @@ const Wallet = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="text-3xl font-bold">{solBalance !== null ? solBalance.toFixed(4) : '0.0000'} FTM</div>
+                    <div className="text-3xl font-bold">{ftmBalance !== null ? ftmBalance.toFixed(4) : '0.0000'} FTM</div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {solanaPrice && solBalance !== null ? (
-                        <>≈ ${(solBalance * solanaPrice).toFixed(2)} USD</>
+                      {ftmPrice && ftmBalance !== null ? (
+                        <>≈ ${(ftmBalance * ftmPrice).toFixed(2)} USD</>
                       ) : (
                         '—'
                       )}
@@ -155,7 +156,7 @@ const Wallet = () => {
               <History className="mr-2 h-4 w-4" />
               UBX Transactions
             </TabsTrigger>
-            <TabsTrigger value="solana" className="flex items-center">
+            <TabsTrigger value="fantom" className="flex items-center">
               <WalletIcon className="mr-2 h-4 w-4" />
               Fantom Transactions
             </TabsTrigger>
@@ -166,11 +167,25 @@ const Wallet = () => {
           </TabsList>
           
           <TabsContent value="transactions" className="mt-6">
-            <LucoinTransactionHistory />
+            <UBXTransactionHistory />
           </TabsContent>
           
-          <TabsContent value="solana" className="mt-6">
-            <SolanaTransactionHistory />
+          <TabsContent value="fantom" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Fantom Transactions</CardTitle>
+                <CardDescription>Your Fantom blockchain transactions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <WalletIcon className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
+                  <p className="text-muted-foreground max-w-md">
+                    Fantom transactions are handled securely behind the scenes. You don't need to interact directly with the blockchain.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="gifts" className="mt-6">
@@ -196,4 +211,4 @@ const Wallet = () => {
   );
 };
 
-export default Wallet;
+export default UpdatedWallet;

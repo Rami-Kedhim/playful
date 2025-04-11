@@ -11,18 +11,18 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Coins } from 'lucide-react';
-import { useLucoins } from '@/hooks/useLucoins';
+import { useUBX } from '@/hooks/useUBX';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface LucoinPackageDialogProps {
+interface UBXPackageDialogProps {
   onSuccess?: () => Promise<void>;
 }
 
-const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) => {
+const UBXPackageDialog: React.FC<UBXPackageDialogProps> = ({ onSuccess }) => {
   const [open, setOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const { fetchPackages, purchasePackage } = useLucoins();
+  const { fetchPackages, purchasePackage } = useUBX();
   const [packages, setPackages] = useState<any[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
@@ -36,7 +36,7 @@ const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) 
         console.error("Error fetching packages:", error);
         toast({
           title: "Failed to load packages",
-          description: "Could not load Lucoin packages. Please try again.",
+          description: "Could not load UBX packages. Please try again.",
           variant: "destructive",
         });
       }
@@ -59,7 +59,7 @@ const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) 
       if (result) {
         toast({
           title: "Purchase successful",
-          description: `You have purchased Lucoins successfully`,
+          description: `You have purchased UBX successfully`,
         });
         setOpen(false);
         if (onSuccess) await onSuccess();
@@ -94,7 +94,7 @@ const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) 
         <DialogHeader>
           <DialogTitle>Purchase UBX</DialogTitle>
           <DialogDescription>
-            UBX are used for premium features, content, and interactions
+            UBX tokens are used for premium features, content, and interactions
           </DialogDescription>
         </DialogHeader>
 
@@ -161,4 +161,4 @@ const LucoinPackageDialog: React.FC<LucoinPackageDialogProps> = ({ onSuccess }) 
   );
 };
 
-export default LucoinPackageDialog;
+export default UBXPackageDialog;
