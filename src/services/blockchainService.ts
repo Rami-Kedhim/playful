@@ -17,6 +17,15 @@ interface SolanaTransactionResult {
   error?: string;
 }
 
+// Network configuration for UI display
+export const NETWORK_CONFIG = {
+  displayName: 'IOTA',
+  confirmationTime: '10-30 seconds',
+  minRecharge: 1,
+  conversionRate: 5, // 5 UBX per 1 MIOTA
+  explorer: 'https://explorer.iota.org/mainnet'
+};
+
 /**
  * Service to handle blockchain interactions for the application
  * Supports both Solana and IOTA integration

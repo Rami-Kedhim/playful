@@ -15,7 +15,7 @@ import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { NETWORK_CONFIG } from "@/services/blockchainService";
+import { blockchainService, NETWORK_CONFIG } from "@/services/blockchainService";
 
 const Wallet = () => {
   const { user, profile } = useAuth();
@@ -23,6 +23,7 @@ const Wallet = () => {
   const [solBalance, setSolBalance] = useState<number | null>(null);
   const [solanaPrice, setSolanaPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [rechargeDialogOpen, setRechargeDialogOpen] = useState(false);
   
   useEffect(() => {
     if (walletAddress) {
@@ -65,7 +66,10 @@ const Wallet = () => {
           </div>
           <div className="flex gap-2">
             <WalletConnect />
-            <UBXRechargeDialog />
+            <Button variant="outline" size="sm" onClick={() => setRechargeDialogOpen(true)}>
+              Add UBX
+            </Button>
+            <UBXRechargeDialog open={rechargeDialogOpen} onClose={() => setRechargeDialogOpen(false)} />
             <LucoinPackageDialog />
           </div>
         </div>

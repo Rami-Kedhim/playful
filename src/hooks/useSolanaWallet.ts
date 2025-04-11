@@ -94,7 +94,7 @@ export const useSolanaWallet = (): WalletHookReturn => {
 
   return {
     ...state,
-    connectWallet,
+    connectWallet: connectWallet as () => Promise<void>, // Fix the type mismatch
     disconnectWallet,
     hasWallet,
     isConnected: !!state.walletAddress,
