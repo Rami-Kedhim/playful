@@ -1,150 +1,198 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Check, CreditCard, Package, Zap } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { useToast } from '@/components/ui/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
-import useUBX from '@/hooks/useUBX';
+} from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Coins, Check, Shield } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useUbxTransactions } from '@/hooks/useUbxTransactions';
+import { useWalletConnection } from '@/hooks/useWalletConnection';
+
+interface UBXPackage {
+  id: string;
+  name: string;
+  amount: number;
+  price_sol?: number;
+  bonus_amount?: number;
+  is_featured?: boolean;
+}
+
+const packages: UBXPackage[] = [
+  {
+    id: "basic",
+    name: "Basic Pack",
+    amount: 100,
+    price_sol: 0.05,
+    is_featured: false
+  },
+  {
+    id: "standard",
+    name: "Standard Pack",
+    amount: 500,
+    price_sol: 0.2,
+    bonus_amount: 50,
+    is_featured: true
+  },
+  {
+    id: "premium",
+    name: "Premium Pack",
+    amount: 1000,
+    price_sol: 0.35,
+    bonus_amount: 150,
+    is_featured: false
+  }
+];
 
 const UBXPackageDialog = () => {
   const [open, setOpen] = useState(false);
-  const [packages, setPackages] = useState<any[]>([]);
-  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { fetchPackages, purchasePackage, isProcessing } = useUBX();
+  const [selectedPackage, setSelectedPackage] = useState<UBXPackage | null>(null);
+  const [solPrice, setSolPrice] = useState<number | null>(null);
   const { toast } = useToast();
-
+  const { isProcessing, purchaseUbxWithSolana } = useUbxTransactions();
+  const { isConnected, connectWallet } = useWalletConnection();
+  
+  // Fetch current SOL price for display
   useEffect(() => {
-    const loadPackages = async () => {
-      setIsLoading(true);
+    const fetchSolPrice = async () => {
       try {
-        const availablePackages = await fetchPackages();
-        setPackages(availablePackages);
+        // For demo, using a hardcoded price - in production, fetch from an API
+        setSolPrice(20.50);
       } catch (error) {
-        console.error('Error loading packages:', error);
-      } finally {
-        setIsLoading(false);
+        console.error("Error fetching SOL price:", error);
       }
     };
-
-    if (open) {
-      loadPackages();
-    }
-  }, [open, fetchPackages]);
-
-  const handlePurchase = async () => {
-    if (!selectedPackageId) return;
     
-    try {
-      const success = await purchasePackage(selectedPackageId);
-      if (success) {
-        toast({
-          title: "Purchase successful",
-          description: "Your UBX package has been added to your account.",
-        });
-        setOpen(false);
+    if (open) {
+      fetchSolPrice();
+    }
+  }, [open]);
+
+  const handlePurchase = async (pkg: UBXPackage) => {
+    setSelectedPackage(pkg);
+    
+    if (!isConnected) {
+      try {
+        await connectWallet();
+      } catch (error) {
+        return; // Error handling done in the wallet hook
       }
-    } catch (error) {
-      console.error("Error purchasing package:", error);
+    }
+    
+    if (!pkg.price_sol) {
       toast({
-        title: "Purchase failed",
-        description: "There was an error processing your purchase. Please try again.",
+        title: "Invalid package",
+        description: "This package cannot be purchased with SOL",
         variant: "destructive",
       });
+      return;
+    }
+    
+    try {
+      const result = await purchaseUbxWithSolana(pkg.amount, pkg.id);
+      
+      if (result.success) {
+        setTimeout(() => setOpen(false), 1500);
+      }
+    } finally {
+      setSelectedPackage(null);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <CreditCard className="h-4 w-4" /> Buy UBX
+        <Button className="gap-2">
+          <Coins className="h-4 w-4" />
+          Buy UBX
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Purchase UBX Packages</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Coins className="h-5 w-5 text-primary" />
+            Purchase UBX Tokens
+          </DialogTitle>
           <DialogDescription>
-            Select a package to add UBX to your account.
+            Choose a package to add UBX tokens to your account.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4">
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array(3).fill(0).map((_, i) => (
-                <div key={i} className="flex flex-col space-y-3">
-                  <Skeleton className="h-[100px] w-full rounded-md" />
+        <div className="grid gap-4">
+          {packages.map((pkg) => (
+            <Card 
+              key={pkg.id} 
+              className={`relative overflow-hidden ${pkg.is_featured ? 'border-primary' : ''}`}
+            >
+              {pkg.is_featured && (
+                <div className="absolute top-0 right-0">
+                  <Badge variant="default" className="rounded-tl-none rounded-br-none">
+                    Best Value
+                  </Badge>
                 </div>
-              ))}
-            </div>
-          ) : packages.length > 0 ? (
-            <div className="grid gap-4">
-              {packages.map((pkg) => (
-                <Card 
-                  key={pkg.id}
-                  className={`p-4 cursor-pointer transition-all ${
-                    selectedPackageId === pkg.id 
-                      ? 'border-primary ring-2 ring-primary/20' 
-                      : 'hover:border-primary/50'
-                  }`}
-                  onClick={() => setSelectedPackageId(pkg.id)}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-md ${pkg.is_featured ? 'bg-primary/20' : 'bg-secondary'}`}>
-                        <Package className={`h-6 w-6 ${pkg.is_featured ? 'text-primary' : ''}`} />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{pkg.name}</h3>
-                        <p className="text-sm text-muted-foreground">${pkg.price.toFixed(2)}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-bold">{pkg.amount} UBX</div>
-                      {pkg.bonus_amount > 0 && (
-                        <div className="text-sm text-green-500 flex items-center gap-1">
-                          <Zap className="h-3 w-3" /> +{pkg.bonus_amount} bonus
-                        </div>
-                      )}
-                    </div>
-                    {selectedPackageId === pkg.id && (
-                      <div className="absolute top-4 right-4">
-                        <Check className="h-5 w-5 text-primary" />
+              )}
+              <CardHeader className="pb-2">
+                <CardTitle>{pkg.name}</CardTitle>
+                <CardDescription>{pkg.amount} UBX Tokens</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="text-2xl font-bold">{pkg.price_sol} SOL</div>
+                    {solPrice && (
+                      <div className="text-xs text-muted-foreground">
+                        ≈ ${(pkg.price_sol || 0 * solPrice).toFixed(2)} USD
                       </div>
                     )}
                   </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No packages available at the moment.
-            </div>
-          )}
+                  {pkg.bonus_amount && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{pkg.bonus_amount} Bonus
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  className="w-full gap-2" 
+                  onClick={() => handlePurchase(pkg)}
+                  disabled={isProcessing}
+                >
+                  {isProcessing && selectedPackage?.id === pkg.id ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-4 w-4" />
+                      Buy Now
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
         
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handlePurchase} 
-            disabled={!selectedPackageId || isProcessing}
-          >
-            {isProcessing ? 'Processing...' : 'Purchase'}
-          </Button>
-        </DialogFooter>
+        <div className="text-xs text-muted-foreground flex items-center justify-center mt-4">
+          <Shield className="h-3 w-3 mr-1" />
+          Secure payment via Solana blockchain
+        </div>
       </DialogContent>
     </Dialog>
   );

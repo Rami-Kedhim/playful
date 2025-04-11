@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
@@ -16,6 +15,8 @@ import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { blockchainService, NETWORK_CONFIG } from "@/services/blockchainService";
+import UBXBalance from "@/components/profile/settings/UBXBalance";
+import SolanaWalletPanel from "@/components/wallet/SolanaWalletPanel";
 
 const Wallet = () => {
   const { user, profile } = useAuth();
@@ -75,70 +76,9 @@ const Wallet = () => {
         </div>
         
         <div className="grid gap-6 md:grid-cols-3 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-lg">
-                <Coins className="h-5 w-5 text-blue-500 mr-2" />
-                UBX Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{profile?.lucoin_balance || profile?.lucoinsBalance || 0} UBX</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Virtual credits for platform features
-              </p>
-            </CardContent>
-          </Card>
+          <UBXBalance onRecharge={() => setRechargeDialogOpen(true)} />
           
-          <Card>
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center text-lg">
-                <Shield className="h-5 w-5 text-primary mr-2" />
-                IOTA Wallet
-              </CardTitle>
-              {walletAddress && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={refreshSolanaData}
-                  disabled={loading}
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent>
-              {walletAddress ? (
-                loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-8 w-24" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-3xl font-bold">{solBalance !== null ? solBalance.toFixed(4) : '0.0000'} MIOTA</div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {solanaPrice && solBalance !== null ? (
-                        <>≈ ${(solBalance * solanaPrice).toFixed(2)} USD</>
-                      ) : (
-                        '—'
-                      )}
-                    </p>
-                  </>
-                )
-              ) : (
-                <div className="text-muted-foreground py-1">
-                  Connect wallet to view balance
-                </div>
-              )}
-              
-              <div className="mt-2 text-xs flex items-center text-muted-foreground">
-                <a href="https://firefly.iota.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
-                  Download IOTA Firefly wallet
-                </a>
-              </div>
-            </CardContent>
-          </Card>
+          <SolanaWalletPanel onRecharge={() => setRechargeDialogOpen(true)} />
           
           <Card>
             <CardHeader className="pb-2">
