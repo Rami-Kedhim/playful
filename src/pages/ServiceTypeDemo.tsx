@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { ServiceTypeProvider } from '@/components/escorts/providers/ServiceTypeProvider';
+import ServiceTypeProvider from '@/components/escorts/providers/ServiceTypeProvider';
 import ServiceTypeSelection from '@/components/escorts/filters/ServiceTypeSelection';
 import ServiceTypeRadioFilter from '@/components/escorts/filters/ServiceTypeRadioFilter';
 import ServiceTypeBadgeLabel, { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
