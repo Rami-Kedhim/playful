@@ -86,16 +86,50 @@ export const calculateSolanaUsdValue = (solBalance: number, solPrice: number): n
   return solBalance * solPrice;
 };
 
-// Function to simulate sending a transaction with a SOL payment
-export const sendSolanaTransaction = async (
-  fromWallet: string,
+// Function to send UBX tokens to the user's account after a successful Solana payment
+export const processUbxPurchase = async (
+  userId: string,
+  packageId: string,
+  amount: number
+): Promise<{ success: boolean, message: string, ubxAmount?: number }> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('process-ubx-transaction', {
+      body: {
+        user_id: userId,
+        amount: amount, // Amount of UBX to credit
+        transaction_type: 'purchase',
+        description: `Purchase of ${amount} UBX tokens`,
+        metadata: { 
+          package_id: packageId,
+          source: 'solana'
+        }
+      }
+    });
+    
+    if (error) throw new Error(error.message);
+    
+    return {
+      success: true,
+      message: `Successfully purchased ${amount} UBX tokens`,
+      ubxAmount: amount
+    };
+  } catch (error: any) {
+    console.error('Error processing UBX purchase:', error);
+    return {
+      success: false,
+      message: error.message || 'Failed to process your purchase'
+    };
+  }
+};
+
+// Mock function to simulate sending a Solana transaction
+// In production, this would use a real wallet adapter to create and send transactions
+export const simulateSolanaTransaction = async (
   amount: number,
   memo: string = ''
-): Promise<{ success: boolean, transactionId: string | null }> => {
-  // Since this would require a wallet adapter and signature in a real implementation,
-  // we're simulating the transaction result for demonstration
+): Promise<{ success: boolean, txId: string | null }> => {
   try {
-    // Mock transaction processing delay
+    // Simulate transaction processing delay
     toast({
       title: "Processing transaction",
       description: "Your SOL transaction is being processed.",
@@ -104,8 +138,8 @@ export const sendSolanaTransaction = async (
     // Simulate blockchain delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Simulate success (in a real app, you'd verify transaction confirmation)
-    const success = Math.random() > 0.1; // 90% success rate for demo
+    // Simulate success (90% success rate for demo)
+    const success = Math.random() > 0.1;
     
     if (success) {
       // Generate a fake transaction ID
@@ -118,7 +152,7 @@ export const sendSolanaTransaction = async (
         description: `Your transaction has been confirmed.`,
       });
       
-      return { success: true, transactionId: txId };
+      return { success: true, txId };
     } else {
       throw new Error("Transaction could not be confirmed");
     }
@@ -129,52 +163,7 @@ export const sendSolanaTransaction = async (
       description: error.message || "There was an error processing your transaction",
       variant: "destructive",
     });
-    return { success: false, transactionId: null };
-  }
-};
-
-// Function to simulate a Lucoin purchase with SOL
-export const purchaseLucoinsWithSol = async (
-  packageId: string, 
-  solAmount: number, 
-  walletAddress: string
-): Promise<{ success: boolean, transactionId: string | null }> => {
-  try {
-    // Status notification
-    toast({
-      title: "Purchase initiated",
-      description: "Your Lucoin purchase is being processed. This may take a moment.",
-    });
-    
-    // Step 1: Send the SOL transaction
-    const { success, transactionId } = await sendSolanaTransaction(
-      walletAddress,
-      solAmount,
-      `Purchase Lucoins Package: ${packageId}`
-    );
-    
-    if (!success) {
-      throw new Error("Could not complete SOL transaction");
-    }
-    
-    // Status update
-    toast({
-      title: "Payment confirmed",
-      description: "Your SOL payment has been confirmed. Adding Lucoins to your account...",
-    });
-    
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return { success: true, transactionId };
-  } catch (error: any) {
-    console.error('Error purchasing Lucoins with SOL:', error);
-    toast({
-      title: "Purchase failed",
-      description: error.message || "There was an error processing your payment",
-      variant: "destructive",
-    });
-    return { success: false, transactionId: null };
+    return { success: false, txId: null };
   }
 };
 
@@ -207,37 +196,5 @@ export const getSolanaTransactionHistory = async (walletAddress: string, limit: 
   } catch (error: any) {
     console.error('Error getting transaction history:', error);
     return [];
-  }
-};
-
-// Function to get transaction details
-export const getSolanaTransactionDetails = async (transactionId: string): Promise<any> => {
-  try {
-    const response = await fetch(SOLANA_RPC_URL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'getTransaction',
-        params: [transactionId, { encoding: 'json', maxSupportedTransactionVersion: 0 }]
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Network error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.error) {
-      console.error('Error getting transaction details:', data.error);
-      return null;
-    }
-    
-    return data.result;
-  } catch (error: any) {
-    console.error('Error getting transaction details:', error);
-    return null;
   }
 };

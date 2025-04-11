@@ -49,15 +49,15 @@ serve(async (req) => {
     
     // 1. Check user's UBX balance if this is a debit transaction
     if (isDebit) {
-      const { data: userWallet, error: walletError } = await supabaseClient
-        .from('ubx_wallets')
-        .select('balance')
-        .eq('user_id', user_id)
+      const { data: userProfile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('lucoin_balance')
+        .eq('id', user_id)
         .single();
       
-      if (walletError || !userWallet) {
+      if (profileError || !userProfile) {
         return new Response(
-          JSON.stringify({ error: 'User wallet not found', details: walletError }),
+          JSON.stringify({ error: 'User profile not found', details: profileError }),
           { 
             status: 404, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -66,11 +66,11 @@ serve(async (req) => {
       }
       
       // Check if user has sufficient balance
-      if (userWallet.balance < Math.abs(processAmount)) {
+      if (userProfile.lucoin_balance < Math.abs(processAmount)) {
         return new Response(
           JSON.stringify({ 
             error: 'Insufficient balance', 
-            current_balance: userWallet.balance, 
+            current_balance: userProfile.lucoin_balance, 
             required: Math.abs(processAmount) 
           }),
           { 
@@ -81,20 +81,20 @@ serve(async (req) => {
       }
     }
     
-    // 2. Process the transaction (update wallet balance)
+    // 2. Process the transaction (update profile balance)
     const { error: updateError } = await supabaseClient
-      .from('ubx_wallets')
+      .from('profiles')
       .update({ 
-        balance: supabaseClient.rpc('adjust_ubx_balance', { 
-          user_id_param: user_id, 
-          adjustment: processAmount 
+        lucoin_balance: supabaseClient.rpc('increment_balance', { 
+          user_id, 
+          amount: processAmount 
         })
       })
-      .eq('user_id', user_id);
+      .eq('id', user_id);
     
     if (updateError) {
       return new Response(
-        JSON.stringify({ error: 'Failed to update wallet balance', details: updateError }),
+        JSON.stringify({ error: 'Failed to update balance', details: updateError }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -102,9 +102,9 @@ serve(async (req) => {
       );
     }
     
-    // 3. Record the transaction in ubx_transactions
+    // 3. Record the transaction in lucoin_transactions
     const { error: transactionError } = await supabaseClient
-      .from('ubx_transactions')
+      .from('lucoin_transactions')
       .insert({
         user_id,
         amount: processAmount,
@@ -119,10 +119,10 @@ serve(async (req) => {
     }
     
     // 4. Get the updated balance
-    const { data: updatedWallet } = await supabaseClient
-      .from('ubx_wallets')
-      .select('balance')
-      .eq('user_id', user_id)
+    const { data: updatedProfile } = await supabaseClient
+      .from('profiles')
+      .select('lucoin_balance')
+      .eq('id', user_id)
       .single();
     
     // 5. Return success response
@@ -130,7 +130,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Transaction processed successfully',
-        new_balance: updatedWallet?.balance || 0
+        new_balance: updatedProfile?.lucoin_balance || 0
       }),
       { 
         status: 200, 

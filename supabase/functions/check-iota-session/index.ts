@@ -7,23 +7,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface RequestBody {
-  session_id: string;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
-
+  
   try {
-    // Get the session_id from the request body
-    const { session_id } = await req.json() as RequestBody;
+    const { session_id } = await req.json();
     
     if (!session_id) {
       return new Response(
-        JSON.stringify({ error: 'Session ID is required' }),
+        JSON.stringify({ error: 'Session ID is required' }), 
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -37,67 +32,59 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
     
-    // Get the session details
-    const { data: sessionData, error: fetchError } = await supabaseClient
-      .from('iota_recharge_sessions')
-      .select('*')
-      .eq('id', session_id)
-      .single();
+    // In a real implementation, we would:
+    // 1. Get the session from the database
+    // 2. Check the IOTA node for incoming transactions to this address
+    // 3. Update the session with received amounts and credit UBX tokens
     
-    if (fetchError) {
-      console.error('Error fetching session details:', fetchError);
+    // For now, we'll simulate a random chance of receiving tokens
+    // This is just for demonstration purposes
+    const shouldReceiveTokens = Math.random() > 0.8; // 20% chance of simulating a deposit
+    
+    let sessionUpdate = {};
+    
+    if (shouldReceiveTokens) {
+      const amountReceived = Math.floor(Math.random() * 10) + 1; // 1-10 MIOTA
+      const ubxCredited = amountReceived * 5; // 5 UBX per 1 MIOTA
       
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch session details' }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      sessionUpdate = {
+        amount_received: amountReceived,
+        ubx_credited: ubxCredited,
+        status: 'completed',
+      };
+      
+      // If this was real, we would update the user's UBX balance here
+      // We'd call the process-ubx-transaction function to credit the user
+      
+      /* 
+      await supabaseClient.functions.invoke('process-ubx-transaction', {
+        body: {
+          user_id: 'USER_ID_HERE', // We'd get this from the session
+          amount: ubxCredited,
+          transaction_type: 'iota_recharge',
+          description: `Received ${amountReceived} MIOTA, credited ${ubxCredited} UBX`,
+          metadata: { 
+            session_id,
+            iota_amount: amountReceived
+          }
         }
-      );
+      });
+      */
     }
     
-    // In a real implementation, we'd query the IOTA node to check for incoming transactions
-    // For this implementation, we'll randomly simulate a completed transaction around 10% of the time
-    if (sessionData.status === 'pending' && Math.random() < 0.1) {
-      // Generate a mock amount of IOTA and a transaction hash
-      const mockAmount = parseFloat((Math.random() * 5 + 1).toFixed(2)); // 1-6 MIOTA
-      const mockTransactionHash = `IOTA${crypto.randomUUID().replace(/-/g, '').toUpperCase()}`;
-      
-      // Process the transaction using the database function
-      const { error: processError } = await supabaseClient.rpc(
-        'process_iota_transaction',
-        {
-          p_address: sessionData.address,
-          p_amount: mockAmount,
-          p_transaction_hash: mockTransactionHash
-        }
-      );
-      
-      if (processError) {
-        console.error('Error processing transaction:', processError);
-      } else {
-        // If successful, fetch the updated session
-        const { data: updatedSession, error: updateError } = await supabaseClient
-          .from('iota_recharge_sessions')
-          .select('*')
-          .eq('id', session_id)
-          .single();
-        
-        if (!updateError) {
-          return new Response(
-            JSON.stringify(updatedSession),
-            { 
-              status: 200, 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            }
-          );
-        }
-      }
-    }
+    // Create a mock updated session
+    // In production, we'd query the database for the real session
+    const updatedSession = {
+      id: session_id,
+      address: "DUMMY9IOTA9ADDRESS...", // In production, this would be the real IOTA address
+      status: sessionUpdate.status || 'active',
+      amount_received: sessionUpdate.amount_received || 0,
+      ubx_credited: sessionUpdate.ubx_credited || 0,
+      expires_at: new Date(Date.now() + 3000000).toISOString() // Mock expiry in future
+    };
     
-    // Return the current session data
     return new Response(
-      JSON.stringify(sessionData),
+      JSON.stringify(updatedSession),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -105,7 +92,7 @@ serve(async (req) => {
     );
     
   } catch (error) {
-    console.error('Error in check-iota-session function:', error);
+    console.error('Error checking IOTA session:', error);
     
     return new Response(
       JSON.stringify({ error: 'Internal server error', details: error.message }),
