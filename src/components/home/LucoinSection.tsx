@@ -10,7 +10,7 @@ const LucoinSection = () => {
       <div className="bg-gradient-to-r from-primary/10 via-lucoin/5 to-lucoin/10 rounded-xl p-8 border border-white/5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div>
-            <Badge variant="lucoin" className="mb-4">WEB3 PAYMENTS</Badge>
+            <Badge variant="warning" className="mb-4">WEB3 PAYMENTS</Badge>
             <h2 className="text-3xl font-bold mb-4">
               <span className="bg-gradient-to-r from-primary to-lucoin bg-clip-text text-transparent">
                 Lucoin: The Token of Privacy

@@ -59,8 +59,8 @@ const ContentFilters: React.FC<ContentFiltersProps> = ({
           Active ({statusCounts.active})
         </Badge>
         <Badge 
-          variant={statusFilter === 'expiring' ? "default" : "outline"}
-          className="cursor-pointer bg-amber-500 hover:bg-amber-600"
+          variant={statusFilter === 'expiring' ? "warning" : "outline"}
+          className="cursor-pointer"
           onClick={() => setStatusFilter('expiring')}
         >
           <Clock className="h-3 w-3 mr-1" />

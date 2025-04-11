@@ -22,13 +22,13 @@ const ProfileTypeBadge: React.FC<ProfileTypeBadgeProps> = ({ type, className }) 
     ai: {
       icon: <Bot className="h-3 w-3 mr-1" />,
       text: 'AI Model',
-      variant: 'outline' as const,
+      variant: 'secondary' as const,
       className: 'bg-purple-500 text-white'
     },
     provisional: {
       icon: <FileQuestion className="h-3 w-3 mr-1" />,
       text: 'Provisional',
-      variant: 'outline' as const,
+      variant: 'warning' as const,
       className: 'bg-amber-500 text-white'
     }
   };
