@@ -10,150 +10,139 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Coins } from 'lucide-react';
+import { Check, CreditCard, Package, Zap } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 import useUBX from '@/hooks/useUBX';
-import { toast } from '@/components/ui/use-toast';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface UBXPackageDialogProps {
-  onSuccess?: () => Promise<void>;
-}
-
-const UBXPackageDialog: React.FC<UBXPackageDialogProps> = ({ onSuccess }) => {
+const UBXPackageDialog = () => {
   const [open, setOpen] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const { fetchPackages, purchasePackage } = useUBX();
   const [packages, setPackages] = useState<any[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { fetchPackages, purchasePackage, isProcessing } = useUBX();
+  const { toast } = useToast();
 
-  const handleOpen = async (open: boolean) => {
-    setOpen(open);
-    if (open) {
+  useEffect(() => {
+    const loadPackages = async () => {
+      setIsLoading(true);
       try {
-        const packageList = await fetchPackages();
-        setPackages(packageList || []);
+        const availablePackages = await fetchPackages();
+        setPackages(availablePackages);
       } catch (error) {
-        console.error("Error fetching packages:", error);
-        toast({
-          title: "Failed to load packages",
-          description: "Could not load UBX packages. Please try again.",
-          variant: "destructive",
-        });
+        console.error('Error loading packages:', error);
+      } finally {
+        setIsLoading(false);
       }
+    };
+
+    if (open) {
+      loadPackages();
     }
-  };
+  }, [open, fetchPackages]);
 
   const handlePurchase = async () => {
-    if (!selectedPackage) {
-      toast({
-        title: "No package selected",
-        description: "Please select a package first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setProcessing(true);
+    if (!selectedPackageId) return;
+    
     try {
-      const result = await purchasePackage(selectedPackage);
-      if (result) {
+      const success = await purchasePackage(selectedPackageId);
+      if (success) {
         toast({
           title: "Purchase successful",
-          description: `You have purchased UBX successfully`,
+          description: "Your UBX package has been added to your account.",
         });
         setOpen(false);
-        if (onSuccess) await onSuccess();
-      } else {
-        toast({
-          title: "Purchase failed",
-          description: "An error occurred during purchase",
-          variant: "destructive",
-        });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error purchasing package:", error);
       toast({
-        title: "Purchase error",
-        description: error.message || "An unexpected error occurred",
+        title: "Purchase failed",
+        description: "There was an error processing your purchase. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setProcessing(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
-          <Coins className="h-4 w-4" />
-          Buy UBX
+          <CreditCard className="h-4 w-4" /> Buy UBX
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Purchase UBX</DialogTitle>
+          <DialogTitle>Purchase UBX Packages</DialogTitle>
           <DialogDescription>
-            UBX tokens are used for premium features, content, and interactions
+            Select a package to add UBX to your account.
           </DialogDescription>
         </DialogHeader>
-
-        <div className="grid gap-4 py-4">
-          {packages.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No packages available at the moment</p>
+        
+        <div className="py-4">
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array(3).fill(0).map((_, i) => (
+                <div key={i} className="flex flex-col space-y-3">
+                  <Skeleton className="h-[100px] w-full rounded-md" />
+                </div>
+              ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ) : packages.length > 0 ? (
+            <div className="grid gap-4">
               {packages.map((pkg) => (
                 <Card 
-                  key={pkg.id} 
-                  className={`cursor-pointer transition-all ${
-                    selectedPackage === pkg.id 
-                      ? 'border-primary bg-primary/5' 
+                  key={pkg.id}
+                  className={`p-4 cursor-pointer transition-all ${
+                    selectedPackageId === pkg.id 
+                      ? 'border-primary ring-2 ring-primary/20' 
                       : 'hover:border-primary/50'
                   }`}
-                  onClick={() => setSelectedPackage(pkg.id)}
+                  onClick={() => setSelectedPackageId(pkg.id)}
                 >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg flex justify-between items-center">
-                      <span>{pkg.name}</span>
-                      {pkg.is_featured && (
-                        <span className="bg-yellow-500/10 text-yellow-500 text-xs px-2 py-1 rounded-full">
-                          Best Value
-                        </span>
-                      )}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold flex items-center gap-1 mb-1">
-                      <Coins className="h-5 w-5 text-blue-500" />
-                      {pkg.amount}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-md ${pkg.is_featured ? 'bg-primary/20' : 'bg-secondary'}`}>
+                        <Package className={`h-6 w-6 ${pkg.is_featured ? 'text-primary' : ''}`} />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{pkg.name}</h3>
+                        <p className="text-sm text-muted-foreground">${pkg.price.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-bold">{pkg.amount} UBX</div>
                       {pkg.bonus_amount > 0 && (
-                        <span className="text-sm text-green-500">+{pkg.bonus_amount} bonus</span>
+                        <div className="text-sm text-green-500 flex items-center gap-1">
+                          <Zap className="h-3 w-3" /> +{pkg.bonus_amount} bonus
+                        </div>
                       )}
                     </div>
-                    <div className="text-sm text-muted-foreground">${pkg.price.toFixed(2)}</div>
-                  </CardContent>
+                    {selectedPackageId === pkg.id && (
+                      <div className="absolute top-4 right-4">
+                        <Check className="h-5 w-5 text-primary" />
+                      </div>
+                    )}
+                  </div>
                 </Card>
               ))}
             </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              No packages available at the moment.
+            </div>
           )}
         </div>
-
+        
         <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => setOpen(false)}
-            disabled={processing}
-          >
+          <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button 
             onClick={handlePurchase} 
-            disabled={!selectedPackage || processing}
+            disabled={!selectedPackageId || isProcessing}
           >
-            {processing ? 'Processing...' : 'Purchase'}
+            {isProcessing ? 'Processing...' : 'Purchase'}
           </Button>
         </DialogFooter>
       </DialogContent>

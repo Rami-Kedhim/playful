@@ -1,70 +1,82 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { useSolanaWallet } from '@/hooks/useSolanaWallet';
+import { ExternalLink, Loader2, LogOut, Shield } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const WalletConnect = () => {
-  const [connecting, setConnecting] = useState(false);
-  const [connected, setConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  
-  const connectWallet = async () => {
-    try {
-      setConnecting(true);
-      
-      // This would integrate with Solana wallet adapter in a real app
-      // For now, simulate a wallet connection after a delay
-      setTimeout(() => {
-        // Generate a mock wallet address
-        const mockAddress = "8xJBr..." + Math.random().toString(16).slice(2, 6);
-        setWalletAddress(mockAddress);
-        setConnected(true);
-        setConnecting(false);
-        
-        toast({
-          title: "Wallet connected",
-          description: `Connected to ${mockAddress}`,
-        });
-      }, 1500);
-    } catch (error: any) {
-      console.error("Error connecting wallet:", error);
-      toast({
-        title: "Connection failed",
-        description: error.message || "Could not connect to wallet",
-        variant: "destructive",
-      });
-      setConnecting(false);
-    }
+  const { walletAddress, isConnected, isConnecting, connectWallet, disconnectWallet } = useSolanaWallet();
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Format address for display
+  const displayAddress = walletAddress && !isHovered 
+    ? `${walletAddress.substring(0, 4)}...${walletAddress.substring(walletAddress.length - 4)}` 
+    : walletAddress;
+
+  // Handle connection
+  const handleConnect = () => {
+    connectWallet();
   };
-  
-  const disconnectWallet = () => {
-    setWalletAddress(null);
-    setConnected(false);
-    
-    toast({
-      title: "Wallet disconnected",
-      description: "Your wallet has been disconnected",
-    });
+
+  // Format address for explorer URL
+  const getExplorerUrl = (address: string) => {
+    return `https://explorer.iota.org/mainnet/addr/${address}`;
   };
-  
+
   return (
-    <Button
-      variant={connected ? "outline" : "default"}
-      onClick={connected ? disconnectWallet : connectWallet}
-      disabled={connecting}
-    >
-      {connecting ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Connecting...
-        </>
-      ) : connected ? (
-        "Disconnect"
+    <>
+      {isConnected ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="font-mono"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              <Shield className="mr-2 h-4 w-4" />
+              {displayAddress}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => window.open(getExplorerUrl(walletAddress!), '_blank')}>
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View on Explorer
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={disconnectWallet}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Disconnect
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : (
-        "Connect"
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleConnect} 
+          disabled={isConnecting}
+        >
+          {isConnecting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              <Shield className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </>
+          )}
+        </Button>
       )}
-    </Button>
+    </>
   );
 };
 
