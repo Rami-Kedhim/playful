@@ -55,6 +55,7 @@ export interface UserProfile {
   gender?: DatabaseGender;
   dateOfBirth?: string;
   location?: string;
+  sexual_orientation?: string;
   isVerified?: boolean;
   is_verified?: boolean; // Adding this to support both naming conventions
   membership?: {

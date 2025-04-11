@@ -8,7 +8,7 @@ export const profileFormSchema = z.object({
     .max(30, "Username must be less than 30 characters"),
   full_name: z.string().max(100, "Full name must be less than 100 characters").optional(),
   bio: z.string().max(500, "Bio must be less than 500 characters").optional(),
-  gender: z.enum(["male", "female", "non-binary", "transgender", "other", "prefer-not-to-say"] as const).optional(),
+  gender: z.enum(["male", "female", "non-binary", "other", "trans"] as const).optional(),
   sexual_orientation: z.string().optional(),
   location: z.string().max(100, "Location must be less than 100 characters").optional(),
   avatar_url: z.string().optional(),

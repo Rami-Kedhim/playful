@@ -36,14 +36,8 @@ export const useProfileManagement = () => {
       // Map extended gender values to supported DatabaseGender values
       if (profileData.gender) {
         const gender = profileData.gender.toString();
-        if (gender === 'transgender' || gender === 'non-binary' || gender === 'prefer-not-to-say') {
-          // Map these values to 'other' which is a valid DatabaseGender
-          processedData.gender = 'other' as DatabaseGender;
-        } else if (['male', 'female', 'other'].includes(gender)) {
-          // These values are already valid DatabaseGender types
-          processedData.gender = gender as DatabaseGender;
-        } else {
-          // Default fallback
+        if (!['male', 'female', 'other', 'trans', 'non-binary'].includes(gender)) {
+          // Default fallback for any unsupported values
           processedData.gender = 'other' as DatabaseGender;
         }
       }
