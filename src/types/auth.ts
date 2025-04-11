@@ -2,10 +2,10 @@
 // Auth types for the application
 
 // Type for user roles in the application
-export type UserRole = 'user' | 'moderator' | 'admin' | 'escort' | 'creator' | string;
+export type UserRole = 'client' | 'escort' | 'user' | 'moderator' | 'admin' | 'creator' | string;
 
 // Type for gender in the database
-export type DatabaseGender = 'male' | 'female' | 'other';
+export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';
 
 // Type for the authentication result
 export interface AuthResult {
@@ -24,6 +24,16 @@ export interface AuthUser {
   isVerified?: boolean;
   role?: UserRole;
   avatarUrl?: string;
+  // User profile data for onboarding
+  displayName?: string;
+  bio?: string;
+  location?: string;
+  preferences?: any;
+  profileComplete?: boolean;
+  profileCompleteness?: number;
+  isCreator?: boolean;
+  isCouple?: boolean;
+  isLGBTQ?: boolean;
   // Supabase User properties
   app_metadata: Record<string, any>;
   user_metadata: Record<string, any>;
@@ -80,7 +90,7 @@ export interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (email: string, password: string, username?: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<boolean>; // Add this line
+  resetPassword: (email: string) => Promise<boolean>; 
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
   updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
   error: string | null;

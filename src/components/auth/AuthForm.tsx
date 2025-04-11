@@ -14,7 +14,7 @@ import ForgotPasswordForm from "./ForgotPasswordForm";
 
 interface AuthFormProps {
   onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (email: string, password: string, username: string) => Promise<void>;
+  onRegister: (email: string, password: string, username: string, isAdult: boolean) => Promise<void>;
   onForgotPassword: (email: string) => Promise<void>;
   isLoading?: boolean;
   error?: string | null;
@@ -57,9 +57,11 @@ const AuthForm: React.FC<AuthFormProps> = ({
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Welcome</CardTitle>
+        <CardTitle>Welcome to UberEscorts</CardTitle>
         <CardDescription>
-          Login or create an account to access exclusive content
+          {activeTab === "login" 
+            ? "Login to access your account and exclusive services" 
+            : "Create an account to join our elite community"}
         </CardDescription>
       </CardHeader>
       <CardContent>

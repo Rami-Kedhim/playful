@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import AuthForm from "@/components/auth/AuthForm";
+import OnboardingFlow from "@/components/auth/OnboardingFlow";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { toast } from 'sonner';
@@ -9,14 +10,20 @@ import { toast } from 'sonner';
 const AuthPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { login, register, isAuthenticated, resetPassword } = useAuth();
+  const { login, register, isAuthenticated, resetPassword, user } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
-  // If already authenticated, redirect to home
+  // If already authenticated and profile complete, redirect to home
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      if (user?.user_metadata?.profileComplete) {
+        navigate('/');
+      } else {
+        // If authenticated but profile not complete, show onboarding
+        setShowOnboarding(true);
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user]);
   
   const handleLogin = async (email: string, password: string) => {
     setIsLoading(true);
@@ -40,7 +47,14 @@ const AuthPage = () => {
     }
   };
   
-  const handleRegister = async (email: string, password: string, username: string) => {
+  const handleRegister = async (email: string, password: string, username: string, isAdult: boolean) => {
+    if (!isAdult) {
+      toast.error("Age verification required", {
+        description: "You must be 21+ to register for this service"
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const result = await register(email, password, username);
@@ -52,6 +66,7 @@ const AuthPage = () => {
         toast.success("Registration successful", {
           description: "Your account has been created!"
         });
+        // Onboarding will be shown automatically due to useEffect
       }
     } catch (error: any) {
       toast.error("Registration error", {
@@ -77,6 +92,14 @@ const AuthPage = () => {
       setIsLoading(false);
     }
   };
+
+  const handleOnboardingComplete = () => {
+    navigate('/');
+  };
+  
+  if (showOnboarding) {
+    return <OnboardingFlow onComplete={handleOnboardingComplete} />;
+  }
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background/80 to-background p-4">
