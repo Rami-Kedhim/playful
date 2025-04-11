@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw } from "lucide-react";
+import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw, Shield } from "lucide-react";
 import UBXBalance from "@/components/profile/settings/UBXBalance";
 import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
 import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
@@ -88,7 +87,7 @@ const UpdatedWallet = () => {
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center text-lg">
                 <WalletIcon className="h-5 w-5 text-primary mr-2" />
-                Fantom Balance
+                IOTA Wallet
               </CardTitle>
               {walletAddress && (
                 <Button 
@@ -110,7 +109,7 @@ const UpdatedWallet = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="text-3xl font-bold">{ftmBalance !== null ? ftmBalance.toFixed(4) : '0.0000'} FTM</div>
+                    <div className="text-3xl font-bold">{ftmBalance !== null ? ftmBalance.toFixed(4) : '0.0000'} MIOTA</div>
                     <p className="text-sm text-muted-foreground mt-1">
                       {ftmPrice && ftmBalance !== null ? (
                         <>≈ ${(ftmBalance * ftmPrice).toFixed(2)} USD</>
@@ -156,9 +155,9 @@ const UpdatedWallet = () => {
               <History className="mr-2 h-4 w-4" />
               UBX Transactions
             </TabsTrigger>
-            <TabsTrigger value="fantom" className="flex items-center">
+            <TabsTrigger value="iota" className="flex items-center">
               <WalletIcon className="mr-2 h-4 w-4" />
-              Fantom Transactions
+              IOTA Transactions
             </TabsTrigger>
             <TabsTrigger value="gifts" className="flex items-center">
               <Gift className="mr-2 h-4 w-4" />
@@ -170,18 +169,18 @@ const UpdatedWallet = () => {
             <UBXTransactionHistory />
           </TabsContent>
           
-          <TabsContent value="fantom" className="mt-6">
+          <TabsContent value="iota" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Fantom Transactions</CardTitle>
-                <CardDescription>Your Fantom blockchain transactions</CardDescription>
+                <CardTitle>IOTA Transactions</CardTitle>
+                <CardDescription>Your private IOTA blockchain transactions</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <WalletIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
+                  <Shield className="h-12 w-12 text-green-500 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Private Transactions</h3>
                   <p className="text-muted-foreground max-w-md">
-                    Fantom transactions are handled securely behind the scenes. You don't need to interact directly with the blockchain.
+                    IOTA transactions are handled securely and privately. Your wallet is never linked to your profile, ensuring maximum privacy.
                   </p>
                 </div>
               </CardContent>
