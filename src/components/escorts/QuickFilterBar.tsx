@@ -18,6 +18,8 @@ interface QuickFilterBarProps {
   onLocationClick?: () => void;
   onShowMoreFilters?: () => void;
   className?: string;
+  ratingMin?: number;
+  setRatingMin?: (rating: number) => void;
 }
 
 /**
@@ -33,7 +35,9 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   location,
   onLocationClick,
   onShowMoreFilters,
-  className
+  className,
+  ratingMin,
+  setRatingMin
 }) => {
   return (
     <Card className={className}>
@@ -68,6 +72,18 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
               >
                 <Clock className="h-4 w-4" />
                 <span>Available Now</span>
+              </Button>
+            )}
+            
+            {setRatingMin && ratingMin !== undefined && (
+              <Button
+                variant={ratingMin > 0 ? "default" : "outline"}
+                size="sm"
+                onClick={() => setRatingMin(ratingMin > 0 ? 0 : 4)}
+                className="flex items-center gap-1"
+              >
+                <Star className="h-4 w-4" />
+                <span>{ratingMin > 0 ? `${ratingMin}+ Stars` : "Any Rating"}</span>
               </Button>
             )}
             

@@ -10,6 +10,8 @@ import AppliedFilters from "@/components/escorts/AppliedFilters";
 import EscortResults from "@/components/escorts/EscortResults";
 import { useEscortFilter } from "@/hooks/useEscortFilter";
 import { Escort } from "@/types/escort";
+import QuickFilterBar from "./QuickFilterBar";
+import FilterSystem from "./FilterSystem";
 
 interface EscortContainerProps {
   escorts: Escort[];
@@ -82,6 +84,22 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
           Filters
         </Button>
       </div>
+      
+      {/* Quick filter bar for mobile and desktop */}
+      <QuickFilterBar
+        serviceTypeFilter={serviceTypeFilter}
+        setServiceTypeFilter={setServiceTypeFilter}
+        verifiedOnly={verifiedOnly}
+        setVerifiedOnly={setVerifiedOnly}
+        availableNow={availableNow}
+        setAvailableNow={setAvailableNow}
+        location={locationFilter}
+        onLocationClick={() => setShowFilters(true)}
+        onShowMoreFilters={() => setShowFilters(true)}
+        className="mb-6 md:mb-8"
+        ratingMin={ratingMin}
+        setRatingMin={setRatingMin}
+      />
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="h-fit sticky top-20 hidden md:block">
