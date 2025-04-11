@@ -1,41 +1,42 @@
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import SearchFilter from "./SearchFilter";
-import LocationFilter from "./LocationFilter";
-import PriceRangeFilter from "./PriceRangeFilter";
-import CheckboxGroup from "./CheckboxGroup";
-import ServiceTypeRadioFilter from "./ServiceTypeRadioFilter";
-import AgeRangeFilter from "./AgeRangeFilter";
-import RatingFilter from "./RatingFilter";
-import AvailabilityFilter from "./AvailabilityFilter";
-import FilterActions from "./FilterActions";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Search } from "lucide-react";
+import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import ServiceTypeRadioGroup from './ServiceTypeRadioGroup';
 
 interface MobileFilterContentProps {
   searchQuery: string;
-  setSearchQuery: (value: string) => void;
+  setSearchQuery: (query: string) => void;
   location: string;
-  setLocation: (value: string) => void;
-  priceRange: number[];
-  setPriceRange: (value: number[]) => void;
+  setLocation: (location: string) => void;
+  priceRange: [number, number];
+  setPriceRange: (range: number[]) => void;
   verifiedOnly: boolean;
-  setVerifiedOnly: (value: boolean) => void;
+  setVerifiedOnly: (verified: boolean) => void;
   selectedServices: string[];
   toggleService: (service: string) => void;
   services: string[];
   clearFilters: () => void;
-  setShowFilters: (value: boolean) => void;
+  setShowFilters: (show: boolean) => void;
   selectedGenders: string[];
   toggleGender: (gender: string) => void;
   selectedOrientations: string[];
   toggleOrientation: (orientation: string) => void;
   ageRange: [number, number];
-  setAgeRange: (value: number[]) => void;
+  setAgeRange: (range: number[]) => void;
   ratingMin: number;
-  setRatingMin: (value: number) => void;
+  setRatingMin: (rating: number) => void;
   availableNow: boolean;
-  setAvailableNow: (value: boolean) => void;
-  serviceTypeFilter: "in-person" | "virtual" | "both" | "";
-  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
+  setAvailableNow: (available: boolean) => void;
+  serviceTypeFilter: ServiceTypeFilter;
+  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
 }
 
 const MobileFilterContent = ({
@@ -47,6 +48,9 @@ const MobileFilterContent = ({
   setPriceRange,
   verifiedOnly,
   setVerifiedOnly,
+  selectedServices,
+  toggleService,
+  services,
   clearFilters,
   setShowFilters,
   selectedGenders,
@@ -62,80 +66,198 @@ const MobileFilterContent = ({
   serviceTypeFilter,
   setServiceTypeFilter
 }: MobileFilterContentProps) => {
-  const genders = ["male", "female", "non-binary", "transgender"];
-  const orientations = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
+  // Common gender options
+  const genderOptions = ["female", "male", "transgender", "non-binary"];
   
-  const applyFilters = () => setShowFilters(false);
-
+  // Common orientation options
+  const orientationOptions = ["straight", "gay", "lesbian", "bisexual", "pansexual"];
+  
+  // Apply filters and close the filter panel
+  const handleApplyFilters = () => {
+    setShowFilters(false);
+  };
+  
   return (
-    <>
-      <ScrollArea className="h-[60vh] pr-4">
-        <div className="space-y-4">
-          <SearchFilter 
-            searchQuery={searchQuery} 
-            setSearchQuery={setSearchQuery} 
-          />
-          
-          <LocationFilter 
-            location={location} 
-            setLocation={setLocation} 
-          />
-          
-          <PriceRangeFilter 
-            priceRange={priceRange} 
-            setPriceRange={setPriceRange} 
-          />
-          
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Service Type</h3>
-            <ServiceTypeRadioFilter
-              serviceTypeFilter={serviceTypeFilter}
-              setServiceTypeFilter={setServiceTypeFilter}
-            />
-          </div>
-          
-          <AgeRangeFilter
-            ageRange={ageRange}
-            setAgeRange={setAgeRange}
-          />
-          
-          <RatingFilter
-            ratingMin={ratingMin}
-            setRatingMin={setRatingMin}
-          />
-          
-          <AvailabilityFilter
-            verifiedOnly={verifiedOnly}
-            setVerifiedOnly={setVerifiedOnly}
-            availableNow={availableNow}
-            setAvailableNow={setAvailableNow}
-          />
-          
-          <CheckboxGroup
-            title="Gender"
-            items={genders}
-            selectedItems={selectedGenders}
-            toggleItem={toggleGender}
-            formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
-            idPrefix="gender-mobile"
-          />
-          
-          <CheckboxGroup
-            title="Sexual Orientation"
-            items={orientations}
-            selectedItems={selectedOrientations}
-            toggleItem={toggleOrientation}
-            formatItem={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
-            idPrefix="orientation-mobile"
+    <div className="space-y-4 py-2">
+      <div className="space-y-2">
+        <Label htmlFor="mobile-search">Search</Label>
+        <div className="relative">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            id="mobile-search"
+            placeholder="Search by name, location..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8"
           />
         </div>
-      </ScrollArea>
+      </div>
       
-      <FilterActions 
-        clearFilters={clearFilters}
-        applyFilters={applyFilters}
-      />
-    </>
+      <div className="space-y-2">
+        <Label htmlFor="mobile-location">Location</Label>
+        <Input
+          id="mobile-location"
+          placeholder="City, Country"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label>Service Type</Label>
+        <ServiceTypeRadioGroup 
+          serviceTypeFilter={serviceTypeFilter}
+          setServiceTypeFilter={setServiceTypeFilter}
+          layout="horizontal"
+          showLabels={true}
+          size="sm"
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="mobile-price-range">Price Range</Label>
+          <span className="text-sm">
+            {priceRange[0]} - {priceRange[1]} LC
+          </span>
+        </div>
+        <Slider
+          id="mobile-price-range"
+          min={0}
+          max={1000}
+          step={10}
+          value={priceRange}
+          onValueChange={setPriceRange}
+        />
+      </div>
+      
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="mobile-verified"
+            checked={verifiedOnly}
+            onCheckedChange={setVerifiedOnly}
+          />
+          <Label htmlFor="mobile-verified">Verified Only</Label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="mobile-available"
+            checked={availableNow}
+            onCheckedChange={setAvailableNow}
+          />
+          <Label htmlFor="mobile-available">Available Now</Label>
+        </div>
+      </div>
+      
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="gender">
+          <AccordionTrigger>Gender</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-2">
+              {genderOptions.map((gender) => (
+                <Button
+                  key={gender}
+                  variant={selectedGenders.includes(gender) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleGender(gender)}
+                  className="justify-start"
+                >
+                  <span className="capitalize">{gender}</span>
+                </Button>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="orientation">
+          <AccordionTrigger>Orientation</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-2">
+              {orientationOptions.map((orientation) => (
+                <Button
+                  key={orientation}
+                  variant={selectedOrientations.includes(orientation) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleOrientation(orientation)}
+                  className="justify-start"
+                >
+                  <span className="capitalize">{orientation}</span>
+                </Button>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="age">
+          <AccordionTrigger>Age Range</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">
+                  {ageRange[0]} - {ageRange[1]} years
+                </span>
+              </div>
+              <Slider
+                min={18}
+                max={99}
+                step={1}
+                value={ageRange}
+                onValueChange={setAgeRange}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="rating">
+          <AccordionTrigger>Minimum Rating</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">
+                  {ratingMin} stars and above
+                </span>
+              </div>
+              <Slider
+                min={0}
+                max={5}
+                step={0.5}
+                value={[ratingMin]}
+                onValueChange={([value]) => setRatingMin(value)}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        <AccordionItem value="services">
+          <AccordionTrigger>Services</AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-wrap gap-2">
+              {services.map((service) => (
+                <Badge
+                  key={service}
+                  variant={selectedServices.includes(service) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => toggleService(service)}
+                >
+                  {service}
+                </Badge>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      
+      <div className="flex justify-between gap-2 pt-4">
+        <Button variant="outline" onClick={clearFilters}>
+          Clear All
+        </Button>
+        <Button onClick={handleApplyFilters}>
+          Apply Filters
+        </Button>
+      </div>
+    </div>
   );
 };
 

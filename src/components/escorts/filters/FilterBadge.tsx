@@ -1,38 +1,50 @@
 
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
-import { ReactNode } from "react";
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FilterBadgeProps {
   label: string;
   onRemove: () => void;
-  variant?: "default" | "secondary" | "outline" | "destructive";
-  className?: string;
-  icon?: ReactNode;
+  icon?: React.ReactNode;
+  variant?: 'default' | 'outline' | 'secondary' | 'destructive';
 }
 
 const FilterBadge = ({ 
   label, 
   onRemove, 
-  variant = "secondary", 
-  className = "",
-  icon 
+  icon,
+  variant = 'default'
 }: FilterBadgeProps) => {
+  const variantClasses = {
+    default: "bg-primary/10 text-primary hover:bg-primary/20 border-primary/20",
+    outline: "bg-background border border-input hover:bg-accent hover:text-accent-foreground",
+    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+    destructive: "bg-destructive/10 text-destructive hover:bg-destructive/20"
+  };
+
   return (
-    <Badge 
-      variant={variant} 
-      className={`flex items-center gap-1 pl-2 pr-1 py-1 ${className}`}
+    <div
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold",
+        "transition-colors border focus:outline-none focus:ring-2",
+        "focus:ring-ring focus:ring-offset-2",
+        variantClasses[variant]
+      )}
     >
-      {icon && <span className="mr-1">{icon}</span>}
+      {icon && (
+        <span className="mr-1 flex items-center justify-center">
+          {icon}
+        </span>
+      )}
       <span>{label}</span>
       <button
         onClick={onRemove}
-        className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20"
+        className="ml-1 rounded-full p-0.5 hover:bg-background/20 transition-colors focus:outline-none"
+        aria-label={`Remove ${label} filter`}
       >
         <X className="h-3 w-3" />
-        <span className="sr-only">Remove {label} filter</span>
       </button>
-    </Badge>
+    </div>
   );
 };
 

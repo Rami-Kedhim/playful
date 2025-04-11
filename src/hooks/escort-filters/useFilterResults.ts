@@ -1,201 +1,228 @@
 
-import { useState, useEffect } from "react";
-import { Escort } from "@/types/escort";
+import { useState, useEffect, useMemo } from 'react';
+import { Escort } from '@/types/escort';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
-interface FilterState {
-  searchQuery: string;
-  location: string;
-  priceRange: [number, number];
-  verifiedOnly: boolean;
-  selectedServices: string[];
-  sortBy: string;
-  selectedGenders: string[];
-  selectedOrientations: string[];
-  ageRange: [number, number];
-  ratingMin: number;
-  availableNow: boolean;
-  serviceTypeFilter: string;
-  currentPage: number;
+// Filter criteria interface
+interface FilterCriteria {
+  searchQuery?: string;
+  location?: string;
+  priceRange?: [number, number];
+  verifiedOnly?: boolean;
+  selectedServices?: string[];
+  selectedGenders?: string[];
+  selectedOrientations?: string[];
+  ageRange?: [number, number];
+  ratingMin?: number;
+  availableNow?: boolean;
+  serviceTypeFilter?: ServiceTypeFilter;
 }
 
+// Sort options
+export type SortOption = 'newest' | 'price-low' | 'price-high' | 'rating' | 'featured';
+
 export const useFilterResults = (
-  escorts: Escort[],
-  filters: FilterState,
+  escorts: Escort[], 
+  filters: FilterCriteria,
   currentPage: number,
-  setCurrentPage: (page: number) => void
+  setCurrentPage: (page: number) => void,
+  itemsPerPage: number = 12
 ) => {
-  const [filteredEscorts, setFilteredEscorts] = useState<Escort[]>([]);
-  const [sortedEscorts, setSortedEscorts] = useState<Escort[]>([]); 
+  const [filteredEscorts, setFilteredEscorts] = useState<Escort[]>(escorts);
+  const [sortedEscorts, setSortedEscorts] = useState<Escort[]>(escorts);
   const [paginatedEscorts, setPaginatedEscorts] = useState<Escort[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isFiltering, setIsFiltering] = useState(false);
-  const pageSize = 12;
   
-  // Apply filters to escorts
+  // Apply filters
   useEffect(() => {
-    // Set filtering state to true when filter operation starts
     setIsFiltering(true);
     
-    // Use timeout to avoid blocking the UI during filtering
-    const filterTimeout = setTimeout(() => {
-      const {
-        searchQuery,
-        location,
-        priceRange,
-        verifiedOnly,
-        selectedServices,
-        selectedGenders,
-        selectedOrientations,
-        ageRange,
-        ratingMin,
-        availableNow,
-        serviceTypeFilter
-      } = filters;
-      
-      let filtered = [...escorts];
-      
-      // Filter by search query
-      if (searchQuery) {
-        filtered = filtered.filter(escort => 
-          escort.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-          escort.bio?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          escort.location?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      
-      // Filter by location
-      if (location) {
-        filtered = filtered.filter(escort => 
-          escort.location?.toLowerCase().includes(location.toLowerCase())
-        );
-      }
-      
-      // Filter by price range
-      filtered = filtered.filter(escort => 
-        escort.price && escort.price >= priceRange[0] && escort.price <= priceRange[1]
-      );
-      
-      // Filter by verified
-      if (verifiedOnly) {
-        filtered = filtered.filter(escort => escort.verified);
-      }
-      
-      // Filter by services - safely handle missing services
-      if (selectedServices.length > 0) {
-        filtered = filtered.filter(escort => {
-          // Handle case where escort has no services
-          if (!escort.services || escort.services.length === 0) {
-            // Consider no services as a mismatch
-            return false;
-          }
-          
-          // Check if any selected service is included in escort's services 
-          // Need to convert both to strings to compare since services might include different types
-          return selectedServices.some(service => 
-            escort.services?.some(escortService => 
-              escortService.toString().toLowerCase() === service.toString().toLowerCase())
-          );
-        });
-      }
-      
-      // Filter by gender
-      if (selectedGenders.length > 0) {
-        filtered = filtered.filter(escort => 
-          escort.gender && selectedGenders.includes(escort.gender)
-        );
-      }
-      
-      // Filter by orientation
-      if (selectedOrientations.length > 0) {
-        filtered = filtered.filter(escort => 
-          escort.sexualOrientation && selectedOrientations.includes(escort.sexualOrientation)
-        );
-      }
-      
-      // Filter by age range (now 21+ years)
-      filtered = filtered.filter(escort => 
-        escort.age >= ageRange[0] && escort.age <= ageRange[1]
-      );
-      
-      // Filter by minimum rating
-      filtered = filtered.filter(escort => 
-        escort.rating >= ratingMin
-      );
-      
-      // Filter by availability now
-      if (availableNow) {
-        filtered = filtered.filter(escort => 
-          escort.availableNow === true
-        );
-      }
-      
-      // Filter by service type - safely handle missing serviceTypes
-      if (serviceTypeFilter === 'in-person') {
-        filtered = filtered.filter(escort => 
-          escort.serviceTypes?.includes('in-person') || 
-          escort.serviceTypes?.includes('both') ||
-          escort.providesInPersonServices === true
-        );
-      } else if (serviceTypeFilter === 'virtual') {
-        filtered = filtered.filter(escort => 
-          escort.serviceTypes?.includes('virtual') || 
-          escort.serviceTypes?.includes('both') || 
-          escort.providesVirtualContent === true
-        );
-      } else if (serviceTypeFilter === 'both') {
-        filtered = filtered.filter(escort => 
-          (escort.serviceTypes?.includes('in-person') || escort.providesInPersonServices === true) && 
-          (escort.serviceTypes?.includes('virtual') || escort.providesVirtualContent === true)
-        );
-      }
-      
-      // Apply sorting
-      let sorted = [...filtered];
-      
-      switch (filters.sortBy) {
-        case 'price-asc':
-          sorted.sort((a, b) => (a.price || 0) - (b.price || 0));
-          break;
-        case 'price-desc':
-          sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
-          break;
-        case 'rating':
-          sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-          break;
-        case 'name':
-          sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-          break;
-        default:
-          // Default sorting (newest/featured)
-          sorted.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
-      }
-      
-      setFilteredEscorts(filtered);
-      setSortedEscorts(sorted);
-      setTotalPages(Math.ceil(filtered.length / pageSize));
-      
-      // Reset to first page when filters change
-      setCurrentPage(1);
-      
-      // Set filtering state to false when filter operation completes
-      setIsFiltering(false);
-    }, 300); // Small delay to show loading state
+    // Reset to first page when filters change
+    setCurrentPage(1);
     
-    return () => clearTimeout(filterTimeout);
+    setTimeout(() => {
+      const results = escorts.filter(escort => {
+        // Filter by search query
+        if (filters.searchQuery && !matchesSearchQuery(escort, filters.searchQuery)) {
+          return false;
+        }
+        
+        // Filter by location
+        if (filters.location && !matchesLocation(escort, filters.location)) {
+          return false;
+        }
+        
+        // Filter by price range
+        if (filters.priceRange && !matchesPriceRange(escort, filters.priceRange)) {
+          return false;
+        }
+        
+        // Filter by verified status
+        if (filters.verifiedOnly && !escort.verified) {
+          return false;
+        }
+        
+        // Filter by services
+        if (filters.selectedServices && filters.selectedServices.length > 0 && !matchesServices(escort, filters.selectedServices)) {
+          return false;
+        }
+        
+        // Filter by gender
+        if (filters.selectedGenders && filters.selectedGenders.length > 0 && !matchesGender(escort, filters.selectedGenders)) {
+          return false;
+        }
+        
+        // Filter by orientation
+        if (filters.selectedOrientations && filters.selectedOrientations.length > 0 && !matchesOrientation(escort, filters.selectedOrientations)) {
+          return false;
+        }
+        
+        // Filter by age range
+        if (filters.ageRange && !matchesAgeRange(escort, filters.ageRange)) {
+          return false;
+        }
+        
+        // Filter by rating
+        if (filters.ratingMin && !matchesRating(escort, filters.ratingMin)) {
+          return false;
+        }
+        
+        // Filter by availability
+        if (filters.availableNow && !escort.availableNow) {
+          return false;
+        }
+        
+        // Filter by service type
+        if (filters.serviceTypeFilter && !matchesServiceType(escort, filters.serviceTypeFilter)) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      setFilteredEscorts(results);
+      setIsFiltering(false);
+    }, 100); // Short timeout to prevent UI freezing with large datasets
   }, [escorts, filters, setCurrentPage]);
   
-  // Apply pagination
+  // Sort escorts
   useEffect(() => {
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
+    const sortResults = [...filteredEscorts];
+    
+    switch (filters.sortBy) {
+      case 'price-low':
+        sortResults.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case 'price-high':
+        sortResults.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case 'rating':
+        sortResults.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'featured':
+        sortResults.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+        break;
+      default:
+        // 'newest' is default - no sort needed if using creation date
+        break;
+    }
+    
+    setSortedEscorts(sortResults);
+  }, [filteredEscorts, filters.sortBy]);
+  
+  // Paginate escorts
+  useEffect(() => {
+    const total = Math.ceil(sortedEscorts.length / itemsPerPage);
+    setTotalPages(total || 1);
+    
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    
     setPaginatedEscorts(sortedEscorts.slice(start, end));
-  }, [sortedEscorts, currentPage]);
+  }, [sortedEscorts, currentPage, itemsPerPage]);
+  
+  // Calculate total after applying filters
+  const totalResults = useMemo(() => filteredEscorts.length, [filteredEscorts]);
   
   return {
     filteredEscorts,
     sortedEscorts,
     paginatedEscorts,
     totalPages,
-    isFiltering
+    totalResults,
+    isFiltering,
   };
 };
+
+// Helper functions for filtering
+const matchesSearchQuery = (escort: Escort, query: string): boolean => {
+  const searchLower = query.toLowerCase();
+  return (
+    (escort.name?.toLowerCase().includes(searchLower)) ||
+    (escort.location?.toLowerCase().includes(searchLower)) ||
+    (escort.description?.toLowerCase().includes(searchLower)) ||
+    (escort.bio?.toLowerCase().includes(searchLower)) ||
+    (escort.services?.some(service => service.toLowerCase().includes(searchLower))) ||
+    (escort.tags?.some(tag => tag.toLowerCase().includes(searchLower)))
+  );
+};
+
+const matchesLocation = (escort: Escort, location: string): boolean => {
+  return escort.location?.toLowerCase().includes(location.toLowerCase());
+};
+
+const matchesPriceRange = (escort: Escort, range: [number, number]): boolean => {
+  const price = escort.price || 0;
+  return price >= range[0] && price <= range[1];
+};
+
+const matchesServices = (escort: Escort, services: string[]): boolean => {
+  return services.some(service => 
+    escort.services?.includes(service as any) || 
+    escort.tags?.includes(service)
+  );
+};
+
+const matchesGender = (escort: Escort, genders: string[]): boolean => {
+  return escort.gender ? genders.includes(escort.gender.toLowerCase()) : false;
+};
+
+const matchesOrientation = (escort: Escort, orientations: string[]): boolean => {
+  const escortOrientation = escort.orientation || escort.sexualOrientation;
+  return escortOrientation ? orientations.includes(escortOrientation.toLowerCase()) : false;
+};
+
+const matchesAgeRange = (escort: Escort, range: [number, number]): boolean => {
+  return escort.age >= range[0] && escort.age <= range[1];
+};
+
+const matchesRating = (escort: Escort, min: number): boolean => {
+  return (escort.rating || 0) >= min;
+};
+
+const matchesServiceType = (escort: Escort, type: ServiceTypeFilter): boolean => {
+  if (!type) return true;
+  
+  // Check for service type fields
+  if (type === "in-person") {
+    return escort.providesInPersonServices === true;
+  } else if (type === "virtual") {
+    return escort.providesVirtualContent === true;
+  } else if (type === "both") {
+    return escort.providesInPersonServices === true && escort.providesVirtualContent === true;
+  }
+
+  // Fallback to service arrays
+  if (Array.isArray(escort.serviceTypes)) {
+    return escort.serviceTypes.includes(type);
+  }
+  
+  if (Array.isArray(escort.services)) {
+    return escort.services.includes(type as any);
+  }
+  
+  return false;
+};
+
+export default useFilterResults;
