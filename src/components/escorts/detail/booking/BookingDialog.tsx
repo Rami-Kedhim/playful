@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import ServiceTypeBadgeLabel from '../../filters/ServiceTypeBadgeLabel';
 
 interface BookingDialogProps {
   escort: Escort;
@@ -27,10 +27,21 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
   const [message, setMessage] = useState<string>("");
   const { toast } = useToast();
   
-  // Generate available time slots
+  const getServiceType = () => {
+    if (escort.providesInPersonServices && escort.providesVirtualContent) {
+      return "both";
+    } else if (escort.providesInPersonServices) {
+      return "in-person";
+    } else if (escort.providesVirtualContent) {
+      return "virtual";
+    }
+    return "";
+  };
+  
+  const serviceType = getServiceType();
+  
   const availableTimeSlots = ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"];
   
-  // Calculate pricing based on duration
   const getPriceForDuration = (durationType: string): number => {
     const basePrice = escort.price || 0;
     
@@ -68,7 +79,6 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
       return;
     }
     
-    // Here you would submit the booking
     toast({
       title: "Booking Submitted",
       description: `Your booking with ${escort.name} has been scheduled for ${format(date, "PP")} at ${timeSlot}`,
@@ -78,7 +88,6 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
     onClose();
   };
   
-  // Reset form when dialog closes
   const handleDialogClose = () => {
     setDate(undefined);
     setTimeSlot(null);
@@ -91,7 +100,10 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
     <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="max-w-md sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Book an Appointment</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            Book an Appointment
+            {serviceType && <ServiceTypeBadgeLabel type={serviceType} />}
+          </DialogTitle>
           <DialogDescription>
             Schedule time with {escort.name}. Please select your preferred date and time.
           </DialogDescription>
@@ -107,7 +119,6 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
                 onSelect={setDate}
                 className="border rounded-md pointer-events-auto"
                 disabled={(date) => {
-                  // Disable past dates
                   return date < new Date();
                 }}
               />
@@ -193,13 +204,15 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
                   <div>{escort.location}</div>
                 </div>
                 
-                <div className="flex justify-between font-medium">
-                  <div className="flex items-center">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Total Price
+                {escort.price && (
+                  <div className="flex justify-between font-medium">
+                    <div className="flex items-center">
+                      <DollarSign className="h-4 w-4 mr-2" />
+                      Total Price
+                    </div>
+                    <div>${getPriceForDuration(duration)} LC</div>
                   </div>
-                  <div>{getPriceForDuration(duration)} LC</div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>

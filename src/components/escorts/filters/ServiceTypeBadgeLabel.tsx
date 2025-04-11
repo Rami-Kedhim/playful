@@ -1,78 +1,78 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { VideoIcon, Users, Radio, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Globe, Users, Map } from 'lucide-react';
 
+// Define the possible service type filter values
 export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
 
-export interface ServiceTypeInfo {
-  icon: React.ReactNode;
+// Information about each service type for consistent display
+export const serviceTypeInfoMap: Record<string, {
   label: string;
-  bgColor: string;
-  textColor: string;
-  // Add the missing properties
   filterLabel: string;
+  icon: React.ReactNode;
+  bgColor: string;
   description: string;
-}
-
-// Map of service types to their display information
-export const serviceTypeInfoMap: Record<ServiceTypeFilter, ServiceTypeInfo> = {
+}> = {
   "": {
-    icon: <CheckCircle className="h-3.5 w-3.5" />,
-    label: "All Services",
+    label: "Any",
+    filterLabel: "Any Service Type",
+    icon: <Globe className="h-3 w-3" />,
     bgColor: "bg-gray-100",
-    textColor: "text-gray-700",
-    filterLabel: "All Services",
-    description: "Both in-person and virtual services"
+    description: "All service types"
   },
   "in-person": {
-    icon: <Users className="h-3.5 w-3.5" />,
     label: "In Person",
+    filterLabel: "In-Person Only",
+    icon: <Map className="h-3 w-3" />,
     bgColor: "bg-blue-100",
-    textColor: "text-blue-700",
-    filterLabel: "In-person",
-    description: "Meet face-to-face for services"
+    description: "Physical meetings only"
   },
   "virtual": {
-    icon: <VideoIcon className="h-3.5 w-3.5" />,
     label: "Virtual",
+    filterLabel: "Virtual Only",
+    icon: <Globe className="h-3 w-3" />,
     bgColor: "bg-purple-100",
-    textColor: "text-purple-700",
-    filterLabel: "Virtual",
-    description: "Video calls and online experiences"
+    description: "Online services only"
   },
   "both": {
-    icon: <Radio className="h-3.5 w-3.5" />,
-    label: "Both Services",
+    label: "Both",
+    filterLabel: "Both Services",
+    icon: <Users className="h-3 w-3" />,
     bgColor: "bg-green-100",
-    textColor: "text-green-700",
-    filterLabel: "Both",
-    description: "Provides both in-person and virtual services"
+    description: "Both in-person and virtual"
   }
-};
-
-export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => {
-  return serviceTypeInfoMap[type] || serviceTypeInfoMap[""];
-};
-
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  return serviceTypeInfoMap[type]?.label || "All Services";
 };
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
+  showLabel?: boolean;
 }
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type }) => {
-  const { icon, label, bgColor, textColor } = getServiceTypeInfo(type);
+/**
+ * A badge component that displays the service type with an icon
+ */
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
+  type, 
+  showLabel = true 
+}) => {
+  if (!type) return null;
+  
+  const info = serviceTypeInfoMap[type];
+  
+  if (!info) return null;
   
   return (
     <Badge 
       variant="outline" 
-      className={`flex items-center gap-1 font-normal ${bgColor} ${textColor} border-0`}
+      className={`${info.bgColor} border-0 text-gray-800 flex items-center gap-1 whitespace-nowrap`}
     >
-      {icon}
-      <span>{label}</span>
+      <span className="flex items-center justify-center">
+        {info.icon}
+      </span>
+      {showLabel && (
+        <span>{info.label}</span>
+      )}
     </Badge>
   );
 };

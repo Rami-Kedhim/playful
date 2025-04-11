@@ -8,6 +8,7 @@ import BookingDialog from './BookingDialog';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import ServiceTypeBadgeLabel from '../../filters/ServiceTypeBadgeLabel';
 
 interface BookingRequestCardProps {
   escort: Escort;
@@ -29,6 +30,20 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({ escort }) => {
     return availabilityArray.join(", ");
   };
   
+  // Determine service type
+  const getServiceType = () => {
+    if (escort.providesInPersonServices && escort.providesVirtualContent) {
+      return "both";
+    } else if (escort.providesInPersonServices) {
+      return "in-person";
+    } else if (escort.providesVirtualContent) {
+      return "virtual";
+    }
+    return "";
+  };
+  
+  const serviceType = getServiceType();
+  
   const handleBookNowClick = () => {
     if (!isAuthenticated) {
       navigate('/auth', { state: { from: `/escorts/${escort.id}`, action: 'booking' } });
@@ -42,7 +57,10 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({ escort }) => {
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Book an Appointment</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Book an Appointment</CardTitle>
+            {serviceType && <ServiceTypeBadgeLabel type={serviceType} />}
+          </div>
           <CardDescription>Schedule time with {escort.name}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

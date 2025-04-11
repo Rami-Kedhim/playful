@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import EscortCard from "@/components/cards/EscortCard";
+import EscortCard from "@/components/escorts/EscortCard";
 import { Escort } from "@/types/escort";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BadgeCheck, Calendar, MapPin } from "lucide-react";
@@ -126,21 +126,9 @@ const EscortResults = ({
         {escorts.map((escort) => (
           <EscortCard
             key={escort.id}
-            id={escort.id}
-            name={escort.name || "Unknown"}
-            age={escort.age || 0}
-            location={escort.location || "Unknown location"}
-            rating={escort.rating || 0}
-            reviews={escort.reviews || 0}
-            tags={escort.tags || []}
-            imageUrl={escort.imageUrl || escort.avatar_url || "/placeholder-escort.jpg"}
-            price={escort.price || 0}
-            verified={escort.verified || false}
-            gender={escort.gender || ""}
-            sexualOrientation={escort.sexualOrientation}
-            availableNow={escort.availableNow || false}
-            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
-            responseRate={escort.responseRate}
+            escort={escort}
+            className=""
+            featured={escort.featured}
           />
         ))}
       </div>

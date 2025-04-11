@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useNavigate } from 'react-router-dom';
 import BookingDialog from './BookingDialog';
 import { Escort } from '@/types/escort';
+import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
 
 interface BookingButtonProps {
   escort: Escort;
@@ -24,6 +25,20 @@ const BookingButton: React.FC<BookingButtonProps> = ({
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
+  // Determine if booking is possible based on service type
+  const getServiceType = (): ServiceTypeFilter => {
+    if (escort.providesInPersonServices && escort.providesVirtualContent) {
+      return "both";
+    } else if (escort.providesInPersonServices) {
+      return "in-person";
+    } else if (escort.providesVirtualContent) {
+      return "virtual";
+    }
+    return "";
+  };
+  
+  const canBook = getServiceType() !== "";
+  
   const handleBookingClick = () => {
     if (!isAuthenticated) {
       navigate('/auth', { state: { from: `/escorts/${escort.id}`, action: 'booking' } });
@@ -37,6 +52,8 @@ const BookingButton: React.FC<BookingButtonProps> = ({
     // Additional actions after successful booking can be added here
     console.log('Booking successful');
   };
+  
+  if (!canBook) return null;
   
   return (
     <>
