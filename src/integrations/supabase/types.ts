@@ -1386,7 +1386,7 @@ export type Database = {
             foreignKeyName: "content_access_records_payment_transaction_id_fkey"
             columns: ["payment_transaction_id"]
             isOneToOne: false
-            referencedRelation: "lucoin_transactions"
+            referencedRelation: "ubx_transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -2528,176 +2528,6 @@ export type Database = {
           },
         ]
       }
-      lucoin_package_options: {
-        Row: {
-          amount: number
-          bonus_amount: number | null
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          is_featured: boolean | null
-          name: string
-          price_sol: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          amount: number
-          bonus_amount?: number | null
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          name: string
-          price_sol?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          amount?: number
-          bonus_amount?: number | null
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          name?: string
-          price_sol?: number | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      lucoin_packages: {
-        Row: {
-          amount: number
-          bonus_amount: number | null
-          created_at: string | null
-          currency: string
-          id: string
-          is_active: boolean | null
-          is_featured: boolean | null
-          name: string
-          price: number
-          updated_at: string | null
-        }
-        Insert: {
-          amount: number
-          bonus_amount?: number | null
-          created_at?: string | null
-          currency?: string
-          id?: string
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          name: string
-          price: number
-          updated_at?: string | null
-        }
-        Update: {
-          amount?: number
-          bonus_amount?: number | null
-          created_at?: string | null
-          currency?: string
-          id?: string
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          name?: string
-          price?: number
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      lucoin_stats: {
-        Row: {
-          created_at: string | null
-          stat_date: string
-          total_recharged: number | null
-          total_retained: number | null
-          total_spent: number | null
-          total_users_active: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          stat_date: string
-          total_recharged?: number | null
-          total_retained?: number | null
-          total_spent?: number | null
-          total_users_active?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          stat_date?: string
-          total_recharged?: number | null
-          total_retained?: number | null
-          total_spent?: number | null
-          total_users_active?: number | null
-        }
-        Relationships: []
-      }
-      lucoin_transactions: {
-        Row: {
-          amount: number
-          created_at: string
-          description: string | null
-          id: string
-          metadata: Json | null
-          status: string
-          transaction_type: string
-          user_id: string
-        }
-        Insert: {
-          amount: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          transaction_type: string
-          user_id: string
-        }
-        Update: {
-          amount?: number
-          created_at?: string
-          description?: string | null
-          id?: string
-          metadata?: Json | null
-          status?: string
-          transaction_type?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lucoin_transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lucoin_wallets: {
-        Row: {
-          address: string
-          balance: number
-          created_at: string | null
-          id: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          address: string
-          balance?: number
-          created_at?: string | null
-          id?: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          address?: string
-          balance?: number
-          created_at?: string | null
-          id?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       matches: {
         Row: {
           created_at: string
@@ -3686,7 +3516,6 @@ export type Database = {
           last_verification_request: string | null
           location: string | null
           looking_for: string[] | null
-          lucoin_balance: number
           max_stream_quality: string | null
           measurements: Json | null
           meta_description: string | null
@@ -3736,6 +3565,7 @@ export type Database = {
           terms_accepted_at: string | null
           timezone: string | null
           total_earnings: number | null
+          ubx_balance: number
           username: string | null
           verification_date: string | null
           verification_documents: Json | null
@@ -3801,7 +3631,6 @@ export type Database = {
           last_verification_request?: string | null
           location?: string | null
           looking_for?: string[] | null
-          lucoin_balance?: number
           max_stream_quality?: string | null
           measurements?: Json | null
           meta_description?: string | null
@@ -3851,6 +3680,7 @@ export type Database = {
           terms_accepted_at?: string | null
           timezone?: string | null
           total_earnings?: number | null
+          ubx_balance?: number
           username?: string | null
           verification_date?: string | null
           verification_documents?: Json | null
@@ -3918,7 +3748,6 @@ export type Database = {
           last_verification_request?: string | null
           location?: string | null
           looking_for?: string[] | null
-          lucoin_balance?: number
           max_stream_quality?: string | null
           measurements?: Json | null
           meta_description?: string | null
@@ -3968,6 +3797,7 @@ export type Database = {
           terms_accepted_at?: string | null
           timezone?: string | null
           total_earnings?: number | null
+          ubx_balance?: number
           username?: string | null
           verification_date?: string | null
           verification_documents?: Json | null
@@ -4991,6 +4821,176 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ubx_package_options: {
+        Row: {
+          amount: number
+          bonus_amount: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          price_sol: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          price_sol?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          price_sol?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ubx_packages: {
+        Row: {
+          amount: number
+          bonus_amount: number | null
+          created_at: string | null
+          currency: string
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          price: number
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          price: number
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          bonus_amount?: number | null
+          created_at?: string | null
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          price?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      ubx_stats: {
+        Row: {
+          created_at: string | null
+          stat_date: string
+          total_recharged: number | null
+          total_retained: number | null
+          total_spent: number | null
+          total_users_active: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          stat_date: string
+          total_recharged?: number | null
+          total_retained?: number | null
+          total_spent?: number | null
+          total_users_active?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          stat_date?: string
+          total_recharged?: number | null
+          total_retained?: number | null
+          total_spent?: number | null
+          total_users_active?: number | null
+        }
+        Relationships: []
+      }
+      ubx_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          status: string
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lucoin_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ubx_wallets: {
+        Row: {
+          address: string
+          balance: number
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address: string
+          balance?: number
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string
+          balance?: number
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_avatars: {
         Row: {

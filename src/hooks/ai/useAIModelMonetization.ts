@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/hooks/auth";
-import { useLucoins } from "@/hooks/useLucoins";
+import { useUBX } from "@/hooks/useUBX";
 import { AIProfile } from "@/types/ai-profile";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,7 +28,7 @@ export function useAIModelMonetization() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { processLucoinTransaction } = useLucoins();
+  const { processTransaction } = useUBX();
 
   const purchaseAIContent = async (contentId: string, profileId: string, price: number): Promise<boolean> => {
     if (!user) {
@@ -65,8 +65,8 @@ export function useAIModelMonetization() {
         return true;
       }
       
-      // Process payment with Lucoins
-      const success = await processLucoinTransaction({
+      // Process payment with UBX
+      const success = await processTransaction({
         amount: -price, // Negative as user is spending
         transactionType: 'ai_content_purchase',
         description: `Purchase AI content (${contentId})`,
@@ -131,8 +131,8 @@ export function useAIModelMonetization() {
     setError(null);
 
     try {
-      // Process payment with Lucoins
-      const success = await processLucoinTransaction({
+      // Process payment with UBX
+      const success = await processTransaction({
         amount: -amount, // Negative as user is spending
         transactionType: 'ai_gift',
         description: `Gift for AI profile (${profileId})`,
@@ -197,8 +197,8 @@ export function useAIModelMonetization() {
     setError(null);
 
     try {
-      // Process payment with Lucoins
-      const success = await processLucoinTransaction({
+      // Process payment with UBX
+      const success = await processTransaction({
         amount: -amount, // Negative as user is spending
         transactionType: 'ai_boost',
         description: `Boost for AI profile (${profileId})`,

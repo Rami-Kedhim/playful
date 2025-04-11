@@ -59,7 +59,7 @@ export const processUBXTransaction = async (params: TransactionParams): Promise<
 export const getUBXTransactionHistory = async (userId: string): Promise<any[]> => {
   try {
     const { data, error } = await supabase
-      .from('lucoin_transactions')
+      .from('ubx_transactions')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });

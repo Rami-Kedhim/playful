@@ -25,7 +25,7 @@ interface BoostManagerContainerProps {
   profileCreatedDate: Date;
   country: string;
   role: 'verified' | 'regular' | 'AI';
-  lucoinBalance: number;
+  ubxBalance: number;
 }
 
 const BoostManagerContainer = ({
@@ -36,7 +36,7 @@ const BoostManagerContainer = ({
   profileCreatedDate,
   country,
   role,
-  lucoinBalance
+  ubxBalance
 }: BoostManagerContainerProps) => {
   
   const {
@@ -158,7 +158,7 @@ const BoostManagerContainer = ({
         rating={rating}
         country={country}
         role={role}
-        lucoinBalance={lucoinBalance}
+        ubxBalance={ubxBalance}
         boostPackages={boostPackages}
         selectedPackage={selectedPackage}
         onSelectPackage={handlePackageSelect}

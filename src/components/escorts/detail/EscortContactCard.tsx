@@ -119,7 +119,7 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
         
         {(!isBookingAvailable || !isMessagingAvailable) && (
           <div className="text-xs text-center text-muted-foreground pt-1">
-            Insufficient Lucoins in your wallet
+            Insufficient UBX in your wallet
           </div>
         )}
         

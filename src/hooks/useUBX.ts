@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { processUBXTransaction, TransactionParams } from '@/services/ubxTransactionService';
@@ -48,7 +49,7 @@ export const useUBX = (): UBXHookReturn => {
     try {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('lucoin_balance')
+        .select('ubx_balance')
         .eq('id', user.id)
         .single();
       
@@ -57,7 +58,7 @@ export const useUBX = (): UBXHookReturn => {
         return null;
       }
       
-      const currentBalance = profileData?.lucoin_balance || 0;
+      const currentBalance = profileData?.ubx_balance || 0;
       setBalance(currentBalance);
       return currentBalance;
     } catch (err) {
@@ -132,7 +133,7 @@ export const useUBX = (): UBXHookReturn => {
       
       // Try to fetch from database first
       const { data: packagesData, error: packagesError } = await supabase
-        .from('lucoin_package_options')
+        .from('ubx_package_options')
         .select('*')
         .eq('is_active', true)
         .order('amount', { ascending: true });

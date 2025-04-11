@@ -51,7 +51,7 @@ serve(async (req) => {
     if (isDebit) {
       const { data: userProfile, error: profileError } = await supabaseClient
         .from('profiles')
-        .select('lucoin_balance')
+        .select('ubx_balance')
         .eq('id', user_id)
         .single();
       
@@ -66,11 +66,11 @@ serve(async (req) => {
       }
       
       // Check if user has sufficient balance
-      if (userProfile.lucoin_balance < Math.abs(processAmount)) {
+      if (userProfile.ubx_balance < Math.abs(processAmount)) {
         return new Response(
           JSON.stringify({ 
             error: 'Insufficient balance', 
-            current_balance: userProfile.lucoin_balance, 
+            current_balance: userProfile.ubx_balance, 
             required: Math.abs(processAmount) 
           }),
           { 
@@ -85,7 +85,7 @@ serve(async (req) => {
     const { error: updateError } = await supabaseClient
       .from('profiles')
       .update({ 
-        lucoin_balance: supabaseClient.rpc('increment_balance', { 
+        ubx_balance: supabaseClient.rpc('increment_balance', { 
           user_id, 
           amount: processAmount 
         })
@@ -102,9 +102,9 @@ serve(async (req) => {
       );
     }
     
-    // 3. Record the transaction in lucoin_transactions
+    // 3. Record the transaction in ubx_transactions
     const { error: transactionError } = await supabaseClient
-      .from('lucoin_transactions')
+      .from('ubx_transactions')
       .insert({
         user_id,
         amount: processAmount,
@@ -121,7 +121,7 @@ serve(async (req) => {
     // 4. Get the updated balance
     const { data: updatedProfile } = await supabaseClient
       .from('profiles')
-      .select('lucoin_balance')
+      .select('ubx_balance')
       .eq('id', user_id)
       .single();
     
@@ -130,7 +130,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Transaction processed successfully',
-        new_balance: updatedProfile?.lucoin_balance || 0
+        new_balance: updatedProfile?.ubx_balance || 0
       }),
       { 
         status: 200, 

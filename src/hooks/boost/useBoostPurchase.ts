@@ -2,35 +2,35 @@
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { BoostPackage } from '@/types/boost';
-import { useLucoins } from '@/hooks/useLucoins';
+import { useUBX } from '@/hooks/useUBX';
 import { useAuth } from '@/hooks/auth/useAuth';
 
 export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Get lucoin utilities from our hook
+  // Get UBX utilities from our hook
   const {
-    processLucoinTransaction,
-    loading: lucoinsLoading,
-    ...lucoinsData
-  } = useLucoins();
+    processTransaction,
+    loading: ubxLoading,
+    ...ubxData
+  } = useUBX();
   
   // Get the user's profile from the Auth context to access their balance
   const { profile } = useAuth();
-  // Access the lucoin balance from the profile, with fallback
-  const userBalance = profile?.lucoin_balance ?? 0;
+  // Access the UBX balance from the profile, with fallback
+  const userBalance = profile?.ubx_balance ?? 0;
   
   const purchaseBoost = async (boostPackage: BoostPackage): Promise<boolean> => {
     try {
       setLoading(true);
       setError(null);
       
-      // Check if user has enough Lucoins
-      if (userBalance < boostPackage.price_lucoin) {
+      // Check if user has enough UBX
+      if (userBalance < boostPackage.price_ubx) {
         toast({
           title: "Insufficient funds",
-          description: `You need ${boostPackage.price_lucoin} Lucoins to purchase this boost`,
+          description: `You need ${boostPackage.price_ubx} UBX to purchase this boost`,
           variant: "destructive"
         });
         return false;
@@ -39,9 +39,9 @@ export const useBoostPurchase = () => {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1200));
       
-      // Use the processLucoinTransaction method to deduct Lucoins
-      const success = await processLucoinTransaction({
-        amount: -boostPackage.price_lucoin, // Negative amount for spending
+      // Use the processTransaction method to deduct UBX
+      const success = await processTransaction({
+        amount: -boostPackage.price_ubx, // Negative amount for spending
         transactionType: "boost_purchase",
         description: `Purchased ${boostPackage.name} boost`
       });
@@ -52,7 +52,7 @@ export const useBoostPurchase = () => {
       
       toast({
         title: "Boost purchased",
-        description: `Successfully purchased ${boostPackage.name} for ${boostPackage.price_lucoin} Lucoins`
+        description: `Successfully purchased ${boostPackage.name} for ${boostPackage.price_ubx} UBX`
       });
       
       return true;

@@ -13,7 +13,7 @@ export const ubxService = {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('lucoin_balance')
+        .select('ubx_balance')
         .eq('id', userId)
         .single();
       
@@ -22,7 +22,7 @@ export const ubxService = {
         return 0;
       }
       
-      return data?.lucoin_balance || 0;
+      return data?.ubx_balance || 0;
     } catch (err) {
       console.error('Failed to get user UBX balance:', err);
       return 0;
@@ -35,7 +35,7 @@ export const ubxService = {
   getUBXPackages: async () => {
     try {
       const { data, error } = await supabase
-        .from('lucoin_package_options')
+        .from('ubx_package_options')
         .select('*')
         .eq('is_active', true)
         .order('amount', { ascending: true });
@@ -60,7 +60,7 @@ export const ubxService = {
   getTransactionHistory: async (userId: string, limit?: number) => {
     try {
       let query = supabase
-        .from('lucoin_transactions')
+        .from('ubx_transactions')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });

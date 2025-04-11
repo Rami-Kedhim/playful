@@ -15,7 +15,7 @@ const UBXBalance: React.FC<UBXBalanceProps> = ({ onRecharge }) => {
   const { profile, refreshProfile } = useAuth();
   const [price, setPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const balance = profile?.lucoin_balance || 0;
+  const balance = profile?.ubx_balance || 0;
   
   useEffect(() => {
     // Fetch the current price for UBX tokens
