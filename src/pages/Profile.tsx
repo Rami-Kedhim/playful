@@ -1,4 +1,3 @@
-
 import React from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,7 +38,7 @@ const Profile = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div>
-            <UserProfileSummary user={user} onEdit={() => {}} />
+            <UserProfileSummary />
             
             <Card className="mt-6">
               <CardHeader>

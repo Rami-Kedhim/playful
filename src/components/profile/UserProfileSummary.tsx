@@ -88,13 +88,13 @@ export const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({
               </Badge>
             )}
             
-            {profile?.profile_type && (
+            {profile?.role && (
               <Badge variant="outline" className="capitalize">
-                {profile.profile_type}
+                {profile.role}
               </Badge>
             )}
             
-            {profile?.is_content_creator && (
+            {profile?.isCreator && (
               <Badge variant="secondary">Creator</Badge>
             )}
           </div>
