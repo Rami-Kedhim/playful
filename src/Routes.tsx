@@ -29,6 +29,8 @@ const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
 const AICompanionPage = lazy(() => import('./pages/ai-companion'));
 const ServiceTypeDemo = lazy(() => import('./pages/ServiceTypeDemo'));
+const WalletPage = lazy(() => import('./pages/Wallet')); // Import Wallet page
+const UpdatedWalletPage = lazy(() => import('./pages/UpdatedWallet')); // Import UpdatedWallet page
 
 // Loading component
 const LoadingFallback = () => (
@@ -53,6 +55,8 @@ const AppRoutes: React.FC = () => {
           <Route path="/profile" element={<AppLayout><ProfilePage /></AppLayout>} />
           <Route path="/favorites" element={<AppLayout><FavoritesPage /></AppLayout>} />
           <Route path="/messages" element={<AppLayout><MessagesPage /></AppLayout>} />
+          <Route path="/wallet" element={<AppLayout><WalletPage /></AppLayout>} />
+          <Route path="/updated-wallet" element={<AppLayout><UpdatedWalletPage /></AppLayout>} />
         </Route>
         
         {/* Public routes */}
