@@ -1,78 +1,85 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthUser } from '@/types/auth';
-import { toast } from '@/components/ui/use-toast';
+import { AuthUser, UserProfile } from '@/types/auth';
+import { toast } from 'sonner';
 
 export const useProfileManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const updateProfile = async (userId: string, userData: Partial<AuthUser>): Promise<boolean> => {
+  /**
+   * Update the user's profile
+   */
+  const updateProfile = async (profileData: Partial<UserProfile>): Promise<boolean> => {
+    if (!profileData.id) return false;
+    
     setIsLoading(true);
+    
     try {
-      // Update auth user metadata
-      const { error } = await supabase.auth.updateUser({
-        data: { ...userData }
-      });
+      // First update the auth metadata if needed
+      if (profileData.username || profileData.avatar_url) {
+        const authUpdate = {
+          ...(profileData.username && { username: profileData.username }),
+          ...(profileData.avatar_url && { avatar_url: profileData.avatar_url }),
+        };
+        
+        const { error: authError } = await supabase.auth.updateUser({
+          data: authUpdate
+        });
+        
+        if (authError) throw authError;
+      }
+      
+      // Then update the profile record
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...profileData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', profileData.id);
       
       if (error) throw error;
       
-      // Update profile in profiles table if needed
-      const profileUpdate = {
-        ...(userData.username && { username: userData.username }),
-        ...(userData.profileImageUrl && { avatar_url: userData.profileImageUrl }),
-      };
-      
-      if (Object.keys(profileUpdate).length > 0) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update(profileUpdate)
-          .eq('id', userId);
-          
-        if (profileError) throw profileError;
-      }
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
-      
       return true;
     } catch (error: any) {
-      toast({
-        title: "Error updating profile",
-        description: error.message || "Failed to update profile",
-        variant: "destructive",
-      });
+      console.error("Failed to update profile:", error.message);
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getProfile = async (userId: string) => {
+  /**
+   * Fetch profile data for the current user
+   */
+  const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
+    if (!userId) return null;
+    
     setIsLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-        
+      
       if (error) throw error;
       
-      return { data };
+      return data as UserProfile;
     } catch (error: any) {
-      return { error: error.message };
+      console.error("Failed to fetch profile:", error.message);
+      return null;
     } finally {
       setIsLoading(false);
     }
   };
-
+  
   return {
     updateProfile,
-    getProfile,
-    isLoading
+    fetchProfile,
+    isLoading,
   };
 };
 
