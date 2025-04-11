@@ -88,9 +88,9 @@ export const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({
               </Badge>
             )}
             
-            {profile?.role && (
+            {user?.role && (
               <Badge variant="outline" className="capitalize">
-                {profile.role}
+                {user.role}
               </Badge>
             )}
             
