@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowDownCircle, ArrowUpCircle, Clock, Info, Shield } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Clock, Info, Shield, ExternalLink } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { useAuth } from '@/contexts/AuthContext';
