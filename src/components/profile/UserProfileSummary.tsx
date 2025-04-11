@@ -88,6 +88,7 @@ export const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({
               </Badge>
             )}
             
+            {/* Use user.role instead of profile.role */}
             {user?.role && (
               <Badge variant="outline" className="capitalize">
                 {user.role}
