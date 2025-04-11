@@ -6,6 +6,43 @@ import { cn } from "@/lib/utils";
 
 export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
 
+export interface ServiceTypeInfo {
+  filterLabel: string;
+  badgeLabel: string;
+  description: string;
+}
+
+export const serviceTypeInfoMap: Record<ServiceTypeFilter, ServiceTypeInfo> = {
+  "in-person": {
+    filterLabel: "In Person",
+    badgeLabel: "In Person",
+    description: "Physical meetups and appointments"
+  },
+  "virtual": {
+    filterLabel: "Virtual",
+    badgeLabel: "Virtual",
+    description: "Online video calls, chats, and content"
+  },
+  "both": {
+    filterLabel: "Both",
+    badgeLabel: "In Person & Virtual",
+    description: "Both physical and virtual services"
+  },
+  "": {
+    filterLabel: "Any",
+    badgeLabel: "Any Type",
+    description: "All service types"
+  }
+};
+
+export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => {
+  return serviceTypeInfoMap[type];
+};
+
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  return type ? serviceTypeInfoMap[type].badgeLabel : "Any Type";
+};
+
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   size?: 'sm' | 'md' | 'lg';
