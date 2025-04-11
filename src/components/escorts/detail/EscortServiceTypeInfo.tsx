@@ -10,16 +10,21 @@ interface EscortServiceTypeInfoProps {
   serviceType: ServiceTypeFilter;
   services: string[];
   className?: string;
+  themeName?: string; // Optional theme name based on Egyptian archetypes
 }
 
 /**
  * Displays service type information for an escort profile
- * with ethical filtering and remapping applied
+ * with ethical filtering and remapping applied.
+ * 
+ * Can be themed according to the Sacred Engine concept with
+ * archetype associations.
  */
 const EscortServiceTypeInfo: React.FC<EscortServiceTypeInfoProps> = ({
   serviceType,
   services,
-  className
+  className,
+  themeName
 }) => {
   // Map services to safe labels
   const safeServices = React.useMemo(() => {
@@ -32,8 +37,14 @@ const EscortServiceTypeInfo: React.FC<EscortServiceTypeInfoProps> = ({
   // Check if any services were remapped
   const hasRemappedServices = safeServices.some(service => service.original !== service.safe);
   
+  // Determine if this escort offers virtual/metaverse services
+  const hasVirtualServices = serviceType === 'virtual' || serviceType === 'both';
+  
+  // Determine theme class based on themeName (for future Sacred Engine integration)
+  const themeClass = themeName ? `theme-${themeName.toLowerCase()}` : '';
+  
   return (
-    <Card className={className}>
+    <Card className={`${className} ${themeClass}`}>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">Service Information</CardTitle>
       </CardHeader>
@@ -42,6 +53,13 @@ const EscortServiceTypeInfo: React.FC<EscortServiceTypeInfoProps> = ({
           <div>
             <h3 className="text-sm font-medium mb-2">Service Type:</h3>
             <ServiceTypeBadgeLabel type={serviceType} />
+            
+            {hasVirtualServices && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                <span className="inline-block mr-1">✧</span>
+                Virtual services available in our digital spaces
+              </div>
+            )}
           </div>
           
           <div>

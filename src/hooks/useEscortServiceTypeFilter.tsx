@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useServiceType } from '@/components/escorts/context/ServiceTypeContext';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
@@ -5,7 +6,10 @@ import { useEscortFilter } from './useEscortFilter';
 
 /**
  * Hook that combines the service type context with escort filtering
- * to provide a unified interface for service-based escort filtering
+ * to provide a unified interface for service-based escort filtering.
+ * 
+ * This hook can be extended to support metaverse integration by adding
+ * virtual location and enhanced experience parameters.
  */
 export const useEscortServiceTypeFilter = () => {
   const {
@@ -54,6 +58,16 @@ export const useEscortServiceTypeFilter = () => {
       )
     );
   }, [selectedSpecializedTypes]);
+
+  // Helper method to check if an escort offers metaverse experiences
+  // This supports the Sacred Grid concept mentioned in the document
+  const isMetaverseCompatible = useCallback((escort) => {
+    return escort.metaverse_enabled || 
+           (escort.tags && escort.tags.some(tag => 
+             tag.toLowerCase().includes('virtual') || 
+             tag.toLowerCase().includes('metaverse')
+           ));
+  }, []);
   
   return {
     // Service type state and actions from context
@@ -72,6 +86,9 @@ export const useEscortServiceTypeFilter = () => {
     validateServiceName,
     getSafeServiceName,
     filterBySpecializedTypes,
+    
+    // Metaverse compatibility check
+    isMetaverseCompatible,
     
     // Additional actions
     resetServiceTypeFilters,
