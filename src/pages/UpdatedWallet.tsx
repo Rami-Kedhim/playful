@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
@@ -7,6 +8,7 @@ import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw } from "luci
 import UBXBalance from "@/components/profile/settings/UBXBalance";
 import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
 import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
+import UBXRechargeDialog from "@/components/profile/settings/UBXRechargeDialog";
 import WalletConnect from "@/components/solana/WalletConnect";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
@@ -61,6 +63,7 @@ const UpdatedWallet = () => {
           </div>
           <div className="flex gap-2">
             <WalletConnect />
+            <UBXRechargeDialog />
             <UBXPackageDialog />
           </div>
         </div>
