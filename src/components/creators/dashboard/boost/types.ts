@@ -7,5 +7,5 @@ export interface BoostManagerContainerProps {
   profileCreatedDate: Date;
   country: string;
   role: 'verified' | 'regular' | 'AI';
-  lucoinBalance: number;
+  ubxBalance: number;
 }

@@ -42,7 +42,7 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
             id: "boost-1",
             name: "Weekend Boost",
             duration: "72:00:00",
-            price_lucoin: 120
+            price_ubx: 120
           },
           price: 120
         },
@@ -54,7 +54,7 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
             id: "boost-2",
             name: "24 Hour Boost",
             duration: "24:00:00",
-            price_lucoin: 50
+            price_ubx: 50
           },
           price: 50
         }
@@ -92,7 +92,7 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
             profileCreatedDate={profile?.created_at ? new Date(profile.created_at) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)}
             country={profile?.country || "US"}
             role={profile?.isVerified ? 'verified' : 'regular'}
-            lucoinBalance={profile?.lucoin_balance || 0}
+            ubxBalance={profile?.ubx_balance || 0}
           />
         </TabsContent>
         

@@ -6,7 +6,7 @@ export interface BoostPackage {
   id: string;
   name: string;
   duration: string; // Format: "HH:MM:SS"
-  price_lucoin: number;
+  price_ubx: number;
   description?: string;
   features?: string[];
 }

@@ -15,7 +15,7 @@ interface BoostStatusProps {
   rating: number;
   country: string;
   role: 'verified' | 'regular' | 'AI';
-  lucoinBalance: number;
+  ubxBalance: number;
   boostPackages: any[];
   selectedPackage: string | null;
   onSelectPackage: (packageId: string) => void;
@@ -32,7 +32,7 @@ const BoostStatus = ({
   rating,
   country,
   role,
-  lucoinBalance,
+  ubxBalance,
   boostPackages,
   selectedPackage,
   onSelectPackage,
@@ -97,7 +97,7 @@ const BoostStatus = ({
               ) : (
                 <BoostPurchaseConfirmation
                   selectedPackage={selectedBoostPackage}
-                  lucoinBalance={lucoinBalance}
+                  ubxBalance={ubxBalance}
                   onBack={() => setActiveStep('select')}
                   onPurchase={onPurchase}
                   loading={loading}

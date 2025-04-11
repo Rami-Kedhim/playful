@@ -71,6 +71,8 @@ export interface UserProfile {
   // Adding fields to fix type errors
   lucoin_balance?: number;
   lucoinsBalance?: number; // Alias for lucoin_balance
+  ubx_balance?: number; // Added UBX balance field
+  ubxBalance?: number; // Alias for ubx_balance
   profile_completeness?: number;
   profileCompleteness?: number; // Alias for profile_completeness
   is_boosted?: boolean;

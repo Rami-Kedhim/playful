@@ -12,7 +12,7 @@ export const useBoostPurchase = () => {
   // Get UBX utilities from our hook
   const {
     processTransaction,
-    loading: ubxLoading,
+    isProcessing: ubxLoading,
     ...ubxData
   } = useUBX();
   
