@@ -34,7 +34,7 @@ export const useBoostStatus = (creatorId: string | undefined) => {
             id: "boost-premium",
             name: "Premium Boost",
             duration: "72:00:00", // 3 days
-            price_lucoin: 150,
+            price_ubx: 150,
             features: ["Top search results", "Featured badge", "Highlighted profile"]
           };
           

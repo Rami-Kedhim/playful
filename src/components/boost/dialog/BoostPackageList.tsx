@@ -40,8 +40,8 @@ const BoostPackageList = ({
               </div>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <Zap className="h-4 w-4 text-yellow-500" />
-                <span className="text-lg font-bold">{pkg.price_lucoin}</span>
-                <span className="text-xs text-muted-foreground">LC</span>
+                <span className="text-lg font-bold">{pkg.price_ubx}</span>
+                <span className="text-xs text-muted-foreground">UBX</span>
               </div>
               {pkg.features && pkg.features.length > 0 && (
                 <div className="mt-3 text-xs text-left">
@@ -62,7 +62,7 @@ const BoostPackageList = ({
         <div className="flex items-center">
           <Zap className="h-4 w-4 text-yellow-500 mr-2" />
           <span className="text-sm">Your balance:</span>
-          <span className="ml-2 font-medium">1000 LC</span>
+          <span className="ml-2 font-medium">1000 UBX</span>
         </div>
         
         <div className="flex items-center text-muted-foreground text-sm">
@@ -80,7 +80,7 @@ const BoostPackageList = ({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <span className="font-medium">{getBoostPrice()} LC</span>
+          <span className="font-medium">{getBoostPrice()} UBX</span>
         </div>
       </div>
     </div>

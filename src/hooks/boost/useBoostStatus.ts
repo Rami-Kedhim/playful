@@ -81,7 +81,7 @@ export const useBoostStatus = (profileId?: string) => {
           id: "boost-standard",
           name: "3-Hour Boost",
           duration: "03:00:00",
-          price_lucoin: 15
+          price_ubx: 15
         };
         
         const remainingTime = calculateRemainingTime(endDate);

@@ -67,7 +67,7 @@ export function adaptBoostPackageToTypes(
     id: pkg.id,
     name: pkg.name,
     duration: formatHoursToDuration(pkg.duration),
-    price_lucoin: pkg.price,
+    price_ubx: pkg.price,
     description: pkg.description,
     features: pkg.features
   };
@@ -132,7 +132,7 @@ export function adaptBoostPackageToManager(
     name: pkg.name,
     description: pkg.description || '',
     duration: durationHours,
-    price: pkg.price_lucoin,
+    price: pkg.price_ubx,
     features: pkg.features || [],
     boostType: 'standard'
   };

@@ -18,7 +18,7 @@ export const useBoostPackages = () => {
           id: "boost-1",
           name: "1-Hour Boost",
           duration: "01:00:00",
-          price_lucoin: 5,
+          price_ubx: 5,
           description: "Quick visibility boost",
           features: ["Top search position", "Featured badge"]
         },
@@ -26,7 +26,7 @@ export const useBoostPackages = () => {
           id: "boost-3",
           name: "3-Hour Boost",
           duration: "03:00:00",
-          price_lucoin: 15,
+          price_ubx: 15,
           description: "Standard visibility boost",
           features: ["Top search position", "Featured badge", "Profile highlighting"]
         },
@@ -34,7 +34,7 @@ export const useBoostPackages = () => {
           id: "boost-24",
           name: "24-Hour Boost",
           duration: "24:00:00",
-          price_lucoin: 50,
+          price_ubx: 50,
           description: "Full day visibility boost",
           features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
         }

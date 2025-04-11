@@ -37,7 +37,7 @@ const BoostPackageGrid = ({
           </CardHeader>
           <CardContent className="pb-2">
             <div className="text-2xl font-bold mb-4">
-              {pkg.price_lucoin} <span className="text-sm font-normal text-muted-foreground">LC</span>
+              {pkg.price_ubx} <span className="text-sm font-normal text-muted-foreground">UBX</span>
             </div>
             
             {pkg.features && (

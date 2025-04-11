@@ -7,7 +7,7 @@ import { formatBoostDuration } from "@/utils/boostCalculator";
 
 interface BoostPurchaseConfirmationProps {
   selectedPackage: BoostPackage | undefined;
-  lucoinBalance: number;
+  ubxBalance: number;
   onBack: () => void;
   onPurchase: () => void;
   loading: boolean;
@@ -15,13 +15,13 @@ interface BoostPurchaseConfirmationProps {
 
 const BoostPurchaseConfirmation = ({
   selectedPackage,
-  lucoinBalance,
+  ubxBalance,
   onBack,
   onPurchase,
   loading
 }: BoostPurchaseConfirmationProps) => {
   const insufficientBalance = selectedPackage && 
-    lucoinBalance < selectedPackage.price_lucoin;
+    ubxBalance < selectedPackage.price_ubx;
 
   return (
     <div className="space-y-6">
@@ -41,12 +41,12 @@ const BoostPurchaseConfirmation = ({
           
           <div className="text-sm text-muted-foreground">Price:</div>
           <div className="font-medium">
-            {selectedPackage?.price_lucoin} LC
+            {selectedPackage?.price_ubx} UBX
           </div>
           
           <div className="text-sm text-muted-foreground">Current Balance:</div>
           <div className={insufficientBalance ? "text-red-500" : ""}>
-            {lucoinBalance} LC
+            {ubxBalance} UBX
           </div>
         </div>
         
@@ -55,7 +55,7 @@ const BoostPurchaseConfirmation = ({
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Insufficient Balance</AlertTitle>
             <AlertDescription>
-              You don't have enough Lucoins to purchase this boost. Please add more credits to your account.
+              You don't have enough UBX to purchase this boost. Please add more credits to your account.
             </AlertDescription>
           </Alert>
         )}
