@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -68,14 +69,14 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
       const serviceSettings = {
         gender: settings.gender,
         style: settings.style,
-        ageRange: settings.ageRange, // This now matches the service interface
-        features: [
-          settings.ethnicity,
-          settings.hairColor,
-          settings.hairStyle,
-          settings.bodyType,
-          settings.skinTone
-        ]
+        ageRange: settings.ageRange,
+        age: settings.age,
+        ethnicity: settings.ethnicity,
+        hairColor: settings.hairColor,
+        hairStyle: settings.hairStyle,
+        bodyType: settings.bodyType,
+        skinTone: settings.skinTone,
+        background: settings.background
       };
       
       const avatars = await generateAIAvatars(serviceSettings);

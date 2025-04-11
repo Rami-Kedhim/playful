@@ -52,6 +52,13 @@ export interface AIAvatarSettings {
   gender: 'male' | 'female' | 'non-binary';
   style: 'realistic' | 'anime' | 'artistic';
   ageRange: number;
+  age?: number;
+  ethnicity?: string;
+  hairColor?: string;
+  hairStyle?: string;
+  bodyType?: string;
+  skinTone?: string;
+  background?: string;
   features?: string[];
 }
 
