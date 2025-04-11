@@ -109,7 +109,7 @@ const EscortResults = ({
         ))}
       </div>
       
-      {/* Pagination */}
+      {/* Pagination - Updated component usage */}
       {totalPages > 1 && (
         <div className="mt-8 flex justify-center">
           <Pagination 
