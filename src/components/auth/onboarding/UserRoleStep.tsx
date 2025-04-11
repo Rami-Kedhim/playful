@@ -1,47 +1,63 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Search, Camera, Users, Heart, ChevronRight } from "lucide-react";
-import ProfileTypeSelection from './ProfileTypeSelection';
-import AIAvatarGenerator, { AIAvatarSettings } from './AIAvatarGenerator';
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { AIAvatarGenerator, AIAvatarSettings } from './AIAvatarGenerator';
 import { generateAIAvatars, saveAIAvatar } from '@/services/ai/aiAvatarService';
+import { Loader2, Check } from "lucide-react";
 
 interface UserRoleStepProps {
   onNext: (data: any) => void;
 }
 
 export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [step, setStep] = useState<'role' | 'type' | 'avatar'>('role');
-  const [profileType, setProfileType] = useState<'real' | 'ai' | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [role, setRole] = useState<string>('');
+  const [displayName, setDisplayName] = useState<string>('');
+  const [bio, setBio] = useState<string>('');
+  const [isCreator, setIsCreator] = useState<boolean>(false);
+  const [isCouple, setIsCouple] = useState<boolean>(false);
+  const [isLGBTQ, setIsLGBTQ] = useState<boolean>(false);
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [generatedAvatars, setGeneratedAvatars] = useState<string[]>([]);
-  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [aiAvatarMode, setAiAvatarMode] = useState<boolean>(false);
 
-  const handleRoleSelect = (role: string) => {
-    setSelectedRole(role);
-  };
-
-  const handleContinue = () => {
-    if (step === 'role' && selectedRole) {
-      setStep('type');
-    } else if (step === 'type' && profileType) {
-      if (profileType === 'ai') {
-        setStep('avatar');
-      } else {
-        // Skip avatar generation for real profiles
-        handleComplete();
-      }
+  useEffect(() => {
+    if (role) {
+      setAiAvatarMode(role === 'escort');
     }
+  }, [role]);
+
+  const handleRoleChange = (value: string) => {
+    setRole(value);
   };
 
-  const handleBack = () => {
-    if (step === 'type') {
-      setStep('role');
-    } else if (step === 'avatar') {
-      setStep('type');
+  const handleDisplayNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayName(e.target.value);
+  };
+
+  const handleBioChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setBio(e.target.value);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -52,7 +68,7 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
       const serviceSettings = {
         gender: settings.gender,
         style: settings.style,
-        ageRange: settings.ageRange, // Now this matches the service interface
+        ageRange: settings.ageRange, // This now matches the service interface
         features: [
           settings.ethnicity,
           settings.hairColor,
@@ -69,105 +85,145 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
     }
   };
 
-  const handleAvatarSelected = async (avatarUrl: string) => {
-    setSelectedAvatar(avatarUrl);
-    handleComplete(avatarUrl);
+  const handleComplete = async (selectedAvatar: string) => {
+    setIsSaving(true);
+    try {
+      const success = await saveAIAvatar(selectedAvatar);
+      if (success) {
+        setAvatarUrl(selectedAvatar);
+        const stepData = {
+          role,
+          isCreator,
+          isCouple,
+          isLGBTQ,
+          avatarUrl: selectedAvatar,
+          displayName,
+          bio
+        };
+        onNext(stepData);
+      } else {
+        alert('Failed to save AI avatar. Please try again.');
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleComplete = (avatarUrl?: string) => {
-    onNext({
-      role: selectedRole,
-      profileType,
-      isAI: profileType === 'ai',
-      avatarUrl: avatarUrl || null
-    });
+  const handleSubmit = () => {
+    const stepData = {
+      role,
+      isCreator,
+      isCouple,
+      isLGBTQ,
+      avatarUrl,
+      displayName,
+      bio
+    };
+    onNext(stepData);
   };
-
-  const roleOptions = [
-    { id: 'client', name: 'Client', icon: <Search className="h-6 w-6" />, description: 'I want to find escorts and content' },
-    { id: 'escort', name: 'Escort', icon: <Heart className="h-6 w-6" />, description: 'I offer in-person services' },
-    { id: 'creator', name: 'Creator', icon: <Camera className="h-6 w-6" />, description: 'I create content and engage with fans' },
-    { id: 'agency', name: 'Agency', icon: <Users className="h-6 w-6" />, description: 'I represent multiple escorts' }
-  ];
 
   return (
-    <div className="space-y-6">
-      {step === 'role' && (
-        <>
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold">How will you use UberEscorts?</h2>
-            <p className="text-muted-foreground">Select your primary role on the platform</p>
-          </div>
+    <div className="space-y-4">
+      <div className="grid gap-2">
+        <Label htmlFor="role">I am a...</Label>
+        <Select value={role} onValueChange={handleRoleChange}>
+          <SelectTrigger id="role">
+            <SelectValue placeholder="Select a role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="escort">Escort</SelectItem>
+            <SelectItem value="client">Client</SelectItem>
+            <SelectItem value="enthusiast">Enthusiast</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            {roleOptions.map(role => (
-              <Card
-                key={role.id}
-                className={`p-4 cursor-pointer transition hover:border-primary ${
-                  selectedRole === role.id ? 'border-primary' : ''
-                }`}
-                onClick={() => handleRoleSelect(role.id)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-full ${
-                      selectedRole === role.id ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                    }`}>
-                      {role.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{role.name}</h3>
-                      <p className="text-sm text-muted-foreground">{role.description}</p>
-                    </div>
-                  </div>
-                  {role.id === 'client' && (
-                    <Badge variant="outline">Most Popular</Badge>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </>
-      )}
-
-      {step === 'type' && selectedRole && (
-        <ProfileTypeSelection 
-          onSelect={setProfileType}
-          selectedType={profileType || undefined}
-          onNext={handleContinue}
-          userRole={selectedRole}
+      <div className="grid gap-2">
+        <Label htmlFor="displayName">Display Name</Label>
+        <Input
+          type="text"
+          id="displayName"
+          placeholder="Enter your display name"
+          value={displayName}
+          onChange={handleDisplayNameChange}
         />
-      )}
+      </div>
 
-      {step === 'avatar' && (
+      <div className="grid gap-2">
+        <Label htmlFor="bio">Bio</Label>
+        <Textarea
+          id="bio"
+          placeholder="Tell us a little about yourself"
+          value={bio}
+          onChange={handleBioChange}
+        />
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch id="isCreator" checked={isCreator} onCheckedChange={setIsCreator} />
+        <Label htmlFor="isCreator">I am a content creator</Label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch id="isCouple" checked={isCouple} onCheckedChange={setIsCouple} />
+        <Label htmlFor="isCouple">We are a couple</Label>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch id="isLGBTQ" checked={isLGBTQ} onCheckedChange={setIsLGBTQ} />
+        <Label htmlFor="isLGBTQ">We are LGBTQ+</Label>
+      </div>
+
+      {aiAvatarMode ? (
         <AIAvatarGenerator
           onGenerate={handleGenerateAvatars}
-          onComplete={handleAvatarSelected}
+          onComplete={handleComplete}
           isGenerating={isGenerating}
           generatedAvatars={generatedAvatars}
         />
+      ) : (
+        <>
+          <div className="grid gap-2">
+            <Label htmlFor="avatar">Upload Avatar</Label>
+            <Input type="file" id="avatar" accept="image/*" onChange={handleAvatarChange} />
+          </div>
+
+          {avatarUrl && (
+            <div className="relative w-32 h-32 rounded-full overflow-hidden">
+              <img
+                src={avatarUrl}
+                alt="Uploaded avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </>
       )}
 
-      <div className="flex justify-between pt-4">
-        {step !== 'role' && (
-          <Button variant="outline" onClick={handleBack}>
-            Back
-          </Button>
+      <Button onClick={handleSubmit} disabled={isGenerating || isSaving}>
+        {isGenerating ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Generating...
+          </>
+        ) : isSaving ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          <>
+            {avatarUrl ? (
+              <>
+                <Check className="mr-2 h-4 w-4" />
+                Continue
+              </>
+            ) : (
+              "Continue"
+            )}
+          </>
         )}
-        
-        {step === 'role' && (
-          <Button 
-            onClick={handleContinue}
-            disabled={!selectedRole}
-            className="ml-auto"
-          >
-            Continue
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-        )}
-      </div>
+      </Button>
     </div>
   );
 };
-
-export default UserRoleStep;
