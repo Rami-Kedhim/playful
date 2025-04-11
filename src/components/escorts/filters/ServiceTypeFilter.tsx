@@ -2,13 +2,13 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import type { ServiceTypeFilter as ServiceTypeFilterType } from './ServiceTypeBadgeLabel';
 import ServiceTypeIcon from './ServiceTypeIcon';
 import { cn } from "@/lib/utils";
 
 interface ServiceTypeFilterProps {
-  serviceTypeFilter: ServiceTypeFilter;
-  setServiceTypeFilter: (type: ServiceTypeFilter) => void;
+  serviceTypeFilter: ServiceTypeFilterType;
+  setServiceTypeFilter: (type: ServiceTypeFilterType) => void;
   className?: string;
 }
 
@@ -20,7 +20,7 @@ const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({
   setServiceTypeFilter,
   className
 }) => {
-  const serviceTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", ""];
+  const serviceTypes: ServiceTypeFilterType[] = ["in-person", "virtual", "both", ""];
   
   const labels = {
     "in-person": "In Person",
