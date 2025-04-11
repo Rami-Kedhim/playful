@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
@@ -11,7 +10,7 @@ import LucoinPackageDialog from "@/components/profile/settings/LucoinPackageDial
 import WalletConnect from "@/components/solana/WalletConnect";
 import SolanaTransactionHistory from "@/components/solana/SolanaTransactionHistory";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { getSolanaBalance, getSolanaPrice } from "@/services/solanaService";
+import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -34,8 +33,8 @@ const Wallet = () => {
     setLoading(true);
     try {
       const [balance, price] = await Promise.all([
-        getSolanaBalance(address),
-        getSolanaPrice()
+        getFantomBalance(address),
+        getFantomPrice()
       ]);
       
       setSolBalance(balance);

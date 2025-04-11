@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
@@ -9,9 +8,8 @@ import UBXBalance from "@/components/profile/settings/UBXBalance";
 import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
 import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
 import WalletConnect from "@/components/solana/WalletConnect";
-import SolanaTransactionHistory from "@/components/solana/SolanaTransactionHistory";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { getSolanaBalance, getSolanaPrice } from "@/services/solanaService";
+import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -33,10 +31,9 @@ const UpdatedWallet = () => {
   const loadFantomData = async (address: string) => {
     setLoading(true);
     try {
-      // This would normally call Fantom services, but we're reusing Solana services for this demo
       const [balance, price] = await Promise.all([
-        getSolanaBalance(address),
-        getSolanaPrice()
+        getFantomBalance(address),
+        getFantomPrice()
       ]);
       
       setFtmBalance(balance);
