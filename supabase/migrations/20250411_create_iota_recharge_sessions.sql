@@ -2,7 +2,7 @@
 -- Create the IOTA recharge sessions table
 CREATE TABLE public.iota_recharge_sessions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   address TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   expires_at TIMESTAMP WITH TIME ZONE DEFAULT (now() + interval '24 hours') NOT NULL,
