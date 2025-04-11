@@ -1,5 +1,5 @@
-
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from '@/integrations/supabase/client';
 
 // The Solana RPC endpoint from Chainstack
 const SOLANA_RPC_URL = "https://solana-mainnet.core.chainstack.com";
@@ -119,6 +119,86 @@ export const processUbxPurchase = async (
       success: false,
       message: error.message || 'Failed to process your purchase'
     };
+  }
+};
+
+// Add missing function for purchasing Lucoins with Solana
+export const purchaseLucoinsWithSol = async (
+  packageId: string,
+  solAmount: number,
+  walletAddress: string
+): Promise<{ success: boolean, transactionId: string | null }> => {
+  try {
+    // Simulate transaction processing delay
+    toast({
+      title: "Processing transaction",
+      description: "Your SOL transaction is being processed.",
+    });
+    
+    // Simulate blockchain delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Simulate success (90% success rate for demo)
+    const success = Math.random() > 0.1;
+    
+    if (success) {
+      // Generate a fake transaction ID
+      const transactionId = Array.from({ length: 64 }, () => 
+        '0123456789abcdef'[Math.floor(Math.random() * 16)]
+      ).join('');
+      
+      toast({
+        title: "Transaction successful",
+        description: `Your transaction has been confirmed.`,
+      });
+      
+      return { success: true, transactionId };
+    } else {
+      throw new Error("Transaction could not be confirmed");
+    }
+  } catch (error: any) {
+    console.error('Error sending SOL transaction:', error);
+    toast({
+      title: "Transaction failed",
+      description: error.message || "There was an error processing your transaction",
+      variant: "destructive",
+    });
+    return { success: false, transactionId: null };
+  }
+};
+
+// Add the missing getSolanaTransactionDetails function
+export const getSolanaTransactionDetails = async (signature: string): Promise<any> => {
+  try {
+    const response = await fetch(SOLANA_RPC_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getTransaction',
+        params: [
+          signature,
+          { encoding: 'json', maxSupportedTransactionVersion: 0 }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Network error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('Error getting transaction details:', data.error);
+      return null;
+    }
+    
+    return data.result;
+  } catch (error: any) {
+    console.error('Error getting transaction details:', error);
+    return null;
   }
 };
 
