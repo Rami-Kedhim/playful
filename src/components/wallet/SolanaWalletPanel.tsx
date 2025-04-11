@@ -1,79 +1,65 @@
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { RefreshCw, ExternalLink, Shield } from 'lucide-react';
-import { getSolanaBalance, getSolanaPrice } from '@/services/solanaService';
-import { useWalletConnection } from '@/hooks/useWalletConnection';
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, RefreshCw, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
 
 interface SolanaWalletPanelProps {
   onRecharge?: () => void;
 }
 
-const SolanaWalletPanel = ({ onRecharge }: SolanaWalletPanelProps) => {
-  const { walletAddress, isConnected, connectWallet } = useWalletConnection();
-  const [balance, setBalance] = useState<number | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
+const SolanaWalletPanel: React.FC<SolanaWalletPanelProps> = ({ onRecharge }) => {
+  const { walletAddress } = useSolanaWallet();
+  const [ftmBalance, setFtmBalance] = useState<number | null>(null);
+  const [ftmPrice, setFtmPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  
-  // Load wallet data when connected
+
   useEffect(() => {
     if (walletAddress) {
-      loadWalletData();
+      loadFantomData(walletAddress);
     } else {
-      setBalance(null);
-      setPrice(null);
+      setFtmBalance(null);
     }
   }, [walletAddress]);
-  
-  const loadWalletData = async () => {
-    if (!walletAddress) return;
-    
+
+  const loadFantomData = async (address: string) => {
     setLoading(true);
     try {
-      const [walletBalance, tokenPrice] = await Promise.all([
-        getSolanaBalance(walletAddress),
-        getSolanaPrice()
+      const [balance, price] = await Promise.all([
+        getFantomBalance(address),
+        getFantomPrice()
       ]);
       
-      setBalance(walletBalance);
-      setPrice(tokenPrice);
+      setFtmBalance(balance);
+      setFtmPrice(price);
     } catch (error) {
-      console.error("Error loading wallet data:", error);
+      console.error("Error loading Fantom data:", error);
     } finally {
       setLoading(false);
     }
   };
-  
-  const handleRefresh = () => {
-    loadWalletData();
-  };
-  
-  const handleConnect = async () => {
-    try {
-      await connectWallet();
-    } catch (error) {
-      // Error handling done in the hook
+
+  const refreshFantomData = () => {
+    if (walletAddress) {
+      loadFantomData(walletAddress);
     }
   };
-  
-  const getExplorerUrl = (address: string) => {
-    return `https://explorer.solana.com/address/${address}`;
-  };
-  
+
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg flex items-center">
+    <Card>
+      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center text-lg">
           <Shield className="h-5 w-5 text-primary mr-2" />
-          Blockchain Wallet
+          IOTA Wallet
         </CardTitle>
-        {isConnected && (
+        {walletAddress && (
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={handleRefresh}
+            onClick={refreshFantomData}
             disabled={loading}
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -81,55 +67,36 @@ const SolanaWalletPanel = ({ onRecharge }: SolanaWalletPanelProps) => {
         )}
       </CardHeader>
       <CardContent>
-        {isConnected ? (
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Address</p>
-              <div className="flex items-center justify-between">
-                <code className="text-xs bg-muted p-1 rounded">
-                  {walletAddress?.substring(0, 8)}...{walletAddress?.substring(walletAddress.length - 8)}
-                </code>
-                <a 
-                  href={walletAddress ? getExplorerUrl(walletAddress) : '#'} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-primary/80"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </div>
+        {walletAddress ? (
+          loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-24" />
+              <Skeleton className="h-4 w-20" />
             </div>
-            
-            <div>
-              <p className="text-sm text-muted-foreground">SOL Balance</p>
-              {loading ? (
-                <Skeleton className="h-7 w-24" />
-              ) : (
-                <p className="text-2xl font-medium">{balance !== null ? balance.toFixed(4) : '0.0000'}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                {price && balance !== null ? (
-                  <>≈ ${(balance * price).toFixed(2)} USD</>
+          ) : (
+            <>
+              <div className="text-3xl font-bold">{ftmBalance !== null ? ftmBalance.toFixed(4) : '0.0000'} MIOTA</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {ftmPrice && ftmBalance !== null ? (
+                  <>≈ ${(ftmBalance * ftmPrice).toFixed(2)} USD</>
                 ) : (
                   '—'
                 )}
               </p>
-            </div>
-
-            {onRecharge && (
-              <Button variant="default" size="sm" onClick={onRecharge} className="w-full mt-2">
-                Add UBX Tokens
-              </Button>
-            )}
-          </div>
+            </>
+          )
         ) : (
-          <div className="flex flex-col items-center justify-center py-4 space-y-3">
-            <p className="text-muted-foreground text-sm">Connect your wallet to get started</p>
-            <Button variant="outline" onClick={handleConnect}>
-              Connect Wallet
-            </Button>
+          <div className="text-muted-foreground py-1">
+            Connect wallet to view balance
           </div>
         )}
+        
+        <div className="mt-2 text-xs flex items-center text-muted-foreground">
+          <ExternalLink className="h-3 w-3 mr-1" />
+          <a href="https://firefly.iota.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+            Download IOTA Firefly wallet
+          </a>
+        </div>
       </CardContent>
     </Card>
   );

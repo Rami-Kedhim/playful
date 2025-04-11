@@ -1,21 +1,20 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw, Shield } from "lucide-react";
-import LucoinBalance from "@/components/profile/settings/LucoinBalance";
-import LucoinTransactionHistory from "@/components/profile/settings/LucoinTransactionHistory";
-import LucoinPackageDialog from "@/components/profile/settings/LucoinPackageDialog";
+import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw, Shield, ExternalLink } from "lucide-react";
+import UBXBalance from "@/components/profile/settings/UBXBalance";
+import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
+import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
 import UBXRechargeDialog from "@/components/profile/settings/UBXRechargeDialog";
 import WalletConnect from "@/components/solana/WalletConnect";
-import SolanaTransactionHistory from "@/components/solana/SolanaTransactionHistory";
 import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { blockchainService, NETWORK_CONFIG } from "@/services/blockchainService";
-import UBXBalance from "@/components/profile/settings/UBXBalance";
 import SolanaWalletPanel from "@/components/wallet/SolanaWalletPanel";
 
 const Wallet = () => {
@@ -71,7 +70,7 @@ const Wallet = () => {
               Add UBX
             </Button>
             <UBXRechargeDialog open={rechargeDialogOpen} onClose={() => setRechargeDialogOpen(false)} />
-            <LucoinPackageDialog />
+            <UBXPackageDialog />
           </div>
         </div>
         
@@ -119,7 +118,7 @@ const Wallet = () => {
           </TabsList>
           
           <TabsContent value="transactions" className="mt-6">
-            <LucoinTransactionHistory />
+            <UBXTransactionHistory />
           </TabsContent>
           
           <TabsContent value="iota" className="mt-6">
@@ -155,6 +154,7 @@ const Wallet = () => {
                 <div className="pt-2">
                   <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
                     <a href="https://explorer.iota.org/mainnet" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-1" />
                       IOTA Explorer
                     </a>
                   </Button>

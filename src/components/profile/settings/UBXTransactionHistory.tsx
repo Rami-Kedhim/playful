@@ -1,179 +1,188 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowDownCircle, ArrowUpCircle, Clock, Info, Shield, ExternalLink } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Clock, RefreshCw, Search, Shield, ExternalLink } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from "@/contexts/AuthContext";
+import { getUBXTransactionHistory } from "@/services/ubxTransactionService";
 
 interface Transaction {
   id: string;
-  date: Date;
+  user_id: string;
   amount: number;
-  type: 'deposit' | 'withdrawal' | 'gift' | 'purchase';
-  description: string;
-  status: 'completed' | 'pending' | 'failed';
-  metadata?: {
-    network?: string;
-    txHash?: string;
-  };
+  transaction_type: string;
+  description?: string;
+  created_at: string;
+  metadata?: any;
 }
 
 const UBXTransactionHistory = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      setLoading(true);
-      try {
-        // In a real app, this would come from an API call
-        // For now, let's use mock data
-        const mockTransactions: Transaction[] = [
-          {
-            id: '1',
-            date: new Date(),
-            amount: 1000,
-            type: 'deposit',
-            description: 'Purchase of Standard UBX package',
-            status: 'completed'
-          },
-          {
-            id: '2',
-            date: new Date(Date.now() - 86400000),
-            amount: 500,
-            type: 'withdrawal',
-            description: 'Gift to EscortUser123',
-            status: 'completed'
-          },
-          {
-            id: '3',
-            date: new Date(Date.now() - 172800000),
-            amount: 200,
-            type: 'purchase',
-            description: 'Access to premium content',
-            status: 'completed'
-          },
-          {
-            id: '4',
-            date: new Date(Date.now() - 259200000),
-            amount: 750,
-            type: 'deposit',
-            description: 'IOTA transfer',
-            status: 'completed',
-            metadata: {
-              network: 'iota',
-              txHash: 'a1b2c3d4e5f6g7h8i9j0'
-            }
-          }
-        ];
-        
-        // Simulate API delay
-        setTimeout(() => {
-          setTransactions(mockTransactions);
-          setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Error fetching UBX transactions', error);
-        setLoading(false);
-      }
-    };
-
     if (user) {
-      fetchTransactions();
-    } else {
-      setLoading(false);
+      loadTransactions();
     }
   }, [user]);
-  
-  const getTransactionIcon = (type: string, metadata?: any) => {
-    if (metadata?.network === 'iota') {
-      return <Shield className="h-5 w-5 text-primary" />;
+
+  useEffect(() => {
+    if (search) {
+      const filtered = transactions.filter(
+        tx => 
+          tx.description?.toLowerCase().includes(search.toLowerCase()) ||
+          tx.transaction_type.toLowerCase().includes(search.toLowerCase())
+      );
+      setFilteredTransactions(filtered);
+    } else {
+      setFilteredTransactions(transactions);
     }
+  }, [search, transactions]);
+
+  const loadTransactions = async () => {
+    if (!user?.id) return;
     
-    switch (type) {
-      case 'deposit':
-        return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
-      case 'withdrawal':
-      case 'gift':
-        return <ArrowUpCircle className="h-5 w-5 text-red-500" />;
-      case 'purchase':
-        return <ArrowUpCircle className="h-5 w-5 text-orange-500" />;
-      default:
-        return <Info className="h-5 w-5 text-blue-500" />;
+    setLoading(true);
+    try {
+      const data = await getUBXTransactionHistory(user.id);
+      setTransactions(data);
+      setFilteredTransactions(data);
+    } catch (error) {
+      console.error("Error fetching transaction history:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getExplorerUrl = (txHash: string) => {
-    return `https://explorer.iota.org/mainnet/message/${txHash}`;
+  const getTransactionIcon = (type: string) => {
+    switch (type) {
+      case 'purchase':
+        return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
+      case 'boost_purchase':
+        return <ArrowUpCircle className="h-5 w-5 text-orange-500" />;
+      case 'gift_sent':
+        return <ArrowUpCircle className="h-5 w-5 text-pink-500" />;
+      case 'gift_received':
+        return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
+      case 'subscription':
+        return <ArrowUpCircle className="h-5 w-5 text-blue-500" />;
+      case 'recharge':
+        return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
+      case 'transfer':
+        return <ArrowUpCircle className="h-5 w-5 text-red-500" />;
+      case 'receive':
+        return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
+      default:
+        return Number(type) > 0 || type.includes('receive') 
+          ? <ArrowDownCircle className="h-5 w-5 text-green-500" /> 
+          : <ArrowUpCircle className="h-5 w-5 text-red-500" />;
+    }
   };
 
-  if (loading) {
+  const getTransactionBadge = (type: string, amount: number) => {
+    const isCredit = type.includes('receive') || amount > 0 || type === 'purchase' || type === 'recharge';
+    
+    let readableType = type.replace(/_/g, ' ');
+    readableType = readableType.charAt(0).toUpperCase() + readableType.slice(1);
+    
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
-          <CardDescription>Your recent UBX transactions</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {Array(3).fill(0).map((_, i) => (
-            <div key={i} className="flex items-center space-x-4 py-2">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <Badge 
+        variant={isCredit ? "success" : "destructive"}
+        className="capitalize"
+      >
+        {readableType}
+      </Badge>
     );
-  }
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Transaction History</CardTitle>
-        <CardDescription>Your recent UBX transactions</CardDescription>
+        <CardTitle className="text-xl">Transaction History</CardTitle>
+        <CardDescription>View your recent UBX transactions</CardDescription>
+        
+        <div className="flex items-center gap-2 mt-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search transactions..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={loadTransactions}
+            disabled={loading}
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        {transactions.length === 0 ? (
-          <div className="text-center py-8">
-            <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No transactions yet</p>
-          </div>
-        ) : (
+        {loading ? (
           <div className="space-y-4">
-            {transactions.map((transaction) => (
-              <div key={transaction.id} className="flex items-start justify-between pb-4 border-b last:border-0 last:pb-0">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1">{getTransactionIcon(transaction.type, transaction.metadata)}</div>
-                  <div>
-                    <p className="font-medium">{transaction.description}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(transaction.date, 'PPp')}
-                    </p>
-                    {transaction.metadata?.txHash && (
-                      <a 
-                        href={getExplorerUrl(transaction.metadata.txHash)} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-xs text-primary hover:underline mt-1 flex items-center gap-1"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        View on explorer
-                      </a>
-                    )}
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between py-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
                   </div>
                 </div>
-                <div className={`text-right ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
-                  <p className="font-medium">
-                    {transaction.type === 'deposit' ? '+' : '-'}{transaction.amount} UBX
-                  </p>
-                  <p className="text-xs text-muted-foreground uppercase">
-                    {transaction.status}
-                  </p>
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ))}
+          </div>
+        ) : filteredTransactions.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            {search ? "No matching transactions found" : "No transactions yet"}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredTransactions.map((tx) => (
+              <div 
+                key={tx.id} 
+                className="flex items-center justify-between p-3 rounded-lg border"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    {getTransactionIcon(tx.transaction_type)}
+                  </div>
+                  <div>
+                    <div className="font-medium">{tx.description || "Transaction"}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getTransactionBadge(tx.transaction_type, tx.amount)}
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(tx.created_at), "MMM d, yyyy h:mm a")}
+                      </span>
+                      {tx.metadata?.transaction_id && (
+                        <a 
+                          href={`https://explorer.solana.com/tx/${tx.metadata.transaction_id}`}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline flex items-center gap-1"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          View
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className={`text-lg font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {tx.amount > 0 ? '+' : ''}{tx.amount} UBX
                 </div>
               </div>
             ))}

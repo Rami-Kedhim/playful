@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { processUBXTransaction, TransactionParams } from '@/services/ubxTransactionService';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface UBXPackage {
   id: string;
@@ -31,13 +32,27 @@ export const useUBX = (): UBXHookReturn => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const processTransaction = async (params: Omit<TransactionParams, 'userId'>): Promise<boolean> => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to perform this operation",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     setIsProcessing(true);
     setError(null);
     
     try {
-      const result = await processUBXTransaction(params);
+      // Include the userId in the params
+      const result = await processUBXTransaction({
+        ...params,
+        userId: user.id
+      });
       
       if (!result.success) {
         setError(result.error || 'Transaction failed');
