@@ -2,8 +2,10 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import ServiceTypeIcon from './ServiceTypeIcon';
+import { ServiceType, isValidServiceType } from './ServiceTypeFilterRules';
 import { cn } from "@/lib/utils";
 
+// Basic service type filter values for location-based filtering
 export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
 
 export interface ServiceTypeInfo {
@@ -41,6 +43,23 @@ export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => 
 
 export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
   return type ? serviceTypeInfoMap[type].badgeLabel : "Any Type";
+};
+
+// Get ethical alternative for potentially unsafe service name
+export const getSafeServiceLabel = (serviceName: string): string => {
+  // First check if it's already a valid service type
+  if (isValidServiceType(serviceName)) {
+    return serviceName;
+  }
+  
+  // Try to remap unsafe terms
+  const remappedService = require('./ServiceTypeFilterRules').remapUnsafeService(serviceName);
+  if (remappedService) {
+    return remappedService;
+  }
+  
+  // If all else fails, just return the original (frontend filtering only - backend validation is separate)
+  return serviceName;
 };
 
 interface ServiceTypeBadgeLabelProps {
