@@ -1,48 +1,51 @@
 
 import React from 'react';
-import { Globe, Users, MapPin, Video } from 'lucide-react';
+import { Globe, Map, Users } from 'lucide-react';
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
-import { cn } from '@/lib/utils';
 
 interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
   size?: number;
-  className?: string;
   variant?: 'default' | 'colored';
+  className?: string;
 }
 
 /**
- * Component that displays the appropriate icon for a service type
- * Supports different visual styles through the variant prop
+ * A component that displays an appropriate icon for service type
  */
 const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
-  type,
+  type, 
   size = 16,
-  className = "",
-  variant = 'default'
+  variant = 'default',
+  className
 }) => {
-  const getColorClass = () => {
-    if (variant !== 'colored') return "";
+  const getIconColor = () => {
+    if (variant !== 'colored') return 'currentColor';
     
-    switch(type) {
-      case "in-person": return "text-blue-500";
-      case "virtual": return "text-purple-500";
-      case "both": return "text-green-500";
-      default: return "text-gray-500";
+    switch (type) {
+      case 'in-person':
+        return '#0ea5e9'; // sky-500
+      case 'virtual':
+        return '#8b5cf6'; // violet-500
+      case 'both':
+        return '#06b6d4'; // cyan-500
+      default:
+        return 'currentColor';
     }
   };
   
-  const iconClass = cn(className, getColorClass());
+  const iconColor = getIconColor();
+  const iconProps = { size, className, color: iconColor };
   
-  switch(type) {
-    case "in-person":
-      return <MapPin size={size} className={iconClass} />;
-    case "virtual":
-      return <Video size={size} className={iconClass} />;
-    case "both":
-      return <Users size={size} className={iconClass} />;
+  switch (type) {
+    case 'in-person':
+      return <Map {...iconProps} />;
+    case 'virtual':
+      return <Globe {...iconProps} />;
+    case 'both':
+      return <Users {...iconProps} />;
     default:
-      return <Globe size={size} className={iconClass} />;
+      return null;
   }
 };
 
