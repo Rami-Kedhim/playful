@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthUser, UserProfile } from '@/types/auth';
 import { toast } from 'sonner';
+import { AuthUser, UserProfile, DatabaseGender } from '@/types/auth';
 
 export const useProfileManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -30,11 +30,29 @@ export const useProfileManagement = () => {
         if (authError) throw authError;
       }
       
+      // Process gender field to ensure it matches DatabaseGender type
+      let processedData = { ...profileData };
+      
+      // Map extended gender values to supported DatabaseGender values
+      if (profileData.gender) {
+        const gender = profileData.gender.toString();
+        if (gender === 'transgender' || gender === 'non-binary' || gender === 'prefer-not-to-say') {
+          // Map these values to 'other' which is a valid DatabaseGender
+          processedData.gender = 'other' as DatabaseGender;
+        } else if (['male', 'female', 'other'].includes(gender)) {
+          // These values are already valid DatabaseGender types
+          processedData.gender = gender as DatabaseGender;
+        } else {
+          // Default fallback
+          processedData.gender = 'other' as DatabaseGender;
+        }
+      }
+      
       // Then update the profile record
       const { error } = await supabase
         .from('profiles')
         .update({
-          ...profileData,
+          ...processedData,
           updated_at: new Date().toISOString()
         })
         .eq('id', profileData.id);
