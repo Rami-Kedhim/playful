@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import AuthForm from "@/components/auth/AuthForm";
 import { useNavigate } from 'react-router-dom';
@@ -9,10 +9,10 @@ import { toast } from 'sonner';
 const AuthPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { login, register, isAuthenticated } = useAuth();
+  const { login, register, isAuthenticated, resetPassword } = useAuth();
   
   // If already authenticated, redirect to home
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) {
       navigate('/');
     }
@@ -65,12 +65,14 @@ const AuthPage = () => {
   const handleForgotPassword = async (email: string) => {
     setIsLoading(true);
     try {
-      // We'll implement this later with Supabase
-      toast.info("Password reset", {
+      await resetPassword(email);
+      toast.success("Password reset email sent", {
         description: `If an account exists for ${email}, we'll send reset instructions.`
       });
-    } catch (error) {
-      toast.error("Password reset failed");
+    } catch (error: any) {
+      toast.error("Password reset failed", {
+        description: error.message || "An unexpected error occurred"
+      });
     } finally {
       setIsLoading(false);
     }

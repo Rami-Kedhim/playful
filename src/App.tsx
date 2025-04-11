@@ -2,7 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
 import HomePage from './pages/HomePage';
 import BrainHubPage from './pages/BrainHubPage';
 import { AuthProvider } from '@/hooks/auth/useAuthContext';
@@ -12,6 +12,7 @@ import AccessDeniedPage from './pages/AccessDeniedPage';
 import ProfilePage from './pages/ProfilePage';
 import EscortDirectoryPage from './pages/EscortDirectory';
 import EscortDetail from './pages/EscortDetail';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/access-denied" element={<AccessDeniedPage />} />
             <Route path="/escorts" element={<EscortDirectoryPage />} />
             <Route path="/escorts/:id" element={<EscortDetail />} />
@@ -52,7 +54,7 @@ function App() {
             {/* Public feature routes - these will be implemented in later phases */}
             <Route path="/creators" element={<ProfilePage />} /> {/* Placeholder - will be implemented later */}
           </Routes>
-          <Toaster />
+          <Toaster position="top-right" />
         </Router>
       </AuthProvider>
     </ThemeProvider>
