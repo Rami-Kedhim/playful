@@ -1,105 +1,159 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { UserCog, Users, PenTool, Heart } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Search, Camera, Users, Heart, ChevronRight } from "lucide-react";
+import ProfileTypeSelection from './ProfileTypeSelection';
+import AIAvatarGenerator, { AIAvatarSettings } from './AIAvatarGenerator';
+import { generateAIAvatars, saveAIAvatar } from '@/services/ai/aiAvatarService';
 
 interface UserRoleStepProps {
   onNext: (data: any) => void;
 }
 
 export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
-  const [role, setRole] = useState<string>('');
-  const [isCreator, setIsCreator] = useState(false);
-  const [isCouple, setIsCouple] = useState(false);
-  const [isLGBTQ, setIsLGBTQ] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [step, setStep] = useState<'role' | 'type' | 'avatar'>('role');
+  const [profileType, setProfileType] = useState<'real' | 'ai' | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedAvatars, setGeneratedAvatars] = useState<string[]>([]);
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+
+  const handleRoleSelect = (role: string) => {
+    setSelectedRole(role);
+  };
 
   const handleContinue = () => {
-    if (role) {
-      onNext({
-        role,
-        isCreator,
-        isCouple,
-        isLGBTQ
-      });
+    if (step === 'role' && selectedRole) {
+      setStep('type');
+    } else if (step === 'type' && profileType) {
+      if (profileType === 'ai') {
+        setStep('avatar');
+      } else {
+        // Skip avatar generation for real profiles
+        handleComplete();
+      }
     }
   };
 
+  const handleBack = () => {
+    if (step === 'type') {
+      setStep('role');
+    } else if (step === 'avatar') {
+      setStep('type');
+    }
+  };
+
+  const handleGenerateAvatars = async (settings: AIAvatarSettings) => {
+    setIsGenerating(true);
+    try {
+      const avatars = await generateAIAvatars(settings);
+      setGeneratedAvatars(avatars);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleAvatarSelected = async (avatarUrl: string) => {
+    setSelectedAvatar(avatarUrl);
+    handleComplete(avatarUrl);
+  };
+
+  const handleComplete = (avatarUrl?: string) => {
+    onNext({
+      role: selectedRole,
+      profileType,
+      isAI: profileType === 'ai',
+      avatarUrl: avatarUrl || null
+    });
+  };
+
+  const roleOptions = [
+    { id: 'client', name: 'Client', icon: <Search className="h-6 w-6" />, description: 'I want to find escorts and content' },
+    { id: 'escort', name: 'Escort', icon: <Heart className="h-6 w-6" />, description: 'I offer in-person services' },
+    { id: 'creator', name: 'Creator', icon: <Camera className="h-6 w-6" />, description: 'I create content and engage with fans' },
+    { id: 'agency', name: 'Agency', icon: <Users className="h-6 w-6" />, description: 'I represent multiple escorts' }
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="text-lg font-medium">How do you want to use UberEscorts?</div>
+      {step === 'role' && (
+        <>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">How will you use UberEscorts?</h2>
+            <p className="text-muted-foreground">Select your primary role on the platform</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {roleOptions.map(role => (
+              <Card
+                key={role.id}
+                className={`p-4 cursor-pointer transition hover:border-primary ${
+                  selectedRole === role.id ? 'border-primary' : ''
+                }`}
+                onClick={() => handleRoleSelect(role.id)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-2 rounded-full ${
+                      selectedRole === role.id ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                    }`}>
+                      {role.icon}
+                    </div>
+                    <div>
+                      <h3 className="font-medium">{role.name}</h3>
+                      <p className="text-sm text-muted-foreground">{role.description}</p>
+                    </div>
+                  </div>
+                  {role.id === 'client' && (
+                    <Badge variant="outline">Most Popular</Badge>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+
+      {step === 'type' && selectedRole && (
+        <ProfileTypeSelection 
+          onSelect={setProfileType}
+          selectedType={profileType || undefined}
+          onNext={handleContinue}
+          userRole={selectedRole}
+        />
+      )}
+
+      {step === 'avatar' && (
+        <AIAvatarGenerator
+          onGenerate={handleGenerateAvatars}
+          onComplete={handleAvatarSelected}
+          isGenerating={isGenerating}
+          generatedAvatars={generatedAvatars}
+        />
+      )}
+
+      <div className="flex justify-between pt-4">
+        {step !== 'role' && (
+          <Button variant="outline" onClick={handleBack}>
+            Back
+          </Button>
+        )}
         
-        <RadioGroup value={role} onValueChange={setRole} className="space-y-3">
-          <div className={`flex items-center space-x-2 rounded-md border p-4 cursor-pointer hover:bg-accent ${role === 'client' ? 'border-primary bg-accent/50' : ''}`} onClick={() => setRole('client')}>
-            <RadioGroupItem value="client" id="role-client" />
-            <div className="flex-1">
-              <div className="flex items-center">
-                <Label htmlFor="role-client" className="text-base font-medium cursor-pointer">I am a Client</Label>
-                <UserCog className="ml-2 h-4 w-4 text-muted-foreground" />
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                I want to explore, message, book, and enjoy
-              </p>
-            </div>
-          </div>
-
-          <div className={`flex items-center space-x-2 rounded-md border p-4 cursor-pointer hover:bg-accent ${role === 'escort' ? 'border-primary bg-accent/50' : ''}`} onClick={() => setRole('escort')}>
-            <RadioGroupItem value="escort" id="role-escort" />
-            <div className="flex-1">
-              <div className="flex items-center">
-                <Label htmlFor="role-escort" className="text-base font-medium cursor-pointer">I am an Escort</Label>
-                <Users className="ml-2 h-4 w-4 text-muted-foreground" />
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                I want to appear in the public directory and monetize my time
-              </p>
-            </div>
-          </div>
-        </RadioGroup>
+        {step === 'role' && (
+          <Button 
+            onClick={handleContinue}
+            disabled={!selectedRole}
+            className="ml-auto"
+          >
+            Continue
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
       </div>
-
-      <div className="space-y-2">
-        <div className="text-sm font-medium">Optional selections:</div>
-        
-        <div className="flex items-start space-x-2 rounded-md border p-3">
-          <Checkbox id="is-creator" checked={isCreator} onCheckedChange={(checked) => setIsCreator(checked === true)} />
-          <div>
-            <div className="flex items-center">
-              <Label htmlFor="is-creator" className="text-sm font-medium cursor-pointer">I also create content</Label>
-              <PenTool className="ml-2 h-3.5 w-3.5 text-muted-foreground" />
-            </div>
-            <p className="text-xs text-muted-foreground">I want to monetize my photos, videos, and other content</p>
-          </div>
-        </div>
-
-        <div className="flex items-start space-x-2 rounded-md border p-3">
-          <Checkbox id="is-couple" checked={isCouple} onCheckedChange={(checked) => setIsCouple(checked === true)} />
-          <div>
-            <Label htmlFor="is-couple" className="text-sm font-medium cursor-pointer">I am part of a couple</Label>
-          </div>
-        </div>
-
-        <div className="flex items-start space-x-2 rounded-md border p-3">
-          <Checkbox id="is-lgbtq" checked={isLGBTQ} onCheckedChange={(checked) => setIsLGBTQ(checked === true)} />
-          <div>
-            <div className="flex items-center">
-              <Label htmlFor="is-lgbtq" className="text-sm font-medium cursor-pointer">I identify as trans / non-binary / other</Label>
-              <Heart className="ml-2 h-3.5 w-3.5 text-muted-foreground" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Button 
-        className="w-full" 
-        onClick={handleContinue}
-        disabled={!role}
-      >
-        Continue
-      </Button>
     </div>
   );
 };
+
+export default UserRoleStep;
