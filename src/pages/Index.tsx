@@ -5,7 +5,7 @@ import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import FeaturedContentSection from "@/components/home/FeaturedContentSection";
-import LucoinSection from "@/components/home/LucoinSection";
+import UBXSection from "@/components/home/UBXSection";
 import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
 import LucieAssistant from "@/components/home/LucieAssistant";
@@ -141,7 +141,7 @@ const Index = () => {
         featuredEscorts={featuredEscorts}
         featuredCreators={featuredCreators}
       />
-      <LucoinSection />
+      <UBXSection />
       <MetaverseSection />
       <TrustSection />
       <CtaSection />

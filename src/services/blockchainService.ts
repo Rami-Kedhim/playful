@@ -1,105 +1,96 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
+// Types for service responses
+interface IOTARechargeSession {
+  id: string;
+  address: string;
+  expires_at: string;
+  status: string;
+  amount_received: number;
+  ubx_credited: number;
+}
+
+interface SolanaTransactionResult {
+  success: boolean;
+  txHash?: string;
+  error?: string;
+}
+
 /**
- * IOTA Blockchain Service for UBX recharge functionality
- * Provides private, feeless transactions for UBX token operations
+ * Service to handle blockchain interactions for the application
+ * Supports both Solana and IOTA integration
  */
+export const blockchainService = {
+  /**
+   * Create a new IOTA recharge session for the user
+   * @param userId The ID of the user
+   * @returns The created recharge session details
+   */
+  createIOTARechargeSession: async (userId: string): Promise<IOTARechargeSession> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-iota-session', {
+        body: { user_id: userId }
+      });
 
-import { supabase } from "@/integrations/supabase/client";
+      if (error) throw new Error(error.message);
+      return data;
+    } catch (error: any) {
+      console.error('Error creating IOTA session:', error);
+      throw new Error(`Failed to create IOTA session: ${error.message}`);
+    }
+  },
 
-// IOTA network configuration
-export enum BlockchainNetwork {
-  IOTA = 'iota'
-}
+  /**
+   * Check the status of an IOTA recharge session
+   * @param sessionId The ID of the recharge session to check
+   * @returns The updated session details
+   */
+  checkIOTASessionStatus: async (sessionId: string): Promise<IOTARechargeSession> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-iota-session', {
+        body: { session_id: sessionId }
+      });
 
-interface NetworkConfig {
-  name: string;
-  displayName: string;
-  logo: string;
-  scannerUrl: string;
-  confirmationTime: string;
-  privacyLevel: 'standard' | 'high';
-}
+      if (error) throw new Error(error.message);
+      return data;
+    } catch (error: any) {
+      console.error('Error checking IOTA session status:', error);
+      throw new Error(`Failed to check IOTA session: ${error.message}`);
+    }
+  },
 
-// Network configuration
-export const NETWORK_CONFIG: NetworkConfig = {
-  name: 'iota',
-  displayName: 'IOTA Network',
-  logo: '/assets/iota-logo.svg', // Would need to be added to assets
-  scannerUrl: 'https://explorer.iota.org/mainnet/message/',
-  confirmationTime: '~10-20 seconds',
-  privacyLevel: 'high',
+  /**
+   * Send Solana for UBX tokens
+   * @param amount Amount of Solana to send
+   * @param packageId ID of the UBX package to purchase
+   * @param walletAddress User's Solana wallet address
+   * @returns Result of the transaction
+   */
+  purchaseUBXWithSolana: async (
+    amount: number,
+    packageId: string,
+    walletAddress: string
+  ): Promise<SolanaTransactionResult> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('process-solana-payment', {
+        body: { 
+          amount,
+          package_id: packageId,
+          wallet_address: walletAddress
+        }
+      });
+
+      if (error) throw new Error(error.message);
+      return data;
+    } catch (error: any) {
+      console.error('Error processing Solana payment:', error);
+      return {
+        success: false,
+        error: `Transaction failed: ${error.message}`
+      };
+    }
+  }
 };
 
-/**
- * Generate a receive address for IOTA network
- * @param userId User ID
- * @returns Object with generated address and QR code data
- */
-export async function generateReceiveAddress(userId: string): Promise<{ address: string; qrCodeData: string }> {
-  try {
-    // Call the edge function to generate an address
-    const { data, error } = await supabase.functions.invoke('iota-service', {
-      body: { user_id: userId },
-    });
-
-    if (error) {
-      console.error("Error generating address:", error);
-      throw new Error(error.message || "Failed to generate address");
-    }
-
-    return {
-      address: data.address,
-      qrCodeData: data.qrCodeData
-    };
-  } catch (error) {
-    console.error("Error in generateReceiveAddress:", error);
-    throw error;
-  }
-}
-
-/**
- * Monitor an address for incoming transactions
- * @param address IOTA address to monitor
- * @param callback Function to call when a transaction is received
- * @returns Function to unsubscribe from monitoring
- */
-export function monitorAddress(address: string, callback: (amount: number, txHash: string) => void) {
-  // In a real implementation, this would use a websocket connection
-  // or polling to monitor for transactions
-  
-  // Mock implementation for development
-  // This simulates receiving a transaction after a random delay
-  const timeout = setTimeout(() => {
-    // Simulate a random transaction amount between 1-5 IOTA
-    const iotaAmount = 1 + Math.random() * 4;
-    // Generate a mock transaction hash
-    const txHash = Array(64).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-    
-    callback(iotaAmount, txHash);
-  }, 8000 + Math.random() * 10000);
-  
-  // Return unsubscribe function
-  return () => {
-    clearTimeout(timeout);
-  };
-}
-
-/**
- * Convert IOTA to UBX at fixed rate
- * @param iotaAmount Amount of IOTA to convert
- * @returns Equivalent UBX amount
- */
-export function convertIotaToUBX(iotaAmount: number): number {
-  // Fixed conversion rate: 1 IOTA = 10 UBX
-  const conversionRate = 10;
-  return Math.round(iotaAmount * conversionRate);
-}
-
-/**
- * Get explorer URL for a transaction
- * @param txHash Transaction hash
- * @returns Explorer URL
- */
-export function getExplorerUrl(txHash: string): string {
-  return `${NETWORK_CONFIG.scannerUrl}${txHash}`;
-}
+export default blockchainService;

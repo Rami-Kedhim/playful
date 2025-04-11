@@ -1,162 +1,104 @@
 
-import { useState, useEffect } from 'react';
-import { SolanaProvider, WalletHookReturn } from '@/types/solana';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { WalletHookReturn, WalletState } from '@/types/solana';
 
 /**
- * Hook for managing Solana wallet connection
+ * Hook for accessing a user's Solana wallet
  */
 export const useSolanaWallet = (): WalletHookReturn => {
-  const [provider, setProvider] = useState<SolanaProvider | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [connecting, setConnecting] = useState<boolean>(false);
-  const [disconnecting, setDisconnecting] = useState<boolean>(false);
-  const { toast } = useToast();
+  const [state, setState] = useState<WalletState>({
+    provider: null,
+    walletAddress: null,
+    connecting: false,
+    disconnecting: false
+  });
+  
+  // Check if wallet is available
+  const hasWallet = typeof window !== 'undefined' && !!(window.solana || window.chainstack?.solana);
 
-  // Check if wallet is available in browser
-  const hasWallet = typeof window !== 'undefined' && 
-    (!!window.solana || (!!window.chainstack && !!window.chainstack.solana));
-
-  // Effect to detect wallet provider and address
+  // Initialize wallet provider
   useEffect(() => {
-    const detectWalletProvider = () => {
-      // Check for Phantom or other injected Solana providers
-      if (window?.solana?.isConnected && window.solana.publicKey) {
-        setProvider(window.solana);
-        setWalletAddress(window.solana.publicKey.toString());
-        return;
-      }
+    const provider = window.solana || window.chainstack?.solana || null;
+    
+    if (provider) {
+      setState(prev => ({
+        ...prev,
+        provider,
+        walletAddress: provider.publicKey ? provider.publicKey.toString() : null
+      }));
       
-      // Check for Chainstack provider
-      if (window?.chainstack?.solana?.isConnected && window?.chainstack?.solana.publicKey) {
-        setProvider(window.chainstack.solana);
-        setWalletAddress(window.chainstack.solana.publicKey.toString());
-        return;
-      }
-      
-      setProvider(null);
-      setWalletAddress(null);
-    };
-
-    if (typeof window !== 'undefined') {
-      detectWalletProvider();
-      
-      // Set up event listeners for wallet changes
-      if (window?.solana) {
-        window.solana.on('connect', detectWalletProvider);
-        window.solana.on('disconnect', detectWalletProvider);
-      }
-      
-      if (window?.chainstack?.solana) {
-        window.chainstack.solana.on('connect', detectWalletProvider);
-        window.chainstack.solana.on('disconnect', detectWalletProvider);
-      }
+      // Listen for account changes
+      provider.on('accountChanged', () => {
+        const address = provider.publicKey ? provider.publicKey.toString() : null;
+        setState(prev => ({ ...prev, walletAddress: address }));
+      });
     }
-
+    
+    // Cleanup event listeners
     return () => {
-      // Clean up listeners
-      if (typeof window !== 'undefined') {
-        if (window?.solana) {
-          // Safely call removeAllListeners if it exists
-          if (window.solana.removeAllListeners) {
-            window.solana.removeAllListeners();
-          }
-        }
-        if (window?.chainstack?.solana) {
-          // Safely call removeAllListeners if it exists
-          if (window.chainstack?.solana.removeAllListeners) {
-            window.chainstack.solana.removeAllListeners();
-          }
-        }
+      if (provider && provider.removeAllListeners) {
+        provider.removeAllListeners();
       }
     };
   }, []);
 
-  // Connect wallet
-  const connectWallet = async () => {
-    if (!hasWallet) {
-      toast({
-        title: "Wallet Not Found",
-        description: "Please install a Solana wallet extension like Phantom or use Chainstack.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setConnecting(true);
-
+  // Connect to wallet
+  const connectWallet = useCallback(async () => {
     try {
-      const preferredProvider = window.chainstack?.solana || window.solana;
+      setState(prev => ({ ...prev, connecting: true }));
       
-      if (!preferredProvider) {
-        throw new Error("No wallet provider available");
+      const provider = window.solana || window.chainstack?.solana;
+      if (!provider) {
+        throw new Error('No Solana wallet found');
       }
       
-      await preferredProvider.connect();
+      const response = await provider.connect();
+      const walletAddress = response.publicKey.toString();
       
-      if (preferredProvider.publicKey) {
-        setProvider(preferredProvider);
-        setWalletAddress(preferredProvider.publicKey.toString());
-        
-        toast({
-          title: "Wallet Connected",
-          description: `Connected to ${preferredProvider.publicKey.toString().substring(0, 6)}...`,
-        });
-      } else {
-        throw new Error("Failed to get wallet public key");
-      }
-    } catch (error: any) {
-      console.error("Wallet connection error:", error);
+      setState(prev => ({
+        ...prev,
+        provider,
+        walletAddress,
+        connecting: false
+      }));
       
-      toast({
-        title: "Connection Failed",
-        description: error.message || "Failed to connect wallet",
-        variant: "destructive",
-      });
-    } finally {
-      setConnecting(false);
+      return walletAddress;
+    } catch (error) {
+      console.error('Error connecting to wallet:', error);
+      setState(prev => ({ ...prev, connecting: false }));
+      throw error;
     }
-  };
+  }, []);
 
-  // Disconnect wallet
-  const disconnectWallet = async () => {
-    if (!provider) return;
-    
-    setDisconnecting(true);
-    
+  // Disconnect from wallet
+  const disconnectWallet = useCallback(async () => {
     try {
-      await provider.disconnect();
+      setState(prev => ({ ...prev, disconnecting: true }));
       
-      setProvider(null);
-      setWalletAddress(null);
+      if (state.provider) {
+        await state.provider.disconnect();
+      }
       
-      toast({
-        title: "Wallet Disconnected",
-        description: "Your wallet has been disconnected",
+      setState({
+        provider: null,
+        walletAddress: null,
+        connecting: false,
+        disconnecting: false
       });
-    } catch (error: any) {
-      console.error("Wallet disconnection error:", error);
-      
-      toast({
-        title: "Disconnection Failed",
-        description: error.message || "Failed to disconnect wallet",
-        variant: "destructive",
-      });
-    } finally {
-      setDisconnecting(false);
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+      setState(prev => ({ ...prev, disconnecting: false }));
+      throw error;
     }
-  };
+  }, [state.provider]);
 
   return {
-    provider,
-    walletAddress,
-    connecting,
-    disconnecting,
+    ...state,
     connectWallet,
     disconnectWallet,
     hasWallet,
-    isConnected: !!walletAddress,
-    isConnecting: connecting, // Add this property to match the interface
+    isConnected: !!state.walletAddress,
+    isConnecting: state.connecting
   };
 };
 

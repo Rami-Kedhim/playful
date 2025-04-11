@@ -38,5 +38,5 @@ export interface WalletHookReturn extends WalletState {
   disconnectWallet: () => Promise<void>;
   hasWallet: boolean;
   isConnected: boolean;
-  isConnecting: boolean; // Add this missing property
+  isConnecting: boolean;
 }
