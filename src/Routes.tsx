@@ -10,7 +10,8 @@ import AuthPage from './pages/AuthPage';
 
 // Use lazy loading for route components
 const HomePage = lazy(() => import('./pages/HomePage'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ProfilePage = lazy(() => import('./pages/Profile'));
+const ProfileEditPage = lazy(() => import('./pages/ProfileEdit'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const MetaversePage = lazy(() => import('./pages/MetaversePage'));
@@ -54,6 +55,11 @@ const AppRoutes: React.FC = () => {
         <Route path="/profile" element={
           <ProtectedRoute>
             <AppLayout><ProfilePage /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile/edit" element={
+          <ProtectedRoute>
+            <AppLayout><ProfileEditPage /></AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/favorites" element={
