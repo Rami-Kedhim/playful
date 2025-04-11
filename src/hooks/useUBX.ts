@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { processUBXTransaction, TransactionParams } from '@/services/ubxTransactionService';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +21,7 @@ export interface UBXHookReturn {
   error: string | null;
   fetchPackages: () => Promise<UBXPackage[]>;
   purchasePackage: (packageId: string) => Promise<boolean>;
+  refreshBalance: () => Promise<number | null>;
 }
 
 /**
@@ -32,7 +32,39 @@ export const useUBX = (): UBXHookReturn => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
+
+  useEffect(() => {
+    if (user?.id) {
+      refreshBalance();
+    }
+  }, [user?.id]);
+
+  const refreshBalance = async (): Promise<number | null> => {
+    if (!user?.id) {
+      return null;
+    }
+
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('lucoin_balance')
+        .eq('id', user.id)
+        .single();
+      
+      if (profileError) {
+        console.error('Error fetching UBX balance:', profileError);
+        return null;
+      }
+      
+      const currentBalance = profileData?.lucoin_balance || 0;
+      setBalance(currentBalance);
+      return currentBalance;
+    } catch (err) {
+      console.error('Failed to refresh UBX balance:', err);
+      return null;
+    }
+  };
 
   const processTransaction = async (params: Omit<TransactionParams, 'userId'>): Promise<boolean> => {
     if (!user?.id) {
@@ -98,8 +130,23 @@ export const useUBX = (): UBXHookReturn => {
     try {
       setIsProcessing(true);
       
-      // Using a fallback approach since we might not have a table yet
-      // In production, this would fetch from a real table
+      // Try to fetch from database first
+      const { data: packagesData, error: packagesError } = await supabase
+        .from('lucoin_package_options')
+        .select('*')
+        .eq('is_active', true)
+        .order('amount', { ascending: true });
+      
+      if (packagesError) {
+        console.error("Error fetching UBX packages:", packagesError);
+      }
+      
+      // If we have data from the database, use that
+      if (packagesData && packagesData.length > 0) {
+        return packagesData;
+      }
+      
+      // Otherwise, use fallback packages
       const packages: UBXPackage[] = [
         {
           id: "pack1",
@@ -170,6 +217,11 @@ export const useUBX = (): UBXHookReturn => {
         metadata: { package_id: packageId }
       });
       
+      if (success) {
+        // Refresh profile to update UBX balance
+        await refreshProfile();
+      }
+      
       return success;
     } catch (err: any) {
       const errorMsg = err.message || 'An unexpected error occurred';
@@ -193,7 +245,8 @@ export const useUBX = (): UBXHookReturn => {
     processTransaction,
     error,
     fetchPackages,
-    purchasePackage
+    purchasePackage,
+    refreshBalance
   };
 };
 

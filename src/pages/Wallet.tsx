@@ -4,57 +4,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw, Shield, ExternalLink } from "lucide-react";
+import { Coins, History, Gift, Zap, Shield, ExternalLink } from "lucide-react";
 import UBXBalance from "@/components/profile/settings/UBXBalance";
 import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
 import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
 import UBXRechargeDialog from "@/components/profile/settings/UBXRechargeDialog";
 import WalletConnect from "@/components/solana/WalletConnect";
-import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { blockchainService, NETWORK_CONFIG } from "@/services/blockchainService";
 import SolanaWalletPanel from "@/components/wallet/SolanaWalletPanel";
+import { Button } from "@/components/ui/button";
+import { blockchainService, NETWORK_CONFIG } from "@/services/blockchainService";
 
 const Wallet = () => {
   const { user, profile } = useAuth();
-  const { walletAddress } = useSolanaWallet();
-  const [solBalance, setSolBalance] = useState<number | null>(null);
-  const [solanaPrice, setSolanaPrice] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
   const [rechargeDialogOpen, setRechargeDialogOpen] = useState(false);
-  
-  useEffect(() => {
-    if (walletAddress) {
-      loadSolanaData(walletAddress);
-    } else {
-      setSolBalance(null);
-    }
-  }, [walletAddress]);
-  
-  const loadSolanaData = async (address: string) => {
-    setLoading(true);
-    try {
-      const [balance, price] = await Promise.all([
-        getFantomBalance(address),
-        getFantomPrice()
-      ]);
-      
-      setSolBalance(balance);
-      setSolanaPrice(price);
-    } catch (error) {
-      console.error("Error loading Solana data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const refreshSolanaData = () => {
-    if (walletAddress) {
-      loadSolanaData(walletAddress);
-    }
-  };
   
   return (
     <AppLayout>
@@ -62,7 +24,7 @@ const Wallet = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-bold">Wallet & Transactions</h1>
-            <p className="text-muted-foreground">Manage your UBX and transactions</p>
+            <p className="text-muted-foreground">Manage your UBX tokens and transactions</p>
           </div>
           <div className="flex gap-2">
             <WalletConnect />
