@@ -32,7 +32,7 @@ const EscortResults = ({
       setLocalLoading(true);
       const timer = setTimeout(() => {
         setLocalLoading(false);
-      }, 300); // Short delay for better UX
+      }, 500); // Slightly longer delay for more noticeable transition
       
       return () => clearTimeout(timer);
     }
@@ -45,7 +45,7 @@ const EscortResults = ({
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array(6).fill(0).map((_, i) => (
+        {Array(9).fill(0).map((_, i) => (
           <div key={i} className="border rounded-lg p-6">
             <Skeleton className="h-48 w-full rounded-md mb-4" />
             <Skeleton className="h-6 w-3/4 mb-2" />
@@ -64,12 +64,12 @@ const EscortResults = ({
   // Shows empty state when no escorts match the filters
   if (!escorts || escorts.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium mb-2">No escorts found</h3>
-        <p className="text-gray-500 mb-6">
+      <div className="text-center py-12 border rounded-lg bg-muted/10 p-8">
+        <h3 className="text-xl font-medium mb-2">No escorts found</h3>
+        <p className="text-muted-foreground mb-6">
           We couldn't find any escorts matching your filters.
         </p>
-        <Button onClick={clearFilters}>
+        <Button onClick={clearFilters} className="px-6 py-2">
           Clear all filters
         </Button>
       </div>
@@ -80,7 +80,7 @@ const EscortResults = ({
     <>
       {/* Results count */}
       <div className="mb-6">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Showing {escorts.length} {escorts.length === 1 ? 'escort' : 'escorts'}
         </p>
       </div>
@@ -97,7 +97,7 @@ const EscortResults = ({
             rating={escort.rating || 0}
             reviews={escort.reviews || 0}
             tags={escort.tags || []}
-            imageUrl={escort.imageUrl || escort.avatar_url || "https://via.placeholder.com/300x400"}
+            imageUrl={escort.imageUrl || escort.avatar_url || "/placeholder-escort.jpg"}
             price={escort.price || 0}
             verified={escort.verified || false}
             gender={escort.gender}
@@ -109,13 +109,14 @@ const EscortResults = ({
         ))}
       </div>
       
-      {/* Pagination - Updated component usage */}
+      {/* Enhanced pagination with improved styling */}
       {totalPages > 1 && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-10 flex justify-center">
           <Pagination 
             totalPages={totalPages}
             currentPage={currentPage}
             onPageChange={setCurrentPage}
+            className="px-2 py-1"
           />
         </div>
       )}
