@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { BoostStatus, BoostPackage } from '@/types/boost';
 import { toast } from '@/hooks/use-toast';
@@ -125,7 +124,7 @@ export const BoostProvider = ({ children }: BoostProviderProps) => {
           id: "boost-standard",
           name: "3-Hour Boost",
           duration,
-          price_lucoin: 15,
+          price_ubx: 15,
           description: "Standard visibility boost package"
         };
         
@@ -171,27 +170,30 @@ export const BoostProvider = ({ children }: BoostProviderProps) => {
       
       // Find the selected package
       // In a real app, this would be fetched from API
-      const packages = [
+      const packages: BoostPackage[] = [
         {
           id: "boost-1",
           name: "1-Hour Boost",
           duration: "01:00:00",
           price_ubx: 5,
-          description: "Quick visibility boost"
+          description: "Quick visibility boost",
+          features: ["Top search position", "Featured badge"]
         },
         {
           id: "boost-3",
           name: "3-Hour Boost",
           duration: "03:00:00",
           price_ubx: 15,
-          description: "Standard visibility boost"
+          description: "Standard visibility boost",
+          features: ["Top search position", "Featured badge", "Profile highlighting"]
         },
         {
           id: "boost-24",
           name: "24-Hour Boost",
           duration: "24:00:00",
           price_ubx: 50,
-          description: "Full day visibility boost"
+          description: "Full day visibility boost",
+          features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
         }
       ];
       
