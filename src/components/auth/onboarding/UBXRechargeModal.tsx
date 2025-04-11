@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Coins, CreditCard, Gift, Wallet } from "lucide-react";
 import { useToast } from '@/components/ui/use-toast';
 import useWallet from '@/hooks/useWallet';
+import useSolanaWallet from '@/hooks/useSolanaWallet';
 
 interface UBXRechargeModalProps {
   isOpen: boolean;
@@ -37,13 +38,14 @@ const UBXRechargeModal: React.FC<UBXRechargeModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const { wallet, loading: walletLoading, error: walletError, refreshWallet, updateBalance } = useWallet();
-  
-  // Check for wallet connection through Solana integration
-  const hasWallet = typeof window !== 'undefined' && 
-    (!!window.solana || (!!window.chainstack && !!window.chainstack.solana));
-  
-  const isConnected = wallet !== null;
-  const walletAddress = wallet?.id || null;
+  const { 
+    hasWallet,
+    isConnected,
+    walletAddress,
+    connectWallet,
+    disconnectWallet,
+    connecting,
+  } = useSolanaWallet();
   
   const handleConnectWallet = async () => {
     if (!hasWallet) {
@@ -55,63 +57,77 @@ const UBXRechargeModal: React.FC<UBXRechargeModalProps> = ({
       return;
     }
     
-    // For now we'll just use the mock implementation
-    // This would be replaced with actual wallet connection logic
-    await refreshWallet();
+    try {
+      await connectWallet();
+    } catch (error: any) {
+      toast({
+        title: "Connection Error",
+        description: error.message || "Could not connect to wallet",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleRecharge = async () => {
     setIsProcessing(true);
     
-    if (rechargeMethod === 'wallet') {
-      if (!isConnected) {
-        await handleConnectWallet();
-        setIsProcessing(false);
-        return;
-      }
-      
-      // Simulate blockchain transaction for recharging
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Add UBX tokens to the user's balance
-      const success = await updateBalance(100); // Add 100 UBX tokens
-      
-      if (success) {
+    try {
+      if (rechargeMethod === 'wallet') {
+        if (!isConnected) {
+          await handleConnectWallet();
+          setIsProcessing(false);
+          return;
+        }
+        
+        // Simulate blockchain transaction for recharging
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Add UBX tokens to the user's balance
+        const success = await updateBalance(100); // Add 100 UBX tokens
+        
+        if (success) {
+          toast({
+            title: "UBX Tokens Added",
+            description: "Your wallet has been recharged with UBX tokens",
+          });
+          onRechargeComplete();
+        } else {
+          toast({
+            title: "Recharge Failed",
+            description: "Failed to add UBX tokens to your wallet",
+            variant: "destructive",
+          });
+        }
+      } else {
+        // Voucher code redemption
+        if (!voucherCode.trim()) {
+          toast({
+            title: "Invalid Voucher",
+            description: "Please enter a valid voucher code",
+            variant: "destructive",
+          });
+          setIsProcessing(false);
+          return;
+        }
+        
+        // Simulate voucher redemption
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         toast({
-          title: "UBX Tokens Added",
-          description: "Your wallet has been recharged with UBX tokens",
+          title: "Voucher Redeemed",
+          description: "Your UBX tokens have been added to your account",
         });
         onRechargeComplete();
-      } else {
-        toast({
-          title: "Recharge Failed",
-          description: "Failed to add UBX tokens to your wallet",
-          variant: "destructive",
-        });
       }
-    } else {
-      // Voucher code redemption
-      if (!voucherCode.trim()) {
-        toast({
-          title: "Invalid Voucher",
-          description: "Please enter a valid voucher code",
-          variant: "destructive",
-        });
-        setIsProcessing(false);
-        return;
-      }
-      
-      // Simulate voucher redemption
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+    } catch (error: any) {
       toast({
-        title: "Voucher Redeemed",
-        description: "Your UBX tokens have been added to your account",
+        title: "Recharge Error",
+        description: error.message || "An error occurred during the recharge process",
+        variant: "destructive",
       });
-      onRechargeComplete();
+    } finally {
+      setIsProcessing(false);
     }
-    
-    setIsProcessing(false);
   };
 
   return (
@@ -155,9 +171,10 @@ const UBXRechargeModal: React.FC<UBXRechargeModalProps> = ({
                     variant="outline" 
                     className="w-full"
                     onClick={handleConnectWallet}
+                    disabled={connecting}
                   >
                     <Wallet className="h-4 w-4 mr-2" />
-                    Connect Wallet
+                    {connecting ? 'Connecting...' : 'Connect Wallet'}
                   </Button>
                 )}
                 

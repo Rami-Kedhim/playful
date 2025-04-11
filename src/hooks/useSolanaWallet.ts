@@ -1,77 +1,156 @@
 
 import { useState, useEffect } from 'react';
+import { SolanaProvider, WalletHookReturn } from '@/types/solana';
 import { useToast } from '@/components/ui/use-toast';
 
 /**
- * Hook for managing IOTA wallet connections
- * (Note: This is currently a mock implementation)
+ * Hook for managing Solana wallet connection
  */
-export function useSolanaWallet() {
+export const useSolanaWallet = (): WalletHookReturn => {
+  const [provider, setProvider] = useState<SolanaProvider | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const [connecting, setConnecting] = useState<boolean>(false);
+  const [disconnecting, setDisconnecting] = useState<boolean>(false);
   const { toast } = useToast();
 
-  // Check for stored wallet connection on mount
+  // Check if wallet is available in browser
+  const hasWallet = typeof window !== 'undefined' && 
+    (!!window.solana || (!!window.chainstack && !!window.chainstack.solana));
+
+  // Effect to detect wallet provider and address
   useEffect(() => {
-    const storedAddress = localStorage.getItem('walletAddress');
-    if (storedAddress) {
-      setWalletAddress(storedAddress);
+    const detectWalletProvider = () => {
+      // Check for Phantom or other injected Solana providers
+      if (window?.solana?.isConnected && window.solana.publicKey) {
+        setProvider(window.solana);
+        setWalletAddress(window.solana.publicKey.toString());
+        return;
+      }
+      
+      // Check for Chainstack provider
+      if (window?.chainstack?.solana?.isConnected && window?.chainstack?.solana.publicKey) {
+        setProvider(window.chainstack.solana);
+        setWalletAddress(window.chainstack.solana.publicKey.toString());
+        return;
+      }
+      
+      setProvider(null);
+      setWalletAddress(null);
+    };
+
+    if (typeof window !== 'undefined') {
+      detectWalletProvider();
+      
+      // Set up event listeners for wallet changes
+      if (window?.solana) {
+        window.solana.on('connect', detectWalletProvider);
+        window.solana.on('disconnect', detectWalletProvider);
+      }
+      
+      if (window?.chainstack?.solana) {
+        window.chainstack.solana.on('connect', detectWalletProvider);
+        window.chainstack.solana.on('disconnect', detectWalletProvider);
+      }
     }
+
+    return () => {
+      // Clean up listeners
+      if (typeof window !== 'undefined') {
+        if (window?.solana) {
+          window.solana.removeAllListeners?.();
+        }
+        if (window?.chainstack?.solana) {
+          window.chainstack.solana.removeAllListeners?.();
+        }
+      }
+    };
   }, []);
 
+  // Connect wallet
   const connectWallet = async () => {
-    setIsConnecting(true);
-    try {
-      // In a real implementation, this would interact with a browser wallet extension
-      // like Firefly IOTA wallet adapter
-      
-      // For demo purposes, simulate a connection delay and generate a mock address
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Generate a mock IOTA address (starting with iota1)
-      const mockAddress = 'iota1' + Array(40).fill(0).map(() => 
-        Math.floor(Math.random() * 16).toString(16)).join('');
-      
-      // Store the address and update state
-      localStorage.setItem('walletAddress', mockAddress);
-      setWalletAddress(mockAddress);
-      
+    if (!hasWallet) {
       toast({
-        title: "Wallet Connected",
-        description: "Your IOTA wallet has been successfully connected.",
+        title: "Wallet Not Found",
+        description: "Please install a Solana wallet extension like Phantom or use Chainstack.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    setConnecting(true);
+
+    try {
+      const preferredProvider = window.chainstack?.solana || window.solana;
       
-      return true;
-    } catch (error) {
-      console.error('Error connecting wallet:', error);
+      if (!preferredProvider) {
+        throw new Error("No wallet provider available");
+      }
+      
+      await preferredProvider.connect();
+      
+      if (preferredProvider.publicKey) {
+        setProvider(preferredProvider);
+        setWalletAddress(preferredProvider.publicKey.toString());
+        
+        toast({
+          title: "Wallet Connected",
+          description: `Connected to ${preferredProvider.publicKey.toString().substring(0, 6)}...`,
+        });
+      } else {
+        throw new Error("Failed to get wallet public key");
+      }
+    } catch (error: any) {
+      console.error("Wallet connection error:", error);
       
       toast({
         title: "Connection Failed",
-        description: "Failed to connect wallet. Please try again.",
+        description: error.message || "Failed to connect wallet",
         variant: "destructive",
       });
-      
-      return false;
     } finally {
-      setIsConnecting(false);
+      setConnecting(false);
     }
   };
 
-  const disconnectWallet = () => {
-    localStorage.removeItem('walletAddress');
-    setWalletAddress(null);
+  // Disconnect wallet
+  const disconnectWallet = async () => {
+    if (!provider) return;
     
-    toast({
-      title: "Wallet Disconnected",
-      description: "Your IOTA wallet has been disconnected.",
-    });
+    setDisconnecting(true);
+    
+    try {
+      await provider.disconnect();
+      
+      setProvider(null);
+      setWalletAddress(null);
+      
+      toast({
+        title: "Wallet Disconnected",
+        description: "Your wallet has been disconnected",
+      });
+    } catch (error: any) {
+      console.error("Wallet disconnection error:", error);
+      
+      toast({
+        title: "Disconnection Failed",
+        description: error.message || "Failed to disconnect wallet",
+        variant: "destructive",
+      });
+    } finally {
+      setDisconnecting(false);
+    }
   };
 
   return {
+    provider,
     walletAddress,
-    isConnected: !!walletAddress,
-    isConnecting,
+    connecting,
+    disconnecting,
     connectWallet,
-    disconnectWallet
+    disconnectWallet,
+    hasWallet,
+    isConnected: !!walletAddress,
   };
-}
+};
+
+export default useSolanaWallet;
