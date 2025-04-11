@@ -3,8 +3,13 @@ import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}
+
+const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -17,6 +22,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
+  }
+
+  // If allowedRoles is specified, check if user has one of the allowed roles
+  if (allowedRoles && allowedRoles.length > 0) {
+    const userRole = user?.role || 'user';
+    if (!allowedRoles.includes(userRole)) {
+      // User doesn't have required role, redirect to access-denied
+      return <Navigate to="/access-denied" replace />;
+    }
   }
 
   return <>{children}</>;

@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Coins } from 'lucide-react';
-import { useUBX } from '@/hooks/useUBX';
+import useUBX from '@/hooks/useUBX';
 import { toast } from '@/components/ui/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 

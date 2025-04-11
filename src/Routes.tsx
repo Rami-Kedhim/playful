@@ -51,13 +51,31 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
         
         {/* Protected routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/profile" element={<AppLayout><ProfilePage /></AppLayout>} />
-          <Route path="/favorites" element={<AppLayout><FavoritesPage /></AppLayout>} />
-          <Route path="/messages" element={<AppLayout><MessagesPage /></AppLayout>} />
-          <Route path="/wallet" element={<AppLayout><WalletPage /></AppLayout>} />
-          <Route path="/updated-wallet" element={<AppLayout><UpdatedWalletPage /></AppLayout>} />
-        </Route>
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <AppLayout><ProfilePage /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/favorites" element={
+          <ProtectedRoute>
+            <AppLayout><FavoritesPage /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <AppLayout><MessagesPage /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/wallet" element={
+          <ProtectedRoute>
+            <AppLayout><WalletPage /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/updated-wallet" element={
+          <ProtectedRoute>
+            <AppLayout><UpdatedWalletPage /></AppLayout>
+          </ProtectedRoute>
+        } />
         
         {/* Public routes */}
         <Route path="/metaverse" element={<AppLayout><MetaversePage /></AppLayout>} />
@@ -73,10 +91,16 @@ const AppRoutes: React.FC = () => {
         <Route path="/livecams/:id" element={<AppLayout><LivecamDetail /></AppLayout>} />
         
         {/* Admin routes */}
-        <Route element={<ProtectedRoute allowedRoles={['admin', 'moderator']} />}>
-          <Route path="/brain-hub" element={<AppLayout><BrainHubPage /></AppLayout>} />
-          <Route path="/nsfw-image-generator" element={<AppLayout><NSFWImageGeneratorPage /></AppLayout>} />
-        </Route>
+        <Route path="/brain-hub" element={
+          <ProtectedRoute>
+            <AppLayout><BrainHubPage /></AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/nsfw-image-generator" element={
+          <ProtectedRoute>
+            <AppLayout><NSFWImageGeneratorPage /></AppLayout>
+          </ProtectedRoute>
+        } />
         
         <Route path="/ai-companion" element={<AppLayout><AICompanionPage /></AppLayout>} />
         <Route path="/service-type-demo" element={<AppLayout><ServiceTypeDemo /></AppLayout>} />
