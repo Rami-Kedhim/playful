@@ -3640,6 +3640,7 @@ export type Database = {
         Row: {
           age_verified: boolean | null
           age_verified_at: string | null
+          ai_settings: Json | null
           allowed_virtual_features: string[] | null
           availability: Json | null
           available: boolean | null
@@ -3670,6 +3671,7 @@ export type Database = {
           interests: string[] | null
           invitation_status: string | null
           is_active: boolean | null
+          is_ai_profile: boolean | null
           is_content_creator: boolean | null
           is_escort: boolean | null
           is_featured: boolean | null
@@ -3753,6 +3755,7 @@ export type Database = {
         Insert: {
           age_verified?: boolean | null
           age_verified_at?: string | null
+          ai_settings?: Json | null
           allowed_virtual_features?: string[] | null
           availability?: Json | null
           available?: boolean | null
@@ -3783,6 +3786,7 @@ export type Database = {
           interests?: string[] | null
           invitation_status?: string | null
           is_active?: boolean | null
+          is_ai_profile?: boolean | null
           is_content_creator?: boolean | null
           is_escort?: boolean | null
           is_featured?: boolean | null
@@ -3868,6 +3872,7 @@ export type Database = {
         Update: {
           age_verified?: boolean | null
           age_verified_at?: string | null
+          ai_settings?: Json | null
           allowed_virtual_features?: string[] | null
           availability?: Json | null
           available?: boolean | null
@@ -3898,6 +3903,7 @@ export type Database = {
           interests?: string[] | null
           invitation_status?: string | null
           is_active?: boolean | null
+          is_ai_profile?: boolean | null
           is_content_creator?: boolean | null
           is_escort?: boolean | null
           is_featured?: boolean | null

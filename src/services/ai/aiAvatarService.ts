@@ -1,98 +1,85 @@
 
-import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { AIAvatarSettings } from "@/components/auth/onboarding/AIAvatarGenerator";
+import { supabase } from '@/integrations/supabase/client';
 
-/**
- * Generate AI avatar images based on the provided settings
- * @param settings Settings for the AI avatar generator
- * @returns Array of URLs to the generated avatar images
- */
+// Mock AI avatar URLs for demonstration
+// In a real implementation, this would call an AI image generation API
+const mockAvatars = {
+  female: {
+    realistic: [
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+    anime: [
+      'https://images.unsplash.com/photo-1519699047748-de8e457a634e?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+    artistic: [
+      'https://images.unsplash.com/photo-1481214110143-ed630356e1bb?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+  },
+  male: {
+    realistic: [
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+    anime: [
+      'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+    artistic: [
+      'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+  },
+  'non-binary': {
+    realistic: [
+      'https://images.unsplash.com/photo-1496345875659-11f7dd282d1d?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+    anime: [
+      'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1484399172022-gd6f5a28b87c?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+    artistic: [
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300&h=300&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=300&h=300&auto=format&fit=crop',
+    ],
+  },
+};
+
+export interface AIAvatarSettings {
+  gender: 'male' | 'female' | 'non-binary';
+  style: 'realistic' | 'anime' | 'artistic';
+  ageRange: number;
+  features?: string[];
+}
+
+// Function to generate AI avatars based on settings
 export const generateAIAvatars = async (settings: AIAvatarSettings): Promise<string[]> => {
-  try {
-    // This would call a Supabase Edge Function that interfaces with Stable Diffusion
-    // For now, we'll simulate with placeholder images
-    const prompt = buildPromptFromSettings(settings);
-    
-    // In a real implementation, call to a Supabase Edge Function that uses Stable Diffusion
-    // const response = await fetch('/api/generate-avatar', {
-    //   method: 'POST',
-    //   body: JSON.stringify({ prompt, settings })
-    // });
-    
-    // For this demo, we'll simulate the API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Generate random avatar URLs for demonstration
-    // In production, these would be the actual generated images
-    const mockAvatars = [
-      `https://source.unsplash.com/random/300x300?portrait,${settings.gender},${settings.ethnicity}&sig=${Math.random()}`,
-      `https://source.unsplash.com/random/300x300?portrait,${settings.gender},${settings.ethnicity}&sig=${Math.random() + 1}`,
-    ];
-    
-    return mockAvatars;
-  } catch (error) {
-    console.error("Failed to generate AI avatars:", error);
-    toast({
-      title: "Error",
-      description: "Failed to generate AI avatars. Please try again.",
-      variant: "destructive",
-    });
-    return [];
-  }
+  // In a real implementation, this would call an AI image generation API
+  // For now, we'll use mock data
+  await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+  
+  // Get the avatar array based on gender and style
+  const avatars = mockAvatars[settings.gender][settings.style];
+  
+  // Return the avatars
+  return avatars;
 };
 
-/**
- * Build a prompt for the AI model based on the user's settings
- */
-const buildPromptFromSettings = (settings: AIAvatarSettings): string => {
-  return `High quality portrait of a ${settings.age} year old ${settings.gender} with ${settings.hairStyle} ${settings.hairColor} hair, ${settings.ethnicity} ethnicity, ${settings.skinTone} skin tone, ${settings.bodyType} body type, wearing ${settings.style} clothing, with a ${settings.background} background.`;
-};
-
-/**
- * Save the selected AI avatar to the user's profile
- * @param userId User ID to associate with the avatar
- * @param avatarUrl URL of the selected avatar
- * @returns URL of the saved avatar
- */
-export const saveAIAvatar = async (userId: string, avatarUrl: string): Promise<string | null> => {
+// Function to save selected AI avatar to user profile
+export const saveAIAvatar = async (avatarUrl: string): Promise<boolean> => {
   try {
-    // In a real implementation, this would download the image and upload it to Supabase storage
-    // For demonstration purposes, we'll just return the URL
+    const { error } = await supabase.from('profiles').update({
+      avatar_url: avatarUrl,
+      is_ai_profile: true,
+    }).eq('id', (await supabase.auth.getUser()).data.user?.id);
     
-    // Example of how this might work:
-    // 1. Download the image
-    // const response = await fetch(avatarUrl);
-    // const blob = await response.blob();
-    // const file = new File([blob], "ai-avatar.png", { type: "image/png" });
-    
-    // 2. Upload to Supabase storage
-    // const filePath = `avatars/${userId}/ai-profile-${Date.now()}.png`;
-    // const { data, error } = await supabase.storage
-    //   .from('profiles')
-    //   .upload(filePath, file);
-    
-    // 3. Get the public URL
-    // if (error) throw error;
-    // const { data: { publicUrl } } = supabase.storage
-    //   .from('profiles')
-    //   .getPublicUrl(filePath);
-    
-    // 4. Update user profile with new avatar URL
-    // await supabase
-    //   .from('profiles')
-    //   .update({ avatar_url: publicUrl, is_ai_profile: true })
-    //   .eq('id', userId);
-    
-    // For demo, just return the original URL
-    return avatarUrl;
+    if (error) throw error;
+    return true;
   } catch (error) {
-    console.error("Failed to save AI avatar:", error);
-    toast({
-      title: "Error",
-      description: "Failed to save avatar. Please try again.",
-      variant: "destructive",
-    });
-    return null;
+    console.error('Error saving AI avatar:', error);
+    return false;
   }
 };
