@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@supabase/auth-helpers-react';
 import { supabase } from '@/integrations/supabase/client';
+import { AuthUser } from '@/types/auth'; // Using existing auth types instead
 
 interface AIProfileContextType {
   isAIProfile: boolean;
@@ -23,7 +23,7 @@ export const useAIProfile = () => useContext(AIProfileContext);
 
 interface AIProfileProviderProps {
   children: React.ReactNode;
-  user: User | null;
+  user: AuthUser | null; // Changed from User to AuthUser
 }
 
 export const AIProfileProvider: React.FC<AIProfileProviderProps> = ({ 
