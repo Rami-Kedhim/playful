@@ -1,111 +1,74 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Star, Calendar, User, Mail, MapPin } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { CalendarDays } from "lucide-react";
 import { format } from "date-fns";
-import UBXWallet from "@/components/wallet/UBXWallet";
 
-interface UserProfileSummaryProps {
-  showSettings?: boolean;
-  showWallet?: boolean;
-}
-
-export const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({
-  showSettings = true,
-  showWallet = true
-}) => {
-  const navigate = useNavigate();
+const UserProfileSummary = () => {
   const { user, profile } = useAuth();
-  
-  if (!user) return null;
-  
+
+  if (!user) {
+    return null;
+  }
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Unknown";
+    try {
+      return format(new Date(dateString), "MMMM d, yyyy");
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex justify-between items-center">
-            <CardTitle>Profile Summary</CardTitle>
-            {showSettings && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/settings')}
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={user.profileImageUrl || profile?.avatar_url} alt="Profile" />
-              <AvatarFallback>
-                {user?.email?.[0]?.toUpperCase() || "U"}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold">
-                {profile?.full_name || user?.username || "User"}
-              </h3>
-              
-              <div className="flex flex-col gap-1 mt-2">
-                {user?.email && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4 mr-2" />
-                    {user.email}
-                  </div>
-                )}
-                
-                {profile?.location && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    {profile.location}
-                  </div>
-                )}
-                
-                {profile?.created_at && (
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Member since {format(new Date(profile.created_at), 'MMM yyyy')}
-                  </div>
-                )}
-              </div>
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-24 w-24">
+            <AvatarImage src={profile?.avatar_url} alt={user.username || "User"} />
+            <AvatarFallback className="text-2xl">
+              {profile?.full_name?.[0] || user.username?.[0] || user.email?.[0] || "U"}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="space-y-1">
+              <h2 className="text-2xl font-semibold leading-none tracking-tight">
+                {profile?.full_name || user.username || "User"}
+              </h2>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {user.role && (
+                <Badge variant="secondary" className="text-xs">
+                  {user.role}
+                </Badge>
+              )}
+              {profile?.isVerified && (
+                <Badge className="bg-blue-500 hover:bg-blue-700 text-xs">
+                  Verified
+                </Badge>
+              )}
             </div>
           </div>
-          
-          <div className="flex flex-wrap gap-2 mt-4">
-            {profile?.is_verified && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-500" />
-                Verified
-              </Badge>
-            )}
-            
-            {/* Use user.role instead of profile.role */}
-            {user?.role && (
-              <Badge variant="outline" className="capitalize">
-                {user.role}
-              </Badge>
-            )}
-            
-            {user?.isCreator && (
-              <Badge variant="secondary">Creator</Badge>
-            )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {profile?.bio && (
+          <div className="mt-2">
+            <p className="text-sm">{profile.bio}</p>
           </div>
-        </CardContent>
-      </Card>
-      
-      {showWallet && (
-        <UBXWallet />
-      )}
-    </div>
+        )}
+        <div className="flex items-center gap-2 mt-4">
+          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
+            Member since {formatDate(user.created_at)}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

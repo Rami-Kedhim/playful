@@ -12,29 +12,45 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, ArrowLeft } from "lucide-react";
+import { useProfileManagement } from "@/hooks/auth/useProfileManagement";
+import { z } from "zod";
+import { profileFormSchema } from "@/components/profile/ProfileFormSchema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import BioField from "@/components/profile/BioField";
+import BasicInfoFields from "@/components/profile/BasicInfoFields";
+import FormActions from "@/components/profile/FormActions";
 
 const ProfileEdit = () => {
   const { user, profile, refreshProfile } = useAuth();
+  const { updateProfile, isLoading, error } = useProfileManagement(user);
   const navigate = useNavigate();
   
-  const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const [activeTab, setActiveTab] = useState("basic");
+  
+  // Initialize form with zod validation
+  const form = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      username: "",
+      full_name: "",
+      bio: "",
+      avatar_url: "",
+    },
+  });
   
   useEffect(() => {
     if (user) {
-      setUsername(user.username || "");
+      form.setValue("username", user.username || "");
     }
     
     if (profile) {
-      setFullName(profile.full_name || "");
-      setBio(profile.bio || "");
-      setAvatarUrl(profile.avatar_url || "");
+      form.setValue("full_name", profile.full_name || "");
+      form.setValue("bio", profile.bio || "");
+      form.setValue("avatar_url", profile.avatar_url || "");
     }
-  }, [user, profile]);
+  }, [user, profile, form]);
   
   if (!user) {
     return (
@@ -48,29 +64,27 @@ const ProfileEdit = () => {
     );
   }
   
-  const handleSaveProfile = async () => {
-    setIsLoading(true);
-    
+  const handleSaveProfile = async (data: z.infer<typeof profileFormSchema>) => {
     try {
-      // In a real implementation, this would save to Supabase
-      // For now, we'll just show a success message
+      const result = await updateProfile(data);
       
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network request
-      
-      toast.success("Profile saved", {
-        description: "Your profile has been updated successfully."
-      });
-      
-      await refreshProfile();
-      
-      navigate("/profile");
-    } catch (error) {
+      if (result.success) {
+        toast.success("Profile saved", {
+          description: "Your profile has been updated successfully."
+        });
+        
+        await refreshProfile();
+        navigate("/profile");
+      } else {
+        toast.error("Error saving profile", {
+          description: result.error || "An error occurred while saving your profile."
+        });
+      }
+    } catch (error: any) {
       console.error("Error saving profile:", error);
       toast.error("Error saving profile", {
-        description: "An error occurred while saving your profile."
+        description: error.message || "An error occurred while saving your profile."
       });
-    } finally {
-      setIsLoading(false);
     }
   };
   
@@ -98,131 +112,99 @@ const ProfileEdit = () => {
               <TabsTrigger value="privacy">Privacy & Security</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="basic">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
-                  <CardDescription>
-                    Update your personal information and how others see you on the platform
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage src={avatarUrl} />
-                      <AvatarFallback>
-                        {username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <Label htmlFor="avatarUrl">Profile Image URL</Label>
-                      <Input
-                        id="avatarUrl"
-                        value={avatarUrl}
-                        onChange={(e) => setAvatarUrl(e.target.value)}
-                        placeholder="https://example.com/avatar.jpg"
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      value={user.email}
-                      disabled 
-                      readOnly
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Your email address cannot be changed
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Your username"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      placeholder="Your full name"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                      placeholder="Tell us about yourself"
-                      className="min-h-[100px]"
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={() => navigate('/profile')}>Cancel</Button>
-                  <Button onClick={handleSaveProfile} disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : 'Save Changes'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="preferences">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Preferences</CardTitle>
-                  <CardDescription>
-                    Customize your experience and preferences
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Preference settings will be available soon.
-                  </p>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={() => navigate('/profile')}>Cancel</Button>
-                  <Button onClick={handleSaveProfile} disabled={isLoading}>Save Changes</Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="privacy">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Privacy & Security</CardTitle>
-                  <CardDescription>
-                    Manage your account security and privacy settings
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Privacy and security settings will be available soon.
-                  </p>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={() => navigate('/profile')}>Cancel</Button>
-                  <Button onClick={handleSaveProfile} disabled={isLoading}>Save Changes</Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSaveProfile)}>
+                <TabsContent value="basic">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Basic Information</CardTitle>
+                      <CardDescription>
+                        Update your personal information and how others see you on the platform
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-20 w-20">
+                          <AvatarImage src={form.watch("avatar_url")} />
+                          <AvatarFallback>
+                            {form.watch("username")?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <FormField
+                            control={form.control}
+                            name="avatar_url"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Profile Image URL</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    placeholder="https://example.com/avatar.jpg"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input 
+                          id="email" 
+                          value={user.email}
+                          disabled 
+                          readOnly
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Your email address cannot be changed
+                        </p>
+                      </div>
+                      
+                      <BasicInfoFields />
+                      <BioField />
+                    </CardContent>
+                    <FormActions loading={isLoading} />
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="preferences">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Preferences</CardTitle>
+                      <CardDescription>
+                        Customize your experience and preferences
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">
+                        Preference settings will be available soon.
+                      </p>
+                    </CardContent>
+                    <FormActions loading={isLoading} />
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="privacy">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Privacy & Security</CardTitle>
+                      <CardDescription>
+                        Manage your account security and privacy settings
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">
+                        Privacy and security settings will be available soon.
+                      </p>
+                    </CardContent>
+                    <FormActions loading={isLoading} />
+                  </Card>
+                </TabsContent>
+              </form>
+            </Form>
           </Tabs>
         </div>
       </div>
