@@ -1,7 +1,6 @@
 
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
-import { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
-import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { ServiceTypeFilter, getServiceTypeBadgeLabel } from '../filters/ServiceTypeBadgeLabel';
 
 interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
@@ -17,86 +16,49 @@ interface ServiceTypeContextType {
 
 const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(undefined);
 
-interface ServiceTypeProviderProps {
-  children: ReactNode;
-  initialServiceType?: ServiceTypeFilter;
-  onServiceTypeChange?: (type: ServiceTypeFilter) => void;
-}
-
-export const ServiceTypeProvider = ({ 
-  children, 
-  initialServiceType = "",
-  onServiceTypeChange
-}: ServiceTypeProviderProps) => {
-  const [serviceType, setServiceTypeState] = useState<ServiceTypeFilter>(initialServiceType);
-  const { toast } = useToast();
-
-  // Wrap the setState to call the callback if provided
-  const setServiceType = (type: ServiceTypeFilter) => {
-    setServiceTypeState(type);
-    if (onServiceTypeChange) {
-      onServiceTypeChange(type);
-    }
-  };
+export function ServiceTypeProvider({ children }: { children: ReactNode }) {
+  const [serviceType, setServiceType] = useState<ServiceTypeFilter>("");
   
-  // Clear the service type selection
-  const clearServiceType = () => {
-    setServiceType("");
-  };
+  const isInPersonService = serviceType === 'in-person' || serviceType === 'both';
+  const isVirtualService = serviceType === 'virtual' || serviceType === 'both';
+  const isBothServiceTypes = serviceType === 'both';
+  const isAnyServiceType = serviceType === '';
   
-  // Toggle service type - if the current type is passed, it will be cleared
+  const clearServiceType = () => setServiceType("");
+  
   const toggleServiceType = (type: ServiceTypeFilter) => {
     if (serviceType === type) {
-      clearServiceType();
-      toast({
-        title: "Service Type Cleared",
-        description: "Showing all service types",
-      });
+      setServiceType("");
     } else {
       setServiceType(type);
-      toast({
-        title: "Service Type Updated",
-        description: getServiceTypeLabel(),
-      });
     }
   };
   
-  // Get a human-readable label for the current service type
-  const getServiceTypeLabel = () => {
-    switch(serviceType) {
-      case "in-person": return "Showing In-Person Services";
-      case "virtual": return "Showing Virtual Services";
-      case "both": return "Showing Services with Both Options";
-      default: return "Showing All Service Types";
-    }
-  };
+  const getServiceTypeLabel = () => getServiceTypeBadgeLabel(serviceType);
   
-  // Derived state
-  const contextValue = useMemo(() => ({
-    serviceType,
-    setServiceType,
-    isInPersonService: serviceType === 'in-person' || serviceType === 'both',
-    isVirtualService: serviceType === 'virtual' || serviceType === 'both',
-    isBothServiceTypes: serviceType === 'both',
-    isAnyServiceType: serviceType === '',
-    clearServiceType,
-    toggleServiceType,
-    getServiceTypeLabel
-  }), [serviceType]);
-
   return (
-    <ServiceTypeContext.Provider value={contextValue}>
+    <ServiceTypeContext.Provider
+      value={{
+        serviceType,
+        setServiceType,
+        isInPersonService,
+        isVirtualService,
+        isBothServiceTypes,
+        isAnyServiceType,
+        clearServiceType,
+        toggleServiceType,
+        getServiceTypeLabel
+      }}
+    >
       {children}
     </ServiceTypeContext.Provider>
   );
-};
+}
 
-export const useServiceType = (): ServiceTypeContextType => {
+export function useServiceType() {
   const context = useContext(ServiceTypeContext);
   if (context === undefined) {
     throw new Error('useServiceType must be used within a ServiceTypeProvider');
   }
   return context;
-};
-
-export default ServiceTypeContext;
+}

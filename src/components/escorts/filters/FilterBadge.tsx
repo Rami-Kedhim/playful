@@ -1,50 +1,52 @@
 
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React from 'react';
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FilterBadgeProps {
   label: string;
   onRemove: () => void;
+  variant?: "default" | "secondary" | "outline";
+  size?: "sm" | "default";
   icon?: React.ReactNode;
-  variant?: 'default' | 'outline' | 'secondary' | 'destructive';
+  className?: string;
 }
 
-const FilterBadge = ({ 
-  label, 
-  onRemove, 
+/**
+ * A badge component for displaying filters with a remove button
+ */
+const FilterBadge: React.FC<FilterBadgeProps> = ({
+  label,
+  onRemove,
+  variant = "default",
+  size = "default",
   icon,
-  variant = 'default'
-}: FilterBadgeProps) => {
-  const variantClasses = {
-    default: "bg-primary/10 text-primary hover:bg-primary/20 border-primary/20",
-    outline: "bg-background border border-input hover:bg-accent hover:text-accent-foreground",
-    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-    destructive: "bg-destructive/10 text-destructive hover:bg-destructive/20"
-  };
-
+  className
+}) => {
   return (
-    <div
+    <Badge 
+      variant={variant}
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold",
-        "transition-colors border focus:outline-none focus:ring-2",
-        "focus:ring-ring focus:ring-offset-2",
-        variantClasses[variant]
+        "gap-1.5 px-2 py-0.5 cursor-default group",
+        size === "sm" && "text-xs h-5",
+        className
       )}
     >
-      {icon && (
-        <span className="mr-1 flex items-center justify-center">
-          {icon}
-        </span>
-      )}
+      {icon && <span className="flex items-center">{icon}</span>}
       <span>{label}</span>
-      <button
-        onClick={onRemove}
-        className="ml-1 rounded-full p-0.5 hover:bg-background/20 transition-colors focus:outline-none"
-        aria-label={`Remove ${label} filter`}
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="rounded-full flex items-center justify-center 
+                   hover:bg-primary-foreground transition-colors
+                   group-hover:bg-background/50"
       >
-        <X className="h-3 w-3" />
+        <X size={size === "sm" ? 12 : 14} />
       </button>
-    </div>
+    </Badge>
   );
 };
 
