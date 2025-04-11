@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
 /**
- * Hook for managing Solana wallet connections
+ * Hook for managing IOTA wallet connections
  * (Note: This is currently a mock implementation)
  */
 export function useSolanaWallet() {
@@ -23,13 +23,13 @@ export function useSolanaWallet() {
     setIsConnecting(true);
     try {
       // In a real implementation, this would interact with a browser wallet extension
-      // like Phantom or Solana Wallet Adapter
+      // like Firefly IOTA wallet adapter
       
       // For demo purposes, simulate a connection delay and generate a mock address
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Generate a mock Solana address
-      const mockAddress = 'io1a' + Array(40).fill(0).map(() => 
+      // Generate a mock IOTA address (starting with iota1)
+      const mockAddress = 'iota1' + Array(40).fill(0).map(() => 
         Math.floor(Math.random() * 16).toString(16)).join('');
       
       // Store the address and update state

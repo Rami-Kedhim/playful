@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowDownCircle, ArrowUpCircle, Clock, Info } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Clock, Info, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,10 @@ interface Transaction {
   type: 'deposit' | 'withdrawal' | 'gift' | 'purchase';
   description: string;
   status: 'completed' | 'pending' | 'failed';
+  metadata?: {
+    network?: string;
+    txHash?: string;
+  };
 }
 
 const UBXTransactionHistory = () => {
@@ -50,6 +54,18 @@ const UBXTransactionHistory = () => {
             type: 'purchase',
             description: 'Access to premium content',
             status: 'completed'
+          },
+          {
+            id: '4',
+            date: new Date(Date.now() - 259200000),
+            amount: 750,
+            type: 'deposit',
+            description: 'IOTA transfer',
+            status: 'completed',
+            metadata: {
+              network: 'iota',
+              txHash: 'a1b2c3d4e5f6g7h8i9j0'
+            }
           }
         ];
         
@@ -71,7 +87,11 @@ const UBXTransactionHistory = () => {
     }
   }, [user]);
   
-  const getTransactionIcon = (type: string) => {
+  const getTransactionIcon = (type: string, metadata?: any) => {
+    if (metadata?.network === 'iota') {
+      return <Shield className="h-5 w-5 text-primary" />;
+    }
+    
     switch (type) {
       case 'deposit':
         return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
@@ -83,6 +103,10 @@ const UBXTransactionHistory = () => {
       default:
         return <Info className="h-5 w-5 text-blue-500" />;
     }
+  };
+
+  const getExplorerUrl = (txHash: string) => {
+    return `https://explorer.iota.org/mainnet/message/${txHash}`;
   };
 
   if (loading) {
@@ -124,12 +148,23 @@ const UBXTransactionHistory = () => {
             {transactions.map((transaction) => (
               <div key={transaction.id} className="flex items-start justify-between pb-4 border-b last:border-0 last:pb-0">
                 <div className="flex items-start gap-3">
-                  <div className="mt-1">{getTransactionIcon(transaction.type)}</div>
+                  <div className="mt-1">{getTransactionIcon(transaction.type, transaction.metadata)}</div>
                   <div>
                     <p className="font-medium">{transaction.description}</p>
                     <p className="text-sm text-muted-foreground">
                       {format(transaction.date, 'PPp')}
                     </p>
+                    {transaction.metadata?.txHash && (
+                      <a 
+                        href={getExplorerUrl(transaction.metadata.txHash)} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline mt-1 flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        View on explorer
+                      </a>
+                    )}
                   </div>
                 </div>
                 <div className={`text-right ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
