@@ -35,6 +35,25 @@ interface FilterSidebarContentProps {
   setAvailableNow?: (available: boolean) => void;
   serviceTypeFilter: ServiceTypeFilter;
   setServiceTypeFilter: (type: ServiceTypeFilter) => void;
+  // New properties for EnhancedEscortFilters compatibility
+  heightRange?: [number, number];
+  setHeightRange?: (range: number[]) => void;
+  weightRange?: [number, number];
+  setWeightRange?: (range: number[]) => void;
+  selectedLanguages?: string[];
+  toggleLanguage?: (language: string) => void;
+  selectedHairColors?: string[];
+  toggleHairColor?: (color: string) => void;
+  selectedEyeColors?: string[];
+  toggleEyeColor?: (color: string) => void;
+  selectedEthnicities?: string[];
+  toggleEthnicity?: (ethnicity: string) => void;
+  selectedBodyTypes?: string[];
+  toggleBodyType?: (bodyType: string) => void;
+  selectedDays?: string[];
+  toggleDay?: (day: string) => void;
+  selectedHours?: string[];
+  toggleHour?: (hour: string) => void;
 }
 
 const FilterSidebarContent = ({

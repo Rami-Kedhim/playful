@@ -16,6 +16,7 @@ interface FilterCriteria {
   ratingMin?: number;
   availableNow?: boolean;
   serviceTypeFilter?: ServiceTypeFilter;
+  sortBy?: string; // Add this property to fix the TypeScript error
 }
 
 // Sort options

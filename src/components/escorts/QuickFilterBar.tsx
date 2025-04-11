@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { ServiceTypeQuickFilter } from '@/components/escorts/filters/ServiceTypeQuickFilter';
+import ServiceTypeQuickFilter from '@/components/escorts/filters/ServiceTypeQuickFilter';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import { BadgeCheck, Clock, Map, Star, Tags } from 'lucide-react';
 

@@ -58,6 +58,12 @@ const MobileFilterCard = ({
   serviceTypeFilter,
   setServiceTypeFilter
 }: MobileFilterCardProps) => {
+  // Ensure ageRange is a tuple of [number, number]
+  const typedAgeRange: [number, number] = [
+    ageRange[0] ?? 18, 
+    ageRange[1] ?? 50
+  ];
+  
   return (
     <Card className="mb-6">
       <MobileFilterHeader setShowFilters={setShowFilters} />
@@ -67,7 +73,7 @@ const MobileFilterCard = ({
           setSearchQuery={setSearchQuery}
           location={location}
           setLocation={setLocation}
-          priceRange={priceRange}
+          priceRange={priceRange as [number, number]}
           setPriceRange={setPriceRange}
           verifiedOnly={verifiedOnly}
           setVerifiedOnly={setVerifiedOnly}
@@ -80,7 +86,7 @@ const MobileFilterCard = ({
           toggleGender={toggleGender}
           selectedOrientations={selectedOrientations}
           toggleOrientation={toggleOrientation}
-          ageRange={ageRange as [number, number]}
+          ageRange={typedAgeRange}
           setAgeRange={setAgeRange}
           ratingMin={ratingMin}
           setRatingMin={setRatingMin}
