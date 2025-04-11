@@ -80,7 +80,7 @@ export const useFilterStateWithUrl = <T extends UrlSyncedFilterState>({
     if (hasChanges) {
       setFilters(newFilters as T);
     }
-  }, []);
+  }, [searchParams, defaultValues, setFilters]);
 
   // Update URL when filters change
   const updateUrl = (newFilters: T) => {

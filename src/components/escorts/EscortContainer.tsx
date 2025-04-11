@@ -1,6 +1,4 @@
-
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useState } from "react";
 import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FilterSidebar from "@/components/escorts/FilterSidebar";
@@ -8,10 +6,9 @@ import MobileFilterCard from "@/components/escorts/MobileFilterCard";
 import SearchBar from "@/components/escorts/SearchBar";
 import AppliedFilters from "@/components/escorts/AppliedFilters";
 import EscortResults from "@/components/escorts/EscortResults";
-import { useEscortFilter } from "@/hooks/useEscortFilter";
+import { useEscortFilterWithUrl } from "@/hooks/useEscortFilterWithUrl";
 import { Escort } from "@/types/escort";
 import QuickFilterBar from "./QuickFilterBar";
-import FilterSystem from "./FilterSystem";
 
 interface EscortContainerProps {
   escorts: Escort[];
@@ -21,12 +18,11 @@ interface EscortContainerProps {
 
 const EscortContainer = ({ escorts, services, isLoading: externalLoading = false }: EscortContainerProps) => {
   const [showFilters, setShowFilters] = useState(false);
-  const location = useLocation();
   
   const {
     searchQuery,
     setSearchQuery,
-    location: locationFilter,
+    location,
     setLocation,
     priceRange,
     handlePriceRangeChange,
@@ -57,16 +53,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
     setAvailableNow,
     serviceTypeFilter,
     setServiceTypeFilter
-  } = useEscortFilter({ escorts });
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const typeParam = params.get('type');
-    
-    if (typeParam && ['in-person', 'virtual', 'both'].includes(typeParam)) {
-      setServiceTypeFilter(typeParam as "in-person" | "virtual" | "both" | "");
-    }
-  }, [location.search, setServiceTypeFilter]);
+  } = useEscortFilterWithUrl({ escorts });
 
   // Consider both internal and external loading states
   const combinedIsLoading = isLoading || externalLoading;
@@ -93,7 +80,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
         setVerifiedOnly={setVerifiedOnly}
         availableNow={availableNow}
         setAvailableNow={setAvailableNow}
-        location={locationFilter}
+        location={location}
         onLocationClick={() => setShowFilters(true)}
         onShowMoreFilters={() => setShowFilters(true)}
         className="mb-6 md:mb-8"
@@ -106,7 +93,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
           <FilterSidebar 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            location={locationFilter}
+            location={location}
             setLocation={setLocation}
             priceRange={priceRange}
             setPriceRange={handlePriceRangeChange}
@@ -136,7 +123,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
             <MobileFilterCard 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              location={locationFilter}
+              location={location}
               setLocation={setLocation}
               priceRange={priceRange}
               setPriceRange={handlePriceRangeChange}
@@ -174,7 +161,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
           <AppliedFilters 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            location={locationFilter}
+            location={location}
             setLocation={setLocation}
             priceRange={priceRange}
             setPriceRange={handlePriceRangeChange}
