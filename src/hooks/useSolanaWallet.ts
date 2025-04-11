@@ -57,10 +57,16 @@ export const useSolanaWallet = (): WalletHookReturn => {
       // Clean up listeners
       if (typeof window !== 'undefined') {
         if (window?.solana) {
-          window.solana.removeAllListeners?.();
+          // Safely call removeAllListeners if it exists
+          if (window.solana.removeAllListeners) {
+            window.solana.removeAllListeners();
+          }
         }
         if (window?.chainstack?.solana) {
-          window.chainstack.solana.removeAllListeners?.();
+          // Safely call removeAllListeners if it exists
+          if (window.chainstack?.solana.removeAllListeners) {
+            window.chainstack.solana.removeAllListeners();
+          }
         }
       }
     };
@@ -150,6 +156,7 @@ export const useSolanaWallet = (): WalletHookReturn => {
     disconnectWallet,
     hasWallet,
     isConnected: !!walletAddress,
+    isConnecting: connecting, // Add this property to match the interface
   };
 };
 

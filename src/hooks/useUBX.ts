@@ -2,12 +2,25 @@
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { processUBXTransaction, TransactionParams } from '@/services/ubxTransactionService';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface UBXPackage {
+  id: string;
+  name: string;
+  amount: number;
+  price: number;
+  price_sol?: number;
+  bonus_amount?: number;
+  is_featured?: boolean;
+}
 
 export interface UBXHookReturn {
   balance: number;
   isProcessing: boolean;
   processTransaction: (params: Omit<TransactionParams, 'userId'>) => Promise<boolean>;
   error: string | null;
+  fetchPackages: () => Promise<UBXPackage[]>;
+  purchasePackage: (packageId: string) => Promise<boolean>;
 }
 
 /**
@@ -63,11 +76,109 @@ export const useUBX = (): UBXHookReturn => {
     }
   };
 
+  /**
+   * Fetch available UBX packages
+   */
+  const fetchPackages = async (): Promise<UBXPackage[]> => {
+    try {
+      setIsProcessing(true);
+      
+      // Using a fallback approach since we might not have a table yet
+      // In production, this would fetch from a real table
+      const packages: UBXPackage[] = [
+        {
+          id: "pack1",
+          name: "Basic Pack",
+          amount: 100,
+          price: 0,
+          price_sol: 0.05,
+          bonus_amount: 0,
+          is_featured: false
+        },
+        {
+          id: "pack2",
+          name: "Standard Pack",
+          amount: 500,
+          price: 0,
+          price_sol: 0.2,
+          bonus_amount: 50,
+          is_featured: true
+        },
+        {
+          id: "pack3",
+          name: "Premium Pack",
+          amount: 1000,
+          price: 0,
+          price_sol: 0.35,
+          bonus_amount: 150,
+          is_featured: false
+        }
+      ];
+      
+      return packages;
+    } catch (err: any) {
+      const errorMsg = err.message || 'An unexpected error occurred';
+      setError(errorMsg);
+      
+      toast({
+        title: "Error Loading Packages",
+        description: errorMsg,
+        variant: "destructive"
+      });
+      
+      return [];
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /**
+   * Purchase UBX package
+   */
+  const purchasePackage = async (packageId: string): Promise<boolean> => {
+    try {
+      setIsProcessing(true);
+      
+      // Find the package from fetchPackages
+      const packages = await fetchPackages();
+      const selectedPackage = packages.find(p => p.id === packageId);
+      
+      if (!selectedPackage) {
+        throw new Error("Package not found");
+      }
+      
+      // Process the transaction
+      const success = await processTransaction({
+        amount: selectedPackage.amount + (selectedPackage.bonus_amount || 0),
+        transactionType: 'purchase',
+        description: `Purchased ${selectedPackage.name} package`,
+        metadata: { package_id: packageId }
+      });
+      
+      return success;
+    } catch (err: any) {
+      const errorMsg = err.message || 'An unexpected error occurred';
+      setError(errorMsg);
+      
+      toast({
+        title: "Purchase Failed",
+        description: errorMsg,
+        variant: "destructive"
+      });
+      
+      return false;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return {
     balance,
     isProcessing,
     processTransaction,
-    error
+    error,
+    fetchPackages,
+    purchasePackage
   };
 };
 

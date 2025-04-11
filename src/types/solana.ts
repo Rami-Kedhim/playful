@@ -6,6 +6,7 @@ export interface SolanaProvider {
   disconnect: () => Promise<void>;
   on: (event: string, callback: () => void) => void;
   publicKey: { toString: () => string } | null;
+  removeAllListeners?: () => void;
 }
 
 // Chainstack connection type
@@ -37,4 +38,5 @@ export interface WalletHookReturn extends WalletState {
   disconnectWallet: () => Promise<void>;
   hasWallet: boolean;
   isConnected: boolean;
+  isConnecting: boolean; // Add this missing property
 }
