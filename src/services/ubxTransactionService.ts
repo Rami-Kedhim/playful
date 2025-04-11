@@ -1,67 +1,77 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
 
 export interface TransactionParams {
+  userId: string;
   amount: number;
-  userId?: string;
   transactionType: string;
   description?: string;
   metadata?: Record<string, any>;
 }
 
-/**
- * Process a UBX token transaction through the Supabase edge function
- * @param params Transaction parameters
- * @returns Promise resolving to the processed transaction result
- */
-export const processUBXTransaction = async (params: TransactionParams): Promise<{
+export interface TransactionResult {
   success: boolean;
-  newBalance?: number;
   message?: string;
   error?: string;
-}> => {
+  newBalance?: number;
+}
+
+/**
+ * Processes a UBX token transaction using the Supabase Edge Function
+ */
+export const processUBXTransaction = async (params: TransactionParams): Promise<TransactionResult> => {
   try {
-    // Get current user ID if not provided
-    const userId = params.userId || (await supabase.auth.getUser()).data.user?.id;
-    
-    if (!userId) {
-      return { 
-        success: false, 
-        error: 'User not authenticated' 
-      };
-    }
-    
-    // Call the Supabase Edge Function to process the transaction
     const { data, error } = await supabase.functions.invoke('process-ubx-transaction', {
       body: {
-        user_id: userId,
+        user_id: params.userId,
         amount: params.amount,
         transaction_type: params.transactionType,
         description: params.description,
-        metadata: params.metadata || {}
+        metadata: params.metadata
       }
     });
     
     if (error) {
-      console.error('UBX transaction processing error:', error);
-      return { 
-        success: false, 
-        error: error.message || 'Failed to process transaction' 
+      console.error('UBX transaction error:', error);
+      return {
+        success: false,
+        error: error.message || 'Transaction failed'
       };
     }
     
-    return { 
+    return {
       success: true,
-      newBalance: data.new_balance,
-      message: data.message
+      message: data.message,
+      newBalance: data.new_balance
     };
+  } catch (err: any) {
+    console.error('UBX transaction service error:', err);
+    return {
+      success: false,
+      error: err.message || 'An unexpected error occurred'
+    };
+  }
+};
+
+/**
+ * Get UBX transaction history for a user
+ */
+export const getUBXTransactionHistory = async (userId: string): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('lucoin_transactions')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
     
-  } catch (error: any) {
-    console.error('UBX transaction service error:', error);
-    return { 
-      success: false, 
-      error: error.message || 'An unexpected error occurred' 
-    };
+    if (error) {
+      console.error('Error fetching UBX transactions:', error);
+      throw error;
+    }
+    
+    return data || [];
+  } catch (err) {
+    console.error('UBX transaction history error:', err);
+    return [];
   }
 };
