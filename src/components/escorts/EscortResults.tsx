@@ -6,6 +6,7 @@ import EscortCard from "@/components/cards/EscortCard";
 import { Escort } from "@/types/escort";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BadgeCheck, Calendar, MapPin } from "lucide-react";
+import ServiceTypeBadgeLabel from "./filters/ServiceTypeBadgeLabel";
 
 interface EscortResultsProps {
   escorts: Escort[];
@@ -77,15 +78,23 @@ const EscortResults = ({
     );
   }
   
+  // Count escorts by service type
+  const inPersonCount = escorts.filter(e => e.providesInPersonServices || e.serviceTypes?.includes('in-person')).length;
+  const virtualCount = escorts.filter(e => e.providesVirtualContent || e.serviceTypes?.includes('virtual')).length;
+  const bothCount = escorts.filter(e => 
+    (e.providesInPersonServices || e.serviceTypes?.includes('in-person')) && 
+    (e.providesVirtualContent || e.serviceTypes?.includes('virtual'))
+  ).length;
+  
   return (
     <>
       {/* Results header with count and sorting options */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <p className="text-sm text-muted-foreground">
           Showing {escorts.length} {escorts.length === 1 ? 'escort' : 'escorts'}
         </p>
         
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex flex-wrap items-center gap-4 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <BadgeCheck className="h-4 w-4 text-green-500" />
             <span>{escorts.filter(e => e.verified).length} Verified</span>
@@ -95,6 +104,20 @@ const EscortResults = ({
             <Calendar className="h-4 w-4 text-blue-500" />
             <span>{escorts.filter(e => e.availableNow).length} Available now</span>
           </div>
+          
+          {inPersonCount > 0 && (
+            <div className="hidden sm:flex">
+              <ServiceTypeBadgeLabel type="in-person" />
+              <span className="ml-1 text-muted-foreground">{inPersonCount}</span>
+            </div>
+          )}
+          
+          {virtualCount > 0 && (
+            <div className="hidden sm:flex">
+              <ServiceTypeBadgeLabel type="virtual" />
+              <span className="ml-1 text-muted-foreground">{virtualCount}</span>
+            </div>
+          )}
         </div>
       </div>
       
@@ -113,7 +136,7 @@ const EscortResults = ({
             imageUrl={escort.imageUrl || escort.avatar_url || "/placeholder-escort.jpg"}
             price={escort.price || 0}
             verified={escort.verified || false}
-            gender={escort.gender}
+            gender={escort.gender || ""}
             sexualOrientation={escort.sexualOrientation}
             availableNow={escort.availableNow || false}
             lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}

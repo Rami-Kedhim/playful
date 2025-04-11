@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Escort } from "@/types/escort";
 
@@ -56,16 +57,16 @@ export const useFilterResults = (
       // Filter by search query
       if (searchQuery) {
         filtered = filtered.filter(escort => 
-          escort.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          escort.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
           escort.bio?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          escort.location.toLowerCase().includes(searchQuery.toLowerCase())
+          escort.location?.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
       
       // Filter by location
       if (location) {
         filtered = filtered.filter(escort => 
-          escort.location.toLowerCase().includes(location.toLowerCase())
+          escort.location?.toLowerCase().includes(location.toLowerCase())
         );
       }
       
@@ -159,10 +160,10 @@ export const useFilterResults = (
           sorted.sort((a, b) => (b.price || 0) - (a.price || 0));
           break;
         case 'rating':
-          sorted.sort((a, b) => b.rating - a.rating);
+          sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
           break;
         case 'name':
-          sorted.sort((a, b) => a.name.localeCompare(b.name));
+          sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
           break;
         default:
           // Default sorting (newest/featured)
