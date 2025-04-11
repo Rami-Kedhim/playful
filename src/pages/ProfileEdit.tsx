@@ -24,7 +24,7 @@ import FormActions from "@/components/profile/FormActions";
 
 const ProfileEdit = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const { updateProfile, isLoading, error } = useProfileManagement(user);
+  const { updateProfile, isLoading } = useProfileManagement(user);
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState("basic");
@@ -68,7 +68,7 @@ const ProfileEdit = () => {
     try {
       const result = await updateProfile(data);
       
-      if (result.success) {
+      if (result) {
         toast.success("Profile saved", {
           description: "Your profile has been updated successfully."
         });
@@ -77,7 +77,7 @@ const ProfileEdit = () => {
         navigate("/profile");
       } else {
         toast.error("Error saving profile", {
-          description: result.error || "An error occurred while saving your profile."
+          description: "An error occurred while saving your profile."
         });
       }
     } catch (error: any) {

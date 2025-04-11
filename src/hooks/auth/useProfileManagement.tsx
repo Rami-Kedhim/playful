@@ -1,54 +1,19 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { AuthUser, UserProfile } from '@/types/auth';
-
-interface ProfileUpdateResult {
-  success: boolean;
-  error?: string;
-  profile?: UserProfile;
-}
 
 export const useProfileManagement = (user: AuthUser | null) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  /**
-   * Fetch profile data for the current user
-   */
-  const fetchProfile = async (): Promise<UserProfile | null> => {
-    if (!user) return null;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) throw error;
-      
-      return data;
-    } catch (error: any) {
-      setError(error.message || "Failed to fetch profile data");
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   /**
    * Update the user's profile
    */
-  const updateProfile = async (profileData: Partial<UserProfile>): Promise<ProfileUpdateResult> => {
-    if (!user) return { success: false, error: "No authenticated user" };
+  const updateProfile = async (profileData: Partial<UserProfile>): Promise<boolean> => {
+    if (!user) return false;
     
     setIsLoading(true);
-    setError(null);
     
     try {
       // First update the auth metadata if needed
@@ -66,81 +31,56 @@ export const useProfileManagement = (user: AuthUser | null) => {
       }
       
       // Then update the profile record
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('profiles')
         .update({
           ...profileData,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id)
-        .select()
-        .single();
+        .eq('id', user.id);
       
       if (error) throw error;
       
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully",
-      });
-      
-      return { 
-        success: true,
-        profile: data
-      };
+      return true;
     } catch (error: any) {
-      const errorMessage = error.message || "Failed to update profile";
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      console.error("Failed to update profile:", error.message);
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * Upload a profile picture
+   * Fetch profile data for the current user
    */
-  const uploadProfilePicture = async (file: File): Promise<ProfileUpdateResult> => {
-    if (!user) return { success: false, error: "No authenticated user" };
+  const fetchProfile = async (): Promise<UserProfile | null> => {
+    if (!user) return null;
     
     setIsLoading(true);
-    setError(null);
     
     try {
-      // Upload file to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `profile-pictures/${fileName}`;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
       
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
+      if (error) throw error;
       
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-      
-      // Update profile with new image URL
-      return await updateProfile({ avatar_url: publicUrl });
+      return data as UserProfile;
     } catch (error: any) {
-      const errorMessage = error.message || "Failed to upload profile picture";
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      console.error("Failed to fetch profile:", error.message);
+      return null;
     } finally {
       setIsLoading(false);
     }
   };
   
-  const clearError = () => setError(null);
-  
   return {
-    fetchProfile,
     updateProfile,
-    uploadProfilePicture,
+    fetchProfile,
     isLoading,
-    error,
-    clearError,
   };
 };
+
+export default useProfileManagement;
