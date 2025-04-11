@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Video, Users, MapPin, Globe } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Define the possible service type filter values
 export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
@@ -12,6 +13,7 @@ export const serviceTypeInfoMap: Record<string, {
   filterLabel: string;
   icon: React.ReactNode;
   bgColor: string;
+  textColor: string;
   description: string;
 }> = {
   "": {
@@ -19,6 +21,7 @@ export const serviceTypeInfoMap: Record<string, {
     filterLabel: "Any Service Type",
     icon: <Globe className="h-3 w-3" />,
     bgColor: "bg-gray-100",
+    textColor: "text-gray-800",
     description: "All service types"
   },
   "in-person": {
@@ -26,6 +29,7 @@ export const serviceTypeInfoMap: Record<string, {
     filterLabel: "In-Person Only",
     icon: <MapPin className="h-3 w-3" />,
     bgColor: "bg-blue-100",
+    textColor: "text-blue-800",
     description: "Physical meetings only"
   },
   "virtual": {
@@ -33,6 +37,7 @@ export const serviceTypeInfoMap: Record<string, {
     filterLabel: "Virtual Only",
     icon: <Video className="h-3 w-3" />,
     bgColor: "bg-purple-100",
+    textColor: "text-purple-800",
     description: "Online services only"
   },
   "both": {
@@ -40,6 +45,7 @@ export const serviceTypeInfoMap: Record<string, {
     filterLabel: "Both Services",
     icon: <Users className="h-3 w-3" />,
     bgColor: "bg-green-100",
+    textColor: "text-green-800",
     description: "Both in-person and virtual"
   }
 };
@@ -57,6 +63,8 @@ export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   showLabel?: boolean;
+  size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 /**
@@ -64,7 +72,9 @@ interface ServiceTypeBadgeLabelProps {
  */
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type, 
-  showLabel = true 
+  showLabel = true,
+  size = "md",
+  className
 }) => {
   if (!type) return null;
   
@@ -72,10 +82,22 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   
   if (!info) return null;
   
+  const sizeClasses = {
+    sm: "text-xs py-0 px-1.5",
+    md: "text-xs py-0.5 px-2",
+    lg: "text-sm py-1 px-2.5"
+  };
+  
   return (
     <Badge 
       variant="outline" 
-      className={`${info.bgColor} border-0 text-gray-800 flex items-center gap-1 whitespace-nowrap`}
+      className={cn(
+        info.bgColor,
+        info.textColor,
+        "border-0 flex items-center gap-1 whitespace-nowrap",
+        sizeClasses[size],
+        className
+      )}
     >
       <span className="flex items-center justify-center">
         {info.icon}

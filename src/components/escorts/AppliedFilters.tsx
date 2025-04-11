@@ -180,7 +180,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label={getServiceTypeBadgeLabel(serviceTypeFilter)}
           onRemove={() => setServiceTypeFilter("")}
-          icon={<ServiceTypeIcon type={serviceTypeFilter} size={14} />}
+          icon={<ServiceTypeIcon type={serviceTypeFilter} size={14} variant="colored" />}
           variant="secondary"
         />
       )}
@@ -189,7 +189,7 @@ const AppliedFilters = ({
         variant="outline" 
         size="sm" 
         onClick={clearFilters}
-        className="h-7 ml-auto flex items-center gap-1 bg-background"
+        className="h-7 ml-auto flex items-center gap-1 bg-background hover:bg-muted/80"
       >
         <FilterX className="h-3.5 w-3.5" />
         Clear all
