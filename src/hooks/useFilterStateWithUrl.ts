@@ -4,9 +4,22 @@ import { useSearchParams } from 'react-router-dom';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 /**
+ * Interface for filter fields that can be synchronized with URL parameters
+ */
+export interface UrlSyncedFilterState {
+  serviceTypeFilter?: ServiceTypeFilter;
+  verifiedOnly?: boolean;
+  availableNow?: boolean;
+  location?: string;
+  searchQuery?: string;
+  ratingMin?: number;
+  [key: string]: any; // Allow additional filter properties
+}
+
+/**
  * Hook to synchronize filter state with URL parameters
  */
-export const useFilterStateWithUrl = <T extends Record<string, any>>({
+export const useFilterStateWithUrl = <T extends UrlSyncedFilterState>({
   filters,
   setFilters,
   defaultValues
@@ -65,7 +78,7 @@ export const useFilterStateWithUrl = <T extends Record<string, any>>({
     }
 
     if (hasChanges) {
-      setFilters(newFilters);
+      setFilters(newFilters as T);
     }
   }, []);
 
@@ -99,7 +112,7 @@ export const useFilterStateWithUrl = <T extends Record<string, any>>({
     }
 
     // Add rating filter to URL
-    if (newFilters.ratingMin > 0) {
+    if (newFilters.ratingMin && newFilters.ratingMin > 0) {
       params.set('rating', newFilters.ratingMin.toString());
     }
 
