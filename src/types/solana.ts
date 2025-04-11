@@ -34,7 +34,7 @@ export interface WalletState {
 }
 
 export interface WalletHookReturn extends WalletState {
-  connectWallet: () => Promise<void>;
+  connectWallet: () => Promise<string | void>;  // Updated to accept string or void
   disconnectWallet: () => Promise<void>;
   hasWallet: boolean;
   isConnected: boolean;
