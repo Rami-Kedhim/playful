@@ -5,6 +5,7 @@ import { Pagination } from "@/components/ui/pagination";
 import EscortCard from "@/components/cards/EscortCard";
 import { Escort } from "@/types/escort";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BadgeCheck, Calendar, MapPin } from "lucide-react";
 
 interface EscortResultsProps {
   escorts: Escort[];
@@ -78,11 +79,23 @@ const EscortResults = ({
   
   return (
     <>
-      {/* Results count */}
-      <div className="mb-6">
+      {/* Results header with count and sorting options */}
+      <div className="flex justify-between items-center mb-6">
         <p className="text-sm text-muted-foreground">
           Showing {escorts.length} {escorts.length === 1 ? 'escort' : 'escorts'}
         </p>
+        
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <BadgeCheck className="h-4 w-4 text-green-500" />
+            <span>{escorts.filter(e => e.verified).length} Verified</span>
+          </div>
+          
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Calendar className="h-4 w-4 text-blue-500" />
+            <span>{escorts.filter(e => e.availableNow).length} Available now</span>
+          </div>
+        </div>
       </div>
       
       {/* Results grid */}
@@ -120,6 +133,15 @@ const EscortResults = ({
           />
         </div>
       )}
+      
+      {/* Footer with additional information */}
+      <div className="mt-8 pt-6 border-t text-sm text-muted-foreground flex justify-between items-center">
+        <p>All escorts are independent service providers</p>
+        <div className="flex items-center gap-1">
+          <MapPin className="h-4 w-4" />
+          <span>Escorts near you</span>
+        </div>
+      </div>
     </>
   );
 };
