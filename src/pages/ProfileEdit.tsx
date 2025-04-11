@@ -21,6 +21,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import BioField from "@/components/profile/BioField";
 import BasicInfoFields from "@/components/profile/BasicInfoFields";
 import FormActions from "@/components/profile/FormActions";
+import PersonalDetails from "@/components/profile/PersonalDetails";
+import LocationField from "@/components/profile/LocationField";
+import { DatabaseGender } from "@/types/auth";
 
 const ProfileEdit = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -37,6 +40,9 @@ const ProfileEdit = () => {
       full_name: "",
       bio: "",
       avatar_url: "",
+      gender: undefined,
+      sexual_orientation: undefined,
+      location: "",
     },
   });
   
@@ -49,6 +55,9 @@ const ProfileEdit = () => {
       form.setValue("full_name", profile.full_name || "");
       form.setValue("bio", profile.bio || "");
       form.setValue("avatar_url", profile.avatar_url || "");
+      form.setValue("gender", profile.gender as any || undefined);
+      form.setValue("sexual_orientation", profile.sexual_orientation || undefined);
+      form.setValue("location", profile.location || "");
     }
   }, [user, profile, form]);
   
@@ -171,6 +180,8 @@ const ProfileEdit = () => {
                       
                       <BasicInfoFields />
                       <BioField />
+                      <PersonalDetails />
+                      <LocationField />
                     </CardContent>
                     <FormActions loading={isLoading} />
                   </Card>
