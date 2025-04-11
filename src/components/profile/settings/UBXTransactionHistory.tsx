@@ -1,159 +1,160 @@
 
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  Gift, 
-  Zap, 
-  ShoppingCart, 
-  Clock, 
-  Search,
-  CreditCard
-} from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useUBX, TransactionHistory } from "@/hooks/useUBX";
+  ArrowDownLeft, ArrowUpRight, Clock, RefreshCw, 
+  Shield, AlertCircle, CheckCircle
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { formatDistanceToNow } from 'date-fns';
+
+type Transaction = {
+  id: string;
+  amount: number;
+  transaction_type: string;
+  description: string;
+  created_at: string;
+  metadata: any;
+};
 
 const UBXTransactionHistory = () => {
-  const [transactions, setTransactions] = useState<TransactionHistory[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<TransactionHistory[]>([]);
-  const [search, setSearch] = useState("");
-  const { getTransactionHistory, loading } = useUBX();
-
-  useEffect(() => {
-    loadTransactions();
-  }, []);
-
-  useEffect(() => {
-    if (search) {
-      const filtered = transactions.filter(
-        tx => 
-          tx.description?.toLowerCase().includes(search.toLowerCase()) ||
-          tx.transaction_type.toLowerCase().includes(search.toLowerCase())
-      );
-      setFilteredTransactions(filtered);
-    } else {
-      setFilteredTransactions(transactions);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  
+  const fetchTransactions = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('lucoin_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      
+      if (error) throw error;
+      setTransactions(data || []);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [search, transactions]);
-
-  const loadTransactions = async () => {
-    const data = await getTransactionHistory();
-    setTransactions(data);
-    setFilteredTransactions(data);
   };
-
-  // Helper function to get icon for transaction type
+  
+  useEffect(() => {
+    fetchTransactions();
+  }, [user]);
+  
   const getTransactionIcon = (type: string) => {
     switch (type) {
-      case 'purchase':
-        return <ShoppingCart className="h-5 w-5" />;
-      case 'boost_purchase':
-        return <Zap className="h-5 w-5" />;
-      case 'gift_sent':
-        return <Gift className="h-5 w-5 text-pink-500" />;
-      case 'gift_received':
-        return <Gift className="h-5 w-5 text-green-500" />;
-      case 'subscription':
-        return <CreditCard className="h-5 w-5" />;
+      case 'deposit':
+        return <ArrowDownLeft className="h-4 w-4 text-green-500" />;
+      case 'spend':
+        return <ArrowUpRight className="h-4 w-4 text-amber-500" />;
+      case 'receive':
+        return <ArrowDownLeft className="h-4 w-4 text-blue-500" />;
+      case 'transfer':
+        return <ArrowUpRight className="h-4 w-4 text-violet-500" />;
       default:
-        return type.includes('receive') || parseInt(type) > 0 
-          ? <ArrowDownLeft className="h-5 w-5 text-green-500" /> 
-          : <ArrowUpRight className="h-5 w-5 text-red-500" />;
+        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
-
-  // Helper function to get badge for transaction type
-  const getTransactionBadge = (type: string, amount: number) => {
-    // Determine if credit or debit
-    const isCredit = type.includes('receive') || amount > 0;
+  
+  const getTransactionStatusIcon = (metadata: any) => {
+    if (!metadata) return null;
     
-    // Format readable transaction type
-    let readableType = type.replace(/_/g, ' ');
-    readableType = readableType.charAt(0).toUpperCase() + readableType.slice(1);
+    if (metadata.txHash) {
+      return (
+        <a 
+          href={`https://explorer.iota.org/mainnet/message/${metadata.txHash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-primary"
+          title="View on IOTA Explorer"
+        >
+          <Shield className="h-4 w-4" />
+        </a>
+      );
+    }
     
-    return (
-      <Badge 
-        variant={isCredit ? "success" : "destructive"}
-        className="capitalize"
-      >
-        {readableType}
-      </Badge>
-    );
+    return null;
   };
-
+  
+  const formatAmount = (amount: number, type: string) => {
+    if (['spend', 'transfer'].includes(type) && amount > 0) {
+      return `-${amount}`;
+    }
+    return amount > 0 ? `+${amount}` : amount;
+  };
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Transaction History</CardTitle>
-        <CardDescription>View your recent UBX transactions</CardDescription>
-        
-        <div className="flex items-center gap-2 mt-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search transactions..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8"
-            />
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={loadTransactions}
-            disabled={loading}
-          >
-            <Clock className="mr-2 h-4 w-4" />
-            Refresh
-          </Button>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-medium">Transaction History</h3>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={fetchTransactions} 
+          disabled={loading}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
+      </div>
+      
+      {loading ? (
+        <div className="py-8 flex justify-center">
+          <RefreshCw className="animate-spin h-8 w-8 text-muted-foreground" />
         </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
-        ) : filteredTransactions.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            {search ? "No matching transactions found" : "No transactions yet"}
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredTransactions.map((tx) => (
-              <div 
-                key={tx.id} 
-                className="flex items-center justify-between p-3 rounded-lg border"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    {getTransactionIcon(tx.transaction_type)}
-                  </div>
-                  <div>
-                    <div className="font-medium">{tx.description || "Transaction"}</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      {getTransactionBadge(tx.transaction_type, tx.amount)}
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(tx.created_at), "MMM d, yyyy h:mm a")}
-                      </span>
-                    </div>
-                  </div>
+      ) : transactions.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4 opacity-30" />
+            <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
+            <p className="text-muted-foreground max-w-md">
+              When you receive or spend UBX, your transactions will appear here.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {transactions.map((tx) => (
+            <div 
+              key={tx.id} 
+              className="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-800"
+            >
+              <div className="flex items-center">
+                <div className="bg-muted rounded-full p-2 mr-3">
+                  {getTransactionIcon(tx.transaction_type)}
                 </div>
-                <div className={`text-lg font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {tx.amount > 0 ? '+' : ''}{tx.amount} UBX
+                <div>
+                  <p className="font-medium">
+                    {tx.description || tx.transaction_type.charAt(0).toUpperCase() + tx.transaction_type.slice(1)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true })}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              
+              <div className="flex items-center">
+                <span className={`font-medium mr-2 ${
+                  tx.amount > 0 && tx.transaction_type !== 'spend' ? 'text-green-600 dark:text-green-400' : 
+                  'text-red-600 dark:text-red-400'
+                }`}>
+                  {formatAmount(tx.amount, tx.transaction_type)} UBX
+                </span>
+                {getTransactionStatusIcon(tx.metadata)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
