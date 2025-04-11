@@ -94,7 +94,7 @@ export const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({
               </Badge>
             )}
             
-            {profile?.isCreator && (
+            {user?.isCreator && (
               <Badge variant="secondary">Creator</Badge>
             )}
           </div>
