@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Monitor, Users, Globe } from 'lucide-react';
+import { Globe, Users, Map } from 'lucide-react';
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 
 interface ServiceTypeIconProps {
@@ -9,16 +9,20 @@ interface ServiceTypeIconProps {
   className?: string;
 }
 
-const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ type, size = 16, className = "" }) => {
-  switch (type) {
+const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
+  type,
+  size = 16,
+  className = ""
+}) => {
+  switch(type) {
     case "in-person":
-      return <Users size={size} className={className} />;
+      return <Map size={size} className={className} />;
     case "virtual":
-      return <Monitor size={size} className={className} />;
-    case "both":
       return <Globe size={size} className={className} />;
+    case "both":
+      return <Users size={size} className={className} />;
     default:
-      return null;
+      return <Globe size={size} className={className} />;
   }
 };
 
