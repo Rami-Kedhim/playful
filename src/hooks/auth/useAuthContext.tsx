@@ -21,6 +21,7 @@ type AuthContextType = {
   refreshProfile: () => Promise<void>;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
   updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
   error: string | null;
   clearError: () => void;
 };
@@ -275,6 +276,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Function to send password reset email
+  const resetPassword = async (email: string): Promise<boolean> => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        setError(error.message);
+        return false;
+      }
+      
+      toast({
+        title: "Password reset email sent",
+        description: "If an account exists with this email, you will receive a password reset link.",
+      });
+      return true;
+    } catch (error: any) {
+      setError(error.message);
+      toast({
+        title: "Error",
+        description: "Failed to send password reset email",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   // Function to update user profile
   const updateUserProfile = async (userData: Partial<AuthUser>): Promise<boolean> => {
     try {
@@ -330,6 +365,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshProfile,
         updatePassword,
         updateUserProfile,
+        resetPassword,
         error,
         clearError,
       }}

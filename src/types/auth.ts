@@ -80,7 +80,7 @@ export interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (email: string, password: string, username?: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>; // Add this line
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
   updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
   error: string | null;

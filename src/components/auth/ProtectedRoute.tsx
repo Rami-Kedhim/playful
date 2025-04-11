@@ -5,9 +5,10 @@ import { useAuth } from '@/hooks/auth/useAuthContext';
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
+  children?: React.ReactNode; // Add support for children prop
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, children }) => {
   const { isAuthenticated, checkRole } = useAuth();
   const location = useLocation();
 
@@ -24,8 +25,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
     }
   }
 
-  // If authenticated and has required role, render the child routes
-  return <Outlet />;
+  // If authenticated and has required role, render children or Outlet
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute;
