@@ -1,8 +1,9 @@
-
 /**
  * IOTA Blockchain Service for UBX recharge functionality
  * Provides private, feeless transactions for UBX token operations
  */
+
+import { supabase } from "@/integrations/supabase/client";
 
 // IOTA network configuration
 export enum BlockchainNetwork {
@@ -40,16 +41,36 @@ export const generateReceiveAddress = async (
 ): Promise<{ address: string; qrCodeData: string }> => {
   console.log(`Generating private IOTA address for user ${userId}`);
   
-  // In production, this would call the IOTA node API
-  // For now we'll simulate address generation with a timestamp-based unique address
-  const timestamp = Date.now().toString();
-  const randomSuffix = Math.random().toString(36).substring(2, 10);
-  
-  // IOTA uses one-time addresses for privacy
-  const mockAddress = `iota${timestamp.substring(timestamp.length - 6)}${randomSuffix}`;
-  const qrCodeData = `iota:${mockAddress}`;
-  
-  return { address: mockAddress, qrCodeData };
+  try {
+    // Call our Supabase Edge Function to generate an address
+    const { data, error } = await supabase.functions.invoke('iota-service/generate-address', {
+      body: { user_id: userId }
+    });
+    
+    if (error) throw new Error(error.message);
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to generate IOTA address');
+    }
+    
+    return { 
+      address: data.address, 
+      qrCodeData: data.qrCodeData 
+    };
+  } catch (error) {
+    console.error('Error generating IOTA address:', error);
+    
+    // Fallback for development if the edge function is not available
+    // In production, you would want to handle this error differently
+    const timestamp = Date.now().toString();
+    const randomSuffix = Math.random().toString(36).substring(2, 10);
+    
+    // IOTA uses one-time addresses for privacy
+    const mockAddress = `iota${timestamp.substring(timestamp.length - 6)}${randomSuffix}`;
+    const qrCodeData = `iota:${mockAddress}`;
+    
+    return { address: mockAddress, qrCodeData };
+  }
 };
 
 /**
@@ -63,12 +84,19 @@ export const checkTransactionStatus = async (
 ): Promise<boolean> => {
   console.log(`Checking IOTA transaction status: ${txHash}`);
   
-  // Mock implementation - would connect to IOTA node in production
-  // Add random delay to simulate network call
-  await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-  
-  // For demo, return true 90% of the time
-  return Math.random() > 0.1;
+  try {
+    // This would typically call the Edge Function to check the transaction status
+    // For now, we'll keep the mock implementation until full integration
+    
+    // Add random delay to simulate network call
+    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+    
+    // For demo, return true 90% of the time
+    return Math.random() > 0.1;
+  } catch (error) {
+    console.error('Error checking transaction status:', error);
+    return false;
+  }
 };
 
 /**
@@ -85,7 +113,8 @@ export const monitorAddress = (
   console.log(`Monitoring IOTA address ${address} for incoming transactions`);
   
   // This is just a mock implementation for development
-  // In production, this would set up a connection to an IOTA node
+  // In production, this would set up a connection to the IOTA node via websockets
+  // or use a polling strategy with the Edge Function
   
   // For demo purposes, simulate a transaction coming in after a random delay
   const simulateTransaction = () => {

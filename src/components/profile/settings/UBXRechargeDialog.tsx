@@ -10,14 +10,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Copy, RefreshCw, CheckCircle, Shield } from 'lucide-react';
+import { Copy, RefreshCw, CheckCircle, Shield, ExternalLink } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   NETWORK_CONFIG, 
   generateReceiveAddress, 
   monitorAddress,
-  convertIotaToUBX
+  convertIotaToUBX,
+  getExplorerUrl
 } from '@/services/blockchainService';
 import QRCode from 'qrcode.react';
 import useUBX from '@/hooks/useUBX';
@@ -138,6 +139,12 @@ const UBXRechargeDialog = () => {
       setIsGenerating(false);
     }
   };
+
+  const viewInExplorer = () => {
+    if (recentTx?.txHash) {
+      window.open(getExplorerUrl(recentTx.txHash), '_blank');
+    }
+  };
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -179,6 +186,15 @@ const UBXRechargeDialog = () => {
                 <div className="text-xs text-muted-foreground mt-2">
                   Transaction ID: {recentTx.txHash.substring(0, 8)}...{recentTx.txHash.substring(recentTx.txHash.length - 8)}
                 </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2 flex items-center gap-2"
+                  onClick={viewInExplorer}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View in Explorer
+                </Button>
               </div>
             ) : (
               <>
@@ -232,11 +248,11 @@ const UBXRechargeDialog = () => {
             )}
           </div>
           
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-lg p-4 text-sm text-amber-800 dark:text-amber-300">
             <h4 className="font-medium mb-1">How to get IOTA?</h4>
             <ul className="list-disc pl-5 space-y-1">
               <li>Purchase IOTA on exchanges like Binance, Bitfinex, or BitPanda</li>
-              <li>Transfer to a compatible wallet like Firefly (the official IOTA wallet)</li>
+              <li>Transfer to a compatible wallet like <a href="https://firefly.iota.org/" target="_blank" rel="noopener noreferrer" className="underline">Firefly</a> (the official IOTA wallet)</li>
               <li>Send the exact amount you wish to convert to UBX</li>
             </ul>
           </div>

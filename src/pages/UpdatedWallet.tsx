@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw, Shield } from "lucide-react";
+import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw, Shield, ExternalLink } from "lucide-react";
 import UBXBalance from "@/components/profile/settings/UBXBalance";
 import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
 import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
@@ -13,6 +14,7 @@ import { useSolanaWallet } from "@/hooks/useSolanaWallet";
 import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NETWORK_CONFIG } from "@/services/blockchainService";
 
 const UpdatedWallet = () => {
   const { user, profile } = useAuth();
@@ -86,7 +88,7 @@ const UpdatedWallet = () => {
           <Card>
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="flex items-center text-lg">
-                <WalletIcon className="h-5 w-5 text-primary mr-2" />
+                <Shield className="h-5 w-5 text-primary mr-2" />
                 IOTA Wallet
               </CardTitle>
               {walletAddress && (
@@ -124,6 +126,13 @@ const UpdatedWallet = () => {
                   Connect wallet to view balance
                 </div>
               )}
+              
+              <div className="mt-2 text-xs flex items-center text-muted-foreground">
+                <ExternalLink className="h-3 w-3 mr-1" />
+                <a href="https://firefly.iota.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+                  Download IOTA Firefly wallet
+                </a>
+              </div>
             </CardContent>
           </Card>
           
@@ -156,8 +165,8 @@ const UpdatedWallet = () => {
               UBX Transactions
             </TabsTrigger>
             <TabsTrigger value="iota" className="flex items-center">
-              <WalletIcon className="mr-2 h-4 w-4" />
-              IOTA Transactions
+              <Shield className="mr-2 h-4 w-4" />
+              IOTA Privacy
             </TabsTrigger>
             <TabsTrigger value="gifts" className="flex items-center">
               <Gift className="mr-2 h-4 w-4" />
@@ -172,16 +181,40 @@ const UpdatedWallet = () => {
           <TabsContent value="iota" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>IOTA Transactions</CardTitle>
-                <CardDescription>Your private IOTA blockchain transactions</CardDescription>
+                <CardTitle>Privacy with IOTA</CardTitle>
+                <CardDescription>Secure, feeless UBX recharge with IOTA blockchain</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
+              <CardContent className="space-y-4">
+                <div className="flex flex-col items-center justify-center py-6 text-center">
                   <Shield className="h-12 w-12 text-green-500 mb-4" />
                   <h3 className="text-lg font-medium mb-2">Private Transactions</h3>
                   <p className="text-muted-foreground max-w-md">
-                    IOTA transactions are handled securely and privately. Your wallet is never linked to your profile, ensuring maximum privacy.
+                    {NETWORK_CONFIG.displayName} transactions are handled with the highest level of privacy. 
+                    Each recharge generates a new one-time address to maximize your anonymity.
                   </p>
+                </div>
+                
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                  <h4 className="font-medium flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-green-500" />
+                    Key Privacy Benefits
+                  </h4>
+                  <ul className="mt-2 space-y-1 text-sm list-disc pl-5">
+                    <li>No transaction fees, ever</li>
+                    <li>One-time addresses for each recharge</li>
+                    <li>No linking between your identity and blockchain activity</li>
+                    <li>Fast confirmations ({NETWORK_CONFIG.confirmationTime})</li>
+                    <li>Simple QR code scanning from any IOTA wallet</li>
+                  </ul>
+                </div>
+                
+                <div className="pt-2">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
+                    <a href="https://explorer.iota.org/mainnet" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4" />
+                      IOTA Explorer
+                    </a>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
