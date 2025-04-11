@@ -36,7 +36,14 @@ const UBXRechargeModal: React.FC<UBXRechargeModalProps> = ({
   const [voucherCode, setVoucherCode] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-  const { connectWallet, isConnected, walletAddress, hasWallet } = useWallet();
+  const { wallet, loading: walletLoading, error: walletError, refreshWallet, updateBalance } = useWallet();
+  
+  // Check for wallet connection through Solana integration
+  const hasWallet = typeof window !== 'undefined' && 
+    (!!window.solana || (!!window.chainstack && !!window.chainstack.solana));
+  
+  const isConnected = wallet !== null;
+  const walletAddress = wallet?.id || null;
   
   const handleConnectWallet = async () => {
     if (!hasWallet) {
@@ -48,7 +55,9 @@ const UBXRechargeModal: React.FC<UBXRechargeModalProps> = ({
       return;
     }
     
-    await connectWallet();
+    // For now we'll just use the mock implementation
+    // This would be replaced with actual wallet connection logic
+    await refreshWallet();
   };
   
   const handleRecharge = async () => {
@@ -64,10 +73,22 @@ const UBXRechargeModal: React.FC<UBXRechargeModalProps> = ({
       // Simulate blockchain transaction for recharging
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast({
-        title: "UBX Tokens Added",
-        description: "Your wallet has been recharged with UBX tokens",
-      });
+      // Add UBX tokens to the user's balance
+      const success = await updateBalance(100); // Add 100 UBX tokens
+      
+      if (success) {
+        toast({
+          title: "UBX Tokens Added",
+          description: "Your wallet has been recharged with UBX tokens",
+        });
+        onRechargeComplete();
+      } else {
+        toast({
+          title: "Recharge Failed",
+          description: "Failed to add UBX tokens to your wallet",
+          variant: "destructive",
+        });
+      }
     } else {
       // Voucher code redemption
       if (!voucherCode.trim()) {
@@ -87,10 +108,10 @@ const UBXRechargeModal: React.FC<UBXRechargeModalProps> = ({
         title: "Voucher Redeemed",
         description: "Your UBX tokens have been added to your account",
       });
+      onRechargeComplete();
     }
     
     setIsProcessing(false);
-    onRechargeComplete();
   };
 
   return (
