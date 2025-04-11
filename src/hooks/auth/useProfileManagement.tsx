@@ -4,14 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { AuthUser, UserProfile } from '@/types/auth';
 
-export const useProfileManagement = (user: AuthUser | null) => {
+export const useProfileManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   /**
    * Update the user's profile
    */
   const updateProfile = async (profileData: Partial<UserProfile>): Promise<boolean> => {
-    if (!user) return false;
+    if (!profileData.id) return false;
     
     setIsLoading(true);
     
@@ -37,7 +37,7 @@ export const useProfileManagement = (user: AuthUser | null) => {
           ...profileData,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id);
+        .eq('id', profileData.id);
       
       if (error) throw error;
       
@@ -53,8 +53,8 @@ export const useProfileManagement = (user: AuthUser | null) => {
   /**
    * Fetch profile data for the current user
    */
-  const fetchProfile = async (): Promise<UserProfile | null> => {
-    if (!user) return null;
+  const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
+    if (!userId) return null;
     
     setIsLoading(true);
     
@@ -62,7 +62,7 @@ export const useProfileManagement = (user: AuthUser | null) => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
       
       if (error) throw error;

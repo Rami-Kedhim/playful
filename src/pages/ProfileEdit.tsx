@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { useAuth } from "@/hooks/auth/useAuth";
@@ -23,7 +24,7 @@ import FormActions from "@/components/profile/FormActions";
 
 const ProfileEdit = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const { updateProfile, isLoading } = useProfileManagement(user);
+  const { updateProfile, isLoading } = useProfileManagement();
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState("basic");
@@ -65,9 +66,15 @@ const ProfileEdit = () => {
   
   const handleSaveProfile = async (data: z.infer<typeof profileFormSchema>) => {
     try {
-      const result = await updateProfile(data);
+      // Add the user id to the profile data
+      const profileData = {
+        ...data,
+        id: user.id
+      };
       
-      if (result) {
+      const success = await updateProfile(profileData);
+      
+      if (success) {
         toast.success("Profile saved", {
           description: "Your profile has been updated successfully."
         });
