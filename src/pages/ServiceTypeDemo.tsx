@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -8,6 +9,9 @@ import ServiceTypeRadioFilter from '@/components/escorts/filters/ServiceTypeRadi
 import ServiceTypeBadgeLabel, { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import { useServiceType } from '@/components/escorts/context/ServiceTypeContext';
 import { ForbiddenTerms, ServiceType } from '@/components/escorts/filters/ServiceTypeFilterRules';
+import ServiceTypeSelect from '@/components/escorts/filters/ServiceTypeSelect';
+import EnhancedServiceTypeFilter from '@/components/escorts/filters/EnhancedServiceTypeFilter';
+import { useEscortServiceTypeFilter } from '@/hooks/useEscortServiceTypeFilter';
 
 const ServiceTypeInfo = () => {
   const {
@@ -124,6 +128,46 @@ const ServiceTypeInfo = () => {
   );
 };
 
+const EnhancedFiltersDemo = () => {
+  const [serviceType, setServiceType] = React.useState<ServiceTypeFilter>("");
+  
+  return (
+    <div className="space-y-6 mt-8">
+      <h2 className="text-xl font-semibold">Enhanced Filter Components</h2>
+      <Separator />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div>
+          <h3 className="text-lg font-medium mb-4">Service Type Select</h3>
+          <ServiceTypeSelect 
+            value={serviceType} 
+            onChange={setServiceType} 
+          />
+        </div>
+        
+        <div className="lg:col-span-2">
+          <h3 className="text-lg font-medium mb-4">Enhanced Service Type Filter</h3>
+          <EnhancedServiceTypeFilter 
+            serviceTypeFilter={serviceType}
+            setServiceTypeFilter={setServiceType}
+          />
+        </div>
+      </div>
+      
+      <div className="mt-4">
+        <h3 className="text-lg font-medium mb-4">Compact Version</h3>
+        <div className="max-w-xs">
+          <EnhancedServiceTypeFilter 
+            serviceTypeFilter={serviceType}
+            setServiceTypeFilter={setServiceType}
+            compact={true}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ServiceTypeDemo = () => {
   const [selectedType, setSelectedType] = React.useState<ServiceTypeFilter>("");
   
@@ -163,6 +207,8 @@ const ServiceTypeDemo = () => {
               </div>
               
               <ServiceTypeInfo />
+              
+              <EnhancedFiltersDemo />
             </CardContent>
           </Card>
         </ServiceTypeProvider>
