@@ -10,6 +10,8 @@ import {
 import ServiceTypeIcon from './ServiceTypeIcon';
 import { ServiceType } from './ServiceTypeFilterRules';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useServiceType } from '../context/ServiceTypeContext';
+import { getSafeServiceLabel } from './ServiceTypeBadgeLabel';
 
 interface ServiceTypeRadioFilterProps {
   selectedType: ServiceTypeFilter;
@@ -28,6 +30,7 @@ const ServiceTypeRadioFilter: React.FC<ServiceTypeRadioFilterProps> = ({
   includeSpecializedTypes = false
 }) => {
   const serviceTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", ""];
+  const { specializedServiceTypes, selectedSpecializedTypes, toggleSpecializedType } = useServiceType();
   
   return (
     <div className={className}>
@@ -67,8 +70,18 @@ const ServiceTypeRadioFilter: React.FC<ServiceTypeRadioFilterProps> = ({
               <TooltipProvider key={serviceType}>
                 <Tooltip delayDuration={300}>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center space-x-2 p-2 rounded-md bg-secondary/40 cursor-pointer hover:bg-secondary/60">
-                      <span className="text-xs">{serviceType}</span>
+                    <div 
+                      className={`flex items-center space-x-2 p-2 rounded-md 
+                        ${selectedSpecializedTypes.includes(serviceType) 
+                          ? 'bg-primary/10 border-primary' 
+                          : 'bg-secondary/40'} 
+                        cursor-pointer hover:bg-secondary/60`}
+                      onClick={() => toggleSpecializedType(serviceType)}
+                    >
+                      <span className="text-xs">{getSafeServiceLabel(serviceType)}</span>
+                      {selectedSpecializedTypes.includes(serviceType) && (
+                        <div className="ml-auto w-3 h-3 bg-primary rounded-full"></div>
+                      )}
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>

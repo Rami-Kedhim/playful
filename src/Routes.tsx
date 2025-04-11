@@ -27,6 +27,7 @@ const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
 const AICompanionPage = lazy(() => import('./pages/ai-companion'));
+const ServiceTypeDemo = lazy(() => import('./pages/ServiceTypeDemo'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -159,6 +160,12 @@ const AppRoutes: React.FC = () => {
         <Route path="/ai-companion" element={
           <AppLayout>
             <AICompanionPage />
+          </AppLayout>
+        } />
+        
+        <Route path="/service-type-demo" element={
+          <AppLayout>
+            <ServiceTypeDemo />
           </AppLayout>
         } />
         

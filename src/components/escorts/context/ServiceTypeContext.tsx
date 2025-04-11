@@ -34,6 +34,7 @@ interface ServiceTypeProviderProps {
   children: ReactNode;
   supportedServiceTypes?: ServiceType[];
   filterForbiddenTerms?: boolean;
+  onUnsafeTermRemap?: (original: string, remapped: ServiceType) => void;
 }
 
 const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(undefined);
@@ -41,7 +42,8 @@ const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(und
 export function ServiceTypeProvider({ 
   children,
   supportedServiceTypes,
-  filterForbiddenTerms = true
+  filterForbiddenTerms = true,
+  onUnsafeTermRemap
 }: ServiceTypeProviderProps) {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>("");
   const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<ServiceType[]>([]);
@@ -116,12 +118,16 @@ export function ServiceTypeProvider({
     // Try to remap it
     const remappedService = remapUnsafeService(name);
     if (remappedService) {
+      // Notify about remapping if callback is provided
+      if (onUnsafeTermRemap) {
+        onUnsafeTermRemap(name, remappedService);
+      }
       return remappedService;
     }
     
     // Nothing worked, just return the original
     return name;
-  }, []);
+  }, [onUnsafeTermRemap]);
   
   return (
     <ServiceTypeContext.Provider
