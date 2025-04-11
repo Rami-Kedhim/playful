@@ -2,7 +2,7 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Check } from "lucide-react";
-import { ServiceTypeFilter, getServiceTypeInfo } from "./ServiceTypeBadgeLabel";
+import { ServiceTypeFilter, serviceTypeInfoMap, getServiceTypeInfo } from "./ServiceTypeBadgeLabel";
 import ServiceTypeIcon from "./ServiceTypeIcon";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

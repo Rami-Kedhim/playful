@@ -44,6 +44,16 @@ export const serviceTypeInfoMap: Record<string, {
   }
 };
 
+// Helper function to get the service type info
+export const getServiceTypeInfo = (type: ServiceTypeFilter) => {
+  return serviceTypeInfoMap[type] || serviceTypeInfoMap[""];
+};
+
+// Helper function to get the badge label for a service type
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  return getServiceTypeInfo(type).filterLabel;
+};
+
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   showLabel?: boolean;
