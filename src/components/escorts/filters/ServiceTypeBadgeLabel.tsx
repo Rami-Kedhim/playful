@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Users, Map } from 'lucide-react';
+import { Video, Users, MapPin, Globe } from 'lucide-react';
 
 // Define the possible service type filter values
 export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both";
@@ -24,14 +24,14 @@ export const serviceTypeInfoMap: Record<string, {
   "in-person": {
     label: "In Person",
     filterLabel: "In-Person Only",
-    icon: <Map className="h-3 w-3" />,
+    icon: <MapPin className="h-3 w-3" />,
     bgColor: "bg-blue-100",
     description: "Physical meetings only"
   },
   "virtual": {
     label: "Virtual",
     filterLabel: "Virtual Only",
-    icon: <Globe className="h-3 w-3" />,
+    icon: <Video className="h-3 w-3" />,
     bgColor: "bg-purple-100",
     description: "Online services only"
   },
