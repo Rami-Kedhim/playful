@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,36 +18,41 @@ import {
   TabsList,
   TabsTrigger
 } from "@/components/ui/tabs";
-import { Loader2, RefreshCw } from "lucide-react";
-
-interface AIAvatarGeneratorProps {
-  onGenerate: (settings: AIAvatarSettings) => void;
-  onComplete: (avatarUrl: string) => void;
-  isGenerating: boolean;
-  generatedAvatars?: string[];
-}
+import {
+  Loader2,
+  RefreshCw
+} from "lucide-react";
 
 export interface AIAvatarSettings {
-  gender: string;
+  gender: 'female' | 'male' | 'non-binary';
+  style: 'realistic' | 'anime' | 'artistic';
+  ageRange: number;
   age: number;
   ethnicity: string;
   hairColor: string;
   hairStyle: string;
   bodyType: string;
   skinTone: string;
-  style: string;
   background: string;
+}
+
+interface AIAvatarGeneratorProps {
+  onGenerate: (settings: AIAvatarSettings) => Promise<void>;
+  onComplete: (avatarUrl: string) => Promise<void>;
+  isGenerating: boolean;
+  generatedAvatars: string[];
 }
 
 const defaultSettings: AIAvatarSettings = {
   gender: 'female',
+  style: 'realistic',
   age: 30,
+  ageRange: 30,
   ethnicity: 'mixed',
   hairColor: 'brown',
   hairStyle: 'medium',
   bodyType: 'average',
   skinTone: 'medium',
-  style: 'professional',
   background: 'neutral'
 };
 
@@ -63,7 +67,15 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
 
   const updateSetting = (key: keyof AIAvatarSettings, value: string | number) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings(prev => {
+      if (key === 'age') {
+        return { ...prev, [key]: value, ageRange: value };
+      }
+      if (key === 'ageRange') {
+        return { ...prev, [key]: value, age: value };
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   const handleGenerate = () => {
@@ -99,7 +111,7 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
               <Label>Gender</Label>
               <Select 
                 value={settings.gender} 
-                onValueChange={(value) => updateSetting('gender', value)}
+                onValueChange={(value: 'female' | 'male' | 'non-binary') => updateSetting('gender', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select gender" />
@@ -234,18 +246,18 @@ export const AIAvatarGenerator: React.FC<AIAvatarGeneratorProps> = ({
             <Label>Style</Label>
             <Select 
               value={settings.style} 
-              onValueChange={(value) => updateSetting('style', value)}
+              onValueChange={(value: 'realistic' | 'anime' | 'artistic') => updateSetting('style', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="realistic">Realistic</SelectItem>
+                <SelectItem value="anime">Anime</SelectItem>
+                <SelectItem value="artistic">Artistic</SelectItem>
                 <SelectItem value="casual">Casual</SelectItem>
                 <SelectItem value="professional">Professional</SelectItem>
                 <SelectItem value="elegant">Elegant</SelectItem>
-                <SelectItem value="glamorous">Glamorous</SelectItem>
-                <SelectItem value="artistic">Artistic</SelectItem>
-                <SelectItem value="sporty">Sporty</SelectItem>
               </SelectContent>
             </Select>
           </div>

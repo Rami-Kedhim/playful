@@ -48,7 +48,21 @@ export const UserRoleStep: React.FC<UserRoleStepProps> = ({ onNext }) => {
   const handleGenerateAvatars = async (settings: AIAvatarSettings) => {
     setIsGenerating(true);
     try {
-      const avatars = await generateAIAvatars(settings);
+      // Transform the settings to match aiAvatarService expected format
+      const serviceSettings = {
+        gender: settings.gender,
+        style: settings.style,
+        ageRange: settings.ageRange, // Now this matches the service interface
+        features: [
+          settings.ethnicity,
+          settings.hairColor,
+          settings.hairStyle,
+          settings.bodyType,
+          settings.skinTone
+        ]
+      };
+      
+      const avatars = await generateAIAvatars(serviceSettings);
       setGeneratedAvatars(avatars);
     } finally {
       setIsGenerating(false);
