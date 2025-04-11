@@ -1,239 +1,142 @@
+
 import React, { useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
 } from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Loader2, Save } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AuthUser, UserProfile } from '@/types/auth';
-
-const accountFormSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: 'Username must be at least 3 characters' })
-    .max(30, { message: 'Username must be less than 30 characters' }),
-  email: z.string().email({ message: 'Invalid email address' }).optional(),
-  fullName: z.string().optional(),
-});
-
-type AccountFormValues = z.infer<typeof accountFormSchema>;
-
-const passwordFormSchema = z.object({
-  currentPassword: z
-    .string()
-    .min(6, { message: 'Current password must be at least 6 characters' }),
-  newPassword: z
-    .string()
-    .min(8, { message: 'New password must be at least 8 characters' }),
-  confirmPassword: z
-    .string()
-    .min(8, { message: 'Confirm password must be at least 8 characters' }),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
-
-type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { toast } from '@/components/ui/use-toast';
+import { Loader2, Mail, KeyRound, User, ShieldCheck } from 'lucide-react';
+import EmailDialog from './settings/EmailDialog';
+import PasswordDialog from './settings/PasswordDialog';
+import { AuthUser } from '@/types/auth';
 
 interface AccountSettingsProps {
   initialTab?: string;
-  user?: AuthUser;
-  profile?: UserProfile | null;
+  user: AuthUser | null;
+  profile: any;
 }
 
 const AccountSettings: React.FC<AccountSettingsProps> = ({ 
-  initialTab = 'general',
-  user: propUser,
-  profile: propProfile
+  initialTab = "general", 
+  user, 
+  profile 
 }) => {
-  const auth = useAuth();
-  const user = propUser || auth.user;
-  const profile = propProfile || auth.profile;
-  const { updateUserProfile, updatePassword } = auth;
-  
-  const [isSaving, setIsSaving] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState(user?.username || '');
+  const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const { updateUserProfile, userRoles } = useAuth();
 
-  const accountForm = useForm<AccountFormValues>({
-    resolver: zodResolver(accountFormSchema),
-    defaultValues: {
-      username: user?.username || '',
-      email: user?.email || '',
-      fullName: profile?.full_name || '',
-    },
-  });
-
-  const passwordForm = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordFormSchema),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: '',
-    },
-  });
-
-  const onSubmitAccount = async (data: AccountFormValues) => {
-    setIsSaving(true);
+  const handleSaveGeneral = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
     try {
-      const result = await updateUserProfile({
-        username: data.username,
+      await updateUserProfile({
+        username,
       });
-
-      if (result) {
-        toast({
-          title: 'Account updated',
-          description: 'Your account settings have been updated.',
-        });
-      }
-    } catch (error) {
-      console.error('Error updating account:', error);
+      
       toast({
-        title: 'Error',
-        description: 'Failed to update account settings. Please try again.',
-        variant: 'destructive',
+        title: "Profile Updated",
+        description: "Your general information has been updated successfully.",
       });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const onSubmitPassword = async (data: PasswordFormValues) => {
-    setIsChangingPassword(true);
-    try {
-      const result = await updatePassword(data.currentPassword, data.newPassword);
-
-      if (result) {
-        toast({
-          title: 'Password updated',
-          description: 'Your password has been updated successfully.',
-        });
-        passwordForm.reset({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        });
-      } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to update password. Please try again.',
-          variant: 'destructive',
-        });
-      }
     } catch (error: any) {
       toast({
-        title: 'Error',
-        description: error.message || 'An unexpected error occurred',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update profile information.",
+        variant: "destructive",
       });
     } finally {
-      setIsChangingPassword(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <Tabs defaultValue={initialTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6">
+    <Tabs 
+      value={activeTab} 
+      onValueChange={setActiveTab} 
+      className="w-full"
+    >
+      <TabsList className="grid grid-cols-3 mb-8">
         <TabsTrigger value="general">General</TabsTrigger>
         <TabsTrigger value="security">Security</TabsTrigger>
+        <TabsTrigger value="account">Account</TabsTrigger>
       </TabsList>
 
       <TabsContent value="general">
         <Card>
           <CardHeader>
-            <CardTitle>General Settings</CardTitle>
+            <CardTitle>General Information</CardTitle>
             <CardDescription>
-              Update your account information and preferences
+              Update your basic profile information.
             </CardDescription>
           </CardHeader>
-          <Form {...accountForm}>
-            <form onSubmit={accountForm.handleSubmit(onSubmitAccount)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={accountForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input placeholder="username" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="flex items-center">
+                <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  value={user?.email}
+                  disabled
+                  className="flex-1"
                 />
+              </div>
+            </div>
 
-                <FormField
-                  control={accountForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="email@example.com" 
-                          {...field} 
-                          disabled
-                          readOnly 
-                        />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground">
-                        Email cannot be changed directly
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <div className="flex items-center">
+                <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="flex-1"
                 />
+              </div>
+            </div>
 
-                <FormField
-                  control={accountForm.control}
-                  name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <div className="flex items-center">
+                <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="flex-1"
                 />
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isSaving} className="ml-auto">
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save Changes
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              onClick={handleSaveGeneral} 
+              disabled={isLoading}
+              className="ml-auto"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : 'Save Changes'}
+            </Button>
+          </CardFooter>
         </Card>
       </TabsContent>
 
@@ -242,87 +145,98 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
           <CardHeader>
             <CardTitle>Security Settings</CardTitle>
             <CardDescription>
-              Update your password and security preferences
+              Manage your account security settings.
             </CardDescription>
           </CardHeader>
-          <Form {...passwordForm}>
-            <form onSubmit={passwordForm.handleSubmit(onSubmitPassword)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={passwordForm.control}
-                  name="currentPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="current-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
-                  name="newPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={passwordForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm New Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="••••••••"
-                          type="password"
-                          autoComplete="new-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>{user?.email}</span>
+                </div>
                 <Button
-                  type="submit"
-                  disabled={isChangingPassword}
-                  className="ml-auto"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEmailDialogOpen(true)}
                 >
-                  {isChangingPassword ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    'Update Password'
-                  )}
+                  Change Email
                 </Button>
-              </CardFooter>
-            </form>
-          </Form>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Password</Label>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <KeyRound className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span>••••••••</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsPasswordDialogOpen(true)}
+                >
+                  Change Password
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <EmailDialog 
+          open={isEmailDialogOpen} 
+          onOpenChange={setIsEmailDialogOpen} 
+        />
+        
+        <PasswordDialog 
+          open={isPasswordDialogOpen} 
+          onOpenChange={setIsPasswordDialogOpen} 
+        />
+      </TabsContent>
+
+      <TabsContent value="account">
+        <Card>
+          <CardHeader>
+            <CardTitle>Account Information</CardTitle>
+            <CardDescription>
+              View details about your account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Your Roles</Label>
+              <div className="flex items-center">
+                <ShieldCheck className="mr-2 h-4 w-4 text-muted-foreground" />
+                <div className="px-3 py-1 bg-primary/10 rounded-md text-sm">
+                  {userRoles.join(', ') || 'user'}
+                </div>
+              </div>
+            </div>
+
+            {user?.created_at && (
+              <div className="space-y-2">
+                <Label>Member Since</Label>
+                <div className="text-sm text-muted-foreground">
+                  {new Date(user.created_at).toLocaleDateString()} 
+                  ({new Date(user.created_at).toLocaleTimeString()})
+                </div>
+              </div>
+            )}
+
+            <div className="border-t pt-4 mt-4">
+              <h3 className="text-lg font-medium mb-2">Account Actions</h3>
+              <div className="flex gap-2">
+                <Button variant="destructive" size="sm">
+                  Delete Account
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Warning: Deleting your account is permanent and cannot be undone.
+              </p>
+            </div>
+          </CardContent>
         </Card>
       </TabsContent>
     </Tabs>

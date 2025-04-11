@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { usePasswordManagement } from "@/hooks/auth/usePasswordManagement";
+import { useAuth } from "@/hooks/auth/useAuthContext";
 
 interface PasswordDialogProps {
   open: boolean;
@@ -28,8 +28,9 @@ const PasswordDialog = ({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const { updatePassword, isLoading } = usePasswordManagement();
+  const { updatePassword } = useAuth();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +47,24 @@ const PasswordDialog = ({
       return;
     }
     
+    setIsLoading(true);
+    
     try {
-      await updatePassword(oldPassword, newPassword);
-      handleClose();
+      const success = await updatePassword(oldPassword, newPassword);
+      
+      if (success) {
+        toast({
+          title: "Password updated",
+          description: "Your password has been updated successfully.",
+        });
+        handleClose();
+      } else {
+        setError("Failed to update password");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to update password");
+    } finally {
+      setIsLoading(false);
     }
   };
   
