@@ -1,10 +1,20 @@
 
 import React from 'react';
-import Routes from './Routes'; // Updated import to use the proper case
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './Routes';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from 'sonner';
 
 function App() {
   return (
-    <Routes />
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes />
+        <Toaster />
+        <Sonner position="top-right" />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

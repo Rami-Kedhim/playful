@@ -1,160 +1,151 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowDownCircle, ArrowUpCircle, Clock, Info } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
-  ArrowDownLeft, ArrowUpRight, Clock, RefreshCw, 
-  Shield, AlertCircle, CheckCircle
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { formatDistanceToNow } from 'date-fns';
 
-type Transaction = {
+interface Transaction {
   id: string;
+  date: Date;
   amount: number;
-  transaction_type: string;
+  type: 'deposit' | 'withdrawal' | 'gift' | 'purchase';
   description: string;
-  created_at: string;
-  metadata: any;
-};
+  status: 'completed' | 'pending' | 'failed';
+}
 
 const UBXTransactionHistory = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  
-  const fetchTransactions = async () => {
-    if (!user) return;
-    
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('lucoin_transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
-      
-      if (error) throw error;
-      setTransactions(data || []);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-    } finally {
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setLoading(true);
+      try {
+        // In a real app, this would come from an API call
+        // For now, let's use mock data
+        const mockTransactions: Transaction[] = [
+          {
+            id: '1',
+            date: new Date(),
+            amount: 1000,
+            type: 'deposit',
+            description: 'Purchase of Standard UBX package',
+            status: 'completed'
+          },
+          {
+            id: '2',
+            date: new Date(Date.now() - 86400000),
+            amount: 500,
+            type: 'withdrawal',
+            description: 'Gift to EscortUser123',
+            status: 'completed'
+          },
+          {
+            id: '3',
+            date: new Date(Date.now() - 172800000),
+            amount: 200,
+            type: 'purchase',
+            description: 'Access to premium content',
+            status: 'completed'
+          }
+        ];
+        
+        // Simulate API delay
+        setTimeout(() => {
+          setTransactions(mockTransactions);
+          setLoading(false);
+        }, 1000);
+      } catch (error) {
+        console.error('Error fetching UBX transactions', error);
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchTransactions();
+    } else {
       setLoading(false);
     }
-  };
-  
-  useEffect(() => {
-    fetchTransactions();
   }, [user]);
   
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case 'deposit':
-        return <ArrowDownLeft className="h-4 w-4 text-green-500" />;
-      case 'spend':
-        return <ArrowUpRight className="h-4 w-4 text-amber-500" />;
-      case 'receive':
-        return <ArrowDownLeft className="h-4 w-4 text-blue-500" />;
-      case 'transfer':
-        return <ArrowUpRight className="h-4 w-4 text-violet-500" />;
+        return <ArrowDownCircle className="h-5 w-5 text-green-500" />;
+      case 'withdrawal':
+      case 'gift':
+        return <ArrowUpCircle className="h-5 w-5 text-red-500" />;
+      case 'purchase':
+        return <ArrowUpCircle className="h-5 w-5 text-orange-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Info className="h-5 w-5 text-blue-500" />;
     }
   };
-  
-  const getTransactionStatusIcon = (metadata: any) => {
-    if (!metadata) return null;
-    
-    if (metadata.txHash) {
-      return (
-        <a 
-          href={`https://explorer.iota.org/mainnet/message/${metadata.txHash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-primary"
-          title="View on IOTA Explorer"
-        >
-          <Shield className="h-4 w-4" />
-        </a>
-      );
-    }
-    
-    return null;
-  };
-  
-  const formatAmount = (amount: number, type: string) => {
-    if (['spend', 'transfer'].includes(type) && amount > 0) {
-      return `-${amount}`;
-    }
-    return amount > 0 ? `+${amount}` : amount;
-  };
-  
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Transaction History</h3>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={fetchTransactions} 
-          disabled={loading}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
-      </div>
-      
-      {loading ? (
-        <div className="py-8 flex justify-center">
-          <RefreshCw className="animate-spin h-8 w-8 text-muted-foreground" />
-        </div>
-      ) : transactions.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <AlertCircle className="h-12 w-12 text-muted-foreground mb-4 opacity-30" />
-            <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
-            <p className="text-muted-foreground max-w-md">
-              When you receive or spend UBX, your transactions will appear here.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {transactions.map((tx) => (
-            <div 
-              key={tx.id} 
-              className="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-800"
-            >
-              <div className="flex items-center">
-                <div className="bg-muted rounded-full p-2 mr-3">
-                  {getTransactionIcon(tx.transaction_type)}
-                </div>
-                <div>
-                  <p className="font-medium">
-                    {tx.description || tx.transaction_type.charAt(0).toUpperCase() + tx.transaction_type.slice(1)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true })}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-center">
-                <span className={`font-medium mr-2 ${
-                  tx.amount > 0 && tx.transaction_type !== 'spend' ? 'text-green-600 dark:text-green-400' : 
-                  'text-red-600 dark:text-red-400'
-                }`}>
-                  {formatAmount(tx.amount, tx.transaction_type)} UBX
-                </span>
-                {getTransactionStatusIcon(tx.metadata)}
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Transaction History</CardTitle>
+          <CardDescription>Your recent UBX transactions</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {Array(3).fill(0).map((_, i) => (
+            <div key={i} className="flex items-center space-x-4 py-2">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
               </div>
             </div>
           ))}
-        </div>
-      )}
-    </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Transaction History</CardTitle>
+        <CardDescription>Your recent UBX transactions</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {transactions.length === 0 ? (
+          <div className="text-center py-8">
+            <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">No transactions yet</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {transactions.map((transaction) => (
+              <div key={transaction.id} className="flex items-start justify-between pb-4 border-b last:border-0 last:pb-0">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1">{getTransactionIcon(transaction.type)}</div>
+                  <div>
+                    <p className="font-medium">{transaction.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(transaction.date, 'PPp')}
+                    </p>
+                  </div>
+                </div>
+                <div className={`text-right ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}`}>
+                  <p className="font-medium">
+                    {transaction.type === 'deposit' ? '+' : '-'}{transaction.amount} UBX
+                  </p>
+                  <p className="text-xs text-muted-foreground uppercase">
+                    {transaction.status}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

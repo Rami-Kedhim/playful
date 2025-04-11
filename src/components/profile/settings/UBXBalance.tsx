@@ -1,49 +1,40 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowUpRight, Plus } from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Coins } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface UBXBalanceProps {
-  balance: number;
-}
-
-const UBXBalance = ({ balance }: UBXBalanceProps) => {
+const UBXBalance = () => {
+  const { profile, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">UBX Balance</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-8 w-24 mb-2" />
+          <Skeleton className="h-4 w-40" />
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">UBX Balance</CardTitle>
-        <CardDescription>
-          Your cryptocurrency balance for platform transactions
-        </CardDescription>
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center text-lg">
+          <Coins className="h-5 w-5 text-blue-500 mr-2" />
+          UBX Balance
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
-              <span className="font-bold text-white">UBX</span>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{balance}</div>
-              <div className="text-xs text-muted-foreground">UBX</div>
-            </div>
-          </div>
-          
-          <div className="text-sm text-muted-foreground">
-            <div className="font-medium">~${(balance * 0.89).toFixed(2)} USD</div>
-            <div className="text-xs text-right text-green-500">+2.4%</div>
-          </div>
-        </div>
-        
-        <div className="flex gap-2 w-full">
-          <Button className="flex-1">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Funds
-          </Button>
-          <Button variant="outline" className="flex-1">
-            <ArrowUpRight className="h-4 w-4 mr-2" />
-            Send
-          </Button>
-        </div>
+      <CardContent>
+        <div className="text-3xl font-bold">{profile?.lucoin_balance || profile?.lucoinsBalance || 0} UBX</div>
+        <p className="text-sm text-muted-foreground mt-1">
+          Virtual credits for platform features
+        </p>
       </CardContent>
     </Card>
   );

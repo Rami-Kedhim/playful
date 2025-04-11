@@ -11,6 +11,15 @@ interface TransactionDetails {
   metadata?: Record<string, any>;
 }
 
+interface UBXPackage {
+  id: string;
+  name: string;
+  price: number;
+  amount: number;
+  bonus_amount: number;
+  is_featured: boolean;
+}
+
 export default function useUBX() {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
@@ -62,8 +71,90 @@ export default function useUBX() {
     }
   };
 
+  /**
+   * Fetches available UBX packages
+   * @returns Array of UBX packages
+   */
+  const fetchPackages = async (): Promise<UBXPackage[]> => {
+    try {
+      // In a real app, this would come from an API
+      const mockPackages: UBXPackage[] = [
+        {
+          id: 'basic',
+          name: 'Basic',
+          price: 9.99,
+          amount: 1000,
+          bonus_amount: 0,
+          is_featured: false
+        },
+        {
+          id: 'standard',
+          name: 'Standard',
+          price: 19.99,
+          amount: 2000,
+          bonus_amount: 200,
+          is_featured: true
+        },
+        {
+          id: 'premium',
+          name: 'Premium',
+          price: 49.99,
+          amount: 5000,
+          bonus_amount: 1000,
+          is_featured: false
+        }
+      ];
+      
+      return mockPackages;
+    } catch (error) {
+      console.error('Error fetching UBX packages:', error);
+      return [];
+    }
+  };
+
+  /**
+   * Purchase a UBX package
+   * @param packageId The ID of the package to purchase
+   * @returns Boolean indicating success or failure
+   */
+  const purchasePackage = async (packageId: string): Promise<boolean> => {
+    setIsProcessing(true);
+    
+    try {
+      // Get package details
+      const packages = await fetchPackages();
+      const selectedPackage = packages.find(pkg => pkg.id === packageId);
+      
+      if (!selectedPackage) {
+        throw new Error('Package not found');
+      }
+      
+      // Process the transaction
+      return await processTransaction({
+        amount: selectedPackage.amount + selectedPackage.bonus_amount,
+        transactionType: 'deposit',
+        description: `Purchase of ${selectedPackage.name} UBX package`,
+        metadata: { packageId, price: selectedPackage.price }
+      });
+    } catch (error: any) {
+      console.error('Error purchasing UBX package:', error);
+      
+      toast({
+        variant: 'destructive',
+        title: 'Purchase failed',
+        description: error.message || 'Failed to complete purchase. Please try again.',
+      });
+      
+      return false;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return {
     processTransaction,
-    isProcessing
+    isProcessing,
+    fetchPackages,
+    purchasePackage
   };
 }
