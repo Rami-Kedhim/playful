@@ -11,10 +11,6 @@ interface AIEscortSuggestionsProps {
   escort?: Escort;
 }
 
-/**
- * Escort suggestions component
- * Eliminix Rule compliant: Only shows verified human profiles
- */
 const AIEscortSuggestions: React.FC<AIEscortSuggestionsProps> = ({
   relatedEscorts,
   escort,
