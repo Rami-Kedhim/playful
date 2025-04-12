@@ -1,3 +1,4 @@
+
 import { validateGlobalPrice, GLOBAL_UBX_RATE, PRICE_TOLERANCE } from './globalPricing';
 import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
 

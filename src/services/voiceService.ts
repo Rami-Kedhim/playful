@@ -16,11 +16,20 @@ interface SpeechOptions {
   voiceSettings?: VoiceSettings;
 }
 
+/**
+ * VoiceService provides safe and reliable text-to-speech functionality
+ * with advanced caching, error handling and security features
+ */
 class VoiceService {
   private audio: HTMLAudioElement | null = null;
   private isSpeakingState: boolean = false;
   private audioCache: Map<string, string> = new Map();
   private maxCacheSize: number = 20;
+  private audioContext: AudioContext | null = null;
+  private securityCheckPassed: boolean = false;
+  private lastErrorTime: number = 0;
+  private errorCount: number = 0;
+  private maxErrorsPerMinute: number = 5;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -30,17 +39,103 @@ class VoiceService {
         this.isSpeakingState = false;
       };
       
-      this.audio.onerror = () => {
-        console.error("Audio playback error");
+      this.audio.onerror = (e) => {
+        console.error("Audio playback error", e);
         this.isSpeakingState = false;
+        this.handleError("playback");
       };
+
+      // Perform security check
+      this.performSecurityCheck();
+    }
+  }
+
+  /**
+   * Performs security checks to ensure the environment is safe for voice playback
+   */
+  private async performSecurityCheck(): Promise<boolean> {
+    try {
+      // Check if audio is supported
+      if (!this.audio) {
+        console.warn("Audio not supported in this environment");
+        return false;
+      }
+
+      // Check if AudioContext is supported
+      if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        this.audioContext = new AudioContextClass();
+      } else {
+        console.warn("AudioContext not supported in this environment");
+      }
+
+      // Check if audio can be played
+      const canPlayAudio = this.audio.canPlayType('audio/mpeg');
+      if (!canPlayAudio) {
+        console.warn("Environment cannot play required audio format");
+        return false;
+      }
+
+      // All checks passed
+      this.securityCheckPassed = true;
+      return true;
+    } catch (error) {
+      console.error("Security check failed:", error);
+      this.securityCheckPassed = false;
+      return false;
+    }
+  }
+
+  /**
+   * Track and handle errors to prevent abuse
+   */
+  private handleError(type: string): void {
+    const now = Date.now();
+    
+    // Reset error count if it's been more than a minute
+    if (now - this.lastErrorTime > 60000) {
+      this.errorCount = 0;
+    }
+    
+    this.errorCount++;
+    this.lastErrorTime = now;
+    
+    if (this.errorCount > this.maxErrorsPerMinute) {
+      console.error("Too many errors occurred. Speech service temporarily disabled.");
+      setTimeout(() => {
+        this.errorCount = 0;
+      }, 60000);
     }
   }
   
+  /**
+   * Convert text to speech and play the resulting audio
+   */
   public async speak(text: string, options: SpeechOptions = {}): Promise<boolean> {
     if (!this.audio) return false;
     
+    // Safety checks
+    if (!this.securityCheckPassed) {
+      await this.performSecurityCheck();
+      if (!this.securityCheckPassed) {
+        console.error("Security check failed. Speech not available.");
+        return false;
+      }
+    }
+    
+    // Rate limit check
+    if (this.errorCount > this.maxErrorsPerMinute) {
+      console.error("Service temporarily unavailable due to error rate limit");
+      return false;
+    }
+    
     try {
+      // Input validation
+      if (!text || typeof text !== 'string' || text.length > 5000) {
+        console.error("Invalid text input");
+        return false;
+      }
+      
       // Stop any current speech
       this.stop();
       
@@ -66,11 +161,13 @@ class VoiceService {
         
         if (error) {
           console.error('Error calling ElevenLabs TTS:', error);
+          this.handleError("api");
           return false;
         }
         
         if (!data || !data.audio) {
           console.error('No audio data returned from ElevenLabs TTS');
+          this.handleError("data");
           return false;
         }
         
@@ -99,12 +196,17 @@ class VoiceService {
         playPromise.catch(error => {
           console.error("Audio play failed:", error);
           this.isSpeakingState = false;
+          this.handleError("play");
+          
+          // Clean up the object URL to prevent memory leaks
+          URL.revokeObjectURL(audioUrl);
         });
       }
       
       return true;
     } catch (error) {
       console.error("Speech synthesis error:", error);
+      this.handleError("synthesis");
       return false;
     }
   }
@@ -174,6 +276,35 @@ class VoiceService {
     };
     
     return voiceMap[voiceType.toLowerCase()] || '21m00Tcm4TlvDq8ikWAM'; // Default to Rachel if not found
+  }
+  
+  /**
+   * Safely disposes of audio resources
+   */
+  public dispose(): void {
+    try {
+      this.stop();
+      
+      // Clear audio element references
+      if (this.audio) {
+        this.audio.onended = null;
+        this.audio.onerror = null;
+        this.audio.src = '';
+        this.audio = null;
+      }
+      
+      // Close audio context if it exists
+      if (this.audioContext && this.audioContext.state !== 'closed') {
+        this.audioContext.close().catch(err => {
+          console.error("Error closing AudioContext:", err);
+        });
+      }
+      
+      // Clear cache
+      this.audioCache.clear();
+    } catch (error) {
+      console.error("Error disposing voice service:", error);
+    }
   }
 }
 
