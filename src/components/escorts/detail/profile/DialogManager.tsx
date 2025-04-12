@@ -53,7 +53,7 @@ const DialogManager = ({
     <>
       <BookingForm
         escort={escort}
-        open={bookingOpen} // Changed from isOpen to open to match BookingForm props
+        open={bookingOpen}
         onClose={onBookingClose}
         onSubmit={handleBookingSubmit}
       />

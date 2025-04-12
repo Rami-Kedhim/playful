@@ -80,8 +80,8 @@ export interface UserProfile {
   
   // Adding missing fields from the errors
   role?: UserRole; // Adding role field
-  is_creator?: boolean; // Adding is_creator field
   role_name?: string; // Adding role_name as an alternative field name
+  is_creator?: boolean; // Adding is_creator field
   is_content_creator?: boolean; // Adding is_content_creator as an alternative field name
 }
 
