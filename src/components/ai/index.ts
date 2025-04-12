@@ -5,6 +5,7 @@ import AIProfileDetail from './AIProfileDetail';
 import AIProfileGenerator from './AIProfileGenerator';
 import AIProfileGrid from './AIProfileGrid';
 import AIController from './AIController';
+import AICompanionChat from './AICompanionChat';
 
 export {
   AIProfileCard,
@@ -12,4 +13,5 @@ export {
   AIProfileGenerator,
   AIProfileGrid,
   AIController,
+  AICompanionChat,
 };
