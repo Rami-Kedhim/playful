@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { BoostPackage, BoostStatus } from "@/types/boost";
 
@@ -426,6 +425,52 @@ export const boostService = {
         reasons: ["An unexpected error occurred"] 
       };
     }
+  },
+
+  /**
+   * Boost a profile with specified parameters
+   */
+  boostProfile: async ({ 
+    profileId, 
+    amount, 
+    durationHours 
+  }: { 
+    profileId: string; 
+    amount: number; 
+    durationHours: number 
+  }): Promise<boolean> => {
+    try {
+      if (!profileId) return false;
+      
+      // In a real implementation, this would create a boost package on-the-fly
+      // based on the amount and duration
+      const boostPackageId = `custom-${durationHours}-${amount}`;
+      
+      // Call the existing purchaseBoost method
+      const result = await boostService.purchaseBoost(profileId, boostPackageId);
+      return result.success;
+    } catch (err) {
+      console.error("Failed to boost profile:", err);
+      return false;
+    }
+  },
+  
+  /**
+   * Get the current boost level for a profile from active boosts
+   */
+  getProfileBoostLevel: (activeBoosts: any[], profileId: string): number => {
+    if (!profileId || !activeBoosts || activeBoosts.length === 0) return 0;
+    
+    // Find the boost with the highest level for this profile
+    const profileBoosts = activeBoosts.filter(boost => 
+      boost.profile_id === profileId && 
+      new Date(boost.end_time) > new Date()
+    );
+    
+    if (profileBoosts.length === 0) return 0;
+    
+    // Return the maximum boost level
+    return Math.max(...profileBoosts.map(boost => boost.boost_level || 0));
   }
 };
 

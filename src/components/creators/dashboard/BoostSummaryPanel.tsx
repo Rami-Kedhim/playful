@@ -144,9 +144,9 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
             <div>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs">Boost Progress</span>
-                <span className="text-xs">{Math.round(boostStatus.progress)}%</span>
+                <span className="text-xs">{Math.round(boostStatus.progress || 0)}%</span>
               </div>
-              <Progress value={boostStatus.progress} className="h-1" />
+              <Progress value={boostStatus.progress || 0} className="h-1" />
             </div>
           </div>
         ) : (
