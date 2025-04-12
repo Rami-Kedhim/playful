@@ -1,77 +1,77 @@
 
-import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
-
-/**
- * Health monitoring for the Oxum Pricing System
- * Tracks system state and validation failures
- */
-
-// System health tracking
+// Health monitoring metrics
+let validationSuccesses = 0;
 let validationFailures = 0;
-let consecutiveFailures = 0;
 let lastValidationTime: Date | null = null;
-let systemHealthy = true;
+let systemStatus: 'healthy' | 'warning' | 'critical' = 'healthy';
 
 /**
- * Get the current health status of the Oxum pricing system
+ * Records a successful validation attempt
  */
-export function getOxumPriceSystemHealth(): { 
-  healthy: boolean;
-  failures: number;
-  consecutiveFailures: number;
-  lastValidationTime: Date | null;
+export function recordSuccessfulValidation(): void {
+  validationSuccesses++;
+  lastValidationTime = new Date();
+  updateSystemStatus();
+}
+
+/**
+ * Records a failed validation attempt
+ */
+export function recordValidationFailure(): void {
+  validationFailures++;
+  lastValidationTime = new Date();
+  updateSystemStatus();
+}
+
+/**
+ * Updates the overall system status based on metrics
+ */
+function updateSystemStatus(): void {
+  const failureRate = validationFailures / Math.max(1, validationSuccesses + validationFailures);
+  
+  if (failureRate > 0.2) {
+    systemStatus = 'critical';
+  } else if (failureRate > 0.05) {
+    systemStatus = 'warning';
+  } else {
+    systemStatus = 'healthy';
+  }
+}
+
+/**
+ * Returns the overall health status of the Oxum price system
+ */
+export function getOxumPriceSystemHealth(): {
+  status: 'healthy' | 'warning' | 'critical';
+  metrics: {
+    successCount: number;
+    failureCount: number;
+    failureRate: number;
+    lastValidation: Date | null;
+  }
 } {
+  const totalValidations = validationSuccesses + validationFailures;
+  const failureRate = totalValidations > 0 
+    ? validationFailures / totalValidations 
+    : 0;
+  
   return {
-    healthy: systemHealthy,
-    failures: validationFailures,
-    consecutiveFailures,
-    lastValidationTime
+    status: systemStatus,
+    metrics: {
+      successCount: validationSuccesses,
+      failureCount: validationFailures,
+      failureRate,
+      lastValidation: lastValidationTime
+    }
   };
 }
 
 /**
- * Record a successful validation
- * Resets the consecutive failures counter and may restore system health
+ * Resets the health metrics (for testing or system recovery)
  */
-export function recordSuccessfulValidation(): void {
-  // Update system health tracking
-  lastValidationTime = new Date();
-  
-  // Reset consecutive failures counter on success
-  consecutiveFailures = 0;
-  
-  // If system was unhealthy but we have a successful validation, restore health
-  if (!systemHealthy && consecutiveFailures === 0) {
-    systemHealthy = true;
-    OxumNotificationService.notifySystemHealthRestored();
-  }
-}
-
-/**
- * Record a validation failure
- * Increments failure counters and may degrade system health
- */
-export function recordValidationFailure(): void {
-  // Update system health tracking
-  lastValidationTime = new Date();
-  
-  // Track failures
-  validationFailures++;
-  consecutiveFailures++;
-  
-  // Update system health if too many consecutive failures
-  if (consecutiveFailures > 5) {
-    systemHealthy = false;
-    OxumNotificationService.notifySystemHealthIssue(
-      `Oxum Price Validation System health degraded: ${consecutiveFailures} consecutive validation failures`
-    );
-  }
-}
-
-/**
- * Reset system health after admin intervention
- */
-export function resetSystemHealth(): void {
-  consecutiveFailures = 0;
-  systemHealthy = true;
+export function resetHealthMetrics(): void {
+  validationSuccesses = 0;
+  validationFailures = 0;
+  lastValidationTime = null;
+  systemStatus = 'healthy';
 }

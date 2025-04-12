@@ -1,58 +1,88 @@
 
-import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
-import { resetSystemHealth } from './healthMonitor';
-import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
+import { GLOBAL_UBX_RATE } from './constants';
+
+// Emergency override flag - only to be used in exceptional circumstances
+let emergencyOverrideActive = false;
+
+// Transaction log for audit purposes
+const transactionLog: {
+  timestamp: Date;
+  price: number;
+  details: string;
+  userId?: string;
+  override: boolean;
+}[] = [];
 
 /**
- * Emergency admin override functions for the Oxum Pricing System
- */
-
-/**
- * Emergency Price Override (Admin Only)
- * Allows bypassing validation rules in emergency situations
+ * Activates emergency override mode for price validation
+ * This should only be used by admins in exceptional circumstances
+ * @param adminId Admin user ID authorizing the override
+ * @param reason Documented reason for override
+ * @returns Success status of the override activation
  */
 export function emergencyPriceValidationOverride(
-  adminKey: string,
+  adminId: string,
   reason: string
 ): boolean {
-  // This would normally validate against a secure admin key
-  const isValidAdminKey = adminKey === process.env.OXUM_ADMIN_KEY;
+  // In a real system, we would verify admin permissions here
   
-  if (!isValidAdminKey) {
-    OxumNotificationService.notifySecurityViolation("Unauthorized emergency override attempt");
-    throw new Error("[Oxum Security] Unauthorized emergency override attempt");
-  }
+  // Log the override activation
+  transactionLog.push({
+    timestamp: new Date(),
+    price: GLOBAL_UBX_RATE,
+    details: `OVERRIDE ACTIVATED: ${reason}`,
+    userId: adminId,
+    override: true
+  });
   
-  // Log the override
-  OxumPriceAnalytics.logPriceEvent(
-    'emergency_override',
-    0,
-    { reason },
-    undefined
-  );
+  // Set the override flag
+  emergencyOverrideActive = true;
   
-  // Reset system health
-  resetSystemHealth();
+  // Add expiration timer - auto disable after 1 hour
+  setTimeout(() => {
+    if (emergencyOverrideActive) {
+      emergencyOverrideActive = false;
+      transactionLog.push({
+        timestamp: new Date(),
+        price: GLOBAL_UBX_RATE,
+        details: 'OVERRIDE AUTO-DEACTIVATED: Timeout',
+        userId: adminId,
+        override: true
+      });
+    }
+  }, 60 * 60 * 1000); // 1 hour
   
   return true;
 }
 
 /**
- * Log a successful transaction
- * For audit trail and analytics purposes
+ * Checks if emergency override is currently active
+ */
+export function isEmergencyOverrideActive(): boolean {
+  return emergencyOverrideActive;
+}
+
+/**
+ * Logs a global price transaction for audit purposes
  */
 export function logGlobalPriceTransaction(
-  amount: number, 
-  userId?: string, 
-  profileId?: string,
-  metadata?: Record<string, any>
+  price: number,
+  userId: string,
+  details: string
 ): void {
-  OxumPriceAnalytics.logPriceEvent(
-    'price_transaction',
-    amount,
-    metadata,
-    undefined,
+  transactionLog.push({
+    timestamp: new Date(),
+    price,
+    details,
     userId,
-    profileId
-  );
+    override: emergencyOverrideActive
+  });
+}
+
+/**
+ * Get transaction log for auditing
+ * In a real system, this would have pagination and filtering
+ */
+export function getTransactionLog(limit = 100): typeof transactionLog {
+  return transactionLog.slice(-limit);
 }

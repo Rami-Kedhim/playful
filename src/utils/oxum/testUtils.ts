@@ -1,60 +1,71 @@
 
-import { validateGlobalPrice } from './validationUtils';
-import { GLOBAL_UBX_RATE, PRICE_TOLERANCE } from './constants';
+import { validateGlobalPrice, GLOBAL_UBX_RATE, PRICE_TOLERANCE } from './globalPricing';
+
+interface TestResult {
+  success: boolean;
+  message: string;
+  details?: any;
+}
 
 /**
- * Price Rule Self-Test
- * Runs automated tests on the price validation system
+ * Runs a comprehensive self-test on the Oxum pricing system
  */
-export function runPricingSystemSelfTest(): { 
-  success: boolean; 
-  results: Array<{test: string; passed: boolean; message?: string}>
-} {
-  const results = [];
-  let allPassed = true;
+export function runPricingSystemSelfTest(): TestResult[] {
+  const results: TestResult[] = [];
   
+  // Test 1: Exact match should pass
   try {
-    // Test 1: Exact price match
-    let test1Passed = false;
-    try {
-      validateGlobalPrice(GLOBAL_UBX_RATE);
-      test1Passed = true;
-      results.push({ test: "Exact price match", passed: true });
-    } catch (e) {
-      results.push({ test: "Exact price match", passed: false, message: String(e) });
-      allPassed = false;
-    }
-    
-    // Test 2: Price within tolerance
-    let test2Passed = false;
-    try {
-      validateGlobalPrice(GLOBAL_UBX_RATE * (1 + PRICE_TOLERANCE / 2));
-      test2Passed = true;
-      results.push({ test: "Price within tolerance", passed: true });
-    } catch (e) {
-      results.push({ test: "Price within tolerance", passed: false, message: String(e) });
-      allPassed = false;
-    }
-    
-    // Test 3: Price outside tolerance (should fail)
-    let test3Passed = false;
-    try {
-      validateGlobalPrice(GLOBAL_UBX_RATE * 1.1);
-      results.push({ test: "Invalid price rejection", passed: false, message: "Failed to reject invalid price" });
-      allPassed = false;
-    } catch (e) {
-      test3Passed = true;
-      results.push({ test: "Invalid price rejection", passed: true });
-    }
-    
-    return {
-      success: allPassed,
-      results
-    };
-  } catch (error) {
-    return {
+    const exactMatchResult = validateGlobalPrice(GLOBAL_UBX_RATE);
+    results.push({
+      success: exactMatchResult === true,
+      message: 'Exact match validation passed',
+      details: { price: GLOBAL_UBX_RATE }
+    });
+  } catch (error: any) {
+    results.push({
       success: false,
-      results: [...results, { test: "Self-test execution", passed: false, message: String(error) }]
-    };
+      message: 'Exact match validation failed unexpectedly',
+      details: { error: error.message }
+    });
   }
+  
+  // Test 2: Price within tolerance should pass
+  const toleranceAmount = GLOBAL_UBX_RATE * (1 + (PRICE_TOLERANCE / 2));
+  try {
+    const toleranceResult = validateGlobalPrice(toleranceAmount);
+    results.push({
+      success: toleranceResult === true,
+      message: 'Tolerance validation passed',
+      details: { price: toleranceAmount }
+    });
+  } catch (error: any) {
+    results.push({
+      success: false,
+      message: 'Tolerance validation failed unexpectedly',
+      details: { 
+        error: error.message,
+        tolerance: PRICE_TOLERANCE,
+        testPrice: toleranceAmount
+      }
+    });
+  }
+  
+  // Test 3: Price outside tolerance should fail
+  const outsideToleranceAmount = GLOBAL_UBX_RATE * (1 + (PRICE_TOLERANCE * 2));
+  try {
+    validateGlobalPrice(outsideToleranceAmount);
+    results.push({
+      success: false,
+      message: 'Out of tolerance validation incorrectly passed',
+      details: { price: outsideToleranceAmount }
+    });
+  } catch (error: any) {
+    results.push({
+      success: true,
+      message: 'Out of tolerance validation correctly failed',
+      details: { error: error.message }
+    });
+  }
+  
+  return results;
 }

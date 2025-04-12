@@ -1,98 +1,79 @@
 
-import { GLOBAL_UBX_RATE } from './globalPricing';
-
-// Fictional exchange rates for demonstration purposes
-const EXCHANGE_RATES = {
-  USD: 0.1,   // 1 UBX = 0.1 USD
-  EUR: 0.09,  // 1 UBX = 0.09 EUR
-  GBP: 0.08,  // 1 UBX = 0.08 GBP
-  JPY: 14.5,  // 1 UBX = 14.5 JPY
-};
-
-type SupportedCurrency = keyof typeof EXCHANGE_RATES;
+import { GLOBAL_UBX_RATE } from './constants';
 
 /**
- * Utility for displaying UBX prices in different currencies
- * while maintaining Oxum Rule #001 enforcement
+ * Utility class for handling Oxum currency conversions and formatting
  */
-export const oxumCurrencyUtils = {
-  /**
-   * Convert UBX amount to a local currency amount
-   * Always enforces global price for boost transactions
-   */
-  convertUBXToLocal: (
-    amount: number,
-    currency: SupportedCurrency,
-    isBoostTransaction: boolean = false
-  ): number => {
-    // For boost transactions, we always enforce the global price
-    const ubxAmount = isBoostTransaction ? GLOBAL_UBX_RATE : amount;
-    
-    // Apply exchange rate
-    return ubxAmount * EXCHANGE_RATES[currency];
-  },
+export class OxumCurrencyUtils {
+  private exchangeRates: Record<string, number> = {
+    USD: 0.01, // 1 UBX = $0.01
+    EUR: 0.009, // 1 UBX = €0.009
+    GBP: 0.0078, // 1 UBX = £0.0078
+    JPY: 1.5, // 1 UBX = ¥1.5
+  };
 
   /**
-   * Format a currency amount with the appropriate symbol and decimals
+   * Get list of supported currencies
    */
-  formatLocalCurrency: (
-    amount: number,
-    currency: SupportedCurrency
-  ): string => {
-    switch (currency) {
-      case 'USD':
-        return `$${amount.toFixed(2)}`;
-      case 'EUR':
-        return `€${amount.toFixed(2)}`;
-      case 'GBP':
-        return `£${amount.toFixed(2)}`;
-      case 'JPY':
-        return `¥${Math.round(amount)}`; // JPY typically shown without decimals
-      default:
-        return `${amount.toFixed(2)} ${currency}`;
-    }
-  },
-  
-  /**
-   * Get the UBX rate for a given currency
-   * Used for display purposes only, actual transactions use GLOBAL_UBX_RATE
-   */
-  getExchangeRate: (currency: SupportedCurrency): number => {
-    return EXCHANGE_RATES[currency] || 0;
-  },
-  
-  /**
-   * Gets all supported currencies
-   */
-  getSupportedCurrencies: (): SupportedCurrency[] => {
-    return Object.keys(EXCHANGE_RATES) as SupportedCurrency[];
-  },
-  
-  /**
-   * Performs a full conversion and formatting in one step
-   * For boost transactions, enforces the global UBX rate
-   */
-  convertAndFormatUBX: (
-    amount: number,
-    currency: SupportedCurrency,
-    isBoostTransaction: boolean = false
-  ): string => {
-    const localAmount = oxumCurrencyUtils.convertUBXToLocal(
-      amount,
-      currency,
-      isBoostTransaction
-    );
-    return oxumCurrencyUtils.formatLocalCurrency(localAmount, currency);
-  },
-  
-  /**
-   * Get the global boost price in local currency
-   */
-  getGlobalBoostPriceInLocal: (currency: SupportedCurrency): string => {
-    return oxumCurrencyUtils.convertAndFormatUBX(
-      GLOBAL_UBX_RATE,
-      currency,
-      true
-    );
+  getSupportedCurrencies(): string[] {
+    return Object.keys(this.exchangeRates);
   }
-};
+
+  /**
+   * Convert UBX amount to local currency
+   */
+  convertUBXToLocalCurrency(
+    ubxAmount: number, 
+    currency: string = 'USD'
+  ): number {
+    const rate = this.exchangeRates[currency];
+    
+    if (!rate) {
+      console.warn(`Currency ${currency} not supported. Falling back to USD.`);
+      return ubxAmount * this.exchangeRates.USD;
+    }
+    
+    return ubxAmount * rate;
+  }
+
+  /**
+   * Format currency with proper symbol
+   */
+  formatCurrency(amount: number, currency: string = 'USD'): string {
+    const symbols: Record<string, string> = {
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+      JPY: '¥',
+    };
+    
+    const symbol = symbols[currency] || '$';
+    
+    // Format numbers appropriately for each currency
+    if (currency === 'JPY') {
+      // JPY doesn't use decimal places typically
+      return `${symbol}${Math.round(amount)}`;
+    } else {
+      return `${symbol}${amount.toFixed(2)}`;
+    }
+  }
+
+  /**
+   * Convert UBX amount to local currency and format
+   */
+  convertAndFormatUBX(
+    ubxAmount: number, 
+    currency: string = 'USD',
+    isGlobalPrice: boolean = false
+  ): string {
+    // If this is a global price, enforce the global rate
+    const amountToConvert = isGlobalPrice ? GLOBAL_UBX_RATE : ubxAmount;
+    
+    // Convert and format
+    const localAmount = this.convertUBXToLocalCurrency(amountToConvert, currency);
+    return this.formatCurrency(localAmount, currency);
+  }
+}
+
+// Export a singleton instance
+export const oxumCurrencyUtils = new OxumCurrencyUtils();

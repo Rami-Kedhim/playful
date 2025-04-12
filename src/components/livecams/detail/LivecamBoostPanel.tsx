@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { LivecamModel } from "@/types/livecams";
 import { Card, CardContent } from "@/components/ui/card";
@@ -63,8 +62,7 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
                   Higher boost intensity gives greater visibility.
                 </p>
               </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            </TooltipProvider>
         </div>
         
         {isBoosted && boostStatus ? (
@@ -116,7 +114,6 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
             <div className="flex items-center justify-between text-sm mb-4">
               <span>Cost:</span>
               <UBXPriceDisplay 
-                amount={GLOBAL_UBX_RATE} 
                 isGlobalPrice={true}
                 showConversion={true}
                 size="sm"
