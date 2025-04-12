@@ -144,7 +144,11 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
           ) : (
             <>
               <Flame className="mr-2 h-4 w-4" />
-              Boost for <UBXPriceDisplay amount={GLOBAL_UBX_RATE} size="sm" isGlobalPrice={true} />
+              Boost for <UBXPriceDisplay 
+                amount={GLOBAL_UBX_RATE} 
+                size="sm" 
+                isGlobalPrice={true} 
+              />
             </>
           )}
         </Button>

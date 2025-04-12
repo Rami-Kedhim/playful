@@ -1,7 +1,7 @@
-
 import { validateGlobalPrice, GLOBAL_UBX_RATE, PRICE_TOLERANCE } from './globalPricing';
+import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
 
-interface TestResult {
+export interface TestResult {
   success: boolean;
   message: string;
   details?: any;
@@ -31,6 +31,9 @@ export function runPricingSystemSelfTest(): {
       details: { error: error.message }
     });
   }
+  
+  // Clear previous analytics events for a clean slate
+  OxumPriceAnalytics.clearEvents();
   
   // Test 2: Price within tolerance should pass
   const toleranceAmount = GLOBAL_UBX_RATE * (1 + (PRICE_TOLERANCE / 2));
