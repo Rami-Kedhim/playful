@@ -1,4 +1,3 @@
-
 /**
  * Analytics service for tracking Oxum price events and violations
  */
@@ -84,7 +83,7 @@ export class OxumPriceAnalytics {
   /**
    * Get filtered events by event type
    */
-  public static getEvents(filter?: { eventType?: string }): Array<any> {
+  public static getEvents(filter?: { eventType?: string }): any[] {
     if (!filter) {
       return [...this.events];
     }
@@ -100,9 +99,15 @@ export class OxumPriceAnalytics {
   /**
    * Get summary statistics for events
    */
-  public static getStats() {
-    const totalEvents = this.events.length;
-    const violationEvents = this.events.filter(e => e.eventType === 'price_violation');
+  public static getStats(): {
+    totalEvents: number;
+    violationCount: number;
+    complianceRate: number;
+    recentViolations: any[];
+  } {
+    const events = this.events;
+    const totalEvents = events.length;
+    const violationEvents = events.filter(e => e.eventType === 'price_violation');
     const violationCount = violationEvents.length;
     const complianceRate = totalEvents > 0 ? ((totalEvents - violationCount) / totalEvents) * 100 : 100;
     
@@ -137,7 +142,7 @@ export class OxumPriceAnalytics {
   }
   
   /**
-   * Clear all events (alias for clearAnalytics)
+   * Clear all analytics events (alias for clearAnalytics)
    */
   public static clearEvents(): void {
     this.clearAnalytics();

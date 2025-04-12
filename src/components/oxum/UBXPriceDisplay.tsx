@@ -14,7 +14,7 @@ interface UBXPriceDisplayProps {
   amount?: number;
   isGlobalPrice?: boolean;
   showConversion?: boolean;
-  showTooltip?: boolean;
+  showTooltip?: boolean; // Add this prop to handle the missing prop error
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'success' | 'warning' | 'error';
   className?: string;
@@ -28,7 +28,7 @@ const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
   amount,
   isGlobalPrice = false,
   showConversion = false,
-  showTooltip = false,
+  showTooltip = false, // Default to false
   size = 'md',
   variant = 'default',
   className
