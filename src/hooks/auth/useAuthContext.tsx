@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +11,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
+  userRoles: string[];
+  checkRole: (role: string) => boolean;
   signIn: (email: string, password: string) => Promise<{ success: boolean, error?: string }>;
   signUp: (email: string, password: string, username?: string) => Promise<{ success: boolean, error?: string }>;
   signOut: () => Promise<void>;
@@ -29,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   // Initialize the auth state
   useEffect(() => {
@@ -38,13 +40,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(newSession);
         setUser(newSession?.user ?? null);
         
-        // Safely fetch profile with setTimeout to avoid Supabase deadlock
+        // Update user roles based on metadata
         if (newSession?.user) {
+          const roles = newSession.user.app_metadata?.roles || [];
+          setUserRoles(Array.isArray(roles) ? roles : [roles].filter(Boolean));
+          
+          // Safely fetch profile with setTimeout to avoid Supabase deadlock
           setTimeout(() => {
             fetchProfile(newSession.user.id);
           }, 0);
         } else {
           setProfile(null);
+          setUserRoles([]);
         }
       }
     );
@@ -54,9 +61,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
+      // Update user roles based on metadata
       if (currentSession?.user) {
+        const roles = currentSession.user.app_metadata?.roles || [];
+        setUserRoles(Array.isArray(roles) ? roles : [roles].filter(Boolean));
         fetchProfile(currentSession.user.id);
       }
+      
       setIsLoading(false);
     });
 
@@ -82,6 +93,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     }
+  };
+
+  // Function to check if user has a specific role
+  const checkRole = (role: string): boolean => {
+    return userRoles.includes(role);
   };
 
   const refreshProfile = async () => {
@@ -228,6 +244,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     isAuthenticated: !!user,
     error,
+    userRoles,
+    checkRole,
     signIn,
     signUp,
     signOut,
