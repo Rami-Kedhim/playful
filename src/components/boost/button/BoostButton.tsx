@@ -22,7 +22,8 @@ const BoostButton = ({
     showDialog, 
     handleOpenDialog, 
     handleCloseDialog, 
-    handleSuccess 
+    handleSuccess,
+    toggleDialog // Add this line to handle dialog state
   } = useBoostDialog(onSuccess);
   
   if (!isAuthenticated) {
@@ -54,7 +55,7 @@ const BoostButton = ({
           onSuccess={handleSuccess}
           onClose={handleCloseDialog}
           open={showDialog}
-          setOpen={setShowDialog}
+          setOpen={toggleDialog} // Update this line
         />
       )}
     </>

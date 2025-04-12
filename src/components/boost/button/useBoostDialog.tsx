@@ -14,6 +14,10 @@ export const useBoostDialog = (onSuccess?: () => void) => {
     setShowDialog(false);
   };
   
+  const toggleDialog = () => {
+    setShowDialog(prevState => !prevState);
+  };
+  
   const handleSuccess = () => {
     handleCloseDialog();
     if (onSuccess) onSuccess();
@@ -25,6 +29,7 @@ export const useBoostDialog = (onSuccess?: () => void) => {
     boostStatus,
     handleOpenDialog,
     handleCloseDialog,
-    handleSuccess
+    handleSuccess,
+    toggleDialog // Add this to the returned object
   };
 };
