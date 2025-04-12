@@ -60,7 +60,8 @@ const BoostManagerContainer = ({
   const boostStatus = adaptBoostStatus(managerBoostStatus);
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
-  // Fix: Use the fixed adapter function
+  
+  // Use the updated adapter function
   const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
   const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
 

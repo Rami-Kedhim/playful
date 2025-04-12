@@ -80,14 +80,30 @@ function adaptBoostPackageToTypes(pkg: ManagerBoostPackage): TypesBoostPackage {
 
 /**
  * Adapt format duration adapter function
- * This adapter correctly handles the signature difference between string and number based formatters
+ * This function now correctly converts between the two different formatter signatures
  */
 export function adaptFormatBoostDuration(
-  formatter: (durationString: string) => string
-): (duration: string) => string {
-  // Just return the formatter as is, since we're not changing the signature
-  // Just ensuring we properly define the return type to match what components expect
-  return formatter;
+  formatter: (hours: number) => string
+): (durationString: string) => string {
+  // Create a new function that takes a string duration and converts it to hours for the formatter
+  return (durationString: string) => {
+    // Parse hours from the duration string (format: "HH:MM:SS")
+    let hours = 0;
+    try {
+      const parts = durationString.split(':');
+      hours = parseInt(parts[0], 10);
+      
+      // Add partial hours from minutes if available
+      if (parts.length > 1) {
+        hours += parseInt(parts[1], 10) / 60;
+      }
+    } catch (e) {
+      console.error("Error parsing duration string:", e);
+      hours = 0;
+    }
+    
+    return formatter(hours);
+  };
 }
 
 /**

@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useBoostContext } from "@/contexts/BoostContext";
 import BoostDialogHeader from "@/components/boost/dialog/BoostDialogHeader";
@@ -54,6 +55,8 @@ const BoostProfileDialog = ({
   const boostStatus = adaptBoostStatus(managerBoostStatus);
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
+  
+  // Use updated adapter function
   const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
   const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
 

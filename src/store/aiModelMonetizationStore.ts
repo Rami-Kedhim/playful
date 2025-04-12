@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentService } from "@/services/contentService";
-import { BoostService } from "@/services/boostService";
+import { boostService } from "@/services/boostService";
 import { GiftService } from "@/services/giftService";
 import { AIAnalyticsService } from "@/services/analyticsService";
 

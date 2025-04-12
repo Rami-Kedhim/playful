@@ -1,10 +1,11 @@
+
 export interface BoostStatus {
   isActive: boolean;
   activeBoostId?: string;
   startTime?: Date;
   endTime?: Date;
   timeRemaining?: string;
-  progress?: number;
+  progress: number;
   profileId?: string;
   remainingTime?: string;
   expiresAt?: Date;
