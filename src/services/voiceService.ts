@@ -1,6 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+// Add interface to declare the webkit-prefixed AudioContext
+interface Window {
+  webkitAudioContext: typeof AudioContext;
+}
+
 interface VoiceSettings {
   stability?: number;
   similarity_boost?: number;
@@ -61,9 +66,9 @@ class VoiceService {
         return false;
       }
 
-      // Check if AudioContext is supported
-      if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      // Check if AudioContext is supported - fixed TypeScript error by using proper type checking
+      if (typeof AudioContext !== 'undefined' || typeof (window as any).webkitAudioContext !== 'undefined') {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
         this.audioContext = new AudioContextClass();
       } else {
         console.warn("AudioContext not supported in this environment");
@@ -310,3 +315,4 @@ class VoiceService {
 
 // Create a singleton instance
 export const voiceService = new VoiceService();
+
