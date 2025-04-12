@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import BookingDialog from './BookingDialog';
 import { Escort } from '@/types/escort';
 import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
+import { BookingFormData } from './index';
 
 interface BookingButtonProps {
   escort: Escort;
@@ -48,9 +49,10 @@ const BookingButton: React.FC<BookingButtonProps> = ({
     setIsDialogOpen(true);
   };
   
-  const handleBookingSuccess = () => {
+  const handleBookingSubmit = (data: BookingFormData) => {
     // Additional actions after successful booking can be added here
-    console.log('Booking successful');
+    console.log('Booking successful', data);
+    setIsDialogOpen(false);
   };
   
   if (!canBook) return null;
@@ -69,9 +71,9 @@ const BookingButton: React.FC<BookingButtonProps> = ({
       
       <BookingDialog
         escort={escort}
-        isOpen={isDialogOpen}
+        open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onBookNow={handleBookingSuccess}
+        onSubmit={handleBookingSubmit}
       />
     </>
   );

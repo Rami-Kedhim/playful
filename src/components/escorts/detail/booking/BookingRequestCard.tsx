@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import ServiceTypeBadgeLabel from '../../filters/ServiceTypeBadgeLabel';
+import { BookingFormData } from './index';
 
 interface BookingRequestCardProps {
   escort: Escort;
@@ -51,6 +52,11 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({ escort }) => {
     }
     
     setIsDialogOpen(true);
+  };
+  
+  const handleBookingSubmit = (data: BookingFormData) => {
+    console.log('Booking submitted:', data);
+    setIsDialogOpen(false);
   };
   
   return (
@@ -98,9 +104,9 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({ escort }) => {
       
       <BookingDialog
         escort={escort}
-        isOpen={isDialogOpen}
+        open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onBookNow={() => setIsDialogOpen(false)}
+        onSubmit={handleBookingSubmit}
       />
     </>
   );

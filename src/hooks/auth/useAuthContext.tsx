@@ -42,15 +42,15 @@ const adaptUser = (user: User | null, profile: UserProfile | null): AuthUser | n
     profileImageUrl: user.user_metadata?.avatar_url || profile?.avatar_url || '',
     avatarUrl: user.user_metadata?.avatar_url || profile?.avatar_url || '',
     // Use optional chaining for potentially undefined properties
-    role: profile?.role_name || 'user', // Changed from profile.role to profile?.role_name
+    role: profile?.role || 'user', // Using profile.role instead of role_name
     isVerified: profile?.is_verified || false,
     lucoinsBalance: profile?.lucoin_balance || 0,
-    // Remove ubxBalance property as it doesn't exist in AuthUser type
+    // app_metadata and user_metadata
     app_metadata: user.app_metadata || {},
     user_metadata: user.user_metadata || {},
     aud: user.aud,
     created_at: user.created_at,
-    isCreator: profile?.is_creator || false, // Changed from is_content_creator to is_creator
+    isCreator: profile?.is_creator || false, // Using is_creator
     bio: profile?.bio || '',
   };
 };
