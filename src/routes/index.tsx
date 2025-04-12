@@ -22,12 +22,10 @@ const EscortLiveStreams = lazy(() => import('../pages/EscortLiveStreams'));
 const EscortLiveStreamDetail = lazy(() => import('../pages/EscortLiveStreamDetail'));
 const Creators = lazy(() => import('../pages/Creators'));
 const CreatorDetail = lazy(() => import('../pages/CreatorDetail'));
-const AIProfiles = lazy(() => import("../pages/AIProfiles"));
 const Livecams = lazy(() => import('../pages/Livecams'));
 const LivecamDetail = lazy(() => import('../pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('../pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('../pages/NSFWImageGeneratorPage'));
-const AICompanionPage = lazy(() => import('../pages/ai-companion'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -57,12 +55,10 @@ const AppRoutes: React.FC = () => {
         <Route path="/escorts/live/:id" element={<AppLayout><EscortLiveStreamDetail /></AppLayout>} />
         <Route path="/creators" element={<AppLayout><Creators /></AppLayout>} />
         <Route path="/creators/:id" element={<AppLayout><CreatorDetail /></AppLayout>} />
-        <Route path="/ai-profiles" element={<AppLayout><AIProfiles /></AppLayout>} />
         <Route path="/livecams" element={<AppLayout><Livecams /></AppLayout>} />
         <Route path="/livecams/:id" element={<AppLayout><LivecamDetail /></AppLayout>} />
         <Route path="/brain-hub" element={<ProtectedRoute><AppLayout><BrainHubPage /></AppLayout></ProtectedRoute>} />
         <Route path="/nsfw-image-generator" element={<ProtectedRoute><AppLayout><NSFWImageGeneratorPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/ai-companion" element={<AppLayout><AICompanionPage /></AppLayout>} />
         
         {/* 404 route */}
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />

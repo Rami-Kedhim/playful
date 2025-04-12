@@ -23,15 +23,13 @@ const EscortLiveStreams = lazy(() => import('./pages/EscortLiveStreams'));
 const EscortLiveStreamDetail = lazy(() => import('./pages/EscortLiveStreamDetail'));
 const Creators = lazy(() => import('./pages/Creators'));
 const CreatorDetail = lazy(() => import('./pages/CreatorDetail'));
-const AIProfiles = lazy(() => import("./pages/AIProfiles"));
 const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
-const AICompanionPage = lazy(() => import('./pages/ai-companion'));
 const ServiceTypeDemo = lazy(() => import('./pages/ServiceTypeDemo'));
-const WalletPage = lazy(() => import('./pages/Wallet')); // Import Wallet page
-const UpdatedWalletPage = lazy(() => import('./pages/UpdatedWallet')); // Import UpdatedWallet page
+const WalletPage = lazy(() => import('./pages/Wallet'));
+const UpdatedWalletPage = lazy(() => import('./pages/UpdatedWallet'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -92,7 +90,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/escorts/live/:id" element={<AppLayout><EscortLiveStreamDetail /></AppLayout>} />
         <Route path="/creators" element={<AppLayout><Creators /></AppLayout>} />
         <Route path="/creators/:id" element={<AppLayout><CreatorDetail /></AppLayout>} />
-        <Route path="/ai-profiles" element={<AppLayout><AIProfiles /></AppLayout>} />
         <Route path="/livecams" element={<AppLayout><Livecams /></AppLayout>} />
         <Route path="/livecams/:id" element={<AppLayout><LivecamDetail /></AppLayout>} />
         
@@ -108,7 +105,6 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         } />
         
-        <Route path="/ai-companion" element={<AppLayout><AICompanionPage /></AppLayout>} />
         <Route path="/service-type-demo" element={<AppLayout><ServiceTypeDemo /></AppLayout>} />
         
         {/* 404 route */}

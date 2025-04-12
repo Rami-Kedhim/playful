@@ -2,7 +2,7 @@
 import { voiceService } from '@/services/voiceService';
 
 /**
- * Integration between the AI companion chat and the ElevenLabs-powered voice service
+ * Simple voice service integration
  */
 export const useElevenLabsVoice = () => {
   /**
