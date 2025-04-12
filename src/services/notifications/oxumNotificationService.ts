@@ -29,6 +29,7 @@ export class OxumNotificationService {
   };
   
   private static isInitialized = false;
+  private static recoveryModeActive = false;
   
   /**
    * Initialize the notification service
@@ -102,6 +103,9 @@ export class OxumNotificationService {
         }
       );
     }
+    
+    // Check if we need to enter recovery mode
+    this.checkAndEnterRecoveryModeIfNeeded();
   }
   
   /**
@@ -130,6 +134,169 @@ export class OxumNotificationService {
         }
       );
     }
+  }
+  
+  /**
+   * Notify about system health issues
+   */
+  static notifySystemHealthIssue(message: string): void {
+    if (this.options.logToConsole) {
+      console.error(`[Oxum System Health] ${message}`);
+    }
+    
+    if (this.options.showUserNotifications) {
+      toast({
+        title: "Oxum System Health Alert",
+        description: message,
+        variant: "destructive"
+      });
+    }
+    
+    if (this.options.notifyAdmins) {
+      // In a real app, this would trigger high-priority alerts to admins
+      console.error("[Oxum] Critical system health notification would be sent to admins");
+    }
+    
+    AIAnalyticsService.trackEvent(
+      'system',
+      'oxum_system_health_issue',
+      { 
+        message,
+        timestamp: new Date(),
+        severity: 'high'
+      }
+    );
+  }
+  
+  /**
+   * Notify when system health is restored
+   */
+  static notifySystemHealthRestored(): void {
+    if (this.options.logToConsole) {
+      console.log("[Oxum System Health] System health restored");
+    }
+    
+    if (this.options.showUserNotifications) {
+      toast({
+        title: "Oxum System Health Restored",
+        description: "The Oxum pricing system has resumed normal operation.",
+        variant: "default"
+      });
+    }
+    
+    AIAnalyticsService.trackEvent(
+      'system',
+      'oxum_system_health_restored',
+      { timestamp: new Date() }
+    );
+    
+    this.exitRecoveryMode();
+  }
+  
+  /**
+   * Notify about an attempted security violation
+   */
+  static notifySecurityViolation(message: string): void {
+    if (this.options.logToConsole) {
+      console.error(`[Oxum Security] ${message}`);
+    }
+    
+    if (this.options.showUserNotifications) {
+      toast({
+        title: "Oxum Security Alert",
+        description: message,
+        variant: "destructive"
+      });
+    }
+    
+    if (this.options.notifyAdmins) {
+      // In a real app, this would trigger high-priority security alerts
+      console.error("[Oxum] Security violation notification would be sent to admins");
+    }
+    
+    AIAnalyticsService.trackEvent(
+      'system',
+      'oxum_security_violation',
+      { 
+        message,
+        timestamp: new Date(),
+        severity: 'critical'
+      }
+    );
+  }
+  
+  /**
+   * Enter system recovery mode
+   */
+  private static enterRecoveryMode(): void {
+    if (this.recoveryModeActive) return;
+    
+    this.recoveryModeActive = true;
+    
+    if (this.options.logToConsole) {
+      console.warn("[Oxum Recovery] Entering recovery mode");
+    }
+    
+    if (this.options.showUserNotifications) {
+      toast({
+        title: "Oxum Recovery Mode Activated",
+        description: "System is operating in recovery mode to maintain price integrity.",
+        variant: "warning"
+      });
+    }
+    
+    AIAnalyticsService.trackEvent(
+      'system',
+      'oxum_recovery_mode_activated',
+      { timestamp: new Date() }
+    );
+  }
+  
+  /**
+   * Exit system recovery mode
+   */
+  private static exitRecoveryMode(): void {
+    if (!this.recoveryModeActive) return;
+    
+    this.recoveryModeActive = false;
+    
+    if (this.options.logToConsole) {
+      console.log("[Oxum Recovery] Exiting recovery mode");
+    }
+    
+    if (this.options.showUserNotifications) {
+      toast({
+        title: "Oxum Recovery Mode Deactivated",
+        description: "System has returned to normal operation.",
+        variant: "default"
+      });
+    }
+    
+    AIAnalyticsService.trackEvent(
+      'system',
+      'oxum_recovery_mode_deactivated',
+      { timestamp: new Date() }
+    );
+  }
+  
+  /**
+   * Check if we need to enter recovery mode based on system metrics
+   */
+  private static checkAndEnterRecoveryModeIfNeeded(): void {
+    // Get latest stats
+    const stats = OxumPriceAnalytics.getStats();
+    
+    // Enter recovery mode if violation rate is above 20%
+    if (stats.complianceRate < 80 || stats.recentViolations.length >= 5) {
+      this.enterRecoveryMode();
+    }
+  }
+  
+  /**
+   * Check if the system is in recovery mode
+   */
+  static isInRecoveryMode(): boolean {
+    return this.recoveryModeActive;
   }
   
   /**

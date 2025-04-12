@@ -31,6 +31,9 @@ const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
   const [showingCurrency, setShowingCurrency] = useState<SupportedCurrency>('UBX');
   const [showCurrency, setShowCurrency] = useState<boolean>(false);
   
+  // For global price, ensure we always use the fixed rate (defensive programming)
+  const safeAmount = isGlobalPrice ? GLOBAL_UBX_RATE : amount;
+  
   const toggleCurrency = () => {
     setShowingCurrency(curr => {
       if (curr === 'UBX') return 'USD';
@@ -47,8 +50,8 @@ const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
   };
   
   const formattedPrice = showCurrency && showConversion 
-    ? formatUBX(amount, showingCurrency === 'UBX' ? 'USD' : 'UBX')
-    : `${amount} UBX`;
+    ? formatUBX(safeAmount, showingCurrency === 'UBX' ? 'USD' : 'UBX')
+    : `${safeAmount} UBX`;
 
   return (
     <div className={`inline-flex items-center gap-1.5 ${sizeClasses[size]} ${className}`}>
@@ -67,6 +70,7 @@ const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
           size="icon" 
           className="h-5 w-5 rounded-full" 
           onClick={toggleCurrency}
+          aria-label="Toggle currency display"
         >
           <ArrowLeftRight className="h-3 w-3" />
         </Button>
