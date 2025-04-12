@@ -1,7 +1,7 @@
 
 /**
  * This file is kept for backward compatibility
- * It re-exports components from the auth/useAuthContext module
+ * It re-exports components from the auth folder
  */
 import { useAuth, AuthProvider } from '@/hooks/auth/useAuthContext';
 

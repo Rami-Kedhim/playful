@@ -20,7 +20,6 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
   onBackToLogin,
   isLoading,
 }) => {
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onForgotPassword(email);
@@ -38,26 +37,26 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
           required
         />
       </FormField>
-      
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending...
-          </>
-        ) : (
-          "Send Reset Link"
-        )}
-      </Button>
-      
-      <div className="flex justify-center">
+
+      <div className="flex items-center justify-between gap-4">
         <Button
-          variant="link"
+          type="button"
+          variant="outline"
           onClick={onBackToLogin}
           disabled={isLoading}
-          type="button"
+          className="flex-1"
         >
           Back to Login
+        </Button>
+        <Button type="submit" disabled={isLoading} className="flex-1">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            "Send Reset Link"
+          )}
         </Button>
       </div>
     </form>

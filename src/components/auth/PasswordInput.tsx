@@ -1,26 +1,14 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 
-interface PasswordInputProps {
+interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  required?: boolean;
-  className?: string;
 }
 
-const PasswordInput: React.FC<PasswordInputProps> = ({
-  id,
-  value,
-  onChange,
-  placeholder = "Enter password",
-  required = true,
-  className,
-}) => {
+const PasswordInput: React.FC<PasswordInputProps> = ({ id, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -28,21 +16,23 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
       <Input
         id={id}
         type={showPassword ? "text" : "password"}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className={className}
+        {...props}
       />
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="absolute right-0 top-0 h-full px-3"
+        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 px-0"
         onClick={() => setShowPassword(!showPassword)}
-        tabIndex={-1}
       >
-        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+        {showPassword ? (
+          <EyeOff className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <Eye className="h-4 w-4 text-muted-foreground" />
+        )}
+        <span className="sr-only">
+          {showPassword ? "Hide password" : "Show password"}
+        </span>
       </Button>
     </div>
   );

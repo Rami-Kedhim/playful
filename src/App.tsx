@@ -1,20 +1,37 @@
 
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import Routes from './Routes';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { Toaster } from '@/components/ui/toaster';
-import { Toaster as Sonner } from 'sonner';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { AuthProvider } from '@/hooks/auth/useAuthContext';
+import { AIVoiceProvider } from '@/components/ai/AIVoiceProvider';
+import Home from '@/pages/Home';
+import Auth from '@/pages/Auth';
+import AuthPage from '@/pages/AuthPage';
+import ProfileManagement from '@/pages/ProfileManagement';
+import ProtectedRoute from '@/components/layout/ProtectedRoute';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes />
-        <Toaster />
-        <Sonner position="top-right" />
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <AIVoiceProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/login" element={<Auth />} />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfileManagement />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Add more routes as needed */}
+          </Routes>
+        </Router>
+        <Toaster position="top-right" />
+      </AIVoiceProvider>
+    </AuthProvider>
   );
 }
 

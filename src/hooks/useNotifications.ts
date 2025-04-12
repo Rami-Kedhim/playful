@@ -1,49 +1,33 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { toast } from 'sonner';
 
 interface Notification {
   id: string;
+  user_id: string;
   title: string;
   message: string;
+  type: string;
   read: boolean;
+  action_url?: string;
+  action_text?: string;
   created_at: string;
-  time: string;
 }
 
-export const useNotifications = () => {
-  const { user } = useAuth();
+export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-
-  // Format timestamp to relative time (e.g. "2h ago")
-  const formatRelativeTime = (timestamp: string): string => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    
-    if (diffMins < 1) return 'just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString();
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
   // Fetch notifications
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
     
     try {
-      setLoading(true);
+      setIsLoading(true);
       
       const { data, error } = await supabase
         .from('notifications')
@@ -54,46 +38,37 @@ export const useNotifications = () => {
       
       if (error) throw error;
       
-      const formattedNotifications = data.map((notification) => ({
-        ...notification,
-        time: formatRelativeTime(notification.created_at)
-      }));
-      
-      setNotifications(formattedNotifications);
-      setUnreadCount(formattedNotifications.filter(n => !n.read).length);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
+      setNotifications(data || []);
+      setUnreadCount(data?.filter(n => !n.read).length || 0);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  // Mark a notification as read
-  const markAsRead = async (id: string) => {
-    if (!user?.id) return;
-    
+  // Mark notification as read
+  const markAsRead = useCallback(async (notificationId: string) => {
     try {
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', notificationId);
       
       if (error) throw error;
       
       // Update local state
       setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
       );
-      
       setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
     }
-  };
+  }, []);
 
   // Mark all notifications as read
-  const markAllAsRead = async () => {
+  const markAllAsRead = useCallback(async () => {
     if (!user?.id) return;
     
     try {
@@ -108,62 +83,80 @@ export const useNotifications = () => {
       // Update local state
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-      
-      toast({
-        title: "All notifications marked as read",
-      });
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
     }
-  };
+  }, [user?.id]);
 
-  // Set up real-time subscription for new notifications
+  // Delete a notification
+  const deleteNotification = useCallback(async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      // Adjust unread count if needed
+      const wasUnread = notifications.find(n => n.id === notificationId && !n.read);
+      if (wasUnread) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+    }
+  }, [notifications]);
+
+  // Listen for new notifications
   useEffect(() => {
     if (!user?.id) return;
     
     // Initial fetch
     fetchNotifications();
     
-    // Subscribe to new notifications
+    // Set up realtime subscription
     const subscription = supabase
-      .channel('notifications-changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${user.id}`
-      }, (payload) => {
-        // Handle the payload based on the event type
-        if (payload.eventType === 'INSERT') {
-          const newNotification = {
-            ...payload.new,
-            time: formatRelativeTime(payload.new.created_at)
-          } as Notification;
-          
+      .channel('notifications_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const newNotification = payload.new as Notification;
           setNotifications(prev => [newNotification, ...prev]);
-          if (!newNotification.read) {
-            setUnreadCount(prev => prev + 1);
-          }
-        } else if (payload.eventType === 'UPDATE') {
-          setNotifications(prev => 
-            prev.map(n => n.id === payload.new.id ? 
-              { ...payload.new, time: formatRelativeTime(payload.new.created_at) } as Notification : n)
-          );
+          setUnreadCount(prev => prev + 1);
+          
+          // Show toast for new notification
+          toast(newNotification.title, {
+            description: newNotification.message,
+            action: newNotification.action_url ? {
+              label: newNotification.action_text || 'View',
+              onClick: () => window.open(newNotification.action_url, '_blank'),
+            } : undefined,
+          });
         }
-      })
+      )
       .subscribe();
     
     return () => {
-      supabase.removeChannel(subscription);
+      subscription.unsubscribe();
     };
-  }, [user?.id]);
+  }, [user?.id, fetchNotifications]);
 
   return {
     notifications,
     unreadCount,
-    loading,
-    fetchNotifications,
+    isLoading,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
+    deleteNotification,
+    refreshNotifications: fetchNotifications
   };
-};
+}

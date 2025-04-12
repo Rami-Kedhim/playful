@@ -1,116 +1,119 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings } from 'lucide-react';
 
 interface PreferencesStepProps {
   onNext: (data: any) => void;
-  userRole: string;
+  initialData: any;
 }
 
-export const PreferencesStep: React.FC<PreferencesStepProps> = ({ onNext, userRole }) => {
-  const [ageRange, setAgeRange] = useState<[number, number]>([21, 45]);
-  const [genderPreferences, setGenderPreferences] = useState<string[]>([]);
-  const [servicePreferences, setServicePreferences] = useState<string[]>([]);
+export const PreferencesStep: React.FC<PreferencesStepProps> = ({ onNext, initialData }) => {
+  const [genderPreferences, setGenderPreferences] = useState<string[]>(initialData.genderPreferences || []);
+  const [servicePreferences, setServicePreferences] = useState<string[]>(initialData.servicePreferences || []);
+  const [maxDistance, setMaxDistance] = useState<number>(initialData.maxDistance || 50);
+  const [ageRange, setAgeRange] = useState<number[]>(initialData.ageRange || [21, 65]);
   
-  // Mock data for preferences
-  const genderOptions = ['Female', 'Male', 'Trans', 'Non-binary'];
-  const serviceOptions = userRole === 'client' 
-    ? ['Companionship', 'Dating', 'Events', 'Travel Companion', 'Virtual Services', 'Massage']
-    : ['Companionship', 'Dating', 'Events', 'Travel Companion', 'Virtual Services', 'Massage'];
-  
-  const toggleGender = (gender: string) => {
-    if (genderPreferences.includes(gender)) {
-      setGenderPreferences(genderPreferences.filter(g => g !== gender));
-    } else {
-      setGenderPreferences([...genderPreferences, gender]);
-    }
+  const handleGenderChange = (value: string) => {
+    setGenderPreferences(prev => 
+      prev.includes(value) 
+        ? prev.filter(item => item !== value)
+        : [...prev, value]
+    );
   };
   
-  const toggleService = (service: string) => {
-    if (servicePreferences.includes(service)) {
-      setServicePreferences(servicePreferences.filter(s => s !== service));
-    } else {
-      setServicePreferences([...servicePreferences, service]);
-    }
+  const handleServiceChange = (value: string) => {
+    setServicePreferences(prev => 
+      prev.includes(value) 
+        ? prev.filter(item => item !== value)
+        : [...prev, value]
+    );
   };
-
-  const handleContinue = () => {
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     onNext({
       preferences: {
-        ageRange,
         genderPreferences,
-        servicePreferences
+        servicePreferences,
+        maxDistance,
+        ageRange,
       }
     });
   };
-
+  
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-        <Settings className="h-4 w-4" />
-        <span>Set your preferences to personalize your experience</span>
-      </div>
-
-      {userRole === 'client' && (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Age Range Preference</Label>
-            <div className="flex justify-between mb-2">
-              <span className="text-sm">{ageRange[0]}</span>
-              <span className="text-sm">{ageRange[1]}</span>
-            </div>
-            <Slider
-              defaultValue={ageRange}
-              min={21}
-              max={65}
-              step={1}
-              onValueChange={(value) => setAgeRange(value as [number, number])}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Gender Preference</Label>
-            <div className="flex flex-wrap gap-2 mt-1.5">
-              {genderOptions.map((gender) => (
-                <Badge
-                  key={gender}
-                  variant={genderPreferences.includes(gender) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleGender(gender)}
-                >
-                  {gender}
-                </Badge>
-              ))}
-            </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-3">
+          <Label>Gender Preferences</Label>
+          <div className="flex flex-wrap gap-4">
+            {['female', 'male', 'trans', 'non-binary'].map(gender => (
+              <div key={gender} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`gender-${gender}`} 
+                  checked={genderPreferences.includes(gender)}
+                  onCheckedChange={() => handleGenderChange(gender)}
+                />
+                <Label htmlFor={`gender-${gender}`} className="capitalize cursor-pointer">
+                  {gender.replace('-', ' ')}
+                </Label>
+              </div>
+            ))}
           </div>
         </div>
-      )}
-
-      <div className="space-y-2">
-        <Label>Services {userRole === 'client' ? 'Interested In' : 'You Offer'}</Label>
-        <div className="flex flex-wrap gap-2 mt-1.5">
-          {serviceOptions.map((service) => (
-            <Badge
-              key={service}
-              variant={servicePreferences.includes(service) ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => toggleService(service)}
-            >
-              {service}
-            </Badge>
-          ))}
+        
+        <div className="space-y-3">
+          <Label>Service Interests</Label>
+          <div className="grid grid-cols-2 gap-3">
+            {['massage', 'companionship', 'virtual', 'role-play', 'fetish', 'dating', 'travel-companion', 'events'].map(service => (
+              <div key={service} className="flex items-center space-x-2">
+                <Checkbox 
+                  id={`service-${service}`} 
+                  checked={servicePreferences.includes(service)}
+                  onCheckedChange={() => handleServiceChange(service)}
+                />
+                <Label htmlFor={`service-${service}`} className="capitalize cursor-pointer">
+                  {service.replace('-', ' ')}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <Label>Maximum Distance</Label>
+            <span className="text-sm font-semibold">{maxDistance} km</span>
+          </div>
+          <Slider
+            defaultValue={[maxDistance]}
+            max={200}
+            step={5}
+            onValueChange={(values) => setMaxDistance(values[0])}
+          />
+        </div>
+        
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <Label>Age Range</Label>
+            <span className="text-sm font-semibold">{ageRange[0]} - {ageRange[1]} years</span>
+          </div>
+          <Slider
+            defaultValue={ageRange}
+            min={18}
+            max={99}
+            step={1}
+            onValueChange={(values) => setAgeRange([values[0], values[1]])}
+          />
         </div>
       </div>
-
-      <Button className="w-full" onClick={handleContinue}>
+      
+      <Button type="submit" className="w-full mt-4">
         Continue
       </Button>
-    </div>
+    </form>
   );
 };

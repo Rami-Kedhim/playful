@@ -108,13 +108,17 @@ const Auth = () => {
       return;
     }
     
-    // This is a placeholder for actual implementation
-    toast({
-      title: "Password reset link sent",
-      description: "If an account exists with this email, you'll receive a password reset link.",
-    });
-    setShowForgotPassword(false);
-    setFormError(null);
+    try {
+      await useAuth().resetPassword(resetEmail);
+      toast({
+        title: "Password reset link sent",
+        description: "If an account exists with this email, you'll receive a password reset link.",
+      });
+      setShowForgotPassword(false);
+      setFormError(null);
+    } catch (error) {
+      setFormError("Failed to send password reset email");
+    }
   };
   
   if (showForgotPassword) {
