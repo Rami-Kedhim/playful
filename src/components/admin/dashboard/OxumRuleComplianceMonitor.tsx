@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -5,9 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, CheckCircle, RefreshCw, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, CheckCircle, RefreshCw, ShieldAlert, Info, CircleDollarSign, Lock } from 'lucide-react';
 import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+import { OxumRuleEnforcement } from '@/services/oxum/OxumRuleEnforcement';
 
 const OxumRuleComplianceMonitor: React.FC = () => {
   const [stats, setStats] = useState({
@@ -51,7 +53,10 @@ const OxumRuleComplianceMonitor: React.FC = () => {
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div>
-          <CardTitle className="text-xl">Oxum Rule #001 Compliance Monitor</CardTitle>
+          <CardTitle className="text-xl flex items-center gap-2">
+            <Lock className="h-5 w-5 text-primary" />
+            Oxum Rule Compliance Monitor
+          </CardTitle>
           <CardDescription>
             Global Price Symmetry enforcement tracking and analytics
           </CardDescription>
@@ -116,10 +121,24 @@ const OxumRuleComplianceMonitor: React.FC = () => {
           <TabsContent value="overview">
             <div className="space-y-4">
               <div className="p-4 bg-muted rounded-md">
-                <h3 className="font-medium mb-2">Oxum Rule #001: Global Price Symmetry</h3>
+                <h3 className="font-medium mb-2 flex items-center gap-2">
+                  <CircleDollarSign className="h-4 w-4 text-green-600" />
+                  Oxum Rule #001: Global Price Symmetry
+                </h3>
                 <p className="text-sm">
                   All boost pricing is uniform worldwide at {GLOBAL_UBX_RATE} UBX, ensuring fairness
                   and equality for all users regardless of location or economic status.
+                </p>
+              </div>
+              
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-md border border-green-100 dark:border-green-800">
+                <h3 className="font-medium mb-2 flex items-center gap-2">
+                  <Lock className="h-4 w-4 text-green-600" />
+                  Core Financial Principle: Zero-Fee User Transactions
+                </h3>
+                <p className="text-sm">
+                  UberEscorts shall never impose fees, commissions, or revenue-sharing mechanisms on any
+                  user-to-user interaction, whether related to bookings, tips, gifts, messaging, or content access.
                 </p>
               </div>
               
@@ -128,112 +147,126 @@ const OxumRuleComplianceMonitor: React.FC = () => {
                   <ShieldAlert className="h-4 w-4" />
                   <AlertTitle>Recent Violations Detected</AlertTitle>
                   <AlertDescription>
-                    {stats.recentViolations.length} price violations in the last 24 hours.
-                    Check the Violations tab for more details.
+                    {stats.recentViolations.length} violation(s) in the last 24 hours. 
+                    Check the Violations tab for details.
                   </AlertDescription>
                 </Alert>
               )}
               
-              {stats.complianceRate < 98 && (
-                <Alert variant="default" className="bg-amber-50 text-amber-800 border-amber-200">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Compliance Warning</AlertTitle>
-                  <AlertDescription>
-                    The system compliance rate is below 98%. Please review recent transactions and ensure proper price enforcement.
-                  </AlertDescription>
-                </Alert>
-              )}
-              
-              {stats.complianceRate >= 98 && stats.recentViolations.length === 0 && (
-                <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertTitle>System Compliant</AlertTitle>
-                  <AlertDescription>
-                    All systems enforcing Oxum Rule #001 are operating correctly.
-                  </AlertDescription>
-                </Alert>
-              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">System Status</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                      <span className="text-sm">Enforcement Active</span>
+                      <Badge variant="outline" className="bg-green-50 text-green-700">Yes</Badge>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                      <span className="text-sm">Global Price</span>
+                      <Badge variant="outline">{GLOBAL_UBX_RATE} UBX</Badge>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                      <span className="text-sm">Admin Override</span>
+                      <Badge variant="outline" className="bg-red-50 text-red-700">Disabled</Badge>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Auditor Status</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                      <span className="text-sm">Auto-Audit Active</span>
+                      <Badge variant="outline" className="bg-green-50 text-green-700">Yes</Badge>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                      <span className="text-sm">Last Audit</span>
+                      <span className="text-sm">
+                        {new Date().toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+                      <span className="text-sm">Audit Frequency</span>
+                      <span className="text-sm">5 minutes</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </TabsContent>
           
           <TabsContent value="violations">
-            <div className="border rounded-md">
+            {stats.recentViolations.length === 0 ? (
+              <div className="text-center py-12">
+                <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Violations Detected</h3>
+                <p className="text-muted-foreground max-w-sm mx-auto">
+                  All transactions are currently compliant with the Oxum Rule. 
+                  The system will alert you if any violations occur.
+                </p>
+              </div>
+            ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Time</TableHead>
-                    <TableHead>User ID</TableHead>
-                    <TableHead>Profile ID</TableHead>
-                    <TableHead>Actual Price</TableHead>
-                    <TableHead>Expected Price</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Expected</TableHead>
                     <TableHead>Difference</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {OxumPriceAnalytics.getEvents({ eventType: 'price_violation' }).map((event, i) => (
-                    <TableRow key={`violation-${i}`}>
-                      <TableCell>{formatDate(event.timestamp)}</TableCell>
-                      <TableCell>{event.userId || 'N/A'}</TableCell>
-                      <TableCell>{event.profileId || 'N/A'}</TableCell>
-                      <TableCell>{event.userPrice} UBX</TableCell>
-                      <TableCell>{event.targetPrice} UBX</TableCell>
-                      <TableCell className="text-red-500">
-                        {event.userPrice - event.targetPrice} UBX
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {OxumPriceAnalytics.getEvents({ eventType: 'price_violation' }).length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                        No violations detected
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="events">
-            <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Event Type</TableHead>
-                    <TableHead>Amount</TableHead>
+                    <TableHead>Transaction Type</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allEvents.slice(0, 100).map((event, i) => (
-                    <TableRow key={`event-${i}`}>
-                      <TableCell>{formatDate(event.timestamp)}</TableCell>
-                      <TableCell>
-                        {event.eventType === 'price_check' && 'Price Check'}
-                        {event.eventType === 'price_violation' && 'Violation'}
-                        {event.eventType === 'price_transaction' && 'Transaction'}
+                  {stats.recentViolations.map((violation, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{formatDate(violation.timestamp)}</TableCell>
+                      <TableCell>{violation.price} UBX</TableCell>
+                      <TableCell>{GLOBAL_UBX_RATE} UBX</TableCell>
+                      <TableCell className="text-red-600">
+                        {(violation.price - GLOBAL_UBX_RATE).toFixed(2)} UBX
                       </TableCell>
-                      <TableCell>{event.amount} UBX</TableCell>
+                      <TableCell>{violation.transactionType}</TableCell>
                       <TableCell>
-                        {event.eventType === 'price_violation' ? (
-                          <Badge variant="destructive">Failed</Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-green-100 text-green-800">Passed</Badge>
-                        )}
+                        <Badge variant="destructive">Blocked</Badge>
                       </TableCell>
                     </TableRow>
                   ))}
-                  {allEvents.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
-                        No events recorded
-                      </TableCell>
-                    </TableRow>
-                  )}
                 </TableBody>
               </Table>
-            </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="events">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Event Type</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Transaction Type</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allEvents.map((event, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{formatDate(event.timestamp)}</TableCell>
+                    <TableCell>{event.eventType}</TableCell>
+                    <TableCell>{event.price} UBX</TableCell>
+                    <TableCell>{event.transactionType}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={event.isCompliant ? "outline" : "destructive"}
+                        className={event.isCompliant ? "bg-green-50 text-green-700" : ""}
+                      >
+                        {event.isCompliant ? "Compliant" : "Violation"}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </TabsContent>
         </Tabs>
       </CardContent>

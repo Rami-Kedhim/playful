@@ -8,15 +8,17 @@ interface EliminixProfileIndicatorProps {
   profile: UberPersona;
   size?: 'sm' | 'md' | 'lg';
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  showOxumIndicator?: boolean;
 }
 
 /**
- * A component to show Eliminix compliance status on profile cards
+ * A component to show Eliminix and Oxum compliance status on profile cards
  */
 const EliminixProfileIndicator: React.FC<EliminixProfileIndicatorProps> = ({
   profile,
   size = 'sm',
-  position = 'top-right'
+  position = 'top-right',
+  showOxumIndicator = true
 }) => {
   const isCompliant = verifyEliminixCompliance(profile);
   
@@ -38,13 +40,19 @@ const EliminixProfileIndicator: React.FC<EliminixProfileIndicatorProps> = ({
   }
   
   return (
-    <div className={`absolute ${positionClasses} z-10`}>
+    <div className={`absolute ${positionClasses} z-10 flex flex-col gap-1 items-end`}>
       <EliminixBadge 
         size={size} 
         isCompliant={isCompliant}
         variant="outline" 
         className={isCompliant ? 'bg-white/90 dark:bg-black/50' : 'bg-white/90 dark:bg-black/50'} 
       />
+      
+      {showOxumIndicator && isCompliant && (
+        <div className="bg-white/90 dark:bg-black/50 px-1.5 py-0.5 rounded-md text-xs flex items-center">
+          <span className="text-green-600 dark:text-green-400 font-medium">Oxum Protected</span>
+        </div>
+      )}
     </div>
   );
 };
