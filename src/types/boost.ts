@@ -1,4 +1,3 @@
-
 export interface BoostStatus {
   isActive: boolean;
   activeBoostId?: string;
@@ -7,6 +6,9 @@ export interface BoostStatus {
   timeRemaining?: string;
   progress?: number;
   profileId?: string;
+  remainingTime?: string;
+  expiresAt?: Date;
+  boostPackage?: BoostPackage;
 }
 
 export interface BoostPackage {
@@ -14,7 +16,8 @@ export interface BoostPackage {
   name: string;
   description: string;
   duration: string;
-  price: number;
+  price_ubx: number;
+  price?: number;
   features: string[];
 }
 

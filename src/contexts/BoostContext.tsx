@@ -86,7 +86,7 @@ export const BoostProvider = ({ children }: BoostProviderProps) => {
         description: "Full day visibility boost",
         features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
       }
-    ];
+    ] as BoostPackage[];
     
     const packageToBoost = mockPackages.find(p => p.id === packageId);
     if (!packageToBoost) {

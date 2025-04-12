@@ -67,7 +67,8 @@ export function adaptBoostPackageToTypes(
     id: pkg.id,
     name: pkg.name,
     duration: formatHoursToDuration(pkg.duration),
-    price_ubx: pkg.price,
+    price_ubx: pkg.price, // Map price to price_ubx
+    price: pkg.price, // Keep price for backward compatibility
     description: pkg.description,
     features: pkg.features
   };
@@ -132,7 +133,7 @@ export function adaptBoostPackageToManager(
     name: pkg.name,
     description: pkg.description || '',
     duration: durationHours,
-    price: pkg.price_ubx,
+    price: pkg.price_ubx || pkg.price || 0, // Use price_ubx if available, otherwise fallback to price
     features: pkg.features || [],
     boostType: 'standard'
   };
