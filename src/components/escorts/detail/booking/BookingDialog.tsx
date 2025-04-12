@@ -12,9 +12,15 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import ServiceTypeBadgeLabel from '../../filters/ServiceTypeBadgeLabel';
-import { BookingFormProps, BookingFormData } from './index';
 
-const BookingDialog = ({ escort, open, onClose, onSubmit }: BookingFormProps) => {
+interface BookingDialogProps {
+  escort: Escort;
+  isOpen: boolean;
+  onClose: () => void;
+  onBookNow: () => void;
+}
+
+const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState<string | null>(null);
   const [duration, setDuration] = useState<string>("1hour");
@@ -73,14 +79,13 @@ const BookingDialog = ({ escort, open, onClose, onSubmit }: BookingFormProps) =>
       return;
     }
     
-    const formData: BookingFormData = {
-      date,
-      time: timeSlot,
-      duration,
-      message
-    };
+    toast({
+      title: "Booking Submitted",
+      description: `Your booking with ${escort.name} has been scheduled for ${format(date, "PP")} at ${timeSlot}`,
+    });
     
-    onSubmit(formData);
+    onBookNow();
+    onClose();
   };
   
   const handleDialogClose = () => {
@@ -92,7 +97,7 @@ const BookingDialog = ({ escort, open, onClose, onSubmit }: BookingFormProps) =>
   };
   
   return (
-    <Dialog open={open} onOpenChange={handleDialogClose}>
+    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogContent className="max-w-md sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

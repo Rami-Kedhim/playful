@@ -1,51 +1,97 @@
 
 import React from 'react';
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from 'lucide-react';
 
-export interface UBXPriceDisplayProps {
-  amount: number;
+interface UBXPriceDisplayProps {
+  amount?: number;
   isGlobalPrice?: boolean;
   showConversion?: boolean;
+  showTooltip?: boolean; // Add this prop to handle the missing prop error
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'success' | 'warning' | 'error';
   className?: string;
 }
 
 /**
- * Component to display UBX prices in a standardized format
+ * A component that displays UBX prices with Oxum Rule #001 enforcement
+ * Always enforces the global pricing rule for boost prices
  */
 const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
   amount,
   isGlobalPrice = false,
   showConversion = false,
+  showTooltip = false, // Default to false
   size = 'md',
-  className = ''
+  variant = 'default',
+  className
 }) => {
-  // Calculate equivalent fiat value (simplified example)
-  const estimatedUSDValue = (amount * 0.1).toFixed(2);
+  // If this is a global price or no amount provided, enforce the global rate
+  const displayAmount = isGlobalPrice || amount === undefined ? GLOBAL_UBX_RATE : amount;
   
-  // Size classes
+  // Convert to local currency if needed (simple placeholder - would integrate with currency service)
+  const localEquivalent = showConversion ? `≈ $${(displayAmount * 0.01).toFixed(2)} USD` : null;
+  
+  // Determine size classes
   const sizeClasses = {
     sm: 'text-sm',
     md: 'text-base',
-    lg: 'text-lg font-semibold'
+    lg: 'text-xl font-bold',
   };
   
-  // Accent color for global prices
-  const priceColor = isGlobalPrice ? 'text-primary' : '';
+  // Determine variant classes
+  const variantClasses = {
+    default: '',
+    success: 'text-green-600',
+    warning: 'text-amber-600',
+    error: 'text-red-600',
+  };
+  
+  const priceDisplay = (
+    <span
+      className={cn(
+        'font-medium',
+        sizeClasses[size],
+        variantClasses[variant],
+        className
+      )}
+    >
+      {displayAmount} UBX
+    </span>
+  );
+  
+  if (showTooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-1 cursor-help">
+              {priceDisplay}
+              <Info className="h-3 w-3 text-muted-foreground" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-xs text-xs">
+              Following Oxum Rule #001 on Global Price Symmetry, boost pricing is uniform worldwide.
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
   
   return (
-    <div className={`flex flex-col ${sizeClasses[size]} ${className}`}>
-      <div className={`flex items-center gap-1 ${priceColor}`}>
-        <span className="font-semibold">{amount}</span>
-        <span className="text-muted-foreground">UBX</span>
-        {isGlobalPrice && (
-          <span className="text-xs bg-primary/10 text-primary px-1 py-0.5 rounded">GLOBAL</span>
-        )}
-      </div>
-      
-      {showConversion && (
-        <span className="text-xs text-muted-foreground">
-          ≈ ${estimatedUSDValue} USD
-        </span>
+    <div className="flex items-center gap-2">
+      {priceDisplay}
+      {showConversion && localEquivalent && (
+        <span className="text-muted-foreground text-sm">{localEquivalent}</span>
       )}
     </div>
   );

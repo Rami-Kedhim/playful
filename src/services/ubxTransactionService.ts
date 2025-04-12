@@ -1,7 +1,7 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { validateGlobalPriceWithRetry, validateGlobalPrice, GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
-import { OxumRuleEnforcement, OxumTransactionData } from '@/services/oxum/OxumRuleEnforcement';
 
 export interface TransactionParams {
   userId: string;
@@ -20,29 +20,10 @@ export interface TransactionResult {
 
 /**
  * Processes a UBX token transaction using the Supabase Edge Function
- * with Oxum Rule enforcement
  */
 export const processUBXTransaction = async (params: TransactionParams): Promise<TransactionResult> => {
   try {
-    // First, validate against Oxum Rules
-    const oxumValidation = OxumRuleEnforcement.validateTransaction({
-      amount: params.amount,
-      transactionType: params.transactionType,
-      sender: params.userId,
-      recipient: params.metadata?.recipientId,
-      metadata: params.metadata
-    });
-    
-    // If the transaction violates Oxum Rules, reject it immediately
-    if (!oxumValidation.success || !oxumValidation.isOxumCompliant) {
-      console.error('[Oxum Rule Violation]:', oxumValidation.error);
-      return {
-        success: false,
-        error: oxumValidation.error || 'Transaction violates the Oxum Rule'
-      };
-    }
-
-    // For boost transactions, explicitly validate against Oxum price rules
+    // Validate against Oxum price rules for boost transactions
     if (params.transactionType === 'boost_purchase' || params.transactionType === 'ai_boost') {
       try {
         // For negative amounts (spending), we need to check the absolute value
@@ -77,27 +58,13 @@ export const processUBXTransaction = async (params: TransactionParams): Promise<
       }
     }
 
-    // Check for any user-to-user transaction attempt to add platform fees
-    if (OxumRuleEnforcement.isUserToUserTransaction(params.transactionType)) {
-      if (params.metadata?.platformFee && params.metadata.platformFee > 0) {
-        return {
-          success: false,
-          error: 'Oxum Rule Violation: Platform fees on user-to-user transactions are strictly prohibited'
-        };
-      }
-    }
-
-    // Proceed with the transaction after all validations pass
     const { data, error } = await supabase.functions.invoke('process-ubx-transaction', {
       body: {
         user_id: params.userId,
         amount: params.amount,
         transaction_type: params.transactionType,
         description: params.description,
-        metadata: {
-          ...params.metadata,
-          oxum_compliant: true // Mark transaction as Oxum compliant
-        }
+        metadata: params.metadata
       }
     });
     
@@ -154,17 +121,7 @@ export const validateTransactionAmount = async (
   amount: number, 
   transactionType: string
 ): Promise<boolean> => {
-  // First check against the broader Oxum rule
-  const oxumValidation = OxumRuleEnforcement.validateTransaction({
-    amount,
-    transactionType
-  });
-  
-  if (!oxumValidation.success || !oxumValidation.isOxumCompliant) {
-    return false;
-  }
-  
-  // Only validate boost transactions against the global price symmetry rule
+  // Only validate for boost-related transactions
   if (transactionType === 'boost_purchase' || transactionType === 'ai_boost') {
     const amountToValidate = amount < 0 ? Math.abs(amount) : amount;
     try {
@@ -176,34 +133,6 @@ export const validateTransactionAmount = async (
     }
   }
   
-  // For non-boost transactions, no price validation needed
+  // For non-boost transactions, no validation needed
   return true;
-};
-
-/**
- * Get the appropriate UBX price for a transaction type
- * based on Oxum Rules
- */
-export const getTransactionPrice = (transactionType: string): number => {
-  // If it's a boost transaction, get the global price
-  if (OxumRuleEnforcement.isBoostTransaction(transactionType)) {
-    return GLOBAL_UBX_RATE;
-  }
-  
-  // Other transaction types don't have fixed prices
-  return 0;
-};
-
-/**
- * Check if a transaction type requires a platform fee
- * According to the Oxum Rule, user-to-user transactions must have zero fees
- */
-export const doesTransactionRequirePlatformFee = (transactionType: string): boolean => {
-  // User-to-user transactions never have fees (per Oxum Rule)
-  if (OxumRuleEnforcement.isUserToUserTransaction(transactionType)) {
-    return false;
-  }
-  
-  // Currently only boost transactions are monetized
-  return OxumRuleEnforcement.isBoostTransaction(transactionType);
 };

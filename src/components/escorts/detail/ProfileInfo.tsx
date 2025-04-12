@@ -107,9 +107,9 @@ const ProfileInfo = ({
       
       <BookingDialog 
         escort={escort}
-        open={bookingDialogOpen}
+        isOpen={bookingDialogOpen}
         onClose={() => setBookingDialogOpen(false)}
-        onSubmit={onBookingOpen}
+        onBookNow={onBookingOpen}
       />
     </div>
   );

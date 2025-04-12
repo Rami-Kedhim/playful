@@ -52,7 +52,8 @@ const ResetPasswordForm = () => {
 
     try {
       setLoading(true);
-      await updatePassword(password);
+      // Fix: provide a dummy value for oldPassword since we're resetting
+      await updatePassword("", password);
       
       toast({
         title: "Password reset successful",

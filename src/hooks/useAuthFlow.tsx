@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { toast } from '@/components/ui/use-toast';
 
 export interface LoginCredentials {
@@ -19,7 +18,7 @@ export function useAuthFlow(redirectTo: string = '/') {
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, signIn, signUp, signOut, error } = useAuth();
+  const { isAuthenticated, login, register, logout, error } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -43,7 +42,7 @@ export function useAuthFlow(redirectTo: string = '/') {
     setAuthError(null);
     
     try {
-      const result = await signIn(credentials.email, credentials.password);
+      const result = await login(credentials.email, credentials.password);
       // Success is determined by the isAuthenticated state changing
       if (!result.success) {
         setAuthError(result.error || 'An unexpected error occurred');
@@ -71,7 +70,7 @@ export function useAuthFlow(redirectTo: string = '/') {
     setAuthError(null);
     
     try {
-      const result = await signUp(credentials.email, credentials.password, credentials.username);
+      const result = await register(credentials.email, credentials.password, credentials.username);
       // Success is determined by the isAuthenticated state changing
       if (!result.success) {
         setAuthError(result.error || 'An unexpected error occurred');
@@ -97,7 +96,7 @@ export function useAuthFlow(redirectTo: string = '/') {
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await signOut();
+      await logout();
       navigate('/auth');
       toast({
         title: 'Logged Out',

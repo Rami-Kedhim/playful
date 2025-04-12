@@ -1,5 +1,7 @@
+
 import React from 'react';
 import { UberPersona } from '@/types/uberPersona';
+import { Grid } from '@/components/ui/grid';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,7 +24,7 @@ const UberPersonaGrid: React.FC<UberPersonaGridProps> = ({
 }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <Grid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {[...Array(8)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
             <Skeleton className="h-48 w-full" />
@@ -41,7 +43,7 @@ const UberPersonaGrid: React.FC<UberPersonaGridProps> = ({
             </CardContent>
           </Card>
         ))}
-      </div>
+      </Grid>
     );
   }
 
@@ -55,7 +57,7 @@ const UberPersonaGrid: React.FC<UberPersonaGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <Grid className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {personas.map(persona => {
         // Check Eliminix compliance for this persona
         const isEliminixCompliant = verifyEliminixCompliance(persona);
@@ -144,7 +146,7 @@ const UberPersonaGrid: React.FC<UberPersonaGridProps> = ({
           </Card>
         );
       })}
-    </div>
+    </Grid>
   );
 };
 
