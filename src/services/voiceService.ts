@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { generateSpeech } from "@/integrations/supabase/elevenlabs-tts";
 
 // Add interface to declare the webkit-prefixed AudioContext
 interface Window {
@@ -154,32 +155,30 @@ class VoiceService {
         // Map voice type to ElevenLabs voice ID if needed
         const voiceId = this.mapVoiceTypeToId(options.voice);
         
-        // Call the Supabase Edge Function for text-to-speech
-        const { data, error } = await supabase.functions.invoke('elevenlabs-tts', {
-          body: {
+        try {
+          // Call the generateSpeech function to use our Supabase Edge Function
+          const response = await generateSpeech({
             text: text,
             voiceId: voiceId,
-            modelId: options.model,
+            modelId: options.model || 'eleven-multilingual-v2',
             voiceSettings: options.voiceSettings
+          });
+          
+          if (!response || !response.audio) {
+            console.error('No audio data returned from ElevenLabs TTS');
+            this.handleError("data");
+            return false;
           }
-        });
-        
-        if (error) {
+          
+          base64Audio = response.audio;
+          
+          // Add to cache
+          this.addToCache(cacheKey, base64Audio);
+        } catch (error) {
           console.error('Error calling ElevenLabs TTS:', error);
           this.handleError("api");
           return false;
         }
-        
-        if (!data || !data.audio) {
-          console.error('No audio data returned from ElevenLabs TTS');
-          this.handleError("data");
-          return false;
-        }
-        
-        base64Audio = data.audio;
-        
-        // Add to cache
-        this.addToCache(cacheKey, base64Audio);
       }
       
       // Convert base64 to Blob
@@ -315,4 +314,3 @@ class VoiceService {
 
 // Create a singleton instance
 export const voiceService = new VoiceService();
-
