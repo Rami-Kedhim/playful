@@ -7,7 +7,7 @@ import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Rocket, TrendingUp, ChevronRight, Zap } from 'lucide-react';
 import { useBoostManager } from '@/hooks/boost';
-import { BoostStatus } from '@/types/boost';
+import { BoostStatus } from '@/types/boost';  // Ensure this import is correct
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
