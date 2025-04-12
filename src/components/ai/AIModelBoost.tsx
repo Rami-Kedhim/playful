@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Flame, Zap } from 'lucide-react';
 import { AIProfile } from '@/types/ai-profile';
 import useAIModelMonetizationStore from '@/store/aiModelMonetizationStore';
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
 interface AIModelBoostProps {
   profile: AIProfile;
@@ -15,7 +16,6 @@ interface AIModelBoostProps {
 }
 
 const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete }) => {
-  const [amount, setAmount] = useState<number>(50);
   const [duration, setDuration] = useState<number>(24);
   const [isBoostInProgress, setIsBoostInProgress] = useState<boolean>(false);
   const [boostProgress, setBoostProgress] = useState<number>(0);
@@ -24,13 +24,6 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
   
   const currentBoostLevel = getProfileBoostLevel(profile.id);
   
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 10) {
-      setAmount(value);
-    }
-  };
-
   const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value >= 1) {
@@ -39,7 +32,7 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
   };
   
   const calculateBoostLevel = () => {
-    return Math.ceil(amount / 20);
+    return Math.ceil(GLOBAL_UBX_RATE / 20);
   };
   
   const handleBoost = async () => {
@@ -59,7 +52,7 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
     }, 200);
     
     try {
-      const result = await boostProfile(profile.id, amount, duration);
+      const result = await boostProfile(profile.id, GLOBAL_UBX_RATE, duration);
       
       if (result && onBoostComplete) {
         // Wait for progress animation to complete
@@ -95,16 +88,14 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="boost-amount">Boost Amount (Lucoins)</Label>
+          <Label htmlFor="boost-amount">Boost Amount (UBX)</Label>
           <div className="flex items-center">
             <Input
               id="boost-amount"
               type="number"
-              min={10}
-              value={amount}
-              onChange={handleAmountChange}
+              value={GLOBAL_UBX_RATE}
+              disabled={true}
               className="w-full"
-              disabled={isBoostInProgress}
             />
           </div>
           <p className="text-xs text-muted-foreground">
@@ -145,7 +136,7 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
           ) : (
             <>
               <Flame className="mr-2 h-4 w-4" />
-              Boost for {amount} Lucoins
+              Boost for {GLOBAL_UBX_RATE} UBX
             </>
           )}
         </Button>

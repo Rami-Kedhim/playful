@@ -3,7 +3,7 @@
 // This module enforces Oxum Rule #001: Global Price Symmetry
 
 // === CONSTANTS ===
-export const GLOBAL_UBX_RATE = 1000; // Example: Boosting price = 1000 UBX for all
+export const GLOBAL_UBX_RATE = 1000; // Boosting price = 1000 UBX for all
 
 // === FUNCTION: Get Boosting Price ===
 export function getBoostingPriceUBX(): number {
