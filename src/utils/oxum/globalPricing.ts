@@ -30,6 +30,7 @@ export {
 
 // Simple helper function for getting the boost price
 export function getBoostingPriceUBX(): number {
-  // Import from constants that we've already exported above
+  // Use the constant directly from the re-exported constants
   return GLOBAL_UBX_RATE;
 }
+
