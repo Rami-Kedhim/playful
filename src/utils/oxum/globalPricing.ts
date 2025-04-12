@@ -30,5 +30,7 @@ export {
 
 // Simple helper function for getting the boost price
 export function getBoostingPriceUBX(): number {
+  // Import the constant directly to fix the error
+  const { GLOBAL_UBX_RATE } = require('./constants');
   return GLOBAL_UBX_RATE;
 }
