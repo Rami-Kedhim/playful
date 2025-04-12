@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { OxumPriceAnalytics } from '@/services/analytics/oxumPriceAnalytics';
 import { AIAnalyticsService } from '@/services/analyticsService';
@@ -106,6 +105,41 @@ export class OxumNotificationService {
     
     // Check if we need to enter recovery mode
     this.checkAndEnterRecoveryModeIfNeeded();
+  }
+  
+  /**
+   * Send a notification about a critical pricing failure
+   */
+  static notifyCriticalFailure(message: string): void {
+    if (this.options.logToConsole) {
+      console.error(`[Oxum Critical Failure] ${message}`);
+    }
+    
+    if (this.options.showUserNotifications) {
+      toast({
+        title: "Oxum Critical System Failure",
+        description: message,
+        variant: "destructive"
+      });
+    }
+    
+    if (this.options.notifyAdmins) {
+      // In a real app, this would send high-priority alerts to admins
+      console.error("[Oxum] Critical failure notification would be sent to admins");
+    }
+    
+    AIAnalyticsService.trackEvent(
+      'system',
+      'oxum_critical_failure',
+      { 
+        message,
+        timestamp: new Date(),
+        severity: 'critical'
+      }
+    );
+    
+    // Critical failures always trigger recovery mode
+    this.enterRecoveryMode();
   }
   
   /**

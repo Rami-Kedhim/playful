@@ -2,7 +2,7 @@
 import { AIAnalyticsService } from '@/services/analyticsService';
 
 interface PriceEvent {
-  eventType: 'price_check' | 'price_violation' | 'price_transaction';
+  eventType: 'price_check' | 'price_violation' | 'price_transaction' | 'critical_price_failure' | 'emergency_override';
   amount: number;
   expectedAmount?: number;
   userId?: string;
@@ -62,9 +62,14 @@ export class OxumPriceAnalytics {
       );
     }
     
-    // Log violations to console for easier debugging
-    if (eventType === 'price_violation') {
-      console.error('[Oxum Rule Violation]', event);
+    // Log violations and critical failures to console for easier debugging
+    if (eventType === 'price_violation' || eventType === 'critical_price_failure') {
+      console.error(`[Oxum ${eventType === 'price_violation' ? 'Rule Violation' : 'Critical Failure'}]`, event);
+    }
+    
+    // Log emergency overrides for security auditing
+    if (eventType === 'emergency_override') {
+      console.warn('[Oxum Security] Emergency override activated:', event);
     }
   }
   

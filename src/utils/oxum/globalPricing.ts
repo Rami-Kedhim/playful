@@ -150,6 +150,9 @@ export async function validateGlobalPriceWithRetry(
     GLOBAL_UBX_RATE
   );
   
+  // Notify about critical failure
+  OxumNotificationService.notifyCriticalFailure(`Price validation failed after ${attempts} attempts`);
+  
   if (lastError) throw lastError;
   throw new Error("[Oxum Enforcement] Price validation failed after multiple attempts");
 }
