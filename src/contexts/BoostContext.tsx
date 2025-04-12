@@ -46,7 +46,7 @@ export const BoostProvider = ({ children }: BoostProviderProps) => {
 
   const {
     checkActiveBoost,
-    purchaseBoost,
+    purchaseBoost: purchaseBoostOperation,
     cancelBoost,
     fetchAnalytics: fetchBoostAnalytics
   } = useBoostOperations(
@@ -57,6 +57,44 @@ export const BoostProvider = ({ children }: BoostProviderProps) => {
     setError, 
     setDailyBoostUsage
   );
+  
+  // Wrapper function that accepts packageId string to match the interface
+  const purchaseBoost = async (packageId: string): Promise<boolean> => {
+    // Find the package by ID - in a real app this would fetch from an API or cache
+    const mockPackages = [
+      {
+        id: "boost-1",
+        name: "1-Hour Boost",
+        duration: "01:00:00",
+        price_ubx: 5,
+        description: "Quick visibility boost",
+        features: ["Top search position", "Featured badge"]
+      },
+      {
+        id: "boost-3",
+        name: "3-Hour Boost",
+        duration: "03:00:00",
+        price_ubx: 15,
+        description: "Standard visibility boost",
+        features: ["Top search position", "Featured badge", "Profile highlighting"]
+      },
+      {
+        id: "boost-24",
+        name: "24-Hour Boost",
+        duration: "24:00:00",
+        price_ubx: 50,
+        description: "Full day visibility boost",
+        features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
+      }
+    ];
+    
+    const packageToBoost = mockPackages.find(p => p.id === packageId);
+    if (!packageToBoost) {
+      return false;
+    }
+    
+    return await purchaseBoostOperation(packageToBoost);
+  };
   
   // Fetch analytics data for current boost
   const fetchAnalytics = async (): Promise<AnalyticsData | null> => {

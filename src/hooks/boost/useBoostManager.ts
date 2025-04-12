@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { AnalyticsData } from "./useBoostAnalytics";
@@ -234,36 +233,25 @@ export const useBoostManager = (profileId?: string) => {
       const engagementBase = Math.floor(Math.random() * 50) + 20;
       
       const mockData: AnalyticsData = {
-        additionalViews: Math.floor(viewsBase * 0.3), // Now required
+        additionalViews: Math.floor(viewsBase * 0.3), 
         engagementIncrease: Math.floor(engagementBase * 0.4),
         rankingPosition: Math.floor(Math.random() * 5) + 1,
         effectiveness: Math.floor(Math.random() * 30) + 70,
         views: {
           withoutBoost: Math.floor(viewsBase * 0.7),
           withBoost: viewsBase,
-          increase: Math.floor(viewsBase * 0.3),
-          current: viewsBase,
-          previous: Math.floor(viewsBase * 0.7),
-          change: Math.floor(viewsBase * 0.3)
+          increase: Math.floor(viewsBase * 0.3)
         },
         clicks: {
           withoutBoost: Math.floor(engagementBase * 0.6),
           withBoost: engagementBase,
-          increase: Math.floor(engagementBase * 0.4),
-          current: engagementBase,
-          previous: Math.floor(engagementBase * 0.6),
-          change: Math.floor(engagementBase * 0.4)
+          increase: Math.floor(engagementBase * 0.4)
         },
-        conversion: {
-          current: Math.floor(Math.random() * 10) + 5,
-          previous: Math.floor(Math.random() * 5) + 2,
-          change: Math.floor(Math.random() * 40) + 10
-        },
-        timeData: Array.from({ length: 24 }, (_, i) => ({
-          hour: `${i}:00`,
-          views: Math.floor(Math.random() * 50) + 10,
-          engagement: Math.floor(Math.random() * 10) + 5
-        }))
+        searchRanking: {
+          withoutBoost: Math.floor(Math.random() * 15) + 8,
+          withBoost: Math.floor(Math.random() * 5) + 1,
+          improvement: Math.floor(Math.random() * 7) + 3
+        }
       };
       
       return mockData;

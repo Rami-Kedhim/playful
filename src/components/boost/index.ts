@@ -9,6 +9,10 @@ export { default as BoostHistoryTable } from './BoostHistoryTable';
 export { default as BoostPackage } from './BoostPackage';
 export { default as BoostPackageSelection } from './BoostPackageSelection';
 export { default as HermesOxumDashboard } from '../admin/HermesOxumDashboard';
+export { default as BoostButton } from './BoostButton';
+
+// Export button components
+export * from './button';
 
 // Export dialog components
 export { default as BoostActivePackage } from './dialog/BoostActivePackage';
