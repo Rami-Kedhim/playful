@@ -75,7 +75,8 @@ export class OxumRuleEnforcement {
       
     } catch (error: any) {
       // System-level error during validation
-      OxumNotificationService.getInstance().notify(error.message || "Unknown error during Oxum Rule validation", 'error');
+      // Using the static notifyCriticalFailure method instead of the private notify method
+      OxumNotificationService.notifyCriticalFailure("Unknown error during Oxum Rule validation");
       
       return {
         success: false,
