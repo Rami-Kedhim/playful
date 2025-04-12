@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Shield, User, Check } from 'lucide-react';
+import { Shield, User, Check, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { 
   Tooltip,
@@ -11,8 +11,10 @@ import {
 
 interface EliminixBadgeProps {
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'outline' | 'secondary';
+  variant?: 'default' | 'outline' | 'secondary' | 'destructive';
   showTooltip?: boolean;
+  isCompliant?: boolean;
+  className?: string;
 }
 
 /**
@@ -23,20 +25,32 @@ interface EliminixBadgeProps {
 const EliminixBadge: React.FC<EliminixBadgeProps> = ({ 
   size = 'md', 
   variant = 'default',
-  showTooltip = true
+  showTooltip = true,
+  isCompliant = true,
+  className = ''
 }) => {
   const badgeContent = (
     <Badge 
-      variant={variant}
+      variant={isCompliant ? variant : 'destructive'}
       className={`
         flex items-center gap-1
         ${size === 'sm' ? 'text-xs py-0' : size === 'lg' ? 'text-sm py-1' : 'text-xs py-0.5'}
-        ${variant === 'default' ? 'bg-green-600 hover:bg-green-700' : ''}
+        ${variant === 'default' && isCompliant ? 'bg-green-600 hover:bg-green-700' : ''}
+        ${className}
       `}
     >
-      <Shield className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />
-      <span>Eliminix Compliant</span>
-      <User className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />
+      {isCompliant ? (
+        <>
+          <Shield className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />
+          <span>Eliminix Compliant</span>
+          <User className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />
+        </>
+      ) : (
+        <>
+          <AlertTriangle className={size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'} />
+          <span>Non-Compliant</span>
+        </>
+      )}
     </Badge>
   );
 
@@ -49,10 +63,15 @@ const EliminixBadge: React.FC<EliminixBadgeProps> = ({
           </TooltipTrigger>
           <TooltipContent>
             <div className="max-w-xs">
-              <p className="font-medium">Eliminix Rule Compliant</p>
+              <p className="font-medium">
+                {isCompliant ? 'Eliminix Rule Compliant' : 'Eliminix Rule Violation'}
+              </p>
               <p className="text-xs mt-1">
-                This platform guarantees 100% real human profiles with no AI-generated companions or 
-                simulated emotional relationships.
+                {isCompliant ? (
+                  "This platform guarantees 100% real human profiles with no AI-generated companions or simulated emotional relationships."
+                ) : (
+                  "This profile may violate the Eliminix Rule which prohibits AI-generated companions or simulated emotional relationships."
+                )}
               </p>
             </div>
           </TooltipContent>

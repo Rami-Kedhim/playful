@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Escort } from "@/types/escort";
 import { Link } from "react-router-dom";
@@ -6,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Video, Image, Clock, CheckCircle, Calendar, Globe } from "lucide-react";
 import { formatCurrency } from "@/utils/boost";
+import { EliminixProfileIndicator } from "@/components/eliminix";
+import { mapEscortToUberPersona } from "@/utils/profileMapping";
 
 interface ServiceIcons {
   escort: React.ReactNode;
@@ -17,12 +18,14 @@ interface UnifiedServiceCardProps {
   provider: Escort;
   showDetails?: boolean;
   className?: string;
+  showEliminixIndicator?: boolean;
 }
 
 const UnifiedServiceCard: React.FC<UnifiedServiceCardProps> = ({
   provider,
   showDetails = true,
   className = "",
+  showEliminixIndicator = true
 }) => {
   const serviceIcons: ServiceIcons = {
     escort: <CheckCircle className="h-4 w-4 text-primary" />,
@@ -30,10 +33,11 @@ const UnifiedServiceCard: React.FC<UnifiedServiceCardProps> = ({
     livecam: <Video className="h-4 w-4 text-primary" />
   };
 
-  // Determine what services this provider offers
   const providesInPerson = provider.providesInPersonServices !== false;
   const providesContent = provider.providesVirtualContent !== false;
   const providesLivecam = provider.contentStats?.live || false;
+
+  const personaProfile = mapEscortToUberPersona(provider);
 
   return (
     <Card className={`overflow-hidden transition-shadow hover:shadow-lg ${className}`}>
@@ -47,7 +51,14 @@ const UnifiedServiceCard: React.FC<UnifiedServiceCardProps> = ({
           />
         </Link>
         
-        {/* Service badges */}
+        {showEliminixIndicator && (
+          <EliminixProfileIndicator 
+            profile={personaProfile}
+            position="top-right"
+            size="sm"
+          />
+        )}
+        
         <div className="absolute top-2 left-2 flex gap-1">
           {provider.verified && (
             <Badge variant="secondary" className="bg-primary/70 backdrop-blur-sm">
@@ -62,14 +73,12 @@ const UnifiedServiceCard: React.FC<UnifiedServiceCardProps> = ({
           )}
         </div>
 
-        {/* Price badge */}
         <div className="absolute bottom-2 right-2">
           <Badge variant="secondary" className="bg-black/50 backdrop-blur-sm text-white">
             {formatCurrency(provider.price)}
           </Badge>
         </div>
 
-        {/* Services offered */}
         <div className="absolute top-2 right-2">
           <div className="flex gap-1 bg-black/50 backdrop-blur-sm rounded-md p-1">
             {providesInPerson && (
