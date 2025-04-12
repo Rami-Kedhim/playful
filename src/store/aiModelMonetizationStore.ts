@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,7 +96,7 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   boostProfile: async (profileId, amount, durationHours) => {
     try {
       set({ loading: true, error: null });
-      const success = await BoostService.boostProfile({ profileId, amount, durationHours });
+      const success = await boostService.boostProfile({ profileId, amount, durationHours });
       
       if (success) {
         // Mock boost for the UI
@@ -202,7 +201,7 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   },
   
   getProfileBoostLevel: (profileId) => {
-    return BoostService.getProfileBoostLevel(get().activeBoosts, profileId);
+    return boostService.getProfileBoostLevel(get().activeBoosts, profileId);
   },
   
   unlockImage: async (profileId, imageUrl, price) => {
