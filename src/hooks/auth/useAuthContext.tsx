@@ -41,16 +41,16 @@ const adaptUser = (user: User | null, profile: UserProfile | null): AuthUser | n
     username: user.user_metadata?.username || profile?.username || user.email?.split('@')[0] || '',
     profileImageUrl: user.user_metadata?.avatar_url || profile?.avatar_url || '',
     avatarUrl: user.user_metadata?.avatar_url || profile?.avatar_url || '',
-    // Use optional chaining for potentially undefined properties
-    role: profile?.role || 'user', // Using profile.role instead of role_name
-    isVerified: profile?.is_verified || false,
-    lucoinsBalance: profile?.lucoin_balance || 0,
+    // Use optional chaining and check for both naming conventions
+    role: profile?.role || profile?.role_name || 'user',
+    isVerified: profile?.is_verified || profile?.isVerified || false,
+    lucoinsBalance: profile?.lucoin_balance || profile?.lucoinsBalance || 0,
     // app_metadata and user_metadata
     app_metadata: user.app_metadata || {},
     user_metadata: user.user_metadata || {},
     aud: user.aud,
     created_at: user.created_at,
-    isCreator: profile?.is_creator || false, // Using is_creator
+    isCreator: profile?.is_creator || profile?.is_content_creator || false,
     bio: profile?.bio || '',
   };
 };

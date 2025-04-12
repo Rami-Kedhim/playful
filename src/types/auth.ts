@@ -77,6 +77,12 @@ export interface UserProfile {
   profileCompleteness?: number; // Alias for profile_completeness
   is_boosted?: boolean;
   isBoosted?: boolean; // Alias for is_boosted
+  
+  // Adding missing fields from the errors
+  role?: UserRole; // Adding role field
+  is_creator?: boolean; // Adding is_creator field
+  role_name?: string; // Adding role_name as an alternative field name
+  is_content_creator?: boolean; // Adding is_content_creator as an alternative field name
 }
 
 // Auth state maintained by auth context
