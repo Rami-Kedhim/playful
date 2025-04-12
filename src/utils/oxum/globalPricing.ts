@@ -6,8 +6,8 @@
  * This module re-exports all Oxum pricing functionality from modularized files
  */
 
-// Import from constants for local use
-import { GLOBAL_UBX_RATE } from './constants';
+// Import constant from constants file for local use
+import { GLOBAL_UBX_RATE as UBX_RATE } from './constants';
 
 // Re-export from constants
 export { GLOBAL_UBX_RATE, PRICE_TOLERANCE, MAX_RETRY_ATTEMPTS } from './constants';
@@ -31,8 +31,12 @@ export {
   logGlobalPriceTransaction
 } from './adminOps';
 
-// Simple helper function for getting the boost price
+/**
+ * Returns the standard UBX boosting price
+ * Uses the constant imported directly to avoid scope issues
+ * @returns {number} The global boosting price in UBX
+ */
 export function getBoostingPriceUBX(): number {
-  // Use the constant directly after importing it at the top
-  return GLOBAL_UBX_RATE;
+  // Using the locally imported constant
+  return UBX_RATE;
 }
