@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { formatDistanceToNow } from 'date-fns';
-import { Play, User, Bot } from 'lucide-react';
+import { Play, Pause, User, Bot } from 'lucide-react';
 import AIEmotionStatus from '../AIEmotionStatus';
+import { useElevenLabsVoice } from './utils/elevenlabsVoiceService';
 
 interface AICompanionMessageProps {
   message: CompanionMessage;
@@ -21,14 +22,41 @@ const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
   voiceType,
   onUnlockContent
 }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLocalPlaying, setIsLocalPlaying] = useState(false);
+  const { speak, stop, isSpeaking } = useElevenLabsVoice();
   
-  const handlePlayVoice = () => {
-    setIsPlaying(true);
-    // Implement voice playing logic
-    setTimeout(() => {
-      setIsPlaying(false);
-    }, 3000);
+  const handlePlayVoice = async () => {
+    if (isLocalPlaying || isSpeaking()) {
+      stop();
+      setIsLocalPlaying(false);
+      return;
+    }
+    
+    setIsLocalPlaying(true);
+    // Map message emotion to voice type if available
+    const emotionVoiceMap: Record<string, string> = {
+      'joy': 'cheerful',
+      'trust': 'friendly',
+      'fear': 'breathy',
+      'surprise': 'bubbly',
+      'sadness': 'soft',
+      'anger': 'authoritative',
+      'anticipation': 'neutral',
+      'interest': 'sophisticated'
+    };
+    
+    // Use emotion-based voice or fall back to provided voiceType
+    const selectedVoice = message.emotion ? 
+      emotionVoiceMap[message.emotion.toLowerCase()] || voiceType : 
+      voiceType;
+    
+    const success = await speak(message.content, selectedVoice);
+    
+    if (!success) {
+      console.error('Failed to play voice message');
+    }
+    
+    setIsLocalPlaying(false);
   };
   
   const isUser = message.role === 'user';
@@ -75,16 +103,19 @@ const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
               )}
               
               {/* Voice message UI */}
-              {voiceType && !message.requiresPayment && !isUser && !isSystem && (
+              {!message.requiresPayment && !isUser && !isSystem && (
                 <div className="mt-2">
                   <Button 
                     variant="outline" 
                     size="icon" 
                     className="h-6 w-6" 
                     onClick={handlePlayVoice}
-                    disabled={isPlaying}
+                    aria-label={isLocalPlaying ? "Pause speech" : "Play speech"}
                   >
-                    <Play className="h-3 w-3" />
+                    {isLocalPlaying ? 
+                      <Pause className="h-3 w-3" /> : 
+                      <Play className="h-3 w-3" />
+                    }
                   </Button>
                 </div>
               )}
