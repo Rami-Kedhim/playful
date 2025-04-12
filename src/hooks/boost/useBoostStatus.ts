@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { toast } from "@/hooks/use-toast";
 import { BoostStatus, BoostPackage } from "@/types/boost";
@@ -81,7 +80,9 @@ export const useBoostStatus = (profileId?: string) => {
           id: "boost-standard",
           name: "3-Hour Boost",
           duration: "03:00:00",
-          price_ubx: 15
+          price_ubx: 15,
+          description: "Standard visibility boost",
+          features: ["Top search position", "Featured badge"]
         };
         
         const remainingTime = calculateRemainingTime(endDate);

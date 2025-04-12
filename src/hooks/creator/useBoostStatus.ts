@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { BoostStatus, BoostPackage } from "@/types/boost";
 import { calculateRemainingTime, formatBoostDuration } from "@/utils/boostCalculator";
@@ -22,8 +21,6 @@ export const useBoostStatus = (creatorId: string | undefined) => {
       try {
         setLoading(true);
         
-        // In a real app, this would be an API call to fetch the current boost status
-        // For demo purposes, we're creating mock data
         const mockActiveBoost = Math.random() > 0.5;
         
         if (mockActiveBoost) {
@@ -35,10 +32,10 @@ export const useBoostStatus = (creatorId: string | undefined) => {
             name: "Premium Boost",
             duration: "72:00:00", // 3 days
             price_ubx: 150,
+            description: "Premium visibility boost for 3 days",
             features: ["Top search results", "Featured badge", "Highlighted profile"]
           };
           
-          // Calculate progress (0-100)
           const totalDurationMs = 3 * 24 * 60 * 60 * 1000; // 3 days in ms
           const elapsedMs = totalDurationMs - (expiryDate.getTime() - new Date().getTime());
           const progress = Math.max(0, Math.min(100, (elapsedMs / totalDurationMs) * 100));
@@ -69,13 +66,11 @@ export const useBoostStatus = (creatorId: string | undefined) => {
     
     fetchBoostStatus();
     
-    // Set up a timer to update remaining time every minute
     const timer = setInterval(() => {
       if (boostStatus.isActive && boostStatus.expiresAt) {
         setBoostStatus(prev => ({
           ...prev,
           remainingTime: calculateRemainingTime(prev.expiresAt as Date),
-          // Update progress
           progress: prev.expiresAt ? 
             (1 - (prev.expiresAt.getTime() - new Date().getTime()) / 
             (new Date(prev.expiresAt).getTime() - new Date(new Date().getTime() - (3 * 24 * 60 * 60 * 1000)).getTime())) * 100 : 

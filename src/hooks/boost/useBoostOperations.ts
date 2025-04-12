@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { BoostStatus, BoostPackage } from '@/types/boost';
 import { toast } from '@/hooks/use-toast';
@@ -24,19 +23,16 @@ export const useBoostOperations = (
   setDailyBoostUsage?: React.Dispatch<React.SetStateAction<number>>, 
   durationToMilliseconds?: (duration: string) => number
 ) => {
-  // Use provided values or provide defaults for standalone usage
   const _setBoostStatus = setBoostStatus || (() => {});
   const _setIsLoading = setIsLoading || (() => {});
   const _setError = setError || (() => {});
   const _setDailyBoostUsage = setDailyBoostUsage || (() => {});
   
-  // If durationToMilliseconds is not provided, create our own version
   const _durationToMilliseconds = durationToMilliseconds || ((duration: string): number => {
     const [hours, minutes, seconds] = duration.split(':').map(Number);
     return ((hours * 60 + minutes) * 60 + seconds) * 1000;
   });
 
-  // Check if user has an active boost
   const checkActiveBoost = useCallback(async () => {
     if (!userId) return;
     
@@ -44,12 +40,10 @@ export const useBoostOperations = (
       _setIsLoading(true);
       _setError(null);
       
-      // Simulate API call - In a real implementation, this would fetch from backend
       const hasActiveBoost = Math.random() > 0.6;
       
       if (hasActiveBoost) {
-        // Mock active boost data
-        const duration = "03:00:00"; // 3 hours
+        const duration = "03:00:00";
         const endDate = new Date(Date.now() + _durationToMilliseconds(duration));
         
         const mockPackage: BoostPackage = {
@@ -57,7 +51,8 @@ export const useBoostOperations = (
           name: "3-Hour Boost",
           duration,
           price_ubx: 15,
-          description: "Standard visibility boost package"
+          description: "Standard visibility boost package",
+          features: ["Top search position", "Featured badge"]
         };
         
         _setBoostStatus({
@@ -65,11 +60,10 @@ export const useBoostOperations = (
           expiresAt: endDate,
           boostPackage: mockPackage,
           remainingTime: calculateRemainingTime(endDate),
-          progress: 10 // Just started
+          progress: 10
         });
         
-        // Also fetch daily usage
-        _setDailyBoostUsage(Math.floor(Math.random() * 3) + 1); // 1-3 boosts used
+        _setDailyBoostUsage(Math.floor(Math.random() * 3) + 1);
       } else {
         _setBoostStatus({
           isActive: false,
@@ -86,7 +80,6 @@ export const useBoostOperations = (
     }
   }, [userId, _setBoostStatus, _setIsLoading, _setError, _setDailyBoostUsage, _durationToMilliseconds]);
 
-  // Purchase a boost package
   const purchaseBoost = useCallback(async (boostPackage: BoostPackage): Promise<boolean> => {
     if (!userId) {
       toast({
@@ -100,14 +93,11 @@ export const useBoostOperations = (
     try {
       _setIsLoading(true);
       
-      // Simulate purchase delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Calculate expiry time based on package duration
       const duration = boostPackage.duration;
       const expiresAt = new Date(Date.now() + _durationToMilliseconds(duration));
       
-      // Update boost status
       _setBoostStatus({
         isActive: true,
         expiresAt,
@@ -116,7 +106,6 @@ export const useBoostOperations = (
         progress: 0
       });
       
-      // Update daily usage
       _setDailyBoostUsage(prev => prev + 1);
       
       toast({
@@ -141,7 +130,6 @@ export const useBoostOperations = (
     }
   }, [userId, _setBoostStatus, _setIsLoading, _setError, _setDailyBoostUsage, _durationToMilliseconds]);
 
-  // Cancel an active boost
   const cancelBoost = useCallback(async (): Promise<boolean> => {
     if (!userId || !(boostStatus?.isActive)) {
       return false;
@@ -150,10 +138,8 @@ export const useBoostOperations = (
     try {
       _setIsLoading(true);
       
-      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Update boost status
       _setBoostStatus({
         isActive: false,
         progress: 0,
@@ -182,7 +168,6 @@ export const useBoostOperations = (
     }
   }, [userId, boostStatus, _setBoostStatus, _setIsLoading, _setError]);
 
-  // Format duration string for display
   const formatDuration = (durationStr: string): string => {
     const [hours, minutes] = durationStr.split(':');
     if (parseInt(hours) > 0) {
@@ -191,14 +176,12 @@ export const useBoostOperations = (
     return `${parseInt(minutes)} minutes`;
   };
 
-  // Fetch analytics data for current boost
   const fetchAnalytics = useCallback(async (): Promise<AnalyticsData | null> => {
     if (!boostStatus?.isActive) return null;
     
     try {
       _setIsLoading(true);
       
-      // Mock analytics data
       const mockAnalytics: AnalyticsData = {
         additionalViews: Math.floor(Math.random() * 50) + 20,
         engagementIncrease: Math.floor(Math.random() * 30) + 10,
@@ -230,7 +213,6 @@ export const useBoostOperations = (
     }
   }, [boostStatus, _setIsLoading]);
 
-  // Return all operations
   return {
     checkActiveBoost,
     purchaseBoost,
@@ -240,5 +222,4 @@ export const useBoostOperations = (
   };
 };
 
-// Export the hook types
 export type UseBoostOperationsReturn = ReturnType<typeof useBoostOperations>;
