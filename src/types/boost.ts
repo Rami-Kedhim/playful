@@ -5,7 +5,7 @@ export interface BoostStatus {
   startTime?: Date;
   endTime?: Date;
   timeRemaining?: string;
-  progress?: number;  // Added this line
+  progress: number | undefined;  // Explicitly defined with union type
   profileId?: string;
   remainingTime?: string;
   expiresAt?: Date;
