@@ -13,6 +13,7 @@ import {
 import { Zap, Info } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { formatDistanceToNow } from "date-fns";
+import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
 
 interface LivecamBoostPanelProps {
   model: LivecamModel;
@@ -42,11 +43,6 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
     const endTime = new Date(Date.now() + boostStatus.timeRemaining * 1000);
     return formatDistanceToNow(endTime, { addSuffix: false });
   };
-  
-  const getBoostCost = () => {
-    // Simple calculation for cost based on intensity - just as an example
-    return Math.round((boostIntensity[0] / 10) * 5);
-  };
 
   return (
     <Card>
@@ -63,7 +59,7 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
               <TooltipContent>
                 <p className="max-w-xs">
                   Boost this stream to increase its visibility in search results and on the homepage.
-                  Higher boost intensity gives greater visibility but costs more.
+                  Higher boost intensity gives greater visibility.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -118,7 +114,7 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
             
             <div className="flex items-center justify-between text-sm mb-4">
               <span>Cost:</span>
-              <span className="font-medium">{getBoostCost()} LC</span>
+              <span className="font-medium">{GLOBAL_UBX_RATE} UBX</span>
             </div>
             
             <Button 

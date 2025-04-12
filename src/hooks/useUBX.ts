@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { processUBXTransaction, TransactionParams } from '@/services/ubxTransactionService';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { validateGlobalPrice } from '@/utils/oxum/globalPricing';
 
 export interface UBXPackage {
   id: string;
@@ -81,6 +81,25 @@ export const useUBX = (): UBXHookReturn => {
     setError(null);
     
     try {
+      // For boost-related transactions, validate the pricing against Oxum rules
+      if (params.transactionType === 'boost_purchase' || 
+          params.transactionType === 'ai_boost' || 
+          (params.metadata?.transactionPurpose === 'boost')) {
+        try {
+          // For negative amounts (spending), we need to check the absolute value
+          const amountToValidate = params.amount < 0 ? Math.abs(params.amount) : params.amount;
+          validateGlobalPrice(amountToValidate);
+        } catch (error: any) {
+          setError(`[Oxum Rule Violation] ${error.message}`);
+          toast({
+            title: "Oxum Rule Violation",
+            description: error.message || "This transaction violates the Oxum Global Price Symmetry Rule.",
+            variant: "destructive"
+          });
+          return false;
+        }
+      }
+      
       // Include the userId in the params
       const result = await processUBXTransaction({
         ...params,

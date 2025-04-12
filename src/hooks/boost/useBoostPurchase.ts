@@ -4,6 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import { BoostPackage } from '@/types/boost';
 import { useUBX } from '@/hooks/useUBX';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { validateGlobalPrice, GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
 export const useBoostPurchase = () => {
   const [loading, setLoading] = useState(false);
@@ -26,11 +27,23 @@ export const useBoostPurchase = () => {
       setLoading(true);
       setError(null);
       
+      // Validate price against Oxum global price rule
+      try {
+        validateGlobalPrice(boostPackage.price_ubx);
+      } catch (validationError: any) {
+        toast({
+          title: "Oxum Rule Violation",
+          description: validationError.message || "The boost price does not comply with Oxum global pricing standards.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
       // Check if user has enough UBX
-      if (userBalance < boostPackage.price_ubx) {
+      if (userBalance < GLOBAL_UBX_RATE) {
         toast({
           title: "Insufficient funds",
-          description: `You need ${boostPackage.price_ubx} UBX to purchase this boost`,
+          description: `You need ${GLOBAL_UBX_RATE} UBX to purchase this boost`,
           variant: "destructive"
         });
         return false;
@@ -41,7 +54,7 @@ export const useBoostPurchase = () => {
       
       // Use the processTransaction method to deduct UBX
       const success = await processTransaction({
-        amount: -boostPackage.price_ubx, // Negative amount for spending
+        amount: -GLOBAL_UBX_RATE, // Negative amount for spending
         transactionType: "boost_purchase",
         description: `Purchased ${boostPackage.name} boost`
       });
@@ -52,7 +65,7 @@ export const useBoostPurchase = () => {
       
       toast({
         title: "Boost purchased",
-        description: `Successfully purchased ${boostPackage.name} for ${boostPackage.price_ubx} UBX`
+        description: `Successfully purchased ${boostPackage.name} for ${GLOBAL_UBX_RATE} UBX`
       });
       
       return true;

@@ -5,6 +5,7 @@ import { ContentService } from "@/services/contentService";
 import { boostService } from "@/services/boostService";
 import { GiftService } from "@/services/giftService";
 import { AIAnalyticsService } from "@/services/analyticsService";
+import { GLOBAL_UBX_RATE, validateGlobalPrice } from "@/utils/oxum/globalPricing";
 
 interface AIModelMonetizationState {
   unlockedContent: string[];
@@ -14,7 +15,6 @@ interface AIModelMonetizationState {
   loading: boolean;
   error: string | null;
   
-  // Actions
   purchaseContent: (contentId: string, profileId: string, price: number) => Promise<boolean>;
   sendGift: (profileId: string, giftType: string, amount: number) => Promise<boolean>;
   boostProfile: (profileId: string, amount: number, durationHours: number) => Promise<boolean>;
@@ -26,7 +26,6 @@ interface AIModelMonetizationState {
   getContentViewCount: (contentId: string) => number;
   getProfileBoostLevel: (profileId: string) => number;
   
-  // Image and video methods
   unlockImage: (profileId: string, imageUrl: string, price: number) => Promise<boolean>;
   isImageUnlocked: (profileId: string, imageUrl: string) => boolean;
   unlockVideo: (profileId: string, videoId: string, price: number) => Promise<boolean>;
@@ -96,7 +95,23 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
   boostProfile: async (profileId, amount, durationHours) => {
     try {
       set({ loading: true, error: null });
-      const success = await boostService.boostProfile({ profileId, amount, durationHours });
+      
+      // Validate against Oxum global price rule
+      try {
+        validateGlobalPrice(amount);
+      } catch (error: any) {
+        set({ error: `[Oxum Enforcement] ${error.message}` });
+        return false;
+      }
+      
+      // Force the correct price according to Oxum Rule #001
+      const validatedAmount = GLOBAL_UBX_RATE;
+      
+      const success = await boostService.boostProfile({ 
+        profileId, 
+        amount: validatedAmount, 
+        durationHours 
+      });
       
       if (success) {
         // Mock boost for the UI
@@ -108,8 +123,8 @@ const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) 
           id: Math.random().toString(36).substring(2, 15),
           profile_id: profileId,
           user_id: 'current-user',
-          boost_amount: amount,
-          boost_level: Math.ceil(amount / 20),
+          boost_amount: validatedAmount,
+          boost_level: Math.ceil(validatedAmount / 20),
           start_time: now.toISOString(),
           end_time: endTime.toISOString(),
           status: 'active'

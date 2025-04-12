@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { validateGlobalPrice, GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
 export interface TransactionParams {
   userId: string;
@@ -21,6 +22,21 @@ export interface TransactionResult {
  */
 export const processUBXTransaction = async (params: TransactionParams): Promise<TransactionResult> => {
   try {
+    // Validate against Oxum price rules for boost transactions
+    if (params.transactionType === 'boost_purchase' || params.transactionType === 'ai_boost') {
+      try {
+        // For negative amounts (spending), we need to check the absolute value
+        const amountToValidate = params.amount < 0 ? Math.abs(params.amount) : params.amount;
+        validateGlobalPrice(amountToValidate);
+      } catch (error: any) {
+        console.error('[Oxum Enforcement Error]:', error);
+        return {
+          success: false,
+          error: `[Oxum Rule #001] ${error.message || 'Global Price Symmetry violation detected'}`
+        };
+      }
+    }
+
     const { data, error } = await supabase.functions.invoke('process-ubx-transaction', {
       body: {
         user_id: params.userId,

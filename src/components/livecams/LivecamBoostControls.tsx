@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Slider } from "@/components/ui/slider";
 import { Livecam } from '@/types/livecams';
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
 interface LivecamBoostControlsProps {
   livecam: Livecam;
@@ -115,6 +116,11 @@ const LivecamBoostControls = ({
               onValueChange={(value) => setBoostDuration(value[0])}
               className="mb-1"
             />
+          </div>
+          
+          <div className="flex justify-between text-xs mb-2 mt-3">
+            <span>Fixed Price (Oxum Rule #001):</span>
+            <span className="font-medium">{GLOBAL_UBX_RATE} UBX</span>
           </div>
         </div>
         

@@ -7,6 +7,7 @@ import {
   getSolanaTransactionDetails 
 } from '@/services/solanaService';
 import { useAuth } from '@/contexts/AuthContext';
+import { validateGlobalPrice, GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
 interface TransactionResult {
   success: boolean;
@@ -36,6 +37,20 @@ export const useUbxTransactions = () => {
     setIsProcessing(true);
     
     try {
+      // For boost packages, validate against Oxum global pricing
+      if (packageId.startsWith('boost-')) {
+        try {
+          validateGlobalPrice(amount);
+        } catch (error: any) {
+          toast({
+            title: "Oxum Price Violation",
+            description: "This transaction violates the Oxum Global Price Symmetry rule (Rule #001).",
+            variant: "destructive",
+          });
+          return { success: false, message: "Oxum price rule violation" };
+        }
+      }
+      
       // 1. Simulate the Solana transaction
       const { success, txId } = await simulateSolanaTransaction(amount, `Purchase ${amount} UBX`);
       
