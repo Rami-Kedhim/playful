@@ -1,53 +1,38 @@
 
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useBoostContext } from "@/contexts/BoostContext";
+import BoostDialogHeader from "@/components/boost/dialog/BoostDialogHeader";
+import BoostDialogTabs from "@/components/boost/dialog/BoostDialogTabs";
+import BoostInfoTooltip from "@/components/boost/dialog/BoostInfoTooltip";
+import { useBoostManager, formatBoostDuration } from "@/hooks/boost";
 import { useEffect, useState } from "react";
-import { Zap, Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { 
-  useBoostManager, formatBoostDuration
-} from "@/hooks/boost";
-import { 
-  BoostPackageSelection, 
-  BoostInfoTooltip,
-  BoostActivePackage
-} from "@/components/boost";
-import { toast } from "@/components/ui/use-toast";
-import {
-  adaptBoostStatus,
+  adaptBoostStatus, 
   adaptBoostEligibility,
   adaptBoostPackages,
   adaptFormatBoostDuration,
   adaptGetBoostPrice
 } from "@/hooks/boost/useBoostAdapters";
+import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
 
 interface BoostProfileDialogProps {
   onSuccess?: () => void;
   onClose?: () => void;
-  open?: boolean;
-  setOpen?: (open: boolean) => void;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
 const BoostProfileDialog = ({ 
-  onSuccess,
+  onSuccess, 
   onClose,
-  open: controlledOpen,
-  setOpen: setControlledOpen
+  open,
+  setOpen
 }: BoostProfileDialogProps) => {
-  const [open, setInternalOpen] = useState(false);
+  const { boostStatus: contextBoostStatus } = useBoostContext();
   const [activeTab, setActiveTab] = useState<string>("packages");
   const [boostAnalytics, setBoostAnalytics] = useState<any>(null);
-  const { user } = useAuth();
-  
-  const profileId = user?.id;
+  const profileId = contextBoostStatus.profileId || '';
 
   const { 
     boostStatus: managerBoostStatus, 
@@ -64,6 +49,9 @@ const BoostProfileDialog = ({
     dailyBoostUsage,
     dailyBoostLimit
   } = useBoostManager(profileId);
+
+  // Add Hermes + Oxum integration
+  const { hermesStatus: hermesBoostStatus } = useHermesOxumBoost(profileId);
 
   // Adapt types to match expected interfaces
   const boostStatus = adaptBoostStatus(managerBoostStatus);
@@ -92,27 +80,21 @@ const BoostProfileDialog = ({
     }
   };
 
-  // Handle controlled/uncontrolled state
-  const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
-  const isOpen = isControlled ? controlledOpen : open;
-  const setIsOpen = isControlled ? setControlledOpen : setInternalOpen;
-
   useEffect(() => {
-    if (isOpen) {
+    if (open) {
       fetchBoostPackages();
       if (boostStatus.isActive) {
         fetchAnalytics();
       }
     }
-  }, [isOpen, boostStatus.isActive]);
+  }, [open, boostStatus.isActive, fetchBoostPackages]);
 
-  const fetchAnalytics = async (): Promise<boolean> => {
+  const fetchAnalytics = async () => {
     const analytics = await getBoostAnalytics();
     if (analytics) {
       setBoostAnalytics(analytics);
-      return true;
     }
-    return false;
+    return analytics;
   };
 
   const handlePurchase = async () => {
@@ -145,103 +127,45 @@ const BoostProfileDialog = ({
     }
   };
 
-  const handleCancel = async (): Promise<boolean> => {
+  const handleCancel = async () => {
     const success = await cancelBoost();
-    if (success && onSuccess) {
-      onSuccess();
+    if (success) {
+      if (onSuccess) onSuccess();
     }
     return success;
   };
 
-  const handleDialogClose = () => {
-    setIsOpen(false);
+  const handleCloseDialog = () => {
     if (onClose) onClose();
-  };
-
-  const renderEligibilityMessage = () => {
-    if (!eligibility.eligible) {
-      return (
-        <div className="text-center py-8">
-          <div className="mb-4">
-            <Zap className="h-12 w-12 mx-auto text-destructive opacity-50" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">Not Eligible for Boosting</h3>
-          <p className="text-muted-foreground mb-4">
-            {eligibility.reason || "Your profile is not eligible for boosting at this time."}
-          </p>
-        </div>
-      );
-    }
-    return null;
+    setOpen(false);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {!isControlled && (
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Zap className="mr-2 h-4 w-4" />
-            Boost Profile
-          </Button>
-        </DialogTrigger>
-      )}
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Boost Your Profile</DialogTitle>
-          <DialogDescription>
-            Get more visibility and appear higher in search results
-          </DialogDescription>
-        </DialogHeader>
+        <BoostDialogHeader />
 
-        <div className="grid gap-4 py-4">
-          {boostStatus.isActive ? (
-            <BoostActivePackage 
-              boostStatus={boostStatus}
-              boostAnalytics={boostAnalytics}
-              onCancel={handleCancel}
-              dailyBoostUsage={dailyBoostUsage}
-              dailyBoostLimit={dailyBoostLimit}
-            />
-          ) : (
-            <>
-              {!eligibility.eligible ? renderEligibilityMessage() : (
-                <BoostPackageSelection
-                  packages={boostPackages}
-                  selectedPackage={selectedPackage}
-                  onSelectPackage={handlePackageSelect}
-                  formatBoostDuration={formatBoostDurationAdapter}
-                  isLoading={loading}
-                />
-              )}
-            </>
-          )}
-          
-          <BoostInfoTooltip />
-        </div>
-
-        {!boostStatus.isActive && eligibility.eligible && (
-          <DialogFooter>
-            <Button variant="outline" onClick={handleDialogClose}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handlePurchase} 
-              disabled={!selectedPackage || loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Zap className="mr-2 h-4 w-4" />
-                  Boost Now
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        )}
+        <BoostDialogTabs 
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          boostStatus={boostStatus}
+          eligibility={eligibility}
+          boostPackages={boostPackages}
+          selectedPackage={selectedPackage}
+          setSelectedPackage={handlePackageSelect}
+          handlePurchase={handlePurchase}
+          handleCancel={handleCancel}
+          handleDialogClose={handleCloseDialog}
+          boostAnalytics={boostAnalytics}
+          formatBoostDuration={formatBoostDurationAdapter}
+          getBoostPrice={getBoostPrice}
+          loading={loading}
+          dailyBoostUsage={dailyBoostUsage}
+          dailyBoostLimit={dailyBoostLimit}
+          hermesBoostStatus={hermesBoostStatus}
+        />
+        
+        <BoostInfoTooltip />
       </DialogContent>
     </Dialog>
   );
