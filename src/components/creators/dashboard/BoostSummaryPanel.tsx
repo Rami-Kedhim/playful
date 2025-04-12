@@ -6,9 +6,8 @@ import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Rocket, TrendingUp, ChevronRight, Zap } from 'lucide-react';
 import { useBoostManager } from '@/hooks/boost';
-import { BoostStatus } from '@/types/boost';  // Explicitly import BoostStatus type
+import { BoostStatus } from '@/types/boost';
 
-// Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface BoostSummaryPanelProps {
@@ -40,8 +39,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
     loadData();
   }, [profileId, boostStatus.isActive, fetchBoostPackages, getBoostAnalytics]);
 
-  // Safely handle progress with default value
-  const boostProgress = boostStatus.progress !== undefined ? boostStatus.progress : 0;
+  const boostProgress = boostStatus.progress ?? 0;
 
   const chartData = {
     labels: ['Boosted Views', 'Organic Views'],
