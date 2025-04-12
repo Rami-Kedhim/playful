@@ -77,6 +77,9 @@ export interface UserProfile {
   profileCompleteness?: number; // Alias for profile_completeness
   is_boosted?: boolean;
   isBoosted?: boolean; // Alias for is_boosted
+  role?: UserRole;   // Added missing role property
+  is_creator?: boolean; // Added missing is_creator property
+  isCreator?: boolean;  // Alias for is_creator
 }
 
 // Auth state maintained by auth context

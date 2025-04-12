@@ -90,6 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check if role is in user metadata
     if (user.user_metadata?.role === role) return true;
     
+    // Check if role is in profile
+    if (profile?.role === role || profile?.role === role) return true;
+    
     return false;
   };
 
