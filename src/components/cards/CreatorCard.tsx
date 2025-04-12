@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import CreatorCardImage from "./creator/CreatorCardImage";
 import CreatorCardContent from "./creator/CreatorCardContent";
+import BoostBadge from "../boost/BoostBadge";
 
 interface CreatorCardProps {
   id: string;
@@ -20,6 +21,9 @@ interface CreatorCardProps {
   price: number;
   isAI: boolean;
   rating?: number;
+  isBoosted?: boolean;
+  boostTimeRemaining?: string;
+  onBoostClick?: () => void;
 }
 
 const CreatorCard = ({
@@ -34,6 +38,9 @@ const CreatorCard = ({
   price,
   isAI,
   rating = 0,
+  isBoosted = false,
+  boostTimeRemaining,
+  onBoostClick
 }: CreatorCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
 
@@ -43,21 +50,42 @@ const CreatorCard = ({
     setIsFavorited(!isFavorited);
   };
 
+  const handleBoostClick = (e: React.MouseEvent) => {
+    if (onBoostClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      onBoostClick();
+    }
+  };
+
   return (
     <Link to={`/creators/${username}`}>
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full bg-card border-border">
-        <CreatorCardImage
-          imageUrl={imageUrl}
-          name={name}
-          isPremium={isPremium}
-          isLive={isLive}
-          isAI={isAI}
-          isFavorited={isFavorited}
-          subscriberCount={subscriberCount}
-          price={price}
-          toggleFavorite={toggleFavorite}
-          badge="Virtual Creator"
-        />
+        <div className="relative">
+          <CreatorCardImage
+            imageUrl={imageUrl}
+            name={name}
+            isPremium={isPremium}
+            isLive={isLive}
+            isAI={isAI}
+            isFavorited={isFavorited}
+            subscriberCount={subscriberCount}
+            price={price}
+            toggleFavorite={toggleFavorite}
+            badge="Virtual Creator"
+          />
+          
+          {isBoosted && (
+            <div className="absolute top-2 left-2 z-10">
+              <BoostBadge 
+                isActive={isBoosted} 
+                remainingTime={boostTimeRemaining}
+                variant="small"
+                onClick={handleBoostClick}
+              />
+            </div>
+          )}
+        </div>
         
         <CreatorCardContent
           name={name}

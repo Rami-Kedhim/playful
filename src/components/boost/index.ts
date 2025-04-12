@@ -10,6 +10,7 @@ export { default as BoostPackage } from './BoostPackage';
 export { default as BoostPackageSelection } from './BoostPackageSelection';
 export { default as HermesOxumDashboard } from '../admin/HermesOxumDashboard';
 export { default as BoostButton } from './BoostButton';
+export { default as BoostBadge } from './BoostBadge';
 
 // Export button components
 export * from './button';
