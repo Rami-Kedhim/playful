@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { InfoCircle, DollarSign, ArrowLeftRight } from 'lucide-react';
+import { Info, DollarSign, ArrowLeftRight } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -76,7 +76,7 @@ const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <InfoCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
               <div className="space-y-2 p-1">

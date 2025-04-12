@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
@@ -13,10 +12,12 @@ import {
   ShieldAlert, 
   BarChart4,
   Search,
-  Brain
+  Brain,
+  Shield
 } from "lucide-react";
 import SEOModule from "@/components/admin/dashboard/SEOModule";
 import HermesOxumControl from "@/components/admin/dashboard/HermesOxumControl";
+import OxumRuleComplianceMonitor from "@/components/admin/dashboard/OxumRuleComplianceMonitor";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -30,13 +31,17 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-2 md:grid-cols-9 w-full">
+          <TabsList className="grid grid-cols-2 md:grid-cols-10 w-full">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="creators">Creators</TabsTrigger>
             <TabsTrigger value="escorts">Escorts</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="oxum">
+              <Shield className="h-4 w-4 mr-2" />
+              Oxum
+            </TabsTrigger>
             <TabsTrigger value="seo">
               <Search className="h-4 w-4 mr-2" />
               SEO
@@ -186,6 +191,10 @@ const AdminDashboard = () => {
                 <p>Reports interface will be implemented soon.</p>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="oxum" className="space-y-4">
+            <OxumRuleComplianceMonitor />
           </TabsContent>
           
           <TabsContent value="seo" className="space-y-4">

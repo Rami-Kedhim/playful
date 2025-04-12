@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { InfoCircle } from 'lucide-react';
+import { Info } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -68,7 +68,7 @@ const OxumInfoTooltip: React.FC<OxumInfoTooltipProps> = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <InfoCircle className={`h-4 w-4 text-muted-foreground cursor-help ${className}`} />
+          <Info className={`h-4 w-4 text-muted-foreground cursor-help ${className}`} />
         </TooltipTrigger>
         <TooltipContent side={position}>
           {getRuleContent()}
