@@ -8,6 +8,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Rocket, TrendingUp, ChevronRight, Zap } from 'lucide-react';
 import { useBoostManager } from '@/hooks/boost';
 import { BoostStatus } from '@/types/boost';
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -104,7 +105,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
         </CardTitle>
         <CardDescription>
           {boostStatus.isActive 
-            ? `Boost active • ${boostStatus.timeRemaining} remaining`
+            ? `Boost active • ${boostStatus.timeRemaining} remaining • ${GLOBAL_UBX_RATE} UBX`
             : 'No active boost • Visibility at normal levels'}
         </CardDescription>
       </CardHeader>
@@ -176,7 +177,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
       </CardContent>
       <CardFooter className="bg-muted/20 pt-3 pb-3">
         <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onShowDetails}>
-          {boostStatus.isActive ? 'View Full Analytics' : 'Boost Now'} <ChevronRight className="h-3 w-3 ml-1" />
+          {boostStatus.isActive ? 'View Full Analytics' : `Boost Now (${GLOBAL_UBX_RATE} UBX)`} <ChevronRight className="h-3 w-3 ml-1" />
         </Button>
       </CardFooter>
     </Card>

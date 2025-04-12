@@ -4,6 +4,7 @@ import { Zap, Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { BoostPackage } from "@/types/boost";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
 
 interface BoostPackageListProps {
   packages: BoostPackage[];
@@ -40,7 +41,7 @@ const BoostPackageList = ({
               </div>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <Zap className="h-4 w-4 text-yellow-500" />
-                <span className="text-lg font-bold">{pkg.price_ubx}</span>
+                <span className="text-lg font-bold">{GLOBAL_UBX_RATE}</span>
                 <span className="text-xs text-muted-foreground">UBX</span>
               </div>
               {pkg.features && pkg.features.length > 0 && (
@@ -66,7 +67,7 @@ const BoostPackageList = ({
         </div>
         
         <div className="flex items-center text-muted-foreground text-sm">
-          <span>Dynamic price:</span>
+          <span>Oxum Global Price:</span>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -74,13 +75,12 @@ const BoostPackageList = ({
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-xs">
-                  The Oxum algorithm adjusts the boost price based on your profile quality, 
-                  location, and current demand.
+                  Following Oxum Rule #001 on Global Price Symmetry, boost pricing is uniform worldwide.
                 </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <span className="font-medium">{getBoostPrice()} UBX</span>
+          <span className="font-medium">{GLOBAL_UBX_RATE} UBX</span>
         </div>
       </div>
     </div>

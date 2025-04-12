@@ -1,8 +1,8 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { AnalyticsData } from "./useBoostAnalytics";
 import { boostService } from "@/services/boostService";
+import { GLOBAL_UBX_RATE, validateGlobalPrice } from "@/utils/oxum/globalPricing";
 
 // Define and export types
 export interface BoostStatus {
@@ -110,9 +110,10 @@ export const useBoostManager = (profileId?: string) => {
     }
   }, [profileId]);
   
-  // Calculate boost price
+  // Calculate boost price - enforce global pricing
   const getBoostPrice = useCallback((boostPackage: BoostPackage) => {
-    return boostPackage.price;
+    // Enforce Oxum Rule #001: Global Price Symmetry
+    return GLOBAL_UBX_RATE;
   }, []);
   
   // Purchase boost
@@ -128,6 +129,19 @@ export const useBoostManager = (profileId?: string) => {
     
     try {
       setLoading(true);
+      
+      // Enforce Oxum Rule #001: Validate global price symmetry
+      try {
+        validateGlobalPrice(boostPackage.price);
+      } catch (error: any) {
+        console.error("Oxum Rule Violation:", error);
+        toast({
+          title: "Oxum Rule Violation",
+          description: "Price inconsistency detected. Transaction halted.",
+          variant: "destructive"
+        });
+        return false;
+      }
       
       // Call the service to purchase the boost
       const result = await boostService.purchaseBoost(profileId, boostPackage.id);

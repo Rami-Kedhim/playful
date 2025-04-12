@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { BoostPackage, BoostStatus } from "@/types/boost";
+import { GLOBAL_UBX_RATE, validateGlobalPrice } from "@/utils/oxum/globalPricing";
 
 /**
  * Service for handling boost-related API calls
@@ -20,24 +21,25 @@ export const boostService = {
         throw error;
       }
 
+      // Apply Oxum Rule #001: Ensure all packages use global pricing
       return data.map(pkg => ({
         id: pkg.id,
         name: pkg.name,
         description: pkg.description || '',
         duration: formatDurationFromInterval(pkg.duration),
-        price_ubx: pkg.price,
+        price_ubx: GLOBAL_UBX_RATE, // Enforce global pricing
         features: pkg.features || []
       }));
     } catch (err) {
       console.error("Failed to fetch boost packages:", err);
-      // Return some fallback packages for development
+      // Return some fallback packages with enforced global pricing
       return [
         {
           id: "boost-1",
           name: "Quick Boost",
           description: "Short-term visibility boost",
           duration: "1:00:00",
-          price_ubx: 5,
+          price_ubx: GLOBAL_UBX_RATE,
           features: ["Higher search ranking", "Featured in 'Boosted' section"]
         },
         {
@@ -45,7 +47,7 @@ export const boostService = {
           name: "Standard Boost",
           description: "Medium-term visibility boost",
           duration: "3:00:00",
-          price_ubx: 12,
+          price_ubx: GLOBAL_UBX_RATE,
           features: ["Higher search ranking", "Featured in 'Boosted' section", "Priority in matching"]
         },
         {
@@ -53,7 +55,7 @@ export const boostService = {
           name: "Premium Boost",
           description: "Long-term visibility boost",
           duration: "24:00:00",
-          price_ubx: 40,
+          price_ubx: GLOBAL_UBX_RATE,
           features: ["Highest search ranking", "Featured in 'Premium' section", "Priority in matching", "Stats and analytics"]
         }
       ];
@@ -170,6 +172,17 @@ export const boostService = {
       const boostPackage = await this.fetchBoostPackageById(packageId);
       if (!boostPackage) {
         return { success: false, message: "Selected boost package not found" };
+      }
+      
+      // Oxum Rule #001: Validate global price symmetry
+      try {
+        validateGlobalPrice(boostPackage.price_ubx);
+      } catch (error: any) {
+        console.error("Oxum Rule Violation:", error);
+        return { 
+          success: false,
+          message: "Price inconsistency detected. Transaction halted by Orus module."
+        };
       }
 
       // Convert duration string to interval (simplified example)
