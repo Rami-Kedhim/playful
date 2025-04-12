@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { BoostPackage } from "@/types/boost";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
+import UBXPriceDisplay from "@/components/oxum/UBXPriceDisplay";
 
 interface BoostPackageListProps {
   packages: BoostPackage[];
@@ -41,8 +42,11 @@ const BoostPackageList = ({
               </div>
               <div className="flex items-center justify-center gap-1 mt-2">
                 <Zap className="h-4 w-4 text-yellow-500" />
-                <span className="text-lg font-bold">{GLOBAL_UBX_RATE}</span>
-                <span className="text-xs text-muted-foreground">UBX</span>
+                <UBXPriceDisplay 
+                  amount={GLOBAL_UBX_RATE}
+                  isGlobalPrice={true}
+                  showTooltip={false}
+                />
               </div>
               {pkg.features && pkg.features.length > 0 && (
                 <div className="mt-3 text-xs text-left">
@@ -80,7 +84,12 @@ const BoostPackageList = ({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <span className="font-medium">{GLOBAL_UBX_RATE} UBX</span>
+          <UBXPriceDisplay 
+            amount={GLOBAL_UBX_RATE}
+            isGlobalPrice={true}
+            showConversion={false}
+            size="sm"
+          />
         </div>
       </div>
     </div>

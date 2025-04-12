@@ -14,6 +14,7 @@ import { Zap, Info } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { formatDistanceToNow } from "date-fns";
 import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
+import UBXPriceDisplay from "@/components/oxum/UBXPriceDisplay";
 
 interface LivecamBoostPanelProps {
   model: LivecamModel;
@@ -114,7 +115,12 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
             
             <div className="flex items-center justify-between text-sm mb-4">
               <span>Cost:</span>
-              <span className="font-medium">{GLOBAL_UBX_RATE} UBX</span>
+              <UBXPriceDisplay 
+                amount={GLOBAL_UBX_RATE} 
+                isGlobalPrice={true}
+                showConversion={true}
+                size="sm"
+              />
             </div>
             
             <Button 

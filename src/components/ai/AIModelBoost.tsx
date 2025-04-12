@@ -9,6 +9,7 @@ import { Flame, Zap } from 'lucide-react';
 import { AIProfile } from '@/types/ai-profile';
 import useAIModelMonetizationStore from '@/store/aiModelMonetizationStore';
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
 
 interface AIModelBoostProps {
   profile: AIProfile;
@@ -88,7 +89,7 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="boost-amount">Boost Amount (UBX)</Label>
+          <Label htmlFor="boost-amount">Boost Amount</Label>
           <div className="flex items-center">
             <Input
               id="boost-amount"
@@ -98,9 +99,17 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
               className="w-full"
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Boosts profile to level {calculateBoostLevel()} for better visibility
-          </p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">
+              Boosts profile to level {calculateBoostLevel()} for better visibility
+            </span>
+            <UBXPriceDisplay 
+              amount={GLOBAL_UBX_RATE}
+              isGlobalPrice={true}
+              showConversion={true}
+              size="sm"
+            />
+          </div>
         </div>
         
         <div className="space-y-2">
@@ -136,7 +145,7 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
           ) : (
             <>
               <Flame className="mr-2 h-4 w-4" />
-              Boost for {GLOBAL_UBX_RATE} UBX
+              Boost for <UBXPriceDisplay amount={GLOBAL_UBX_RATE} size="sm" isGlobalPrice={true} showTooltip={false} />
             </>
           )}
         </Button>

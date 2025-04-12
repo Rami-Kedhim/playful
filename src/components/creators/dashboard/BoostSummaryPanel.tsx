@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Rocket, TrendingUp, ChevronRight, Zap } from 'lucide-react';
 import { useBoostManager } from '@/hooks/boost';
 import { BoostStatus } from '@/types/boost';
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+import UBXPriceDisplay from '@/components/oxum/UBXPriceDisplay';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -105,8 +105,9 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
         </CardTitle>
         <CardDescription>
           {boostStatus.isActive 
-            ? `Boost active • ${boostStatus.timeRemaining} remaining • ${GLOBAL_UBX_RATE} UBX`
+            ? `Boost active • ${boostStatus.timeRemaining} remaining • `
             : 'No active boost • Visibility at normal levels'}
+          {boostStatus.isActive && <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} showTooltip={false} size="sm" />}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4">
@@ -177,7 +178,13 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
       </CardContent>
       <CardFooter className="bg-muted/20 pt-3 pb-3">
         <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onShowDetails}>
-          {boostStatus.isActive ? 'View Full Analytics' : `Boost Now (${GLOBAL_UBX_RATE} UBX)`} <ChevronRight className="h-3 w-3 ml-1" />
+          {boostStatus.isActive ? (
+            <>View Full Analytics <ChevronRight className="h-3 w-3 ml-1" /></>
+          ) : (
+            <>
+              Boost Now <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} showTooltip={false} size="sm" /> <ChevronRight className="h-3 w-3 ml-1" />
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>
