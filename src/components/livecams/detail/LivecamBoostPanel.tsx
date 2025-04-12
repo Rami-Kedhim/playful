@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { LivecamModel } from "@/types/livecams";
 import { Card, CardContent } from "@/components/ui/card";
@@ -62,7 +63,8 @@ const LivecamBoostPanel: React.FC<LivecamBoostPanelProps> = ({
                   Higher boost intensity gives greater visibility.
                 </p>
               </TooltipContent>
-            </TooltipProvider>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         
         {isBoosted && boostStatus ? (
