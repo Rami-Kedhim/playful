@@ -41,7 +41,9 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
   }, [profileId, boostStatus.isActive, fetchBoostPackages, getBoostAnalytics]);
 
   // Make sure progress is handled properly with type safety
-  const boostProgress = boostStatus.progress !== undefined ? boostStatus.progress : 0;
+  // Use a type assertion to tell TypeScript that we know the structure
+  const boostProgressValue = (boostStatus as any).progress;
+  const boostProgress = boostProgressValue !== undefined ? boostProgressValue : 0;
 
   const chartData = {
     labels: ['Boosted Views', 'Organic Views'],
