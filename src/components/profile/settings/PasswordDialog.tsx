@@ -1,137 +1,113 @@
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/auth/useAuthContext";
 import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { useAuth } from "@/hooks/auth/useAuthContext";
 
 interface PasswordDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const PasswordDialog = ({ 
-  open, 
-  onOpenChange,
-}: PasswordDialogProps) => {
-  const [oldPassword, setOldPassword] = useState("");
+const PasswordDialog = ({ open, onOpenChange }: PasswordDialogProps) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
   const { updatePassword } = useAuth();
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     
-    // Validate passwords
     if (newPassword.length < 6) {
-      setError("New password must be at least 6 characters");
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
       return;
     }
     
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure your new passwords match",
+        variant: "destructive",
+      });
       return;
     }
     
     setIsLoading(true);
     
     try {
-      const success = await updatePassword(oldPassword, newPassword);
+      await updatePassword(newPassword);
       
-      if (success) {
-        toast({
-          title: "Password updated",
-          description: "Your password has been updated successfully.",
-        });
-        handleClose();
-      } else {
-        setError("Failed to update password");
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to update password");
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully updated",
+      });
+      
+      // Close the dialog and reset form
+      onOpenChange(false);
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Error updating password:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update password. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const handleClose = () => {
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setError(null);
-    onOpenChange(false);
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
-          <DialogDescription>
-            Update your account password. You'll need your current password to confirm.
-          </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
-          {error && (
-            <div className="text-sm font-medium text-destructive">{error}</div>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="current-password">Current Password</Label>
-            <Input 
-              id="current-password" 
-              type="password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
-          
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="new-password">New Password</Label>
-            <Input 
-              id="new-password" 
+            <Input
+              id="new-password"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              required
+              placeholder="Enter your new password"
               disabled={isLoading}
+              required
             />
+            <p className="text-xs text-muted-foreground">
+              Must be at least 6 characters
+            </p>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm New Password</Label>
-            <Input 
-              id="confirm-password" 
+            <Label htmlFor="confirm-password">Confirm Password</Label>
+            <Input
+              id="confirm-password"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              required
+              placeholder="Confirm your new password"
               disabled={isLoading}
+              required
             />
           </div>
           
-          <DialogFooter className="pt-4">
+          <div className="flex justify-end gap-3 pt-4">
             <Button 
               type="button" 
-              variant="ghost" 
-              onClick={handleClose}
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
               Cancel
@@ -142,11 +118,9 @@ const PasswordDialog = ({
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Updating...
                 </>
-              ) : (
-                "Update Password"
-              )}
+              ) : "Update Password"}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

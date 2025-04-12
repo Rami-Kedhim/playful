@@ -1,11 +1,12 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { UserProfile } from '@/types/auth';
+import { UserProfile, AuthUser } from '@/types/auth';
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   session: Session | null;
   profile: UserProfile | null;
   isLoading: boolean;
@@ -19,18 +20,50 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
-  updateUser: (userData: Partial<User['user_metadata']>) => Promise<void>;
+  updateUserProfile: (userData: Partial<AuthUser>) => Promise<boolean>;
+  
+  // Backward compatibility aliases
+  login: (email: string, password: string) => Promise<{ success: boolean, error?: string }>;
+  register: (email: string, password: string, username?: string) => Promise<{ success: boolean, error?: string }>;
+  logout: () => Promise<void>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper function to adapt Supabase User to our AuthUser type
+const adaptUser = (user: User | null, profile: UserProfile | null): AuthUser | null => {
+  if (!user) return null;
+  
+  return {
+    id: user.id,
+    email: user.email || '',
+    username: user.user_metadata?.username || profile?.username || user.email?.split('@')[0] || '',
+    profileImageUrl: user.user_metadata?.avatar_url || profile?.avatar_url || '',
+    avatarUrl: user.user_metadata?.avatar_url || profile?.avatar_url || '',
+    role: profile?.role || 'user',
+    isVerified: profile?.is_verified || false,
+    lucoinsBalance: profile?.lucoin_balance || 0,
+    ubxBalance: profile?.ubx_balance || 0,
+    app_metadata: user.app_metadata || {},
+    user_metadata: user.user_metadata || {},
+    aud: user.aud,
+    created_at: user.created_at,
+    isCreator: profile?.is_content_creator || false,
+    bio: profile?.bio || '',
+  };
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [rawUser, setRawUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userRoles, setUserRoles] = useState<string[]>([]);
+  
+  // Compute the adapted user whenever raw user or profile changes
+  const user = adaptUser(rawUser, profile);
 
   // Initialize the auth state
   useEffect(() => {
@@ -38,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         setSession(newSession);
-        setUser(newSession?.user ?? null);
+        setRawUser(newSession?.user ?? null);
         
         // Update user roles based on metadata
         if (newSession?.user) {
@@ -59,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      setRawUser(currentSession?.user ?? null);
       
       // Update user roles based on metadata
       if (currentSession?.user) {
@@ -100,9 +133,70 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return userRoles.includes(role);
   };
 
+  const clearError = () => {
+    setError(null);
+  };
+
   const refreshProfile = async () => {
-    if (user) {
-      await fetchProfile(user.id);
+    if (rawUser) {
+      await fetchProfile(rawUser.id);
+    }
+  };
+
+  const updateUserProfile = async (userData: Partial<AuthUser>): Promise<boolean> => {
+    setError(null);
+    try {
+      if (!rawUser) {
+        throw new Error('User not authenticated');
+      }
+
+      // Update user metadata if needed
+      if (userData.username || userData.avatarUrl || userData.profileImageUrl) {
+        const { error: metadataError } = await supabase.auth.updateUser({
+          data: {
+            username: userData.username,
+            avatar_url: userData.avatarUrl || userData.profileImageUrl,
+          }
+        });
+        
+        if (metadataError) throw metadataError;
+      }
+      
+      // Update profile in database if it exists
+      if (profile) {
+        const profileData = {
+          username: userData.username,
+          avatar_url: userData.avatarUrl || userData.profileImageUrl,
+          bio: userData.bio,
+          // Add other profile fields as needed
+        };
+        
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('id', rawUser.id);
+          
+        if (profileError) throw profileError;
+      }
+      
+      // Refresh profile to get updated data
+      await refreshProfile();
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+      
+      return true;
+    } catch (err: any) {
+      const errorMessage = err.message || 'An unexpected error occurred during profile update';
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return false;
     }
   };
 
@@ -212,30 +306,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateUser = async (userData: Partial<User['user_metadata']>) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        data: userData
-      });
-      
-      if (error) throw error;
-      
-      // Refresh the profile to get updated data
-      refreshProfile();
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully",
-      });
-    } catch (err: any) {
-      setError(err.message || 'Error updating user data');
-      toast({
-        title: "Error",
-        description: err.message || 'Error updating user data',
-        variant: "destructive",
-      });
-    }
-  };
+  // Backward compatibility aliases
+  const login = signIn;
+  const register = signUp;
+  const logout = signOut;
 
   const value = {
     user,
@@ -252,7 +326,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resetPassword,
     updatePassword,
     refreshProfile,
-    updateUser,
+    updateUserProfile,
+    
+    // Backward compatibility
+    login,
+    register,
+    logout,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
