@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
     loadData();
   }, [profileId, boostStatus.isActive, fetchBoostPackages, getBoostAnalytics]);
 
+  // Safely handle progress with optional chaining and nullish coalescing
   const boostProgress = boostStatus.progress ?? 0;
 
   const chartData = {
