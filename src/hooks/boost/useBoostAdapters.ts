@@ -58,83 +58,45 @@ export function adaptBoostEligibility(
 }
 
 /**
- * Adapt BoostPackage from useBoostManager to the format expected by types/boost.ts
+ * Adapt BoostPackage from useBoostManager to the format expected by components
  */
-export function adaptBoostPackageToTypes(
-  pkg: ManagerBoostPackage
-): TypesBoostPackage {
+export function adaptBoostPackages(packages: ManagerBoostPackage[]): TypesBoostPackage[] {
+  return packages.map(adaptBoostPackageToTypes);
+}
+
+/**
+ * Adapt a single BoostPackage from useBoostManager to the format expected by components
+ */
+function adaptBoostPackageToTypes(pkg: ManagerBoostPackage): TypesBoostPackage {
   return {
     id: pkg.id,
     name: pkg.name,
-    duration: formatHoursToDuration(pkg.duration),
-    price_ubx: pkg.price, // Map price to price_ubx
-    price: pkg.price, // Keep price for backward compatibility
     description: pkg.description,
+    duration: typeof pkg.duration === 'number' ? `${pkg.duration}:00:00` : pkg.duration,
+    price_ubx: pkg.price,
     features: pkg.features
   };
 }
 
 /**
- * Adapt BoostPackage array from useBoostManager to the format expected by types/boost.ts
- */
-export function adaptBoostPackages(
-  packages: ManagerBoostPackage[]
-): TypesBoostPackage[] {
-  return packages.map(adaptBoostPackageToTypes);
-}
-
-/**
- * Format hours to duration string (HH:MM:SS)
- */
-function formatHoursToDuration(hours: number): string {
-  const h = Math.floor(hours);
-  const m = Math.floor((hours - h) * 60);
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:00`;
-}
-
-/**
- * Adapter for formatBoostDuration function
+ * Fix format duration adapter function to match the expected signature
+ * This adapter converts from string-based duration formatter to number-based
  */
 export function adaptFormatBoostDuration(
-  originalFormatFn: (hours: number) => string
-): (duration: string) => string {
-  return (duration: string) => {
-    // Parse HH:MM:SS to hours
-    const [hours, minutes] = duration.split(':').map(Number);
-    const totalHours = hours + (minutes / 60);
-    return originalFormatFn(totalHours);
+  formatter: (durationString: string) => string
+): (hours: number) => string {
+  return (hours: number) => {
+    // Convert hours to "HH:00:00" format
+    const hoursStr = `${Math.floor(hours)}:00:00`;
+    return formatter(hoursStr);
   };
 }
 
 /**
- * Adapter for getBoostPrice function
+ * Adapt getBoostPrice function
  */
 export function adaptGetBoostPrice(
-  priceFn: (pkg: ManagerBoostPackage) => number
+  getPrice: () => number
 ): () => number {
-  return () => {
-    // Return a default price since we can't get the selected package here
-    return 15;
-  };
-}
-
-/**
- * Convert TypesBoostPackage to ManagerBoostPackage
- */
-export function adaptBoostPackageToManager(
-  pkg: TypesBoostPackage
-): ManagerBoostPackage {
-  // Parse duration string to hours
-  const [hours, minutes] = pkg.duration.split(':').map(Number);
-  const durationHours = hours + (minutes / 60);
-  
-  return {
-    id: pkg.id,
-    name: pkg.name,
-    description: pkg.description || '',
-    duration: durationHours,
-    price: pkg.price_ubx || pkg.price || 0, // Use price_ubx if available, otherwise fallback to price
-    features: pkg.features || [],
-    boostType: 'standard'
-  };
+  return getPrice;
 }

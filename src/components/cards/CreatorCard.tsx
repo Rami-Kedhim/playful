@@ -50,10 +50,9 @@ const CreatorCard = ({
     setIsFavorited(!isFavorited);
   };
 
-  const handleBoostClick = (e: React.MouseEvent) => {
+  // Fixed handleBoostClick to work without an event parameter
+  const handleBoostClick = () => {
     if (onBoostClick) {
-      e.preventDefault();
-      e.stopPropagation();
       onBoostClick();
     }
   };

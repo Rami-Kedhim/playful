@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useBoostContext } from "@/contexts/BoostContext";
 import BoostDialogHeader from "@/components/boost/dialog/BoostDialogHeader";
@@ -50,20 +49,16 @@ const BoostProfileDialog = ({
     dailyBoostLimit
   } = useBoostManager(profileId);
 
-  // Add Hermes + Oxum integration
   const { hermesStatus: hermesBoostStatus } = useHermesOxumBoost(profileId);
 
-  // Adapt types to match expected interfaces
   const boostStatus = adaptBoostStatus(managerBoostStatus);
   const eligibility = adaptBoostEligibility(managerEligibility);
   const boostPackages = adaptBoostPackages(managerBoostPackages);
   const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
   const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
 
-  // Handle selected package conversion
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
-  // Update selected package when manager selected package changes
   useEffect(() => {
     if (managerSelectedPackage) {
       setSelectedPackage(managerSelectedPackage.id);
@@ -72,7 +67,6 @@ const BoostProfileDialog = ({
     }
   }, [managerSelectedPackage]);
 
-  // Handle package selection
   const handlePackageSelect = (packageId: string) => {
     const pkg = managerBoostPackages.find(p => p.id === packageId);
     if (pkg) {
@@ -107,7 +101,6 @@ const BoostProfileDialog = ({
       return;
     }
 
-    // Find the manager package object from the selected package ID
     const packageToBoost = managerBoostPackages.find(p => p.id === selectedPackage);
     
     if (!packageToBoost) {

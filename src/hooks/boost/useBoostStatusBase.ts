@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { BoostStatus, BoostPackage } from "@/types/boost";
 import { calculateRemainingTime, formatBoostDuration } from "@/utils/boostCalculator";
@@ -158,6 +159,7 @@ export const useBoostStatusBase = (profileId?: string, options: BoostStatusOptio
    * Start a timer to update remaining time and progress
    */
   const startBoostTimer = useCallback(() => {
+    // Fix the timer type by using NodeJS.Timeout
     const timer = setInterval(() => {
       if (boostStatus.isActive && boostStatus.expiresAt) {
         setBoostStatus(prev => {
@@ -254,7 +256,7 @@ export const useBoostStatusBase = (profileId?: string, options: BoostStatusOptio
   
   // Setup timer if boost is active
   useEffect(() => {
-    let timer: number | undefined;
+    let timer: NodeJS.Timeout | undefined;
     
     if (boostStatus.isActive && boostStatus.expiresAt) {
       timer = startBoostTimer();
