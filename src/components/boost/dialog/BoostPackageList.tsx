@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Zap, Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -45,7 +44,6 @@ const BoostPackageList = ({
                 <UBXPriceDisplay 
                   amount={GLOBAL_UBX_RATE}
                   isGlobalPrice={true}
-                  showTooltip={false}
                 />
               </div>
               {pkg.features && pkg.features.length > 0 && (

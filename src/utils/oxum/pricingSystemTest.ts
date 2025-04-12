@@ -94,7 +94,7 @@ export class OxumPricingSystemTest {
         results.push({ 
           name: "System self-test", 
           passed: false,
-          error: `Self-test failed: ${selfTestResults.results.filter(r => !r.passed).map(r => r.message).join(", ")}` 
+          error: `Self-test failed: ${selfTestResults.results.filter(r => !r.success).map(r => r.message).join(", ")}` 
         });
       }
       

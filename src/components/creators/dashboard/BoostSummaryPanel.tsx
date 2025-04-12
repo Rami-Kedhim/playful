@@ -41,8 +41,6 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
     loadData();
   }, [profileId, boostStatus.isActive, fetchBoostPackages, getBoostAnalytics]);
 
-  // Make sure progress is handled properly with type safety
-  // Use a type assertion to tell TypeScript that we know the structure
   const boostProgressValue = (boostStatus as any).progress;
   const boostProgress = boostProgressValue !== undefined ? boostProgressValue : 0;
 
@@ -107,7 +105,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
           {boostStatus.isActive 
             ? `Boost active • ${boostStatus.timeRemaining} remaining • `
             : 'No active boost • Visibility at normal levels'}
-          {boostStatus.isActive && <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} showTooltip={false} size="sm" />}
+          {boostStatus.isActive && <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} size="sm" />}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4">
@@ -182,7 +180,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
             <>View Full Analytics <ChevronRight className="h-3 w-3 ml-1" /></>
           ) : (
             <>
-              Boost Now <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} showTooltip={false} size="sm" /> <ChevronRight className="h-3 w-3 ml-1" />
+              Boost Now <UBXPriceDisplay amount={GLOBAL_UBX_RATE} isGlobalPrice={true} size="sm" /> <ChevronRight className="h-3 w-3 ml-1" />
             </>
           )}
         </Button>

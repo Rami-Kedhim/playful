@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -176,10 +175,10 @@ const OxumRuleComplianceMonitor: React.FC = () => {
                       <TableCell>{formatDate(event.timestamp)}</TableCell>
                       <TableCell>{event.userId || 'N/A'}</TableCell>
                       <TableCell>{event.profileId || 'N/A'}</TableCell>
-                      <TableCell>{event.amount} UBX</TableCell>
-                      <TableCell>{event.expectedAmount} UBX</TableCell>
+                      <TableCell>{event.userPrice} UBX</TableCell>
+                      <TableCell>{event.targetPrice} UBX</TableCell>
                       <TableCell className="text-red-500">
-                        {event.amount - (event.expectedAmount || 0)} UBX
+                        {event.userPrice - event.targetPrice} UBX
                       </TableCell>
                     </TableRow>
                   ))}

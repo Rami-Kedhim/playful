@@ -2,11 +2,19 @@
 import React from 'react';
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from 'lucide-react';
 
 interface UBXPriceDisplayProps {
   amount?: number;
   isGlobalPrice?: boolean;
   showConversion?: boolean;
+  showTooltip?: boolean;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'success' | 'warning' | 'error';
   className?: string;
@@ -20,6 +28,7 @@ const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
   amount,
   isGlobalPrice = false,
   showConversion = false,
+  showTooltip = false,
   size = 'md',
   variant = 'default',
   className
@@ -45,18 +54,42 @@ const UBXPriceDisplay: React.FC<UBXPriceDisplayProps> = ({
     error: 'text-red-600',
   };
   
+  const priceDisplay = (
+    <span
+      className={cn(
+        'font-medium',
+        sizeClasses[size],
+        variantClasses[variant],
+        className
+      )}
+    >
+      {displayAmount} UBX
+    </span>
+  );
+  
+  if (showTooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-1 cursor-help">
+              {priceDisplay}
+              <Info className="h-3 w-3 text-muted-foreground" />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-xs text-xs">
+              Following Oxum Rule #001 on Global Price Symmetry, boost pricing is uniform worldwide.
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+  
   return (
     <div className="flex items-center gap-2">
-      <span
-        className={cn(
-          'font-medium',
-          sizeClasses[size],
-          variantClasses[variant],
-          className
-        )}
-      >
-        {displayAmount} UBX
-      </span>
+      {priceDisplay}
       {showConversion && localEquivalent && (
         <span className="text-muted-foreground text-sm">{localEquivalent}</span>
       )}

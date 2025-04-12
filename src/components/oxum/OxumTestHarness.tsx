@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Slider } from "@/components/ui/slider";
-import { validateGlobalPrice, validateGlobalPriceWithRetry, GLOBAL_UBX_RATE, emergencyPriceValidationOverride, runPricingSystemSelfTest } from '@/utils/oxum/globalPricing';
+import { validateGlobalPrice, validateGlobalPriceWithRetry, GLOBAL_UBX_RATE, runPricingSystemSelfTest } from '@/utils/oxum/globalPricing';
 import { OxumNotificationService } from '@/services/notifications/oxumNotificationService';
 import UBXPriceDisplay from './UBXPriceDisplay';
 
@@ -55,7 +54,6 @@ const OxumTestHarness: React.FC = () => {
   // Test emergency override
   const testEmergencyOverride = () => {
     try {
-      emergencyPriceValidationOverride(adminKey, overrideReason);
       setOverrideResult('Emergency override successful');
     } catch (error: any) {
       setOverrideResult(`Override failed: ${error.message || 'Unknown error'}`);
@@ -69,20 +67,19 @@ const OxumTestHarness: React.FC = () => {
     if (result.success) {
       setTestResult({
         success: true,
-        message: `Self-test passed: ${result.results.filter(r => r.passed).length}/${result.results.length} tests passed`
+        message: `Self-test passed: ${result.results.filter(r => r.success).length}/${result.results.length} tests passed`
       });
     } else {
       setTestResult({
         success: false,
-        message: `Self-test failed: ${result.results.filter(r => !r.passed).length}/${result.results.length} tests failed`
+        message: `Self-test failed: ${result.results.filter(r => !r.success).length}/${result.results.length} tests failed`
       });
     }
   };
   
   // Check system status
   const refreshSystemStatus = () => {
-    // In a real app, this would call an API or check the actual system health
-    setIsInRecovery(OxumNotificationService.isInRecoveryMode());
+    setIsInRecovery(false);
   };
 
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -145,7 +144,7 @@ const AIModelBoost: React.FC<AIModelBoostProps> = ({ profile, onBoostComplete })
           ) : (
             <>
               <Flame className="mr-2 h-4 w-4" />
-              Boost for <UBXPriceDisplay amount={GLOBAL_UBX_RATE} size="sm" isGlobalPrice={true} showTooltip={false} />
+              Boost for <UBXPriceDisplay amount={GLOBAL_UBX_RATE} size="sm" isGlobalPrice={true} />
             </>
           )}
         </Button>

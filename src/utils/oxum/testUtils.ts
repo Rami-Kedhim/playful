@@ -10,7 +10,10 @@ interface TestResult {
 /**
  * Runs a comprehensive self-test on the Oxum pricing system
  */
-export function runPricingSystemSelfTest(): TestResult[] {
+export function runPricingSystemSelfTest(): {
+  success: boolean;
+  results: TestResult[];
+} {
   const results: TestResult[] = [];
   
   // Test 1: Exact match should pass
@@ -67,5 +70,11 @@ export function runPricingSystemSelfTest(): TestResult[] {
     });
   }
   
-  return results;
+  // Determine if all tests passed
+  const allTestsPassed = results.every(result => result.success);
+  
+  return {
+    success: allTestsPassed,
+    results: results
+  };
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Zap, X, Settings } from "lucide-react";
@@ -125,7 +124,6 @@ const LivecamBoostControls = ({
               amount={GLOBAL_UBX_RATE} 
               size="sm" 
               isGlobalPrice={true} 
-              showTooltip={true}
               showConversion={false}
             />
           </div>

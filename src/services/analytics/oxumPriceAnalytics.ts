@@ -82,6 +82,44 @@ export class OxumPriceAnalytics {
   }
   
   /**
+   * Get filtered events by event type
+   */
+  public static getEvents(filter?: { eventType?: string }): Array<any> {
+    if (!filter) {
+      return [...this.events];
+    }
+    
+    return this.events.filter(event => {
+      if (filter.eventType && event.eventType !== filter.eventType) {
+        return false;
+      }
+      return true;
+    });
+  }
+  
+  /**
+   * Get summary statistics for events
+   */
+  public static getStats() {
+    const totalEvents = this.events.length;
+    const violationEvents = this.events.filter(e => e.eventType === 'price_violation');
+    const violationCount = violationEvents.length;
+    const complianceRate = totalEvents > 0 ? ((totalEvents - violationCount) / totalEvents) * 100 : 100;
+    
+    // Get recent violations (last 24 hours)
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    const recentViolations = violationEvents.filter(e => e.timestamp >= oneDayAgo);
+    
+    return {
+      totalEvents,
+      violationCount,
+      complianceRate,
+      recentViolations
+    };
+  }
+  
+  /**
    * Calculate average price from events
    */
   private static calculateAveragePrice(events: typeof this.events) {
@@ -96,5 +134,12 @@ export class OxumPriceAnalytics {
    */
   public static clearAnalytics(): void {
     this.events = [];
+  }
+  
+  /**
+   * Clear all events (alias for clearAnalytics)
+   */
+  public static clearEvents(): void {
+    this.clearAnalytics();
   }
 }
