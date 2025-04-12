@@ -3,6 +3,7 @@ import React from 'react';
 import { UberPersona } from '@/types/uberPersona';
 import { verifyEliminixCompliance } from '@/services/eliminix/eliminixService';
 import { EliminixBadge } from '@/components/eliminix';
+import { OxumBadge } from '@/components/oxum';
 
 interface EliminixProfileIndicatorProps {
   profile: UberPersona;
@@ -49,9 +50,12 @@ const EliminixProfileIndicator: React.FC<EliminixProfileIndicatorProps> = ({
       />
       
       {showOxumIndicator && isCompliant && (
-        <div className="bg-white/90 dark:bg-black/50 px-1.5 py-0.5 rounded-md text-xs flex items-center">
-          <span className="text-green-600 dark:text-green-400 font-medium">Oxum Protected</span>
-        </div>
+        <OxumBadge
+          size={size}
+          variant="outline"
+          className="bg-white/90 dark:bg-black/50"
+          showTooltip={true}
+        />
       )}
     </div>
   );

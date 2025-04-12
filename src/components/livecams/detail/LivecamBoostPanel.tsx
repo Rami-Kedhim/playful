@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { LivecamModel } from "@/types/livecams";
 import { Card, CardContent } from "@/components/ui/card";
