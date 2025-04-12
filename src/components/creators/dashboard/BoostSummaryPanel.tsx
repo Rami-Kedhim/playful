@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,7 +41,7 @@ const BoostSummaryPanel: React.FC<BoostSummaryPanelProps> = ({
   }, [profileId, boostStatus.isActive, fetchBoostPackages, getBoostAnalytics]);
 
   // Safely handle progress with default value
-  const boostProgress = boostStatus.progress ?? 0;
+  const boostProgress = boostStatus.progress !== undefined ? boostStatus.progress : 0;
 
   const chartData = {
     labels: ['Boosted Views', 'Organic Views'],
