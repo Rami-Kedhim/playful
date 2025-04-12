@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { oxumCurrencyUtils } from '@/utils/oxum/oxumCurrencyUtils';
 import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/utils';
 
 interface UBXCurrencyDisplayProps {
   amount?: number;
