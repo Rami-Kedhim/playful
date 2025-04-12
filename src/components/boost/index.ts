@@ -1,26 +1,23 @@
 
-// Export all boost-related components
-export { default as BoostProfileDialog } from './BoostProfileDialog';
+// Core components
+export { default as BoostBadge } from './BoostBadge';
+export { default as BoostButton } from './BoostButton';
+export { default as BoostHistoryTable } from './BoostHistoryTable';
 export { default as BoostDialogContainer } from './BoostDialogContainer';
-export { default as BoostScoreCard } from './BoostScoreCard';
+export { default as BoostProfileDialog } from './BoostProfileDialog';
+
+// Analytics and visualization components
+export { default as BoostEffectsVisualizer } from './BoostEffectsVisualizer';
+export { default as BoostHistoryTimeline } from './BoostHistoryTimeline';
 export { default as BoostScoreCardContainer } from './BoostScoreCardContainer';
 export { default as BoostAnalyticsCard } from './BoostAnalyticsCard';
-export { default as BoostHistoryTable } from './BoostHistoryTable';
-export { default as BoostPackage } from './BoostPackage';
-export { default as BoostPackageSelection } from './BoostPackageSelection';
-export { default as HermesOxumDashboard } from '../admin/HermesOxumDashboard';
-export { default as BoostButton } from './BoostButton';
-export { default as BoostBadge } from './BoostBadge';
 
-// Export button components
-export * from './button';
-
-// Export dialog components
-export { default as BoostActivePackage } from './dialog/BoostActivePackage';
+// Dialog components
 export { default as BoostInfoTooltip } from './dialog/BoostInfoTooltip';
-export { default as BoostPackageList } from './dialog/BoostPackageList';
-export { default as HermesBoostInfo } from './dialog/HermesBoostInfo';
-export { default as BoostEligibilityMessage } from './dialog/BoostEligibilityMessage';
-export { default as BoostPackages } from './dialog/BoostPackages';
 export { default as BoostDialogHeader } from './dialog/BoostDialogHeader';
 export { default as BoostDialogTabs } from './dialog/BoostDialogTabs';
+export { default as BoostPackageList } from './dialog/BoostPackageList';
+export { default as BoostPackages } from './dialog/BoostPackages';
+export { default as BoostActivePackage } from './dialog/BoostActivePackage';
+export { default as BoostEligibilityMessage } from './dialog/BoostEligibilityMessage';
+export { default as HermesBoostInfo } from './dialog/HermesBoostInfo';

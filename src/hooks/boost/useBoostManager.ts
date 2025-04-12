@@ -1,6 +1,8 @@
-import { useState, useCallback } from "react";
+
+import { useState, useCallback, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
 import { AnalyticsData } from "./useBoostAnalytics";
+import { boostService } from "@/services/boostService";
 
 // Define and export types
 export interface BoostStatus {
@@ -57,69 +59,48 @@ export const useBoostManager = (profileId?: string) => {
       setLoading(true);
       setError(null);
       
-      // Mock data - in a real app, this would be fetched from an API
-      const mockPackages: BoostPackage[] = [
-        {
-          id: "boost-1",
-          name: "Quick Boost",
-          description: "Short-term visibility boost for your profile",
-          duration: 1, // 1 hour
-          price: 5,
-          features: ["Higher search ranking", "Featured in 'Boosted' section"],
-          boostType: "standard"
-        },
-        {
-          id: "boost-2",
-          name: "Standard Boost",
-          description: "Medium-term visibility boost for your profile",
-          duration: 3, // 3 hours
-          price: 12,
-          features: ["Higher search ranking", "Featured in 'Boosted' section", "Priority in matching"],
-          boostType: "standard"
-        },
-        {
-          id: "boost-3",
-          name: "Premium Boost",
-          description: "Long-term visibility boost with premium features",
-          duration: 24, // 24 hours
-          price: 40,
-          features: ["Highest search ranking", "Featured in 'Premium Boosted' section", "Priority in matching", "Stats and analytics"],
-          boostType: "premium"
-        }
-      ];
+      // Fetch boost packages from the service
+      const packages = await boostService.fetchBoostPackages();
       
-      setBoostPackages(mockPackages);
+      // Convert the API response to our internal format
+      const formattedPackages: BoostPackage[] = packages.map(pkg => ({
+        id: pkg.id,
+        name: pkg.name,
+        description: pkg.description || '',
+        duration: parseInt(pkg.duration.split(':')[0]), // Convert "HH:MM:SS" to hours
+        price: pkg.price_ubx,
+        features: pkg.features || [],
+        boostType: 'standard' // Default to standard, can be refined based on metadata
+      }));
       
-      // Simulating network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      setBoostPackages(formattedPackages);
       
-      // Check if user has an active boost
+      // Check active boost status
       if (profileId) {
-        const hasActiveBoost = Math.random() > 0.7;
+        const activeBoostStatus = await boostService.fetchActiveBoost(profileId);
         
-        if (hasActiveBoost) {
-          const now = new Date();
-          const endTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
+        if (activeBoostStatus?.isActive) {
           setBoostStatus({
             isActive: true,
             activeBoostId: "active-boost-1",
-            startTime: now,
-            endTime,
-            timeRemaining: "1h 58min"
+            startTime: activeBoostStatus.expiresAt 
+              ? new Date(activeBoostStatus.expiresAt.getTime() - 2 * 60 * 60 * 1000)  // Approximate
+              : new Date(),
+            endTime: activeBoostStatus.expiresAt,
+            timeRemaining: activeBoostStatus.remainingTime
           });
         }
         
         // Check eligibility
-        const isEligibleForBoost = Math.random() > 0.2;
-        const dailyBoostsUsed = Math.floor(Math.random() * DAILY_BOOST_LIMIT);
-        setDailyBoostUsage(dailyBoostsUsed);
+        const eligibilityResult = await boostService.checkBoostEligibility(profileId);
+        setEligibility(eligibilityResult);
         
-        setEligibility({
-          isEligible: isEligibleForBoost && dailyBoostsUsed < DAILY_BOOST_LIMIT,
-          reasons: isEligibleForBoost 
-            ? [] 
-            : ["Profile needs to be completed", "Verification required"]
-        });
+        // Get daily usage (this is a placeholder - real implementation would track this)
+        const dailyBoostsUsed = Math.min(
+          Math.floor(Math.random() * DAILY_BOOST_LIMIT), 
+          DAILY_BOOST_LIMIT - (eligibilityResult.isEligible ? 1 : 0)
+        );
+        setDailyBoostUsage(dailyBoostsUsed);
       }
     } catch (err: any) {
       console.error("Error fetching boost packages:", err);
@@ -148,20 +129,30 @@ export const useBoostManager = (profileId?: string) => {
     try {
       setLoading(true);
       
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call the service to purchase the boost
+      const result = await boostService.purchaseBoost(profileId, boostPackage.id);
       
-      // Simulate purchase success
-      const now = new Date();
-      const endTime = new Date(now.getTime() + boostPackage.duration * 60 * 60 * 1000);
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to purchase boost",
+          variant: "destructive"
+        });
+        return false;
+      }
       
-      setBoostStatus({
-        isActive: true,
-        activeBoostId: boostPackage.id,
-        startTime: now,
-        endTime,
-        timeRemaining: formatBoostDuration(boostPackage.duration)
-      });
+      // Refresh the boost status
+      const updatedBoost = await boostService.fetchActiveBoost(profileId);
+      
+      if (updatedBoost?.isActive) {
+        setBoostStatus({
+          isActive: true,
+          activeBoostId: boostPackage.id,
+          startTime: new Date(),
+          endTime: updatedBoost.expiresAt,
+          timeRemaining: updatedBoost.remainingTime
+        });
+      }
       
       setDailyBoostUsage(prev => Math.min(DAILY_BOOST_LIMIT, prev + 1));
       
@@ -195,8 +186,17 @@ export const useBoostManager = (profileId?: string) => {
     try {
       setLoading(true);
       
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Call the service to cancel the boost
+      const result = await boostService.cancelBoost(profileId);
+      
+      if (!result.success) {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to cancel boost",
+          variant: "destructive"
+        });
+        return false;
+      }
       
       setBoostStatus({
         isActive: false
@@ -225,41 +225,22 @@ export const useBoostManager = (profileId?: string) => {
   
   // Get boost analytics
   const getBoostAnalytics = async (): Promise<AnalyticsData | null> => {
+    if (!profileId) return null;
+    
     try {
-      // This would call an analytics API in a real implementation
-      
-      // Generate some mock analytics data
-      const viewsBase = Math.floor(Math.random() * 300) + 100;
-      const engagementBase = Math.floor(Math.random() * 50) + 20;
-      
-      const mockData: AnalyticsData = {
-        additionalViews: Math.floor(viewsBase * 0.3), 
-        engagementIncrease: Math.floor(engagementBase * 0.4),
-        rankingPosition: Math.floor(Math.random() * 5) + 1,
-        effectiveness: Math.floor(Math.random() * 30) + 70,
-        views: {
-          withoutBoost: Math.floor(viewsBase * 0.7),
-          withBoost: viewsBase,
-          increase: Math.floor(viewsBase * 0.3)
-        },
-        clicks: {
-          withoutBoost: Math.floor(engagementBase * 0.6),
-          withBoost: engagementBase,
-          increase: Math.floor(engagementBase * 0.4)
-        },
-        searchRanking: {
-          withoutBoost: Math.floor(Math.random() * 15) + 8,
-          withBoost: Math.floor(Math.random() * 5) + 1,
-          improvement: Math.floor(Math.random() * 7) + 3
-        }
-      };
-      
-      return mockData;
+      return await boostService.fetchBoostAnalytics(profileId);
     } catch (err) {
       console.error('Error fetching boost analytics:', err);
       return null;
     }
   };
+
+  // Automatically refresh boost status on mount
+  useEffect(() => {
+    if (profileId) {
+      fetchBoostPackages();
+    }
+  }, [profileId, fetchBoostPackages]);
   
   return {
     boostStatus,
