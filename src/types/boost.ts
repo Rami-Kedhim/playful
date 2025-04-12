@@ -5,7 +5,7 @@ export interface BoostStatus {
   startTime?: Date;
   endTime?: Date;
   timeRemaining?: string;
-  progress: number;
+  progress?: number;  // Add this line to include the progress property
   profileId?: string;
   remainingTime?: string;
   expiresAt?: Date;
