@@ -4,6 +4,15 @@ import { CompanionMessage } from '@/hooks/ai-companion/types';
 import AICompanionMessage from './AICompanionMessage';
 import AICompanionTypingIndicator from './AICompanionTypingIndicator';
 
+// Define a Message interface that's compatible with AICompanionMessage component
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system'; // Updated to include 'system'
+  content: string;
+  timestamp: Date;
+  requiresPayment?: boolean;
+}
+
 interface AICompanionMessageSystemProps {
   messages: CompanionMessage[];
   isTyping: boolean;
@@ -69,7 +78,7 @@ const AICompanionMessageSystem: React.FC<AICompanionMessageSystemProps> = ({
             {msgs.map((message) => (
               <AICompanionMessage
                 key={message.id}
-                message={message}
+                message={message as Message}
                 onActionClick={onActionClick}
                 voiceType={voiceType}
                 onUnlockContent={message.requiresPayment ? onUnlockContent : undefined}

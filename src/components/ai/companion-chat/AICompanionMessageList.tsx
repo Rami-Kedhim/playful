@@ -1,8 +1,18 @@
+
 import React, { useRef, useEffect } from 'react';
 import AICompanionMessage from './AICompanionMessage';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+
+// Define a Message interface that's compatible with AICompanionMessage component
+interface Message {
+  id: string;
+  role: 'user' | 'assistant' | 'system'; // Updated to include 'system'
+  content: string;
+  timestamp: Date;
+  requiresPayment?: boolean;
+}
 
 interface AICompanionMessageListProps {
   messages: CompanionMessage[];
@@ -49,7 +59,7 @@ const AICompanionMessageList: React.FC<AICompanionMessageListProps> = ({
               transition={{ duration: 0.3 }}
             >
               <AICompanionMessage 
-                message={message}
+                message={message as Message}
                 onActionClick={onActionClick}
                 voiceType={voiceType}
                 onUnlockContent={onUnlockContent}

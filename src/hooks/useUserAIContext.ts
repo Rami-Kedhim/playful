@@ -33,8 +33,8 @@ export const useUserAIContext = () => {
   // Check if the user has AI features enabled (could be based on subscription, etc.)
   const hasAIFeatures = (): boolean => {
     return auth.isAuthenticated && 
-      (!auth.profile?.user_metadata?.subscription_tier || 
-       ['standard', 'premium'].includes(String(auth.profile?.user_metadata?.subscription_tier)));
+      (!auth.profile?.subscription_tier || 
+       ['standard', 'premium'].includes(String(auth.profile?.subscription_tier)));
   };
   
   return {
