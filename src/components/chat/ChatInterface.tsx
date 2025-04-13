@@ -8,7 +8,7 @@ import { Send, User, ArrowLeftCircle } from 'lucide-react';
 import { Conversation } from '@/types/messaging';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton'; // Fix import from skeleton instead of scroll-area
 import { format } from 'date-fns';
 
 interface ChatInterfaceProps {

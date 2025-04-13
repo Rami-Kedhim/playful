@@ -6,6 +6,7 @@ import AIProfileGenerator from './AIProfileGenerator';
 import AIProfileGrid from './AIProfileGrid';
 import AIController from './AIController';
 import AICompanionChat from './AICompanionChat';
+import { AIVoiceProvider } from './AIVoiceProvider';
 
 export {
   AIProfileCard,
@@ -14,4 +15,5 @@ export {
   AIProfileGrid,
   AIController,
   AICompanionChat,
+  AIVoiceProvider,
 };

@@ -1,6 +1,7 @@
 
 import React, { useMemo } from "react";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface PasswordStrengthProps {
   password: string;
@@ -45,8 +46,12 @@ const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password }) => {
       <div className="flex justify-between items-center">
         <Progress 
           value={strength} 
-          className="h-1" 
-          indicatorClassName={getProgressColor()}
+          className="h-1"
+          // Use className to style the indicator instead of indicatorClassName
+          // with the cn utility to combine classes
+          style={{
+            ["--progress-indicator-color" as any]: getProgressColor()
+          }}
         />
         <span className={`text-xs ml-2 ${color}`}>
           {text}
