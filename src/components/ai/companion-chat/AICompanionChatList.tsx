@@ -1,70 +1,65 @@
 
 import React, { useRef, useEffect } from 'react';
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CompanionMessage } from '@/hooks/ai-companion/types';
 import AICompanionMessage from './AICompanionMessage';
+import { Message as AIMessage } from './AICompanionMessage';
 import AICompanionTypingIndicator from './AICompanionTypingIndicator';
 
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  requiresPayment?: boolean;
-}
-
 interface AICompanionChatListProps {
-  messages: Message[];
+  messages: any[];
   isTyping: boolean;
-  aiName: string;
+  aiName?: string;
   aiAvatar?: string;
-  onSpeakMessage: (content: string) => void;
+  onSpeakMessage?: (content: string) => void;
   onUnlockContent?: () => void;
 }
 
 const AICompanionChatList: React.FC<AICompanionChatListProps> = ({
   messages,
   isTyping,
-  aiName,
+  aiName = "AI Assistant",
   aiAvatar,
   onSpeakMessage,
   onUnlockContent
 }) => {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Scroll to bottom when messages change
+  // Auto-scroll to bottom when new messages arrive or typing status changes
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      setTimeout(() => {
-        scrollAreaRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end'
-        });
-      }, 100);
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
-  
+
   return (
-    <ScrollArea className="flex-1 p-4">
-      <div className="space-y-4">
-        {messages.map((msg) => (
-          <AICompanionMessage
-            key={msg.id}
-            message={msg}
-            aiName={aiName}
-            aiAvatar={aiAvatar}
-            onSpeakMessage={onSpeakMessage}
-            onUnlockContent={msg.requiresPayment ? onUnlockContent : undefined}
-          />
-        ))}
-        
-        {isTyping && (
-          <div className="flex justify-start">
-            <AICompanionTypingIndicator size="small" />
-          </div>
-        )}
-      </div>
-      <div ref={scrollAreaRef} />
-    </ScrollArea>
+    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {messages.length === 0 && !isTyping ? (
+        <div className="h-full flex items-center justify-center">
+          <p className="text-muted-foreground text-center">
+            Start a conversation with {aiName}.
+          </p>
+        </div>
+      ) : (
+        <>
+          {messages.map((message) => (
+            <AICompanionMessage
+              key={message.id}
+              message={message as AIMessage}
+              aiName={aiName}
+              aiAvatar={aiAvatar}
+              onSpeakMessage={onSpeakMessage}
+              onUnlockContent={onUnlockContent}
+            />
+          ))}
+          
+          {isTyping && (
+            <div className="flex items-start">
+              <AICompanionTypingIndicator size="medium" />
+            </div>
+          )}
+        </>
+      )}
+      
+      <div ref={messagesEndRef} />
+    </div>
   );
 };
 
