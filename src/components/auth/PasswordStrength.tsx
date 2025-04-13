@@ -47,8 +47,7 @@ const PasswordStrength: React.FC<PasswordStrengthProps> = ({ password }) => {
         <Progress 
           value={strength} 
           className="h-1"
-          // Use className to style the indicator instead of indicatorClassName
-          // with the cn utility to combine classes
+          // Use inline style to set custom indicator color
           style={{
             ["--progress-indicator-color" as any]: getProgressColor()
           }}

@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAIVoice } from './AIVoiceProvider';
+import { useAI } from '@/contexts/AIContext';
 import { Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { toast } from 'sonner';
+import { AIAnalyticsService } from '@/services/ai/aiAnalyticsService';
 
 interface Message {
   id: string;
@@ -17,7 +19,7 @@ interface Message {
   timestamp: Date;
 }
 
-interface AICompanionChatProps {
+export interface AICompanionChatProps {
   aiName?: string;
   aiAvatar?: string;
   initialMessage?: string;
@@ -42,13 +44,17 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   companionId,
   name,
   avatarUrl,
+  userCredits,
+  personalityType,
+  userId,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { speak, stopSpeaking, isPlaying, isMuted, toggleMute } = useAIVoice();
+  const { trackInteraction, setCurrentCompanion } = useAI();
 
   // Initialize with the assistant's greeting
   useEffect(() => {
@@ -65,7 +71,26 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
         speak(initialMessage);
       }
     }
-  }, [initialMessage, isMuted, speak]);
+
+    // Set current companion in context if provided
+    if (companionId && name) {
+      setCurrentCompanion({
+        id: companionId,
+        name: name,
+        avatarUrl: avatarUrl,
+        personalityType: personalityType
+      });
+      
+      // Track this companion view
+      if (user?.id) {
+        AIAnalyticsService.trackEvent(
+          user.id,
+          'ai_companion_open',
+          { companionId, name, personalityType }
+        );
+      }
+    }
+  }, [initialMessage, isMuted, speak, companionId, name, avatarUrl, personalityType, setCurrentCompanion, user?.id]);
 
   // Use name from props if provided
   const displayName = name || aiName;
@@ -128,6 +153,11 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       // Speak the response if voice is not muted
       if (!isMuted) {
         speak(response);
+      }
+      
+      // Track interaction with this companion
+      if (companionId && user?.id) {
+        trackInteraction(companionId);
       }
     } catch (error) {
       console.error("Error getting AI response:", error);

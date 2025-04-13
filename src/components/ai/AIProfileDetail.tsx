@@ -1,5 +1,3 @@
-
-// Update AIProfileDetail to use profileId instead of profile
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { useToast } from '@/components/ui/use-toast';
 import AIEscortSuggestions from './AIEscortSuggestions';
+import { useUserAIContext } from '@/hooks/useUserAIContext';
+import AICompanionChat from './AICompanionChat';
+import { AIAnalyticsService } from '@/services/ai/aiAnalyticsService';
 
 // Mock AI profile data
 const mockAIProfiles = [
@@ -41,19 +42,17 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profileId }) => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('chat');
+  const [showChat, setShowChat] = useState(false);
   const { toast } = useToast();
+  const { isAuthenticated, user } = useUserAIContext();
 
-  // Load AI profile data
   useEffect(() => {
     const loadProfile = async () => {
       setLoading(true);
       try {
-        // For a real app, this would be an API call
-        // Simulate API request and Brain Hub processing
         const mockProfile = mockAIProfiles.find(p => p.id === profileId);
         
         if (mockProfile) {
-          // Process through Brain Hub
           const response = await brainHub.processRequest({
             type: 'ai_profile_view',
             data: mockProfile
@@ -79,7 +78,15 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profileId }) => {
   }, [profileId, toast]);
 
   const handleSubscribe = async () => {
-    // Simulate API request with Brain Hub processing
+    if (!isAuthenticated) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to subscribe to AI companions',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       const response = await brainHub.processRequest({
         type: 'ai_subscription',
@@ -95,10 +102,20 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profileId }) => {
           isSubscribed: true
         }));
         
+        if (user?.id) {
+          AIAnalyticsService.trackEvent(
+            user.id, 
+            'ai_companion_subscribe',
+            { profileId, name: profile?.name }
+          );
+        }
+        
         toast({
           title: 'Subscribed!',
           description: `You have successfully subscribed to ${profile?.name}.`
         });
+
+        setShowChat(true);
       }
     } catch (error) {
       console.error('Error subscribing to AI profile:', error);
@@ -108,6 +125,15 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profileId }) => {
         variant: 'destructive'
       });
     }
+  };
+
+  const handleStartChat = () => {
+    setShowChat(true);
+    setActiveTab('chat');
+  };
+
+  const handleCloseChat = () => {
+    setShowChat(false);
   };
 
   if (loading) {
@@ -153,13 +179,24 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profileId }) => {
                 </TabsList>
                 
                 <TabsContent value="chat" className="p-6">
-                  <div className="bg-muted h-80 rounded-md flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <h3 className="text-xl font-semibold mb-2">Start Chatting with {profile?.name}</h3>
-                      <p className="text-muted-foreground mb-4">Subscribe to unlock unlimited conversations</p>
-                      <Button onClick={handleSubscribe}>Subscribe Now</Button>
+                  {showChat ? (
+                    <AICompanionChat 
+                      companionId={profileId}
+                      name={profile.name}
+                      avatarUrl={profile.avatar}
+                      personalityType={profile.personalityType}
+                      initialMessage={`Hello! I'm ${profile.name}. How can I assist you today?`}
+                      onClose={handleCloseChat}
+                    />
+                  ) : (
+                    <div className="bg-muted h-80 rounded-md flex items-center justify-center">
+                      <div className="text-center p-6">
+                        <h3 className="text-xl font-semibold mb-2">Start Chatting with {profile?.name}</h3>
+                        <p className="text-muted-foreground mb-4">Subscribe to unlock unlimited conversations</p>
+                        <Button onClick={handleStartChat}>Start Chat</Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="gallery" className="p-6">

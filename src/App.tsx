@@ -1,49 +1,49 @@
-
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/hooks/auth/useAuthContext';
+import { AIProvider } from '@/contexts/AIContext';
 import { AIVoiceProvider } from '@/components/ai/AIVoiceProvider';
-import Home from '@/pages/Home';
-import Auth from '@/pages/Auth';
-import AuthPage from '@/pages/AuthPage';
-import ProfileManagement from '@/pages/ProfileManagement';
-import ProtectedRoute from '@/components/layout/ProtectedRoute';
-import Escorts from '@/pages/Escorts';
-import { analyticsService } from './services/analyticsService';
-import AnalyticsDashboard from './components/analytics/AnalyticsDashboard';
+import AuthGuard from '@/components/auth/AuthGuard';
+import { Toaster } from 'sonner';
 
-function App() {
+// Import your pages here
+import HomePage from '@/pages/Index';
+import AuthPage from '@/pages/AuthPage';
+import ProfilePage from '@/pages/ProfilePage';
+import AICompanionPage from '@/pages/AICompanionPage';
+// ...other imports
+
+const App: React.FC = () => {
   return (
     <AuthProvider>
-      <AIVoiceProvider>
-        <Router>
+      <AIProvider>
+        <AIVoiceProvider>
+          <Toaster position="top-right" />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/escorts" element={<Escorts />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/login" element={<Auth />} />
+            <Route path="/" element={<HomePage />} />
+            <Route 
+              path="/auth" 
+              element={
+                <AuthGuard requireAuth={false}>
+                  <AuthPage />
+                </AuthGuard>
+              } 
+            />
             <Route 
               path="/profile" 
               element={
-                <ProtectedRoute>
-                  <ProfileManagement />
-                </ProtectedRoute>
+                <AuthGuard>
+                  <ProfilePage />
+                </AuthGuard>
               } 
             />
-            <Route path="/analytics" element={
-              <ProtectedRoute>
-                <div className="container mx-auto py-6 px-4 md:px-6">
-                  <AnalyticsDashboard />
-                </div>
-              </ProtectedRoute>
-            } />
-            {/* Add more routes as needed */}
+            <Route path="/ai-companions" element={<AICompanionPage />} />
+            {/* Add other protected routes here */}
           </Routes>
-        </Router>
-        <Toaster position="top-right" />
-      </AIVoiceProvider>
+        </AIVoiceProvider>
+      </AIProvider>
     </AuthProvider>
   );
-}
+};
 
 export default App;
