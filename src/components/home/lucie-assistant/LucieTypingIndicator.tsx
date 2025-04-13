@@ -1,14 +1,14 @@
 
 import React from 'react';
+import AICompanionTypingIndicator from '@/components/ai/AICompanionTypingIndicator';
 
 const LucieTypingIndicator = () => {
   return (
     <div className="flex justify-start">
-      <div className="max-w-[80%] p-3 rounded-lg bg-white/5 text-white flex items-center gap-1">
-        <div className="typing-dot"></div>
-        <div className="typing-dot"></div>
-        <div className="typing-dot"></div>
-      </div>
+      <AICompanionTypingIndicator 
+        className="bg-white/5 text-white"
+        size="small"
+      />
     </div>
   );
 };

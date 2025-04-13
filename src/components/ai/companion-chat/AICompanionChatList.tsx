@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AICompanionMessage from './AICompanionMessage';
+import AICompanionTypingIndicator from './AICompanionTypingIndicator';
 
 interface Message {
   id: string;
@@ -58,13 +59,7 @@ const AICompanionChatList: React.FC<AICompanionChatListProps> = ({
         
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-              <div className="flex space-x-1 items-center">
-                <div className="w-2 h-2 rounded-full bg-current animate-bounce" />
-                <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '0.3s' }} />
-                <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '0.6s' }} />
-              </div>
-            </div>
+            <AICompanionTypingIndicator size="small" />
           </div>
         )}
       </div>

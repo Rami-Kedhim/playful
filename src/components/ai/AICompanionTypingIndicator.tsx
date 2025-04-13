@@ -3,20 +3,41 @@ import React from 'react';
 
 interface AICompanionTypingIndicatorProps {
   className?: string;
+  dotColor?: string;
+  size?: 'small' | 'medium' | 'large';
 }
 
 /**
  * A component that displays a typing indicator for AI companions
+ * Can be customized with different sizes and colors
  */
 const AICompanionTypingIndicator: React.FC<AICompanionTypingIndicatorProps> = ({ 
-  className = ""
+  className = "",
+  dotColor = "bg-white/80",
+  size = "medium"
 }) => {
+  // Determine size classes based on the size prop
+  const dotSizeClasses = {
+    small: "w-1.5 h-1.5",
+    medium: "w-2 h-2",
+    large: "w-2.5 h-2.5"
+  };
+  
+  const containerClasses = {
+    small: "p-1.5",
+    medium: "p-2",
+    large: "p-3"
+  };
+  
+  const dotSize = dotSizeClasses[size];
+  const containerSize = containerClasses[size];
+  
   return (
-    <div className={`bg-muted/30 p-2 rounded-lg inline-flex items-center ${className}`}>
+    <div className={`bg-muted/30 ${containerSize} rounded-lg inline-flex items-center ${className}`}>
       <div className="flex space-x-1">
-        <div className="typing-dot bg-white/80 w-2 h-2 rounded-full"></div>
-        <div className="typing-dot bg-white/80 w-2 h-2 rounded-full"></div>
-        <div className="typing-dot bg-white/80 w-2 h-2 rounded-full"></div>
+        <div className={`typing-dot ${dotColor} ${dotSize} rounded-full`}></div>
+        <div className={`typing-dot ${dotColor} ${dotSize} rounded-full`}></div>
+        <div className={`typing-dot ${dotColor} ${dotSize} rounded-full`}></div>
       </div>
       <style>
         {`
