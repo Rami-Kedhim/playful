@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect } from 'react';
-import AICompanionMessage, { Message } from './AICompanionMessage';
+import AICompanionMessage, { Message as AIMessage } from './AICompanionMessage';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -50,7 +50,7 @@ const AICompanionMessageList: React.FC<AICompanionMessageListProps> = ({
               transition={{ duration: 0.3 }}
             >
               <AICompanionMessage 
-                message={message as unknown as Message}
+                message={message as unknown as AIMessage}
                 onActionClick={onActionClick}
                 voiceType={voiceType}
                 onUnlockContent={onUnlockContent}

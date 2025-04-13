@@ -1,8 +1,11 @@
 
 import React, { useRef, useEffect } from 'react';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
-import AICompanionMessage, { Message } from './AICompanionMessage';
+import AICompanionMessage from './AICompanionMessage';
 import AICompanionTypingIndicator from './AICompanionTypingIndicator';
+
+// Import the shared Message type from AICompanionMessage
+import { Message as AIMessage } from './AICompanionMessage'; 
 
 interface AICompanionMessageSystemProps {
   messages: CompanionMessage[];
@@ -69,7 +72,7 @@ const AICompanionMessageSystem: React.FC<AICompanionMessageSystemProps> = ({
             {msgs.map((message) => (
               <AICompanionMessage
                 key={message.id}
-                message={message as unknown as Message}
+                message={message as unknown as AIMessage}
                 onActionClick={onActionClick}
                 voiceType={voiceType}
                 onUnlockContent={message.requiresPayment ? onUnlockContent : undefined}
