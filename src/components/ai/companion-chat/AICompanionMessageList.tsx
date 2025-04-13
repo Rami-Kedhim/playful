@@ -4,6 +4,7 @@ import AICompanionMessage, { Message as AIMessage } from './AICompanionMessage';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import AICompanionTypingIndicator from '../AICompanionTypingIndicator';
 
 interface AICompanionMessageListProps {
   messages: CompanionMessage[];
@@ -68,13 +69,7 @@ const AICompanionMessageList: React.FC<AICompanionMessageListProps> = ({
                 transition={{ duration: 0.2 }}
                 className="flex justify-start"
               >
-                <div className="bg-background/80 border border-border p-3 rounded-lg inline-flex items-center gap-1">
-                  <div className="flex gap-1">
-                    <span className="typing-dot"></span>
-                    <span className="typing-dot"></span>
-                    <span className="typing-dot"></span>
-                  </div>
-                </div>
+                <AICompanionTypingIndicator />
               </motion.div>
             )}
           </AnimatePresence>

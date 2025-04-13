@@ -7,6 +7,7 @@ import AIProfileGrid from './AIProfileGrid';
 import AIController from './AIController';
 import AICompanionChat from './AICompanionChat';
 import { AIVoiceProvider } from './AIVoiceProvider';
+import AICompanionTypingIndicator from './AICompanionTypingIndicator';
 
 export {
   AIProfileCard,
@@ -16,4 +17,5 @@ export {
   AIController,
   AICompanionChat,
   AIVoiceProvider,
+  AICompanionTypingIndicator,
 };
