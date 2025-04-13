@@ -85,7 +85,7 @@ const AICompanionMessageSystem: React.FC<AICompanionMessageSystemProps> = ({
       {/* Show typing indicator if the AI is currently typing */}
       {isTyping && (
         <div className="flex items-start space-x-2">
-          <AICompanionTypingIndicator />
+          <AICompanionTypingIndicator size="medium" />
         </div>
       )}
       
