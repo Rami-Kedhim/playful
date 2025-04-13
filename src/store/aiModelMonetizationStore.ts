@@ -1,10 +1,11 @@
+
 import { create } from 'zustand';
 import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
 import { supabase } from "@/integrations/supabase/client";
 import { ContentService } from "@/services/contentService";
 import { boostService } from "@/services/boostService";
 import { GiftService } from "@/services/giftService";
-import { AIAnalyticsService } from "@/services/analyticsService";
+import { analyticsService, AIAnalyticsService } from "@/services/analyticsService";
 import { GLOBAL_UBX_RATE, validateGlobalPrice } from "@/utils/oxum/globalPricing";
 
 interface AIModelMonetizationState {

@@ -1,5 +1,4 @@
-
-import { AIAnalyticsService } from './analyticsService';
+import { AIAnalyticsService } from './ai/aiAnalyticsService';
 
 // Event tracking categories
 export type EventCategory = 
@@ -262,3 +261,6 @@ if (typeof window !== 'undefined') {
     analyticsService.init();
   });
 }
+
+// Export the AIAnalyticsService to prevent import errors
+export { AIAnalyticsService };

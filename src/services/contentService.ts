@@ -1,5 +1,5 @@
 
-import { AIAnalyticsService } from "./analyticsService";
+import { analyticsService, AIAnalyticsService } from "./analyticsService";
 import { supabase } from "@/integrations/supabase/client";
 import { ImageUnlockParams, VideoUnlockParams, ContentPurchase } from "@/types/monetization";
 
