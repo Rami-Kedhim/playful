@@ -69,7 +69,7 @@ const AICompanionMessageList: React.FC<AICompanionMessageListProps> = ({
                 transition={{ duration: 0.2 }}
                 className="flex justify-start"
               >
-                <AICompanionTypingIndicator />
+                <AICompanionTypingIndicator size="medium" />
               </motion.div>
             )}
           </AnimatePresence>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import AICompanionTypingIndicator from '@/components/ai/AICompanionTypingIndicator';
+import AICompanionTypingIndicator from '@/components/ai/companion-chat/AICompanionTypingIndicator';
 
 const LucieTypingIndicator = () => {
   return (
