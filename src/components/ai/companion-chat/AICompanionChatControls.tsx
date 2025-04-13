@@ -1,76 +1,75 @@
 
 import React, { useState } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Send, Mic, MicOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Bot, Send, Square } from 'lucide-react';
 
 interface AICompanionChatControlsProps {
-  onSendMessage: (message: string) => Promise<void>;
-  isTyping: boolean;
-  isSpeaking: boolean;
-  onStopSpeaking: () => void;
-  disabled?: boolean;
-  companion: {
+  onSendMessage: (message: string) => void;
+  isTyping?: boolean;
+  isSpeaking?: boolean;
+  onStopSpeaking?: () => void;
+  companion?: {
     name: string;
+    [key: string]: any;
   };
 }
 
 const AICompanionChatControls: React.FC<AICompanionChatControlsProps> = ({
   onSendMessage,
-  isTyping,
-  isSpeaking,
+  isTyping = false,
+  isSpeaking = false,
   onStopSpeaking,
-  disabled = false,
-  companion,
+  companion
 }) => {
-  const [input, setInput] = useState('');
-
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
-    
-    await onSendMessage(input);
-    setInput('');
+  const [message, setMessage] = useState('');
+  
+  const handleSend = () => {
+    if (!message.trim()) return;
+    onSendMessage(message.trim());
+    setMessage('');
   };
-
+  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleSend();
     }
   };
-
-  const placeholder = isTyping
-    ? `${companion.name} is typing...`
-    : `Message ${companion.name}...`;
-
+  
   return (
-    <div className="p-4 pt-0 border-t">
-      <div className="flex space-x-2">
-        <div className="relative flex-1">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            disabled={isTyping || disabled}
-            className="pr-10"
-          />
-          {isSpeaking && (
-            <Button
-              variant="ghost" 
-              size="icon"
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7"
-              onClick={onStopSpeaking}
-            >
-              <MicOff size={16} className="text-red-500" />
-            </Button>
-          )}
+    <div className="flex flex-col space-y-4">
+      {isSpeaking && onStopSpeaking && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onStopSpeaking}
+            className="flex items-center gap-2"
+          >
+            <Square className="h-4 w-4" />
+            <span>Stop Speaking</span>
+          </Button>
         </div>
+      )}
+      
+      <div className="flex space-x-2">
+        <Input
+          placeholder={`Message ${companion?.name || 'AI'}...`}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={isTyping}
+          className="flex-1"
+        />
         <Button 
-          onClick={handleSendMessage} 
-          disabled={!input.trim() || isTyping || disabled}
+          onClick={handleSend} 
+          disabled={!message.trim() || isTyping}
+          variant="default"
+          size="icon"
         >
-          <Send size={18} />
+          <Send className="h-4 w-4" />
+          <span className="sr-only">Send message</span>
         </Button>
       </div>
     </div>
