@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Lock } from 'lucide-react';
 
-interface Message {
+export interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
   requiresPayment?: boolean;
@@ -19,6 +19,7 @@ interface AICompanionMessageProps {
   aiAvatar?: string;
   onSpeakMessage?: (content: string) => void;
   onUnlockContent?: () => void;
+  onActionClick?: (action: string) => void;
 }
 
 const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
@@ -26,7 +27,8 @@ const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
   aiName = "Assistant",
   aiAvatar,
   onSpeakMessage,
-  onUnlockContent
+  onUnlockContent,
+  onActionClick
 }) => {
   const isAssistant = message.role === 'assistant';
   
