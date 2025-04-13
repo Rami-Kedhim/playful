@@ -1,9 +1,11 @@
+
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/hooks/auth/useAuthContext';
 import { AIProvider } from '@/contexts/AIContext';
 import { AIVoiceProvider } from '@/components/ai/AIVoiceProvider';
 import AuthGuard from '@/components/auth/AuthGuard';
+import RequireAuth from '@/components/auth/RequireAuth';
 import { Toaster } from 'sonner';
 
 // Import your pages here
@@ -11,7 +13,6 @@ import HomePage from '@/pages/Index';
 import AuthPage from '@/pages/AuthPage';
 import ProfilePage from '@/pages/ProfilePage';
 import AICompanionPage from '@/pages/AICompanionPage';
-// ...other imports
 
 const App: React.FC = () => {
   return (
@@ -32,13 +33,29 @@ const App: React.FC = () => {
             <Route 
               path="/profile" 
               element={
-                <AuthGuard>
+                <RequireAuth>
                   <ProfilePage />
-                </AuthGuard>
+                </RequireAuth>
               } 
             />
-            <Route path="/ai-companions" element={<AICompanionPage />} />
-            {/* Add other protected routes here */}
+            <Route 
+              path="/ai-companions" 
+              element={
+                <AICompanionPage />
+              } 
+            />
+            <Route 
+              path="/admin/*" 
+              element={
+                <RequireAuth requiredRoles={['admin', 'moderator']}>
+                  {/* Admin routes go here */}
+                  <div>Admin area</div>
+                </RequireAuth>
+              } 
+            />
+            
+            {/* Catch-all redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AIVoiceProvider>
       </AIProvider>

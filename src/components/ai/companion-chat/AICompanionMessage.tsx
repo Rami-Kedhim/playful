@@ -1,198 +1,91 @@
 
-import React, { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { CompanionMessage } from '@/hooks/ai-companion/types';
-import { formatDistanceToNow } from 'date-fns';
-import { Play, Pause, User, Bot } from 'lucide-react';
-import AIEmotionStatus from '../AIEmotionStatus';
-import { useElevenLabsVoice } from './utils/elevenlabsVoiceService';
+import React from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Lock } from 'lucide-react';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  requiresPayment?: boolean;
+}
 
 interface AICompanionMessageProps {
-  message: CompanionMessage;
-  onActionClick?: (action: string) => void;
-  voiceType?: string;
+  message: Message;
+  aiName?: string;
+  aiAvatar?: string;
+  onSpeakMessage?: (content: string) => void;
   onUnlockContent?: () => void;
 }
 
 const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
   message,
-  onActionClick,
-  voiceType,
+  aiName = "Assistant",
+  aiAvatar,
+  onSpeakMessage,
   onUnlockContent
 }) => {
-  const [isLocalPlaying, setIsLocalPlaying] = useState(false);
-  const { speak, stop, isSpeaking } = useElevenLabsVoice();
+  const isAssistant = message.role === 'assistant';
   
-  const handlePlayVoice = async () => {
-    if (isLocalPlaying || isSpeaking()) {
-      stop();
-      setIsLocalPlaying(false);
-      return;
+  const handleSpeakClick = () => {
+    if (isAssistant && onSpeakMessage) {
+      onSpeakMessage(message.content);
     }
-    
-    setIsLocalPlaying(true);
-    // Map message emotion to voice type if available
-    const emotionVoiceMap: Record<string, string> = {
-      'joy': 'cheerful',
-      'trust': 'friendly',
-      'fear': 'breathy',
-      'surprise': 'bubbly',
-      'sadness': 'soft',
-      'anger': 'authoritative',
-      'anticipation': 'neutral',
-      'interest': 'sophisticated'
-    };
-    
-    // Use emotion-based voice or fall back to provided voiceType
-    const selectedVoice = message.emotion ? 
-      emotionVoiceMap[message.emotion.toLowerCase()] || voiceType : 
-      voiceType;
-    
-    const success = await speak(message.content, selectedVoice);
-    
-    if (!success) {
-      console.error('Failed to play voice message');
-    }
-    
-    setIsLocalPlaying(false);
   };
   
-  const isUser = message.role === 'user';
-  const isSystem = message.role === 'system';
-  
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} max-w-[80%] items-start gap-2`}>
-        {!isUser && !isSystem && (
-          <Avatar className="h-8 w-8 mt-0.5">
-            <AvatarImage src="/ai-avatar.png" alt="AI Companion" />
-            <AvatarFallback>
-              <Bot className="h-4 w-4" />
-            </AvatarFallback>
-          </Avatar>
-        )}
-        
-        {isUser && (
-          <Avatar className="h-8 w-8 mt-0.5">
-            <AvatarImage src="/user-avatar.png" alt="User" />
-            <AvatarFallback>
-              <User className="h-4 w-4" />
-            </AvatarFallback>
-          </Avatar>
-        )}
-        
-        <div className={`space-y-1 ${isUser ? 'text-right' : ''}`}>
-          <Card className={`
-            ${isSystem ? 'bg-muted border-muted' : isUser ? 'bg-primary text-primary-foreground' : 'bg-card'}
-          `}>
-            <CardContent className="p-3 text-sm">
-              {message.content}
-              
-              {/* Premium content unlock UI */}
-              {message.requiresPayment && onUnlockContent && (
-                <div className="mt-2 flex flex-col gap-2">
-                  <div className="text-xs text-muted">
-                    {message.paymentAmount} Lucoins required to view this content
-                  </div>
-                  <Button size="sm" onClick={onUnlockContent}>
-                    Unlock Content
-                  </Button>
-                </div>
-              )}
-              
-              {/* Voice message UI */}
-              {!message.requiresPayment && !isUser && !isSystem && (
-                <div className="mt-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-6 w-6" 
-                    onClick={handlePlayVoice}
-                    aria-label={isLocalPlaying ? "Pause speech" : "Play speech"}
-                  >
-                    {isLocalPlaying ? 
-                      <Pause className="h-3 w-3" /> : 
-                      <Play className="h-3 w-3" />
-                    }
-                  </Button>
-                </div>
-              )}
-              
-              {/* Suggested actions */}
-              {message.suggestedActions && message.suggestedActions.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {message.suggestedActions.map((action, index) => (
-                    <Button 
-                      key={index}
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onActionClick?.(action)}
-                    >
-                      {action}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              
-              {/* Visual elements like images */}
-              {message.visualElements && message.visualElements.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {message.visualElements.map((element, index) => (
-                    <div key={index}>
-                      {element.data.type === 'image' && (
-                        <div className="rounded-md overflow-hidden">
-                          <img 
-                            src={element.data.url} 
-                            alt={element.data.alt || 'AI generated image'} 
-                            className="w-full h-auto object-cover"
-                          />
-                          {element.data.caption && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {element.data.caption}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          {/* Message metadata */}
-          <div className="flex text-xs text-muted-foreground gap-2">
-            {message.timestamp && (
-              <time dateTime={message.timestamp.toISOString()}>
-                {formatDistanceToNow(message.timestamp, { addSuffix: true })}
-              </time>
-            )}
-            
-            {/* Show emotion state for AI messages */}
-            {!isUser && !isSystem && message.emotion && (
-              <div className="flex items-center gap-1">
-                <AIEmotionStatus 
-                  emotionalState={{ 
-                    joy: 0, 
-                    trust: 0, 
-                    fear: 0, 
-                    surprise: 0, 
-                    sadness: 0, 
-                    anger: 0, 
-                    anticipation: 0, 
-                    interest: 0,
-                    dominantEmotion: message.emotion,
-                    intensityLevel: 75,  // Placeholder value
-                    lastUpdated: message.timestamp?.toISOString() || new Date().toISOString()
-                  }} 
-                  compact 
-                  showIntensity={false}
-                />
-              </div>
-            )}
+    <div className={`flex ${isAssistant ? 'justify-start' : 'justify-end'}`}>
+      {isAssistant && (
+        <Avatar className="h-8 w-8 mr-2">
+          <AvatarImage src={aiAvatar} alt={aiName} />
+          <AvatarFallback>{aiName.charAt(0)}</AvatarFallback>
+        </Avatar>
+      )}
+      
+      <div
+        className={`max-w-[80%] p-3 rounded-lg ${
+          isAssistant
+            ? 'bg-muted'
+            : 'bg-primary text-primary-foreground'
+        }`}
+      >
+        {message.requiresPayment ? (
+          <div className="flex flex-col items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
+            <p className="text-sm text-center">This content requires payment to view</p>
+            <Button 
+              size="sm" 
+              variant="secondary"
+              onClick={onUnlockContent}
+            >
+              Unlock content
+            </Button>
           </div>
+        ) : (
+          <p className="whitespace-pre-wrap">{message.content}</p>
+        )}
+        
+        <div className="flex justify-between items-center mt-1">
+          <p className={`text-xs ${
+            isAssistant ? 'text-muted-foreground' : 'text-primary-foreground/70'
+          }`}>
+            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </p>
+          
+          {isAssistant && onSpeakMessage && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0" 
+              onClick={handleSpeakClick}
+              title="Listen to this message"
+            >
+              🔊
+            </Button>
+          )}
         </div>
       </div>
     </div>

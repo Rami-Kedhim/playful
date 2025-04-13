@@ -1,22 +1,23 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Volume2, VolumeX, X } from 'lucide-react';
 import { useAIVoice } from './AIVoiceProvider';
 import { useAI } from '@/contexts/AIContext';
-import { Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useUserAIContext } from '@/hooks/useUserAIContext';
 import { toast } from 'sonner';
 import { AIAnalyticsService } from '@/services/ai/aiAnalyticsService';
+import AICompanionChatList from './companion-chat/AICompanionChatList';
+import AICompanionChatControls from './companion-chat/AICompanionChatControls';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  requiresPayment?: boolean;
 }
 
 export interface AICompanionChatProps {
@@ -46,13 +47,10 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   avatarUrl,
   userCredits,
   personalityType,
-  userId,
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useUserAIContext();
   const { speak, stopSpeaking, isPlaying, isMuted, toggleMute } = useAIVoice();
   const { trackInteraction, setCurrentCompanion } = useAI();
 
@@ -96,19 +94,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   const displayName = name || aiName;
   const displayAvatar = avatarUrl || aiAvatar;
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-      setTimeout(() => {
-        scrollAreaRef.current?.scrollTo({
-          top: scrollAreaRef.current.scrollHeight,
-          behavior: 'smooth'
-        });
-      }, 100);
-    }
-  }, [messages]);
-
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (input: string) => {
     if (!input.trim()) return;
     
     if (!isAuthenticated) {
@@ -126,7 +112,6 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
     setIsTyping(true);
 
     try {
@@ -169,10 +154,9 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+  const handleSpeakMessage = (content: string) => {
+    if (!isMuted) {
+      speak(content);
     }
   };
 
@@ -201,82 +185,29 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
           {onClose && (
             <Button variant="ghost" size="icon" onClick={onClose}>
               <span className="sr-only">Close</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+              <X size={18} />
             </Button>
           )}
         </div>
       </div>
 
-      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-        <div className="space-y-4">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[80%] p-3 rounded-lg ${
-                  msg.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-4'
-                    : 'bg-muted mr-4'
-                }`}
-              >
-                <p className="whitespace-pre-wrap">{msg.content}</p>
-                <p className={`text-xs mt-1 ${
-                  msg.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                }`}>
-                  {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          ))}
-          
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                <div className="flex space-x-1 items-center">
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" />
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '0.3s' }} />
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '0.6s' }} />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+      <AICompanionChatList
+        messages={messages}
+        isTyping={isTyping}
+        aiName={displayName}
+        aiAvatar={displayAvatar}
+        onSpeakMessage={handleSpeakMessage}
+        onUnlockContent={() => toast.info("Premium content unlocking not implemented")}
+      />
 
-      <CardContent className="p-4 pt-0 border-t mt-auto">
-        <div className="flex space-x-2">
-          <div className="relative flex-1">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              disabled={isTyping}
-              className="pr-10"
-            />
-            {isPlaying && (
-              <Button
-                variant="ghost" 
-                size="icon"
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7"
-                onClick={stopSpeaking}
-              >
-                <MicOff size={16} className="text-red-500" />
-              </Button>
-            )}
-          </div>
-          <Button 
-            onClick={handleSendMessage} 
-            disabled={!input.trim() || isTyping}
-          >
-            <Send size={18} />
-          </Button>
-        </div>
+      <CardContent>
+        <AICompanionChatControls
+          onSendMessage={handleSendMessage}
+          isTyping={isTyping}
+          isSpeaking={isPlaying}
+          onStopSpeaking={stopSpeaking}
+          companion={{ name: displayName }}
+        />
       </CardContent>
     </Card>
   );
