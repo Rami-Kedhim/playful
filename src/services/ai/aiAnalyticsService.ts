@@ -1,3 +1,4 @@
+
 /**
  * AIAnalyticsService - specialized analytics service for AI-related operations
  */
@@ -8,7 +9,7 @@ interface AIEventData {
   timestamp?: Date;
 }
 
-class AIAnalyticsService {
+export class AIAnalyticsServiceClass {
   private readonly API_ENDPOINT = '/api/ai-analytics';
   private readonly LOCAL_STORAGE_KEY = 'ai_analytics_cache';
   private readonly MAX_CACHE_SIZE = 50;
@@ -147,4 +148,5 @@ class AIAnalyticsService {
 }
 
 // Export singleton instance
-export const AIAnalyticsService = new AIAnalyticsService();
+export const AIAnalyticsService = new AIAnalyticsServiceClass();
+
