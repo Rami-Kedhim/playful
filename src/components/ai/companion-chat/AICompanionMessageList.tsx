@@ -4,7 +4,7 @@ import AICompanionMessage, { Message as AIMessage } from './AICompanionMessage';
 import { CompanionMessage } from '@/hooks/ai-companion/types';
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import AICompanionTypingIndicator from '../AICompanionTypingIndicator';
+import AICompanionTypingIndicator from './AICompanionTypingIndicator';
 
 interface AICompanionMessageListProps {
   messages: CompanionMessage[];
