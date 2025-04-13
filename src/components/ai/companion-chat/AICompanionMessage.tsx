@@ -20,6 +20,7 @@ interface AICompanionMessageProps {
   onSpeakMessage?: (content: string) => void;
   onUnlockContent?: () => void;
   onActionClick?: (action: string) => void;
+  voiceType?: string;
 }
 
 const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
@@ -28,7 +29,8 @@ const AICompanionMessage: React.FC<AICompanionMessageProps> = ({
   aiAvatar,
   onSpeakMessage,
   onUnlockContent,
-  onActionClick
+  onActionClick,
+  voiceType
 }) => {
   const isAssistant = message.role === 'assistant';
   
