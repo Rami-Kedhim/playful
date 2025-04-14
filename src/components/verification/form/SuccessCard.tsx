@@ -51,8 +51,8 @@ const SuccessCard: React.FC<SuccessCardProps> = ({
       )}
       
       <CardFooter className="flex justify-center">
-        <Button as={Link} to={redirectPath} variant="outline">
-          {redirectText}
+        <Button variant="outline" asChild>
+          <Link to={redirectPath}>{redirectText}</Link>
         </Button>
       </CardFooter>
     </Card>

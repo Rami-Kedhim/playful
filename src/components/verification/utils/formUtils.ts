@@ -8,7 +8,7 @@ export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 // Zod schema for verification form
 export const verificationFormSchema = z.object({
-  documentType: z.enum(['passport', 'id_card', 'driver_license', 'other']),
+  documentType: z.enum(['passport', 'id_card', 'driver_license']),
   documentFrontImage: z
     .any()
     .refine((file) => file instanceof File, 'Front image is required')

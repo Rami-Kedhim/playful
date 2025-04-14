@@ -27,7 +27,6 @@ const DocumentTypeSelect = ({ form }: DocumentTypeSelectProps) => {
               <SelectItem value="passport">Passport</SelectItem>
               <SelectItem value="id_card">ID Card</SelectItem>
               <SelectItem value="driver_license">Driver's License</SelectItem>
-              <SelectItem value="other">Other Government ID</SelectItem>
             </SelectContent>
           </Select>
           <FormDescription>
