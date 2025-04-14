@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { verificationFormSchema, VerificationFormValues } from './utils/formUtils';
+import { verificationFormSchema, VerificationFormData } from './utils/formUtils';
 import DocumentTypeSelect from './form/DocumentTypeSelect';
 import DocumentImageUpload from './form/DocumentImageUpload';
 import SubmitButton from './form/SubmitButton';
@@ -23,13 +23,13 @@ const VerificationForm = () => {
     message: string;
   } | null>(null);
 
-  const form = useForm<VerificationFormValues>({
+  const form = useForm<VerificationFormData>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
       documentType: 'id_card',
-      documentFrontImage: null,
-      documentBackImage: null,
-      selfieImage: null,
+      documentFrontImage: undefined,
+      documentBackImage: undefined,
+      selfieImage: undefined,
     },
   });
 
@@ -52,7 +52,7 @@ const VerificationForm = () => {
     }
   }, [user]);
 
-  const onSubmit = async (data: VerificationFormValues) => {
+  const onSubmit = async (data: VerificationFormData) => {
     if (!user) return;
     
     setLoading(true);
@@ -61,9 +61,9 @@ const VerificationForm = () => {
       const result = await submitVerificationRequest(
         user.id,
         data.documentType,
-        data.documentFrontImage,
-        data.documentBackImage,
-        data.selfieImage
+        data.documentFrontImage.file,
+        data.documentBackImage?.file || null,
+        data.selfieImage.file
       );
       
       setSubmitMessage({

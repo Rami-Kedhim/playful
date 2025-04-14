@@ -16,46 +16,24 @@ export const DOCUMENT_TYPES = {
 export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES];
 
 // Zod schema for verification form
+const documentFileSchema = z.object({
+  file: z.instanceof(File)
+    .refine((file) => file.size <= MAX_FILE_SIZE, 'File must be less than 5MB')
+    .refine(
+      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+      'Only JPG, PNG and WEBP formats are supported'
+    )
+});
+
 export const verificationFormSchema = z.object({
   documentType: z.enum([
     DOCUMENT_TYPES.PASSPORT, 
     DOCUMENT_TYPES.ID_CARD, 
     DOCUMENT_TYPES.DRIVER_LICENSE
   ]),
-  documentFrontImage: z
-    .any()
-    .refine((file) => file instanceof File, 'Front image is required')
-    .refine(
-      (file) => file instanceof File && file.size <= MAX_FILE_SIZE, 
-      'Front image must be less than 5MB'
-    )
-    .refine(
-      (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
-      'Only JPG, PNG and WEBP formats are supported'
-    ),
-  documentBackImage: z
-    .any()
-    .nullable()
-    .optional()
-    .refine(
-      (file) => !file || (file instanceof File && file.size <= MAX_FILE_SIZE),
-      'Back image must be less than 5MB'
-    )
-    .refine(
-      (file) => !file || (file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type)),
-      'Only JPG, PNG and WEBP formats are supported'
-    ),
-  selfieImage: z
-    .any()
-    .refine((file) => file instanceof File, 'Selfie image is required')
-    .refine(
-      (file) => file instanceof File && file.size <= MAX_FILE_SIZE, 
-      'Selfie image must be less than 5MB'
-    )
-    .refine(
-      (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
-      'Only JPG, PNG and WEBP formats are supported'
-    ),
+  documentFrontImage: documentFileSchema,
+  documentBackImage: documentFileSchema.optional(),
+  selfieImage: documentFileSchema
 });
 
 export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
@@ -90,11 +68,11 @@ export const handleFileChange = (
     }
 
     // If validation passes, set the value and clear any errors
-    form.setValue(fieldName, file, { shouldValidate: true });
+    form.setValue(fieldName, { file }, { shouldValidate: true });
     form.clearErrors(fieldName);
   } else {
     // Clear the field if no file is selected
-    form.setValue(fieldName, null, { shouldValidate: true });
+    form.setValue(fieldName, undefined, { shouldValidate: true });
   }
 };
 
