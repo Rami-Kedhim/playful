@@ -4,7 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
 import { VerificationFormValues, handleFileChange, DOCUMENT_TYPES, isBackImageRequired } from '../utils/formUtils';
-import { FileAlert, FileCheck, Upload } from 'lucide-react';
+import { AlertCircle, FileCheck, Upload } from 'lucide-react';
 
 interface DocumentImageUploadProps {
   form: UseFormReturn<VerificationFormValues>;
@@ -58,7 +58,7 @@ const DocumentImageUpload = ({
             </span>
             {fieldError && (
               <span className="text-xs font-normal text-destructive flex items-center">
-                <FileAlert className="h-3.5 w-3.5 mr-1" /> {fieldError}
+                <AlertCircle className="h-3.5 w-3.5 mr-1" /> {fieldError}
               </span>
             )}
           </FormLabel>
