@@ -1,57 +1,62 @@
 
 import React from 'react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
 
 interface SubmissionAlertProps {
-  type: 'success' | 'error' | 'info' | 'warning';
+  type: 'success' | 'error' | 'warning';
   title?: string;
   message: string;
-  className?: string;
 }
 
-const SubmissionAlert: React.FC<SubmissionAlertProps> = ({
-  type,
-  title,
-  message,
-  className = ''
+const SubmissionAlert: React.FC<SubmissionAlertProps> = ({ 
+  type, 
+  title, 
+  message 
 }) => {
   const getIcon = () => {
     switch (type) {
       case 'success':
         return <CheckCircle className="h-4 w-4" />;
-      case 'error':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'info':
       case 'warning':
+        return <AlertTriangle className="h-4 w-4" />;
+      case 'error':
       default:
-        return <Info className="h-4 w-4" />;
+        return <AlertCircle className="h-4 w-4" />;
     }
   };
-  
-  const getAlertClass = () => {
+
+  const getVariant = () => {
     switch (type) {
       case 'success':
-        return 'bg-green-50 text-green-800 border-green-200';
-      case 'error':
-        return 'bg-red-50 text-red-800 border-red-200';
+        return 'success';
       case 'warning':
-        return 'bg-yellow-50 text-yellow-800 border-yellow-200';
-      case 'info':
+        return 'warning';
+      case 'error':
       default:
-        return 'bg-blue-50 text-blue-800 border-blue-200';
+        return 'destructive';
     }
   };
-  
+
+  const getDefaultTitle = () => {
+    switch (type) {
+      case 'success':
+        return 'Success';
+      case 'warning':
+        return 'Warning';
+      case 'error':
+      default:
+        return 'Error';
+    }
+  };
+
   return (
-    <Alert className={`${getAlertClass()} ${className}`}>
-      <div className="flex items-start">
-        <div className="mr-2 mt-0.5">{getIcon()}</div>
-        <div>
-          {title && <AlertTitle>{title}</AlertTitle>}
-          <AlertDescription>{message}</AlertDescription>
-        </div>
-      </div>
+    <Alert variant={getVariant()}>
+      {getIcon()}
+      {(title || type !== 'success') && (
+        <AlertTitle>{title || getDefaultTitle()}</AlertTitle>
+      )}
+      <AlertDescription>{message}</AlertDescription>
     </Alert>
   );
 };

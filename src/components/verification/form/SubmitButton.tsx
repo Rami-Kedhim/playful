@@ -8,20 +8,25 @@ interface SubmitButtonProps {
   disabled?: boolean;
   loadingText?: string;
   text?: string;
+  className?: string;
+  onClick?: () => void;
 }
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({ 
   loading = false, 
   disabled = false,
   loadingText = 'Submitting...',
-  text = 'Submit Verification'
+  text = 'Submit Verification',
+  className = '',
+  onClick
 }) => {
   return (
     <Button 
       type="submit" 
       disabled={loading || disabled} 
-      className="w-full"
+      className={`w-full ${className}`}
       variant="default"
+      onClick={onClick}
     >
       {loading ? (
         <>
