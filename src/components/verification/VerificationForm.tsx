@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { verificationFormSchema, VerificationFormData } from './utils/formUtils';
+import { verificationFormSchema, VerificationFormValues } from './utils/formUtils';
 import DocumentTypeSelect from './form/DocumentTypeSelect';
 import DocumentImageUpload from './form/DocumentImageUpload';
 import SubmitButton from './form/SubmitButton';
@@ -23,7 +22,7 @@ const VerificationForm = () => {
     message: string;
   } | null>(null);
 
-  const form = useForm<VerificationFormData>({
+  const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
       documentType: 'id_card',
@@ -35,7 +34,6 @@ const VerificationForm = () => {
 
   useEffect(() => {
     if (user) {
-      // Check if user can submit verification
       const checkSubmitEligibility = async () => {
         const result = await canSubmitVerification(user.id);
         setCanSubmit(result.canSubmit);
@@ -52,7 +50,7 @@ const VerificationForm = () => {
     }
   }, [user]);
 
-  const onSubmit = async (data: VerificationFormData) => {
+  const onSubmit = async (data: VerificationFormValues) => {
     if (!user) return;
     
     setLoading(true);
