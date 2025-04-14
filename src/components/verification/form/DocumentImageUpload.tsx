@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormData } from '../utils/validationUtils';
+import { VerificationFormValues } from '../utils/formUtils';
 import { AlertCircle, FileCheck, Upload } from 'lucide-react';
 
 interface DocumentImageUploadProps {
-  form: UseFormReturn<VerificationFormData>;
+  form: UseFormReturn<VerificationFormValues>;
   fieldName: 'documentFrontImage' | 'documentBackImage' | 'selfieImage';
   label: string;
   description: string;
