@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
+import { Button, ButtonProps } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
-interface SubmitButtonProps {
+interface SubmitButtonProps extends Omit<ButtonProps, 'type'> {
   loading?: boolean;
   disabled?: boolean;
   loadingText?: string;
@@ -18,15 +18,18 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
   loadingText = 'Submitting...',
   text = 'Submit Verification',
   className = '',
-  onClick
+  onClick,
+  variant = "default",
+  ...props
 }) => {
   return (
     <Button 
       type="submit" 
       disabled={loading || disabled} 
       className={`w-full ${className}`}
-      variant="default"
+      variant={variant}
       onClick={onClick}
+      {...props}
     >
       {loading ? (
         <>

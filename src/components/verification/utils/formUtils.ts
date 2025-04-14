@@ -17,11 +17,18 @@ export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES];
 
 // Zod schema for verification form
 export const verificationFormSchema = z.object({
-  documentType: z.enum([DOCUMENT_TYPES.PASSPORT, DOCUMENT_TYPES.ID_CARD, DOCUMENT_TYPES.DRIVER_LICENSE]),
+  documentType: z.enum([
+    DOCUMENT_TYPES.PASSPORT, 
+    DOCUMENT_TYPES.ID_CARD, 
+    DOCUMENT_TYPES.DRIVER_LICENSE
+  ]),
   documentFrontImage: z
     .any()
     .refine((file) => file instanceof File, 'Front image is required')
-    .refine((file) => file instanceof File && file.size <= MAX_FILE_SIZE, 'Max file size is 5MB')
+    .refine(
+      (file) => file instanceof File && file.size <= MAX_FILE_SIZE, 
+      'Max file size is 5MB'
+    )
     .refine(
       (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
       'Only .jpg, .png and .webp formats are supported'
@@ -41,7 +48,10 @@ export const verificationFormSchema = z.object({
   selfieImage: z
     .any()
     .refine((file) => file instanceof File, 'Selfie image is required')
-    .refine((file) => file instanceof File && file.size <= MAX_FILE_SIZE, 'Max file size is 5MB')
+    .refine(
+      (file) => file instanceof File && file.size <= MAX_FILE_SIZE, 
+      'Max file size is 5MB'
+    )
     .refine(
       (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
       'Only .jpg, .png and .webp formats are supported'

@@ -35,6 +35,11 @@ export const useVerification = () => {
             description: err.message
           });
         });
+      } else {
+        console.error('Document validation error:', error);
+        toast.error('Validation Error', {
+          description: 'There was an error validating your documents'
+        });
       }
       return false;
     }
@@ -60,6 +65,7 @@ export const useVerification = () => {
       });
 
       if (error) {
+        console.error('Error from Supabase function:', error);
         throw error;
       }
 

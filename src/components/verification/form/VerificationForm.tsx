@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import DocumentTypeSelect from './DocumentTypeSelect';
@@ -10,7 +9,7 @@ import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
-import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
+import { verificationFormSchema, VerificationFormValues, DOCUMENT_TYPES } from '../utils/formUtils';
 import { useVerification, VerificationDocument } from '@/hooks/verification/useVerification';
 
 interface VerificationFormProps {
@@ -26,7 +25,10 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: 'id_card',
+      documentType: DOCUMENT_TYPES.ID_CARD,
+      documentFrontImage: null,
+      documentBackImage: null,
+      selfieImage: null
     },
   });
   

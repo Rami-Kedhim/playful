@@ -51,12 +51,16 @@ const SubmissionAlert: React.FC<SubmissionAlertProps> = ({
   };
 
   return (
-    <Alert variant={getVariant()}>
-      {getIcon()}
-      {(title || type !== 'success') && (
-        <AlertTitle>{title || getDefaultTitle()}</AlertTitle>
-      )}
-      <AlertDescription>{message}</AlertDescription>
+    <Alert variant={getVariant() as any}>
+      <div className="flex items-start">
+        <span className="mr-2">{getIcon()}</span>
+        <div>
+          {(title || type !== 'success') && (
+            <AlertTitle>{title || getDefaultTitle()}</AlertTitle>
+          )}
+          <AlertDescription>{message}</AlertDescription>
+        </div>
+      </div>
     </Alert>
   );
 };
