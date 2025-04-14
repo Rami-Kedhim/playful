@@ -8,11 +8,21 @@ import { z } from 'zod';
 const documentSchema = z.object({
   type: z.enum(['id_card', 'passport', 'driver_license']),
   frontImage: z.instanceof(File).refine(file => file.size <= 5 * 1024 * 1024, {
-    message: "File size must be less than 5MB"
+    message: "Front image must be less than 5MB"
+  }).refine(file => ['image/jpeg', 'image/png', 'image/webp'].includes(file.type), {
+    message: "Front image must be a JPG, PNG, or WEBP file"
   }),
-  backImage: z.instanceof(File).optional(),
+  backImage: z.instanceof(File).optional()
+    .refine(file => !file || file.size <= 5 * 1024 * 1024, {
+      message: "Back image must be less than 5MB"
+    })
+    .refine(file => !file || ['image/jpeg', 'image/png', 'image/webp'].includes(file.type), {
+      message: "Back image must be a JPG, PNG, or WEBP file"
+    }),
   selfieImage: z.instanceof(File).refine(file => file.size <= 5 * 1024 * 1024, {
     message: "Selfie image must be less than 5MB"
+  }).refine(file => ['image/jpeg', 'image/png', 'image/webp'].includes(file.type), {
+    message: "Selfie image must be a JPG, PNG, or WEBP file"
   })
 });
 
@@ -54,6 +64,12 @@ export const useVerification = () => {
     setVerificationStatus('uploading');
 
     try {
+      // First show a toast message that verification is being processed
+      toast.info('Processing', {
+        description: 'Uploading your verification documents...',
+        duration: 3000,
+      });
+
       // Simulate document upload and processing
       const { data, error } = await supabase.functions.invoke('process-verification', {
         body: {
@@ -71,7 +87,7 @@ export const useVerification = () => {
 
       setVerificationStatus('completed');
       toast.success('Verification Submitted', {
-        description: 'Your documents are being processed.'
+        description: 'Your documents are being processed. We\'ll notify you once review is complete.',
       });
 
       return true;
@@ -79,7 +95,9 @@ export const useVerification = () => {
       console.error('Verification submission error:', error);
       setVerificationStatus('error');
       toast.error('Verification Failed', {
-        description: 'Unable to submit verification. Please try again.'
+        description: typeof error === 'object' && error !== null && 'message' in error 
+          ? String(error.message)
+          : 'Unable to submit verification. Please try again.'
       });
       return false;
     } finally {

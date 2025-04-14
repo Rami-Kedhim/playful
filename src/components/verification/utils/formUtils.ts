@@ -27,34 +27,34 @@ export const verificationFormSchema = z.object({
     .refine((file) => file instanceof File, 'Front image is required')
     .refine(
       (file) => file instanceof File && file.size <= MAX_FILE_SIZE, 
-      'Max file size is 5MB'
+      'Front image must be less than 5MB'
     )
     .refine(
       (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
-      'Only .jpg, .png and .webp formats are supported'
+      'Only JPG, PNG and WEBP formats are supported'
     ),
   documentBackImage: z
     .any()
-    .optional()
     .nullable()
+    .optional()
     .refine(
       (file) => !file || (file instanceof File && file.size <= MAX_FILE_SIZE),
-      'Max file size is 5MB'
+      'Back image must be less than 5MB'
     )
     .refine(
       (file) => !file || (file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type)),
-      'Only .jpg, .png and .webp formats are supported'
+      'Only JPG, PNG and WEBP formats are supported'
     ),
   selfieImage: z
     .any()
     .refine((file) => file instanceof File, 'Selfie image is required')
     .refine(
       (file) => file instanceof File && file.size <= MAX_FILE_SIZE, 
-      'Max file size is 5MB'
+      'Selfie image must be less than 5MB'
     )
     .refine(
       (file) => file instanceof File && ACCEPTED_IMAGE_TYPES.includes(file.type),
-      'Only .jpg, .png and .webp formats are supported'
+      'Only JPG, PNG and WEBP formats are supported'
     ),
 });
 
@@ -67,7 +67,31 @@ export const handleFileChange = (
   fieldName: keyof VerificationFormValues
 ) => {
   if (e.target.files && e.target.files[0]) {
-    form.setValue(fieldName, e.target.files[0], { shouldValidate: true });
+    const file = e.target.files[0];
+    const fileType = file.type;
+    const fileSize = file.size;
+
+    // Validate file type first
+    if (!ACCEPTED_IMAGE_TYPES.includes(fileType)) {
+      form.setError(fieldName, {
+        type: 'manual',
+        message: 'Only JPG, PNG and WEBP formats are supported'
+      });
+      return;
+    }
+
+    // Then validate file size
+    if (fileSize > MAX_FILE_SIZE) {
+      form.setError(fieldName, {
+        type: 'manual',
+        message: 'File must be less than 5MB'
+      });
+      return;
+    }
+
+    // If validation passes, set the value and clear any errors
+    form.setValue(fieldName, file, { shouldValidate: true });
+    form.clearErrors(fieldName);
   } else {
     // Clear the field if no file is selected
     form.setValue(fieldName, null, { shouldValidate: true });
