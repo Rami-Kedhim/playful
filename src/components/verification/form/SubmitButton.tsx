@@ -21,6 +21,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       type="submit" 
       disabled={loading || disabled} 
       className="w-full"
+      variant="default"
     >
       {loading ? (
         <>

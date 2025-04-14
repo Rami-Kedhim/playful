@@ -49,5 +49,8 @@ export const handleFileChange = (
 ) => {
   if (e.target.files && e.target.files[0]) {
     form.setValue(fieldName, e.target.files[0], { shouldValidate: true });
+  } else {
+    // Clear the field if no file is selected
+    form.setValue(fieldName, null, { shouldValidate: true });
   }
 };
