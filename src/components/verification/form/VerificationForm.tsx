@@ -4,7 +4,7 @@ import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { verificationFormSchema, VerificationFormData } from '../utils/validationUtils';
+import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
 import { useVerification } from '@/hooks/verification/useVerification';
 import VerificationCardWrapper from './VerificationCardWrapper';
 import DocumentRequirements from './DocumentRequirements';
@@ -24,7 +24,7 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
   const [submitted, setSubmitted] = React.useState(false);
   const [formError, setFormError] = React.useState<string>("");
   
-  const form = useForm<VerificationFormData>({
+  const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
       documentType: 'id_card',
@@ -34,7 +34,7 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
     },
   });
   
-  const onSubmit = async (data: VerificationFormData) => {
+  const onSubmit = async (data: VerificationFormValues) => {
     try {
       setFormError("");
       

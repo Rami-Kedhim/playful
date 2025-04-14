@@ -3,10 +3,10 @@ import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormData } from '../utils/validationUtils';
+import { VerificationFormValues } from '../utils/formUtils';
 
 interface DocumentTypeSelectProps {
-  form: UseFormReturn<VerificationFormData>;
+  form: UseFormReturn<VerificationFormValues>;
 }
 
 const DocumentTypeSelect = ({ form }: DocumentTypeSelectProps) => {
