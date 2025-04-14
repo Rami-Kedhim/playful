@@ -4,7 +4,7 @@ import BaseTypingIndicator from '../AICompanionTypingIndicator';
 
 interface AICompanionTypingIndicatorProps {
   className?: string;
-  size?: 'small' | 'medium' | 'large'; // Added size prop to match BaseTypingIndicator
+  size?: 'small' | 'medium' | 'large';
 }
 
 /**
@@ -13,7 +13,7 @@ interface AICompanionTypingIndicatorProps {
  */
 const AICompanionTypingIndicator: React.FC<AICompanionTypingIndicatorProps> = ({ 
   className = "",
-  size = "medium" // Default to medium size
+  size = "medium"
 }) => {
   return <BaseTypingIndicator className={className} size={size} />;
 };
