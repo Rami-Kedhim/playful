@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormValues, handleFileChange, DOCUMENT_TYPES, isBackImageRequired } from '../utils/formUtils';
+import { VerificationFormData } from '../utils/validationUtils';
 import { AlertCircle, FileCheck, Upload } from 'lucide-react';
 
 interface DocumentImageUploadProps {
-  form: UseFormReturn<VerificationFormValues>;
+  form: UseFormReturn<VerificationFormData>;
   fieldName: 'documentFrontImage' | 'documentBackImage' | 'selfieImage';
   label: string;
   description: string;
@@ -22,29 +22,37 @@ const DocumentImageUpload = ({
   optional = false 
 }: DocumentImageUploadProps) => {
   const documentType = form.watch('documentType');
-  const file = form.watch(fieldName);
+  const fieldValue = form.watch(fieldName);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
   // Check if this field is required based on document type
   const isRequired = 
     fieldName !== 'documentBackImage' || 
     (fieldName === 'documentBackImage' && 
-     documentType !== DOCUMENT_TYPES.PASSPORT && 
+     documentType !== 'passport' && 
      !optional);
 
   // Generate preview when file changes
   useEffect(() => {
-    if (file && file instanceof File) {
-      const url = URL.createObjectURL(file);
+    if (fieldValue && fieldValue.file instanceof File) {
+      const url = URL.createObjectURL(fieldValue.file);
       setPreviewUrl(url);
       return () => URL.revokeObjectURL(url);
     } else {
       setPreviewUrl(null);
     }
-  }, [file]);
+  }, [fieldValue]);
 
   // Get field error
   const fieldError = form.formState.errors[fieldName]?.message as string | undefined;
+  
+  // Handle file change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      form.setValue(fieldName, { file }, { shouldValidate: true });
+    }
+  };
   
   return (
     <FormField
@@ -53,7 +61,8 @@ const DocumentImageUpload = ({
       render={({ field }) => (
         <FormItem className="space-y-3">
           <FormLabel className="flex justify-between">
-            <span>{label}
+            <span>
+              {label}
               {!isRequired && <span className="text-muted-foreground ml-1">(Optional)</span>}
             </span>
             {fieldError && (
@@ -82,7 +91,7 @@ const DocumentImageUpload = ({
                     type="file"
                     id={fieldName}
                     accept="image/png,image/jpeg,image/webp"
-                    onChange={(e) => handleFileChange(e, form, fieldName)}
+                    onChange={handleFileChange}
                     className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-primary/10 file:text-primary cursor-pointer opacity-0 absolute inset-0 w-full h-full"
                   />
                 </div>
