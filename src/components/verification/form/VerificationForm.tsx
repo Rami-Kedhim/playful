@@ -5,23 +5,23 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-// Fix imports to use default imports instead of named imports
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
 import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
+import { useVerification, VerificationDocument } from '@/hooks/verification/useVerification';
 
 interface VerificationFormProps {
   onSubmissionComplete?: () => void;
 }
 
 const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  
+  const { submitVerification, isSubmitting, verificationStatus } = useVerification();
   
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
@@ -31,38 +31,30 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
   });
   
   const onSubmit = async (data: VerificationFormValues) => {
-    setIsSubmitting(true);
     setSubmissionError(null);
     
     try {
-      // This would normally send the data to your backend
-      // Mock submission delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Convert form data to VerificationDocument format
+      const document: VerificationDocument = {
+        type: data.documentType,
+        frontImage: data.documentFrontImage as File,
+        backImage: data.documentBackImage as File | undefined,
+        selfieImage: data.selfieImage as File
+      };
       
-      console.log("Form submitted with data:", data);
+      // Submit verification using our hook
+      const success = await submitVerification(document);
       
-      toast({
-        title: "Verification submitted",
-        description: "Your documents have been submitted for verification.",
-        variant: "default",
-      });
-      
-      setSubmitted(true);
-      
-      if (onSubmissionComplete) {
-        onSubmissionComplete();
+      if (success) {
+        setSubmitted(true);
+        
+        if (onSubmissionComplete) {
+          onSubmissionComplete();
+        }
       }
     } catch (error) {
       console.error("Verification submission error:", error);
       setSubmissionError("Failed to submit verification. Please try again.");
-      
-      toast({
-        title: "Submission failed",
-        description: "There was an error submitting your verification documents.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
   
@@ -89,6 +81,13 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
               />
             )}
             
+            {verificationStatus === 'error' && (
+              <SubmissionAlert 
+                type="error" 
+                message="There was an error processing your documents. Please try again." 
+              />
+            )}
+            
             <DocumentTypeSelect form={form} />
             
             <DocumentImageUpload 
@@ -101,7 +100,7 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
             <DocumentImageUpload 
               form={form} 
               fieldName="documentBackImage"
-              label="Back of ID (Optional)"
+              label="Back of ID (Optional for Passport)"
               description="Upload a clear photo of the back of your ID if applicable"
               optional
             />
@@ -115,7 +114,10 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
           </CardContent>
           
           <CardFooter>
-            <SubmitButton loading={isSubmitting} />
+            <SubmitButton 
+              loading={isSubmitting} 
+              loadingText={verificationStatus === 'uploading' ? 'Uploading...' : 'Processing...'}
+            />
           </CardFooter>
         </form>
       </Form>
