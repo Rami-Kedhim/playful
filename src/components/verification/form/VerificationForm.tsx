@@ -4,7 +4,7 @@ import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
+import { verificationFormSchema, VerificationFormData } from '../utils/validationUtils';
 import { useVerification } from '@/hooks/verification/useVerification';
 import VerificationCardWrapper from './VerificationCardWrapper';
 import DocumentRequirements from './DocumentRequirements';
@@ -13,6 +13,7 @@ import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
 import SuccessCard from './SuccessCard';
+import FormError from './FormError';
 
 interface VerificationFormProps {
   onSubmissionComplete?: () => void;
@@ -21,32 +22,38 @@ interface VerificationFormProps {
 const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
   const { submitVerification, isSubmitting, verificationStatus } = useVerification();
   const [submitted, setSubmitted] = React.useState(false);
+  const [formError, setFormError] = React.useState<string>("");
   
-  const form = useForm<VerificationFormValues>({
+  const form = useForm<VerificationFormData>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
       documentType: 'id_card',
-      documentFrontImage: null,
-      documentBackImage: null,
-      selfieImage: null
+      documentFrontImage: undefined,
+      documentBackImage: undefined,
+      selfieImage: undefined
     },
   });
   
-  const onSubmit = async (data: VerificationFormValues) => {
-    const document = {
-      type: data.documentType,
-      frontImage: data.documentFrontImage as File,
-      backImage: data.documentBackImage as File | undefined,
-      selfieImage: data.selfieImage as File
-    };
-    
-    const success = await submitVerification(document);
-    
-    if (success) {
-      setSubmitted(true);
-      if (onSubmissionComplete) {
-        onSubmissionComplete();
+  const onSubmit = async (data: VerificationFormData) => {
+    try {
+      setFormError("");
+      
+      const success = await submitVerification({
+        type: data.documentType,
+        frontImage: data.documentFrontImage.file,
+        backImage: data.documentBackImage?.file,
+        selfieImage: data.selfieImage.file
+      });
+      
+      if (success) {
+        setSubmitted(true);
+        if (onSubmissionComplete) {
+          onSubmissionComplete();
+        }
       }
+    } catch (error) {
+      setFormError("There was an error submitting your verification. Please try again.");
+      console.error("Verification submission error:", error);
     }
   };
   
@@ -88,6 +95,8 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
           />
           
           <FileUploadInstructions />
+          
+          <FormError message={formError} />
           
           <Separator />
           
