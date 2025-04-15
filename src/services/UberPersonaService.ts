@@ -2,7 +2,7 @@
 import { UberPersona, mapEscortToUberPersona } from '@/types/uberPersona';
 import { Escort } from '@/types/escort';
 import { ContentCreator } from '@/types/creator';
-import { LivecamModel } from '@/types/livecams';
+import { LivecamModel } from '@/types/livecam';
 import { visibilitySystem } from '@/services/visibility/VisibilitySystem';
 
 export class UberPersonaService {
@@ -96,8 +96,8 @@ export class UberPersonaService {
       age: livecam.age || 0,
       ethnicity: livecam.ethnicity || '',
       tags: livecam.tags || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: livecam.createdAt || new Date(),
+      updatedAt: livecam.createdAt || new Date(),
       
       roleFlags: {
         isEscort: false,
