@@ -60,15 +60,9 @@ export function useUberPersonas() {
             id: creator.id,
             name: creator.name,
             username: creator.username,
-            imageUrl: creator.imageUrl,
-            isPremium: creator.isPremium || false,
-            isLive: creator.isLive || false,
-            isAI: creator.isAI || false,
-            subscriberCount: creator.subscriberCount || 0,
-            contentCount: creator.contentCount || { photos: 0, videos: 0 },
-            price: creator.price || 0,
-            avatarUrl: creator.avatarUrl || creator.imageUrl,
             profileImage: creator.profileImage || creator.imageUrl,
+            avatarUrl: creator.avatarUrl || creator.imageUrl,
+            imageUrl: creator.imageUrl, // Add imageUrl from creator
             location: creator.location || '',
             languages: creator.languages || ['English'],
             bio: creator.bio || '',
@@ -78,13 +72,21 @@ export function useUberPersonas() {
             tags: creator.tags || [],
             createdAt: creator.createdAt || new Date(),
             updatedAt: creator.updatedAt || new Date(),
+            isAI: creator.isAI || false,
             isVerified: creator.isVerified || false,
             isFeatured: creator.isFeatured || false,
             isScraped: creator.isScraped || true,
             hasLiveStream: creator.hasLiveStream || false,
             subscriptionPrice: creator.subscriptionPrice || creator.price || 0,
+            isPremium: creator.isPremium || false,
+            isLive: creator.isLive || false,
+            subscriberCount: creator.subscriberCount || 0,
+            contentCount: creator.contentCount || { photos: 0, videos: 0 },
+            price: creator.price || 0,
             lastSynced: new Date(),
-            rating: creator.rating || 0
+            rating: creator.rating || 0,
+            region: creator.location || '',
+            language: (creator.languages && creator.languages[0]) || 'English'
           };
         });
         

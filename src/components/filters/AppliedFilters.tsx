@@ -1,74 +1,51 @@
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import FilterBadge from './FilterBadge';
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import FilterBadge from "./FilterBadge";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-
-interface FilterItem {
-  id: string;
+interface Filter {
   label: string;
-  group?: string;
+  key: string;
+  value?: string;
 }
 
 interface AppliedFiltersProps {
-  filters: FilterItem[];
-  onRemoveFilter: (id: string) => void;
-  onClearAll: () => void;
-  className?: string;
-  showClearButton?: boolean;
+  filters: Filter[];
+  removeFilter: (filter: Filter) => void;
+  clearFilters: () => void;
 }
 
-export function AppliedFilters({
-  filters,
-  onRemoveFilter,
-  onClearAll,
-  className,
-  showClearButton = true
-}: AppliedFiltersProps) {
-  if (filters.length === 0) return null;
-  
+const AppliedFilters: React.FC<AppliedFiltersProps> = ({ 
+  filters, 
+  removeFilter,
+  clearFilters 
+}) => {
+  if (filters.length === 0) {
+    return (
+      <Badge variant="secondary">
+        No filters applied
+      </Badge>
+    );
+  }
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.2 }}
-      className={cn("flex flex-wrap gap-2 items-center py-2", className)}
-    >
-      <AnimatePresence>
-        {filters.map((filter) => (
-          <motion.div
-            key={filter.id}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.15 }}
-          >
-            <FilterBadge
-              label={filter.label}
-              onRemove={() => onRemoveFilter(filter.id)}
-            />
-          </motion.div>
-        ))}
-        
-        {showClearButton && filters.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onClearAll}
-              className="h-8 text-xs ml-auto whitespace-nowrap"
-            >
-              Clear all
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    <div className="flex flex-wrap gap-2">
+      {filters.map((filter, index) => (
+        <FilterBadge
+          key={index}
+          label={filter.label}
+          value={filter.value || ""}  // Add this line to provide the value prop
+          onRemove={() => removeFilter(filter)}
+        />
+      ))}
+      <Badge 
+        variant="outline" 
+        className="cursor-pointer hover:bg-secondary/30"
+        onClick={clearFilters}
+      >
+        Clear all
+      </Badge>
+    </div>
   );
-}
+};
+
+export default AppliedFilters;

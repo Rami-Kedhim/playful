@@ -1,99 +1,102 @@
 
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Image, Upload, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Upload, X, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-interface ImageDropzoneProps {
-  onFileSelect: (file: File) => void;
-  currentFile?: File | null;
-  maxSizeMB?: number;
-  accept?: string[];
-  className?: string;
-  label?: string;
+export interface ImageDropzoneProps {
+  onFileSelect: (file: { file?: File }) => void;
+  currentFile?: { file?: File };
+  onImageSelected?: (file: any) => void; // Added for backward compatibility
   error?: string;
-  imagePreview?: string;
-  disabled?: boolean;
+  label?: string;
+  maxSize?: number;
+  acceptedTypes?: string[];
+  className?: string;
 }
 
 const ImageDropzone: React.FC<ImageDropzoneProps> = ({
   onFileSelect,
   currentFile,
-  maxSizeMB = 5,
-  accept = ['image/jpeg', 'image/png', 'image/webp'],
-  className,
-  label = "Drop file here or click to browse",
+  onImageSelected,
   error,
-  imagePreview,
-  disabled = false
+  label = 'Drop files here or click to browse',
+  maxSize = 5, // MB
+  acceptedTypes = ['image/jpeg', 'image/png', 'image/webp'],
+  className = ''
 }) => {
-  const maxSize = maxSizeMB * 1024 * 1024; // Convert to bytes
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles && acceptedFiles.length > 0) {
-      onFileSelect(acceptedFiles[0]);
+  const [preview, setPreview] = useState<string | null>(null);
+  
+  const handleDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      const reader = new FileReader();
+      
+      reader.onload = () => {
+        setPreview(reader.result as string);
+      };
+      
+      reader.readAsDataURL(file);
+      
+      if (onFileSelect) {
+        onFileSelect({ file });
+      }
+      
+      if (onImageSelected) {
+        onImageSelected(file);
+      }
     }
-  }, [onFileSelect]);
-
+  }, [onFileSelect, onImageSelected]);
+  
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: accept.reduce((acc, type) => ({ ...acc, [type]: [] }), {}),
-    maxSize,
-    disabled,
+    onDrop: handleDrop,
+    accept: acceptedTypes.reduce((obj, type) => ({ ...obj, [type]: [] }), {}),
+    maxSize: maxSize * 1024 * 1024,
     multiple: false
   });
-
-  const previewUrl = imagePreview || (currentFile ? URL.createObjectURL(currentFile) : '');
+  
+  const handleRemove = useCallback(() => {
+    setPreview(null);
+    onFileSelect({ file: undefined });
+    if (onImageSelected) onImageSelected(null);
+  }, [onFileSelect, onImageSelected]);
 
   return (
-    <div className="space-y-2 w-full">
-      <div
-        {...getRootProps()}
-        className={cn(
-          "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
-          isDragActive ? "border-primary bg-primary/5" : "border-border",
-          error ? "border-destructive" : "",
-          disabled ? "opacity-50 cursor-not-allowed" : "",
-          className
-        )}
-      >
-        <input {...getInputProps()} />
-        
-        {previewUrl ? (
-          <div className="flex flex-col items-center">
-            <div className="relative w-full max-w-[200px] aspect-square mb-2 overflow-hidden rounded border">
-              <img 
-                src={previewUrl} 
-                alt="Preview" 
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {currentFile?.name || "Selected image"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Click or drag to replace
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center py-4">
-            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-2">
-              <Upload className="h-6 w-6 text-muted-foreground" />
-            </div>
+    <div className={className}>
+      {preview || (currentFile && currentFile.file) ? (
+        <div className="relative border rounded-md overflow-hidden">
+          <img 
+            src={preview || (currentFile?.file ? URL.createObjectURL(currentFile.file) : '')} 
+            alt="Preview" 
+            className="w-full h-36 object-cover"
+          />
+          <Button 
+            variant="destructive" 
+            size="icon" 
+            className="absolute top-2 right-2 h-6 w-6"
+            onClick={handleRemove}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      ) : (
+        <div
+          {...getRootProps()}
+          className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors ${
+            isDragActive ? 'border-primary bg-primary/10' : 'border-muted'
+          } ${error ? 'border-destructive' : ''}`}
+        >
+          <input {...getInputProps()} />
+          <div className="flex flex-col items-center gap-2 p-4">
+            <Upload className="h-8 w-8 text-muted-foreground mb-2" />
             <p className="text-sm font-medium">{label}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {accept.join(', ')} (max {maxSizeMB}MB)
+            <p className="text-xs text-muted-foreground">
+              Max size: {maxSize}MB
             </p>
           </div>
-        )}
-      </div>
-      
-      {error && (
-        <div className="flex items-center text-destructive text-sm">
-          <AlertCircle className="h-4 w-4 mr-1" />
-          <span>{error}</span>
         </div>
       )}
+      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
     </div>
   );
 };

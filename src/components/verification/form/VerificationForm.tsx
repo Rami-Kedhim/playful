@@ -106,7 +106,8 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
               control={control}
               render={({ field }) => (
                 <ImageDropzone
-                  onImageSelected={(file) => field.onChange({ file })}
+                  onFileSelect={(file) => field.onChange(file)}
+                  currentFile={field.value}
                   label="Drop front image here or click to browse"
                   maxSize={5}
                   acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}
@@ -129,7 +130,8 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
                 control={control}
                 render={({ field }) => (
                   <ImageDropzone
-                    onImageSelected={(file) => field.onChange({ file })}
+                    onFileSelect={(file) => field.onChange(file)}
+                    currentFile={field.value}
                     label="Drop back image here or click to browse"
                     maxSize={5}
                     acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}
@@ -155,7 +157,8 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
               control={control}
               render={({ field }) => (
                 <ImageDropzone
-                  onImageSelected={(file) => field.onChange({ file })}
+                  onFileSelect={(file) => field.onChange(file)}
+                  currentFile={field.value}
                   label="Drop selfie image here or click to browse"
                   maxSize={5}
                   acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}

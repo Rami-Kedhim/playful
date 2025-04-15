@@ -3,7 +3,8 @@ import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS, DOCUMENT_TYPE_REQUIREMENTS } from '../utils/formUtils';
+import { DOCUMENT_TYPES } from '@/types/verification';
+import { DOCUMENT_TYPE_LABELS, DOCUMENT_TYPE_REQUIREMENTS } from '@/types/verification';
 import { VerificationFormValues } from '../utils/formUtils';
 
 interface DocumentTypeSelectProps {
@@ -37,7 +38,7 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
             </Select>
           </FormControl>
           <FormDescription>
-            {DOCUMENT_TYPE_REQUIREMENTS[field.value]}
+            {DOCUMENT_TYPE_REQUIREMENTS[field.value as keyof typeof DOCUMENT_TYPE_REQUIREMENTS]}
           </FormDescription>
           <FormMessage />
         </FormItem>

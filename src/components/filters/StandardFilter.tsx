@@ -1,162 +1,170 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Slider } from "@/components/ui/slider"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import FilterBadge from './FilterBadge';
+import { cn } from '@/lib/utils';
 
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import { FilterBlock, FilterSection } from "@/components/ui/filter-block";
-import FilterBadge from "./FilterBadge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-export interface FilterOption {
-  id: string;
-  label: string;
-  group?: string;
-}
-
-interface StandardFilterProps {
+interface FilterProps {
   title: string;
-  description?: string;
-  selectedOptions: string[];
-  options: FilterOption[];
-  onToggleOption: (id: string) => void;
-  onClearAll: () => void;
-  showClearButton?: boolean;
-  renderExtraFields?: () => React.ReactNode;
-  className?: string;
-  collapsible?: boolean;
-  defaultCollapsed?: boolean;
+  options?: { key: string; label: string }[];
+  range?: { min: number; max: number };
+  onFilterChange: (filter: any) => void;
+  activeFilters: any;
 }
 
-export function StandardFilter({
-  title,
-  description,
-  selectedOptions,
-  options,
-  onToggleOption,
-  onClearAll,
-  showClearButton = true,
-  renderExtraFields,
-  className,
-  collapsible = false,
-  defaultCollapsed = false,
-}: StandardFilterProps) {
-  // Group options by their group property
-  const groupedOptions = options.reduce((acc, option) => {
-    const group = option.group || 'default';
-    if (!acc[group]) {
-      acc[group] = [];
+const StandardFilter: React.FC<FilterProps> = ({ 
+  title, 
+  options, 
+  range, 
+  onFilterChange,
+  activeFilters 
+}) => {
+  const [filterValues, setFilterValues] = useState<string[]>([]);
+  const [rangeValues, setRangeValues] = useState<number[]>([range?.min || 0, range?.max || 0]);
+  
+  useEffect(() => {
+    if (options) {
+      const activeOptionKeys = options
+        .filter(option => activeFilters[option.key])
+        .map(option => option.key);
+      setFilterValues(activeOptionKeys);
     }
-    acc[group].push(option);
-    return acc;
-  }, {} as Record<string, FilterOption[]>);
+    if (range) {
+      setRangeValues([
+        activeFilters[title]?.min || range.min,
+        activeFilters[title]?.max || range.max
+      ]);
+    }
+  }, [activeFilters, options, range, title]);
 
-  const hasSelectedOptions = selectedOptions.length > 0;
+  const handleCheckboxChange = (key: string) => {
+    const newFilterValues = filterValues.includes(key)
+      ? filterValues.filter(value => value !== key)
+      : [...filterValues, key];
+    setFilterValues(newFilterValues);
 
-  const headerExtra = showClearButton && hasSelectedOptions ? (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={onClearAll}
-      className="h-8 px-2 text-xs"
-    >
-      Clear
-    </Button>
-  ) : null;
+    const filter = newFilterValues.reduce((obj: any, key) => {
+      obj[key] = true;
+      return obj;
+    }, {});
+    
+    onFilterChange(filter);
+  };
+
+  const handleRangeChange = (values: number[]) => {
+    setRangeValues(values);
+    onFilterChange({ min: values[0], max: values[1] });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const parsedValue = parseInt(value);
+
+    if (!isNaN(parsedValue) && range) {
+      const newValues = [...rangeValues];
+      if (name === 'min') {
+        newValues[0] = Math.min(parsedValue, rangeValues[1]);
+      } else {
+        newValues[1] = Math.max(parsedValue, rangeValues[0]);
+      }
+      setRangeValues(newValues);
+      handleRangeChange(newValues);
+    }
+  };
+
+  const handleRemoveFilter = (key: string) => {
+    const newFilterValues = filterValues.filter(value => value !== key);
+    setFilterValues(newFilterValues);
+
+    const filter = newFilterValues.reduce((obj: any, key) => {
+      obj[key] = true;
+      return obj;
+    }, {});
+    
+    onFilterChange(filter);
+  };
 
   return (
-    <FilterBlock 
-      title={title} 
-      description={description}
-      className={className}
-      headerClassName="flex flex-row items-start justify-between"
-      headerExtra={headerExtra}
-      collapsible={collapsible}
-      defaultCollapsed={defaultCollapsed}
-    >
-      <div className="space-y-4">
-        {Object.entries(groupedOptions).map(([group, groupOptions]) => (
-          <FilterSection 
-            key={group} 
-            title={group !== 'default' ? group : ''}
-            className={group !== 'default' ? 'mt-4' : 'mt-0'}
-          >
-            <div className="flex flex-wrap gap-2 mt-2">
-              {groupOptions.map((option) => (
-                <TooltipProvider key={option.id}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge
-                        key={option.id}
-                        variant={selectedOptions.includes(option.id) ? "default" : "outline"}
-                        className="cursor-pointer transition-colors hover:bg-accent"
-                        onClick={() => onToggleOption(option.id)}
-                      >
-                        {option.label}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>{selectedOptions.includes(option.id) ? "Remove" : "Add"} {option.label}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value={title}>
+        <AccordionTrigger>{title}</AccordionTrigger>
+        <AccordionContent>
+          {options && (
+            <div className="grid gap-2">
+              {options.map(filter => (
+                <div key={filter.key} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={filter.key}
+                    checked={filterValues.includes(filter.key)}
+                    onCheckedChange={() => handleCheckboxChange(filter.key)}
+                  />
+                  <Label htmlFor={filter.key} className="capitalize">{filter.label}</Label>
+                </div>
               ))}
             </div>
-          </FilterSection>
-        ))}
+          )}
 
-        {renderExtraFields && (
-          <div className="mt-4 pt-4 border-t border-border">
-            {renderExtraFields()}
-          </div>
-        )}
-      </div>
-    </FilterBlock>
+          {range && (
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="min">Min</Label>
+                <Input 
+                  type="number" 
+                  id="min" 
+                  name="min"
+                  value={rangeValues[0].toString()}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="max">Max</Label>
+                <Input 
+                  type="number" 
+                  id="max"
+                  name="max"
+                  value={rangeValues[1].toString()}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <Slider
+                defaultValue={rangeValues}
+                max={range.max}
+                min={range.min}
+                step={1}
+                onValueChange={handleRangeChange}
+              />
+            </div>
+          )}
+          
+          {activeFilters && Object.keys(activeFilters).length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {options && options.map(filter => {
+                if (activeFilters[filter.key]) {
+                  return (
+                    <FilterBadge
+                      key={filter.key}
+                      label={filter.label}
+                      value={filter.value || filter.key}  // Add this line to provide the value prop
+                      onRemove={() => handleRemoveFilter(filter.key)}
+                    />
+                  );
+                }
+                return null;
+              })}
+            </div>
+          )}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
-}
+};
 
-export function AppliedFilterBadges({
-  selectedOptions,
-  options,
-  onToggleOption,
-  onClearAll,
-  className,
-}: {
-  selectedOptions: string[];
-  options: FilterOption[];
-  onToggleOption: (id: string) => void;
-  onClearAll: () => void;
-  className?: string;
-}) {
-  if (selectedOptions.length === 0) return null;
-  
-  // Map selected option IDs to their labels
-  const selectedLabels = options.reduce((acc, option) => {
-    if (selectedOptions.includes(option.id)) {
-      acc[option.id] = option.label;
-    }
-    return acc;
-  }, {} as Record<string, string>);
-  
-  return (
-    <div className={`flex flex-wrap gap-2 ${className}`}>
-      {selectedOptions.map(id => (
-        <FilterBadge
-          key={id}
-          label={selectedLabels[id]}
-          onRemove={() => onToggleOption(id)}
-        />
-      ))}
-      
-      {selectedOptions.length > 1 && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onClearAll}
-          className="h-8 ml-auto text-xs"
-        >
-          Clear all
-        </Button>
-      )}
-    </div>
-  );
-}
+export default StandardFilter;

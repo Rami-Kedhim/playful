@@ -22,7 +22,20 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
       {creators.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {creators.map(creator => (
-            <CreatorCard key={creator.id} {...creator} />
+            <CreatorCard 
+              key={creator.id} 
+              id={creator.id}
+              name={creator.name}
+              username={creator.username}
+              imageUrl={creator.imageUrl || creator.avatarUrl || creator.profileImage || ''}
+              isLive={creator.isLive || false}
+              isPremium={creator.isPremium}
+              subscriberCount={creator.subscriberCount}
+              contentCount={creator.contentCount || { photos: 0, videos: 0 }}
+              price={creator.price}
+              isAI={creator.isAI || false}
+              rating={creator.rating || 0}
+            />
           ))}
         </div>
       ) : (

@@ -17,8 +17,8 @@ export class CreatorVisibilityAdapter {
       id: creator.id,
       type: 'creator',
       score: baseScore,
-      region: creator.region,
-      language: creator.language,
+      region: creator.region || creator.location || '',
+      language: creator.language || (creator.languages && creator.languages[0]) || '',
       metadata: {
         isPremium: creator.isPremium,
         isAI: creator.isAI,
