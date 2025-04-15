@@ -1,10 +1,10 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { VerificationStatusIndicator } from '@/components/verification';
 import { VerificationRequest } from '@/types/escort';
+import ReviewRequestModal from './ReviewRequestModal';
 
 interface VerificationReviewPanelProps {
   requests: VerificationRequest[];
@@ -17,6 +17,8 @@ const VerificationReviewPanel = ({
   onApprove,
   onReject
 }: VerificationReviewPanelProps) => {
+  const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
+
   return (
     <div className="w-full">
       <h2 className="text-xl font-bold mb-4">Verification Requests</h2>
@@ -32,7 +34,7 @@ const VerificationReviewPanel = ({
         </TableHeader>
         <TableBody>
           {requests.map((request) => (
-            <TableRow key={request.id}>
+            <TableRow key={request.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedRequest(request)}>
               <TableCell>
                 {new Date(request.submittedAt).toLocaleDateString()}
               </TableCell>
@@ -65,6 +67,24 @@ const VerificationReviewPanel = ({
           ))}
         </TableBody>
       </Table>
+
+      <ReviewRequestModal
+        request={selectedRequest}
+        isOpen={!!selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+        onApprove={() => {
+          if (selectedRequest) {
+            onApprove(selectedRequest.id);
+            setSelectedRequest(null);
+          }
+        }}
+        onReject={(reason) => {
+          if (selectedRequest) {
+            onReject(selectedRequest.id, reason);
+            setSelectedRequest(null);
+          }
+        }}
+      />
     </div>
   );
 };

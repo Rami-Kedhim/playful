@@ -5289,6 +5289,47 @@ export type Database = {
           },
         ]
       }
+      verification_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          status: string
+          title: string
+          user_id: string
+          verification_request_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          status: string
+          title: string
+          user_id: string
+          verification_request_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          status?: string
+          title?: string
+          user_id?: string
+          verification_request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_notifications_verification_request_id_fkey"
+            columns: ["verification_request_id"]
+            isOneToOne: false
+            referencedRelation: "verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       verification_requests: {
         Row: {
           created_at: string | null
