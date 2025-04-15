@@ -31,5 +31,6 @@ export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
 export interface SubmitButtonProps {
   loading?: boolean;
   disabled?: boolean;
+  loadingText?: string;
   text: string;
 }

@@ -7,6 +7,7 @@ import { SubmitButtonProps } from '@/types/verification';
 const SubmitButton: React.FC<SubmitButtonProps> = ({ 
   loading = false, 
   disabled = false,
+  loadingText = "Processing...",
   text 
 }) => {
   return (
@@ -18,7 +19,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       {loading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Processing...
+          {loadingText}
         </>
       ) : (
         text
