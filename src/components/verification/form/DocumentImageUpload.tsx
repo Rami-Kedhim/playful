@@ -33,7 +33,7 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
             <ImageDropzone
               onFileSelect={(fileObj) => {
                 // Ensure we always pass an object with a file property or undefined
-                field.onChange(fileObj?.file ? { file: fileObj.file } : undefined);
+                field.onChange(fileObj && 'file' in fileObj ? { file: fileObj.file } : undefined);
               }}
               currentFile={field.value && typeof field.value === 'object' && 'file' in field.value ? field.value : undefined}
               error={form.formState.errors[fieldName]?.message?.toString()}
