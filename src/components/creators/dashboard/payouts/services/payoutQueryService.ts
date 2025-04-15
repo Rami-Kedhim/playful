@@ -12,7 +12,7 @@ export const usePayoutQueries = (creatorId: string) => {
   
   // Fetch payouts query
   const {
-    data: payouts = [],
+    data: payoutsData = { data: [], totalCount: 0 },
     isLoading,
     error,
     refetch
@@ -20,7 +20,7 @@ export const usePayoutQueries = (creatorId: string) => {
     queryKey: ['creator', creatorId, 'payouts'],
     queryFn: async () => {
       const result = await payoutService.getPayouts(creatorId);
-      return result.data || [];
+      return result;
     }
   });
   
@@ -49,7 +49,7 @@ export const usePayoutQueries = (creatorId: string) => {
   });
   
   return {
-    payouts: payouts as CreatorPayout[],
+    payouts: (payoutsData.data || []) as CreatorPayout[],
     isLoading,
     error,
     refreshPayouts: refetch,

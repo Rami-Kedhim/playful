@@ -25,9 +25,9 @@ const usePayouts = (creatorId: string) => {
   }) => {
     try {
       const request: PayoutRequest = {
-        creatorId,
+        creator_id: creatorId,
         amount: payoutData.amount,
-        payoutMethod: payoutData.payoutMethod,
+        payout_method: payoutData.payoutMethod,
         payoutDetails: payoutData.payoutDetails
       };
       

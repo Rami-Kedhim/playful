@@ -18,11 +18,17 @@ const useEarningsCalculator = (payouts: CreatorPayout[], isLoading: boolean) => 
       // This would be fetched from an API in a real app
       const totalEarnings = 1250;
       
-      // Calculate pending payouts
-      const pendingPayouts = calculatePendingPayouts(payouts);
+      // Calculate pending payouts based on the actual shape of CreatorPayout
+      const pendingAmount = payouts
+        .filter(payout => payout.status === 'pending' || payout.status === 'processing')
+        .reduce((sum, payout) => sum + Number(payout.amount), 0);
       
       // Update earnings state
-      setEarnings(calculateEarnings(totalEarnings, pendingPayouts));
+      setEarnings({
+        total: totalEarnings,
+        pending: pendingAmount,
+        available: totalEarnings - pendingAmount
+      });
     }
   }, [payouts, isLoading]);
   

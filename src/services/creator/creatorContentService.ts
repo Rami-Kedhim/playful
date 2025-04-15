@@ -14,6 +14,7 @@ export const fetchCreatorContent = async (
     // For now, we'll mock some data
     const mockContent: CreatorContent[] = Array.from({ length: 20 }).map((_, index) => ({
       id: `content-${index + 1}`,
+      creator_id: creatorId,
       title: `Content ${index + 1}`,
       description: index % 3 === 0 ? `Description for content ${index + 1}` : undefined,
       content_type: index % 2 === 0 ? 'video' : 'image',
@@ -104,6 +105,7 @@ export const saveContent = async (
     // For now, we'll mock the response
     const newContent: CreatorContent = {
       id: `content-${Date.now()}`,
+      creator_id: creatorId,
       title: contentData.title || 'Untitled',
       description: contentData.description,
       content_type: contentData.content_type || 'image',
@@ -138,6 +140,7 @@ export const updateContent = async (
       success: true,
       data: {
         id: contentId,
+        creator_id: contentData.creator_id || 'default-creator',
         title: contentData.title || 'Untitled',
         description: contentData.description,
         content_type: contentData.content_type || 'image',
@@ -182,6 +185,7 @@ export const getContentDetail = async (
     
     const mockContent: CreatorContent = {
       id: contentId,
+      creator_id: `creator-${Date.now()}`,
       title: `Content Detail ${contentId}`,
       description: `Detailed description for content ${contentId}`,
       content_type: Math.random() > 0.5 ? 'video' : 'image',

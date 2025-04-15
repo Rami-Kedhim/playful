@@ -57,15 +57,15 @@ export const fetchCreatorAnalytics = async (
     
     // If no data is found, generate mock data for development
     console.warn("No analytics data found, generating mock data for development");
-    return generateMockAnalyticsData(period);
+    return generateMockAnalyticsData(creatorId, period);
   } catch (error) {
     console.error("Error fetching creator analytics:", error);
-    return generateMockAnalyticsData(period);
+    return generateMockAnalyticsData(creatorId, period);
   }
 };
 
 // Helper function to generate mock data for development and testing
-const generateMockAnalyticsData = (period: 'week' | 'month' | 'year'): CreatorAnalytics[] => {
+const generateMockAnalyticsData = (creatorId: string, period: 'week' | 'month' | 'year'): CreatorAnalytics[] => {
   let days: number;
   switch (period) {
     case 'week':
@@ -93,6 +93,8 @@ const generateMockAnalyticsData = (period: 'week' | 'month' | 'year'): CreatorAn
     const factor = 1 + (i / days); // Higher for more recent days
     
     data.push({
+      id: `mock-${Date.now()}-${i}`,
+      creator_id: creatorId,
       date: date.toISOString().split('T')[0],
       views: Math.floor(Math.random() * 200 * factor) + 50,
       likes: Math.floor(Math.random() * 50 * factor) + 10,

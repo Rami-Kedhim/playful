@@ -152,7 +152,7 @@ const StandardFilter: React.FC<FilterProps> = ({
                     <FilterBadge
                       key={filter.key}
                       label={filter.label}
-                      value={filter.value || filter.key}  // Add this line to provide the value prop
+                      value={filter.key}
                       onRemove={() => handleRemoveFilter(filter.key)}
                     />
                   );

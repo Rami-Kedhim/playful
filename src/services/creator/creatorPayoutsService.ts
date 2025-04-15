@@ -8,21 +8,24 @@ export const getCreatorPayouts = async (creatorId: string): Promise<PayoutResult
     const mockPayouts: CreatorPayout[] = [
       {
         id: '1',
-        amount: '250.00',
+        creator_id: creatorId,
+        amount: 250.00,
         status: 'completed',
         created_at: '2023-06-01T10:00:00Z',
         payout_method: 'bank_transfer'
       },
       {
         id: '2',
-        amount: '175.50',
+        creator_id: creatorId,
+        amount: 175.50,
         status: 'processing',
         created_at: '2023-06-15T14:30:00Z',
         payout_method: 'paypal'
       },
       {
         id: '3',
-        amount: '120.00',
+        creator_id: creatorId,
+        amount: 120.00,
         status: 'pending',
         created_at: '2023-06-28T09:15:00Z',
         payout_method: 'bank_transfer'
@@ -30,6 +33,7 @@ export const getCreatorPayouts = async (creatorId: string): Promise<PayoutResult
     ];
     
     return {
+      success: true,
       data: mockPayouts,
       totalCount: mockPayouts.length
     };
@@ -45,7 +49,7 @@ export const fetchCreatorPayouts = async (creatorId: string): Promise<PayoutResu
   return getCreatorPayouts(creatorId);
 };
 
-export const requestPayout = async (request: PayoutRequest): Promise<{ success: boolean; data?: any }> => {
+export const requestPayout = async (request: PayoutRequest): Promise<PayoutResult> => {
   try {
     // In a real app, this would make an API call to submit a payout request
     // For now, we'll simulate a successful request
@@ -56,18 +60,24 @@ export const requestPayout = async (request: PayoutRequest): Promise<{ success: 
     }
     
     // Mock successful response
-    return {
+    const mockPayout: CreatorPayout = {
+      id: `payout-${Date.now()}`,
+      creator_id: request.creator_id,
+      amount: request.amount,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      payout_method: request.payout_method
+    };
+    
+    return { 
       success: true,
-      data: {
-        id: `payout-${Date.now()}`,
-        amount: request.amount.toString(),
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        payout_method: request.payoutMethod
-      }
+      data: [mockPayout]
     };
   } catch (error) {
     console.error("Error requesting payout:", error);
-    return { success: false };
+    return { 
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error" 
+    };
   }
 };

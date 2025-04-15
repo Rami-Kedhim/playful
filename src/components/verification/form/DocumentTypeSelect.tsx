@@ -5,7 +5,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DOCUMENT_TYPES } from '@/types/verification';
 import { DOCUMENT_TYPE_LABELS, DOCUMENT_TYPE_REQUIREMENTS } from '@/types/verification';
-import { VerificationFormValues } from '../utils/formUtils';
+import type { VerificationFormValues } from '@/types/verification';
 
 interface DocumentTypeSelectProps {
   form: UseFormReturn<VerificationFormValues>;
@@ -31,14 +31,14 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
               <SelectContent>
                 {Object.entries(DOCUMENT_TYPE_LABELS).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
-                    {label}
+                    {label as string}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </FormControl>
           <FormDescription>
-            {DOCUMENT_TYPE_REQUIREMENTS[field.value as keyof typeof DOCUMENT_TYPE_REQUIREMENTS]}
+            {field.value && DOCUMENT_TYPE_REQUIREMENTS[field.value as keyof typeof DOCUMENT_TYPE_REQUIREMENTS]}
           </FormDescription>
           <FormMessage />
         </FormItem>

@@ -31,10 +31,10 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
           </FormLabel>
           <FormControl>
             <ImageDropzone
-              onFileSelect={(file) => {
-                field.onChange({ file });
+              onFileSelect={(fileObj) => {
+                field.onChange(fileObj);
               }}
-              currentFile={field.value?.file}
+              currentFile={field.value?.file ? field.value : undefined}
               error={form.formState.errors[fieldName]?.message?.toString()}
             />
           </FormControl>

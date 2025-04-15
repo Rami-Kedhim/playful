@@ -1,4 +1,3 @@
-
 export interface ContentCreator {
   id: string;
   name: string;
@@ -67,16 +66,18 @@ export interface CreatorPayout {
 }
 
 export interface PayoutRequest {
-  amount: number;
   creator_id: string;
+  amount: number;
   payout_method: string;
   notes?: string;
+  payoutDetails?: Record<string, any>;
 }
 
 export interface PayoutResult {
   success: boolean;
-  message: string;
-  payout?: CreatorPayout;
+  message?: string;
+  data?: CreatorPayout[];
+  totalCount?: number;
 }
 
 export interface CreatorAnalytics {
@@ -87,4 +88,5 @@ export interface CreatorAnalytics {
   likes: number;
   shares: number;
   earnings: number;
+  created_at?: string | Date;
 }

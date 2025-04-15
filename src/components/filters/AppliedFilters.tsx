@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import FilterBadge from './FilterBadge';
@@ -33,7 +34,7 @@ const AppliedFilters: React.FC<AppliedFiltersProps> = ({
         <FilterBadge
           key={index}
           label={filter.label}
-          value={filter.value || ""}  // Add this line to provide the value prop
+          value={filter.value || filter.key}
           onRemove={() => removeFilter(filter)}
         />
       ))}

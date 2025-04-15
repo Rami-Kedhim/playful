@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { verificationFormSchema, VerificationFormValues } from './utils/formUtils';
+import { verificationFormSchema, VerificationFormValues } from '@/types/verification';
 import DocumentTypeSelect from './form/DocumentTypeSelect';
 import DocumentImageUpload from './form/DocumentImageUpload';
 import SubmitButton from './form/SubmitButton';
