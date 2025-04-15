@@ -1,154 +1,134 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle2, Circle, ArrowRight, Upload, Smartphone, Mail } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+interface Requirement {
+  id: string;
+  title: string;
+  description: string;
+  required: boolean;
+}
 
 interface VerificationLevelRequirementsProps {
   currentLevel: VerificationLevel;
   targetLevel: VerificationLevel;
-  onComplete: () => void;
+  onComplete?: () => void;
 }
+
+const LEVEL_REQUIREMENTS: Record<VerificationLevel, Requirement[]> = {
+  none: [],
+  basic: [
+    {
+      id: 'id_verification',
+      title: 'ID Verification',
+      description: 'Government-issued photo ID (passport, driver\'s license, or national ID card)',
+      required: true
+    },
+    {
+      id: 'selfie',
+      title: 'Selfie with ID',
+      description: 'A photo of yourself holding your ID next to your face',
+      required: true
+    }
+  ],
+  enhanced: [
+    {
+      id: 'id_verification',
+      title: 'ID Verification',
+      description: 'Government-issued photo ID (passport, driver\'s license, or national ID card)',
+      required: true
+    },
+    {
+      id: 'selfie',
+      title: 'Selfie with ID',
+      description: 'A photo of yourself holding your ID next to your face',
+      required: true
+    },
+    {
+      id: 'proof_of_address',
+      title: 'Proof of Address',
+      description: 'Recent utility bill or bank statement (less than 3 months old)',
+      required: true
+    }
+  ],
+  premium: [
+    {
+      id: 'id_verification',
+      title: 'ID Verification',
+      description: 'Government-issued photo ID (passport, driver\'s license, or national ID card)',
+      required: true
+    },
+    {
+      id: 'selfie',
+      title: 'Selfie with ID',
+      description: 'A photo of yourself holding your ID next to your face',
+      required: true
+    },
+    {
+      id: 'proof_of_address',
+      title: 'Proof of Address',
+      description: 'Recent utility bill or bank statement (less than 3 months old)',
+      required: true
+    },
+    {
+      id: 'video_verification',
+      title: 'Video Verification',
+      description: 'Short video call with our verification team',
+      required: true
+    }
+  ]
+};
 
 const VerificationLevelRequirements = ({
   currentLevel,
   targetLevel,
   onComplete
 }: VerificationLevelRequirementsProps) => {
-  // Mock requirements based on the target level
-  const requirements = [
-    {
-      id: 'id_verification',
-      title: 'ID Verification',
-      description: 'Upload a government-issued ID',
-      icon: <Upload className="h-5 w-5 text-primary" />,
-      forLevels: ['basic', 'enhanced', 'premium'],
-      alreadyCompleted: currentLevel !== 'none'
-    },
-    {
-      id: 'phone_verification',
-      title: 'Phone Verification',
-      description: 'Verify your phone number',
-      icon: <Smartphone className="h-5 w-5 text-primary" />,
-      forLevels: ['enhanced', 'premium'],
-      alreadyCompleted: currentLevel === 'enhanced' || currentLevel === 'premium'
-    },
-    {
-      id: 'email_verification',
-      title: 'Email Verification',
-      description: 'Verify your email address',
-      icon: <Mail className="h-5 w-5 text-primary" />,
-      forLevels: ['enhanced', 'premium'],
-      alreadyCompleted: currentLevel === 'enhanced' || currentLevel === 'premium'
-    },
-    {
-      id: 'in_person_verification',
-      title: 'In-Person Verification',
-      description: 'Schedule an in-person verification meeting',
-      icon: <CheckCircle2 className="h-5 w-5 text-primary" />,
-      forLevels: ['premium'],
-      alreadyCompleted: currentLevel === 'premium'
-    }
-  ];
-  
-  // Filter requirements based on the target level and what's already completed
-  const applicableRequirements = requirements.filter(
-    req => req.forLevels.includes(targetLevel) && !req.alreadyCompleted
-  );
-  
-  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  
-  const handleCompleteStep = (stepId: string) => {
-    // In a real app, this would handle the actual verification process for each step
-    if (!completedSteps.includes(stepId)) {
-      setCompletedSteps([...completedSteps, stepId]);
-    }
-  };
-  
-  const progress = applicableRequirements.length > 0
-    ? (completedSteps.length / applicableRequirements.length) * 100
-    : 100;
-  
-  const allCompleted = applicableRequirements.length === completedSteps.length || applicableRequirements.length === 0;
+  const requirements = LEVEL_REQUIREMENTS[targetLevel];
   
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Verification Requirements</h2>
-        <p className="text-muted-foreground">
-          Complete the following requirements to upgrade your verification level
-        </p>
-      </div>
-      
-      <Progress value={progress} className="h-2 mb-4" />
-      
-      {applicableRequirements.length > 0 ? (
-        <div className="space-y-4">
-          {applicableRequirements.map((req) => {
-            const isCompleted = completedSteps.includes(req.id);
-            
-            return (
-              <Card key={req.id} className={isCompleted ? "border-green-500/30 bg-green-500/5" : ""}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-full ${isCompleted ? 'bg-green-500/10' : 'bg-primary/10'}`}>
-                        {req.icon}
-                      </div>
-                      
-                      <div>
-                        <div className="font-medium">{req.title}</div>
-                        <div className="text-sm text-muted-foreground">{req.description}</div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      {isCompleted ? (
-                        <div className="flex items-center text-green-500">
-                          <CheckCircle2 className="h-5 w-5 mr-1" />
-                          <span>Completed</span>
-                        </div>
-                      ) : (
-                        <Button size="sm" onClick={() => handleCompleteStep(req.id)}>
-                          Complete
-                        </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Requirements for {targetLevel} Verification</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {requirements.map((requirement) => (
+              <div
+                key={requirement.id}
+                className={cn(
+                  "p-4 rounded-lg border",
+                  requirement.required ? "bg-muted/50" : "bg-muted/30"
+                )}
+              >
+                <div className="flex items-start space-x-3">
+                  {requirement.required ? (
+                    <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  )}
+                  <div>
+                    <h3 className="font-medium">
+                      {requirement.title}
+                      {requirement.required && (
+                        <span className="text-xs text-red-500 ml-2">(Required)</span>
                       )}
-                    </div>
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {requirement.description}
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-          
-          <div className="pt-4">
-            <Button 
-              onClick={onComplete} 
-              disabled={!allCompleted} 
-              className="w-full"
-            >
-              Continue <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-            {!allCompleted && (
-              <p className="text-sm text-center text-muted-foreground mt-2">
-                Complete all requirements to continue
-              </p>
-            )}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      ) : (
-        <div className="py-4 text-center">
-          <p className="text-lg font-medium mb-2">All requirements already completed!</p>
-          <p className="text-muted-foreground mb-4">
-            You've already completed all the required verification steps for {targetLevel} level.
-          </p>
-          <Button onClick={onComplete}>
-            Continue to Next Step <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
