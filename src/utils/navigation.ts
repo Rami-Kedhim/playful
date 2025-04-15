@@ -19,7 +19,9 @@ export const AppRoutes = {
   LIVECAM_DETAIL: '/livecams/:id',
   BRAIN_HUB: '/brain-hub',
   AUTH: '/auth',
-  WALLET: '/wallet'
+  WALLET: '/wallet',
+  VERIFICATION: '/verification',
+  PERSONAS: '/personas'
 };
 
 export const ServiceCategories = {

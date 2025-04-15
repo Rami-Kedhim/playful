@@ -1,92 +1,111 @@
 
 import React from 'react';
-import { UberPersona } from "@/types/uberPersona";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Star, CheckCircle, Video, Image, Calendar } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { UberPersona } from '@/types/uberPersona';
+import { Heart, Star, Video, MessageCircle, CheckCircle, Award } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface UberPersonaCardProps {
   persona: UberPersona;
+  className?: string;
 }
 
-const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ persona }) => {
-  const { roleFlags, capabilities } = persona;
-  
-  const getRoleBadge = () => {
-    if (roleFlags.isAI) return <Badge className="bg-purple-500">AI</Badge>;
-    if (roleFlags.isEscort) return <Badge className="bg-blue-500">Escort</Badge>;
-    if (roleFlags.isCreator) return <Badge className="bg-pink-500">Creator</Badge>;
-    if (roleFlags.isLivecam) return <Badge className="bg-red-500">Live</Badge>;
-    return null;
+const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ persona, className }) => {
+  // Determine the route based on role flags
+  const getPersonaRoute = () => {
+    if (persona.roleFlags.isEscort) {
+      return `/escorts/${persona.id}`;
+    } else if (persona.roleFlags.isCreator) {
+      return `/creators/${persona.id}`;
+    } else if (persona.roleFlags.isLivecam) {
+      return `/livecams/${persona.id}`;
+    }
+    // Default fallback
+    return `/personas/${persona.id}`;
   };
+
+  const profileUrl = getPersonaRoute();
   
-  const getCapabilityIcons = () => {
-    return (
-      <div className="flex space-x-1">
-        {capabilities.hasPhotos && <Image className="h-4 w-4" />}
-        {capabilities.hasVideos && <Video className="h-4 w-4" />}
-        {capabilities.hasBooking && <Calendar className="h-4 w-4" />}
-      </div>
-    );
-  };
-  
+  // Extract key properties for display
+  const { displayName, avatarUrl, location, age, tags } = persona;
+
   return (
-    <Card className="overflow-hidden">
-      <div className="relative aspect-[3/4]">
-        <img
-          src={persona.avatarUrl || "https://via.placeholder.com/300x400"}
-          alt={persona.displayName}
-          className="h-full w-full object-cover"
-        />
-        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <h3 className="text-lg font-bold text-white">{persona.displayName}</h3>
-              {persona.age > 0 && (
-                <span className="text-sm text-gray-200">{persona.age}</span>
-              )}
+    <Link to={profileUrl}>
+      <Card
+        className={cn(
+          "overflow-hidden transition-all hover:shadow-md",
+          persona.roleFlags.isFeatured && "border-primary/50 bg-gradient-to-br from-background to-primary/5",
+          className
+        )}
+      >
+        <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="h-full w-full object-cover transition-transform hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-secondary/50">
+              <span className="text-muted-foreground">No Image</span>
             </div>
-            {roleFlags.isVerified && (
-              <CheckCircle className="h-5 w-5 text-blue-400" />
+          )}
+          <div className="absolute top-2 right-2 flex gap-1 flex-col items-end">
+            {persona.roleFlags.isVerified && (
+              <Badge variant="secondary" className="bg-white/80 text-primary flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" /> Verified
+              </Badge>
+            )}
+            {persona.roleFlags.isFeatured && (
+              <Badge className="bg-primary text-primary-foreground flex items-center gap-1">
+                <Award className="h-3 w-3" /> Featured
+              </Badge>
             )}
           </div>
-          <div className="flex items-center gap-1 text-gray-200">
-            <MapPin className="h-3 w-3" />
-            <span className="text-xs">{persona.location}</span>
+        </div>
+
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start mb-1">
+            <h3 className="font-medium text-base line-clamp-1">{displayName}</h3>
+            <div className="text-sm text-muted-foreground">{age > 0 ? `${age}` : ""}</div>
           </div>
-        </div>
-        <div className="absolute top-2 right-2 flex flex-col gap-1">
-          {getRoleBadge()}
-          {persona.monetization.boostingActive && (
-            <Badge className="bg-amber-500">Boosted</Badge>
-          )}
-        </div>
-      </div>
-
-      <CardContent className="p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <Star className="h-4 w-4 text-yellow-500" />
-            <span className="text-sm">4.8 (32)</span>
+          
+          <div className="text-sm text-muted-foreground mb-2">{location}</div>
+          
+          <div className="flex flex-wrap gap-1 mb-3">
+            {tags.slice(0, 3).map((tag, index) => (
+              <Badge key={index} variant="outline" className="text-xs py-0">
+                {tag}
+              </Badge>
+            ))}
+            {tags.length > 3 && (
+              <Badge variant="outline" className="text-xs py-0">
+                +{tags.length - 3}
+              </Badge>
+            )}
           </div>
-          {getCapabilityIcons()}
-        </div>
-
-        <div className="mt-2 line-clamp-2 text-xs text-gray-500">
-          {persona.bio}
-        </div>
-      </CardContent>
-
-      <CardFooter className="border-t p-3">
-        <Link to={`/persona/${persona.username}`} className="w-full">
-          <Button variant="default" className="w-full">
-            View Profile
-          </Button>
-        </Link>
-      </CardFooter>
-    </Card>
+          
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex space-x-2">
+              {persona.roleFlags.isEscort && <span>Escort</span>}
+              {persona.roleFlags.isCreator && <span>Creator</span>}
+              {persona.roleFlags.isLivecam && <span>Livecam</span>}
+            </div>
+            
+            <div className="flex gap-2">
+              {persona.capabilities.hasLiveStream && (
+                <Video className="h-4 w-4 text-red-500" />
+              )}
+              {persona.capabilities.hasChat && (
+                <MessageCircle className="h-4 w-4" />
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 

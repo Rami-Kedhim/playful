@@ -1,59 +1,31 @@
 
-import React from "react";
-import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 
 interface FilterBadgeProps {
   label: string;
   onRemove: () => void;
-  variant?: "default" | "secondary" | "outline" | "destructive";
   className?: string;
-  showTooltip?: boolean;
 }
 
-export function FilterBadge({ 
-  label, 
-  onRemove, 
-  variant = "secondary", 
-  className,
-  showTooltip = true
-}: FilterBadgeProps) {
-  const badge = (
-    <Badge 
-      variant={variant} 
-      className={cn(
-        "flex items-center gap-1 transition-all py-1 px-2",
-        "hover:shadow-sm cursor-default",
-        className
-      )}
+const FilterBadge: React.FC<FilterBadgeProps> = ({ label, onRemove, className = '' }) => {
+  return (
+    <Badge
+      variant="secondary"
+      className={`flex items-center gap-1 px-2 py-1 ${className}`}
     >
-      {label}
+      <span className="text-xs">{label}</span>
       <X 
-        size={14} 
-        className="cursor-pointer opacity-70 hover:opacity-100" 
+        className="h-3 w-3 cursor-pointer hover:text-destructive" 
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
           onRemove();
-        }}
-        aria-label={`Remove filter: ${label}`}
+        }} 
       />
     </Badge>
   );
-  
-  if (!showTooltip) return badge;
-  
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {badge}
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          <p>Remove filter: {label}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-}
+};
+
+export default FilterBadge;

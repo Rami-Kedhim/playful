@@ -28,6 +28,8 @@ const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
 const WalletPage = lazy(() => import('./pages/WalletPage/index'));
+const VerificationPage = lazy(() => import('./pages/VerificationPage'));
+const PersonasPage = lazy(() => import('./pages/Personas'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -61,6 +63,8 @@ const RoutesComponent: React.FC = () => {
         <Route path={AppRoutes.BRAIN_HUB} element={<ProtectedRoute><AppLayout><BrainHubPage /></AppLayout></ProtectedRoute>} />
         <Route path="/nsfw-image-generator" element={<ProtectedRoute><AppLayout><NSFWImageGeneratorPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.WALLET} element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
+        <Route path="/verification" element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
+        <Route path="/personas" element={<AppLayout><PersonasPage /></AppLayout>} />
         
         {/* 404 route */}
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />

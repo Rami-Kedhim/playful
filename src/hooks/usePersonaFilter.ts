@@ -1,94 +1,109 @@
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { UberPersona } from '@/types/uberPersona';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface UsePersonaFilterProps {
   initialPersonas: UberPersona[];
 }
 
-export const usePersonaFilter = ({ initialPersonas }: UsePersonaFilterProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [roleFilters, setRoleFilters] = useState<Record<string, boolean>>({
+interface RoleFilters {
+  [key: string]: boolean;
+}
+
+interface CapabilityFilters {
+  [key: string]: boolean;
+}
+
+export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [locationFilter, setLocationFilter] = useState<string>('');
+  const [roleFilters, setRoleFilters] = useState<RoleFilters>({
     isEscort: false,
     isCreator: false,
     isLivecam: false,
     isAI: false,
-    isVerified: false
+    isVerified: false,
+    isFeatured: false
   });
-  const [capabilityFilters, setCapabilityFilters] = useState<Record<string, boolean>>({
+  const [capabilityFilters, setCapabilityFilters] = useState<CapabilityFilters>({
     hasPhotos: false,
     hasVideos: false,
     hasStories: false,
-    hasBooking: false
+    hasChat: false,
+    hasVoice: false,
+    hasBooking: false,
+    hasLiveStream: false,
+    hasExclusiveContent: false
   });
-  const [minAge, setMinAge] = useState(18);
-  const [maxAge, setMaxAge] = useState(99);
-  
-  const toggleRoleFilter = useCallback((role: keyof UberPersona['roleFlags']) => {
+
+  // Debounce search queries for performance
+  const debouncedSearch = useDebounce(searchQuery, 300);
+  const debouncedLocation = useDebounce(locationFilter, 300);
+
+  // Toggle a role filter
+  const toggleRoleFilter = (role: keyof UberPersona['roleFlags']) => {
     setRoleFilters(prev => ({
       ...prev,
       [role]: !prev[role]
     }));
-  }, []);
-  
-  const toggleCapabilityFilter = useCallback((capability: keyof UberPersona['capabilities']) => {
+  };
+
+  // Toggle a capability filter
+  const toggleCapabilityFilter = (capability: keyof UberPersona['capabilities']) => {
     setCapabilityFilters(prev => ({
       ...prev,
       [capability]: !prev[capability]
     }));
-  }, []);
-  
+  };
+
+  // Apply filters to personas
   const filteredPersonas = useMemo(() => {
     return initialPersonas.filter(persona => {
-      // Filter by search query
-      if (searchQuery && !persona.displayName.toLowerCase().includes(searchQuery.toLowerCase()) && 
-          !persona.bio.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
+      // Search filter
+      if (debouncedSearch) {
+        const searchLower = debouncedSearch.toLowerCase();
+        const matchesSearch = 
+          persona.displayName.toLowerCase().includes(searchLower) ||
+          persona.bio.toLowerCase().includes(searchLower) ||
+          persona.tags.some(tag => tag.toLowerCase().includes(searchLower));
+        
+        if (!matchesSearch) return false;
       }
       
-      // Filter by location
-      if (locationFilter && !persona.location.toLowerCase().includes(locationFilter.toLowerCase())) {
-        return false;
+      // Location filter
+      if (debouncedLocation) {
+        const locationLower = debouncedLocation.toLowerCase();
+        if (!persona.location.toLowerCase().includes(locationLower)) {
+          return false;
+        }
       }
       
-      // Filter by age
-      if (persona.age < minAge || persona.age > maxAge) {
-        return false;
+      // Role filters
+      const hasActiveRoleFilters = Object.values(roleFilters).some(value => value);
+      if (hasActiveRoleFilters) {
+        const matchesRoleFilter = Object.entries(roleFilters).some(([role, isActive]) => {
+          return isActive && persona.roleFlags[role as keyof UberPersona['roleFlags']];
+        });
+        
+        if (!matchesRoleFilter) return false;
       }
       
-      // Filter by roles
-      const activeRoleFilters = Object.entries(roleFilters).filter(([_, isActive]) => isActive);
-      if (activeRoleFilters.length > 0) {
-        const matchesRole = activeRoleFilters.some(([role, _]) => 
-          persona.roleFlags[role as keyof UberPersona['roleFlags']]
-        );
-        if (!matchesRole) return false;
-      }
-      
-      // Filter by capabilities
-      const activeCapabilityFilters = Object.entries(capabilityFilters).filter(([_, isActive]) => isActive);
-      if (activeCapabilityFilters.length > 0) {
-        const matchesCapability = activeCapabilityFilters.some(([capability, _]) => 
-          persona.capabilities[capability as keyof UberPersona['capabilities']]
-        );
-        if (!matchesCapability) return false;
+      // Capability filters
+      const hasActiveCapabilityFilters = Object.values(capabilityFilters).some(value => value);
+      if (hasActiveCapabilityFilters) {
+        const matchesCapabilityFilter = Object.entries(capabilityFilters).some(([capability, isActive]) => {
+          return isActive && persona.capabilities[capability as keyof UberPersona['capabilities']];
+        });
+        
+        if (!matchesCapabilityFilter) return false;
       }
       
       return true;
     });
-  }, [
-    initialPersonas,
-    searchQuery,
-    locationFilter,
-    minAge,
-    maxAge,
-    roleFilters,
-    capabilityFilters
-  ]);
-  
+  }, [initialPersonas, debouncedSearch, debouncedLocation, roleFilters, capabilityFilters]);
+
   return {
-    filteredPersonas,
     searchQuery,
     setSearchQuery,
     locationFilter,
@@ -97,11 +112,6 @@ export const usePersonaFilter = ({ initialPersonas }: UsePersonaFilterProps) => 
     toggleRoleFilter,
     capabilityFilters,
     toggleCapabilityFilter,
-    minAge,
-    setMinAge,
-    maxAge,
-    setMaxAge
+    filteredPersonas
   };
-};
-
-export default usePersonaFilter;
+}
