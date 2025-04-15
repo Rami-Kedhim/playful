@@ -12,6 +12,7 @@ import VerificationBadge from './VerificationBadge';
 const VerificationContainer = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>("status");
+  const [verificationType, setVerificationType] = useState<'personal' | 'business' | 'premium' | null>(null);
   
   useEffect(() => {
     if (location.state?.tab) {
@@ -31,7 +32,7 @@ const VerificationContainer = () => {
     console.log("Verification form submitted:", data);
     handleVerificationSuccess();
   };
-  
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <h1 className="text-2xl font-bold mb-2 flex items-center">
@@ -48,10 +49,11 @@ const VerificationContainer = () => {
         />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="status">Verification Status</TabsTrigger>
-            <TabsTrigger value="submit">Submit Verification</TabsTrigger>
-            <TabsTrigger value="upgrade">Upgrade Level</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="status">Status</TabsTrigger>
+            <TabsTrigger value="type">Type</TabsTrigger>
+            <TabsTrigger value="submit">Submit</TabsTrigger>
+            <TabsTrigger value="upgrade">Upgrade</TabsTrigger>
           </TabsList>
           
           <TabsContent value="status" className="mt-6 space-y-4">
@@ -59,6 +61,13 @@ const VerificationContainer = () => {
             <VerificationStatusTimeline status="in_review" />
           </TabsContent>
           
+          <TabsContent value="type" className="mt-6">
+            <VerificationLevelType
+              selectedType={verificationType}
+              onSelectType={setVerificationType}
+            />
+          </TabsContent>
+
           <TabsContent value="submit" className="mt-6">
             <VerificationForm 
               onSubmit={handleSubmitVerification} 
