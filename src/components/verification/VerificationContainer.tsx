@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import VerificationForm from './form/VerificationForm';
@@ -8,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, Info } from 'lucide-react';
 import VerificationBadge from './VerificationBadge';
+import VerificationLevelType from './level/VerificationLevelType';
 
 const VerificationContainer = () => {
   const location = useLocation();
