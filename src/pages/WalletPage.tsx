@@ -1,43 +1,50 @@
 
 import React from 'react';
-import { UBXWallet } from '@/components/wallet/UBXWallet';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const WalletPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">UBX Wallet</h1>
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6">UBX Wallet</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <UBXWallet showRefresh={true} showHistory={true} />
-          
-          <div className="mt-8 bg-card border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
-            <div className="text-center py-8 text-muted-foreground">
-              Your transaction history will appear here
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Balance</CardTitle>
+            <CardDescription>Your current UBX balance</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">0 UBX</div>
+            <p className="text-sm text-muted-foreground mt-2">
+              UBX can be used to access premium features and services
+            </p>
+          </CardContent>
+        </Card>
         
-        <div className="space-y-6">
-          <div className="bg-card border rounded-lg p-6">
-            <h3 className="font-medium mb-4">Add UBX Tokens</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Purchase UBX tokens to access premium features and services across the platform.
-            </p>
-            <button className="w-full py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
-              Purchase Tokens
+        <Card>
+          <CardHeader>
+            <CardTitle>Transaction History</CardTitle>
+            <CardDescription>Recent UBX transactions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">No transactions yet</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>UBX Management</CardTitle>
+            <CardDescription>Manage your UBX</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <button className="w-full bg-primary text-primary-foreground p-2 rounded-md hover:bg-primary/90 transition">
+              Purchase UBX
             </button>
-          </div>
-          
-          <div className="bg-card border rounded-lg p-6">
-            <h3 className="font-medium mb-4">About UBX Tokens</h3>
-            <p className="text-sm text-muted-foreground">
-              UBX tokens are our platform's currency, enabling secure and private transactions across all services.
-              Use them for appointments, content access, tipping, and more.
-            </p>
-          </div>
-        </div>
+            <button className="w-full border border-input bg-background hover:bg-accent hover:text-accent-foreground p-2 rounded-md transition">
+              Transfer UBX
+            </button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DOCUMENT_TYPES, getDocumentTypeLabel } from '@/utils/verification/documentTypes';
+import { DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS } from '@/utils/verification/documentTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
@@ -35,9 +35,13 @@ const DocumentTypeSelect = ({ form }: DocumentTypeSelectProps) => {
                 <SelectValue placeholder="Select document type" />
               </SelectTrigger>
               <SelectContent>
-                {Object.values(DOCUMENT_TYPES).map((value) => (
+                {[
+                  DOCUMENT_TYPES.ID_CARD,
+                  DOCUMENT_TYPES.PASSPORT,
+                  DOCUMENT_TYPES.DRIVERS_LICENSE
+                ].map((value) => (
                   <SelectItem key={value} value={value}>
-                    {getDocumentTypeLabel(value)}
+                    {DOCUMENT_TYPE_LABELS[value]}
                   </SelectItem>
                 ))}
               </SelectContent>

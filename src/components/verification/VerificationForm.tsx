@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -138,7 +139,11 @@ const VerificationForm = () => {
               description="Upload a selfie of yourself holding your ID document next to your face. Your face and the ID must be clearly visible."
             />
 
-            <SubmitButton loading={loading} disabled={!canSubmit} />
+            <SubmitButton 
+              loading={loading} 
+              disabled={!canSubmit} 
+              text="Submit Verification"
+            />
           </form>
         </Form>
       </CardContent>

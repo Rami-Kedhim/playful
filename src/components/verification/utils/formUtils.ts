@@ -22,8 +22,7 @@ export const verificationFormSchema = z.object({
   documentType: z.enum([
     DOCUMENT_TYPES.ID_CARD,
     DOCUMENT_TYPES.PASSPORT,
-    DOCUMENT_TYPES.DRIVERS_LICENSE,
-    DOCUMENT_TYPES.SELFIE
+    DOCUMENT_TYPES.DRIVERS_LICENSE
   ]),
   documentFrontImage: FileSchema,
   documentBackImage: FileSchema.optional(),
