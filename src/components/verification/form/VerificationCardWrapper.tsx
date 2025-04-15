@@ -1,25 +1,25 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield } from 'lucide-react';
 
 interface VerificationCardWrapperProps {
-  children: React.ReactNode;
   title: string;
-  description?: string;
+  description: string;
+  children: React.ReactNode;
 }
 
-const VerificationCardWrapper = ({ children, title, description }: VerificationCardWrapperProps) => {
+const VerificationCardWrapper: React.FC<VerificationCardWrapperProps> = ({ 
+  title, 
+  description, 
+  children 
+}) => {
   return (
-    <Card className="border-muted shadow-sm">
-      <CardHeader className="bg-muted/30">
-        <CardTitle className="flex items-center text-xl">
-          <Shield className="h-5 w-5 mr-2 text-primary" />
-          {title}
-        </CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6 pt-6">
+      <CardContent>
         {children}
       </CardContent>
     </Card>

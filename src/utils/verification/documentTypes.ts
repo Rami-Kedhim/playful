@@ -23,3 +23,8 @@ export const requiresBackImage = (documentType: DocumentType): boolean => {
   return documentType === DOCUMENT_TYPES.ID_CARD || 
          documentType === DOCUMENT_TYPES.DRIVERS_LICENSE;
 };
+
+// Helper function to get document type label
+export const getDocumentTypeLabel = (documentType: DocumentType): string => {
+  return DOCUMENT_TYPE_LABELS[documentType] || 'Unknown Document Type';
+};

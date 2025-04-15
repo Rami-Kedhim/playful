@@ -6,7 +6,7 @@ import { AIProvider } from '@/contexts/AIContext';
 import { AIVoiceProvider } from '@/components/ai/AIVoiceProvider';
 import RequireAuth from '@/components/auth/RequireAuth';
 import { Toaster } from 'sonner';
-import Routes from './Routes';
+import AppRoutes from './Routes';
 
 const App: React.FC = () => {
   return (
@@ -14,7 +14,7 @@ const App: React.FC = () => {
       <AIProvider>
         <AIVoiceProvider>
           <Toaster position="top-right" />
-          <Routes />
+          <AppRoutes />
         </AIVoiceProvider>
       </AIProvider>
     </AuthProvider>

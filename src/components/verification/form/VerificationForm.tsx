@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
 import { useVerification } from '@/hooks/verification/useVerification';
+import { DOCUMENT_TYPES } from '@/utils/verification/documentTypes';
 import VerificationCardWrapper from './VerificationCardWrapper';
 import DocumentRequirements from './DocumentRequirements';
 import FileUploadInstructions from './FileUploadInstructions';
@@ -26,7 +27,7 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: 'id_card',
+      documentType: DOCUMENT_TYPES.ID_CARD,
       documentFrontImage: undefined,
       documentBackImage: undefined,
       selfieImage: undefined

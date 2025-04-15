@@ -7,7 +7,7 @@ interface FormErrorProps {
   message?: string;
 }
 
-const FormError = ({ message }: FormErrorProps) => {
+const FormError: React.FC<FormErrorProps> = ({ message }) => {
   if (!message) return null;
   
   return (

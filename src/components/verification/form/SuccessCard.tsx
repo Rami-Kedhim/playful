@@ -1,34 +1,24 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle2 } from 'lucide-react';
 
-const SuccessCard = () => {
+const SuccessCard: React.FC = () => {
   return (
-    <Card className="border-green-500/30 bg-green-500/5">
-      <CardHeader>
-        <div className="flex items-center space-x-3">
-          <div className="p-2 rounded-full bg-green-500/10">
-            <CheckCircle className="h-6 w-6 text-green-500" />
-          </div>
-          <div>
-            <CardTitle>Verification Submitted</CardTitle>
-            <CardDescription>Your documents are being processed</CardDescription>
-          </div>
+    <Card className="w-full text-center">
+      <CardHeader className="pb-2">
+        <div className="flex justify-center mb-2">
+          <CheckCircle2 className="h-16 w-16 text-green-500" />
         </div>
+        <CardTitle className="text-2xl">Verification Submitted</CardTitle>
+        <CardDescription>Your verification documents have been received</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            We've received your verification documents and they are now being reviewed. This process typically takes 24-48 hours.
-          </p>
-          <div className="bg-background/50 p-4 rounded-md space-y-2">
-            <h4 className="font-medium text-sm">What happens next?</h4>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>Our team will review your submitted documents</li>
-              <li>You'll receive an email once the review is complete</li>
-              <li>Additional information may be requested if needed</li>
-            </ul>
-          </div>
+      <CardContent className="space-y-4">
+        <p className="text-muted-foreground">
+          Thank you for submitting your verification documents. Our team will review them as soon as possible. This process typically takes 1-2 business days.
+        </p>
+        <div className="rounded-md p-3 bg-muted/50 text-sm">
+          <p>You'll receive an email notification once your verification is approved.</p>
         </div>
       </CardContent>
     </Card>
@@ -36,4 +26,3 @@ const SuccessCard = () => {
 };
 
 export default SuccessCard;
-
