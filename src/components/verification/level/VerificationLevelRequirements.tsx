@@ -1,85 +1,32 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
-
-interface Requirement {
-  id: string;
-  title: string;
-  description: string;
-  required: boolean;
-}
+import { Button } from '@/components/ui/button';
+import { Check, AlertCircle } from 'lucide-react';
 
 interface VerificationLevelRequirementsProps {
-  currentLevel: VerificationLevel;
-  targetLevel: VerificationLevel;
-  onComplete?: () => void;
+  currentLevel: string;
+  targetLevel: string;
+  onComplete: () => void;
 }
 
-const LEVEL_REQUIREMENTS: Record<VerificationLevel, Requirement[]> = {
-  none: [],
+const LEVEL_REQUIREMENTS = {
   basic: [
-    {
-      id: 'id_verification',
-      title: 'ID Verification',
-      description: 'Government-issued photo ID (passport, driver\'s license, or national ID card)',
-      required: true
-    },
-    {
-      id: 'selfie',
-      title: 'Selfie with ID',
-      description: 'A photo of yourself holding your ID next to your face',
-      required: true
-    }
+    'Government-issued ID',
+    'Selfie verification',
+    'Valid email address'
   ],
   enhanced: [
-    {
-      id: 'id_verification',
-      title: 'ID Verification',
-      description: 'Government-issued photo ID (passport, driver\'s license, or national ID card)',
-      required: true
-    },
-    {
-      id: 'selfie',
-      title: 'Selfie with ID',
-      description: 'A photo of yourself holding your ID next to your face',
-      required: true
-    },
-    {
-      id: 'proof_of_address',
-      title: 'Proof of Address',
-      description: 'Recent utility bill or bank statement (less than 3 months old)',
-      required: true
-    }
+    'All Basic requirements',
+    'Phone number verification',
+    'Proof of address',
+    'Background check consent'
   ],
   premium: [
-    {
-      id: 'id_verification',
-      title: 'ID Verification',
-      description: 'Government-issued photo ID (passport, driver\'s license, or national ID card)',
-      required: true
-    },
-    {
-      id: 'selfie',
-      title: 'Selfie with ID',
-      description: 'A photo of yourself holding your ID next to your face',
-      required: true
-    },
-    {
-      id: 'proof_of_address',
-      title: 'Proof of Address',
-      description: 'Recent utility bill or bank statement (less than 3 months old)',
-      required: true
-    },
-    {
-      id: 'video_verification',
-      title: 'Video Verification',
-      description: 'Short video call with our verification team',
-      required: true
-    }
+    'All Enhanced requirements',
+    'Business registration documents',
+    'Professional references',
+    'Video verification'
   ]
 };
 
@@ -88,48 +35,42 @@ const VerificationLevelRequirements = ({
   targetLevel,
   onComplete
 }: VerificationLevelRequirementsProps) => {
-  const requirements = LEVEL_REQUIREMENTS[targetLevel];
-  
+  const requirements = LEVEL_REQUIREMENTS[targetLevel as keyof typeof LEVEL_REQUIREMENTS] || [];
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Requirements for {targetLevel} Verification</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {requirements.map((requirement) => (
-              <div
-                key={requirement.id}
-                className={cn(
-                  "p-4 rounded-lg border",
-                  requirement.required ? "bg-muted/50" : "bg-muted/30"
-                )}
-              >
-                <div className="flex items-start space-x-3">
-                  {requirement.required ? (
-                    <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  )}
-                  <div>
-                    <h3 className="font-medium">
-                      {requirement.title}
-                      {requirement.required && (
-                        <span className="text-xs text-red-500 ml-2">(Required)</span>
-                      )}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {requirement.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <AlertCircle className="h-5 w-5 mr-2 text-blue-500" />
+          Requirements for {targetLevel} Verification
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <ul className="space-y-2">
+            {requirements.map((requirement, index) => (
+              <li key={index} className="flex items-start">
+                <Check className="h-5 w-5 mr-2 text-green-500 mt-0.5" />
+                <span>{requirement}</span>
+              </li>
             ))}
+          </ul>
+          
+          <div className="bg-muted/30 p-4 rounded-md mt-6">
+            <h4 className="text-sm font-medium mb-2">Important Notes:</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>• All documents must be clear and legible</li>
+              <li>• Documents must be valid and not expired</li>
+              <li>• Verification process may take 24-48 hours</li>
+            </ul>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          
+          <Button onClick={onComplete} className="w-full mt-4">
+            Continue with Verification
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

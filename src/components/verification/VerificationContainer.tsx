@@ -10,11 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, Info } from 'lucide-react';
 import VerificationBadge from './VerificationBadge';
 import VerificationLevelType from './level/VerificationLevelType';
+import VerificationLevelRequirements from './level/VerificationLevelRequirements';
 
 const VerificationContainer = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>("status");
   const [verificationType, setVerificationType] = useState<'personal' | 'business' | 'premium' | null>(null);
+  const [showRequirements, setShowRequirements] = useState(false);
   
   useEffect(() => {
     if (location.state?.tab) {
@@ -33,6 +35,16 @@ const VerificationContainer = () => {
   const handleSubmitVerification = (data: any) => {
     console.log("Verification form submitted:", data);
     handleVerificationSuccess();
+  };
+
+  const handleSelectType = (type: 'personal' | 'business' | 'premium') => {
+    setVerificationType(type);
+    setShowRequirements(true);
+  };
+
+  const handleCompleteRequirements = () => {
+    setShowRequirements(false);
+    setActiveTab("submit");
   };
 
   return (
@@ -64,10 +76,18 @@ const VerificationContainer = () => {
           </TabsContent>
           
           <TabsContent value="type" className="mt-6">
-            <VerificationLevelType
-              selectedType={verificationType}
-              onSelectType={setVerificationType}
-            />
+            {showRequirements ? (
+              <VerificationLevelRequirements
+                currentLevel="none"
+                targetLevel={verificationType || 'basic'}
+                onComplete={handleCompleteRequirements}
+              />
+            ) : (
+              <VerificationLevelType
+                selectedType={verificationType}
+                onSelectType={handleSelectType}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="submit" className="mt-6">
