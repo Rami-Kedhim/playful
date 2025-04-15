@@ -9,4 +9,12 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider defaultTheme="dark" forcedTheme="dark" {...props}>{children}</NextThemesProvider>
 }
 
-// Remove useTheme export
+// Add useTheme export for compatibility
+export const useTheme = () => {
+  return {
+    theme: "dark",
+    setTheme: () => {}, // No-op function since we're forcing dark mode
+    resolvedTheme: "dark",
+    systemTheme: "dark",
+  }
+}

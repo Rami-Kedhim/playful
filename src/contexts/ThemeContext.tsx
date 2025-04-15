@@ -22,7 +22,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "dark",
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
@@ -38,6 +38,7 @@ export function ThemeProvider({
     <NextThemesProvider
       defaultTheme={defaultTheme}
       storageKey={storageKey}
+      forcedTheme="dark"
       {...props}
     >
       <InnerThemeProvider>{children}</InnerThemeProvider>
@@ -46,12 +47,12 @@ export function ThemeProvider({
 }
 
 function InnerThemeProvider({ children }: { children: ReactNode }) {
-  const { theme, setTheme, isDark, toggleTheme } = useThemeToggle();
+  const { theme, isDark, toggleTheme, mounted } = useThemeToggle();
 
-  // Create context value
+  // Create context value with added setTheme function to match expected interface
   const value = {
     theme,
-    setTheme,
+    setTheme: () => {}, // No-op function since we're forcing dark mode
     isDark,
     toggleTheme,
   };

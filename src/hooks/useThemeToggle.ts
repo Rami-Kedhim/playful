@@ -1,9 +1,7 @@
 
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 export const useThemeToggle = () => {
-  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
@@ -18,8 +16,8 @@ export const useThemeToggle = () => {
   return {
     theme: 'dark',
     isDark: true,
-    mounted: true,
-    toggleTheme: () => {}, // No-op function
+    mounted,
+    toggleTheme: () => {}, // No-op function since we only use dark mode
   };
 };
 
