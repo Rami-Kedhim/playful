@@ -1,44 +1,40 @@
 
-import React from 'react';
-import { Button, ButtonProps } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Upload, Loader2 } from "lucide-react";
 
-interface SubmitButtonProps extends Omit<ButtonProps, 'type'> {
+interface SubmitButtonProps {
   loading?: boolean;
   disabled?: boolean;
   loadingText?: string;
   text?: string;
-  className?: string;
-  onClick?: () => void;
 }
 
-const SubmitButton: React.FC<SubmitButtonProps> = ({ 
+const SubmitButton = ({ 
   loading = false, 
   disabled = false,
-  loadingText = 'Submitting...',
-  text = 'Submit Verification',
-  className = '',
-  onClick,
-  variant = "default",
-  ...props
-}) => {
+  loadingText = "Uploading...",
+  text = "Submit Verification"
+}: SubmitButtonProps) => {
   return (
     <Button 
-      type="submit" 
-      disabled={loading || disabled} 
-      className={`w-full ${className}`}
-      variant={variant}
-      onClick={onClick}
-      {...props}
+      type="submit"
+      disabled={disabled || loading}
+      className="w-full"
     >
       {loading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           {loadingText}
         </>
-      ) : text}
+      ) : (
+        <>
+          <Upload className="mr-2 h-4 w-4" />
+          {text}
+        </>
+      )}
     </Button>
   );
 };
 
 export default SubmitButton;
+

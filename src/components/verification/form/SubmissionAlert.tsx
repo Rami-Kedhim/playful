@@ -1,68 +1,26 @@
 
-import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface SubmissionAlertProps {
-  type: 'success' | 'error' | 'warning';
+  type: "error" | "success";
   title?: string;
   message: string;
 }
 
-const SubmissionAlert: React.FC<SubmissionAlertProps> = ({ 
-  type, 
-  title, 
-  message 
-}) => {
-  const getIcon = () => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4" />;
-      case 'error':
-      default:
-        return <AlertCircle className="h-4 w-4" />;
-    }
-  };
-
-  const getVariant = () => {
-    switch (type) {
-      case 'success':
-        return 'success';
-      case 'warning':
-        return 'warning';
-      case 'error':
-      default:
-        return 'destructive';
-    }
-  };
-
-  const getDefaultTitle = () => {
-    switch (type) {
-      case 'success':
-        return 'Success';
-      case 'warning':
-        return 'Warning';
-      case 'error':
-      default:
-        return 'Error';
-    }
-  };
-
+const SubmissionAlert = ({ type, title, message }: SubmissionAlertProps) => {
   return (
-    <Alert variant={getVariant() as any} className="mb-4">
-      <div className="flex items-start">
-        <span className="mr-2 mt-0.5">{getIcon()}</span>
-        <div>
-          {(title || type !== 'success') && (
-            <AlertTitle className="font-medium">{title || getDefaultTitle()}</AlertTitle>
-          )}
-          <AlertDescription className="text-sm mt-1">{message}</AlertDescription>
-        </div>
-      </div>
+    <Alert variant={type === "error" ? "destructive" : "default"} className="mb-6">
+      {type === "error" ? (
+        <AlertCircle className="h-4 w-4" />
+      ) : (
+        <CheckCircle className="h-4 w-4" />
+      )}
+      {title && <AlertTitle>{title}</AlertTitle>}
+      <AlertDescription>{message}</AlertDescription>
     </Alert>
   );
 };
 
 export default SubmissionAlert;
+

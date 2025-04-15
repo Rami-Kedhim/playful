@@ -1,30 +1,34 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CircleCheck } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle } from "lucide-react";
 
 const SuccessCard = () => {
   return (
-    <Card>
+    <Card className="border-green-500/30 bg-green-500/5">
       <CardHeader>
-        <CardTitle className="flex items-center text-lg text-green-500">
-          <CircleCheck className="h-5 w-5 mr-2" />
-          Verification Submitted Successfully
-        </CardTitle>
+        <div className="flex items-center space-x-3">
+          <div className="p-2 rounded-full bg-green-500/10">
+            <CheckCircle className="h-6 w-6 text-green-500" />
+          </div>
+          <div>
+            <CardTitle>Verification Submitted</CardTitle>
+            <CardDescription>Your documents are being processed</CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-muted-foreground">
-          Your verification request has been submitted and will be reviewed by our team.
-          This typically takes 24-48 hours.
-        </p>
-        
-        <div className="bg-muted/30 p-4 rounded-md space-y-2">
-          <h4 className="text-sm font-medium">What happens next?</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Our team will review your submitted documents</li>
-            <li>• You'll receive a notification when the review is complete</li>
-            <li>• You can check the status of your verification at any time</li>
-          </ul>
+      <CardContent>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            We've received your verification documents and they are now being reviewed. This process typically takes 24-48 hours.
+          </p>
+          <div className="bg-background/50 p-4 rounded-md space-y-2">
+            <h4 className="font-medium text-sm">What happens next?</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>Our team will review your submitted documents</li>
+              <li>You'll receive an email once the review is complete</li>
+              <li>Additional information may be requested if needed</li>
+            </ul>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -32,3 +36,4 @@ const SuccessCard = () => {
 };
 
 export default SuccessCard;
+
