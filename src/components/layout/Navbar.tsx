@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { Button } from '@/components/ui/button';
 import { useRole } from '@/hooks/auth/useRole';
 import UserMenu from '@/components/layout/UserMenu';
-import { ModeToggle } from '@/components/ui/mode-toggle';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, X } from 'lucide-react';
 
@@ -80,8 +78,6 @@ const Navbar: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          <ModeToggle />
-          
           {isAuthenticated ? (
             <UserMenu />
           ) : (
