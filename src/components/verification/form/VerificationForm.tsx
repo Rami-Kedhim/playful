@@ -11,6 +11,7 @@ import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
+import DocumentUploadHandler from './DocumentUploadHandler';
 
 interface VerificationFormProps {
   onSubmit?: (data: VerificationFormValues) => void;
@@ -63,11 +64,6 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   }, [user]);
 
   const onSubmit = async (data: VerificationFormValues) => {
-    if (externalSubmit) {
-      externalSubmit(data);
-      return;
-    }
-
     if (!user) return;
     
     setLoading(true);
@@ -89,7 +85,6 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       if (result.success) {
         setSubmitted(true);
         form.reset();
-        
         if (onSubmissionComplete) {
           onSubmissionComplete();
         }
@@ -136,27 +131,23 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <DocumentTypeSelect form={form} />
-
-            <DocumentImageUpload
-              form={form}
-              fieldName="documentFrontImage"
+            
+            <DocumentUploadHandler
               label="Front of ID Document"
-              description="Upload a clear photo of the front of your ID document. Max 5MB."
+              onFileSelect={(file) => form.setValue('documentFrontImage', { file })}
+              error={form.formState.errors.documentFrontImage?.message?.toString()}
             />
-
-            <DocumentImageUpload
-              form={form}
-              fieldName="documentBackImage"
+            
+            <DocumentUploadHandler
               label="Back of ID Document (Optional for Passport)"
-              description="Upload a clear photo of the back of your ID document. Required for ID cards and driver's licenses."
-              optional={true}
+              onFileSelect={(file) => form.setValue('documentBackImage', { file })}
+              error={form.formState.errors.documentBackImage?.message?.toString()}
             />
-
-            <DocumentImageUpload
-              form={form}
-              fieldName="selfieImage"
+            
+            <DocumentUploadHandler
               label="Selfie with ID"
-              description="Upload a selfie of yourself holding your ID document next to your face. Your face and the ID must be clearly visible."
+              onFileSelect={(file) => form.setValue('selfieImage', { file })}
+              error={form.formState.errors.selfieImage?.message?.toString()}
             />
 
             <SubmitButton 
@@ -168,7 +159,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         </Form>
       </CardContent>
       <CardFooter className="flex flex-col">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Your verification information is encrypted and only used for identity verification purposes.
           We follow strict privacy guidelines and never share your personal information.
         </p>
