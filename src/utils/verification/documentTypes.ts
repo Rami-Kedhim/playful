@@ -6,14 +6,14 @@ export const DOCUMENT_TYPES = {
   SELFIE: 'selfie'
 } as const;
 
-export type DocumentType = keyof typeof DOCUMENT_TYPES;
+export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES];
 
 export const getDocumentTypeLabel = (type: DocumentType): string => {
   const labels: Record<DocumentType, string> = {
-    id_card: 'ID Card',
-    passport: 'Passport',
-    drivers_license: "Driver's License",
-    selfie: 'Selfie with ID'
+    'id_card': 'ID Card',
+    'passport': 'Passport',
+    'drivers_license': "Driver's License",
+    'selfie': 'Selfie with ID'
   };
   return labels[type];
 };

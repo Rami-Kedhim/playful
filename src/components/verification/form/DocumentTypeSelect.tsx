@@ -35,9 +35,9 @@ const DocumentTypeSelect = ({ form }: DocumentTypeSelectProps) => {
                 <SelectValue placeholder="Select document type" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(DOCUMENT_TYPES).map(([key, value]) => (
-                  <SelectItem key={key} value={value}>
-                    {getDocumentTypeLabel(value as keyof typeof DOCUMENT_TYPES)}
+                {Object.values(DOCUMENT_TYPES).map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {getDocumentTypeLabel(value)}
                   </SelectItem>
                 ))}
               </SelectContent>
