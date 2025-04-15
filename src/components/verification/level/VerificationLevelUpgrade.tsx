@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { toast } from '@/components/ui/use-toast';
 import { ArrowLeft, ShieldCheck, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useVerificationStatus } from '../hooks/useVerificationStatus';
@@ -52,7 +52,7 @@ const VerificationLevelUpgrade = () => {
       });
       
       setCurrentStep('processing');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error upgrading verification level:", error);
       toast({
         title: "Upgrade failed",

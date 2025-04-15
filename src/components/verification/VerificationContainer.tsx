@@ -6,8 +6,8 @@ import VerificationStatus from './VerificationStatus';
 import VerificationFlowSteps from './VerificationFlowSteps';
 import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Shield, ShieldCheck, ShieldAlert, Info } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Shield, Info } from 'lucide-react';
 import VerificationBadge from './VerificationBadge';
 
 const VerificationContainer = () => {
