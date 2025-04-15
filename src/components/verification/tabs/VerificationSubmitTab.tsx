@@ -1,23 +1,33 @@
 
-import React from 'react';
-import VerificationForm from '../form/VerificationForm';
+import React from 'react'
+import VerificationForm from '../form/VerificationForm'
+import { useVerificationProcess } from '@/hooks/verification/useVerificationProcess'
 
 interface VerificationSubmitTabProps {
-  onSubmit: (data: any) => void;
-  onComplete: () => void;
+  onSubmit: (data: any) => void
+  onComplete: () => void
 }
 
 const VerificationSubmitTab: React.FC<VerificationSubmitTabProps> = ({
-  onSubmit,
-  onComplete,
+  onComplete
 }) => {
+  const { submitVerification, loading } = useVerificationProcess()
+
+  const handleSubmit = async (data: any) => {
+    const success = await submitVerification(data)
+    if (success) {
+      onComplete()
+    }
+  }
+
   return (
     <VerificationForm 
-      onSubmit={onSubmit} 
+      onSubmit={handleSubmit} 
+      loading={loading}
       serviceType="escort"
       onSubmissionComplete={onComplete} 
     />
-  );
-};
+  )
+}
 
-export default VerificationSubmitTab;
+export default VerificationSubmitTab
