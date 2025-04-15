@@ -30,7 +30,7 @@ const VerificationDashboard = () => {
             <CardContent>
               <VerificationMetrics />
               
-              <Tabs defaultValue="pending">
+              <Tabs defaultValue="pending" className="space-y-4">
                 <TabsList>
                   <TabsTrigger value="pending">Pending</TabsTrigger>
                   <TabsTrigger value="approved">Approved</TabsTrigger>
@@ -41,6 +41,7 @@ const VerificationDashboard = () => {
                   <VerificationReviewPanel
                     onApprove={handleApprove}
                     onReject={handleReject}
+                    initialStatus="pending"
                   />
                 </TabsContent>
 
@@ -48,6 +49,7 @@ const VerificationDashboard = () => {
                   <VerificationReviewPanel
                     onApprove={handleApprove}
                     onReject={handleReject}
+                    initialStatus="approved"
                   />
                 </TabsContent>
 
@@ -55,6 +57,7 @@ const VerificationDashboard = () => {
                   <VerificationReviewPanel
                     onApprove={handleApprove}
                     onReject={handleReject}
+                    initialStatus="rejected"
                   />
                 </TabsContent>
               </Tabs>

@@ -12,6 +12,11 @@ export function useVerificationSearch(initialStatus: string | null = null) {
     to: Date | null;
   }>({ from: null, to: null });
 
+  // Update statusFilter when initialStatus changes
+  useEffect(() => {
+    setStatusFilter(initialStatus);
+  }, [initialStatus]);
+
   const { data: requests, isLoading } = useQuery({
     queryKey: ['verification-requests', searchQuery, statusFilter, levelFilter, dateRange],
     queryFn: async () => {
