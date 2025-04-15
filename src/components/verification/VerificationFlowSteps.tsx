@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Circle, CircleDot, CheckCircle2 } from 'lucide-react';
-import { VerificationStatus } from '@/types/escort';
 import { cn } from '@/lib/utils';
+import { VerificationStatus } from '@/types/escort';
 
 interface VerificationFlowStepsProps {
   status: VerificationStatus;

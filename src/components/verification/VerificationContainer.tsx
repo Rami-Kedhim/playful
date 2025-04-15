@@ -4,9 +4,8 @@ import { useLocation } from 'react-router-dom';
 import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import VerificationFlowSteps from './VerificationFlowSteps';
-import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, Info } from 'lucide-react';
 import VerificationBadge from './VerificationBadge';
 
@@ -14,7 +13,6 @@ const VerificationContainer = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>("status");
   
-  // Check if we have a tab in the location state to handle redirects
   useEffect(() => {
     if (location.state?.tab) {
       setActiveTab(location.state.tab);
@@ -26,13 +24,11 @@ const VerificationContainer = () => {
   };
 
   const handleVerificationSuccess = () => {
-    // Return to status tab after successful submission
     setActiveTab("status");
   };
 
   const handleSubmitVerification = (data: any) => {
     console.log("Verification form submitted:", data);
-    // Here you would typically submit the verification request to your backend
     handleVerificationSuccess();
   };
   
@@ -71,7 +67,43 @@ const VerificationContainer = () => {
         </TabsContent>
 
         <TabsContent value="upgrade" className="mt-6">
-          <VerificationLevelUpgrade />
+          <Card className="bg-muted/30">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center">
+                <Info className="h-4 w-4 mr-2 text-blue-500" />
+                Verification Levels
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <VerificationBadge level="basic" size="sm" showTooltip={false} />
+                  <span className="ml-2 text-sm">Basic Verification</span>
+                </div>
+                <span className="text-xs text-muted-foreground">ID Verification</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <VerificationBadge level="enhanced" size="sm" showTooltip={false} />
+                  <span className="ml-2 text-sm">Enhanced Verification</span>
+                </div>
+                <span className="text-xs text-muted-foreground">ID + Contact Verification</span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <VerificationBadge level="premium" size="sm" showTooltip={false} />
+                  <span className="ml-2 text-sm">Premium Verification</span>
+                </div>
+                <span className="text-xs text-muted-foreground">ID + In-person Verification</span>
+              </div>
+              
+              <p className="text-xs text-muted-foreground border-t border-border pt-3 mt-3">
+                Higher verification levels increase trust and visibility on the platform.
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
       
@@ -101,37 +133,30 @@ const VerificationContainer = () => {
           <CardHeader>
             <CardTitle className="text-base flex items-center">
               <Info className="h-4 w-4 mr-2 text-blue-500" />
-              Verification Levels
+              Verification Benefits
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <VerificationBadge level="basic" size="sm" showTooltip={false} />
-                <span className="ml-2 text-sm">Basic Verification</span>
+                <span className="ml-2 text-sm">Increased Visibility</span>
               </div>
-              <span className="text-xs text-muted-foreground">ID Verification</span>
+              <span className="text-xs text-muted-foreground">Higher Search Rankings</span>
             </div>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <VerificationBadge level="enhanced" size="sm" showTooltip={false} />
-                <span className="ml-2 text-sm">Enhanced Verification</span>
+                <span className="ml-2 text-sm">Priority Support</span>
               </div>
-              <span className="text-xs text-muted-foreground">ID + Contact Verification</span>
+              <span className="text-xs text-muted-foreground">24/7 Assistance</span>
             </div>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <VerificationBadge level="premium" size="sm" showTooltip={false} />
-                <span className="ml-2 text-sm">Premium Verification</span>
+                <span className="ml-2 text-sm">Trust Badge</span>
               </div>
-              <span className="text-xs text-muted-foreground">ID + In-person Verification</span>
+              <span className="text-xs text-muted-foreground">Profile Verification Mark</span>
             </div>
-            
-            <p className="text-xs text-muted-foreground border-t border-border pt-3 mt-3">
-              Higher verification levels increase trust and visibility on the platform.
-            </p>
           </CardContent>
         </Card>
       </div>
