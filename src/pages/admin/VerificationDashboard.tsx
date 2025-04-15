@@ -5,8 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import VerificationReviewPanel from '@/components/verification/admin/VerificationReviewPanel';
+import VerificationMetrics from '@/components/verification/admin/VerificationMetrics';
 import RoleGuard from '@/components/auth/RoleGuard';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useVerificationReviews } from '@/hooks/verification/useVerificationReviews';
 
 const VerificationDashboard = () => {
   const { data: requests, refetch } = useQuery({
@@ -60,9 +62,11 @@ const VerificationDashboard = () => {
         <div className="container mx-auto p-6">
           <Card>
             <CardHeader>
-              <CardTitle>Verification Requests</CardTitle>
+              <CardTitle>Verification Dashboard</CardTitle>
             </CardHeader>
             <CardContent>
+              <VerificationMetrics />
+              
               <Tabs defaultValue="pending">
                 <TabsList>
                   <TabsTrigger value="pending">Pending</TabsTrigger>
