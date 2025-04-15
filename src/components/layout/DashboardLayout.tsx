@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -40,7 +39,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const isActive = (path: string) => location.pathname.startsWith(path);
   
-  // Navigation items - dynamic based on user role
   const navigationItems = [
     {
       title: 'Dashboard',
@@ -90,9 +88,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       icon: <HelpCircle className="h-4 w-4" />,
       show: true,
     },
+    {
+      title: 'Verifications',
+      href: '/admin/verifications',
+      icon: <ShieldCheck className="h-4 w-4" />,
+      show: isAdmin() || isModerator(),
+    },
   ];
   
-  // Filter items based on user role
   const filteredItems = navigationItems.filter(item => item.show);
   
   const Sidebar = (
@@ -143,13 +146,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   return (
     <div className="flex min-h-screen">
-      {/* Desktop Sidebar - hidden on mobile */}
       <div className="hidden lg:block">
         {Sidebar}
       </div>
       
       <div className="flex flex-col flex-1">
-        {/* Top bar */}
         <header className="flex h-14 lg:h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
           <Sheet>
             <SheetTrigger asChild>
@@ -187,7 +188,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           </div>
         </header>
         
-        {/* Main content */}
         <main className="flex-1 overflow-auto">
           <div className="container py-6 md:py-8 lg:py-10">
             {children}

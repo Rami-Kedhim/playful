@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -30,6 +29,7 @@ const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage
 const WalletPage = lazy(() => import('./pages/WalletPage/index'));
 const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const PersonasPage = lazy(() => import('./pages/Personas'));
+const VerificationDashboard = lazy(() => import('./pages/admin/VerificationDashboard'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -65,6 +65,16 @@ const RoutesComponent: React.FC = () => {
         <Route path={AppRoutes.WALLET} element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
         <Route path="/verification" element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
         <Route path="/personas" element={<AppLayout><PersonasPage /></AppLayout>} />
+        
+        {/* Add verification admin route */}
+        <Route 
+          path="/admin/verifications" 
+          element={
+            <ProtectedRoute>
+              <VerificationDashboard />
+            </ProtectedRoute>
+          } 
+        />
         
         {/* 404 route */}
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
