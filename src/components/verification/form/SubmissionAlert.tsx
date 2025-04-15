@@ -1,43 +1,23 @@
 
 import React from 'react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle, InfoIcon } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface SubmissionAlertProps {
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error';
   title?: string;
   message: string;
 }
 
 const SubmissionAlert: React.FC<SubmissionAlertProps> = ({ type, title, message }) => {
-  const getIcon = () => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'error':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'info':
-      default:
-        return <InfoIcon className="h-4 w-4" />;
-    }
-  };
-
-  const getVariant = () => {
-    switch (type) {
-      case 'success':
-        return 'default';
-      case 'error':
-        return 'destructive';
-      case 'info':
-      default:
-        return 'default';
-    }
-  };
+  const isError = type === 'error';
+  const Icon = isError ? AlertTriangle : CheckCircle;
+  const defaultTitle = isError ? 'Error' : 'Success';
 
   return (
-    <Alert variant={getVariant()} className="mb-4">
-      {getIcon()}
-      {title && <AlertTitle>{title}</AlertTitle>}
+    <Alert variant={isError ? 'destructive' : 'default'} className="mb-6">
+      <Icon className="h-4 w-4" />
+      <AlertTitle>{title || defaultTitle}</AlertTitle>
       <AlertDescription>{message}</AlertDescription>
     </Alert>
   );

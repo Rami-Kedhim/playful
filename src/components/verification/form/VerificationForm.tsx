@@ -1,113 +1,179 @@
-
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Card, CardContent } from '@/components/ui/card';
+import { useForm } from 'react-hook-form';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
-import { verificationFormSchema, VerificationFormValues, DOCUMENT_TYPES } from '@/types/verification';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
+import { verificationFormSchema, VerificationFormValues } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
+import SubmissionAlert from './SubmissionAlert';
+import SuccessCard from './SuccessCard';
 
 interface VerificationFormProps {
-  onSubmit: (data: VerificationFormValues) => void;
+  onSubmit?: (data: VerificationFormValues) => void;
   loading?: boolean;
-  serviceType: 'escort' | 'creator' | 'livecam';
+  serviceType?: string;
   onSubmissionComplete?: () => void;
 }
 
 const VerificationForm: React.FC<VerificationFormProps> = ({ 
-  onSubmit, 
-  loading = false,
-  serviceType,
+  onSubmit: externalSubmit, 
+  loading: externalLoading = false,
+  serviceType = 'escort',
   onSubmissionComplete
 }) => {
-  const [documentType, setDocumentType] = useState<string>(DOCUMENT_TYPES.ID_CARD);
-  
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(true);
+  const [submitMessage, setSubmitMessage] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
+
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: DOCUMENT_TYPES.ID_CARD,
-    }
+      documentType: 'id_card',
+      documentFrontImage: undefined,
+      documentBackImage: undefined,
+      selfieImage: undefined,
+    },
   });
-  
-  const needsBackImage = documentType === DOCUMENT_TYPES.ID_CARD || 
-                        documentType === DOCUMENT_TYPES.DRIVERS_LICENSE;
-                         
-  const getServiceSpecificMessage = () => {
-    switch (serviceType) {
-      case 'escort':
-        return "For escort verification, please ensure your ID clearly shows your age as 18+ and matches your profile information.";
-      case 'creator':
-        return "Content creators must verify their identity to ensure compliance with content policies and age verification requirements.";
-      case 'livecam':
-        return "Livecam performers need to be verified to ensure they are eligible to perform on our platform.";
-      default:
-        return "Please upload your documents for verification.";
+
+  useEffect(() => {
+    if (user) {
+      const checkSubmitEligibility = async () => {
+        const result = await canSubmitVerification(user.id);
+        setCanSubmit(result.canSubmit);
+        
+        if (!result.canSubmit) {
+          setSubmitMessage({
+            success: false,
+            message: result.reason || "You cannot submit a verification request at this time"
+          });
+        }
+      };
+      
+      checkSubmitEligibility();
+    }
+  }, [user]);
+
+  const onSubmit = async (data: VerificationFormValues) => {
+    if (externalSubmit) {
+      externalSubmit(data);
+      return;
+    }
+
+    if (!user) return;
+    
+    setLoading(true);
+    
+    try {
+      const result = await submitVerificationRequest(
+        user.id,
+        data.documentType,
+        data.documentFrontImage.file,
+        data.documentBackImage?.file || null,
+        data.selfieImage.file
+      );
+      
+      setSubmitMessage({
+        success: result.success,
+        message: result.message
+      });
+      
+      if (result.success) {
+        setSubmitted(true);
+        form.reset();
+        
+        if (onSubmissionComplete) {
+          onSubmissionComplete();
+        }
+      }
+    } catch (error) {
+      console.error("Verification submission error:", error);
+      setSubmitMessage({
+        success: false,
+        message: "An unexpected error occurred. Please try again later."
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleFormSubmit = async (data: VerificationFormValues) => {
-    await onSubmit(data);
-    if (onSubmissionComplete) {
-      onSubmissionComplete();
-    }
-  };
+  if (submitted) {
+    return <SuccessCard />;
+  }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
-        <div className="text-sm text-muted-foreground mb-6">
-          {getServiceSpecificMessage()}
-        </div>
-        
-        <div className="space-y-4">
-          <DocumentTypeSelect form={form} />
+    <Card>
+      <CardHeader>
+        <CardTitle>Identity Verification</CardTitle>
+        <CardDescription>
+          To ensure platform safety, we require identity verification for all users offering services.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {!canSubmit && submitMessage && (
+          <SubmissionAlert 
+            type="error" 
+            title="Cannot Submit" 
+            message={submitMessage.message} 
+          />
+        )}
 
-          <Card>
-            <CardContent className="pt-6">
-              <DocumentImageUpload
-                form={form}
-                fieldName="documentFrontImage"
-                label="Front of ID Document"
-                description="Upload a clear photo of the front of your ID document. Max 5MB."
-              />
-            </CardContent>
-          </Card>
-          
-          {needsBackImage && (
-            <Card>
-              <CardContent className="pt-6">
-                <DocumentImageUpload
-                  form={form}
-                  fieldName="documentBackImage"
-                  label="Back of ID Document (Optional for Passport)"
-                  description="Upload a clear photo of the back of your ID document. Required for ID cards and driver's licenses."
-                  optional={true}
-                />
-              </CardContent>
-            </Card>
-          )}
-          
-          <Card>
-            <CardContent className="pt-6">
-              <DocumentImageUpload
-                form={form}
-                fieldName="selfieImage"
-                label="Selfie with Document"
-                description="Upload a selfie of yourself holding your ID document next to your face. Your face and the ID must be clearly visible."
-              />
-            </CardContent>
-          </Card>
-        </div>
-        
-        <SubmitButton 
-          loading={loading} 
-          text="Submit Verification"
-          loadingText="Submitting verification..."
-        />
-      </form>
-    </Form>
+        {submitMessage && submitMessage.success === false && canSubmit && (
+          <SubmissionAlert 
+            type="error" 
+            message={submitMessage.message} 
+          />
+        )}
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <DocumentTypeSelect form={form} />
+
+            <DocumentImageUpload
+              form={form}
+              fieldName="documentFrontImage"
+              label="Front of ID Document"
+              description="Upload a clear photo of the front of your ID document. Max 5MB."
+            />
+
+            <DocumentImageUpload
+              form={form}
+              fieldName="documentBackImage"
+              label="Back of ID Document (Optional for Passport)"
+              description="Upload a clear photo of the back of your ID document. Required for ID cards and driver's licenses."
+              optional={true}
+            />
+
+            <DocumentImageUpload
+              form={form}
+              fieldName="selfieImage"
+              label="Selfie with ID"
+              description="Upload a selfie of yourself holding your ID document next to your face. Your face and the ID must be clearly visible."
+            />
+
+            <SubmitButton 
+              loading={loading || externalLoading} 
+              disabled={!canSubmit} 
+              text="Submit Verification"
+            />
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter className="flex flex-col">
+        <p className="text-sm text-gray-500">
+          Your verification information is encrypted and only used for identity verification purposes.
+          We follow strict privacy guidelines and never share your personal information.
+        </p>
+      </CardFooter>
+    </Card>
   );
 };
 
