@@ -1,14 +1,12 @@
 
 import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Form } from '@/components/ui/form';
 import { verificationFormSchema, VerificationFormValues, DOCUMENT_TYPES } from '@/types/verification';
-import ImageDropzone from '../utils/ImageDropzone';
+import DocumentTypeSelect from './DocumentTypeSelect';
+import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
 
 interface VerificationFormProps {
@@ -26,7 +24,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
 }) => {
   const [documentType, setDocumentType] = useState<string>(DOCUMENT_TYPES.ID_CARD);
   
-  const { control, handleSubmit, formState: { errors } } = useForm<VerificationFormValues>({
+  const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
       documentType: DOCUMENT_TYPES.ID_CARD,
@@ -34,9 +32,8 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   });
   
   const needsBackImage = documentType === DOCUMENT_TYPES.ID_CARD || 
-                         documentType === DOCUMENT_TYPES.DRIVERS_LICENSE;
+                        documentType === DOCUMENT_TYPES.DRIVERS_LICENSE;
                          
-  // Service-specific messages
   const getServiceSpecificMessage = () => {
     switch (serviceType) {
       case 'escort':
@@ -58,128 +55,59 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      <div className="text-sm text-muted-foreground mb-6">
-        {getServiceSpecificMessage()}
-      </div>
-      
-      <div className="space-y-4">
-        <div>
-          <Label>Document Type</Label>
-          <Controller
-            name="documentType"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup 
-                value={field.value} 
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  setDocumentType(value);
-                }}
-                className="flex flex-col space-y-1 mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={DOCUMENT_TYPES.ID_CARD} id="id_card" />
-                  <Label htmlFor="id_card">ID Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={DOCUMENT_TYPES.PASSPORT} id="passport" />
-                  <Label htmlFor="passport">Passport</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={DOCUMENT_TYPES.DRIVERS_LICENSE} id="drivers_license" />
-                  <Label htmlFor="drivers_license">Driver's License</Label>
-                </div>
-              </RadioGroup>
-            )}
-          />
-          {errors.documentType && (
-            <p className="text-red-500 text-xs mt-1">{errors.documentType.message}</p>
-          )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+        <div className="text-sm text-muted-foreground mb-6">
+          {getServiceSpecificMessage()}
         </div>
         
-        <Card>
-          <CardContent className="pt-6">
-            <Label>Front Image of Document</Label>
-            <Controller
-              name="documentFrontImage"
-              control={control}
-              render={({ field }) => (
-                <ImageDropzone
-                  onFileSelect={(file) => field.onChange(file)}
-                  currentFile={field.value}
-                  label="Drop front image here or click to browse"
-                  maxSize={5}
-                  acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}
-                  className="mt-2"
-                />
-              )}
-            />
-            {errors.documentFrontImage && (
-              <p className="text-red-500 text-xs mt-1">{errors.documentFrontImage.message}</p>
-            )}
-          </CardContent>
-        </Card>
-        
-        {needsBackImage && (
+        <div className="space-y-4">
+          <DocumentTypeSelect form={form} />
+
           <Card>
             <CardContent className="pt-6">
-              <Label>Back Image of Document</Label>
-              <Controller
-                name="documentBackImage"
-                control={control}
-                render={({ field }) => (
-                  <ImageDropzone
-                    onFileSelect={(file) => field.onChange(file)}
-                    currentFile={field.value}
-                    label="Drop back image here or click to browse"
-                    maxSize={5}
-                    acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}
-                    className="mt-2"
-                  />
-                )}
+              <DocumentImageUpload
+                form={form}
+                fieldName="documentFrontImage"
+                label="Front of ID Document"
+                description="Upload a clear photo of the front of your ID document. Max 5MB."
               />
-              {errors.documentBackImage && (
-                <p className="text-red-500 text-xs mt-1">{errors.documentBackImage.message}</p>
-              )}
             </CardContent>
           </Card>
-        )}
-        
-        <Card>
-          <CardContent className="pt-6">
-            <Label>Selfie with Document</Label>
-            <div className="text-xs text-muted-foreground mb-2">
-              Please take a photo holding your ID next to your face
-            </div>
-            <Controller
-              name="selfieImage"
-              control={control}
-              render={({ field }) => (
-                <ImageDropzone
-                  onFileSelect={(file) => field.onChange(file)}
-                  currentFile={field.value}
-                  label="Drop selfie image here or click to browse"
-                  maxSize={5}
-                  acceptedTypes={['image/jpeg', 'image/png', 'image/webp']}
+          
+          {needsBackImage && (
+            <Card>
+              <CardContent className="pt-6">
+                <DocumentImageUpload
+                  form={form}
+                  fieldName="documentBackImage"
+                  label="Back of ID Document (Optional for Passport)"
+                  description="Upload a clear photo of the back of your ID document. Required for ID cards and driver's licenses."
+                  optional={true}
                 />
-              )}
-            />
-            {errors.selfieImage && (
-              <p className="text-red-500 text-xs mt-1">{errors.selfieImage.message}</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="flex justify-end">
+              </CardContent>
+            </Card>
+          )}
+          
+          <Card>
+            <CardContent className="pt-6">
+              <DocumentImageUpload
+                form={form}
+                fieldName="selfieImage"
+                label="Selfie with Document"
+                description="Upload a selfie of yourself holding your ID document next to your face. Your face and the ID must be clearly visible."
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
         <SubmitButton 
           loading={loading} 
-          loadingText="Submitting verification..." 
-          text="Submit Verification" 
+          text="Submit Verification"
+          loadingText="Submitting verification..."
         />
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 };
 
