@@ -1,27 +1,46 @@
+
 import React, { useState } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { VerificationStatusIndicator } from '@/components/verification';
 import { VerificationRequest } from '@/types/escort';
 import ReviewRequestModal from './ReviewRequestModal';
+import { VerificationFilters } from './VerificationFilters';
+import { useVerificationSearch } from '@/hooks/verification/useVerificationSearch';
 
 interface VerificationReviewPanelProps {
-  requests: VerificationRequest[];
   onApprove: (requestId: string) => void;
   onReject: (requestId: string, reason?: string) => void;
 }
 
 const VerificationReviewPanel = ({
-  requests,
   onApprove,
   onReject
 }: VerificationReviewPanelProps) => {
   const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
+  const {
+    requests,
+    isLoading,
+    setSearchQuery,
+    setStatusFilter,
+    setLevelFilter,
+    setDateRange
+  } = useVerificationSearch();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="w-full">
-      <h2 className="text-xl font-bold mb-4">Verification Requests</h2>
+    <div className="w-full space-y-6">
+      <VerificationFilters
+        onSearchChange={setSearchQuery}
+        onStatusChange={setStatusFilter}
+        onLevelChange={setLevelFilter}
+        onDateRangeChange={setDateRange}
+      />
+
       <Table>
         <TableHeader>
           <TableRow>
