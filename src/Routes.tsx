@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -30,6 +29,7 @@ const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage
 const ServiceTypeDemo = lazy(() => import('./pages/ServiceTypeDemo'));
 const WalletPage = lazy(() => import('./pages/Wallet'));
 const UpdatedWalletPage = lazy(() => import('./pages/UpdatedWallet'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -109,6 +109,13 @@ const AppRoutes: React.FC = () => {
         
         {/* 404 route */}
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
+        
+        {/* Notifications route */}
+        <Route path="/notifications" element={
+          <ProtectedRoute>
+            <AppLayout><NotificationsPage /></AppLayout>
+          </ProtectedRoute>
+        } />
       </RouterRoutes>
     </Suspense>
   );

@@ -21,7 +21,7 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-
+  
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
     if (!user?.id) return;
