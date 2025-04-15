@@ -3,7 +3,7 @@ import React from 'react';
 import { Search, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 
 interface VerificationFiltersProps {
   onSearchChange: (value: string) => void;
@@ -54,9 +54,9 @@ const VerificationFilters = ({
           </SelectContent>
         </Select>
 
-        <DateRangePicker
+        <DatePickerWithRange
           onChange={onDateRangeChange}
-          placeholder="Filter by date"
+          className="w-full"
         />
       </div>
     </div>

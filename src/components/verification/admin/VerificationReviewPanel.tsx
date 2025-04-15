@@ -6,7 +6,7 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import { VerificationStatusIndicator } from '@/components/verification';
 import { VerificationRequest } from '@/types/escort';
 import ReviewRequestModal from './ReviewRequestModal';
-import { VerificationFilters } from './VerificationFilters';
+import VerificationFilters from './VerificationFilters';
 import { useVerificationSearch } from '@/hooks/verification/useVerificationSearch';
 
 interface VerificationReviewPanelProps {
