@@ -1,12 +1,7 @@
 
 import React from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  AlertTriangle 
-} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 import { VerificationStatus } from '@/types/escort';
 
 interface VerificationStatusIndicatorProps {
@@ -24,12 +19,12 @@ const VerificationStatusIndicator = ({
 }: VerificationStatusIndicatorProps) => {
   const sizeClasses = {
     sm: 'text-xs py-0.5 px-1.5',
-    md: 'text-xs py-1 px-2',
-    lg: 'text-sm py-1 px-2.5',
+    md: 'text-sm py-1 px-2',
+    lg: 'text-sm py-1.5 px-2.5',
   };
-  
+
   const iconSize = size === 'sm' ? 'h-3 w-3 mr-1' : size === 'lg' ? 'h-5 w-5 mr-1.5' : 'h-4 w-4 mr-1';
-  
+
   switch (status) {
     case 'approved':
       return (

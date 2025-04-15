@@ -26,7 +26,6 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   
   useEffect(() => {
-    // Calculate time until expiration if applicable
     if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'in_review') {
       const updateRemainingTime = () => {
         const estimatedCompletionMs = new Date(verificationRequest.submittedAt).getTime() + 48 * 60 * 60 * 1000; // 48 hours
@@ -44,7 +43,6 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
         setTimeRemaining(`${diffHrs}h ${diffMins}m remaining`);
       };
       
-      // Update immediately and then every minute
       updateRemainingTime();
       const interval = setInterval(updateRemainingTime, 60 * 1000);
       
