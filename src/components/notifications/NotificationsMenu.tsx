@@ -54,7 +54,7 @@ const NotificationsMenu = () => {
                 message={notification.content}
                 type={notification.type}
                 isRead={notification.is_read}
-                createdAt={notification.created_at}
+                createdAt={notification.created_at.toString()}
                 onMarkAsRead={markAsRead}
               />
             ))
