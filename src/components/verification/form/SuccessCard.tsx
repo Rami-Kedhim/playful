@@ -1,33 +1,30 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { CircleCheck } from 'lucide-react';
 
 const SuccessCard = () => {
   return (
-    <Card className="border-green-100 dark:border-green-900 shadow-md">
-      <CardHeader className="bg-green-50 dark:bg-green-900/20 border-b border-green-100 dark:border-green-800">
-        <CardTitle className="flex items-center text-xl text-green-700 dark:text-green-400">
-          <CheckCircle className="h-6 w-6 text-green-500 mr-2" />
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center text-lg text-green-500">
+          <CircleCheck className="h-5 w-5 mr-2" />
           Verification Submitted Successfully
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 pt-6">
+      <CardContent className="space-y-4">
         <p className="text-muted-foreground">
-          Your verification documents have been submitted successfully and are now being processed. Our team will review your submission and update your status shortly.
+          Your verification request has been submitted and will be reviewed by our team.
+          This typically takes 24-48 hours.
         </p>
-        <p className="text-muted-foreground">
-          You can check the status of your verification request in your profile dashboard.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-6">
-          <Button variant="outline" asChild>
-            <Link to="/verification/status">Check Status</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/dashboard">Go to Dashboard</Link>
-          </Button>
+        
+        <div className="bg-muted/30 p-4 rounded-md space-y-2">
+          <h4 className="text-sm font-medium">What happens next?</h4>
+          <ul className="text-sm text-muted-foreground space-y-1">
+            <li>• Our team will review your submitted documents</li>
+            <li>• You'll receive a notification when the review is complete</li>
+            <li>• You can check the status of your verification at any time</li>
+          </ul>
         </div>
       </CardContent>
     </Card>

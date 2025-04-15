@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Form } from '@/components/ui/form';
-import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { verificationFormSchema, VerificationFormValues } from '../utils/formUtils';
@@ -97,8 +96,6 @@ const VerificationForm = ({ onSubmissionComplete }: VerificationFormProps) => {
           <FileUploadInstructions />
           
           <FormError message={formError} />
-          
-          <Separator />
           
           <div className="pt-2">
             <SubmitButton 
