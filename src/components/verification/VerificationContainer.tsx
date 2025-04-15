@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import VerificationFlowSteps from './VerificationFlowSteps';
+import { VerificationStatusTimeline } from './status/VerificationStatusTimeline';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, Info } from 'lucide-react';
@@ -42,70 +42,72 @@ const VerificationContainer = () => {
         Complete verification to enhance trust and access all platform features
       </p>
       
-      <VerificationFlowSteps 
-        status={activeTab === "submit" ? "pending" : "in_review"} 
-        className="mb-6"
-      />
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="status">Verification Status</TabsTrigger>
-          <TabsTrigger value="submit">Submit Verification</TabsTrigger>
-          <TabsTrigger value="upgrade">Upgrade Level</TabsTrigger>
-        </TabsList>
+      <div className="grid gap-6">
+        <VerificationFlowSteps 
+          status={activeTab === "submit" ? "pending" : "in_review"} 
+        />
         
-        <TabsContent value="status" className="mt-6">
-          <VerificationStatus onStartVerification={handleStartVerification} />
-        </TabsContent>
-        
-        <TabsContent value="submit" className="mt-6">
-          <VerificationForm 
-            onSubmit={handleSubmitVerification} 
-            serviceType="escort"
-            onSubmissionComplete={handleVerificationSuccess} 
-          />
-        </TabsContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="status">Verification Status</TabsTrigger>
+            <TabsTrigger value="submit">Submit Verification</TabsTrigger>
+            <TabsTrigger value="upgrade">Upgrade Level</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="status" className="mt-6 space-y-4">
+            <VerificationStatus onStartVerification={handleStartVerification} />
+            <VerificationStatusTimeline status="in_review" />
+          </TabsContent>
+          
+          <TabsContent value="submit" className="mt-6">
+            <VerificationForm 
+              onSubmit={handleSubmitVerification} 
+              serviceType="escort"
+              onSubmissionComplete={handleVerificationSuccess} 
+            />
+          </TabsContent>
 
-        <TabsContent value="upgrade" className="mt-6">
-          <Card className="bg-muted/30">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center">
-                <Info className="h-4 w-4 mr-2 text-blue-500" />
-                Verification Levels
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <VerificationBadge level="basic" size="sm" showTooltip={false} />
-                  <span className="ml-2 text-sm">Basic Verification</span>
+          <TabsContent value="upgrade" className="mt-6">
+            <Card className="bg-muted/30">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center">
+                  <Info className="h-4 w-4 mr-2 text-blue-500" />
+                  Verification Levels
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <VerificationBadge level="basic" size="sm" showTooltip={false} />
+                    <span className="ml-2 text-sm">Basic Verification</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">ID Verification</span>
                 </div>
-                <span className="text-xs text-muted-foreground">ID Verification</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <VerificationBadge level="enhanced" size="sm" showTooltip={false} />
-                  <span className="ml-2 text-sm">Enhanced Verification</span>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <VerificationBadge level="enhanced" size="sm" showTooltip={false} />
+                    <span className="ml-2 text-sm">Enhanced Verification</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">ID + Contact Verification</span>
                 </div>
-                <span className="text-xs text-muted-foreground">ID + Contact Verification</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <VerificationBadge level="premium" size="sm" showTooltip={false} />
-                  <span className="ml-2 text-sm">Premium Verification</span>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <VerificationBadge level="premium" size="sm" showTooltip={false} />
+                    <span className="ml-2 text-sm">Premium Verification</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">ID + In-person Verification</span>
                 </div>
-                <span className="text-xs text-muted-foreground">ID + In-person Verification</span>
-              </div>
-              
-              <p className="text-xs text-muted-foreground border-t border-border pt-3 mt-3">
-                Higher verification levels increase trust and visibility on the platform.
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                
+                <p className="text-xs text-muted-foreground border-t border-border pt-3 mt-3">
+                  Higher verification levels increase trust and visibility on the platform.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         <Card className="bg-muted/30">
