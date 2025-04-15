@@ -1,22 +1,27 @@
 
 import React from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertCircle, FileCheck } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const DocumentRequirements = () => {
   return (
-    <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 flex items-start">
-      <AlertTriangle className="h-5 w-5 text-amber-500 mr-2 mt-0.5 flex-shrink-0" />
-      <div className="space-y-1">
-        <h4 className="font-medium text-sm">Document requirements</h4>
-        <ul className="text-xs text-muted-foreground space-y-1">
-          <li>• Government-issued ID, passport, or driver's license only</li>
-          <li>• Documents must be valid and not expired</li>
-          <li>• All text must be clearly readable</li>
-          <li>• Photos must be in color and well-lit</li>
-          <li>• No digital modifications or screenshots</li>
+    <Alert>
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Document Requirements</AlertTitle>
+      <AlertDescription className="space-y-2 mt-2">
+        <ul className="list-disc pl-4 space-y-1">
+          <li>Document must be valid and not expired</li>
+          <li>All text must be clearly readable</li>
+          <li>Images must be in color and high resolution</li>
+          <li>No glare or reflections on the document</li>
+          <li>All corners of the document must be visible</li>
         </ul>
-      </div>
-    </div>
+        <div className="flex items-center gap-2 text-sm mt-4 text-muted-foreground">
+          <FileCheck className="h-4 w-4" />
+          <span>Accepted formats: JPG, PNG, or WEBP (max 5MB)</span>
+        </div>
+      </AlertDescription>
+    </Alert>
   );
 };
 

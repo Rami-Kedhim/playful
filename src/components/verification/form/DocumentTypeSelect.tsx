@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
+import { DOCUMENT_TYPES, getDocumentTypeLabel } from '@/utils/verification/documentTypes';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { VerificationFormValues } from '../utils/formUtils';
 
@@ -25,7 +26,7 @@ const DocumentTypeSelect = ({ form }: DocumentTypeSelectProps) => {
                 field.onChange(value);
                 
                 // If changing to passport, reset back image since it's optional
-                if (value === 'passport') {
+                if (value === DOCUMENT_TYPES.PASSPORT) {
                   form.setValue('documentBackImage', undefined);
                 }
               }}
@@ -34,9 +35,11 @@ const DocumentTypeSelect = ({ form }: DocumentTypeSelectProps) => {
                 <SelectValue placeholder="Select document type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="passport">Passport</SelectItem>
-                <SelectItem value="id_card">ID Card</SelectItem>
-                <SelectItem value="driver_license">Driver's License</SelectItem>
+                {Object.entries(DOCUMENT_TYPES).map(([key, value]) => (
+                  <SelectItem key={key} value={value}>
+                    {getDocumentTypeLabel(value as keyof typeof DOCUMENT_TYPES)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </FormControl>
