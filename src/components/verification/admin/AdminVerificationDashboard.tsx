@@ -11,7 +11,7 @@ const AdminVerificationDashboard = () => {
   const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
-  const { data: requests, refetch } = useQuery({
+  const { refetch } = useQuery({
     queryKey: ['verification-requests'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -84,13 +84,12 @@ const AdminVerificationDashboard = () => {
   return (
     <div className="container mx-auto p-6">
       <VerificationReviewPanel
-        requests={requests || []}
         onApprove={(id) => {
-          setSelectedRequest(requests?.find(r => r.id === id) || null);
+          setSelectedRequest({ id } as VerificationRequest);
           setIsReviewModalOpen(true);
         }}
         onReject={(id) => {
-          setSelectedRequest(requests?.find(r => r.id === id) || null);
+          setSelectedRequest({ id } as VerificationRequest);
           setIsReviewModalOpen(true);
         }}
       />

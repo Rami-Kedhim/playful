@@ -52,7 +52,7 @@ const VerificationReviewPanel = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {requests.map((request) => (
+          {requests && requests.map((request) => (
             <TableRow key={request.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedRequest(request)}>
               <TableCell>
                 {new Date(request.submittedAt).toLocaleDateString()}

@@ -1,11 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-export function useVerificationSearch() {
+export function useVerificationSearch(initialStatus: string | null = null) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(initialStatus);
   const [levelFilter, setLevelFilter] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<{
     from: Date | null;

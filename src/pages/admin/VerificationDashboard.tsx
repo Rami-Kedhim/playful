@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import VerificationReviewPanel from '@/components/verification/admin/VerificationReviewPanel';
@@ -11,49 +9,14 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useVerificationReviews } from '@/hooks/verification/useVerificationReviews';
 
 const VerificationDashboard = () => {
-  const { data: requests, refetch } = useQuery({
-    queryKey: ['verification-requests'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('verification_requests')
-        .select(`
-          *,
-          profile:profiles(username, email)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    }
-  });
+  const { approveRequest, rejectRequest } = useVerificationReviews();
 
   const handleApprove = async (requestId: string) => {
-    const { error } = await supabase
-      .from('verification_requests')
-      .update({ 
-        status: 'approved',
-        reviewed_at: new Date().toISOString()
-      })
-      .eq('id', requestId);
-
-    if (!error) {
-      refetch();
-    }
+    await approveRequest(requestId);
   };
 
   const handleReject = async (requestId: string, reason?: string) => {
-    const { error } = await supabase
-      .from('verification_requests')
-      .update({ 
-        status: 'rejected',
-        reviewer_notes: reason,
-        reviewed_at: new Date().toISOString()
-      })
-      .eq('id', requestId);
-
-    if (!error) {
-      refetch();
-    }
+    await rejectRequest(requestId, reason);
   };
 
   return (
@@ -76,7 +39,6 @@ const VerificationDashboard = () => {
 
                 <TabsContent value="pending">
                   <VerificationReviewPanel
-                    requests={requests?.filter(r => r.status === 'pending') || []}
                     onApprove={handleApprove}
                     onReject={handleReject}
                   />
@@ -84,7 +46,6 @@ const VerificationDashboard = () => {
 
                 <TabsContent value="approved">
                   <VerificationReviewPanel
-                    requests={requests?.filter(r => r.status === 'approved') || []}
                     onApprove={handleApprove}
                     onReject={handleReject}
                   />
@@ -92,7 +53,6 @@ const VerificationDashboard = () => {
 
                 <TabsContent value="rejected">
                   <VerificationReviewPanel
-                    requests={requests?.filter(r => r.status === 'rejected') || []}
                     onApprove={handleApprove}
                     onReject={handleReject}
                   />
