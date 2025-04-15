@@ -12,11 +12,13 @@ import { useVerificationSearch } from '@/hooks/verification/useVerificationSearc
 interface VerificationReviewPanelProps {
   onApprove: (requestId: string) => void;
   onReject: (requestId: string, reason?: string) => void;
+  initialStatus?: string | null;
 }
 
 const VerificationReviewPanel = ({
   onApprove,
-  onReject
+  onReject,
+  initialStatus
 }: VerificationReviewPanelProps) => {
   const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
   const {
@@ -26,7 +28,7 @@ const VerificationReviewPanel = ({
     setStatusFilter,
     setLevelFilter,
     setDateRange
-  } = useVerificationSearch();
+  } = useVerificationSearch(initialStatus);
 
   if (isLoading) {
     return <div>Loading...</div>;
