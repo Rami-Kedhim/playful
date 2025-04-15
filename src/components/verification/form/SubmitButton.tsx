@@ -2,32 +2,27 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-
-interface SubmitButtonProps {
-  loading?: boolean;
-  loadingText?: string;
-  text: string;
-  disabled?: boolean;
-}
+import { SubmitButtonProps } from '@/types/verification';
 
 const SubmitButton: React.FC<SubmitButtonProps> = ({ 
   loading = false, 
-  loadingText = "Loading...", 
-  text,
-  disabled = false
+  disabled = false,
+  text 
 }) => {
   return (
-    <Button 
-      type="submit" 
-      className="w-full" 
-      disabled={loading || disabled}
+    <Button
+      type="submit"
+      disabled={disabled || loading}
+      className="w-full"
     >
       {loading ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {loadingText}
+          Processing...
         </>
-      ) : text}
+      ) : (
+        text
+      )}
     </Button>
   );
 };

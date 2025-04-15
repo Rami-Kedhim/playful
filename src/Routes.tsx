@@ -9,7 +9,7 @@ import { AppRoutes } from '@/utils/navigation';
 // Auth page
 import AuthPage from './pages/AuthPage';
 
-// Use lazy loading for route components
+// Lazy loaded components
 const HomePage = lazy(() => import('./pages/Index'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
@@ -27,7 +27,7 @@ const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
-const WalletPage = lazy(() => import('./pages/WalletPage'));
+const WalletPage = lazy(() => import('./pages/WalletPage/index'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -36,7 +36,6 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Main routes component
 const RoutesComponent: React.FC = () => {
   return (
     <Suspense fallback={<LoadingFallback />}>
@@ -61,7 +60,7 @@ const RoutesComponent: React.FC = () => {
         <Route path={AppRoutes.LIVECAM_DETAIL} element={<AppLayout><LivecamDetail /></AppLayout>} />
         <Route path={AppRoutes.BRAIN_HUB} element={<ProtectedRoute><AppLayout><BrainHubPage /></AppLayout></ProtectedRoute>} />
         <Route path="/nsfw-image-generator" element={<ProtectedRoute><AppLayout><NSFWImageGeneratorPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/wallet" element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
+        <Route path={AppRoutes.WALLET} element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
         
         {/* 404 route */}
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
