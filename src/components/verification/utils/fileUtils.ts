@@ -24,3 +24,24 @@ export const formatFileSize = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 };
+
+export const createFilePreview = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+export const createFileWithPreview = async (file: File): Promise<FileWithPreview> => {
+  try {
+    const previewUrl = await createFilePreview(file);
+    return { file, previewUrl };
+  } catch (error) {
+    console.error('Error creating file preview:', error);
+    return { file };
+  }
+};

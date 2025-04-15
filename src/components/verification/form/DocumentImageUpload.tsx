@@ -5,7 +5,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { VerificationFormValues } from '../utils/formUtils';
 import ImageDropzone from '../utils/ImageDropzone';
 import DocumentPreview from './DocumentPreview';
-import { isFileWithPreview } from '../utils/fileUtils';
+import { isFileWithPreview, createFileWithPreview, FileWithPreview } from '../utils/fileUtils';
 
 interface DocumentImageUploadProps {
   form: UseFormReturn<VerificationFormValues>;
@@ -39,12 +39,18 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
             {isFileWithPreview(field.value) ? (
               <DocumentPreview 
                 file={field.value.file}
+                previewUrl={field.value.previewUrl}
                 onRemove={() => field.onChange(undefined)}
               />
             ) : (
               <ImageDropzone
-                onFileSelect={(fileObj) => {
-                  field.onChange(fileObj && 'file' in fileObj ? { file: fileObj.file } : undefined);
+                onFileSelect={async (fileObj) => {
+                  if (fileObj && 'file' in fileObj) {
+                    const fileWithPreview = await createFileWithPreview(fileObj.file);
+                    field.onChange(fileWithPreview);
+                  } else {
+                    field.onChange(undefined);
+                  }
                 }}
                 currentFile={isFileWithPreview(field.value) ? field.value : undefined}
                 error={form.formState.errors[fieldName]?.message?.toString()}

@@ -5,14 +5,15 @@ import { Button } from '@/components/ui/button';
 
 interface DocumentPreviewProps {
   file: File;
+  previewUrl?: string;
   onRemove: () => void;
 }
 
-const DocumentPreview: React.FC<DocumentPreviewProps> = ({ file, onRemove }) => {
-  const [preview, setPreview] = React.useState<string | null>(null);
+const DocumentPreview: React.FC<DocumentPreviewProps> = ({ file, previewUrl, onRemove }) => {
+  const [preview, setPreview] = React.useState<string | null>(previewUrl || null);
 
   React.useEffect(() => {
-    if (file) {
+    if (!previewUrl && file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
@@ -20,7 +21,7 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({ file, onRemove }) => 
       reader.readAsDataURL(file);
     }
     return () => setPreview(null);
-  }, [file]);
+  }, [file, previewUrl]);
 
   if (!preview) {
     return null;
