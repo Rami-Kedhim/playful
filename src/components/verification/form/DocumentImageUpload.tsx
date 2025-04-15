@@ -11,6 +11,8 @@ interface DocumentImageUploadProps {
   label: string;
   description: string;
   optional?: boolean;
+  maxSizeMB?: number;
+  allowedFileTypes?: string[];
 }
 
 const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
@@ -18,7 +20,9 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
   fieldName,
   label,
   description,
-  optional = false
+  optional = false,
+  maxSizeMB = 5,
+  allowedFileTypes = ['image/jpeg', 'image/png', 'image/webp']
 }) => {
   return (
     <FormField
@@ -37,9 +41,17 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
               }}
               currentFile={field.value && typeof field.value === 'object' && 'file' in field.value ? field.value : undefined}
               error={form.formState.errors[fieldName]?.message?.toString()}
+              maxSize={maxSizeMB}
+              acceptedTypes={allowedFileTypes}
             />
           </FormControl>
-          <FormDescription>{description}</FormDescription>
+          <FormDescription>
+            {description} 
+            <p className="text-xs text-muted-foreground mt-1">
+              Accepted file types: {allowedFileTypes.map(type => type.split('/')[1]).join(', ')}. 
+              Maximum file size: {maxSizeMB}MB.
+            </p>
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}
