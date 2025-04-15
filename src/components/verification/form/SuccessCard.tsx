@@ -1,24 +1,42 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 
 const SuccessCard: React.FC = () => {
   return (
-    <Card className="w-full text-center">
-      <CardHeader className="pb-2">
-        <div className="flex justify-center mb-2">
-          <CheckCircle2 className="h-16 w-16 text-green-500" />
+    <Card className="border-green-200 bg-green-50">
+      <CardHeader>
+        <div className="flex items-center space-x-2">
+          <CheckCircle className="h-6 w-6 text-green-600" />
+          <CardTitle className="text-green-800">Verification Submitted Successfully</CardTitle>
         </div>
-        <CardTitle className="text-2xl">Verification Submitted</CardTitle>
-        <CardDescription>Your verification documents have been received</CardDescription>
+        <CardDescription className="text-green-700">
+          Your verification request has been submitted and will be reviewed shortly.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-muted-foreground">
-          Thank you for submitting your verification documents. Our team will review them as soon as possible. This process typically takes 1-2 business days.
-        </p>
-        <div className="rounded-md p-3 bg-muted/50 text-sm">
-          <p>You'll receive an email notification once your verification is approved.</p>
+      <CardContent>
+        <div className="space-y-4">
+          <p className="text-green-700">
+            We will notify you once your verification is complete. This process typically takes 1-2 business days.
+          </p>
+          <div className="bg-white p-4 rounded-md border border-green-200">
+            <h4 className="text-sm font-medium mb-2">What happens next?</h4>
+            <ul className="text-sm space-y-2">
+              <li className="flex items-start">
+                <span className="text-green-600 mr-2">•</span>
+                Our team will review your submitted documents
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-600 mr-2">•</span>
+                You'll receive a notification when verification is complete
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-600 mr-2">•</span>
+                Your profile will display a verified badge upon approval
+              </li>
+            </ul>
+          </div>
         </div>
       </CardContent>
     </Card>

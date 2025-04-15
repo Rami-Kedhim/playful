@@ -1,55 +1,45 @@
 
 import React from 'react';
-import { DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS } from '@/utils/verification/documentTypes';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FormField, FormItem, FormLabel, FormControl, FormDescription } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS, DOCUMENT_TYPE_REQUIREMENTS } from '../utils/formUtils';
 import { VerificationFormValues } from '../utils/formUtils';
 
 interface DocumentTypeSelectProps {
   form: UseFormReturn<VerificationFormValues>;
 }
 
-const DocumentTypeSelect = ({ form }: DocumentTypeSelectProps) => {
+const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
   return (
     <FormField
       control={form.control}
       name="documentType"
       render={({ field }) => (
         <FormItem>
-          <FormLabel>ID Document Type</FormLabel>
+          <FormLabel>Document Type</FormLabel>
           <FormControl>
             <Select
+              onValueChange={field.onChange}
+              defaultValue={field.value}
               value={field.value}
-              onValueChange={(value) => {
-                // Update the document type
-                field.onChange(value);
-                
-                // If changing to passport, reset back image since it's optional
-                if (value === DOCUMENT_TYPES.PASSPORT) {
-                  form.setValue('documentBackImage', undefined);
-                }
-              }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select document type" />
+                <SelectValue placeholder="Select ID document type" />
               </SelectTrigger>
               <SelectContent>
-                {[
-                  DOCUMENT_TYPES.ID_CARD,
-                  DOCUMENT_TYPES.PASSPORT,
-                  DOCUMENT_TYPES.DRIVERS_LICENSE
-                ].map((value) => (
+                {Object.entries(DOCUMENT_TYPE_LABELS).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
-                    {DOCUMENT_TYPE_LABELS[value]}
+                    {label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </FormControl>
           <FormDescription>
-            Choose the type of ID document you will upload for verification
+            {DOCUMENT_TYPE_REQUIREMENTS[field.value]}
           </FormDescription>
+          <FormMessage />
         </FormItem>
       )}
     />

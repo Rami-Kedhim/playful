@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -12,7 +13,19 @@ import SubmitButton from './form/SubmitButton';
 import SubmissionAlert from './form/SubmissionAlert';
 import SuccessCard from './form/SuccessCard';
 
-const VerificationForm = () => {
+interface VerificationFormProps {
+  onSubmit?: (data: VerificationFormValues) => void;
+  loading?: boolean;
+  serviceType?: string;
+  onSubmissionComplete?: () => void;
+}
+
+const VerificationForm: React.FC<VerificationFormProps> = ({ 
+  onSubmit: externalSubmit, 
+  loading: externalLoading = false,
+  serviceType = 'escort',
+  onSubmissionComplete
+}) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -51,6 +64,11 @@ const VerificationForm = () => {
   }, [user]);
 
   const onSubmit = async (data: VerificationFormValues) => {
+    if (externalSubmit) {
+      externalSubmit(data);
+      return;
+    }
+
     if (!user) return;
     
     setLoading(true);
@@ -72,6 +90,11 @@ const VerificationForm = () => {
       if (result.success) {
         setSubmitted(true);
         form.reset();
+        
+        // Call onSubmissionComplete callback if provided
+        if (onSubmissionComplete) {
+          onSubmissionComplete();
+        }
       }
     } catch (error) {
       console.error("Verification submission error:", error);
@@ -139,7 +162,7 @@ const VerificationForm = () => {
             />
 
             <SubmitButton 
-              loading={loading} 
+              loading={loading || externalLoading} 
               disabled={!canSubmit} 
               text="Submit Verification"
             />

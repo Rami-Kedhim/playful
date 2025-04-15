@@ -54,9 +54,9 @@ export function useUberPersonas() {
       // Load creators
       try {
         const creators = await scrapeCreators();
-        // Convert Creator to ContentCreator with defaults for required fields
-        const contentCreators = creators.map((creator: Creator) => {
-          const contentCreator: ContentCreator = {
+        // Convert Creator to ContentCreator with default values for required fields
+        const contentCreators = creators.map((creator: Creator): ContentCreator => {
+          return {
             id: creator.id,
             name: creator.name,
             username: creator.username,
@@ -67,10 +67,25 @@ export function useUberPersonas() {
             subscriberCount: creator.subscriberCount || 0,
             contentCount: creator.contentCount || { photos: 0, videos: 0 },
             price: creator.price || 0,
-            // Include other properties from creator as needed
-            ...creator
+            avatarUrl: creator.avatarUrl || creator.imageUrl,
+            profileImage: creator.profileImage || creator.imageUrl,
+            location: creator.location || '',
+            languages: creator.languages || ['English'],
+            bio: creator.bio || '',
+            description: creator.description || '',
+            age: creator.age || 0,
+            ethnicity: creator.ethnicity || '',
+            tags: creator.tags || [],
+            createdAt: creator.createdAt || new Date(),
+            updatedAt: creator.updatedAt || new Date(),
+            isVerified: creator.isVerified || false,
+            isFeatured: creator.isFeatured || false,
+            isScraped: creator.isScraped || true,
+            hasLiveStream: creator.hasLiveStream || false,
+            subscriptionPrice: creator.subscriptionPrice || creator.price || 0,
+            lastSynced: new Date(),
+            rating: creator.rating || 0
           };
-          return contentCreator;
         });
         
         const creatorPersonas = contentCreators.map(creator => 
