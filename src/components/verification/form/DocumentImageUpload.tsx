@@ -5,6 +5,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessa
 import { VerificationFormValues } from '../utils/formUtils';
 import ImageDropzone from '../utils/ImageDropzone';
 import DocumentPreview from './DocumentPreview';
+import { isFileWithPreview } from '../utils/fileUtils';
 
 interface DocumentImageUploadProps {
   form: UseFormReturn<VerificationFormValues>;
@@ -35,10 +36,7 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
             {label} {optional && <span className="text-muted-foreground">(Optional)</span>}
           </FormLabel>
           <FormControl>
-            {field.value && 
-             typeof field.value === 'object' && 
-             'file' in field.value && 
-             field.value.file ? (
+            {isFileWithPreview(field.value) ? (
               <DocumentPreview 
                 file={field.value.file}
                 onRemove={() => field.onChange(undefined)}
@@ -48,7 +46,7 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
                 onFileSelect={(fileObj) => {
                   field.onChange(fileObj && 'file' in fileObj ? { file: fileObj.file } : undefined);
                 }}
-                currentFile={field.value && typeof field.value === 'object' && 'file' in field.value ? field.value : undefined}
+                currentFile={isFileWithPreview(field.value) ? field.value : undefined}
                 error={form.formState.errors[fieldName]?.message?.toString()}
                 maxSize={maxSizeMB}
                 acceptedTypes={allowedFileTypes}
