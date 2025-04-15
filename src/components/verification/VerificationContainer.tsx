@@ -29,6 +29,12 @@ const VerificationContainer = () => {
     // Return to status tab after successful submission
     setActiveTab("status");
   };
+
+  const handleSubmitVerification = (data: any) => {
+    console.log("Verification form submitted:", data);
+    // Here you would typically submit the verification request to your backend
+    handleVerificationSuccess();
+  };
   
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
@@ -57,7 +63,11 @@ const VerificationContainer = () => {
         </TabsContent>
         
         <TabsContent value="submit" className="mt-6">
-          <VerificationForm onSubmissionComplete={handleVerificationSuccess} />
+          <VerificationForm 
+            onSubmit={handleSubmitVerification} 
+            serviceType="escort"
+            onSubmissionComplete={handleVerificationSuccess} 
+          />
         </TabsContent>
 
         <TabsContent value="upgrade" className="mt-6">

@@ -1,30 +1,22 @@
 
-// Document type constants
 export const DOCUMENT_TYPES = {
   ID_CARD: 'id_card',
   PASSPORT: 'passport',
-  DRIVERS_LICENSE: 'driver_license',
-  SELFIE: 'selfie'
-} as const;
-
-// Document type type
-export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES];
-
-// Document type labels
-export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
-  [DOCUMENT_TYPES.ID_CARD]: 'ID Card',
-  [DOCUMENT_TYPES.PASSPORT]: 'Passport',
-  [DOCUMENT_TYPES.DRIVERS_LICENSE]: 'Driver\'s License',
-  [DOCUMENT_TYPES.SELFIE]: 'Selfie'
+  DRIVERS_LICENSE: 'drivers_license'
 };
 
-// Function to check if document type requires back image
-export const requiresBackImage = (documentType: DocumentType): boolean => {
-  return documentType === DOCUMENT_TYPES.ID_CARD || 
-         documentType === DOCUMENT_TYPES.DRIVERS_LICENSE;
+export const DOCUMENT_TYPE_LABELS: Record<string, string> = {
+  id_card: 'ID Card',
+  passport: 'Passport',
+  drivers_license: "Driver's License"
 };
 
-// Helper function to get document type label
-export const getDocumentTypeLabel = (documentType: DocumentType): string => {
-  return DOCUMENT_TYPE_LABELS[documentType] || 'Unknown Document Type';
+export const DOCUMENT_TYPE_REQUIREMENTS: Record<string, string> = {
+  id_card: 'Must be a valid government-issued ID card showing your photo, name, and date of birth.',
+  passport: 'Must be a valid passport showing your photo, name, and date of birth.',
+  drivers_license: 'Must be a valid driver\'s license showing your photo, name, and date of birth.'
+};
+
+export const needsBackImage = (documentType: string) => {
+  return documentType === DOCUMENT_TYPES.ID_CARD || documentType === DOCUMENT_TYPES.DRIVERS_LICENSE;
 };

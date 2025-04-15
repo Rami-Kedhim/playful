@@ -2,22 +2,37 @@ export interface ContentCreator {
   id: string;
   name: string;
   username: string;
+  avatarUrl?: string;
+  profileImage?: string;
   imageUrl: string;
   bio?: string;
+  description?: string;
   isPremium: boolean;
   isLive: boolean;
   isAI: boolean;
+  isScraped?: boolean;
+  isVerified?: boolean;
+  isFeatured?: boolean;
   subscriberCount: number;
   contentCount: {
     photos: number;
     videos: number;
+    stories?: number;
   };
   price: number;
+  subscriptionPrice?: number;
   createdAt?: string;
+  updatedAt?: string;
+  lastSynced?: Date;
   tags?: string[];
   rating?: number;
   region?: string;
+  location?: string;
   language?: string;
+  languages?: string[];
+  ethnicity?: string;
+  age?: number;
+  hasLiveStream?: boolean;
 }
 
 export interface CreatorAnalytics {

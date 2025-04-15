@@ -15,12 +15,14 @@ interface VerificationFormProps {
   onSubmit: (data: VerificationFormValues) => void;
   loading?: boolean;
   serviceType: 'escort' | 'creator' | 'livecam';
+  onSubmissionComplete?: () => void;
 }
 
 const VerificationForm: React.FC<VerificationFormProps> = ({ 
   onSubmit, 
   loading = false,
-  serviceType 
+  serviceType,
+  onSubmissionComplete
 }) => {
   const [documentType, setDocumentType] = useState<string>(DOCUMENT_TYPES.ID_CARD);
   
@@ -48,8 +50,15 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     }
   };
 
+  const handleFormSubmit = async (data: VerificationFormValues) => {
+    await onSubmit(data);
+    if (onSubmissionComplete) {
+      onSubmissionComplete();
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       <div className="text-sm text-muted-foreground mb-6">
         {getServiceSpecificMessage()}
       </div>

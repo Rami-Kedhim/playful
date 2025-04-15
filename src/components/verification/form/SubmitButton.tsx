@@ -2,19 +2,25 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import { SubmitButtonProps } from '@/types/verification';
 
-const SubmitButton: React.FC<SubmitButtonProps> = ({ 
-  loading = false, 
+interface SubmitButtonProps {
+  loading?: boolean;
+  disabled?: boolean;
+  loadingText?: string;
+  text: string;
+}
+
+const SubmitButton: React.FC<SubmitButtonProps> = ({
+  loading = false,
   disabled = false,
-  loadingText = "Processing...",
-  text 
+  loadingText = 'Processing...',
+  text
 }) => {
   return (
     <Button
       type="submit"
-      disabled={disabled || loading}
-      className="w-full"
+      disabled={loading || disabled}
+      className="w-full md:w-auto"
     >
       {loading ? (
         <>

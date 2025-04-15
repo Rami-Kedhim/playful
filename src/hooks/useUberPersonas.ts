@@ -4,6 +4,16 @@ import { UberPersona } from '@/types/uberPersona';
 import { uberPersonaService } from '@/services/UberPersonaService';
 import useScrapers from '@/hooks/useScrapers';
 import { toast } from 'sonner';
+import { ContentCreator } from '@/types/creator';
+
+// Define a Creator type that's compatible with what scrapeCreators returns
+export interface Creator extends Partial<ContentCreator> {
+  id: string;
+  name: string;
+  username: string;
+  imageUrl: string;
+  isPremium?: boolean; // Make this optional to match what the scraper returns
+}
 
 export function useUberPersonas() {
   const [personas, setPersonas] = useState<UberPersona[]>([]);
@@ -44,7 +54,28 @@ export function useUberPersonas() {
       // Load creators
       try {
         const creators = await scrapeCreators();
-        const creatorPersonas = creators.map(creator => uberPersonaService.creatorToUberPersona(creator));
+        // Convert Creator to ContentCreator with defaults for required fields
+        const contentCreators = creators.map((creator: Creator) => {
+          const contentCreator: ContentCreator = {
+            id: creator.id,
+            name: creator.name,
+            username: creator.username,
+            imageUrl: creator.imageUrl,
+            isPremium: creator.isPremium || false,
+            isLive: creator.isLive || false,
+            isAI: creator.isAI || false,
+            subscriberCount: creator.subscriberCount || 0,
+            contentCount: creator.contentCount || { photos: 0, videos: 0 },
+            price: creator.price || 0,
+            // Include other properties from creator as needed
+            ...creator
+          };
+          return contentCreator;
+        });
+        
+        const creatorPersonas = contentCreators.map(creator => 
+          uberPersonaService.creatorToUberPersona(creator)
+        );
         results.push(...creatorPersonas);
       } catch (e) {
         console.error("Error loading creators:", e);

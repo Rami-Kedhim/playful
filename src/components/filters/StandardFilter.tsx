@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { FilterBlock, FilterSection } from "@/components/ui/filter-block";
-import { FilterBadge } from "./FilterBadge";
+import FilterBadge from "./FilterBadge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface FilterOption {

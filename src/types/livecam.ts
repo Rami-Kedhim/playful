@@ -14,6 +14,7 @@ export interface LivecamModel {
   boostRank?: string;
   profileUrl?: string;
   region?: string;
+  location?: string;
   language?: string;
   category?: string;
   isStreaming?: boolean;
@@ -22,8 +23,12 @@ export interface LivecamModel {
   categories?: string[];
   description?: string;
   age?: number;
+  ethnicity?: string;
   streamUrl?: string;
   previewVideoUrl?: string;
+  isVerified?: boolean;
+  isFeatured?: boolean;
+  price?: number;
   room?: {
     id: string;
     name: string;
