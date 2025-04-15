@@ -17,7 +17,7 @@ const UBXSection = () => {
               </span>
             </h2>
             <p className="text-gray-300 mb-8">
-              Our Fantom-based token enables secure, anonymous transactions across the UberEscorts ecosystem. Use UBX for all interactions, content access, and service bookings.
+              Our Fantom-based token enables secure, anonymous transactions across the platform ecosystem. Use UBX for all interactions, content access, and service bookings.
             </p>
             
             <div className="space-y-3 mb-6">

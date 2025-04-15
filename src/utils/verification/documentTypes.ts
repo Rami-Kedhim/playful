@@ -1,23 +1,25 @@
 
+// Document type constants
 export const DOCUMENT_TYPES = {
   ID_CARD: 'id_card',
   PASSPORT: 'passport',
-  DRIVERS_LICENSE: 'drivers_license',
+  DRIVERS_LICENSE: 'driver_license',
   SELFIE: 'selfie'
 } as const;
 
+// Document type type
 export type DocumentType = typeof DOCUMENT_TYPES[keyof typeof DOCUMENT_TYPES];
 
-export const getDocumentTypeLabel = (type: DocumentType): string => {
-  const labels: Record<DocumentType, string> = {
-    'id_card': 'ID Card',
-    'passport': 'Passport',
-    'drivers_license': "Driver's License",
-    'selfie': 'Selfie with ID'
-  };
-  return labels[type];
+// Document type labels
+export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
+  [DOCUMENT_TYPES.ID_CARD]: 'ID Card',
+  [DOCUMENT_TYPES.PASSPORT]: 'Passport',
+  [DOCUMENT_TYPES.DRIVERS_LICENSE]: 'Driver\'s License',
+  [DOCUMENT_TYPES.SELFIE]: 'Selfie'
 };
 
-export const requiresBackImage = (type: DocumentType): boolean => {
-  return type === 'id_card' || type === 'drivers_license';
+// Function to check if document type requires back image
+export const requiresBackImage = (documentType: DocumentType): boolean => {
+  return documentType === DOCUMENT_TYPES.ID_CARD || 
+         documentType === DOCUMENT_TYPES.DRIVERS_LICENSE;
 };

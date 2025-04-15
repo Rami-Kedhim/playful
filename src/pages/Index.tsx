@@ -1,6 +1,4 @@
-
 import { useState, useEffect } from "react";
-import AppLayout from "@/components/layout/AppLayout";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";

@@ -31,4 +31,3 @@ export const verificationFormSchema = z.object({
 });
 
 export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
-

@@ -84,7 +84,7 @@ export const UBXWallet: React.FC<UBXWalletProps> = ({
             onClick={loadUBXData}
             disabled={loading || isProcessing}
           >
-            <RefreshCw className={`h-4 w-4 ${loading || isProcessing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading || isProcessing ? 'animate-spin' : ''}`} />
           </Button>
         )}
       </CardHeader>

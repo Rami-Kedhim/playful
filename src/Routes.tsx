@@ -1,16 +1,17 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
+import { AppRoutes } from '@/utils/navigation';
 
 // Auth page
 import AuthPage from './pages/AuthPage';
 
 // Use lazy loading for route components
-const HomePage = lazy(() => import('./pages/HomePage'));
-const ProfilePage = lazy(() => import('./pages/Profile'));
-const ProfileEditPage = lazy(() => import('./pages/ProfileEdit'));
+const HomePage = lazy(() => import('./pages/Index'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const MetaversePage = lazy(() => import('./pages/MetaversePage'));
@@ -26,10 +27,7 @@ const Livecams = lazy(() => import('./pages/Livecams'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
-const ServiceTypeDemo = lazy(() => import('./pages/ServiceTypeDemo'));
-const WalletPage = lazy(() => import('./pages/Wallet'));
-const UpdatedWalletPage = lazy(() => import('./pages/UpdatedWallet'));
-const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const WalletPage = lazy(() => import('./pages/WalletPage'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -39,86 +37,37 @@ const LoadingFallback = () => (
 );
 
 // Main routes component
-const AppRoutes: React.FC = () => {
+const RoutesComponent: React.FC = () => {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <RouterRoutes>
         {/* Public routes */}
-        <Route path="/auth" element={<AuthPage />} />
+        <Route path={AppRoutes.AUTH} element={<AuthPage />} />
         
         {/* Routes using AppLayout */}
-        <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />
-        
-        {/* Protected routes */}
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <AppLayout><ProfilePage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/profile/edit" element={
-          <ProtectedRoute>
-            <AppLayout><ProfileEditPage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/favorites" element={
-          <ProtectedRoute>
-            <AppLayout><FavoritesPage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/messages" element={
-          <ProtectedRoute>
-            <AppLayout><MessagesPage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/wallet" element={
-          <ProtectedRoute>
-            <AppLayout><WalletPage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/updated-wallet" element={
-          <ProtectedRoute>
-            <AppLayout><UpdatedWalletPage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* Public routes */}
-        <Route path="/metaverse" element={<AppLayout><MetaversePage /></AppLayout>} />
-        <Route path="/search" element={<AppLayout><SearchPage /></AppLayout>} />
-        <Route path="/escorts" element={<AppLayout><Escorts /></AppLayout>} />
-        <Route path="/escorts/:id" element={<AppLayout><EscortDetail /></AppLayout>} />
+        <Route path={AppRoutes.HOME} element={<AppLayout><HomePage /></AppLayout>} />
+        <Route path={AppRoutes.PROFILE} element={<ProtectedRoute><AppLayout><ProfilePage /></AppLayout></ProtectedRoute>} />
+        <Route path={AppRoutes.FAVORITES} element={<ProtectedRoute><AppLayout><FavoritesPage /></AppLayout></ProtectedRoute>} />
+        <Route path={AppRoutes.MESSAGES} element={<ProtectedRoute><AppLayout><MessagesPage /></AppLayout></ProtectedRoute>} />
+        <Route path={AppRoutes.METAVERSE} element={<AppLayout><MetaversePage /></AppLayout>} />
+        <Route path={AppRoutes.SEARCH} element={<AppLayout><SearchPage /></AppLayout>} />
+        <Route path={AppRoutes.ESCORTS} element={<AppLayout><Escorts /></AppLayout>} />
+        <Route path={AppRoutes.ESCORT_DETAIL} element={<AppLayout><EscortDetail /></AppLayout>} />
         <Route path="/escorts/live" element={<AppLayout><EscortLiveStreams /></AppLayout>} />
         <Route path="/escorts/live/:id" element={<AppLayout><EscortLiveStreamDetail /></AppLayout>} />
-        <Route path="/creators" element={<AppLayout><Creators /></AppLayout>} />
-        <Route path="/creators/:id" element={<AppLayout><CreatorDetail /></AppLayout>} />
-        <Route path="/livecams" element={<AppLayout><Livecams /></AppLayout>} />
-        <Route path="/livecams/:id" element={<AppLayout><LivecamDetail /></AppLayout>} />
-        
-        {/* Admin routes */}
-        <Route path="/brain-hub" element={
-          <ProtectedRoute>
-            <AppLayout><BrainHubPage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/nsfw-image-generator" element={
-          <ProtectedRoute>
-            <AppLayout><NSFWImageGeneratorPage /></AppLayout>
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/service-type-demo" element={<AppLayout><ServiceTypeDemo /></AppLayout>} />
+        <Route path={AppRoutes.CREATORS} element={<AppLayout><Creators /></AppLayout>} />
+        <Route path={AppRoutes.CREATOR_DETAIL} element={<AppLayout><CreatorDetail /></AppLayout>} />
+        <Route path={AppRoutes.LIVECAMS} element={<AppLayout><Livecams /></AppLayout>} />
+        <Route path={AppRoutes.LIVECAM_DETAIL} element={<AppLayout><LivecamDetail /></AppLayout>} />
+        <Route path={AppRoutes.BRAIN_HUB} element={<ProtectedRoute><AppLayout><BrainHubPage /></AppLayout></ProtectedRoute>} />
+        <Route path="/nsfw-image-generator" element={<ProtectedRoute><AppLayout><NSFWImageGeneratorPage /></AppLayout></ProtectedRoute>} />
+        <Route path="/wallet" element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
         
         {/* 404 route */}
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
-        
-        {/* Notifications route */}
-        <Route path="/notifications" element={
-          <ProtectedRoute>
-            <AppLayout><NotificationsPage /></AppLayout>
-          </ProtectedRoute>
-        } />
       </RouterRoutes>
     </Suspense>
   );
 };
 
-export default AppRoutes;
+export default RoutesComponent;
