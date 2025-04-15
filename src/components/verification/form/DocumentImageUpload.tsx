@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
@@ -34,7 +35,10 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
             {label} {optional && <span className="text-muted-foreground">(Optional)</span>}
           </FormLabel>
           <FormControl>
-            {field.value?.file ? (
+            {field.value && 
+             typeof field.value === 'object' && 
+             'file' in field.value && 
+             field.value.file ? (
               <DocumentPreview 
                 file={field.value.file}
                 onRemove={() => field.onChange(undefined)}
