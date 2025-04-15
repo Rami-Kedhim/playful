@@ -1,53 +1,26 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-import React from "react";
-import { NavLink } from "react-router-dom";
-import { useAuth } from "@/hooks/auth/useAuthContext";
-import { useTranslation } from "react-i18next";
-import { AppRoutes } from "@/utils/navigation";
-
-const DesktopNavigation: React.FC = () => {
-  const { isAuthenticated, checkRole } = useAuth();
-  const { t } = useTranslation();
-  
-  const isAdmin = checkRole('admin') || checkRole('moderator');
-  
-  const navItems = [
-    { name: t('nav.escorts'), path: `/escorts`, auth: false },
-    { name: t('nav.creators'), path: `/creators`, auth: false },
-    { name: t('nav.metaverse'), path: `/metaverse`, auth: true },
-    { name: t('nav.brainHub'), path: AppRoutes.BRAIN_HUB, auth: true }, // Added Brain Hub link
-  ];
-  
-  // Add admin routes if user has admin access
-  if (isAdmin) {
-    navItems.push({ name: 'SEO', path: `/seo`, auth: true });
-  }
-  
+const DesktopNavigation = () => {
   return (
-    <nav className="hidden md:block">
-      <ul className="flex space-x-8">
-        {navItems.map((item) => {
-          // Skip auth-required items if not authenticated
-          if (item.auth && !isAuthenticated) return null;
-          
-          return (
-            <li key={item.path}>
-              <NavLink
-                to={item.path}
-                className={({ isActive }) =>
-                  `text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`
-                }
-              >
-                {item.name}
-              </NavLink>
-            </li>
-          );
-        })}
-      </ul>
+    <nav className="hidden md:flex items-center space-x-4">
+      <Link to="/" className="text-foreground/60 hover:text-foreground">
+        Home
+      </Link>
+      <Link to="/verification" className="text-foreground/60 hover:text-foreground">
+        <Button variant="ghost" size="sm" className="flex items-center gap-2">
+          <Shield className="h-4 w-4" />
+          Verify Account
+        </Button>
+      </Link>
+      <Link to="/pricing" className="text-foreground/60 hover:text-foreground">
+        Pricing
+      </Link>
+      <Link to="/contact" className="text-foreground/60 hover:text-foreground">
+        Contact
+      </Link>
     </nav>
   );
 };
