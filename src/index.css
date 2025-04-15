@@ -42,8 +42,6 @@
     --muted-foreground: 0 0% 63.9%;
     --accent: 301 59% 42%;
     --accent-foreground: 0 0% 98%;
-    --lucoin: 39 70% 50%;
-    --lucoin-foreground: 0 0% 3.9%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
@@ -54,7 +52,7 @@
 
 @layer components {
   .glass-card {
-    @apply border border-white/10 bg-white/5 backdrop-blur-sm;
+    @apply border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:bg-white/10;
   }
   
   .hero-gradient {
@@ -63,6 +61,14 @@
   
   .theme-transition {
     @apply transition-colors duration-300;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10;
+  }
+  
+  .input-highlight {
+    @apply focus:ring-2 focus:ring-primary/20 focus:border-primary/30;
   }
 }
 
@@ -77,6 +83,22 @@
 
   html {
     @apply scroll-smooth dark;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-gradient-primary;
+  }
+  
+  h1 {
+    @apply text-4xl sm:text-5xl lg:text-6xl;
+  }
+  
+  h2 {
+    @apply text-3xl sm:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl sm:text-3xl;
   }
 }
 
@@ -104,5 +126,26 @@
   
   .text-gradient-primary {
     @apply bg-gradient-to-br from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
+  }
+
+  .hover-glow {
+    @apply hover:shadow-[0_0_15px] hover:shadow-primary/20 transition-shadow duration-300;
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/5 border border-white/10;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
