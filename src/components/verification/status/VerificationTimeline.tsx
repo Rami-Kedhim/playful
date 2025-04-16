@@ -1,89 +1,98 @@
-
 import React from 'react';
+import { CheckCircle, AlertTriangle, Clock, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { VerificationRequest } from '@/types/auth';
-import { CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { isVerificationInProgress } from '@/utils/verification/assessmentProgress';
 
-interface VerificationTimelineProps {
-  verificationRequest: VerificationRequest;
+// Define any missing types
+type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+
+interface TimelineStep {
+  id: string;
+  name: string;
+  status: 'upcoming' | 'current' | 'complete';
+  date: string;
 }
 
-const VerificationTimeline = ({ verificationRequest }: VerificationTimelineProps) => {
-  const { status, submittedAt, updated_at } = verificationRequest;
+interface VerificationTimelineProps {
+  verificationRequest: VerificationRequest | null;
+}
+
+const VerificationTimeline = ({ verificationRequest }) => {
+  const getStatusIcon = (status: string) => {
+    const typedStatus = status as VerificationStatus;
+    
+    switch (typedStatus) {
+      case 'approved':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'rejected':
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case 'in_review':
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case 'pending':
+      default:
+        return <Loader2 className="h-4 w-4 animate-spin text-gray-500" />;
+    }
+  };
   
-  const timelineSteps = [
+  const getStatusColor = (status: string): string => {
+    const typedStatus = status as VerificationStatus;
+    
+    switch (typedStatus) {
+      case 'approved':
+        return 'text-green-500';
+      case 'rejected':
+        return 'text-red-500';
+      case 'in_review':
+        return 'text-yellow-500';
+      case 'pending':
+      default:
+        return 'text-gray-500';
+    }
+  };
+
+  const timelineSteps: TimelineStep[] = [
     {
       id: 'submitted',
-      label: 'Submitted',
-      date: new Date(submittedAt || verificationRequest.created_at).toLocaleDateString(),
+      name: 'Submitted',
       status: 'complete',
-      icon: CheckCircle,
-      iconClass: 'text-green-500'
+      date: verificationRequest?.created_at || 'N/A',
     },
     {
-      id: 'in_queue',
-      label: 'In Queue',
-      status: status === 'pending' ? 'current' : (status === 'in_review' || status === 'approved' || status === 'rejected') ? 'complete' : 'upcoming',
-      icon: status === 'pending' ? Clock : CheckCircle,
-      iconClass: status === 'pending' ? 'text-amber-500 animate-pulse' : 'text-green-500'
+      id: 'review',
+      name: 'In Review',
+      status: verificationRequest?.status === 'in_review' ? 'current' : 'upcoming',
+      date: verificationRequest?.updated_at || 'N/A',
     },
     {
-      id: 'in_review',
-      label: 'Under Review',
-      status: status === 'in_review' ? 'current' : (status === 'approved' || status === 'rejected') ? 'complete' : 'upcoming',
-      icon: status === 'in_review' ? Clock : (status === 'approved' || status === 'rejected') ? CheckCircle : Clock,
-      iconClass: status === 'in_review' ? 'text-blue-500 animate-pulse' : (status === 'approved' || status === 'rejected') ? 'text-green-500' : 'text-gray-400'
+      id: 'approved',
+      name: 'Approved',
+      status: verificationRequest?.status === 'approved' ? 'complete' : 'upcoming',
+      date: verificationRequest?.updated_at || 'N/A',
     },
-    {
-      id: 'decision',
-      label: status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Decision',
-      status: (status === 'approved' || status === 'rejected') ? 'complete' : 'upcoming',
-      icon: status === 'approved' ? CheckCircle : status === 'rejected' ? XCircle : Clock, 
-      iconClass: status === 'approved' ? 'text-green-500' : status === 'rejected' ? 'text-red-500' : 'text-gray-400'
-    }
   ];
 
   return (
-    <div className="space-y-1">
-      <h4 className="text-sm font-medium mb-3">Verification Progress</h4>
-      <ol className="relative border-l border-muted">
-        {timelineSteps.map((step, index) => (
-          <li key={step.id} className="mb-3 ml-4">
-            <div className="absolute w-3 h-3 rounded-full -left-1.5 border border-background mt-1.5">
-              <step.icon 
-                className={cn(
-                  "h-3 w-3", 
-                  step.iconClass
-                )} 
-              />
+    <div className="relative">
+      {timelineSteps.map((step, index) => (
+        <div key={step.id} className="mb-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <span className="flex items-center justify-center h-6 w-6 rounded-full bg-white border-2">
+                {getStatusIcon(verificationRequest?.status || 'pending')}
+              </span>
             </div>
-            <div>
-              <h3 className="text-sm font-medium flex items-center">
-                {step.label}
-                {step.status === 'current' && (
-                  <span className="ml-2 text-xs bg-muted px-1.5 py-0.5 rounded-full text-muted-foreground">
-                    Current
-                  </span>
-                )}
-              </h3>
-              {(step.id === 'submitted' || (step.id === 'decision' && (status === 'approved' || status === 'rejected'))) && (
-                <time className="text-xs text-muted-foreground">
-                  {step.id === 'submitted' ? 
-                    new Date(submittedAt || verificationRequest.created_at).toLocaleString() : 
-                    updated_at ? new Date(updated_at).toLocaleString() : ''}
-                </time>
-              )}
+            <div className="ml-3">
+              <h4 className="text-sm font-semibold">{step.name}</h4>
+              <p className="text-xs text-muted-foreground">
+                {step.date}
+              </p>
             </div>
-          </li>
-        ))}
-      </ol>
-      
-      {isVerificationInProgress(status) && (
-        <div className="text-xs text-muted-foreground italic mt-2">
-          Estimated completion within 24-48 hours of submission
+          </div>
+          {index < timelineSteps.length - 1 && (
+            <div className="ml-3 mt-2 pl-2 border-l border-gray-300"></div>
+          )}
         </div>
-      )}
+      ))}
     </div>
   );
 };

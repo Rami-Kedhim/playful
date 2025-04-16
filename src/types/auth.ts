@@ -20,10 +20,12 @@ export interface UserProfile {
   username?: string;
   full_name?: string;
   avatar_url?: string;
+  avatarUrl?: string; // Added alias for compatibility
   bio?: string;
   location?: string;
   website?: string;
   is_verified?: boolean;
+  isVerified?: boolean; // Added alias for compatibility
   services?: string[];
   languages?: string[];
   availability?: any;
@@ -60,5 +62,5 @@ export interface VerificationRequest {
   submittedAt?: string; // Add this for compatibility with existing code
 }
 
-// Define ServiceTypeFilter type
+// Define ServiceTypeFilter type as a string literal union
 export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "";

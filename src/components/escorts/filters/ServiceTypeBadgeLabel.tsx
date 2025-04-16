@@ -7,7 +7,7 @@ import { ServiceTypeFilter } from '@/types/auth';
 interface ServiceTypeInfo {
   label: string;
   filterLabel: string;
-  icon: React.FC<{ className?: string, size?: number }>;
+  icon: React.FC<{ className?: string, size?: number | string }>;
   description?: string;
   color?: string;
 }
@@ -45,6 +45,10 @@ export const serviceTypeInfoMap: Record<string, ServiceTypeInfo> = {
 
 export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => {
   return serviceTypeInfoMap[type] || serviceTypeInfoMap[""];
+};
+
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  return getServiceTypeInfo(type).filterLabel;
 };
 
 export const getSafeServiceLabel = (serviceLabel: string): string => {
@@ -92,10 +96,11 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
       variant="outline" 
       className={`flex items-center gap-1 ${sizeClasses[size]} ${info.color || ""} ${className}`}
     >
-      <IconComponent className="w-3 h-3" />
+      <IconComponent className="w-3 h-3" size={12} />
       <span>{info.label}</span>
     </Badge>
   );
 };
 
 export default ServiceTypeBadgeLabel;
+export type { ServiceTypeFilter };

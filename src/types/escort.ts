@@ -1,152 +1,184 @@
-
-export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'completed';
-export type ServiceType = 'in-person' | 'virtual' | 'both';
-export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
-export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+// Add any missing type definitions to support all service types
+export enum ServiceType {
+  Massage = "Massage",
+  Companionship = "Companionship",
+  GFE = "GFE",
+  Roleplay = "Role Play",
+  DinnerDate = "Dinner Date",
+  TravelCompanion = "Travel Companion",
+  Events = "Events",
+  Overnight = "Overnight",
+  WeekendGetaways = "Weekend Getaways",
+  BDSM = "BDSM",
+  SensualMassage = "Sensual Massage",
+  VirtualDate = "virtual-date",
+  CustomContent = "custom-content"
+}
 
 export interface Escort {
   id: string;
   name: string;
-  avatar_url?: string;
+  age: number;
   location: string;
-  price?: number;
-  rates?: {
-    hourly?: number;
-    [key: string]: number | undefined;
-  };
-  description?: string;
-  bio?: string;
-  tags?: string[];
-  gallery?: string[];
-  gallery_images?: string[]; 
-  services?: string[];
-  serviceTypes?: ServiceType[];
-  availability?: any;
-  reviews?: number;
-  reviewCount?: number;
-  rating?: number;
-  is_verified?: boolean;
-  verified?: boolean;
-  is_featured?: boolean;
-  featured?: boolean;
-  
-  // Physical attributes and demographics
-  age?: number;
+  price: number;
   gender?: string;
   sexualOrientation?: string;
-  height?: number | string;
-  weight?: number | string;
+  imageUrl: string;
+  profileImage?: string;
+  gallery?: string[];
+  videos?: Video[];
+  bio?: string;
+  services?: ServiceType[];
+  rating?: number;
+  reviews?: number;
+  verified?: boolean;
+  tags?: string[];
+  availableNow?: boolean;
+  languages?: string[];
+  lastActive?: string | Date;
+  responseRate?: number;
+  height?: number;
+  weight?: number;
+  measurements?: Measurements | string;
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
-  measurements?: {
-    bust?: number | string;
-    waist?: number | string;
-    hips?: number | string;
-  } | string;
-  
-  // Status and activity
-  availableNow?: boolean;
-  lastActive?: Date | string;
-  responseRate?: number;
-  responseTime?: string;
-  
-  // Media and content
-  imageUrl?: string;
-  profileImage?: string;
-  videos?: (string | {
-    id: string;
-    url: string;
-    thumbnail: string;
-    title: string;
-  })[];
-  
-  // Verification and trust signals
-  verificationLevel?: VerificationLevel;
+  rates?: Rates;
+  featured?: boolean;
+  isAI?: boolean;
+  profileType?: "verified" | "ai" | "provisional";
+  contactInfo?: ContactInfo;
+  availability?: Availability;
+  serviceTypes?: string[];
+  reviewCount?: number;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
-  languages?: string[];
-
-  // Additional fields
-  contactInfo?: {
-    phone?: string;
-    email?: string;
-    website?: string;
-  };
-  contentStats?: {
-    totalMedia?: number;
-    photos?: number;
-    videos?: number;
-  };
-  subscriptionPrice?: number;
-  isAI?: boolean;
-  profileType?: string;
+  metaverse_enabled?: boolean;
   boostLevel?: number;
 }
 
-export interface Booking {
+export interface Video {
   id: string;
-  escort_id: string;
-  client_id: string;
-  start_time: string;
-  end_time: string;
-  status: BookingStatus;
-  price: number;
-  location?: any;
-  notes?: string;
-  booking_type?: string;
-  service_type?: string;
-  created_at: string;
-  updated_at: string;
-  special_requests?: string;
-  action_url?: string;
-  action_text?: string;
+  url: string;
+  thumbnail: string;
+  title: string;
+}
+
+export interface Measurements {
+  bust: number;
+  waist: number;
+  hips: number;
+}
+
+export interface Rates {
+  hourly: number;
+  twoHours: number;
+  overnight: number;
+  weekend: number;
+}
+
+export interface ContactInfo {
+  email: string;
+  phone: string;
+  website: string;
+}
+
+export interface Availability {
+  days: string[];
+  hours: string[];
 }
 
 export interface EscortFilterOptions {
   location?: string;
+  serviceTypes?: string[];
   priceRange?: [number, number];
-  age?: [number, number];
   gender?: string[];
-  services?: string[];
-  availability?: string[];
-  verificationLevel?: VerificationLevel[];
-  serviceType?: ServiceType[];
-  sortBy?: 'price' | 'rating' | 'distance' | 'newest';
-  page?: number;
-  limit?: number;
-  selectedServices?: string[];
-  selectedGenders?: string[];
-  selectedOrientations?: string[];
+  orientation?: string[];
   ageRange?: [number, number];
-  ratingMin?: number;
+  rating?: number;
+  verified?: boolean;
   availableNow?: boolean;
-  verifiedOnly?: boolean;
-  languages?: string[];
+  escortType?: "verified" | "ai" | "provisional" | "all";
+  language?: string[];
 }
 
-export interface VerificationDocument {
-  id: string;
-  type: string;
-  fileUrl: string;
-  uploadedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
+export interface EscortFilterState {
+  searchQuery: string;
+  location: string;
+  priceRange: [number, number];
+  verifiedOnly: boolean;
+  selectedServices: string[];
+  sortBy: string;
+  currentPage: number;
+  selectedGenders: string[];
+  selectedOrientations: string[];
+  ageRange: [number, number];
+  ratingMin: number;
+  availableNow: boolean;
+  serviceTypeFilter: "" | "in-person" | "virtual" | "both";
+  isLoading: boolean;
 }
 
-export interface VerificationRequest {
-  id: string;
-  profile_id?: string;
-  userId?: string;
-  status: VerificationStatus;
-  verificationLevel?: VerificationLevel;
-  requested_level: VerificationLevel;
-  documents?: VerificationDocument[];
-  created_at: string;
-  submittedAt?: string;
-  updated_at?: string;
-  reviewed_at?: string;
-  reviewed_by?: string;
-  reviewer_notes?: string;
-  expires_at?: string;
-  rejectionReason?: string;
+export interface EscortFilterActions {
+  setSearchQuery: (query: string) => void;
+  setLocation: (location: string) => void;
+  setPriceRange: (range: [number, number]) => void;
+  setVerifiedOnly: (verified: boolean) => void;
+  setSelectedServices: (services: string[]) => void;
+  toggleService: (service: string) => void;
+  setSortBy: (sortBy: string) => void;
+  setCurrentPage: (page: number) => void;
+  setSelectedGenders: (genders: string[]) => void;
+  toggleGender: (gender: string) => void;
+  setSelectedOrientations: (orientations: string[]) => void;
+  toggleOrientation: (orientation: string) => void;
+  setAgeRange: (ageRange: [number, number]) => void;
+  setRatingMin: (rating: number) => void;
+  setAvailableNow: (available: boolean) => void;
+  setServiceTypeFilter: (type: "in-person" | "virtual" | "both" | "") => void;
+  setIsLoading: (loading: boolean) => void;
+  clearFilters: () => void;
 }
+
+export interface EscortFilterHook {
+  searchQuery: string;
+  location: string;
+  priceRange: [number, number];
+  verifiedOnly: boolean;
+  selectedServices: string[];
+  sortBy: string;
+  currentPage: number;
+  selectedGenders: string[];
+  selectedOrientations: string[];
+  ageRange: [number, number];
+  ratingMin: number;
+  availableNow: boolean;
+  serviceTypeFilter: "" | "in-person" | "virtual" | "both";
+  isLoading: boolean;
+  setSearchQuery: (query: string) => void;
+  setLocation: (location: string) => void;
+  setPriceRange: (range: [number, number]) => void;
+  handlePriceRangeChange: (values: number[]) => void;
+  setVerifiedOnly: (verified: boolean) => void;
+  setSelectedServices: (services: string[]) => void;
+  toggleService: (service: string) => void;
+  setSortBy: (sortBy: string) => void;
+  setCurrentPage: (page: number) => void;
+  setSelectedGenders: (genders: string[]) => void;
+  toggleGender: (gender: string) => void;
+  setSelectedOrientations: (orientations: string[]) => void;
+  toggleOrientation: (orientation: string) => void;
+  setAgeRange: (ageRange: [number, number]) => void;
+  handleAgeRangeChange: (values: number[]) => void;
+  setRatingMin: (rating: number) => void;
+  setAvailableNow: (available: boolean) => void;
+  setServiceTypeFilter: (type: "" | "in-person" | "virtual" | "both") => void;
+  setIsLoading: (loading: boolean) => void;
+  clearFilters: () => void;
+  filteredEscorts: Escort[];
+  sortedEscorts: Escort[];
+  paginatedEscorts: Escort[];
+  totalPages: number;
+}
+
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';

@@ -1,156 +1,58 @@
-
-import React from "react";
-import { Escort } from "@/types/escort";
-import { Link } from "react-router-dom";
+import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Star, Video, Image, Clock, CheckCircle, Calendar, Globe } from "lucide-react";
-import { formatCurrency } from "@/utils/boost";
-
-interface ServiceIcons {
-  escort: React.ReactNode;
-  content: React.ReactNode;
-  livecam: React.ReactNode;
-}
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ImageIcon, VideoIcon, Radio } from "lucide-react";
 
 interface UnifiedServiceCardProps {
-  provider: Escort;
-  showDetails?: boolean;
-  className?: string;
+  service: any;
 }
 
-const UnifiedServiceCard: React.FC<UnifiedServiceCardProps> = ({
-  provider,
-  showDetails = true,
-  className = "",
-}) => {
-  const serviceIcons: ServiceIcons = {
-    escort: <CheckCircle className="h-4 w-4 text-primary" />,
-    content: <Image className="h-4 w-4 text-primary" />,
-    livecam: <Video className="h-4 w-4 text-primary" />
+// Update the component to handle the "live" property safely
+const UnifiedServiceCard = ({ service, ...props }) => {
+  const renderMediaStats = () => {
+    if (!service.mediaGallery) return null;
+    
+    // Handle the "live" property safely 
+    const { totalMedia, photos, videos, live } = service.mediaGallery;
+    
+    return (
+      <div className="flex space-x-2 text-xs text-muted-foreground">
+        {photos && photos > 0 && (
+          <span className="flex items-center">
+            <ImageIcon className="w-3 h-3 mr-1" />
+            {photos}
+          </span>
+        )}
+        {videos && videos > 0 && (
+          <span className="flex items-center">
+            <VideoIcon className="w-3 h-3 mr-1" />
+            {videos}
+          </span>
+        )}
+        {live && live > 0 && (
+          <span className="flex items-center">
+            <Radio className="w-3 h-3 mr-1" />
+            {live}
+          </span>
+        )}
+      </div>
+    );
   };
 
-  // Determine what services this provider offers
-  const providesInPerson = provider.providesInPersonServices !== false;
-  const providesContent = provider.providesVirtualContent !== false;
-  const providesLivecam = provider.contentStats?.live || false;
-
   return (
-    <Card className={`overflow-hidden transition-shadow hover:shadow-lg ${className}`}>
-      <div className="relative">
-        <Link to={`/escorts/${provider.id}`}>
-          <img
-            src={provider.imageUrl}
-            alt={provider.name}
-            className="h-64 w-full object-cover object-center"
-            loading="lazy"
-          />
-        </Link>
-        
-        {/* Service badges */}
-        <div className="absolute top-2 left-2 flex gap-1">
-          {provider.verified && (
-            <Badge variant="secondary" className="bg-primary/70 backdrop-blur-sm">
-              <CheckCircle className="mr-1 h-3 w-3" /> Verified
-            </Badge>
-          )}
-          
-          {provider.availableNow && (
-            <Badge variant="secondary" className="bg-green-600/70 backdrop-blur-sm">
-              <Clock className="mr-1 h-3 w-3" /> Available Now
-            </Badge>
-          )}
-        </div>
-
-        {/* Price badge */}
-        <div className="absolute bottom-2 right-2">
-          <Badge variant="secondary" className="bg-black/50 backdrop-blur-sm text-white">
-            {formatCurrency(provider.price)}
-          </Badge>
-        </div>
-
-        {/* Services offered */}
-        <div className="absolute top-2 right-2">
-          <div className="flex gap-1 bg-black/50 backdrop-blur-sm rounded-md p-1">
-            {providesInPerson && (
-              <span title="In-person services available">
-                {serviceIcons.escort}
-              </span>
-            )}
-            
-            {providesContent && (
-              <span title="Content creator">
-                {serviceIcons.content}
-              </span>
-            )}
-            
-            {providesLivecam && (
-              <span title="Live cam available">
-                {serviceIcons.livecam}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
+    <Card className="w-full">
       <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <Link to={`/escorts/${provider.id}`} className="hover:underline">
-            <h3 className="font-medium text-lg">{provider.name}</h3>
-          </Link>
-          
-          <div className="flex items-center text-sm">
-            <Star className="h-4 w-4 text-yellow-500 mr-1" />
-            <span>{provider.rating}</span>
-            <span className="text-muted-foreground ml-1">
-              ({provider.reviews})
-            </span>
+        <div className="flex items-center space-x-4">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src={service.imageUrl} alt={service.name} />
+            <AvatarFallback>{service.name?.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold">{service.name}</h2>
+            <p className="text-sm text-muted-foreground">{service.description}</p>
+            {renderMediaStats()}
           </div>
         </div>
-
-        <div className="flex items-center text-sm mb-1">
-          <Globe className="h-3.5 w-3.5 text-muted-foreground mr-1.5" />
-          <span className="text-muted-foreground">
-            {provider.location}
-          </span>
-        </div>
-
-        <div className="flex flex-wrap gap-1 my-2">
-          {provider.tags.slice(0, 3).map((tag) => (
-            <Badge 
-              key={tag} 
-              variant="outline" 
-              className="bg-secondary text-xs font-normal"
-            >
-              {tag}
-            </Badge>
-          ))}
-          {provider.tags.length > 3 && (
-            <Badge 
-              variant="outline" 
-              className="bg-secondary text-xs font-normal"
-            >
-              +{provider.tags.length - 3}
-            </Badge>
-          )}
-        </div>
-
-        {showDetails && (
-          <>
-            <div className="text-sm mt-2">
-              {provider.services.slice(0, 2).join(" • ")}
-              {provider.services.length > 2 && " • ..."}
-            </div>
-            
-            {providesContent && provider.subscriptionPrice && (
-              <div className="mt-2 text-sm font-medium">
-                <Badge variant="outline" className="bg-primary/10 text-primary">
-                  Content: {formatCurrency(provider.subscriptionPrice)}/mo
-                </Badge>
-              </div>
-            )}
-          </>
-        )}
       </CardContent>
     </Card>
   );

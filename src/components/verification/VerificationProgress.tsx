@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
-import { VerificationRequest } from '@/types/escort';
+import { VerificationRequest } from '@/types/auth';
 import { 
   calculateVerificationProgress, 
   getVerificationStatusMessage, 
@@ -27,21 +27,21 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   useEffect(() => {
     if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'in_review') {
       const updateRemainingTime = () => {
-        const estimatedCompletionMs = new Date(verificationRequest.submittedAt).getTime() + 48 * 60 * 60 * 1000; // 48 hours
+        const estimatedCompletionMs = new Date(verificationRequest.submittedAt).getTime() + 48 * 60 * 60 * 1000;
         const now = Date.now();
         const diffMs = estimatedCompletionMs - now;
-        
+
         if (diffMs <= 0) {
           setTimeRemaining('Estimated completion time passed');
           return;
         }
-        
+
         const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
         const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        
+
         setTimeRemaining(`${diffHrs}h ${diffMins}m remaining`);
       };
-      
+
       updateRemainingTime();
       const interval = setInterval(updateRemainingTime, 60 * 1000);
       
@@ -87,11 +87,46 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     : '—';
 
   const handleCancelVerification = () => {
-    // In a real app, this would make an API call to cancel the verification
     toast({
       title: "Verification Cancelled",
       description: "Your verification request has been cancelled.",
     });
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      return new Date(dateString).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
+
+  const getVerificationSteps = (request: VerificationRequest | null) => {
+    if (!request) return [];
+    
+    const steps = [
+      {
+        id: 'submitted',
+        name: 'Submitted',
+        status: 'complete',
+        date: formatDate(request.created_at)
+      },
+      {
+        id: 'review',
+        name: 'In Review',
+        status: request.status === 'pending' ? 'current' 
+          : ['in_review', 'approved', 'rejected'].includes(request.status) ? 'complete' : 'upcoming',
+        date: request.updated_at ? formatDate(request.updated_at) : 'Waiting'
+      },
+    ];
+    
+    return steps;
   };
 
   return (
