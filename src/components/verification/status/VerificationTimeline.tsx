@@ -1,85 +1,109 @@
 
 import React from 'react';
-import { CheckCircle, CircleDashed, Clock, X } from 'lucide-react';
-import { VerificationStatus } from '@/types/verification';
+import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+type VerificationStep = 'submitted' | 'documents_verified' | 'identity_confirmed' | 'completed';
+type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
 
 interface VerificationTimelineProps {
   status: VerificationStatus;
-  updatedAt?: string;
+  currentStep?: VerificationStep;
+  rejectionReason?: string;
 }
 
-// Circle component for the timeline
-const Circle = ({ className, children }: { className?: string; children?: React.ReactNode }) => (
-  <div className={cn("h-6 w-6 rounded-full flex items-center justify-center", className)}>
-    {children}
-  </div>
-);
+const VerificationTimeline: React.FC<VerificationTimelineProps> = ({
+  status,
+  currentStep = 'submitted',
+  rejectionReason
+}) => {
+  const steps: { id: VerificationStep; label: string }[] = [
+    { id: 'submitted', label: 'Application Submitted' },
+    { id: 'documents_verified', label: 'Documents Verified' },
+    { id: 'identity_confirmed', label: 'Identity Confirmed' },
+    { id: 'completed', label: 'Verification Completed' }
+  ];
 
-const VerificationTimeline: React.FC<VerificationTimelineProps> = ({ status, updatedAt }) => {
-  const getStatusDate = () => {
-    if (!updatedAt) return '';
-    return new Date(updatedAt).toLocaleDateString();
-  };
-
-  const getStatusIcon = () => {
-    switch (status) {
-      case 'approved':
-        return <Circle className="bg-green-100 text-green-600"><CheckCircle className="h-4 w-4" /></Circle>;
-      case 'rejected':
-        return <Circle className="bg-red-100 text-red-600"><X className="h-4 w-4" /></Circle>;
-      case 'in_review':
-        return <Circle className="bg-yellow-100 text-yellow-600"><Clock className="h-4 w-4" /></Circle>;
-      case 'pending':
-      default:
-        return <Circle className="bg-gray-100 text-gray-500"><CircleDashed className="h-4 w-4" /></Circle>;
+  // Map the status to a step index (0-3)
+  const getCurrentStepIndex = () => {
+    if (status === 'rejected') return -1;
+    
+    switch (currentStep) {
+      case 'submitted': return 0;
+      case 'documents_verified': return 1;
+      case 'identity_confirmed': return 2;
+      case 'completed': return 3;
+      default: return 0;
     }
   };
 
-  const getStatusText = () => {
-    switch (status) {
-      case 'approved':
-        return 'Your verification has been approved.';
-      case 'rejected':
-        return 'Your verification has been rejected. Please check the reason and try again.';
-      case 'in_review':
-        return 'Your verification is being reviewed by our team.';
-      case 'pending':
-      default:
-        return 'Your verification is pending review.';
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (status) {
-      case 'approved':
-        return 'text-green-600';
-      case 'rejected':
-        return 'text-red-600';
-      case 'in_review':
-        return 'text-yellow-600';
-      case 'pending':
-      default:
-        return 'text-gray-500';
-    }
-  };
+  const currentStepIndex = getCurrentStepIndex();
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-3">
-        {getStatusIcon()}
-        <div>
-          <p className={cn("font-medium", getStatusColor())}>
-            {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {getStatusDate()}
-          </p>
+    <div className="space-y-4">
+      {status === 'rejected' && (
+        <div className="bg-destructive/10 border border-destructive/30 p-4 rounded-md mb-4 flex items-start gap-3">
+          <XCircle className="text-destructive h-5 w-5 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-destructive">Verification Rejected</h4>
+            <p className="text-sm text-muted-foreground mt-1">
+              {rejectionReason || "Your verification was rejected. Please review the requirements and try again."}
+            </p>
+          </div>
         </div>
+      )}
+      
+      <div className="relative">
+        {steps.map((step, index) => {
+          let Icon;
+          let bgColor;
+          
+          if (status === 'rejected') {
+            Icon = index === 0 ? XCircle : AlertCircle;
+            bgColor = index === 0 ? 'bg-destructive' : 'bg-muted';
+          } else if (index < currentStepIndex) {
+            Icon = CheckCircle;
+            bgColor = 'bg-green-500';
+          } else if (index === currentStepIndex) {
+            Icon = status === 'approved' ? CheckCircle : Clock;
+            bgColor = status === 'approved' ? 'bg-green-500' : 'bg-blue-500';
+          } else {
+            Icon = Clock;
+            bgColor = 'bg-muted';
+          }
+          
+          return (
+            <div key={step.id} className={cn(
+              "flex items-start mb-6 last:mb-0", 
+              index > currentStepIndex && status !== 'approved' && 'opacity-50'
+            )}>
+              <div className={cn("rounded-full p-1 mr-3", bgColor)}>
+                <Icon className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <p className="font-medium">{step.label}</p>
+                <p className="text-sm text-muted-foreground">
+                  {index < currentStepIndex && "Completed"}
+                  {index === currentStepIndex && status !== 'approved' && "In progress"}
+                  {index === currentStepIndex && status === 'approved' && "Completed"}
+                  {index > currentStepIndex && "Pending"}
+                </p>
+              </div>
+              
+              {/* Connecting line between steps */}
+              {index < steps.length - 1 && (
+                <div 
+                  className={cn(
+                    "absolute left-2.5 ml-px w-0.5 h-10", 
+                    index < currentStepIndex ? 'bg-green-500' : 'bg-muted'
+                  )}
+                  style={{ top: `${(index * 6) + 2.5}rem` }}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
-      <p className="pl-9 text-sm">
-        {getStatusText()}
-      </p>
     </div>
   );
 };

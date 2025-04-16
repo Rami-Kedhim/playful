@@ -1,17 +1,16 @@
 
-import React, { useState } from 'react';
-import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { VerificationFormValues } from '@/types/verification';
+import { FileUploader } from '@/components/shared/FileUploader';
 
-interface DocumentImageUploadProps {
+export interface DocumentImageUploadProps {
   form: UseFormReturn<VerificationFormValues>;
-  fieldName: keyof VerificationFormValues;
+  fieldName: string;
   label: string;
-  description?: string;
-  optional?: boolean; // Added optional prop
+  description: string;
+  optional?: boolean;
 }
 
 const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
@@ -19,71 +18,31 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
   fieldName,
   label,
   description,
-  optional = false // Default to false
+  optional = false
 }) => {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    
-    // Create a preview URL
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
-    
-    // Update form values
-    form.setValue(fieldName, {
-      file: file,
-      preview: objectUrl
-    } as any);
-  };
-  
   return (
-    <FormItem>
-      <FormLabel>
-        {label}
-        {optional && <span className="text-sm text-muted-foreground ml-2">(Optional)</span>}
-      </FormLabel>
-      <FormControl>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-          {previewUrl ? (
-            <div className="space-y-2">
-              <img 
-                src={previewUrl} 
-                alt="Document preview" 
-                className="mx-auto max-h-40 object-contain"
-              />
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={() => {
-                  setPreviewUrl(null);
-                  form.setValue(fieldName, undefined as any);
-                }}
-              >
-                Remove
-              </Button>
-            </div>
-          ) : (
-            <>
-              <Upload className="mx-auto h-10 w-10 text-gray-400" />
-              <p className="mt-2 text-sm text-gray-600">{description || "Click to upload or drag and drop"}</p>
-              <p className="text-xs text-gray-400">PNG, JPG, PDF up to 10MB</p>
-              <input
-                type="file"
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                accept="image/*,.pdf"
-                onChange={handleFileChange}
-              />
-              <Button type="button" variant="outline" className="mt-2">
-                Select File
-              </Button>
-            </>
-          )}
-        </div>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
+    <FormField
+      control={form.control}
+      name={fieldName as any}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>
+            {label} {optional && <span className="text-muted-foreground text-sm">(Optional)</span>}
+          </FormLabel>
+          <FormControl>
+            <FileUploader
+              value={field.value}
+              onChange={field.onChange}
+              accept="image/*"
+              maxSizeInMB={5}
+              className="h-32"
+            />
+          </FormControl>
+          <FormDescription>{description}</FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 };
 
