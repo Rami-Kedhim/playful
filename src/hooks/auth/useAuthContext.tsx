@@ -1,4 +1,3 @@
-
 import { useState, useContext, createContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -211,7 +210,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = signUp; // Alias for backward compatibility
 
-  const signOut = async () => {
+  const registerWithEmail = async (email: string, password: string, data: any = {}): Promise<AuthResult> => {
+    try {
+      setError(null);
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: {
+            ...data,
+            username: email.split('@')[0],
+            role: 'user',
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Registration successful",
+        description: "Please check your email to verify your account.",
+      });
+      
+      return { success: true };
+    } catch (error: any) {
+      setError(error.message);
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { success: false, error: error.message };
+    }
+  };
+
+  const signOut = async (): Promise<AuthResult> => {
     try {
       setError(null);
       await supabase.auth.signOut();
@@ -219,6 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Logged out",
         description: "You have been logged out successfully.",
       });
+      return { success: true, user: null, session: null };
     } catch (error: any) {
       setError(error.message);
       toast({
@@ -226,6 +260,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Failed to log out.",
         variant: "destructive",
       });
+      return { success: false, user: null, session: null, error };
     }
   };
 

@@ -13,13 +13,29 @@ export interface UberPersona {
   popularity?: number;
   gender?: string;
   age?: number;
-  roleFlags?: {
+  roleFlags: {
     isEscort?: boolean;
     isCreator?: boolean;
     isLivecam?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+    isAI?: boolean;
   };
   tags?: string[];
   price?: number;
+  capabilities?: {
+    hasContent?: boolean;
+    hasLiveStream?: boolean;
+    hasVirtualMeets?: boolean;
+    hasRealMeets?: boolean;
+  };
+  monetization?: {
+    acceptsLucoin?: boolean;
+    pricePerMessage?: number;
+    subscriptionPrice?: number;
+    videoChatPrice?: number;
+    meetingPrice?: number;
+  };
   systemMetadata?: {
     source?: string;
     internalId?: string;

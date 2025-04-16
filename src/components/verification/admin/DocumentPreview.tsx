@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import DocumentViewer from '@/components/documents/DocumentViewer';
-import { VerificationDocument } from '@/types/auth';
+import { VerificationDocument } from '@/types/verification';
 
 interface DocumentPreviewProps {
   document: VerificationDocument;

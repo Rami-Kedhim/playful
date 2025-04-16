@@ -1,190 +1,94 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { UberPersona } from '@/types/uberPersona';
-import { uberPersonaService } from '@/services/UberPersonaService';
-import useScrapers from '@/hooks/useScrapers';
-import { toast } from 'sonner';
-import { ContentCreator } from '@/types/creator';
-import { Escort } from '@/types/escort';
+import escortService from '@/services/escortService';
 
-// Define a Creator type that's compatible with what scrapeCreators returns
-export interface Creator extends Partial<ContentCreator> {
-  id: string;
-  name: string;
-  username: string;
-  imageUrl: string;
-  isPremium?: boolean; // Make this optional to match what the scraper returns
-}
-
-export function useUberPersonas() {
+export const useUberPersonas = () => {
   const [personas, setPersonas] = useState<UberPersona[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { scrapeLivecams, scrapeCreators, scrapeEscorts } = useScrapers();
-
-  // Load personas from multiple sources
+  
+  const convertToUberPersona = (profile: any): UberPersona => {
+    return {
+      id: profile.id || '',
+      username: profile.username || `user_${profile.id?.slice(0, 5)}`,
+      displayName: profile.name || profile.displayName || '',
+      avatarUrl: profile.imageUrl || profile.avatar || profile.avatar_url || profile.profileImage || '/placeholder-avatar.jpg',
+      language: profile.language || 'en',
+      location: profile.location || 'Unknown',
+      isOnline: profile.availableNow || false,
+      lastActive: profile.lastActive ? new Date(profile.lastActive) : undefined,
+      bio: profile.bio || profile.about || profile.description || '',
+      rating: profile.rating || undefined,
+      popularity: profile.popularity || undefined,
+      gender: profile.gender || undefined,
+      age: profile.age || undefined,
+      roleFlags: {
+        isEscort: profile.profileType === 'escort' || !!profile.isEscort,
+        isCreator: profile.profileType === 'creator' || !!profile.isCreator,
+        isLivecam: profile.profileType === 'livecam' || !!profile.isLivecam,
+        isVerified: !!profile.verified || !!profile.is_verified,
+        isFeatured: !!profile.featured || !!profile.is_featured,
+        isAI: !!profile.isAI
+      },
+      tags: profile.tags || [],
+      price: profile.price || undefined,
+      capabilities: {
+        hasContent: !!profile.providesVirtualContent || !!profile.contentStats?.photos,
+        hasLiveStream: !!profile.contentStats?.live,
+        hasVirtualMeets: !!profile.providesVirtualContent,
+        hasRealMeets: !!profile.providesInPersonServices
+      },
+      monetization: {
+        acceptsLucoin: true,
+        pricePerMessage: 1,
+        subscriptionPrice: profile.subscriptionPrice || 9.99,
+        videoChatPrice: 50,
+        meetingPrice: profile.price || profile.rates?.hourly || 150
+      }
+    };
+  };
+  
   const loadPersonas = useCallback(async (useCache = true) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // Try to get cached data first if allowed
-      if (useCache) {
-        const cachedData = localStorage.getItem('cachedUberPersonas');
-        if (cachedData) {
-          const parsed = JSON.parse(cachedData);
-          if (parsed.expiry > Date.now()) {
-            setPersonas(parsed.personas);
-            setIsLoading(false);
-            return;
-          }
-        }
-      }
+      // Get data from escort service
+      const allProfiles = await escortService.getAllProfiles();
       
-      const results: UberPersona[] = [];
+      // Convert each profile to UberPersona format
+      const convertedPersonas = allProfiles.map(convertToUberPersona);
       
-      // Load escorts
-      try {
-        const escorts = await scrapeEscorts();
-        if (escorts && Array.isArray(escorts)) {
-          const escortPromises = escorts.map(escort => {
-            try {
-              return uberPersonaService.escortToUberPersona(escort);
-            } catch (e) {
-              console.error("Error mapping escort to persona:", e);
-              return null;
-            }
-          }).filter(Boolean);
-          
-          const escortPersonas = await Promise.all(escortPromises);
-          results.push(...escortPersonas.filter(Boolean) as UberPersona[]);
-        }
-      } catch (e) {
-        console.error("Error loading escorts:", e);
-      }
-      
-      // Load creators
-      try {
-        const creators = await scrapeCreators();
-        if (creators && Array.isArray(creators)) {
-          // Convert Creator to ContentCreator with default values for required fields
-          const contentCreators = creators.map((creator: Creator): ContentCreator => {
-            return {
-              id: creator.id,
-              name: creator.name,
-              username: creator.username,
-              profileImage: creator.profileImage || creator.imageUrl,
-              avatarUrl: creator.avatarUrl || creator.imageUrl,
-              imageUrl: creator.imageUrl, // Add imageUrl from creator
-              location: creator.location || '',
-              languages: creator.languages || ['English'],
-              bio: creator.bio || '',
-              description: creator.description || '',
-              age: creator.age || 0,
-              ethnicity: creator.ethnicity || '',
-              tags: creator.tags || [],
-              createdAt: creator.createdAt || new Date(),
-              updatedAt: creator.updatedAt || new Date(),
-              isAI: creator.isAI || false,
-              isVerified: creator.isVerified || false,
-              isFeatured: creator.isFeatured || false,
-              isScraped: creator.isScraped || true,
-              hasLiveStream: creator.hasLiveStream || false,
-              subscriptionPrice: creator.subscriptionPrice || creator.price || 0,
-              isPremium: creator.isPremium || false,
-              isLive: creator.isLive || false,
-              subscriberCount: creator.subscriberCount || 0,
-              contentCount: creator.contentCount || { photos: 0, videos: 0 },
-              price: creator.price || 0,
-              lastSynced: new Date(),
-              rating: creator.rating || 0,
-              region: creator.location || '',
-              language: (creator.languages && creator.languages[0]) || 'English'
-            };
-          });
-          
-          const creatorPromises = contentCreators.map(creator => {
-            try {
-              return uberPersonaService.creatorToUberPersona(creator);
-            } catch (e) {
-              console.error("Error mapping creator to persona:", e);
-              return null;
-            }
-          }).filter(Boolean);
-          
-          const creatorPersonas = await Promise.all(creatorPromises);
-          results.push(...creatorPersonas.filter(Boolean) as UberPersona[]);
-        }
-      } catch (e) {
-        console.error("Error loading creators:", e);
-      }
-      
-      // Load livecams
-      try {
-        const livecamResponse = await scrapeLivecams();
-        if (livecamResponse && Array.isArray(livecamResponse.models)) {
-          const livecamPromises = livecamResponse.models.map(model => {
-            try {
-              return uberPersonaService.livecamToUberPersona(model);
-            } catch (e) {
-              console.error("Error mapping livecam to persona:", e);
-              return null;
-            }
-          }).filter(Boolean);
-          
-          const livecamPersonas = await Promise.all(livecamPromises);
-          results.push(...livecamPersonas.filter(Boolean) as UberPersona[]);
-        }
-      } catch (e) {
-        console.error("Error loading livecams:", e);
-      }
-      
-      // Register all personas with visibility system
-      for (const persona of results) {
-        try {
-          if (persona && persona.id) {
-            uberPersonaService.registerWithVisibilitySystem(persona.id, persona.systemMetadata?.source || 'manual');
-          }
-        } catch (e) {
-          console.error("Error registering persona with visibility system:", e);
-        }
-      }
-
-      // Cache the results
-      localStorage.setItem('cachedUberPersonas', JSON.stringify({
-        personas: results,
-        expiry: Date.now() + (30 * 60 * 1000) // 30 minutes
-      }));
-      
-      setPersonas(results);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load personas');
-      toast.error('Failed to load profiles', {
-        description: 'There was an error loading the profiles. Please try again later.'
-      });
+      setPersonas(convertedPersonas);
+    } catch (error: any) {
+      setError(error.message || 'Failed to load personas');
+      console.error('Error loading personas:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [scrapeEscorts, scrapeCreators, scrapeLivecams]);
-
-  // Filter personas by role
+  }, []);
+  
+  useEffect(() => {
+    loadPersonas();
+  }, [loadPersonas]);
+  
   const getEscorts = useCallback(() => {
-    return personas.filter(persona => persona && persona.roleFlags && persona.roleFlags.isEscort);
+    return personas.filter(persona => persona.roleFlags?.isEscort);
   }, [personas]);
   
   const getCreators = useCallback(() => {
-    return personas.filter(persona => persona && persona.roleFlags && persona.roleFlags.isCreator);
+    return personas.filter(persona => persona.roleFlags?.isCreator);
   }, [personas]);
   
   const getLivecams = useCallback(() => {
-    return personas.filter(persona => persona && persona.roleFlags && persona.roleFlags.isLivecam);
+    return personas.filter(persona => persona.roleFlags?.isLivecam);
   }, [personas]);
-
-  // Find persona by ID
+  
   const getPersonaById = useCallback((id: string) => {
     return personas.find(persona => persona.id === id);
   }, [personas]);
-
+  
   return {
     personas,
     isLoading,
@@ -195,6 +99,4 @@ export function useUberPersonas() {
     getLivecams,
     getPersonaById
   };
-}
-
-export default useUberPersonas;
+};

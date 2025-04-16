@@ -1,8 +1,8 @@
-
 import React from 'react';
-import { CheckCircle, Circle, Clock, XCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, Clock, AlertCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VerificationRequest, VerificationStatus } from '@/types/auth';
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
 interface TimelineStepProps {
   title: string;

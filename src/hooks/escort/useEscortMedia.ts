@@ -1,47 +1,39 @@
 
+import { useState } from 'react';
 import { Escort } from "@/types/escort";
-import { 
-  useGalleryManagement, 
-  useProfileImageManagement,
-  useVideoManagement 
-} from './media';
 
-/**
- * Custom hook for managing escort media (images, videos)
- * Acts as a facade to the more specific hooks
- */
 export const useEscortMedia = (
   updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
 ) => {
-  // Get gallery management functions
-  const galleryManagement = useGalleryManagement(updateEscortProfile);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  // Get profile image management functions
-  const profileImageManagement = useProfileImageManagement(updateEscortProfile);
-  
-  // Get video management functions
-  const videoManagement = useVideoManagement(updateEscortProfile);
-
-  return {
-    // Gallery functions
-    addGalleryImage: (id: string, imageUrl: string, escort?: Escort | null) => {
-      return galleryManagement.addGalleryImage(id, imageUrl);
-    },
-    removeGalleryImage: (id: string, imageUrl: string, escort?: Escort | null) => {
-      return galleryManagement.removeGalleryImage(id, imageUrl);
-    },
+  const setProfileImage = async (escortId: string, imageUrl: string) => {
+    setIsLoading(true);
+    setError(null);
     
-    // Profile image functions
-    setProfileImage: (id: string, imageUrl: string, escort?: Escort | null) => {
-      return profileImageManagement.setProfileImage(id, imageUrl);
-    },
-    
-    // Video functions
-    addVideo: (id: string, videoUrl: string, escort?: Escort | null) => {
-      return videoManagement.addVideo(id, videoUrl);
-    },
-    removeVideo: (id: string, videoIdOrUrl: string, escort?: Escort | null) => {
-      return videoManagement.removeVideo(id, videoIdOrUrl);
+    try {
+      // Update escort with new profile image
+      const updatedEscort = await updateEscortProfile(escortId, {
+        avatar: imageUrl,
+        profileImage: imageUrl,
+        imageUrl: imageUrl // Update all image-related fields
+      });
+      
+      return updatedEscort;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to set profile image';
+      setError(errorMessage);
+      console.error('Error setting profile image:', err);
+      return null;
+    } finally {
+      setIsLoading(false);
     }
+  };
+  
+  return {
+    setProfileImage,
+    isLoading,
+    error
   };
 };

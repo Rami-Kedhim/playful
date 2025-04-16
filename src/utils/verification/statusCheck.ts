@@ -1,80 +1,70 @@
 
 import { VerificationDocument, VerificationRequest, VerificationStatus } from '@/types/verification';
 
-export const checkVerificationStatus = async (userId: string): Promise<{
-  isVerified: boolean;
-  verificationStatus?: VerificationStatus;
-  pendingRequest?: VerificationRequest;
-}> => {
-  // In a real app, this would check with backend API
-  // For now, let's return mock data
-  
-  const mockPendingRequest = Math.random() > 0.7;
-  
-  if (mockPendingRequest) {
-    return {
-      isVerified: false,
-      verificationStatus: 'pending',
-      pendingRequest: generateMockRequest(userId, 'pending')
-    };
-  }
-  
-  const isVerified = Math.random() > 0.5;
-  
-  return {
-    isVerified,
-    verificationStatus: isVerified ? 'approved' : 'rejected'
-  };
+export const isPending = (status?: VerificationStatus): boolean => {
+  return status === 'pending' || status === 'in_review';
 };
 
-export const generateMockRequest = (userId: string, status: VerificationStatus): VerificationRequest => {
-  const now = new Date();
-  const requestId = `vr-${Date.now()}`;
-  
-  return {
-    id: requestId,
-    profile_id: userId,
-    status,
-    requested_level: 'basic',
-    documents: [
-      {
-        id: `doc-id-front-${Date.now()}`,
-        verification_id: requestId,
-        document_type: 'id_card',
-        document_url: 'https://example.com/document.jpg',
+export const isApproved = (status?: VerificationStatus): boolean => {
+  return status === 'approved';
+};
+
+export const isRejected = (status?: VerificationStatus): boolean => {
+  return status === 'rejected';
+};
+
+export const isExpired = (status?: VerificationStatus): boolean => {
+  return status === 'expired';
+};
+
+// Mock function to create a verification request
+export const createVerificationRequest = async (
+  userId: string,
+  documentUrls: string[]
+): Promise<VerificationRequest | null> => {
+  try {
+    const request: VerificationRequest = {
+      id: `req-${Date.now()}`,
+      profile_id: userId,
+      status: 'pending',
+      requested_level: 'basic',
+      documents: documentUrls.map((url, index) => ({
+        id: `doc-${Date.now()}-${index}`,
+        verification_id: `ver-${Date.now()}`,
+        document_type: index === 0 ? 'id_front' : index === 1 ? 'id_back' : 'selfie',
+        document_url: url,
         status: 'pending',
-        created_at: now.toISOString(),
-        type: 'id_front',
-        fileUrl: 'https://example.com/document.jpg',
-        uploadedAt: now.toISOString()
-      },
-      {
-        id: `doc-id-back-${Date.now()}`,
-        verification_id: requestId,
-        document_type: 'id_card_back',
-        document_url: 'https://example.com/document-back.jpg',
-        status: 'pending',
-        created_at: now.toISOString(),
-        type: 'id_back',
-        fileUrl: 'https://example.com/document-back.jpg',
-        uploadedAt: now.toISOString()
-      },
-      {
-        id: `doc-selfie-${Date.now()}`,
-        verification_id: requestId,
-        document_type: 'selfie',
-        document_url: 'https://example.com/selfie.jpg',
-        status: 'pending',
-        created_at: now.toISOString(),
-        type: 'selfie',
-        fileUrl: 'https://example.com/selfie.jpg',
-        uploadedAt: now.toISOString()
-      }
-    ],
-    created_at: now.toISOString(),
+        created_at: new Date().toISOString(),
+        // Backward compatibility fields
+        type: index === 0 ? 'id_front' : index === 1 ? 'id_back' : 'selfie',
+        fileUrl: url,
+        uploadedAt: new Date().toISOString()
+      })),
+      created_at: new Date().toISOString(),
+    };
     
-    // Backwards compatibility
-    submittedAt: now.toISOString(),
-    userId: userId
-  };
+    // In a real app this would be saved to a database
+    console.log('Created verification request:', request);
+    
+    return request;
+  } catch (error) {
+    console.error('Error creating verification request:', error);
+    return null;
+  }
+};
+
+// Mock function to update verification status
+export const updateVerificationStatus = async (
+  requestId: string,
+  status: VerificationStatus,
+  notes?: string
+): Promise<boolean> => {
+  try {
+    // In a real app this would update a database record
+    console.log(`Updated verification ${requestId} to ${status}${notes ? ` with notes: ${notes}` : ''}`);
+    return true;
+  } catch (error) {
+    console.error('Error updating verification status:', error);
+    return false;
+  }
 };

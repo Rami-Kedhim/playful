@@ -1,111 +1,74 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/auth/useAuth"; 
-import AppLayout from "@/components/layout/AppLayout";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { AuthUser } from "@/types/auth"; 
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useProfile } from '@/hooks/useProfile';
+import { useEscortMedia } from '@/hooks/escort/useEscortMedia';
+import { toast } from '@/components/ui/use-toast';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
+import { escortService } from '@/services/escortService';
 
-// Import custom components
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import PersonalInfoForm from "@/components/profile/PersonalInfoForm";
-import AccountSettings from "@/components/profile/AccountSettings";
-import { uploadAvatar, validateGender } from "@/utils/profileUtils";
-import { useAvatarUpload } from "@/hooks/useAvatarUpload";
-import { profileFormSchema, ProfileFormData } from "@/components/profile/ProfileFormSchema";
-
-const ProfileManagement = () => {
-  const { user, profile, refreshProfile } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+const ProfileManagement: React.FC = () => {
+  const { user } = useAuth();
+  const { profile, isLoading, error, updateProfile } = useProfile();
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
-  const {
-    avatarFile,
-    avatarPreview,
-    handleAvatarChange,
-    handleAvatarRemove,
-    isDefault,
-    uploadProgress,
-    setUploadProgress
-  } = useAvatarUpload(profile?.avatar_url || "");
-
-  const onSubmit = async (data: ProfileFormData) => {
-    if (!user) return;
-    setLoading(true);
-
+  const updateEscortProfile = async (id: string, updates: Partial<any>) => {
     try {
-      let avatarUrl = profile?.avatar_url || null;
+      const updatedEscort = await escortService.updateProfile(id, updates);
+      return updatedEscort;
+    } catch (error) {
+      console.error("Error updating escort profile:", error);
+      return null;
+    }
+  };
+  
+  const { setProfileImage } = useEscortMedia(updateEscortProfile);
+  
+  useEffect(() => {
+    if (profile) {
+      setProfileImageUrl(profile.avatar_url || null);
+    }
+  }, [profile]);
+  
+  const handleSetProfileImage = async (imageUrl: string) => {
+    try {
+      // Update to call with correct parameters
+      await setProfileImage(user?.id as string, imageUrl);
       
-      // Handle avatar changes
-      if (avatarFile) {
-        // Set initial progress
-        setUploadProgress(10);
-        
-        // Create a function to track upload progress
-        const trackProgress = (progress: number) => {
-          setUploadProgress(Math.min(Math.floor(10 + progress * 0.8), 90)); // Scale between 10% and 90%
-        };
-        
-        // Here we need to adapt for the AuthUser type - use user.id instead of the full User object
-        const newAvatarUrl = await uploadAvatar(avatarFile, user.id, trackProgress);
-        if (newAvatarUrl) {
-          avatarUrl = newAvatarUrl;
-        }
-      } else if (!isDefault && profile?.avatar_url) {
-        // User removed the avatar
-        avatarUrl = null;
-        
-        // If there was a previous avatar, remove it from storage
-        try {
-          const filename = profile.avatar_url.split('/').pop();
-          if (filename) {
-            setUploadProgress(30);
-            await supabase
-              .storage
-              .from('profiles')
-              .remove([`avatars/${filename}`]);
-            setUploadProgress(70);
-          }
-        } catch (error) {
-          console.error("Error removing old avatar:", error);
-          // Non-critical error, continue with profile update
-        }
+      toast({
+        title: "Profile image updated",
+        description: "Your profile image has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error updating profile image",
+        description: "Failed to update profile image. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    
+    try {
+      if (!profile) {
+        throw new Error("Profile not loaded");
       }
-
-      // Validate and process gender to ensure it matches our database accepted values
-      const validatedGender = validateGender(data.gender);
-
-      setUploadProgress(90); // Almost done
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          username: data.username,
-          full_name: data.full_name,
-          bio: data.bio,
-          gender: validatedGender,
-          sexual_orientation: data.sexual_orientation,
-          location: data.location,
-          avatar_url: avatarUrl,
-          updated_at: new Date()
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      setUploadProgress(100); // Complete
       
-      await refreshProfile();
+      const updates = {
+        id: profile.id,
+        avatar_url: profileImageUrl || profile.avatar_url,
+      };
+      
+      await updateProfile(updates);
+      
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
@@ -113,82 +76,96 @@ const ProfileManagement = () => {
     } catch (error: any) {
       toast({
         title: "Error updating profile",
-        description: error.message || "Something went wrong. Please try again.",
+        description: error.message || "Failed to update profile. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
-
-  if (!user) {
+  
+  if (isLoading) {
     return (
-      <AppLayout>
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-center">Please log in to manage your profile.</p>
-          <div className="flex justify-center mt-4">
-            <button onClick={() => navigate("/auth")}>Go to Login</button>
-          </div>
-        </div>
-      </AppLayout>
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
     );
   }
-
-  return (
-    <AppLayout>
-      <ProfileHeader title="Profile Management" />
-      
-      <div className="container mx-auto px-4 pb-8">
-        <Tabs defaultValue="personal" className="w-full">
-          <TabsList className="grid grid-cols-2 mb-8">
-            <TabsTrigger value="personal">Personal Information</TabsTrigger>
-            <TabsTrigger value="account">Account Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="personal">
-            <Card>
-              <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>
-                  Update your personal details and how others see you on the platform
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent>
-                <PersonalInfoForm 
-                  profile={profile}
-                  user={user}
-                  loading={loading}
-                  avatarPreview={avatarPreview}
-                  handleAvatarChange={handleAvatarChange}
-                  handleAvatarRemove={handleAvatarRemove}
-                  onSubmit={onSubmit}
-                  uploadProgress={uploadProgress}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="account">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>
-                  Manage your account settings and preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AccountSettings 
-                  user={user} 
-                  profile={profile} 
-                  initialTab="general"
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+  
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-red-500">Error: {error}</p>
       </div>
-    </AppLayout>
+    );
+  }
+  
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Management</CardTitle>
+          <CardDescription>Manage your profile information and settings</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-20 w-20">
+              {profileImageUrl ? (
+                <AvatarImage src={profileImageUrl} alt="Profile picture" />
+              ) : (
+                <AvatarFallback>{profile?.username?.substring(0, 2).toUpperCase()}</AvatarFallback>
+              )}
+            </Avatar>
+            <div>
+              <Label htmlFor="profile-image">Profile Image</Label>
+              <Input
+                type="url"
+                id="profile-image"
+                placeholder="Enter image URL"
+                value={profileImageUrl || ''}
+                onChange={(e) => setProfileImageUrl(e.target.value)}
+              />
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="mt-2"
+                onClick={() => handleSetProfileImage(profileImageUrl || '')}
+              >
+                Set Image
+              </Button>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input type="text" id="username" defaultValue={profile?.username} disabled />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input type="email" id="email" defaultValue={profile?.email} disabled />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea id="bio" placeholder="Write a short bio about yourself" defaultValue={profile?.bio} disabled />
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={handleSaveProfile} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Profile"
+            )}
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 };
 

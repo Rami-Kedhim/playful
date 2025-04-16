@@ -1,144 +1,84 @@
 
-import React, { useRef, useState } from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Card } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UseFormReturn } from 'react-hook-form';
 import { VerificationFormValues } from '@/types/verification';
-import { FileUp, X, Image } from 'lucide-react';
 
 interface DocumentImageUploadProps {
   form: UseFormReturn<VerificationFormValues>;
-  fieldName: 'documentFrontImage' | 'documentBackImage' | 'selfieImage';
+  fieldName: keyof VerificationFormValues;
   label: string;
-  description: string;
-  optional?: boolean;
+  description?: string;
 }
 
 const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
   form,
   fieldName,
   label,
-  description,
-  optional = false
+  description
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
     
-    const reader = new FileReader();
-    reader.onload = () => {
-      form.setValue(fieldName, {
-        file,
-        preview: reader.result as string
-      }, { shouldValidate: true });
-    };
-    reader.readAsDataURL(file);
-  };
-  
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-  
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-  
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
+    // Create a preview URL
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
     
-    const reader = new FileReader();
-    reader.onload = () => {
-      form.setValue(fieldName, {
-        file,
-        preview: reader.result as string
-      }, { shouldValidate: true });
-    };
-    reader.readAsDataURL(file);
+    // Update form values
+    form.setValue(fieldName, {
+      file: file,
+      preview: objectUrl
+    } as any);
   };
   
-  const resetFile = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    
-    // Create a placeholder file to avoid TypeScript errors
-    const placeholder = new File([""], "placeholder.jpg", { type: "image/jpeg" });
-    form.setValue(fieldName, { 
-      file: placeholder,
-      preview: '' 
-    }, { shouldValidate: true });
-  };
-
   return (
-    <FormField
-      control={form.control}
-      name={fieldName}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label} {optional && <span className="text-muted-foreground text-xs">(Optional)</span>}</FormLabel>
-          <FormControl>
+    <FormItem>
+      <FormLabel>{label}</FormLabel>
+      <FormControl>
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+          {previewUrl ? (
+            <div className="space-y-2">
+              <img 
+                src={previewUrl} 
+                alt="Document preview" 
+                className="mx-auto max-h-40 object-contain"
+              />
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => {
+                  setPreviewUrl(null);
+                  form.setValue(fieldName, undefined as any);
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          ) : (
             <>
+              <Upload className="mx-auto h-10 w-10 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-600">{description || "Click to upload or drag and drop"}</p>
+              <p className="text-xs text-gray-400">PNG, JPG, PDF up to 10MB</p>
               <input
                 type="file"
-                ref={fileInputRef}
-                accept="image/*"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                accept="image/*,.pdf"
                 onChange={handleFileChange}
-                className="hidden"
               />
-              {field.value?.preview ? (
-                <Card className="overflow-hidden relative">
-                  <img
-                    src={field.value.preview}
-                    alt={label}
-                    className="w-full h-auto max-h-40 object-cover"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-6 w-6"
-                    onClick={resetFile}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </Card>
-              ) : (
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                    isDragging ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {isDragging ? (
-                    <Image className="h-8 w-8 text-primary mb-2" />
-                  ) : (
-                    <FileUp className="h-8 w-8 text-muted-foreground mb-2" />
-                  )}
-                  <p className="text-sm font-medium text-center">
-                    {isDragging ? 'Drop to upload' : 'Click to upload or drag and drop'}
-                  </p>
-                  <p className="text-xs text-muted-foreground text-center mt-1">
-                    {description}
-                  </p>
-                </div>
-              )}
+              <Button type="button" variant="outline" className="mt-2">
+                Select File
+              </Button>
             </>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+          )}
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
   );
 };
 

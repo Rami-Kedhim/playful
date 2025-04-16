@@ -1,119 +1,123 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { AuthUser, UserProfile, DatabaseGender } from '@/types/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
-import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { UserProfile, DatabaseGender } from '@/types/auth';
-
-// Mock API call to get a user profile
-const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
-  // Simulate API call latency
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Mock data
-  return {
-    id: userId,
-    username: 'userprofile123',
-    full_name: 'Test User',
-    avatar_url: 'https://i.pravatar.cc/150?u=userprofile123',
-    email: 'user@example.com',
-    bio: 'This is a mock user profile for development purposes.',
-    location: 'San Francisco, CA',
-    gender: DatabaseGender.OTHER,
-    sexual_orientation: 'Heterosexual',
-    profile_completeness: 80,
-    is_boosted: false,
-    created_at: new Date().toISOString(),
-    is_verified: true
-  };
-};
-
-export function useProfile(userId?: string) {
+export const useProfile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { user, setUser } = useAuth();
 
-  // Fetch user profile
-  const fetchProfile = async (id: string) => {
-    if (!id) return;
-    
+  const loadProfile = useCallback(async (userId: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const userProfile = await getUserProfile(id);
-      setProfile(userProfile);
-    } catch (err) {
-      console.error('Error fetching user profile:', err);
-      setError('Failed to load profile data');
-      toast({
-        title: "Error",
-        description: "Could not load profile data",
-        variant: "destructive",
-      });
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data) {
+        setProfile(data as UserProfile);
+      } else {
+        setProfile(null);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load profile');
+      console.error('Error loading profile:', err);
     } finally {
       setLoading(false);
     }
-  };
-  
-  // Update user profile
-  const updateProfile = async (data: Partial<UserProfile>) => {
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadProfile(user.id);
+    }
+  }, [user, loadProfile]);
+
+  const updateProfile = async (updates: Partial<UserProfile>) => {
     setLoading(true);
-    
+    setError(null);
+
     try {
-      // Simulate API call latency
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Map string gender values to DatabaseGender enum values
-      let genderValue = data.gender;
-      if (data.gender === 'male') {
-        genderValue = DatabaseGender.MALE;
-      } else if (data.gender === 'female') {
-        genderValue = DatabaseGender.FEMALE;
-      } else if (data.gender === 'other' || data.gender === 'non-binary' || data.gender === 'trans') {
-        genderValue = DatabaseGender.OTHER;
+      // Make sure to convert string gender to enum value
+      if (updates.gender) {
+        if (updates.gender === 'male') {
+          updates.gender = DatabaseGender.MALE;
+        } else if (updates.gender === 'female') {
+          updates.gender = DatabaseGender.FEMALE;
+        } else if (updates.gender === 'other') {
+          updates.gender = DatabaseGender.OTHER;
+        } else if (updates.gender === 'non_binary') {
+          updates.gender = DatabaseGender.NON_BINARY;
+        } else if (updates.gender === 'trans') {
+          updates.gender = DatabaseGender.TRANS;
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user?.id)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data) {
+        setProfile(data as UserProfile);
+
+        // Update user context if username or avatar_url is changed
+        if (updates.username || updates.avatar_url) {
+          setUser((prevUser: AuthUser | null) => {
+            if (!prevUser) return prevUser;
+            return {
+              ...prevUser,
+              username: updates.username || prevUser.username,
+              avatarUrl: updates.avatar_url || prevUser.avatarUrl
+            };
+          });
+        }
+
+        toast({
+          title: 'Profile updated',
+          description: 'Your profile has been updated successfully.',
+        });
       }
       
-      // Merge with existing profile
-      const updatedProfile = {
-        ...profile,
-        ...data,
-        gender: genderValue
-      };
-      
-      setProfile(updatedProfile as UserProfile);
-      
+      return data as UserProfile;
+    } catch (error: any) {
+      setError(error.message || 'Failed to update profile');
+      console.error('Error updating profile:', error);
       toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-      
-      return updatedProfile;
-    } catch (err) {
-      console.error('Error updating user profile:', err);
-      setError('Failed to update profile');
-      toast({
-        title: "Error",
-        description: "Could not update profile data",
-        variant: "destructive",
+        title: 'Update failed',
+        description: error.message || 'Failed to update profile.',
+        variant: 'destructive',
       });
       return null;
     } finally {
       setLoading(false);
     }
   };
-  
-  // Load profile on component mount if userId is provided
-  useEffect(() => {
-    if (userId) {
-      fetchProfile(userId);
-    }
-  }, [userId]);
 
   return {
     profile,
     loading,
     error,
-    fetchProfile,
+    loadProfile,
     updateProfile
   };
-}
+};
+
+export default useProfile;

@@ -16,7 +16,7 @@ export interface AuthResult {
   error?: any;
 }
 
-export type UserRole = 'admin' | 'moderator' | 'user' | 'escort' | string;
+export type UserRole = 'admin' | 'moderator' | 'user' | 'escort' | 'creator' | string;
 
 export interface AuthUser {
   id: string;
@@ -24,6 +24,11 @@ export interface AuthUser {
   username?: string;
   roles?: UserRole[];
   aud?: string;
+  avatarUrl?: string;
+  profileImageUrl?: string;
+  user_metadata?: any;
+  created_at?: string;
+  lucoinsBalance?: number;
   // Add other user properties as needed
 }
 
@@ -41,4 +46,12 @@ export interface UserProfile {
   is_boosted?: boolean;
   created_at: string;
   is_verified?: boolean;
+  ubx_balance?: number;
+  lucoin_balance?: number;
 }
+
+// Add ServiceTypeFilter definition
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
+
+// Re-export verification types from verification.ts to maintain compatibility
+export { VerificationDocument, VerificationRequest, VerificationStatus } from '../types/verification';

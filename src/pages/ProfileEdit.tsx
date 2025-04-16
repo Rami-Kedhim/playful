@@ -1,231 +1,198 @@
-
-import React, { useState, useEffect } from "react";
-import AppLayout from "@/components/layout/AppLayout";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { toast } from "sonner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, ArrowLeft } from "lucide-react";
-import { useProfileManagement } from "@/hooks/auth/useProfileManagement";
-import { z } from "zod";
-import { profileFormSchema } from "@/components/profile/ProfileFormSchema";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import BioField from "@/components/profile/BioField";
-import BasicInfoFields from "@/components/profile/BasicInfoFields";
-import FormActions from "@/components/profile/FormActions";
-import PersonalDetails from "@/components/profile/PersonalDetails";
-import LocationField from "@/components/profile/LocationField";
-import { DatabaseGender } from "@/types/auth";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useProfile } from '@/hooks/useProfile';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/use-toast';
+import { DatabaseGender } from '@/types/auth';
 
 const ProfileEdit = () => {
-  const { user, profile, refreshProfile } = useAuth();
-  const { updateProfile, isLoading } = useProfileManagement();
+  const { user } = useAuth();
+  const { profile, updateProfile } = useProfile();
   const navigate = useNavigate();
-  
-  const [activeTab, setActiveTab] = useState("basic");
-  
-  // Initialize form with zod validation
-  const form = useForm<z.infer<typeof profileFormSchema>>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      username: "",
-      full_name: "",
-      bio: "",
-      avatar_url: "",
-      gender: undefined,
-      sexual_orientation: undefined,
-      location: "",
-    },
+
+  const [formData, setFormData] = useState({
+    username: '',
+    full_name: '',
+    avatar_url: '',
+    bio: '',
+    location: '',
+    gender: '',
+    sexual_orientation: ''
   });
-  
+
   useEffect(() => {
-    if (user) {
-      form.setValue("username", user.username || "");
-    }
-    
     if (profile) {
-      form.setValue("full_name", profile.full_name || "");
-      form.setValue("bio", profile.bio || "");
-      form.setValue("avatar_url", profile.avatar_url || "");
-      form.setValue("gender", profile.gender as any || undefined);
-      form.setValue("sexual_orientation", profile.sexual_orientation || undefined);
-      form.setValue("location", profile.location || "");
+      setFormData({
+        username: profile.username || '',
+        full_name: profile.full_name || '',
+        avatar_url: profile.avatar_url || '',
+        bio: profile.bio || '',
+        location: profile.location || '',
+        gender: profile.gender || '',
+        sexual_orientation: profile.sexual_orientation || ''
+      });
     }
-  }, [user, profile, form]);
-  
-  if (!user) {
-    return (
-      <AppLayout>
-        <div className="container px-4 py-8">
-          <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
-          <p>Please sign in to edit your profile.</p>
-          <Button className="mt-4" onClick={() => navigate("/auth")}>Sign In</Button>
-        </div>
-      </AppLayout>
-    );
-  }
-  
-  const handleSaveProfile = async (data: z.infer<typeof profileFormSchema>) => {
+  }, [profile]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     try {
-      // Add the user id to the profile data
-      const profileData = {
-        ...data,
-        id: user.id
-      };
+      const genderValue = formData.gender ? 
+        (formData.gender === 'male' ? DatabaseGender.MALE :
+         formData.gender === 'female' ? DatabaseGender.FEMALE :
+         formData.gender === 'other' ? DatabaseGender.OTHER :
+         formData.gender === 'non-binary' ? DatabaseGender.NON_BINARY :
+         formData.gender === 'trans' ? DatabaseGender.TRANS : DatabaseGender.OTHER)
+        : undefined;
       
-      const success = await updateProfile(profileData);
+      const updatedProfile = await updateProfile({
+        id: user?.id as string,
+        location: formData.location,
+        username: formData.username,
+        bio: formData.bio,
+        gender: genderValue,
+        avatar_url: formData.avatar_url,
+        full_name: formData.full_name,
+        sexual_orientation: formData.sexual_orientation
+      });
       
-      if (success) {
-        toast.success("Profile saved", {
-          description: "Your profile has been updated successfully."
+      if (updatedProfile) {
+        toast({
+          title: 'Profile Updated',
+          description: 'Your profile has been updated successfully.',
         });
-        
-        await refreshProfile();
-        navigate("/profile");
+        navigate('/profile');
       } else {
-        toast.error("Error saving profile", {
-          description: "An error occurred while saving your profile."
+        toast({
+          title: 'Update Failed',
+          description: 'Failed to update profile. Please try again.',
+          variant: 'destructive',
         });
       }
     } catch (error: any) {
-      console.error("Error saving profile:", error);
-      toast.error("Error saving profile", {
-        description: error.message || "An error occurred while saving your profile."
+      console.error('Profile update error:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'An unexpected error occurred.',
+        variant: 'destructive',
       });
     }
   };
-  
+
   return (
-    <AppLayout>
-      <div className="container px-4 py-8">
-        <div className="flex items-center mb-6">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mr-4"
-            onClick={() => navigate('/profile')}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-semibold mb-4">Edit Profile</h1>
+      <form onSubmit={handleSubmit} className="max-w-lg">
+        <div className="mb-4">
+          <Label htmlFor="username" className="block text-sm font-medium text-gray-700">
+            Username
+          </Label>
+          <Input
+            type="text"
+            id="username"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
+            Full Name
+          </Label>
+          <Input
+            type="text"
+            id="full_name"
+            name="full_name"
+            value={formData.full_name}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="avatar_url" className="block text-sm font-medium text-gray-700">
+            Avatar URL
+          </Label>
+          <Input
+            type="text"
+            id="avatar_url"
+            name="avatar_url"
+            value={formData.avatar_url}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+            Bio
+          </Label>
+          <textarea
+            id="bio"
+            name="bio"
+            value={formData.bio}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="location" className="block text-sm font-medium text-gray-700">
+            Location
+          </Label>
+          <Input
+            type="text"
+            id="location"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          />
+        </div>
+        <div className="mb-4">
+          <Label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+            Gender
+          </Label>
+          <select
+            id="gender"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Profile
-          </Button>
-          <h1 className="text-3xl font-bold">Edit Profile</h1>
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+            <option value="non-binary">Non-binary</option>
+            <option value="trans">Trans</option>
+          </select>
         </div>
-        
-        <div className="max-w-3xl mx-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-6">
-              <TabsTrigger value="basic">Basic Information</TabsTrigger>
-              <TabsTrigger value="preferences">Preferences</TabsTrigger>
-              <TabsTrigger value="privacy">Privacy & Security</TabsTrigger>
-            </TabsList>
-            
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSaveProfile)}>
-                <TabsContent value="basic">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Basic Information</CardTitle>
-                      <CardDescription>
-                        Update your personal information and how others see you on the platform
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="h-20 w-20">
-                          <AvatarImage src={form.watch("avatar_url")} />
-                          <AvatarFallback>
-                            {form.watch("username")?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <FormField
-                            control={form.control}
-                            name="avatar_url"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Profile Image URL</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    placeholder="https://example.com/avatar.jpg"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email" 
-                          value={user.email}
-                          disabled 
-                          readOnly
-                        />
-                        <p className="text-sm text-muted-foreground">
-                          Your email address cannot be changed
-                        </p>
-                      </div>
-                      
-                      <BasicInfoFields />
-                      <BioField />
-                      <PersonalDetails />
-                      <LocationField />
-                    </CardContent>
-                    <FormActions loading={isLoading} />
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="preferences">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Preferences</CardTitle>
-                      <CardDescription>
-                        Customize your experience and preferences
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">
-                        Preference settings will be available soon.
-                      </p>
-                    </CardContent>
-                    <FormActions loading={isLoading} />
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="privacy">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Privacy & Security</CardTitle>
-                      <CardDescription>
-                        Manage your account security and privacy settings
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">
-                        Privacy and security settings will be available soon.
-                      </p>
-                    </CardContent>
-                    <FormActions loading={isLoading} />
-                  </Card>
-                </TabsContent>
-              </form>
-            </Form>
-          </Tabs>
+        <div className="mb-4">
+          <Label htmlFor="sexual_orientation" className="block text-sm font-medium text-gray-700">
+            Sexual Orientation
+          </Label>
+          <Input
+            type="text"
+            id="sexual_orientation"
+            name="sexual_orientation"
+            value={formData.sexual_orientation}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+          />
         </div>
-      </div>
-    </AppLayout>
+        <Button type="submit">Update Profile</Button>
+      </form>
+    </div>
   );
 };
 

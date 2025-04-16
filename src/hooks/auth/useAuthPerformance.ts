@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -7,7 +6,7 @@ import { AuthResult } from '@/types/auth';
 /**
  * Hook for optimized authentication operations
  */
-export function useAuthPerformance() {
+export const useAuthPerformance = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -62,12 +61,70 @@ export function useAuthPerformance() {
     setError(null);
   };
 
+  const checkPerformance = (): AuthResult => {
+    const slowAuthDetected = false; // Placeholder for actual performance check logic
+    if (slowAuthDetected) {
+      return {
+        success: false,
+        user: null,
+        session: null,
+        error: "Slow auth performance detected"
+      };
+    }
+    
+    return {
+      success: true,
+      user: null,
+      session: null
+    };
+  };
+
+  const startMonitoring = async (): Promise<AuthResult> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: "test@example.com",
+        password: "password"
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Login successful",
+        description: "You have been logged in successfully",
+      });
+      
+      return {
+        success: true,
+        user: null,
+        session: null
+      };
+    } catch (error) {
+      const errorMessage = error.message || "Login failed. Please check your credentials.";
+      setError(errorMessage);
+      
+      toast({
+        title: "Login failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
+      return {
+        success: false,
+        user: null,
+        session: null,
+        error
+      };
+    }
+  };
+
   return {
     performLogin,
     clearErrors,
+    checkPerformance,
+    startMonitoring,
     isLoading,
     error
   };
-}
+};
 
 export default useAuthPerformance;

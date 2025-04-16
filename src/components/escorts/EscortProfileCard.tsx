@@ -71,6 +71,38 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
     }
   };
 
+  const renderAvailability = () => {
+    if (!escort.availability) return null;
+    
+    let availabilityData = escort.availability;
+    
+    if (Array.isArray(availabilityData)) {
+      // Handle array case
+      return (
+        <div>
+          {availabilityData.map((avail, index) => (
+            <div key={index} className="text-sm">
+              {avail.day && <span className="font-medium">{avail.day}: </span>}
+              {avail.hours ? avail.hours.join(', ') : 
+               avail.slots ? avail.slots.map(slot => `${slot.start}-${slot.end}`).join(', ') : 
+               'Hours not specified'}
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      // Handle single object case
+      return (
+        <div className="text-sm">
+          {availabilityData.day && <span className="font-medium">{availabilityData.day}: </span>}
+          {availabilityData.hours ? availabilityData.hours.join(', ') : 
+           availabilityData.slots ? availabilityData.slots.map(slot => `${slot.start}-${slot.end}`).join(', ') : 
+           'Hours not specified'}
+        </div>
+      );
+    }
+  };
+
   return (
     <Card className="overflow-hidden">
       <div className="relative">
@@ -219,15 +251,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort }) => {
             </span>
           </div>
           
-          {escort.availability?.hours && (
-            <div className="text-xs text-muted-foreground">
-              {typeof escort.availability === 'object' && 'hours' in escort.availability ? 
-                Array.isArray(escort.availability.hours) ? 
-                  escort.availability.hours.join(', ') : 
-                  escort.availability.hours 
-                : ''}
-            </div>
-          )}
+          {renderAvailability()}
         </div>
         
         {/* Tabs for different sections */}

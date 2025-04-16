@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ServiceTypeFilter } from '@/types/auth';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { ServiceTypeFilter } from '@/types/escort';
 import ServiceTypeIcon from './ServiceTypeIcon';
 import { ServiceType } from './ServiceTypeFilterRules';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';

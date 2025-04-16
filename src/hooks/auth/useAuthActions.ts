@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthResult } from "@/types/auth";
@@ -33,7 +32,6 @@ export function useAuthActions() {
     setIsLoading(true);
     
     try {
-      // Register with Supabase
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
@@ -86,10 +84,93 @@ export function useAuthActions() {
     }
   };
 
+  const signInWithEmail = async (email: string, password: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
+      if (error) throw error;
+      
+      return {
+        success: true,
+        user: null,
+        session: null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        user: null,
+        session: null,
+        error
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithProvider = async (provider: Provider): Promise<AuthResult> => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithProvider({ 
+        provider 
+      });
+      
+      if (error) throw error;
+      
+      return {
+        success: true,
+        user: null,
+        session: null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        user: null,
+        session: null,
+        error
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signOut = async (): Promise<AuthResult> => {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
+      return {
+        success: true,
+        user: null,
+        session: null
+      };
+    } catch (error) {
+      return {
+        success: false,
+        user: null,
+        session: null,
+        error
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return { 
     login, 
     register, 
     logout,
+    signInWithEmail,
+    signInWithProvider,
+    signOut,
     isLoading 
   };
 }

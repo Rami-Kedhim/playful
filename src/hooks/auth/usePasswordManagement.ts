@@ -1,93 +1,99 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 import { AuthResult } from '@/types/auth';
 
-export const usePasswordManagement = () => {
+export function usePasswordManagement() {
   const [isLoading, setIsLoading] = useState(false);
-
-  const resetPassword = async (email: string): Promise<boolean> => {
+  const [error, setError] = useState<string | null>(null);
+  
+  const validatePassword = async (password: string): Promise<AuthResult> => {
     setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Password reset email sent",
-        description: "Check your email for the password reset link.",
-      });
-
-      return true;
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send reset email",
-        variant: "destructive",
-      });
-      return false;
-    } finally {
-      setIsLoading(false);
+    setError(null);
+    
+    // Password criteria
+    const minLength = 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    const validationErrors: string[] = [];
+    
+    if (password.length < minLength) {
+      validationErrors.push(`Password must be at least ${minLength} characters`);
     }
-  };
-
-  const updatePassword = async (currentPassword: string, newPassword: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    try {
-      // First verify current password by trying to sign in
-      const { data: userData } = await supabase.auth.getUser();
-      const userEmail = userData.user?.email || '';
-      
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: userEmail,
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        return {
-          success: false,
-          error: "Current password is incorrect"
-        };
-      }
-
-      // Update to new password
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated.",
-      });
-
-      return { success: true };
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update password",
-        variant: "destructive",
-      });
+    if (!hasUppercase) {
+      validationErrors.push("Password must contain at least one uppercase letter");
+    }
+    if (!hasLowercase) {
+      validationErrors.push("Password must contain at least one lowercase letter");
+    }
+    if (!hasNumber) {
+      validationErrors.push("Password must contain at least one number");
+    }
+    if (!hasSpecialChar) {
+      validationErrors.push("Password must contain at least one special character");
+    }
+    
+    const isPasswordValid = validationErrors.length === 0;
+    
+    setIsLoading(false);
+    
+    // If validation fails
+    if (!isPasswordValid) {
       return {
         success: false,
-        error: error.message
+        user: null,
+        session: null,
+        error: validationErrors.join(", ")
       };
-    } finally {
+    }
+    
+    // If validation passes
+    return {
+      success: true,
+      user: null,
+      session: null
+    };
+  };
+  
+  const resetPassword = async (email: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/password/update`,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
       setIsLoading(false);
+      
+      return {
+        success: true,
+        user: null,
+        session: null
+      };
+    } catch (error: any) {
+      setIsLoading(false);
+      setError(error.message || "Failed to reset password");
+      
+      return {
+        success: false,
+        user: null,
+        session: null,
+        error
+      };
     }
   };
-
+  
   return {
+    validatePassword,
     resetPassword,
-    updatePassword,
-    isLoading
+    isLoading,
+    error
   };
-};
-
-export default usePasswordManagement;
+}

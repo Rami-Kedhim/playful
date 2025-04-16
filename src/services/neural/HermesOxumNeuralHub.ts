@@ -1,4 +1,3 @@
-
 import { NeuralModel, ModelParameters, SystemHealthMetrics, TrainingProgress } from './types/neuralHub';
 import { TrainingManager } from './training/trainingManager';
 
@@ -318,6 +317,17 @@ class HermesOxumNeuralHub {
         }
       }, 500);
     });
+  }
+  
+  public async generateVirtualEscort(profile: Partial<Escort> = {}): Promise<Escort> {
+    const escort: Escort = {
+      ...profile,
+      isAI: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    return escort;
   }
 }
 

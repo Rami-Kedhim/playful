@@ -36,7 +36,10 @@ const PersonaChatTab: React.FC<PersonaChatTabProps> = ({ persona }) => {
     setTimeout(() => {
       let responseContent = "Thank you for your message! I'll respond as soon as I can.";
       
-      if (persona.roleFlags.isAI) {
+      // Default roleFlags if missing
+      const roleFlags = persona.roleFlags || {};
+
+      if (roleFlags.isAI) {
         // If AI persona, generate more dynamic response
         const responses = [
           `That's interesting! I'd love to chat more about it.`,
@@ -65,6 +68,12 @@ const PersonaChatTab: React.FC<PersonaChatTabProps> = ({ persona }) => {
     }
   };
   
+  // Default monetization if not present
+  const monetization = persona.monetization || {
+    acceptsLucoin: false,
+    pricePerMessage: 0
+  };
+
   return (
     <div className="flex flex-col h-[600px]">
       <h2 className="text-2xl font-semibold mb-4">Chat with {persona.displayName}</h2>
@@ -126,9 +135,9 @@ const PersonaChatTab: React.FC<PersonaChatTabProps> = ({ persona }) => {
             </Button>
           </div>
           
-          {persona.monetization.acceptsLucoin && (
+          {monetization.acceptsLucoin && (
             <div className="text-xs text-muted-foreground text-center mt-2">
-              Chat costs: {persona.roleFlags.isAI ? '1 LC' : '2 LC'} per message
+              Chat costs: {persona.roleFlags?.isAI ? '1 LC' : '2 LC'} per message
             </div>
           )}
         </div>

@@ -84,3 +84,25 @@ export const getProfileType = (profile: Escort): 'scraped' | 'manual' | 'ai_enha
   if (profile.isAI || profile.profileType === 'ai') return 'ai_enhanced';
   return 'manual';
 };
+
+export const mapProfileToType = (profileData: any): any => {
+  return {
+    id: profileData.id,
+    username: profileData.username,
+    displayName: profileData.displayName,
+    avatarUrl: profileData.avatarUrl,
+    location: profileData.location,
+    language: profileData.language,
+    bio: profileData.bio,
+    age: profileData.age,
+    ethnicity: profileData.ethnicity,
+    tags: profileData.tags,
+    createdAt: profileData.createdAt,
+    updatedAt: profileData.updatedAt,
+    sourceType: profileData.sourceType || 'manual',
+    roleFlags: profileData.roleFlags,
+    capabilities: profileData.capabilities,
+    monetization: profileData.monetization,
+    systemMetadata: profileData.systemMetadata
+  };
+};

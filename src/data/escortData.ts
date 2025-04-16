@@ -1,60 +1,398 @@
+import { Escort } from '@/types/escort';
+import { generateAIGirl } from './mock/aiProfileGenerator';
 
-import { Escort, ServiceType, ServiceTypeString } from "@/types/escort";
-import escortProfiles from "./escortProfiles";
-import moreEscortProfiles from "./moreEscortProfiles";
+export const escortProfiles = async (): Promise<Escort[]> => {
+  const aiProfiles = await Promise.all(
+    Array.from({ length: 5 }, () => generateAIGirl())
+  );
 
-// Mock data for escort services
-export const availableServices = [
-  "GFE (Girlfriend Experience)",
-  "Massage",
-  "Dinner Date",
-  "Overnight",
-  "Travel Companion",
-  "Role Play",
-  "BDSM",
-  "Couples",
-  "Fetish",
-  "Domination",
-  "Submission"
-];
+  return [
+    {
+      id: '1',
+      name: 'Alice',
+      age: 25,
+      location: 'New York',
+      gender: 'female',
+      services: ['massage', 'dinner'],
+      price: 200,
+      rate: {
+        hourly: 200,
+        twoHours: 350,
+        overnight: 1000,
+        weekend: 2500,
+      },
+      rating: 4.5,
+      reviewCount: 50,
+      avatar: '/images/avatars/1.png',
+      phone: '+1234567890',
+      email: 'alice@example.com',
+      verified: true,
+      languages: ['english', 'french'],
+      gallery: ['/images/gallery/1.png', '/images/gallery/2.png'],
+      availability: [
+        {
+          day: 'Monday',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+        {
+          day: 'Tuesday',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+      ],
+      about: 'I am a professional escort in New York.',
+      bio: 'I am a professional escort in New York.',
+      description: 'I am a professional escort in New York.',
+      subscriptionPrice: 9.99,
+      contentStats: {
+        photos: 10,
+        videos: 5,
+        streams: '3',
+        live: true,
+      },
+      gallery_images: ['/images/gallery/1.png', '/images/gallery/2.png'],
+      verificationLevel: 'verified',
+      orientation: 'straight',
+      avatar_url: '/images/avatars/1.png',
+      providesInPersonServices: true,
+      providesVirtualContent: true,
+      tags: ['massage', 'dinner'],
+      featured: true,
+      serviceTypes: ['massage', 'dinner'],
+      profileType: 'escort',
+      profileImage: '/images/avatars/1.png',
+      imageUrl: '/images/avatars/1.png',
+      availableNow: true,
+      lastActive: new Date(),
+      responseRate: 90,
+      reviews: 50,
+      sexualOrientation: 'straight',
+      isAI: false,
+    },
+    {
+      id: '2',
+      name: 'Bob',
+      age: 28,
+      location: 'Los Angeles',
+      gender: 'male',
+      services: ['roleplay', 'overnight'],
+      price: 250,
+      rate: {
+        hourly: 250,
+        twoHours: 400,
+        overnight: 1200,
+        weekend: 3000,
+      },
+      rating: 4.2,
+      reviewCount: 30,
+      avatar: '/images/avatars/2.png',
+      phone: '+1234567891',
+      email: 'bob@example.com',
+      verified: false,
+      languages: ['english', 'spanish'],
+      gallery: ['/images/gallery/3.png', '/images/gallery/4.png'],
+      availability: [
+        {
+          day: 'Wednesday',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+        {
+          day: 'Thursday',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+      ],
+      about: 'I am a professional escort in Los Angeles.',
+      bio: 'I am a professional escort in Los Angeles.',
+      description: 'I am a professional escort in Los Angeles.',
+      subscriptionPrice: 12.99,
+      contentStats: {
+        photos: 15,
+        videos: 8,
+        streams: '5',
+        live: false,
+      },
+      gallery_images: ['/images/gallery/3.png', '/images/gallery/4.png'],
+      verificationLevel: 'unverified',
+      orientation: 'gay',
+      avatar_url: '/images/avatars/2.png',
+      providesInPersonServices: true,
+      providesVirtualContent: false,
+      tags: ['roleplay', 'overnight'],
+      featured: false,
+      serviceTypes: ['roleplay', 'overnight'],
+      profileType: 'escort',
+      profileImage: '/images/avatars/2.png',
+      imageUrl: '/images/avatars/2.png',
+      availableNow: false,
+      lastActive: new Date(),
+      responseRate: 85,
+      reviews: 30,
+      sexualOrientation: 'gay',
+      isAI: false,
+    },
+    {
+      id: '3',
+      name: 'Charlie',
+      age: 30,
+      location: 'Chicago',
+      gender: 'male',
+      services: ['bdsm', 'companionship'],
+      price: 300,
+      rate: {
+        hourly: 300,
+        twoHours: 500,
+        overnight: 1500,
+        weekend: 4000,
+      },
+      rating: 4.8,
+      reviewCount: 75,
+      avatar: '/images/avatars/3.png',
+      phone: '+1234567892',
+      email: 'charlie@example.com',
+      verified: true,
+      languages: ['english', 'german'],
+      gallery: ['/images/gallery/5.png', '/images/gallery/6.png'],
+      availability: [
+        {
+          day: 'Friday',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+        {
+          day: 'Saturday',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+      ],
+      about: 'I am a professional escort in Chicago.',
+      bio: 'I am a professional escort in Chicago.',
+      description: 'I am a professional escort in Chicago.',
+      subscriptionPrice: 15.99,
+      contentStats: {
+        photos: 20,
+        videos: 10,
+        streams: '8',
+        live: true,
+      },
+      gallery_images: ['/images/gallery/5.png', '/images/gallery/6.png'],
+      verificationLevel: 'verified',
+      orientation: 'bisexual',
+      avatar_url: '/images/avatars/3.png',
+      providesInPersonServices: true,
+      providesVirtualContent: true,
+      tags: ['bdsm', 'companionship'],
+      featured: true,
+      serviceTypes: ['bdsm', 'companionship'],
+      profileType: 'escort',
+      profileImage: '/images/avatars/3.png',
+      imageUrl: '/images/avatars/3.png',
+      availableNow: true,
+      lastActive: new Date(),
+      responseRate: 95,
+      reviews: 75,
+      sexualOrientation: 'bisexual',
+      isAI: false,
+    },
+    {
+      id: '4',
+      name: 'Diana',
+      age: 22,
+      location: 'Houston',
+      gender: 'female',
+      services: ['dinner', 'events'],
+      price: 180,
+      rate: {
+        hourly: 180,
+        twoHours: 300,
+        overnight: 900,
+        weekend: 2200,
+      },
+      rating: 4.0,
+      reviewCount: 20,
+      avatar: '/images/avatars/4.png',
+      phone: '+1234567893',
+      email: 'diana@example.com',
+      verified: false,
+      languages: ['english'],
+      gallery: ['/images/gallery/7.png', '/images/gallery/8.png'],
+      availability: [
+        {
+          day: 'Sunday',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+      ],
+      about: 'I am a professional escort in Houston.',
+      bio: 'I am a professional escort in Houston.',
+      description: 'I am a professional escort in Houston.',
+      subscriptionPrice: 7.99,
+      contentStats: {
+        photos: 8,
+        videos: 3,
+        streams: '2',
+        live: false,
+      },
+      gallery_images: ['/images/gallery/7.png', '/images/gallery/8.png'],
+      verificationLevel: 'unverified',
+      orientation: 'straight',
+      avatar_url: '/images/avatars/4.png',
+      providesInPersonServices: true,
+      providesVirtualContent: false,
+      tags: ['dinner', 'events'],
+      featured: false,
+      serviceTypes: ['dinner', 'events'],
+      profileType: 'escort',
+      profileImage: '/images/avatars/4.png',
+      imageUrl: '/images/avatars/4.png',
+      availableNow: false,
+      lastActive: new Date(),
+      responseRate: 70,
+      reviews: 20,
+      sexualOrientation: 'straight',
+      isAI: false,
+    },
+    {
+      id: '5',
+      name: 'Eve',
+      age: 32,
+      location: 'Miami',
+      gender: 'female',
+      services: ['travel', 'massage'],
+      price: 350,
+      rate: {
+        hourly: 350,
+        twoHours: 600,
+        overnight: 1800,
+        weekend: 5000,
+      },
+      rating: 4.9,
+      reviewCount: 100,
+      avatar: '/images/avatars/5.png',
+      phone: '+1234567894',
+      email: 'eve@example.com',
+      verified: true,
+      languages: ['english', 'russian'],
+      gallery: ['/images/gallery/9.png', '/images/gallery/10.png'],
+      availability: [
+        {
+          day: 'Any',
+          slots: [
+            { start: '10:00', end: '12:00' },
+            { start: '14:00', end: '16:00' },
+          ],
+        },
+      ],
+      about: 'I am a professional escort in Miami.',
+      bio: 'I am a professional escort in Miami.',
+      description: 'I am a professional escort in Miami.',
+      subscriptionPrice: 19.99,
+      contentStats: {
+        photos: 25,
+        videos: 12,
+        streams: '10',
+        live: true,
+      },
+      gallery_images: ['/images/gallery/9.png', '/images/gallery/10.png'],
+      verificationLevel: 'verified',
+      orientation: 'straight',
+      avatar_url: '/images/avatars/5.png',
+      providesInPersonServices: true,
+      providesVirtualContent: true,
+      tags: ['travel', 'massage'],
+      featured: true,
+      serviceTypes: ['travel', 'massage'],
+      profileType: 'escort',
+      profileImage: '/images/avatars/5.png',
+      imageUrl: '/images/avatars/5.png',
+      availableNow: true,
+      lastActive: new Date(),
+      responseRate: 98,
+      reviews: 100,
+      sexualOrientation: 'straight',
+      isAI: false,
+    },
+    ...aiProfiles,
+  ];
+};
 
-// Export the escortProfiles array as escorts
-// Merge both escort profile arrays and ensure service types are set
-const combinedEscorts = [...escortProfiles, ...moreEscortProfiles].map(escort => {
-  // Ensure each escort has service type flags
-  if (escort.serviceTypes && escort.serviceTypes.includes('in-person')) {
-    escort.providesInPersonServices = true;
-  }
-  
-  if (escort.serviceTypes && escort.serviceTypes.includes('virtual')) {
-    escort.providesVirtualContent = true;
-  }
-  
-  // If no service type is specified, default to in-person for standard escorts
-  // and virtual for AI escorts
-  if (escort.providesInPersonServices === undefined && escort.providesVirtualContent === undefined) {
-    if (escort.isAI === true || escort.profileType === 'ai') {
-      escort.providesVirtualContent = true;
-      escort.providesInPersonServices = false;
-    } else {
-      escort.providesInPersonServices = true;
-      escort.providesVirtualContent = false;
-    }
-  }
-  
-  return escort;
-});
+export const generateEscortProfile = async (): Promise<Escort> => {
+  const profile: Escort = {
+    id: '6',
+    name: 'Frank',
+    age: 35,
+    location: 'San Francisco',
+    gender: 'male',
+    services: ['roleplay', 'companionship'],
+    price: 280,
+    rate: {
+      hourly: 280,
+      twoHours: 450,
+      overnight: 1300,
+      weekend: 3500,
+    },
+    rating: 4.6,
+    reviewCount: 60,
+    avatar: '/images/avatars/6.png',
+    phone: '+1234567895',
+    email: 'frank@example.com',
+    verified: true,
+    languages: ['english', 'italian'],
+    gallery: ['/images/gallery/11.png', '/images/gallery/12.png'],
+    availability: [
+      {
+        day: 'Tuesday',
+        slots: [
+          { start: '11:00', end: '13:00' },
+          { start: '15:00', end: '17:00' },
+        ],
+      },
+    ],
+    about: 'I am a professional escort in San Francisco.',
+    bio: 'I am a professional escort in San Francisco.',
+    description: 'I am a professional escort in San Francisco.',
+    subscriptionPrice: 14.99,
+    contentStats: {
+      photos: 18,
+      videos: 9,
+      streams: '6',
+      live: false,
+    },
+    gallery_images: ['/images/gallery/11.png', '/images/gallery/12.png'],
+    verificationLevel: 'verified',
+    orientation: 'straight',
+    avatar_url: '/images/avatars/6.png',
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    tags: ['roleplay', 'companionship'],
+    featured: true,
+    serviceTypes: ['roleplay', 'companionship'],
+    profileType: 'escort',
+    profileImage: '/images/avatars/6.png',
+    imageUrl: '/images/avatars/6.png',
+    availableNow: false,
+    lastActive: new Date(),
+    responseRate: 92,
+    reviews: 60,
+    sexualOrientation: 'straight',
+    isAI: false, // Add missing property
+  };
 
-export const escorts: Escort[] = combinedEscorts as Escort[];
-
-// Helper function to get escort by ID
-export function getEscortById(id: string): Escort | undefined {
-  return escorts.find(escort => escort.id === id);
-}
-
-// Make sure escorts are saved in localStorage for mock persistence
-if (typeof window !== 'undefined') {
-  if (!localStorage.getItem("mockEscorts")) {
-    localStorage.setItem("mockEscorts", JSON.stringify(escorts));
-  }
-}
+  return profile;
+};

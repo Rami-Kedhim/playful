@@ -1,47 +1,49 @@
 
 import React from 'react';
-import { Controller } from 'react-hook-form';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
+import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { VerificationFormValues, DOCUMENT_TYPES } from '@/types/verification';
+import { VerificationFormValues, DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS } from '@/types/verification';
 
 interface DocumentTypeSelectProps {
   form: UseFormReturn<VerificationFormValues>;
+  onTypeChange: (type: string) => void;
 }
 
-const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
+const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeChange }) => {
+  const documentOptions = [
+    { value: DOCUMENT_TYPES.ID_CARD, label: DOCUMENT_TYPE_LABELS[DOCUMENT_TYPES.ID_CARD] },
+    { value: DOCUMENT_TYPES.PASSPORT, label: DOCUMENT_TYPE_LABELS[DOCUMENT_TYPES.PASSPORT] },
+    { value: DOCUMENT_TYPES.DRIVERS_LICENSE, label: DOCUMENT_TYPE_LABELS[DOCUMENT_TYPES.DRIVERS_LICENSE] }
+  ];
+
   return (
-    <div>
-      <Label>Document Type</Label>
-      <Controller
-        name="documentType"
-        control={form.control}
-        render={({ field }) => (
-          <RadioGroup 
-            value={field.value} 
-            onValueChange={field.onChange}
-            className="flex flex-col space-y-1 mt-2"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={DOCUMENT_TYPES.ID_CARD} id="id_card" />
-              <Label htmlFor="id_card">ID Card</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={DOCUMENT_TYPES.PASSPORT} id="passport" />
-              <Label htmlFor="passport">Passport</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={DOCUMENT_TYPES.DRIVERS_LICENSE} id="drivers_license" />
-              <Label htmlFor="drivers_license">Driver's License</Label>
-            </div>
-          </RadioGroup>
-        )}
-      />
-      {form.formState.errors.documentType && (
-        <p className="text-red-500 text-xs mt-1">{form.formState.errors.documentType.message}</p>
-      )}
-    </div>
+    <FormItem>
+      <FormLabel>Document Type</FormLabel>
+      <Select
+        onValueChange={(value) => {
+          form.setValue('documentType', value);
+          onTypeChange(value);
+        }}
+        defaultValue={form.getValues('documentType')}
+      >
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select document type" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          <SelectGroup>
+            {documentOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
   );
 };
 
