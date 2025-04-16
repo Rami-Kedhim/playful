@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { EnhancedButton } from '@/components/ui/enhanced-button';
 
 interface SubmitButtonProps {
   loading: boolean;
@@ -17,18 +16,15 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
   loadingText = "Submitting..."
 }) => {
   return (
-    <Button 
+    <EnhancedButton 
       type="submit" 
-      disabled={loading || disabled}
+      disabled={disabled}
+      isLoading={loading}
+      loadingText={loadingText}
       className="w-full"
     >
-      {loading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {loadingText}
-        </>
-      ) : text}
-    </Button>
+      {text}
+    </EnhancedButton>
   );
 };
 

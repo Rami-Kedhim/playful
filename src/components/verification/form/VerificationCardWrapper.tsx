@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader } from '@/components/ui/enhanced-card';
 
 interface VerificationCardWrapperProps {
   title: string;
@@ -14,15 +14,15 @@ const VerificationCardWrapper: React.FC<VerificationCardWrapperProps> = ({
   children 
 }) => {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <EnhancedCard variant="hover" className="w-full">
+      <EnhancedCardHeader>
+        <h2 className="text-xl font-semibold">{title}</h2>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </EnhancedCardHeader>
+      <EnhancedCardContent>
         {children}
-      </CardContent>
-    </Card>
+      </EnhancedCardContent>
+    </EnhancedCard>
   );
 };
 

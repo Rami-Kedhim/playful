@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { EnhancedButton } from "@/components/ui/enhanced-button";
 import { Heart, Calendar, MessageSquare, Share2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -19,8 +20,10 @@ const ProfileActions = ({
   onShareOpen 
 }: ProfileActionsProps) => {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const [isLoadingFavorite, setIsLoadingFavorite] = useState(false);
   
-  const handleFavoriteToggle = () => {
+  const handleFavoriteToggle = async () => {
+    setIsLoadingFavorite(true);
     toggleFavorite(escort.id);
     toast({
       title: isFavorite(escort.id) ? "Removed from favorites" : "Added to favorites",
@@ -28,44 +31,46 @@ const ProfileActions = ({
         ? `${escort.name} has been removed from your favorites.` 
         : `${escort.name} has been added to your favorites.`,
     });
+    setIsLoadingFavorite(false);
   };
   
   return (
     <div className="grid grid-cols-2 gap-3 mt-6">
-      <Button onClick={onBookingOpen} className="w-full">
+      <EnhancedButton onClick={onBookingOpen} className="w-full">
         <Calendar size={16} className="mr-2" />
         Book Now
-      </Button>
+      </EnhancedButton>
       
-      <Button 
+      <EnhancedButton 
         variant="outline" 
         className="w-full"
         onClick={onMessageOpen}
       >
         <MessageSquare size={16} className="mr-2" />
         Message
-      </Button>
+      </EnhancedButton>
       
-      <Button 
+      <EnhancedButton 
         variant="outline" 
         className="w-full" 
         onClick={handleFavoriteToggle}
+        isLoading={isLoadingFavorite}
       >
         <Heart 
           size={16} 
           className={`mr-2 ${isFavorite(escort.id) ? "fill-red-500 text-red-500" : ""}`} 
         />
         {isFavorite(escort.id) ? "Favorited" : "Favorite"}
-      </Button>
+      </EnhancedButton>
       
-      <Button 
+      <EnhancedButton 
         variant="ghost" 
         className="w-full"
         onClick={onShareOpen}
       >
         <Share2 size={16} className="mr-2" />
         Share Profile
-      </Button>
+      </EnhancedButton>
     </div>
   );
 };
