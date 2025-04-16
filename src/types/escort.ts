@@ -1,3 +1,4 @@
+
 export enum ServiceType {
   Massage = 'massage',
   Roleplay = 'roleplay',
@@ -19,7 +20,7 @@ export interface Availability {
     start: string;
     end: string;
   }[];
-  hours?: string[];
+  hours?: string[]; // Add hours property
   timeZone?: string;
   availableNow?: boolean;
   customNotes?: string;
@@ -97,9 +98,9 @@ export interface Escort {
   lastActive?: string | Date;
   responseRate?: number;
   sexualOrientation?: string;
-  isAI?: boolean;
+  isAI?: boolean; // Add isAI property
   isScraped?: boolean;
-  videos?: Video[];
+  videos?: Video[]; // Add videos property
   boostLevel?: number;
   boostExpiry?: Date;
   contactInfo?: {

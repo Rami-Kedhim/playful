@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/auth/useAuth"; 
@@ -56,7 +55,7 @@ const ProfileManagement = () => {
         };
         
         // Here we need to adapt for the AuthUser type - use user.id instead of the full User object
-        const newAvatarUrl = await uploadAvatar(avatarFile, { id: user.id }, trackProgress);
+        const newAvatarUrl = await uploadAvatar(avatarFile, user.id, trackProgress);
         if (newAvatarUrl) {
           avatarUrl = newAvatarUrl;
         }

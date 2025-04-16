@@ -1,43 +1,39 @@
 
-import { Escort } from "@/types/escort";
-import { toast } from "@/components/ui/use-toast";
+import { useState } from 'react';
+import { Escort } from '@/types/escort';
 
-/**
- * Custom hook for managing the escort's profile image
- */
 export const useProfileImageManagement = (
   updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
 ) => {
-  /**
-   * Set profile image
-   */
-  const setProfileImage = async (id: string, imageUrl: string) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const setProfileImage = async (escortId: string, imageUrl: string) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const updatedEscort = await updateEscortProfile(id, {
-        avatar_url: imageUrl,
-        imageUrl: imageUrl
+      // Update escort with new profile image
+      const updatedEscort = await updateEscortProfile(escortId, {
+        avatar: imageUrl,
+        profileImage: imageUrl,
+        imageUrl: imageUrl // Update all image-related fields
       });
-      
-      if (updatedEscort) {
-        toast({
-          title: "Profile image updated",
-          description: "Your profile image has been updated successfully",
-        });
-      }
       
       return updatedEscort;
-    } catch (error) {
-      console.error("Error updating profile image:", error);
-      toast({
-        title: "Error updating profile image",
-        description: "Failed to update profile image",
-        variant: "destructive",
-      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to set profile image';
+      setError(errorMessage);
+      console.error('Error setting profile image:', err);
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
   
   return {
-    setProfileImage
+    setProfileImage,
+    isLoading,
+    error
   };
 };

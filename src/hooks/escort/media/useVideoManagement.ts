@@ -1,116 +1,91 @@
 
 import { useState } from 'react';
 import { Escort, Video } from '@/types/escort';
-import { toast } from '@/components/ui/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 export const useVideoManagement = (
   updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
 ) => {
-  const [isAddingVideo, setIsAddingVideo] = useState(false);
-  const [isRemovingVideo, setIsRemovingVideo] = useState(false);
-
-  const addVideo = async (
-    escortId: string, 
-    videoUrl: string,
-    escort?: Escort | null
-  ) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const addVideo = async (escortId: string, videoUrl: string) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsAddingVideo(true);
+      // Get current escort data first
+      const escort = await updateEscortProfile(escortId, {});
       
-      // Get current escort data if not provided
-      const currentEscort = escort || await updateEscortProfile(escortId, {});
-      if (!currentEscort) throw new Error("Escort not found");
+      if (!escort) {
+        throw new Error('Escort not found');
+      }
       
       // Create new video object
       const newVideo: Video = {
-        id: `video-${Date.now()}`,
+        id: uuidv4(),
         url: videoUrl,
-        thumbnail: videoUrl.replace('.mp4', '.jpg'),
-        title: "New Video",
-        duration: 0,
-        isPublic: true
+        thumbnail: videoUrl.replace(/\.[^/.]+$/, "_thumb.jpg") // Generate simple thumbnail URL
       };
       
-      // Add video to array
-      const updatedVideos = [
-        ...(currentEscort.videos || []),
-        newVideo
-      ];
+      // Add video to videos array
+      const currentVideos = escort.videos || [];
+      const updatedVideos = [...currentVideos, newVideo];
       
-      // Update escort profile
-      const result = await updateEscortProfile(escortId, {
+      // Update escort with new videos
+      const updatedEscort = await updateEscortProfile(escortId, {
         videos: updatedVideos
       });
       
-      if (result) {
-        toast({
-          title: "Video added",
-          description: "The video has been added to your profile"
-        });
-      }
-      
-      return result;
-    } catch (error) {
-      console.error("Error adding video:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add video",
-        variant: "destructive"
-      });
+      return updatedEscort;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add video';
+      setError(errorMessage);
+      console.error('Error adding video:', err);
       return null;
     } finally {
-      setIsAddingVideo(false);
+      setIsLoading(false);
     }
   };
   
-  const removeVideo = async (
-    escortId: string,
-    videoIdOrUrl: string,
-    escort?: Escort | null
-  ) => {
+  const removeVideo = async (escortId: string, videoIdOrUrl: string) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsRemovingVideo(true);
+      // Get current escort data first
+      const escort = await updateEscortProfile(escortId, {});
       
-      // Get current escort data if not provided
-      const currentEscort = escort || await updateEscortProfile(escortId, {});
-      if (!currentEscort) throw new Error("Escort not found");
-      if (!currentEscort.videos) return currentEscort;
+      if (!escort) {
+        throw new Error('Escort not found');
+      }
       
-      // Filter out the video to remove
-      const updatedVideos = currentEscort.videos.filter(video => 
-        video.id !== videoIdOrUrl && video.url !== videoIdOrUrl
+      // Remove the video from videos array
+      const currentVideos = escort.videos || [];
+      const updatedVideos = currentVideos.filter(
+        video => video.id !== videoIdOrUrl && video.url !== videoIdOrUrl
       );
       
-      // Update escort profile
-      const result = await updateEscortProfile(escortId, {
+      // Update escort with new videos
+      const updatedEscort = await updateEscortProfile(escortId, {
         videos: updatedVideos
       });
       
-      if (result) {
-        toast({
-          title: "Video removed",
-          description: "The video has been removed from your profile"
-        });
-      }
-      
-      return result;
-    } catch (error) {
-      console.error("Error removing video:", error);
-      toast({
-        title: "Error",
-        description: "Failed to remove video",
-        variant: "destructive"
-      });
+      return updatedEscort;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to remove video';
+      setError(errorMessage);
+      console.error('Error removing video:', err);
       return null;
     } finally {
-      setIsRemovingVideo(false);
+      setIsLoading(false);
     }
   };
   
   return {
     addVideo,
     removeVideo,
-    isAddingVideo,
-    isRemovingVideo
+    isLoading,
+    error
   };
 };

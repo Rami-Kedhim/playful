@@ -63,14 +63,21 @@ export function useProfile(userId?: string) {
       // Simulate API call latency
       await new Promise(resolve => setTimeout(resolve, 800));
       
+      // Map string gender values to DatabaseGender enum values
+      let genderValue = data.gender;
+      if (data.gender === 'male') {
+        genderValue = DatabaseGender.MALE;
+      } else if (data.gender === 'female') {
+        genderValue = DatabaseGender.FEMALE;
+      } else if (data.gender === 'other' || data.gender === 'non-binary' || data.gender === 'trans') {
+        genderValue = DatabaseGender.OTHER;
+      }
+      
       // Merge with existing profile
       const updatedProfile = {
         ...profile,
         ...data,
-        // Use enum values for gender
-        gender: data.gender === 'male' ? DatabaseGender.MALE : 
-                data.gender === 'female' ? DatabaseGender.FEMALE : 
-                DatabaseGender.OTHER,
+        gender: genderValue
       };
       
       setProfile(updatedProfile as UserProfile);

@@ -1,86 +1,80 @@
 
-import { VerificationRequest, VerificationStatus, VerificationDocument, VerificationLevel } from "@/types/verification";
+import { VerificationDocument, VerificationRequest, VerificationStatus } from '@/types/verification';
 
-/**
- * Check if a verification request is pending
- */
-export const isPending = (status: VerificationStatus): boolean => {
-  return status === 'pending';
-};
-
-/**
- * Check if a verification request is approved
- */
-export const isApproved = (status: VerificationStatus): boolean => {
-  return status === 'approved';
-};
-
-/**
- * Check if a verification request is rejected
- */
-export const isRejected = (status: VerificationStatus): boolean => {
-  return status === 'rejected';
-};
-
-/**
- * Check if a verification request is expired
- */
-export const isExpired = (request: VerificationRequest): boolean => {
-  const expiryDate = new Date(request.submittedAt || request.created_at || '');
-  expiryDate.setDate(expiryDate.getDate() + 30); // Assuming 30 days validity
+export const checkVerificationStatus = async (userId: string): Promise<{
+  isVerified: boolean;
+  verificationStatus?: VerificationStatus;
+  pendingRequest?: VerificationRequest;
+}> => {
+  // In a real app, this would check with backend API
+  // For now, let's return mock data
   
-  return new Date() > expiryDate;
-};
-
-/**
- * Create a new verification request
- */
-export const createVerificationRequest = async (
-  userId: string,
-  documentUrls: string[]
-): Promise<VerificationRequest> => {
-  // In a real implementation, this would create a new verification request in the database
+  const mockPendingRequest = Math.random() > 0.7;
   
-  // Convert string URLs to document objects
-  const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
-    id: `doc-${index}`,
-    type: 'id-verification',
-    document_type: 'id-verification',
-    fileUrl: url,
-    document_url: url,
-    uploadedAt: new Date().toISOString(),
-    status: 'pending',
-    verification_id: `verification-${Date.now()}`
-  }));
+  if (mockPendingRequest) {
+    return {
+      isVerified: false,
+      verificationStatus: 'pending',
+      pendingRequest: generateMockRequest(userId, 'pending')
+    };
+  }
   
-  // Mock creating a verification request
-  const request: VerificationRequest = {
-    id: `verification-${Date.now()}`,
-    userId,
-    profile_id: userId,
-    status: 'pending',
-    requested_level: 'none', // Starting with 'none' verification level
-    verificationLevel: 'none',
-    documents: documents,
-    submittedAt: new Date().toISOString(),
-    created_at: new Date().toISOString()
+  const isVerified = Math.random() > 0.5;
+  
+  return {
+    isVerified,
+    verificationStatus: isVerified ? 'approved' : 'rejected'
   };
-  
-  return request;
 };
 
-/**
- * Update the status of a verification request
- */
-export const updateVerificationStatus = async (
-  requestId: string,
-  status: VerificationStatus,
-  notes?: string
-): Promise<boolean> => {
-  // In a real implementation, this would update the status of a verification request in the database
+export const generateMockRequest = (userId: string, status: VerificationStatus): VerificationRequest => {
+  const now = new Date();
+  const requestId = `vr-${Date.now()}`;
   
-  // Mock updating a verification request
-  console.log(`Updating verification request ${requestId} to ${status}`, { notes });
-  
-  return true;
+  return {
+    id: requestId,
+    profile_id: userId,
+    status,
+    requested_level: 'basic',
+    documents: [
+      {
+        id: `doc-id-front-${Date.now()}`,
+        verification_id: requestId,
+        document_type: 'id_card',
+        document_url: 'https://example.com/document.jpg',
+        status: 'pending',
+        created_at: now.toISOString(),
+        type: 'id_front',
+        fileUrl: 'https://example.com/document.jpg',
+        uploadedAt: now.toISOString()
+      },
+      {
+        id: `doc-id-back-${Date.now()}`,
+        verification_id: requestId,
+        document_type: 'id_card_back',
+        document_url: 'https://example.com/document-back.jpg',
+        status: 'pending',
+        created_at: now.toISOString(),
+        type: 'id_back',
+        fileUrl: 'https://example.com/document-back.jpg',
+        uploadedAt: now.toISOString()
+      },
+      {
+        id: `doc-selfie-${Date.now()}`,
+        verification_id: requestId,
+        document_type: 'selfie',
+        document_url: 'https://example.com/selfie.jpg',
+        status: 'pending',
+        created_at: now.toISOString(),
+        type: 'selfie',
+        fileUrl: 'https://example.com/selfie.jpg',
+        uploadedAt: now.toISOString()
+      }
+    ],
+    created_at: now.toISOString(),
+    
+    // Backwards compatibility
+    submittedAt: now.toISOString(),
+    userId: userId
+  };
 };
