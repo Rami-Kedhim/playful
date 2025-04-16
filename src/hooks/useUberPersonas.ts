@@ -47,15 +47,17 @@ export function useUberPersonas() {
       try {
         const escorts = await scrapeEscorts();
         if (escorts && Array.isArray(escorts)) {
-          const escortPersonas = escorts.map(escort => {
+          const escortPromises = escorts.map(escort => {
             try {
               return uberPersonaService.escortToUberPersona(escort);
             } catch (e) {
               console.error("Error mapping escort to persona:", e);
               return null;
             }
-          }).filter(Boolean) as UberPersona[];
-          results.push(...escortPersonas);
+          }).filter(Boolean);
+          
+          const escortPersonas = await Promise.all(escortPromises);
+          results.push(...escortPersonas.filter(Boolean) as UberPersona[]);
         }
       } catch (e) {
         console.error("Error loading escorts:", e);
@@ -101,15 +103,17 @@ export function useUberPersonas() {
             };
           });
           
-          const creatorPersonas = contentCreators.map(creator => {
+          const creatorPromises = contentCreators.map(creator => {
             try {
               return uberPersonaService.creatorToUberPersona(creator);
             } catch (e) {
               console.error("Error mapping creator to persona:", e);
               return null;
             }
-          }).filter(Boolean) as UberPersona[];
-          results.push(...creatorPersonas);
+          }).filter(Boolean);
+          
+          const creatorPersonas = await Promise.all(creatorPromises);
+          results.push(...creatorPersonas.filter(Boolean) as UberPersona[]);
         }
       } catch (e) {
         console.error("Error loading creators:", e);
@@ -119,15 +123,17 @@ export function useUberPersonas() {
       try {
         const livecamResponse = await scrapeLivecams();
         if (livecamResponse && Array.isArray(livecamResponse.models)) {
-          const livecamPersonas = livecamResponse.models.map(model => {
+          const livecamPromises = livecamResponse.models.map(model => {
             try {
               return uberPersonaService.livecamToUberPersona(model);
             } catch (e) {
               console.error("Error mapping livecam to persona:", e);
               return null;
             }
-          }).filter(Boolean) as UberPersona[];
-          results.push(...livecamPersonas);
+          }).filter(Boolean);
+          
+          const livecamPersonas = await Promise.all(livecamPromises);
+          results.push(...livecamPersonas.filter(Boolean) as UberPersona[]);
         }
       } catch (e) {
         console.error("Error loading livecams:", e);
@@ -137,7 +143,7 @@ export function useUberPersonas() {
       for (const persona of results) {
         try {
           if (persona && persona.id) {
-            uberPersonaService.registerWithVisibilitySystem(persona, persona.systemMetadata?.source || 'manual');
+            uberPersonaService.registerWithVisibilitySystem(persona.id, persona.systemMetadata?.source || 'manual');
           }
         } catch (e) {
           console.error("Error registering persona with visibility system:", e);

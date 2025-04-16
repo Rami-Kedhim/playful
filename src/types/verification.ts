@@ -66,8 +66,45 @@ export const verificationFormSchema = z.object({
   })
 });
 
-export const DOCUMENT_TYPES = [
-  { value: 'id_card', label: 'ID Card' },
-  { value: 'passport', label: 'Passport' },
-  { value: 'driving_license', label: 'Driving License' }
-];
+export const DOCUMENT_TYPES = {
+  ID_CARD: 'id_card',
+  PASSPORT: 'passport',
+  DRIVERS_LICENSE: 'driving_license'
+};
+
+export const DOCUMENT_TYPE_LABELS = {
+  [DOCUMENT_TYPES.ID_CARD]: 'ID Card',
+  [DOCUMENT_TYPES.PASSPORT]: 'Passport',
+  [DOCUMENT_TYPES.DRIVERS_LICENSE]: 'Driver\'s License'
+};
+
+export const DOCUMENT_TYPE_REQUIREMENTS = {
+  [DOCUMENT_TYPES.ID_CARD]: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  },
+  [DOCUMENT_TYPES.PASSPORT]: {
+    frontRequired: true,
+    backRequired: false,
+    selfieRequired: true
+  },
+  [DOCUMENT_TYPES.DRIVERS_LICENSE]: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  }
+};
+
+// Additional types for verification API responses
+export interface VerificationEligibilityResponse {
+  canSubmit: boolean;
+  reason?: string;
+  cooldownRemaining?: number; // in hours
+}
+
+export interface VerificationSubmissionResponse {
+  success: boolean;
+  message: string;
+  requestId?: string;
+}

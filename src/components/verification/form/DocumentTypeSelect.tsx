@@ -24,15 +24,15 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form }) => {
             className="flex flex-col space-y-1 mt-2"
           >
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value={DOCUMENT_TYPES.ID_CARD} id="id_card" />
+              <RadioGroupItem value="id_card" id="id_card" />
               <Label htmlFor="id_card">ID Card</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value={DOCUMENT_TYPES.PASSPORT} id="passport" />
+              <RadioGroupItem value="passport" id="passport" />
               <Label htmlFor="passport">Passport</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value={DOCUMENT_TYPES.DRIVERS_LICENSE} id="drivers_license" />
+              <RadioGroupItem value="driving_license" id="drivers_license" />
               <Label htmlFor="drivers_license">Driver's License</Label>
             </div>
           </RadioGroup>

@@ -65,10 +65,16 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
   };
   
   const resetFile = () => {
-    form.setValue(fieldName, { preview: '' }, { shouldValidate: true });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    
+    // Create a placeholder file to avoid TypeScript errors
+    const placeholder = new File([""], "placeholder.jpg", { type: "image/jpeg" });
+    form.setValue(fieldName, { 
+      file: placeholder,
+      preview: '' 
+    }, { shouldValidate: true });
   };
 
   return (

@@ -52,12 +52,15 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
       // Convert string URLs to document objects
       const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
         id: `doc-${index}`,
+        verification_id: `verification-${userId}`,
         document_type: 'id-verification',
         document_url: url,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        // Backward compatibility fields
         type: 'id-verification',
         fileUrl: url,
-        uploadedAt: new Date().toISOString(),
-        status: 'pending'
+        uploadedAt: new Date().toISOString()
       }));
       
       // Create verification request object

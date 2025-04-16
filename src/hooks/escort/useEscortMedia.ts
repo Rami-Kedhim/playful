@@ -25,23 +25,23 @@ export const useEscortMedia = (
   return {
     // Gallery functions
     addGalleryImage: (id: string, imageUrl: string, escort?: Escort | null) => {
-      return galleryManagement.addGalleryImage(id, imageUrl, escort);
+      return galleryManagement.addGalleryImage(id, imageUrl);
     },
     removeGalleryImage: (id: string, imageUrl: string, escort?: Escort | null) => {
-      return galleryManagement.removeGalleryImage(id, imageUrl, escort);
+      return galleryManagement.removeGalleryImage(id, imageUrl);
     },
     
     // Profile image functions
     setProfileImage: (id: string, imageUrl: string, escort?: Escort | null) => {
-      return profileImageManagement.setProfileImage(id, imageUrl, escort);
+      return profileImageManagement.setProfileImage(id, imageUrl);
     },
     
     // Video functions
     addVideo: (id: string, videoUrl: string, escort?: Escort | null) => {
-      return videoManagement.addVideo(id, videoUrl, escort);
+      return videoManagement.addVideo(id, videoUrl);
     },
     removeVideo: (id: string, videoIdOrUrl: string, escort?: Escort | null) => {
-      return videoManagement.removeVideo(id, videoIdOrUrl, escort);
+      return videoManagement.removeVideo(id, videoIdOrUrl);
     }
   };
 };

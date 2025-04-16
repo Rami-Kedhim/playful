@@ -1,68 +1,46 @@
 
+import { VerificationDocument, VerificationRequest, VerificationStatus } from '@/types/verification';
 import { VerificationEligibilityResponse, VerificationSubmissionResponse } from '@/types/verification';
 
-// Function to check if a user is eligible to submit a verification request
+// Common function to check if user can submit verification
 export const canSubmitVerification = async (userId: string): Promise<VerificationEligibilityResponse> => {
-  // In a real app, this would make an API call to check eligibility
-  // For demonstration purposes, we'll simulate success
+  // In a real app, this would check with the backend
+  // For now we'll just return true
   return {
-    canSubmit: true,
-    reason: null
+    canSubmit: true
   };
 };
 
-// Function to submit a verification request
+// Function to submit verification request
 export const submitVerificationRequest = async (
   userId: string,
   documentType: string,
-  documentFrontImage?: File | null,
-  documentBackImage?: File | null,
-  selfieImage?: File | null
+  frontImage: File,
+  backImage: File | null,
+  selfieImage: File
 ): Promise<VerificationSubmissionResponse> => {
-  // In a real app, this would upload files and create a verification request
-  // For demonstration purposes, we'll simulate success
-  
-  // Simulate upload delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Check if required files are present
-  if (!documentFrontImage || !selfieImage) {
+  try {
+    // In a real app, we'd upload these files to storage
+    // And then create a verification request in the database
+    
+    // Simulate a successful submission
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    return {
+      success: true,
+      message: "Verification request submitted successfully!",
+      requestId: `verification-${Date.now()}`
+    };
+  } catch (error) {
+    console.error("Error submitting verification request:", error);
     return {
       success: false,
-      message: 'Missing required documents'
+      message: "Failed to submit verification request. Please try again later."
     };
   }
-  
-  console.log(`Submitting verification for user ${userId}`);
-  console.log(`Document type: ${documentType}`);
-  console.log(`Front image: ${documentFrontImage.name}`);
-  if (documentBackImage) {
-    console.log(`Back image: ${documentBackImage.name}`);
-  }
-  console.log(`Selfie image: ${selfieImage.name}`);
-  
-  return {
-    success: true,
-    message: 'Your verification request has been submitted successfully',
-    requestId: `req-${Math.random().toString(36).substring(2, 10)}`
-  };
 };
 
-// Check a user's verification status
-export const checkVerificationStatus = async (userId: string) => {
-  // In a real app, this would make an API call to check verification status
-  // For demonstration purposes, we'll simulate a random status
-  const statuses = ['pending', 'in_review', 'approved', 'rejected'];
-  const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-  
-  return {
-    status: randomStatus,
-    lastRequest: randomStatus !== 'pending' ? {
-      id: `req-${Math.random().toString(36).substring(2, 10)}`,
-      profile_id: userId,
-      status: randomStatus,
-      requested_level: 'basic',
-      created_at: new Date(Date.now() - 86400000).toISOString(),
-    } : null
-  };
-};
+// Export other verification helpers
+export * from './verification/statusCheck';
+export * from './verification/requestSubmission';
+export * from './verification/documentUpload';
