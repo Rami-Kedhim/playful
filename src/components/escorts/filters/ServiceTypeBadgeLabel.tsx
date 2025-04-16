@@ -2,12 +2,13 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Globe, MapPin, Users } from "lucide-react";
-import { ServiceTypeFilter } from '@/types/auth';
+
+export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "";
 
 interface ServiceTypeInfo {
   label: string;
   filterLabel: string;
-  icon: React.FC<{ className?: string, size?: number | string }>;
+  icon: React.ElementType;
   description?: string;
   color?: string;
 }
@@ -96,11 +97,11 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
       variant="outline" 
       className={`flex items-center gap-1 ${sizeClasses[size]} ${info.color || ""} ${className}`}
     >
-      <IconComponent className="w-3 h-3" size={12} />
+      <IconComponent className="w-3 h-3" />
       <span>{info.label}</span>
     </Badge>
   );
 };
 
 export default ServiceTypeBadgeLabel;
-export type { ServiceTypeFilter };
+export { type ServiceTypeFilter };

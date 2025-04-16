@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -7,7 +8,6 @@ interface UnifiedServiceCardProps {
   service: any;
 }
 
-// Update the component to handle the "live" property safely
 const UnifiedServiceCard = ({ service, ...props }) => {
   const renderMediaStats = () => {
     if (!service.mediaGallery) return null;

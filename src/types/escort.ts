@@ -1,3 +1,4 @@
+
 // Add any missing type definitions to support all service types
 export enum ServiceType {
   Massage = "Massage",
@@ -12,7 +13,17 @@ export enum ServiceType {
   BDSM = "BDSM",
   SensualMassage = "Sensual Massage",
   VirtualDate = "virtual-date",
-  CustomContent = "custom-content"
+  CustomContent = "custom-content",
+  
+  // Add string literals that are used in the codebase
+  dinner = "dinner",
+  travel = "travel",
+  events = "events",
+  companionship = "companionship",
+  massage = "massage",
+  roleplay = "roleplay",
+  bdsm = "bdsm",
+  overnight = "overnight"
 }
 
 export interface Escort {
@@ -26,8 +37,10 @@ export interface Escort {
   imageUrl: string;
   profileImage?: string;
   gallery?: string[];
+  gallery_images?: string[]; // Added for compatibility
   videos?: Video[];
   bio?: string;
+  description?: string; // Added for compatibility
   services?: ServiceType[];
   rating?: number;
   reviews?: number;
@@ -55,6 +68,7 @@ export interface Escort {
   providesVirtualContent?: boolean;
   metaverse_enabled?: boolean;
   boostLevel?: number;
+  verificationLevel?: string; // Added for compatibility
 }
 
 export interface Video {
@@ -100,6 +114,12 @@ export interface EscortFilterOptions {
   availableNow?: boolean;
   escortType?: "verified" | "ai" | "provisional" | "all";
   language?: string[];
+  
+  // Add these fields to fix EscortFilterControls errors
+  selectedServices?: string[];
+  selectedGenders?: string[];
+  verifiedOnly?: boolean;
+  languages?: string[];
 }
 
 export interface EscortFilterState {
@@ -182,3 +202,54 @@ export interface EscortFilterHook {
 }
 
 export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+
+// Add Booking related types
+export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'completed' | 'in_review';
+
+export interface Booking {
+  id: string;
+  escort_id: string;
+  client_id: string;
+  start_time: string;
+  end_time: string;
+  status: BookingStatus;
+  created_at: string;
+  updated_at: string;
+  service_type?: string;
+  location?: string;
+  price?: number;
+  notes?: string;
+  reviewed_by?: string;
+  review_notes?: string;
+}
+
+// Add verification document interfaces
+export interface VerificationDocument {
+  id: string;
+  verification_id: string;
+  document_type: string;
+  document_url: string;
+  status: VerificationStatus;
+  notes?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface VerificationRequest {
+  id: string;
+  profile_id: string;
+  status: VerificationStatus;
+  requested_level: string;
+  documents?: VerificationDocument[];
+  created_at: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+  submittedAt?: string;
+  updatedAt?: string; // Added for compatibility
+  verificationLevel?: string; // Added for compatibility
+  rejectionReason?: string; // Added for compatibility
+}

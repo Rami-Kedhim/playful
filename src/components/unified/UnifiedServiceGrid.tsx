@@ -1,6 +1,6 @@
+
 import React from 'react';
-import { Grid } from "@/components/ui/grid";
-import { SectionTitle } from "@/components/ui/typography";
+import { Card, CardContent } from "@/components/ui/card";
 import { ImageIcon, VideoIcon, Radio } from "lucide-react";
 import UnifiedServiceCard from './UnifiedServiceCard';
 
@@ -24,15 +24,16 @@ const UnifiedServiceGrid = ({ services, title, description, ...props }) => {
     <section className="py-12">
       {title && (
         <div className="mb-6">
-          <SectionTitle title={title} description={description} />
+          <h2 className="text-2xl font-bold">{title}</h2>
+          {description && <p className="text-muted-foreground mt-1">{description}</p>}
         </div>
       )}
       
-      <Grid className="gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {services.map((service) => (
           <UnifiedServiceCard key={service.id} service={service} />
         ))}
-      </Grid>
+      </div>
     </section>
   );
 };
