@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { EnhancedButton } from '@/components/ui/enhanced-button';
+import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent } from '@/components/ui/enhanced-card';
 import { useResponsive } from '@/hooks/useMobileResponsive';
 import { Users, Image, MessageCircle, BarChart3 } from 'lucide-react';
 import { analyticsService } from '@/services/analyticsService';
@@ -27,12 +27,12 @@ const Home: React.FC = () => {
             Experience our seamless platform across all your devices with advanced moderation and analytics.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" asChild>
+            <EnhancedButton size="lg" asChild>
               <Link to="/escorts">Browse Escorts</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
+            </EnhancedButton>
+            <EnhancedButton size="lg" variant="outline" asChild>
               <Link to="/auth">Sign Up Now</Link>
-            </Button>
+            </EnhancedButton>
           </div>
           
           <div className="mt-6 text-sm text-muted-foreground">
@@ -140,15 +140,15 @@ const FeatureCard = ({ icon, title, description }: {
   description: string;
 }) => {
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
+    <EnhancedCard variant="hover" className="h-full">
+      <EnhancedCardHeader className="pb-2">
         <div className="mb-4">{icon}</div>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <CardDescription className="text-base">{description}</CardDescription>
-      </CardContent>
-    </Card>
+        <h3 className="text-lg font-semibold">{title}</h3>
+      </EnhancedCardHeader>
+      <EnhancedCardContent>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </EnhancedCardContent>
+    </EnhancedCard>
   );
 };
 
