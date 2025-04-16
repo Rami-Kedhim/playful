@@ -1,4 +1,3 @@
-
 import { Escort } from "@/types/escort";
 import { UberPersona, RoleFlags, Capabilities, Monetization, SystemMetadata } from "@/types/uberPersona";
 
@@ -78,4 +77,10 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
  */
 export const mapEscortsToUberPersonas = (escorts: Escort[]): UberPersona[] => {
   return escorts.map(mapEscortToUberPersona);
+};
+
+export const getProfileType = (profile: Escort): 'scraped' | 'manual' | 'ai_enhanced' => {
+  if (profile.isScraped || profile.profileType === 'scraped') return 'scraped';
+  if (profile.isAI || profile.profileType === 'ai') return 'ai_enhanced';
+  return 'manual';
 };

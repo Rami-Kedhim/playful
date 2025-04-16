@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
-import { Escort, VerificationRequest, VerificationStatus, VerificationDocument } from "@/types/escort";
+import { Escort } from "@/types/escort";
+import { VerificationStatus, VerificationRequest, VerificationDocument } from "@/types/verification";
 import { useToast } from '@/hooks/use-toast';
 
 type UpdateVerificationFn = (id: string, updates: Partial<VerificationRequest>) => Promise<VerificationRequest | null>;
@@ -28,11 +29,6 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
       } else {
         return 'rejected';
       }
-      
-      // In a real app, this would be:
-      // const response = await fetch(`/api/verification/escort/${escortId}`);
-      // const data = await response.json();
-      // return data.status;
     } catch (error) {
       console.error('Error checking verification status:', error);
       toast({
@@ -56,6 +52,8 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
       // Convert string URLs to document objects
       const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
         id: `doc-${index}`,
+        document_type: 'id-verification',
+        document_url: url,
         type: 'id-verification',
         fileUrl: url,
         uploadedAt: new Date().toISOString(),
@@ -65,9 +63,12 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
       // Create verification request object
       const verificationRequest: Partial<VerificationRequest> = {
         userId,
+        profile_id: userId,
         status: 'pending',
-        documents: documents,
+        documents,
         submittedAt: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        requested_level: 'basic'
       };
       
       // In a real app, this would send the data to an API

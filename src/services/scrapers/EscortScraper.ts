@@ -1,6 +1,6 @@
 
 import { BaseScraperService } from "./baseScraperService";
-import { Escort, ServiceType } from "@/types/escort";
+import { Escort, ServiceType, Rates } from "@/types/escort";
 import { brainHub } from "../neural/HermesOxumBrainHub";
 
 export class EscortScraper extends BaseScraperService {
@@ -117,11 +117,13 @@ export class EscortScraper extends BaseScraperService {
       
       const selectedServices = this.services
         .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 5) + 2) as ServiceType[];
+        .slice(0, Math.floor(Math.random() * 5) + 2);
         
-      const randomPrices = {
+      const randomPrices: Rates = {
         hourly: Math.floor(Math.random() * 200) + 150,
+        twoHours: Math.floor(Math.random() * 400) + 300,
         overnight: Math.floor(Math.random() * 1000) + 500,
+        weekend: Math.floor(Math.random() * 2000) + 1000
       };
       
       const gender = Math.random() > 0.7 ? 'male' : 'female';
@@ -149,6 +151,7 @@ export class EscortScraper extends BaseScraperService {
         location: this.region || 'International',
         bio: `High-class ${gender === 'female' ? 'female' : 'male'} escort offering premium companionship services. Available for bookings.`,
         services: selectedServices,
+        price: randomPrices.hourly || 200,
         imageUrl: mockImageUrl,
         profileImage: mockImageUrl,
         gallery: [
@@ -156,32 +159,19 @@ export class EscortScraper extends BaseScraperService {
           `https://picsum.photos/seed/${seed}-2/800/800`,
           `https://picsum.photos/seed/${seed}-3/800/800`,
         ],
-        rates: {
-          hourly: randomPrices.hourly,
-          overnight: randomPrices.overnight
-        },
+        rates: randomPrices,
         availableNow: Math.random() > 0.4,
         verified,
         rating: Math.random() * 2 + 3,
         reviews: Math.floor(Math.random() * 50),
-        tags: selectedServices.map(s => s.toString()),
+        reviewCount: Math.floor(Math.random() * 50),
+        tags: selectedServices,
         languages: ['English'],
-        contactInfo: {
-          email: `escort${i}@example.com`,
-          phone: '+1234567890',
-          website: `https://example.com/escort${i}`
-        },
-        availability: {
-          days: ['monday', 'wednesday', 'friday', 'saturday'],
-          hours: ['10:00-22:00']
-        },
-        featured: Math.random() > 0.7,
-        price: randomPrices.hourly,
+        avatar: mockImageUrl,
         isAI,
         isScraped: provisional,
         profileType,
-        boostLevel,
-        boostExpiry: boostLevel > 0 ? new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)) : undefined
+        boostLevel
       });
     }
     

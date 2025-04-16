@@ -1,5 +1,5 @@
 
-import { VerificationRequest, VerificationStatus, VerificationDocument } from "@/types/escort";
+import { VerificationRequest, VerificationStatus, VerificationDocument, VerificationLevel } from "@/types/verification";
 
 /**
  * Check if a verification request is pending
@@ -26,7 +26,7 @@ export const isRejected = (status: VerificationStatus): boolean => {
  * Check if a verification request is expired
  */
 export const isExpired = (request: VerificationRequest): boolean => {
-  const expiryDate = new Date(request.submittedAt);
+  const expiryDate = new Date(request.submittedAt || request.created_at || '');
   expiryDate.setDate(expiryDate.getDate() + 30); // Assuming 30 days validity
   
   return new Date() > expiryDate;
@@ -45,19 +45,25 @@ export const createVerificationRequest = async (
   const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
     id: `doc-${index}`,
     type: 'id-verification',
+    document_type: 'id-verification',
     fileUrl: url,
+    document_url: url,
     uploadedAt: new Date().toISOString(),
-    status: 'pending'
+    status: 'pending',
+    verification_id: `verification-${Date.now()}`
   }));
   
   // Mock creating a verification request
   const request: VerificationRequest = {
     id: `verification-${Date.now()}`,
     userId,
+    profile_id: userId,
     status: 'pending',
-    verificationLevel: 'none', // Add the required verificationLevel property, starting with 'none'
+    requested_level: 'none', // Starting with 'none' verification level
+    verificationLevel: 'none',
     documents: documents,
-    submittedAt: new Date().toISOString()
+    submittedAt: new Date().toISOString(),
+    created_at: new Date().toISOString()
   };
   
   return request;

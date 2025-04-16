@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { VerificationRequest } from '@/types/auth';
+import { VerificationRequest, VerificationLevel } from '@/types/verification';
 
 export function useVerificationStatus() {
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ export function useVerificationStatus() {
         // const data = await response.json();
         
         // Generate a random verification level for testing
-        const levels = ['none', 'basic', 'enhanced', 'premium'];
+        const levels: VerificationLevel[] = ['none', 'basic', 'enhanced', 'premium'];
         const randomLevelIndex = Math.floor(Math.random() * levels.length);
         
         // Mock data for testing the UI
@@ -36,7 +36,7 @@ export function useVerificationStatus() {
           status: Math.random() > 0.7 ? 'pending' : Math.random() > 0.5 ? 'in_review' : Math.random() > 0.3 ? 'approved' : 'rejected',
           requested_level: levels[randomLevelIndex],
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          documents: []
         };
 
         setTimeout(() => {

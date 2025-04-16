@@ -32,22 +32,35 @@ export const DOCUMENT_TYPE_REQUIREMENTS = {
 
 export interface VerificationDocument {
   id: string;
-  type: string;
-  fileUrl: string;
-  uploadedAt: string;
+  verification_id?: string;
+  document_type?: string;
+  document_url?: string;
+  created_at?: string;
+  type?: string;
+  fileUrl?: string;
+  uploadedAt?: string;
   status: 'pending' | 'approved' | 'rejected';
+  notes?: string;
+  updated_at?: string;
+  category?: string;
 }
 
 export interface VerificationRequest {
   id: string;
-  profile_id: string;
+  profile_id?: string;
+  userId?: string;
   status: VerificationStatus;
-  requested_level: VerificationLevel;
-  documents?: VerificationDocument[];
-  created_at: string;
+  requested_level?: VerificationLevel;
+  verificationLevel?: VerificationLevel;
+  documents: VerificationDocument[];
+  created_at?: string;
+  submittedAt?: string;
+  updated_at?: string;
+  updatedAt?: string;
   reviewed_at?: string;
   reviewed_by?: string;
   reviewer_notes?: string;
+  rejectionReason?: string;
   expires_at?: string;
 }
 
@@ -67,38 +80,14 @@ export interface VerificationFormValues {
   };
 }
 
-import { z } from 'zod';
-
 // Constants for file validation
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
-// Zod schema for verification form
-const documentFileSchema = z.object({
-  file: z.instanceof(File)
-    .refine((file) => file.size <= MAX_FILE_SIZE, 'File must be less than 5MB')
-    .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-      'Only JPG, PNG and WEBP formats are supported'
-    ),
-  preview: z.string().min(1, 'Preview is required')
-});
-
-export const verificationFormSchema = z.object({
-  documentType: z.enum([
-    DOCUMENT_TYPES.PASSPORT, 
-    DOCUMENT_TYPES.ID_CARD, 
-    DOCUMENT_TYPES.DRIVERS_LICENSE
-  ]),
-  documentFrontImage: documentFileSchema,
-  documentBackImage: documentFileSchema.optional(),
-  selfieImage: documentFileSchema
-});
-
 // Responses from verification utility functions
 export interface VerificationEligibilityResponse {
   canSubmit: boolean;
-  reason?: string;
+  reason?: string | null;
   cooldownRemaining?: number; // in hours
 }
 

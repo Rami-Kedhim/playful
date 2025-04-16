@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Escort, Availability } from '@/types/escorts';
+
+import { useState, useCallback } from 'react';
+import { Escort, Availability } from '@/types/escort';
 import { toast } from '@/components/ui/use-toast';
 
 export const useEscortAvailability = (initialAvailability?: Availability) => {

@@ -1,5 +1,5 @@
 
-import { Escort, ServiceType } from "@/types/escort";
+import { Escort, ServiceType, ServiceTypeString } from "@/types/escort";
 import escortProfiles from "./escortProfiles";
 import moreEscortProfiles from "./moreEscortProfiles";
 
@@ -33,19 +33,19 @@ const combinedEscorts = [...escortProfiles, ...moreEscortProfiles].map(escort =>
   // If no service type is specified, default to in-person for standard escorts
   // and virtual for AI escorts
   if (escort.providesInPersonServices === undefined && escort.providesVirtualContent === undefined) {
-    if (escort.isAI) {
+    if (escort.isAI || escort.profileType === 'ai') {
       escort.providesVirtualContent = true;
       escort.providesInPersonServices = false;
     } else {
       escort.providesInPersonServices = true;
-      escort.providesVirtualContent = escort.isAI || false;
+      escort.providesVirtualContent = false;
     }
   }
   
   return escort;
 });
 
-export const escorts: Escort[] = combinedEscorts;
+export const escorts: Escort[] = combinedEscorts as Escort[];
 
 // Helper function to get escort by ID
 export function getEscortById(id: string): Escort | undefined {

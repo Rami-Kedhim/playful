@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
-import { VerificationRequest, VerificationStatus } from '@/types/auth';
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 import { toast } from '@/components/ui/use-toast';
 import VerificationStatusIndicator from './status/VerificationStatusIndicator';
 import VerificationTimeline from './status/VerificationTimeline';
@@ -96,10 +96,10 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   };
 
   // Ensure the status is a valid VerificationStatus
-  const safeStatus = (status: string): VerificationStatus => {
+  const safeStatus = (statusValue: string): VerificationStatus => {
     const validStatuses: VerificationStatus[] = ['pending', 'in_review', 'approved', 'rejected', 'expired'];
-    return validStatuses.includes(status as VerificationStatus) 
-      ? (status as VerificationStatus) 
+    return validStatuses.includes(statusValue as VerificationStatus) 
+      ? (statusValue as VerificationStatus) 
       : 'pending';
   };
 

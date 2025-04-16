@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { VerificationDocument } from '@/types/escort';
+import { VerificationDocument } from '@/types/verification';
 import DocumentPreview from './DocumentPreview';
 
 interface DocumentReviewModalProps {
