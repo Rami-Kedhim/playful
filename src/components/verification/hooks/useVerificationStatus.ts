@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { VerificationRequest, VerificationLevel } from '@/types/escort';
@@ -30,27 +29,18 @@ export function useVerificationStatus() {
         const randomLevelIndex = Math.floor(Math.random() * levels.length);
         
         // Mock data for testing the UI
-        const mockVerificationData: VerificationRequest = {
-          id: 'mock-verification-1',
-          userId: user.id,
+        const mockRequest: VerificationRequest = {
+          id: 'mock-request-id',
+          profile_id: user.id,
           status: Math.random() > 0.7 ? 'pending' : Math.random() > 0.5 ? 'in_review' : Math.random() > 0.3 ? 'approved' : 'rejected',
-          verificationLevel: levels[randomLevelIndex],
-          submittedAt: new Date(Date.now() - 86400000 * 3).toISOString(), // 3 days ago
-          updatedAt: new Date().toISOString(),
-          documents: [
-            {
-              id: 'doc-1',
-              type: 'id_card',
-              fileUrl: '/mock-id-front.jpg',
-              uploadedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-              status: 'pending'
-            }
-          ],
-          rejectionReason: Math.random() > 0.7 ? 'Documents unclear or incomplete' : undefined
+          requested_level: levels[randomLevelIndex],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          submittedAt: new Date().toISOString()
         };
 
         setTimeout(() => {
-          setVerificationRequest(mockVerificationData);
+          setVerificationRequest(mockRequest);
           setLoading(false);
         }, 800); // Simulate network delay
       } catch (err) {

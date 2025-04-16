@@ -31,9 +31,34 @@ export interface UserProfile {
   created_at?: string;
   updated_at?: string;
   verification_level?: string;
+  // Add missing properties
+  lucoin_balance?: number;
+  lucoinsBalance?: number;
+  profile_completeness?: number;
+  profileCompleteness?: number;
+  ubx_balance?: number;
 }
 
 export interface AuthResult {
   success: boolean;
   error?: string;
 }
+
+// Add interface for verification request
+export interface VerificationRequest {
+  id: string;
+  profile_id: string;
+  status: string;
+  requested_level: string;
+  documents?: any[];
+  created_at: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+  submittedAt?: string; // Add this for compatibility with existing code
+}
+
+// Define ServiceTypeFilter type
+export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "";

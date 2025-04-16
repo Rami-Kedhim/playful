@@ -1,70 +1,99 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { PersonStanding, Laptop, Flower2 } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
+import { Globe, MapPin, Users } from "lucide-react";
+import { ServiceTypeFilter } from '@/types/auth';
 
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
-
-interface ServiceTypeBadgeLabelProps {
-  type: 'in-person' | 'virtual' | 'both';
-  size?: 'sm' | 'md' | 'lg';
+interface ServiceTypeInfo {
+  label: string;
+  filterLabel: string;
+  icon: React.FC<{ className?: string, size?: number }>;
+  description?: string;
+  color?: string;
 }
 
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  switch (type) {
-    case 'in-person':
-      return 'In-Person';
-    case 'virtual':
-      return 'Virtual Only';
-    case 'both':
-      return 'In-Person & Virtual';
-    default:
-      return '';
+export const serviceTypeInfoMap: Record<string, ServiceTypeInfo> = {
+  "in-person": {
+    label: "In-Person",
+    filterLabel: "In-Person Only",
+    icon: MapPin,
+    description: "Physical meetings",
+    color: "text-rose-500"
+  },
+  "virtual": {
+    label: "Virtual",
+    filterLabel: "Virtual Only",
+    icon: Globe,
+    description: "Online experiences",
+    color: "text-blue-500"
+  },
+  "both": {
+    label: "Hybrid",
+    filterLabel: "In-Person & Virtual",
+    icon: Users,
+    description: "Both types available",
+    color: "text-purple-500"
+  },
+  "": {
+    label: "Any",
+    filterLabel: "Any Type",
+    icon: Users,
+    description: "All service types",
+    color: "text-gray-500"
   }
 };
 
-export const getSafeServiceLabel = (type: ServiceTypeFilter) => {
-  return getServiceTypeBadgeLabel(type);
+export const getServiceTypeInfo = (type: ServiceTypeFilter): ServiceTypeInfo => {
+  return serviceTypeInfoMap[type] || serviceTypeInfoMap[""];
 };
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
-  type, 
-  size = 'md' 
-}) => {
-  const getLabel = () => {
-    return getServiceTypeBadgeLabel(type);
-  };
-  
-  const getIcon = () => {
-    switch (type) {
-      case 'in-person':
-        return <PersonStanding className="h-3 w-3 mr-1" />;
-      case 'virtual':
-        return <Laptop className="h-3 w-3 mr-1" />;
-      case 'both':
-        return <Flower2 className="h-3 w-3 mr-1" />;
-      default:
-        return null;
-    }
-  };
-  
-  const getVariant = () => {
-    switch (type) {
-      case 'in-person':
-        return 'default';
-      case 'virtual':
-        return 'secondary';
-      case 'both':
-        return 'outline';
-      default:
-        return 'default';
-    }
+export const getSafeServiceLabel = (serviceLabel: string): string => {
+  // Map potentially problematic service names to safer ones
+  const safetyMap: Record<string, string> = {
+    "bdsm": "Power Play",
+    "GFE": "Girlfriend Experience",
+    "BDSM": "Power Play",
+    "massage": "Massage",
+    "roleplay": "Role Play",
+    "Role Play": "Role Play",
+    "Sensual Massage": "Massage",
+    "overnight": "Overnight",
+    "Dinner Date": "Dinner Date",
+    "Travel Companion": "Travel Companion",
+    "Events": "Events",
+    "Weekend Getaways": "Weekend Getaways"
   };
 
+  return safetyMap[serviceLabel] || serviceLabel;
+};
+
+interface ServiceTypeBadgeLabelProps {
+  type: ServiceTypeFilter;
+  className?: string;
+  size?: "sm" | "default" | "lg";
+}
+
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
+  type,
+  className = "",
+  size = "default"
+}) => {
+  const info = getServiceTypeInfo(type);
+  const IconComponent = info.icon;
+  
+  const sizeClasses = {
+    sm: "text-xs py-0.5 px-1.5",
+    default: "text-xs py-1 px-2",
+    lg: "text-sm py-1 px-3"
+  };
+  
   return (
-    <Badge variant={getVariant()} className="flex items-center gap-1">
-      {getIcon()}
-      {getLabel()}
+    <Badge 
+      variant="outline" 
+      className={`flex items-center gap-1 ${sizeClasses[size]} ${info.color || ""} ${className}`}
+    >
+      <IconComponent className="w-3 h-3" />
+      <span>{info.label}</span>
     </Badge>
   );
 };

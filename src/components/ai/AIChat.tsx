@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useAIMessaging, AIMessage } from '@/hooks/useAIMessaging';
 import { Button } from '@/components/ui/button';
@@ -130,6 +129,8 @@ const AIChat: React.FC<AIChatProps> = ({
     );
   };
   
+  const userAvatar = profile?.avatar_url || user?.avatarUrl || undefined;
+  
   return (
     <Card className="w-full h-full flex flex-col">
       <CardHeader className="px-4 py-3 border-b">
@@ -145,7 +146,7 @@ const AIChat: React.FC<AIChatProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Avatar>
-                <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                <AvatarImage src={userAvatar} alt={profile?.name} />
                 <AvatarFallback>{profile?.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>

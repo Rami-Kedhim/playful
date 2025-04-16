@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -83,9 +82,9 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   const estimatedTime = getEstimatedCompletionTime(verificationRequest.status);
   
   const submittedDate = new Date(verificationRequest.submittedAt).toLocaleDateString();
-  const updatedDate = verificationRequest.updatedAt 
-    ? new Date(verificationRequest.updatedAt).toLocaleDateString() 
-    : null;
+  const updatedDate = verificationRequest.updated_at 
+    ? new Date(verificationRequest.updated_at).toLocaleDateString() 
+    : '—';
 
   const handleCancelVerification = () => {
     // In a real app, this would make an API call to cancel the verification

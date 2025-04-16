@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -46,7 +45,7 @@ const UserProfileSummary = () => {
                   {user.role}
                 </Badge>
               )}
-              {profile?.isVerified && (
+              {profile?.is_verified && (
                 <Badge className="bg-blue-500 hover:bg-blue-700 text-xs">
                   Verified
                 </Badge>

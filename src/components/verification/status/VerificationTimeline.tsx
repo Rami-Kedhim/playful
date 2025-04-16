@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { VerificationRequest } from '@/types/escort';
+import { VerificationRequest } from '@/types/auth';
 import { CheckCircle, Clock, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isVerificationInProgress } from '@/utils/verification/assessmentProgress';
@@ -10,13 +10,13 @@ interface VerificationTimelineProps {
 }
 
 const VerificationTimeline = ({ verificationRequest }: VerificationTimelineProps) => {
-  const { status, submittedAt, updatedAt } = verificationRequest;
+  const { status, submittedAt, updated_at } = verificationRequest;
   
   const timelineSteps = [
     {
       id: 'submitted',
       label: 'Submitted',
-      date: new Date(submittedAt).toLocaleDateString(),
+      date: new Date(submittedAt || verificationRequest.created_at).toLocaleDateString(),
       status: 'complete',
       icon: CheckCircle,
       iconClass: 'text-green-500'
@@ -70,8 +70,8 @@ const VerificationTimeline = ({ verificationRequest }: VerificationTimelineProps
               {(step.id === 'submitted' || (step.id === 'decision' && (status === 'approved' || status === 'rejected'))) && (
                 <time className="text-xs text-muted-foreground">
                   {step.id === 'submitted' ? 
-                    new Date(submittedAt).toLocaleString() : 
-                    updatedAt ? new Date(updatedAt).toLocaleString() : ''}
+                    new Date(submittedAt || verificationRequest.created_at).toLocaleString() : 
+                    updated_at ? new Date(updated_at).toLocaleString() : ''}
                 </time>
               )}
             </div>

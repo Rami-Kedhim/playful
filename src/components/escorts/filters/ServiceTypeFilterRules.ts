@@ -29,10 +29,24 @@ export enum ServiceType {
   SweetSurrender = "Sweet Surrender (Light BDSM)",
   LingerieShow = "Lingerie Private Show",
   ExoticTease = "Exotic Tease & Please",
-  TravelCompanion = "Intimate Travel Companion",
+  TravelCompanion = "Travel Companion",
   DiscreetFun = "Discreet Fun",
   HiddenDesires = "Hidden Desires",
-  ConfidentKinky = "Confident & Kinky (Soft Limit)"
+  ConfidentKinky = "Confident & Kinky (Soft Limit)",
+  // Add more compatible service types to fix issues in escortProfiles.ts
+  "massage" = "massage",
+  "roleplay" = "roleplay",
+  "bdsm" = "bdsm",
+  "overnight" = "overnight",
+  "Dinner Date" = "Dinner Date",
+  "Travel Companion" = "Travel Companion",
+  "Events" = "Events",
+  "Weekend Getaways" = "Weekend Getaways",
+  "BDSM" = "BDSM",
+  "Sensual Massage" = "Sensual Massage",
+  "Role Play" = "Role Play",
+  "events" = "events",
+  "travel" = "travel"
 }
 
 /**
@@ -77,10 +91,3 @@ export function remapUnsafeService(label: string): ServiceType | null {
   };
   return map[label.toLowerCase()] || null;
 }
-
-/**
- * 🌐 Future Integration Note:
- * This module is planned to connect directly with UberEscorts AI Core and Orus Guardian System.
- * The AI will use `ServiceType` as a reference vocabulary for filtering, recommendation and user onboarding.
- * Smart classification will match free-form text to the closest valid service type.
- */

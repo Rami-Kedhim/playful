@@ -2,12 +2,13 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import ServiceTypeBadgeLabel, { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
+import ServiceTypeBadgeLabel from '../filters/ServiceTypeBadgeLabel';
 import { ServiceType } from '../filters/ServiceTypeFilterRules';
+import { ServiceTypeFilter } from '@/types/auth';
 import { getSafeServiceLabel } from '../filters/ServiceTypeBadgeLabel';
 
 interface EscortServiceTypeInfoProps {
-  serviceType: ServiceTypeFilter;
+  serviceType: string;
   services: string[];
   className?: string;
   themeName?: string; // Optional theme name based on Egyptian archetypes
@@ -34,11 +35,19 @@ const EscortServiceTypeInfo: React.FC<EscortServiceTypeInfoProps> = ({
     }));
   }, [services]);
 
+  // Convert serviceType string to ServiceTypeFilter
+  const convertedServiceType = React.useMemo(() => {
+    if (serviceType === "virtual") return "virtual" as ServiceTypeFilter;
+    if (serviceType === "in-person") return "in-person" as ServiceTypeFilter;
+    if (serviceType === "both") return "both" as ServiceTypeFilter;
+    return "" as ServiceTypeFilter;
+  }, [serviceType]);
+
   // Check if any services were remapped
   const hasRemappedServices = safeServices.some(service => service.original !== service.safe);
   
   // Determine if this escort offers virtual/metaverse services
-  const hasVirtualServices = serviceType === 'virtual' || serviceType === 'both';
+  const hasVirtualServices = convertedServiceType === 'virtual' || convertedServiceType === 'both';
   
   // Determine theme class based on themeName (for future Sacred Engine integration)
   const themeClass = themeName ? `theme-${themeName.toLowerCase()}` : '';
@@ -52,7 +61,7 @@ const EscortServiceTypeInfo: React.FC<EscortServiceTypeInfoProps> = ({
         <div className="space-y-4">
           <div>
             <h3 className="text-sm font-medium mb-2">Service Type:</h3>
-            <ServiceTypeBadgeLabel type={serviceType} />
+            <ServiceTypeBadgeLabel type={convertedServiceType} />
             
             {hasVirtualServices && (
               <div className="mt-2 text-xs text-muted-foreground">

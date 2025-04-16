@@ -6,10 +6,11 @@ import { Navigate } from 'react-router-dom';
 import { Loader2, ShieldAlert } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { UserRole } from '@/types/auth';
 
 interface RoleGuardProps {
   children: React.ReactNode;
-  allowedRoles: string[];
+  allowedRoles: UserRole[];
   fallbackPath?: string;
   requireAllRoles?: boolean;
   showAccessDenied?: boolean;
@@ -52,8 +53,8 @@ const RoleGuard = ({
 
   // Check if user has required role(s)
   const hasAccess = requireAllRoles 
-    ? hasAllRoles(allowedRoles)
-    : hasRole(allowedRoles);
+    ? hasAllRoles(allowedRoles as UserRole[])
+    : hasRole(allowedRoles as UserRole[]);
 
   // If user doesn't have required role(s)
   if (!hasAccess) {
