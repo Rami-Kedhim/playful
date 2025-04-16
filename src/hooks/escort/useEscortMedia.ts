@@ -24,10 +24,10 @@ export const useEscortMedia = (
 
   return {
     // Gallery functions
-    addGalleryImage: async (id: string, imageUrl: string, escort?: Escort | null) => {
+    addGalleryImage: (id: string, imageUrl: string, escort?: Escort | null) => {
       return galleryManagement.addGalleryImage(id, imageUrl, escort);
     },
-    removeGalleryImage: async (id: string, imageUrl: string, escort?: Escort | null) => {
+    removeGalleryImage: (id: string, imageUrl: string, escort?: Escort | null) => {
       return galleryManagement.removeGalleryImage(id, imageUrl, escort);
     },
     
@@ -35,10 +35,10 @@ export const useEscortMedia = (
     setProfileImage: profileImageManagement.setProfileImage,
     
     // Video functions
-    addVideo: async (id: string, videoUrl: string, escort?: Escort | null) => {
+    addVideo: (id: string, videoUrl: string, escort?: Escort | null) => {
       return videoManagement.addVideo(id, videoUrl, escort);
     },
-    removeVideo: async (id: string, videoIdOrUrl: string, escort?: Escort | null) => {
+    removeVideo: (id: string, videoIdOrUrl: string, escort?: Escort | null) => {
       return videoManagement.removeVideo(id, videoIdOrUrl, escort);
     }
   };

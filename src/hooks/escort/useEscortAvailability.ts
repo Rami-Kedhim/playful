@@ -1,67 +1,81 @@
 
 import { useState, useCallback } from 'react';
 import { Escort, Availability } from '@/types/escort';
-import { toast } from '@/components/ui/use-toast';
 
-export const useEscortAvailability = (initialAvailability?: Availability) => {
-  const [availability, setAvailability] = useState<Availability>(
-    initialAvailability || {
-      days: [],
-      hours: [],
-      timeZone: 'UTC',
-      availableNow: false
+export const useEscortAvailability = (updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>) => {
+  const [availability, setAvailability] = useState<Availability>({
+    days: [],
+    hours: [],
+    timeZone: 'UTC',
+    availableNow: false
+  });
+  
+  const updateAvailability = useCallback(async (
+    escortId: string, 
+    updatedAvailability: Availability
+  ) => {
+    try {
+      const result = await updateEscortProfile(escortId, {
+        availability: updatedAvailability
+      });
+      
+      if (result) {
+        setAvailability(updatedAvailability);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error updating availability:', error);
+      return null;
     }
-  );
-
-  const toggleDay = useCallback((day: string) => {
-    setAvailability(prev => {
-      const currentDays = prev.days || [];
-      const updatedDays = currentDays.includes(day)
-        ? currentDays.filter(d => d !== day)
-        : [...currentDays, day];
-
-      return {
-        ...prev,
-        days: updatedDays
-      };
+  }, [updateEscortProfile]);
+  
+  const setAvailableNow = useCallback(async (
+    escortId: string,
+    isAvailableNow: boolean
+  ) => {
+    return updateAvailability(escortId, {
+      ...availability,
+      availableNow: isAvailableNow
     });
-  }, []);
-
-  const setAvailableHours = useCallback((hours: string[]) => {
-    setAvailability(prev => ({
-      ...prev,
+  }, [availability, updateAvailability]);
+  
+  const setDays = useCallback(async (
+    escortId: string,
+    days: string[]
+  ) => {
+    return updateAvailability(escortId, {
+      ...availability,
+      days
+    });
+  }, [availability, updateAvailability]);
+  
+  const setHours = useCallback(async (
+    escortId: string,
+    hours: string[]
+  ) => {
+    return updateAvailability(escortId, {
+      ...availability,
       hours
-    }));
-  }, []);
-
-  const setAvailableTimeZone = useCallback((timeZone: string) => {
-    setAvailability(prev => ({
-      ...prev,
+    });
+  }, [availability, updateAvailability]);
+  
+  const setTimeZone = useCallback(async (
+    escortId: string,
+    timeZone: string
+  ) => {
+    return updateAvailability(escortId, {
+      ...availability,
       timeZone
-    }));
-  }, []);
-
-  const toggleAvailableNow = useCallback((availableNow: boolean) => {
-    setAvailability(prev => ({
-      ...prev,
-      availableNow
-    }));
-  }, []);
-
-  const setCustomNotes = useCallback((customNotes: string) => {
-    setAvailability(prev => ({
-      ...prev,
-      customNotes
-    }));
-  }, []);
-
+    });
+  }, [availability, updateAvailability]);
+  
   return {
     availability,
-    setAvailability,
-    toggleDay,
-    setAvailableHours,
-    setAvailableTimeZone,
-    toggleAvailableNow,
-    setCustomNotes
+    updateAvailability,
+    setAvailableNow,
+    setDays,
+    setHours,
+    setTimeZone
   };
 };

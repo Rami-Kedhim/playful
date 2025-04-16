@@ -1,64 +1,70 @@
 
-import { DatabaseGender, UserProfile } from "@/types/auth";
+import { DatabaseGender, UserProfile } from '@/types/auth';
 
-/**
- * Normalizes gender values from various formats to the standard DatabaseGender enum
- */
-export const normalizeGender = (gender: string | null | undefined): DatabaseGender => {
+// Generate avatar URL from initials for use when no image is provided
+export const getInitialsAvatar = (name: string): string => {
+  const initials = name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+    
+  // Use a placeholder service that generates an image with the initials
+  const backgroundColor = stringToColor(name);
+  return `https://ui-avatars.com/api/?name=${initials}&background=${backgroundColor.replace('#', '')}&color=ffffff`;
+};
+
+// Convert string to color for consistent avatar background colors
+const stringToColor = (str: string): string => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  
+  return color;
+};
+
+// Maps string gender values to DatabaseGender enum
+export const mapStringToGender = (gender?: string): DatabaseGender => {
   if (!gender) return DatabaseGender.OTHER;
   
-  const normalizedGender = gender.toUpperCase();
-  
-  if (normalizedGender === 'MALE') return DatabaseGender.MALE;
-  if (normalizedGender === 'FEMALE') return DatabaseGender.FEMALE;
-  
-  return DatabaseGender.OTHER;
+  switch (gender.toLowerCase()) {
+    case 'male':
+      return DatabaseGender.MALE;
+    case 'female':
+      return DatabaseGender.FEMALE;
+    default:
+      return DatabaseGender.OTHER;
+  }
 };
 
-/**
- * Format display name for a user profile
- */
-export const getDisplayName = (profile: UserProfile | null): string => {
-  if (!profile) return 'User';
-  
-  if (profile.full_name) return profile.full_name;
-  if (profile.username) return profile.username;
-  
-  return 'User';
+// Upload avatar to storage (mock implementation)
+export const uploadAvatar = async (file: File): Promise<string> => {
+  // In a real implementation, this would upload to a storage service
+  // For now, we'll return a fake URL
+  return URL.createObjectURL(file);
 };
 
-/**
- * Calculate profile completeness percentage
- */
-export const calculateProfileCompleteness = (profile: UserProfile): number => {
-  if (!profile) return 0;
-  
-  const requiredFields = [
-    'full_name',
-    'avatar_url',
-    'bio',
-    'location',
-    'gender',
-  ];
-  
-  const optionalFields = [
-    'interests',
-    'commute_route',
-    'sexual_orientation'
-  ];
-  
-  let score = 0;
-  let possibleScore = requiredFields.length + optionalFields.length;
-  
-  // Required fields count more
-  requiredFields.forEach(field => {
-    if (profile[field as keyof UserProfile]) score += 1;
-  });
-  
-  // Optional fields
-  optionalFields.forEach(field => {
-    if (profile[field as keyof UserProfile]) score += 0.5;
-  });
-  
-  return Math.min(100, Math.round((score / possibleScore) * 100));
+// Validate gender string against allowed values
+export const validateGender = (gender: string): boolean => {
+  return ['male', 'female', 'other', 'non-binary', 'trans'].includes(gender.toLowerCase());
+};
+
+// Format profile data for display
+export const formatProfileData = (profile: UserProfile) => {
+  return {
+    ...profile,
+    displayName: profile.full_name || profile.username || 'Anonymous',
+    memberSince: profile.created_at 
+      ? new Date(profile.created_at).toLocaleDateString() 
+      : 'Unknown',
+    verified: profile.is_verified || false
+  };
 };

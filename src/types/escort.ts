@@ -103,6 +103,12 @@ export interface Escort {
   videos?: Video[];
   boostLevel?: number;
   boostExpiry?: Date;
+  contactInfo?: {
+    email?: string;
+    phone?: string;
+    website?: string;
+    social?: Record<string, string>;
+  };
   
   // Physical attributes
   height?: number | string;

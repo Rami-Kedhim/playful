@@ -26,8 +26,10 @@ export interface AuthUser {
   role?: UserRole;
   created_at?: string;
   user_metadata?: Record<string, any>;
+  app_metadata?: Record<string, any>;
   ubx_balance?: number;
   lucoinsBalance?: number;
+  isCreator?: boolean;
 }
 
 export interface UserProfile {
@@ -51,12 +53,14 @@ export interface UserProfile {
   isBoosted?: boolean;
   created_at?: string;
   is_verified?: boolean;
+  role?: UserRole;
 }
 
 export interface AuthResult {
   user: AuthUser;
   session: any;
   error?: string;
+  success?: boolean;
 }
 
 // Import verification types from the verification.ts file
