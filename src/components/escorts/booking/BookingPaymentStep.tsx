@@ -6,7 +6,7 @@ import { Escort, Booking } from '@/types/escort';
 import { Loader2, ArrowLeft, CreditCard, Wallet } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
 interface BookingPaymentStepProps {
   escort: Escort;
@@ -25,16 +25,16 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
 }) => {
   const [paymentMethod, setPaymentMethod] = useState('credits');
   
-  const formatDateTime = (dateTimeString?: string) => {
-    if (!dateTimeString) return 'N/A';
-    return format(parseISO(dateTimeString), 'MMM d, yyyy h:mm a');
+  const formatDateTime = (dateTime?: Date) => {
+    if (!dateTime) return 'N/A';
+    return format(dateTime, 'MMM d, yyyy h:mm a');
   };
   
   const calculateDuration = () => {
     if (!booking.startTime || !booking.endTime) return 'N/A';
     
-    const start = parseISO(booking.startTime);
-    const end = parseISO(booking.endTime);
+    const start = booking.startTime;
+    const end = booking.endTime;
     const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     
     return `${durationHours} ${durationHours === 1 ? 'hour' : 'hours'}`;
@@ -57,22 +57,22 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
             
             <div className="text-muted-foreground">Date:</div>
             <div className="font-medium">
-              {booking.startTime ? format(parseISO(booking.startTime), 'MMM d, yyyy') : 'N/A'}
+              {booking.startTime ? format(booking.startTime, 'MMM d, yyyy') : 'N/A'}
             </div>
             
             <div className="text-muted-foreground">Time:</div>
             <div className="font-medium">
-              {booking.startTime ? format(parseISO(booking.startTime), 'h:mm a') : 'N/A'} - 
-              {booking.endTime ? format(parseISO(booking.endTime), 'h:mm a') : 'N/A'}
+              {booking.startTime ? format(booking.startTime, 'h:mm a') : 'N/A'} - 
+              {booking.endTime ? format(booking.endTime, 'h:mm a') : 'N/A'}
             </div>
             
             <div className="text-muted-foreground">Duration:</div>
             <div className="font-medium">{calculateDuration()}</div>
             
-            {booking.service && (
+            {booking.serviceType && (
               <>
                 <div className="text-muted-foreground">Service Type:</div>
-                <div className="font-medium">{booking.service}</div>
+                <div className="font-medium">{booking.serviceType}</div>
               </>
             )}
             
@@ -88,7 +88,7 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
         <div className="border-t border-b py-4">
           <div className="flex justify-between items-center">
             <span className="font-medium">Total Amount</span>
-            <span className="text-xl font-bold">${booking.price}</span>
+            <span className="text-xl font-bold">${booking.price || booking.totalPrice}</span>
           </div>
         </div>
         

@@ -45,11 +45,11 @@ const BookingDialog: React.FC<BookingDialogProps> = ({ escort, onSubmit, onCance
       const endDateTime = addHours(startDateTime, parseInt(duration));
       
       await onSubmit({
-        startTime: startDateTime.toISOString(),
-        endTime: endDateTime.toISOString(),
+        startTime: startDateTime,
+        endTime: endDateTime,
         notes,
         price: (escort.price || 100) * parseInt(duration),
-        service: 'in-person',
+        serviceType: 'in-person',
       });
     } catch (error) {
       console.error('Booking submission error:', error);

@@ -17,19 +17,23 @@ export enum BookingStatus {
   CONFIRMED = 'confirmed',
   DECLINED = 'declined',
   CANCELED = 'canceled',
-  COMPLETED = 'completed'
+  COMPLETED = 'completed',
+  REJECTED = 'rejected'
 }
 
 export interface Booking {
   id: string;
   escortId: string;
   userId: string;
+  clientId?: string; // Added for backward compatibility
   startTime: Date;
   endTime: Date;
-  serviceType: string;
+  serviceType?: string;
+  service?: string; // For backward compatibility
   location: string;
   status: BookingStatus;
   totalPrice: number;
+  price?: number; // For backward compatibility
   createdAt: Date;
   notes?: string;
   isPaid?: boolean;
@@ -55,12 +59,13 @@ export interface Escort {
   profileImage?: string;
   imageUrl?: string;
   images?: string[];
-  videos?: string[] | { id: string; url: string; thumbnail: string; title: string; duration?: number; isPublic?: boolean }[];
+  videos?: string[] | { id: string; url: string; thumbnail: string; title: string; duration?: number; isPublic?: boolean; }[];
   isAI?: boolean;
   gallery?: {
     imageUrls?: string[];
     videoUrls?: string[];
   };
+  gallery_images?: string[]; // For backward compatibility
   categories?: EscortCategory[];
   serviceTypes?: ServiceType[];
   serviceLocations?: ServiceLocation[];
@@ -105,6 +110,7 @@ export interface Escort {
   // Additional properties needed by components
   tags?: string[];
   sexualOrientation?: string;
+  orientation?: string; // Alias for sexualOrientation
   availableNow?: boolean;
   lastActive?: Date;
   responseRate?: number;
@@ -118,11 +124,79 @@ export interface Escort {
   eyeColor?: string;
   ethnicity?: string;
   services?: string[];
-  verificationLevel?: 'none' | 'basic' | 'enhanced' | 'premium';
+  verificationLevel?: VerificationLevel;
   contentStats?: {
     photos?: number;
     videos?: number;
     streams?: number;
     live?: boolean;
   };
+}
+
+// Verification related types
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+export interface VerificationRequest {
+  id: string;
+  profile_id: string;
+  status: VerificationStatus;
+  requested_level: VerificationLevel;
+  documents: VerificationDocument[];
+  created_at: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+  
+  // For backward compatibility
+  submittedAt?: string;
+  updatedAt?: string;
+  verificationLevel?: VerificationLevel;
+  rejectionReason?: string;
+  userId?: string;
+}
+
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  fileUrl: string;
+  uploadedAt: string;
+  verification_id?: string;
+  document_type?: string;
+  document_url?: string;
+  status?: VerificationStatus;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// For media management
+export interface Video {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title?: string;
+  duration?: number;
+  isPublic?: boolean;
+}
+
+// Filter options
+export interface EscortFilterOptions {
+  gender?: string[];
+  service?: string[];
+  priceRange?: [number, number];
+  ageRange?: [number, number];
+  language?: string[];
+  location?: string;
+  maxDistance?: number;
+  availability?: string[];
+  rating?: number;
+  verified?: boolean;
+  // Additional filters
+  selectedServices?: string[];
+  selectedGenders?: string[];
+  verifiedOnly?: boolean;
+  languages?: string[];
 }

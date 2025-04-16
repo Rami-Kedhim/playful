@@ -12,8 +12,16 @@ interface MediaSectionProps {
 const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photos" }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   
-  // Get gallery images from either gallery or gallery_images field
-  const galleryImages = escort.gallery || escort.gallery_images || [];
+  // Get gallery images from either gallery or images field
+  let galleryImages: string[] = [];
+  
+  if (escort.gallery && 'imageUrls' in escort.gallery && Array.isArray(escort.gallery.imageUrls)) {
+    galleryImages = escort.gallery.imageUrls;
+  } else if (Array.isArray(escort.gallery)) {
+    galleryImages = escort.gallery;
+  } else if (escort.images && Array.isArray(escort.images)) {
+    galleryImages = escort.images;
+  }
   
   // Filter videos that are actual video objects or strings
   const videos = escort.videos?.filter(video => 

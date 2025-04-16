@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
@@ -38,13 +39,14 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
         (updatedBooking) => {
           setRealTimeStatus(updatedBooking.status);
           
-          if (updatedBooking.status === 'confirmed') {
+          if (updatedBooking.status === BookingStatus.CONFIRMED) {
             toast({
               title: 'Booking Confirmed!',
               description: 'Your booking has been confirmed.',
               variant: 'success',
             });
-          } else if (updatedBooking.status === 'rejected') {
+          } else if (updatedBooking.status === BookingStatus.REJECTED || 
+                     updatedBooking.status === BookingStatus.DECLINED) {
             toast({
               title: 'Booking Rejected',
               description: updatedBooking.notes || 'Your booking request was rejected.',
@@ -75,7 +77,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     
     setBooking({
       escortId: escort.id,
-      clientId: user.id,
+      userId: user.id,
       ...bookingDetails,
     });
     
@@ -83,7 +85,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
   };
   
   const handlePaymentComplete = async () => {
-    if (!booking) return;
+    if (!booking || !user) return;
     
     setIsSubmitting(true);
     
@@ -91,8 +93,9 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       const result = await bookingService.createBooking({
         ...booking,
         id: `booking-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        createdAt: new Date(),
+        status: BookingStatus.PENDING,
+        totalPrice: booking.price || 0
       } as Booking);
       
       if (!result.success) {
@@ -143,7 +146,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
         return (
           <BookingConfirmation
             escort={escort}
-            status={realTimeStatus || 'pending'}
+            status={realTimeStatus || BookingStatus.PENDING}
             onClose={onClose}
           />
         );

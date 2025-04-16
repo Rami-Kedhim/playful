@@ -18,7 +18,7 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
 }) => {
   const renderStatusContent = () => {
     switch (status) {
-      case 'pending':
+      case BookingStatus.PENDING:
         return (
           <>
             <div className="flex items-center gap-2 text-amber-500 mb-4">
@@ -39,7 +39,7 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
           </>
         );
       
-      case 'confirmed':
+      case BookingStatus.CONFIRMED:
         return (
           <>
             <div className="flex items-center gap-2 text-green-500 mb-4">
@@ -60,7 +60,8 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
           </>
         );
         
-      case 'rejected':
+      case BookingStatus.REJECTED:
+      case BookingStatus.DECLINED:
         return (
           <>
             <div className="flex items-center gap-2 text-red-500 mb-4">

@@ -1,49 +1,44 @@
 
 import React from 'react';
-import { PersonStanding, Laptop, Flower2 } from 'lucide-react';
+import { Monitor, Users, Globe } from 'lucide-react';
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 
 interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
   size?: number;
   variant?: 'default' | 'colored';
+  className?: string;
 }
 
 const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
   type, 
-  size = 16,
-  variant = 'default'
+  size = 16, 
+  variant = 'default',
+  className = '' 
 }) => {
-  if (!type) return null;
-  
-  const iconProps = {
-    width: size,
-    height: size,
-    className: variant === 'colored' ? getColorClass(type) : undefined
+  const getColorClass = () => {
+    if (variant !== 'colored') return '';
+    
+    switch (type) {
+      case 'in-person': return 'text-indigo-500';
+      case 'virtual': return 'text-purple-500';
+      case 'both': return 'text-blue-500';
+      default: return '';
+    }
   };
   
+  const colorClass = getColorClass();
+  const combinedClass = `${colorClass} ${className}`.trim();
+  
   switch (type) {
     case 'in-person':
-      return <PersonStanding {...iconProps} />;
+      return <Users size={size} className={combinedClass} />;
     case 'virtual':
-      return <Laptop {...iconProps} />;
+      return <Monitor size={size} className={combinedClass} />;
     case 'both':
-      return <Flower2 {...iconProps} />;
+      return <Globe size={size} className={combinedClass} />;
     default:
       return null;
-  }
-};
-
-const getColorClass = (type: ServiceTypeFilter): string => {
-  switch (type) {
-    case 'in-person':
-      return 'text-primary';
-    case 'virtual':
-      return 'text-blue-500';
-    case 'both':
-      return 'text-purple-500';
-    default:
-      return '';
   }
 };
 

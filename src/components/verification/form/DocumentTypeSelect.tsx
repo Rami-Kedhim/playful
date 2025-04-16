@@ -1,53 +1,57 @@
 
 import React from 'react';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
-import { FormControl, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormValues, DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS } from '@/types/verification';
+import { VerificationFormValues } from '@/types/verification';
 
-interface DocumentTypeSelectProps {
+export interface DocumentTypeSelectProps {
   form: UseFormReturn<VerificationFormValues>;
   onTypeChange?: (type: string) => void;
 }
 
-const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeChange }) => {
-  const documentOptions = [
-    { value: DOCUMENT_TYPES.ID_CARD, label: DOCUMENT_TYPE_LABELS[DOCUMENT_TYPES.ID_CARD] },
-    { value: DOCUMENT_TYPES.PASSPORT, label: DOCUMENT_TYPE_LABELS[DOCUMENT_TYPES.PASSPORT] },
-    { value: DOCUMENT_TYPES.DRIVERS_LICENSE, label: DOCUMENT_TYPE_LABELS[DOCUMENT_TYPES.DRIVERS_LICENSE] }
+const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({
+  form,
+  onTypeChange = () => {}
+}) => {
+  const documentTypes = [
+    { value: 'passport', label: 'Passport' },
+    { value: 'drivers_license', label: 'Driver\'s License' },
+    { value: 'id_card', label: 'Government ID Card' },
+    { value: 'residence_permit', label: 'Residence Permit' }
   ];
 
-  const handleTypeChange = (value: string) => {
-    form.setValue('documentType', value);
-    if (onTypeChange) {
-      onTypeChange(value);
-    }
-  };
-
   return (
-    <FormItem>
-      <FormLabel>Document Type</FormLabel>
-      <Select
-        onValueChange={handleTypeChange}
-        defaultValue={form.getValues('documentType')}
-      >
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select document type" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          <SelectGroup>
-            {documentOptions.map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
+    <FormField
+      control={form.control}
+      name="documentType"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Document Type</FormLabel>
+          <FormControl>
+            <Select
+              value={field.value}
+              onValueChange={(value) => {
+                field.onChange(value);
+                onTypeChange(value);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select document type" />
+              </SelectTrigger>
+              <SelectContent>
+                {documentTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 };
 

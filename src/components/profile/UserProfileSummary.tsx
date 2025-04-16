@@ -1,73 +1,83 @@
-import React from "react";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import React from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { VerifiedMark } from "@/components/shared/VerifiedMark";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays } from "lucide-react";
-import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const UserProfileSummary = () => {
-  const { user, profile } = useAuth();
+interface UserProfileSummaryProps {
+  user: any;
+  profile: any;
+  isLoading?: boolean;
+}
 
-  if (!user) {
-    return null;
-  }
+const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({ user, profile, isLoading }) => {
+  const avatarUrl = profile?.avatar_url || user?.avatar_url || "";
+  const name = profile?.name || user?.name || "User";
+  const location = profile?.location || user?.location || "Unknown";
+  const bio = profile?.bio || user?.bio || "No bio available";
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Unknown";
-    try {
-      return format(new Date(dateString), "MMMM d, yyyy");
-    } catch (error) {
-      return "Invalid date";
+  const getRoleBadgeVariant = (roles?: string[]) => {
+    if (!roles || roles.length === 0) return 'outline';
+    
+    if (roles.includes('escort')) {
+      return 'secondary';
+    } else if (roles.includes('creator')) {
+      return 'accent';
     }
+    return 'outline';
+  };
+
+  const getRoleLabel = (roles?: string[]) => {
+    if (!roles || roles.length === 0) return 'User';
+    
+    if (roles.includes('escort')) {
+      return 'Escort';
+    } else if (roles.includes('creator')) {
+      return 'Creator';
+    }
+    return 'User';
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center space-x-4">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={profile?.avatar_url} alt={user.username || "User"} />
-            <AvatarFallback className="text-2xl">
-              {profile?.full_name?.[0] || user.username?.[0] || user.email?.[0] || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold leading-none tracking-tight">
-                {profile?.full_name || user.username || "User"}
-              </h2>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {user.role && (
-                <Badge variant="secondary" className="text-xs">
-                  {user.role}
-                </Badge>
-              )}
-              {profile?.is_verified && (
-                <Badge className="bg-blue-500 hover:bg-blue-700 text-xs">
-                  Verified
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {profile?.bio && (
-          <div className="mt-2">
-            <p className="text-sm">{profile.bio}</p>
-          </div>
-        )}
-        <div className="flex items-center gap-2 mt-4">
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">
-            Member since {formatDate(user.created_at)}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col items-center text-center">
+      {isLoading ? (
+        <Skeleton className="h-24 w-24 rounded-full mb-4" />
+      ) : (
+        <Avatar className="h-24 w-24 relative">
+          <AvatarImage src={avatarUrl} alt={name} />
+          <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+          {user?.isVerified && (
+            <VerifiedMark className="absolute bottom-0 right-0 transform translate-x-1/4 translate-y-1/4" />
+          )}
+        </Avatar>
+      )}
+      
+      {isLoading ? (
+        <Skeleton className="h-6 w-32 mt-2" />
+      ) : (
+        <h2 className="text-2xl font-semibold mt-2">{name}</h2>
+      )}
+      
+      {isLoading ? (
+        <Skeleton className="h-4 w-24 mt-1" />
+      ) : (
+        <p className="text-gray-500 text-sm">{location}</p>
+      )}
+      
+      {isLoading ? (
+        <Skeleton className="h-7 w-40 mt-3" />
+      ) : (
+        <Badge variant={getRoleBadgeVariant(user?.roles)} className="mt-3">
+          {getRoleLabel(user?.roles)}
+        </Badge>
+      )}
+      
+      {isLoading ? (
+        <Skeleton className="h-4 w-48 mt-4" />
+      ) : (
+        <p className="text-gray-600 mt-4">{bio}</p>
+      )}
+    </div>
   );
 };
 

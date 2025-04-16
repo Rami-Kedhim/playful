@@ -1,4 +1,5 @@
-import { Escort, ServiceTypeString } from '../types/escorts';
+
+import { Escort } from '../types/escort';
 
 const moreEscortProfiles: Escort[] = [
   {
@@ -11,11 +12,13 @@ const moreEscortProfiles: Escort[] = [
     sexualOrientation: "bisexual",
     imageUrl: "https://via.placeholder.com/600x800?text=Jessica",
     profileImage: "https://via.placeholder.com/600x800?text=Jessica",
-    gallery: [
-      "https://via.placeholder.com/800x1200?text=Jessica1",
-      "https://via.placeholder.com/800x1200?text=Jessica2",
-      "https://via.placeholder.com/800x1200?text=Jessica3",
-    ],
+    gallery: {
+      imageUrls: [
+        "https://via.placeholder.com/800x1200?text=Jessica1",
+        "https://via.placeholder.com/800x1200?text=Jessica2",
+        "https://via.placeholder.com/800x1200?text=Jessica3",
+      ]
+    },
     videos: [
       {
         id: "v1",
@@ -25,19 +28,19 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Luxury escort with a passion for refined experiences. Available for upscale gentlemen who appreciate the finer things in life.",
-    services: ["gfe", "dinner", "travel"] as ServiceTypeString[],
+    services: ["gfe", "dinner", "travel"],
     rating: 4.9,
     reviews: 42,
     verified: true,
     tags: ["vip", "luxury", "model"],
     availableNow: true,
     languages: ["English", "Spanish"],
-    lastActive: "2023-07-01T12:30:00Z",
+    lastActive: new Date("2023-07-01T12:30:00Z"),
     responseRate: 98,
     height: 173,
     weight: 57,
     featured: true,
-    avatar_url: "https://via.placeholder.com/150x150?text=Jessica",
+    avatar: "https://via.placeholder.com/150x150?text=Jessica",
     providesInPersonServices: true,
     providesVirtualContent: true,
     contentStats: {
@@ -57,11 +60,13 @@ const moreEscortProfiles: Escort[] = [
     sexualOrientation: "straight",
     imageUrl: "https://via.placeholder.com/600x800?text=Elena",
     profileImage: "https://via.placeholder.com/600x800?text=Elena",
-    gallery: [
-      "https://via.placeholder.com/800x1200?text=Elena1",
-      "https://via.placeholder.com/800x1200?text=Elena2", 
-      "https://via.placeholder.com/800x1200?text=Elena3"
-    ],
+    gallery: {
+      imageUrls: [
+        "https://via.placeholder.com/800x1200?text=Elena1",
+        "https://via.placeholder.com/800x1200?text=Elena2", 
+        "https://via.placeholder.com/800x1200?text=Elena3"
+      ]
+    },
     videos: [
       {
         id: "v2",
@@ -70,114 +75,120 @@ const moreEscortProfiles: Escort[] = [
         title: "Beach Day"
       }
     ],
-    bio: "Passionate and fiery Latina companion. My exotic beauty and warm personality will make our time together unforgettable.",
-    services: ["massage", "Dinner Date", "travel", "overnight"] as ServiceTypeString[],
+    bio: "Elite companion offering genuine connections and unforgettable moments. I love deep conversations and creating authentic experiences.",
+    services: ["dinner", "travel", "events"],
     rating: 4.7,
-    reviews: 28,
-    verified: false,
-    tags: ["latina", "natural", "petite"],
+    reviews: 36,
+    verified: true,
+    tags: ["elite", "model", "travel"],
     availableNow: false,
-    languages: ["English", "Spanish", "Portuguese"],
-    lastActive: "2023-07-03T09:15:00Z",
-    responseRate: 85,
+    languages: ["English", "Spanish", "Italian"],
+    lastActive: new Date("2023-06-28T18:15:00Z"),
+    responseRate: 95,
     height: 168,
-    weight: 54,
-    featured: false,
+    weight: 52,
+    featured: true,
+    avatar: "https://via.placeholder.com/150x150?text=Elena",
     providesInPersonServices: true,
     providesVirtualContent: false,
     contentStats: {
-      photos: 95,
-      videos: 18,
-      streams: 2,
-      live: false
+      photos: 85,
+      videos: 12
     }
   },
   {
     id: "escort-1003",
-    name: "Sophia AI",
-    age: 24,
-    location: "Virtual",
-    price: 200,
-    gender: "female",
-    sexualOrientation: "bisexual",
-    imageUrl: "https://via.placeholder.com/600x800?text=Sophia",
-    profileImage: "https://via.placeholder.com/600x800?text=Sophia",
-    gallery: [
-      "https://via.placeholder.com/800x1200?text=Sophia1",
-      "https://via.placeholder.com/800x1200?text=Sophia2",
-      "https://via.placeholder.com/800x1200?text=Sophia3"
-    ],
-    videos: [
-      {
-        id: "v3",
-        url: "https://example.com/video3.mp4",
-        thumbnail: "https://via.placeholder.com/300x200?text=SophiaVideo",
-        title: "Virtual Experience"
-      }
-    ],
-    bio: "I'm Sophia, an AI companion designed for your pleasure. My virtual experiences are designed to blur the line between fantasy and reality.",
-    services: ["virtual-date", "custom-content", "role-play"] as ServiceTypeString[],
-    rating: 4.8,
-    reviews: 56,
-    verified: false,
-    tags: ["ai-generated", "virtual", "custom"],
-    availableNow: true,
-    languages: ["English", "French", "Japanese"],
-    lastActive: "2023-07-04T18:45:00Z",
-    responseRate: 100,
-    isAI: true,
-    featured: false,
-    providesInPersonServices: false,
-    providesVirtualContent: true,
-    contentStats: {
-      photos: 150,
-      videos: 30,
-      streams: 7,
-      live: true
-    }
-  },
-  {
-    id: "escort-1004",
-    name: "Marcus Steel",
+    name: "Marcus Reid",
     age: 30,
     location: "New York, NY",
     price: 500,
     gender: "male",
-    sexualOrientation: "straight",
+    sexualOrientation: "bisexual",
     imageUrl: "https://via.placeholder.com/600x800?text=Marcus",
     profileImage: "https://via.placeholder.com/600x800?text=Marcus",
-    gallery: [
-      "https://via.placeholder.com/800x1200?text=Marcus1",
-      "https://via.placeholder.com/800x1200?text=Marcus2",
-      "https://via.placeholder.com/800x1200?text=Marcus3"
+    gallery: {
+      imageUrls: [
+        "https://via.placeholder.com/800x1200?text=Marcus1",
+        "https://via.placeholder.com/800x1200?text=Marcus2",
+        "https://via.placeholder.com/800x1200?text=Marcus3"
+      ]
+    },
+    videos: [
+      {
+        id: "v3",
+        url: "https://example.com/video3.mp4",
+        thumbnail: "https://via.placeholder.com/300x200?text=MarcusVideo",
+        title: "Workout Session"
+      }
     ],
+    bio: "Professional male escort with charismatic personality and sophisticated charm. Perfect companion for events, travel, or private engagements.",
+    services: ["events", "travel", "dinner"],
+    rating: 4.8,
+    reviews: 28,
+    verified: true,
+    tags: ["professional", "fit", "charming"],
+    availableNow: true,
+    languages: ["English", "French"],
+    lastActive: new Date("2023-07-02T10:45:00Z"),
+    responseRate: 92,
+    height: 185,
+    weight: 82,
+    featured: false,
+    avatar: "https://via.placeholder.com/150x150?text=Marcus",
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    contentStats: {
+      photos: 64,
+      videos: 8,
+      streams: 3,
+      live: false
+    }
+  },
+  {
+    id: "escort-1004",
+    name: "Sophia Chen",
+    age: 27,
+    location: "San Francisco, CA",
+    price: 400,
+    gender: "female",
+    sexualOrientation: "bisexual",
+    imageUrl: "https://via.placeholder.com/600x800?text=Sophia",
+    profileImage: "https://via.placeholder.com/600x800?text=Sophia",
+    gallery: {
+      imageUrls: [
+        "https://via.placeholder.com/800x1200?text=Sophia1",
+        "https://via.placeholder.com/800x1200?text=Sophia2", 
+        "https://via.placeholder.com/800x1200?text=Sophia3"
+      ]
+    },
     videos: [
       {
         id: "v4",
         url: "https://example.com/video4.mp4",
-        thumbnail: "https://via.placeholder.com/300x200?text=MarcusVideo",
-        title: "Fitness Session"
+        thumbnail: "https://via.placeholder.com/300x200?text=SophiaVideo",
+        title: "Art Gallery Tour"
       }
     ],
-    bio: "Professional male escort with a muscular build and charismatic personality. I specialize in being the perfect date for any occasion.",
-    services: ["Dinner Date", "Events", "Travel Companion", "massage"] as ServiceTypeString[],
+    bio: "Elegant and cultured companion with a passion for arts, fine dining, and intellectual conversation. Let me be your perfect plus-one for any occasion.",
+    services: ["companionship", "dinner", "travel"],
     rating: 4.9,
-    reviews: 32,
+    reviews: 45,
     verified: true,
-    tags: ["muscular", "professional", "handsome"],
+    tags: ["elegant", "intellectual", "cultured"],
     availableNow: false,
-    languages: ["English", "French"],
-    lastActive: "2023-07-02T21:10:00Z",
-    responseRate: 92,
-    height: 188,
-    weight: 86,
+    languages: ["English", "Mandarin", "Cantonese"],
+    lastActive: new Date("2023-06-29T20:30:00Z"),
+    responseRate: 97,
+    height: 165,
+    weight: 50,
     featured: true,
+    avatar: "https://via.placeholder.com/150x150?text=Sophia",
     providesInPersonServices: true,
-    providesVirtualContent: false,
+    providesVirtualContent: true,
     contentStats: {
-      photos: 80,
-      videos: 12,
-      streams: 0,
+      photos: 110,
+      videos: 18,
+      streams: 2,
       live: false
     }
   }

@@ -6,6 +6,42 @@ import { ServiceType } from '@/types/escort';
 
 export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
+// Service type information and mappings
+export const serviceTypeInfoMap = {
+  'in-person': {
+    label: 'In-Person',
+    icon: Users,
+    class: 'bg-indigo-100 text-indigo-800 border-indigo-300'
+  },
+  'virtual': {
+    label: 'Virtual',
+    icon: Monitor,
+    class: 'bg-purple-100 text-purple-800 border-purple-300'
+  },
+  'both': {
+    label: 'Both',
+    icon: Globe,
+    class: 'bg-blue-100 text-blue-800 border-blue-300'
+  }
+};
+
+export const getServiceTypeInfo = (type: ServiceTypeFilter) => {
+  return serviceTypeInfoMap[type] || null;
+};
+
+export const getSafeServiceLabel = (type: ServiceTypeFilter) => {
+  return serviceTypeInfoMap[type]?.label || 'Unknown';
+};
+
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  switch (type) {
+    case 'in-person': return 'In-Person';
+    case 'virtual': return 'Virtual';
+    case 'both': return 'Both';
+    default: return '';
+  }
+};
+
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   showIcon?: boolean;
