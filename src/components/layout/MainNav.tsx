@@ -19,6 +19,11 @@ export const MainNav = ({ className }: MainNavProps) => {
       <Link to="/creators" className="text-sm font-medium transition-colors hover:text-primary">
         Creators
       </Link>
+      <Link to="/verification" className="text-sm font-medium transition-colors hover:text-primary">
+        Verification
+      </Link>
     </nav>
   );
 };
+
+export default MainNav;

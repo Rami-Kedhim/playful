@@ -12,16 +12,51 @@ export interface Escort {
     [key: string]: number | undefined;
   };
   description?: string;
+  bio?: string;
   tags?: string[];
   gallery?: string[];
+  gallery_images?: string[]; // Some components use this instead of gallery
   services?: string[];
+  serviceTypes?: string[]; // For backward compatibility
   availability?: any;
   reviews?: number;
+  reviewCount?: number; // For components expecting this name
   rating?: number;
   is_verified?: boolean;
+  verified?: boolean; // For components using this version
   is_featured?: boolean;
+  featured?: boolean; // For components using this version
+  
+  // Physical attributes and demographics
+  age?: number;
+  gender?: string;
+  sexualOrientation?: string;
+  height?: number | string;
+  weight?: number | string;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  measurements?: {
+    bust?: number | string;
+    waist?: number | string;
+    hips?: number | string;
+  };
+  
+  // Status and activity
+  availableNow?: boolean;
+  lastActive?: Date | string;
+  responseRate?: number;
+  
+  // Media and content
+  imageUrl?: string; // For backward compatibility
+  profileImage?: string; // For backward compatibility
+  videos?: string[];
+  
+  // Verification and trust signals
+  verificationLevel?: 'none' | 'basic' | 'enhanced' | 'premium';
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
+  languages?: string[];
 }
 
 export interface Booking {

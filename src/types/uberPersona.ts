@@ -62,41 +62,43 @@ export interface Monetization {
 
 // System Integration Metadata
 export interface SystemMetadata {
-  source: 'manual' | 'scraped' | 'ai_generated';
+  source: 'manual' | 'scraped' | 'ai_enhanced';
   lastSynced?: Date;
   aiPersonality?: string;
   aiMood?: string;
-  aiEngine?: 'GPT' | 'Custom';
+  aiEngine?: string;
   tagsGeneratedByAI?: boolean;
+  enhancementLevel?: number;
+  originalContentPercentage?: number;
 }
 
-// Mapping function to transform legacy escort objects to UberPersona
-export const mapEscortToUberPersona = (escort: any): UberPersona => {
+// Updated mapper function to transform Escort objects to UberPersona with AI enhancement flag
+export const mapEscortToUberPersona = (escort: any, isAIEnhanced: boolean = false): UberPersona => {
   return {
     id: escort.id,
     username: escort.name?.toLowerCase().replace(/\s/g, '_') || `escort_${escort.id.substring(0, 8)}`,
     displayName: escort.name || 'Unnamed',
-    avatarUrl: escort.imageUrl || '',
+    avatarUrl: escort.avatar_url || escort.imageUrl || '',
     location: escort.location || '',
     language: escort.languages?.[0] || 'English',
     bio: escort.bio || escort.description || '',
     age: escort.age || 0,
     ethnicity: escort.ethnicity || '',
     tags: [...(escort.tags || []), ...(escort.services || [])],
-    createdAt: escort.createdAt ? new Date(escort.createdAt) : new Date(),
-    updatedAt: escort.updatedAt ? new Date(escort.updatedAt) : new Date(),
+    createdAt: escort.created_at ? new Date(escort.created_at) : new Date(),
+    updatedAt: escort.updated_at ? new Date(escort.updated_at) : new Date(),
     
     roleFlags: {
       isEscort: true,
       isCreator: !!escort.gallery?.length,
       isLivecam: false,
-      isAI: escort.isAI || false,
-      isVerified: escort.verified || false,
-      isFeatured: escort.featured || false
+      isAI: false,
+      isVerified: escort.is_verified || escort.verified || false,
+      isFeatured: escort.is_featured || escort.featured || false
     },
     
     capabilities: {
-      hasPhotos: !!escort.gallery?.length,
+      hasPhotos: !!(escort.gallery?.length || escort.gallery_images?.length),
       hasVideos: !!escort.videos?.length,
       hasStories: false,
       hasChat: true,
@@ -111,16 +113,14 @@ export const mapEscortToUberPersona = (escort: any): UberPersona => {
       acceptsTips: true,
       subscriptionPrice: escort.subscriptionPrice || undefined,
       unlockingPrice: escort.price || undefined,
-      boostingActive: escort.boostLevel > 0
+      boostingActive: !!escort.boostLevel
     },
     
     systemMetadata: {
-      source: escort.isScraped ? 'scraped' : escort.isAI ? 'ai_generated' : 'manual',
+      source: isAIEnhanced ? 'ai_enhanced' : 'manual',
       lastSynced: escort.lastSynced ? new Date(escort.lastSynced) : undefined,
-      aiPersonality: escort.isAI ? 'friendly' : undefined,
-      aiMood: escort.isAI ? 'happy' : undefined,
-      aiEngine: escort.isAI ? 'GPT' : undefined,
-      tagsGeneratedByAI: escort.isAI || escort.isScraped || false
+      enhancementLevel: isAIEnhanced ? 1 : 0,
+      originalContentPercentage: isAIEnhanced ? 80 : 100
     }
   };
 };
