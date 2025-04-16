@@ -92,3 +92,6 @@ export const useEscortProfile = (initialEscort?: Escort) => {
     updateContactInfo
   };
 };
+
+// Export as both named and default export for compatibility
+export default useEscortProfile;

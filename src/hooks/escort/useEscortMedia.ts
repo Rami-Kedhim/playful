@@ -32,7 +32,9 @@ export const useEscortMedia = (
     },
     
     // Profile image functions
-    setProfileImage: profileImageManagement.setProfileImage,
+    setProfileImage: (id: string, imageUrl: string, escort?: Escort | null) => {
+      return profileImageManagement.setProfileImage(id, imageUrl, escort);
+    },
     
     // Video functions
     addVideo: (id: string, videoUrl: string, escort?: Escort | null) => {

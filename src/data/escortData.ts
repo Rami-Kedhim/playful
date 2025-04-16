@@ -33,7 +33,7 @@ const combinedEscorts = [...escortProfiles, ...moreEscortProfiles].map(escort =>
   // If no service type is specified, default to in-person for standard escorts
   // and virtual for AI escorts
   if (escort.providesInPersonServices === undefined && escort.providesVirtualContent === undefined) {
-    if (escort.isAI || escort.profileType === 'ai') {
+    if (escort.isAI === true || escort.profileType === 'ai') {
       escort.providesVirtualContent = true;
       escort.providesInPersonServices = false;
     } else {

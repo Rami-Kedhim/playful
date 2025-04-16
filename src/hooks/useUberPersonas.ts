@@ -5,6 +5,7 @@ import { uberPersonaService } from '@/services/UberPersonaService';
 import useScrapers from '@/hooks/useScrapers';
 import { toast } from 'sonner';
 import { ContentCreator } from '@/types/creator';
+import { Escort } from '@/types/escort';
 
 // Define a Creator type that's compatible with what scrapeCreators returns
 export interface Creator extends Partial<ContentCreator> {
@@ -45,8 +46,17 @@ export function useUberPersonas() {
       // Load escorts
       try {
         const escorts = await scrapeEscorts();
-        const escortPersonas = escorts.map(escort => uberPersonaService.escortToUberPersona(escort));
-        results.push(...escortPersonas);
+        if (escorts && Array.isArray(escorts)) {
+          const escortPersonas = escorts.map(escort => {
+            try {
+              return uberPersonaService.escortToUberPersona(escort);
+            } catch (e) {
+              console.error("Error mapping escort to persona:", e);
+              return null;
+            }
+          }).filter(Boolean) as UberPersona[];
+          results.push(...escortPersonas);
+        }
       } catch (e) {
         console.error("Error loading escorts:", e);
       }
@@ -54,46 +64,53 @@ export function useUberPersonas() {
       // Load creators
       try {
         const creators = await scrapeCreators();
-        // Convert Creator to ContentCreator with default values for required fields
-        const contentCreators = creators.map((creator: Creator): ContentCreator => {
-          return {
-            id: creator.id,
-            name: creator.name,
-            username: creator.username,
-            profileImage: creator.profileImage || creator.imageUrl,
-            avatarUrl: creator.avatarUrl || creator.imageUrl,
-            imageUrl: creator.imageUrl, // Add imageUrl from creator
-            location: creator.location || '',
-            languages: creator.languages || ['English'],
-            bio: creator.bio || '',
-            description: creator.description || '',
-            age: creator.age || 0,
-            ethnicity: creator.ethnicity || '',
-            tags: creator.tags || [],
-            createdAt: creator.createdAt || new Date(),
-            updatedAt: creator.updatedAt || new Date(),
-            isAI: creator.isAI || false,
-            isVerified: creator.isVerified || false,
-            isFeatured: creator.isFeatured || false,
-            isScraped: creator.isScraped || true,
-            hasLiveStream: creator.hasLiveStream || false,
-            subscriptionPrice: creator.subscriptionPrice || creator.price || 0,
-            isPremium: creator.isPremium || false,
-            isLive: creator.isLive || false,
-            subscriberCount: creator.subscriberCount || 0,
-            contentCount: creator.contentCount || { photos: 0, videos: 0 },
-            price: creator.price || 0,
-            lastSynced: new Date(),
-            rating: creator.rating || 0,
-            region: creator.location || '',
-            language: (creator.languages && creator.languages[0]) || 'English'
-          };
-        });
-        
-        const creatorPersonas = contentCreators.map(creator => 
-          uberPersonaService.creatorToUberPersona(creator)
-        );
-        results.push(...creatorPersonas);
+        if (creators && Array.isArray(creators)) {
+          // Convert Creator to ContentCreator with default values for required fields
+          const contentCreators = creators.map((creator: Creator): ContentCreator => {
+            return {
+              id: creator.id,
+              name: creator.name,
+              username: creator.username,
+              profileImage: creator.profileImage || creator.imageUrl,
+              avatarUrl: creator.avatarUrl || creator.imageUrl,
+              imageUrl: creator.imageUrl, // Add imageUrl from creator
+              location: creator.location || '',
+              languages: creator.languages || ['English'],
+              bio: creator.bio || '',
+              description: creator.description || '',
+              age: creator.age || 0,
+              ethnicity: creator.ethnicity || '',
+              tags: creator.tags || [],
+              createdAt: creator.createdAt || new Date(),
+              updatedAt: creator.updatedAt || new Date(),
+              isAI: creator.isAI || false,
+              isVerified: creator.isVerified || false,
+              isFeatured: creator.isFeatured || false,
+              isScraped: creator.isScraped || true,
+              hasLiveStream: creator.hasLiveStream || false,
+              subscriptionPrice: creator.subscriptionPrice || creator.price || 0,
+              isPremium: creator.isPremium || false,
+              isLive: creator.isLive || false,
+              subscriberCount: creator.subscriberCount || 0,
+              contentCount: creator.contentCount || { photos: 0, videos: 0 },
+              price: creator.price || 0,
+              lastSynced: new Date(),
+              rating: creator.rating || 0,
+              region: creator.location || '',
+              language: (creator.languages && creator.languages[0]) || 'English'
+            };
+          });
+          
+          const creatorPersonas = contentCreators.map(creator => {
+            try {
+              return uberPersonaService.creatorToUberPersona(creator);
+            } catch (e) {
+              console.error("Error mapping creator to persona:", e);
+              return null;
+            }
+          }).filter(Boolean) as UberPersona[];
+          results.push(...creatorPersonas);
+        }
       } catch (e) {
         console.error("Error loading creators:", e);
       }
@@ -101,22 +118,31 @@ export function useUberPersonas() {
       // Load livecams
       try {
         const livecamResponse = await scrapeLivecams();
-        const livecamPersonas = livecamResponse.models.map(model => 
-          uberPersonaService.livecamToUberPersona(model)
-        );
-        results.push(...livecamPersonas);
+        if (livecamResponse && Array.isArray(livecamResponse.models)) {
+          const livecamPersonas = livecamResponse.models.map(model => {
+            try {
+              return uberPersonaService.livecamToUberPersona(model);
+            } catch (e) {
+              console.error("Error mapping livecam to persona:", e);
+              return null;
+            }
+          }).filter(Boolean) as UberPersona[];
+          results.push(...livecamPersonas);
+        }
       } catch (e) {
         console.error("Error loading livecams:", e);
       }
       
       // Register all personas with visibility system
-      results.forEach(persona => {
+      for (const persona of results) {
         try {
-          uberPersonaService.registerWithVisibilitySystem(persona);
+          if (persona && persona.id) {
+            uberPersonaService.registerWithVisibilitySystem(persona, persona.systemMetadata?.source || 'manual');
+          }
         } catch (e) {
           console.error("Error registering persona with visibility system:", e);
         }
-      });
+      }
 
       // Cache the results
       localStorage.setItem('cachedUberPersonas', JSON.stringify({
@@ -137,15 +163,15 @@ export function useUberPersonas() {
 
   // Filter personas by role
   const getEscorts = useCallback(() => {
-    return personas.filter(persona => persona.roleFlags.isEscort);
+    return personas.filter(persona => persona && persona.roleFlags && persona.roleFlags.isEscort);
   }, [personas]);
   
   const getCreators = useCallback(() => {
-    return personas.filter(persona => persona.roleFlags.isCreator);
+    return personas.filter(persona => persona && persona.roleFlags && persona.roleFlags.isCreator);
   }, [personas]);
   
   const getLivecams = useCallback(() => {
-    return personas.filter(persona => persona.roleFlags.isLivecam);
+    return personas.filter(persona => persona && persona.roleFlags && persona.roleFlags.isLivecam);
   }, [personas]);
 
   // Find persona by ID

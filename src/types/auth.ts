@@ -1,4 +1,3 @@
-
 export enum DatabaseGender {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
@@ -27,6 +26,7 @@ export interface AuthUser {
   created_at?: string;
   user_metadata?: Record<string, any>;
   app_metadata?: Record<string, any>;
+  aud?: string;
   ubx_balance?: number;
   lucoinsBalance?: number;
   isCreator?: boolean;

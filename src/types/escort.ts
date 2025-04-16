@@ -1,4 +1,3 @@
-
 export enum ServiceType {
   Massage = 'massage',
   Roleplay = 'roleplay',
