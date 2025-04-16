@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useState, useContext, createContext, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from '@/components/ui/use-toast';
@@ -91,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (user.user_metadata?.role === role) return true;
     
     // Check if role is in profile
-    if (profile?.role === role || profile?.role === role) return true;
+    if (profile?.role === role) return true;
     
     return false;
   };
