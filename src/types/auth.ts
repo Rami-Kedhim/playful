@@ -27,8 +27,11 @@ export interface AuthUser {
   avatarUrl?: string;
   profileImageUrl?: string;
   user_metadata?: any;
+  app_metadata?: any; // Adding app_metadata property
   created_at?: string;
   lucoinsBalance?: number;
+  lucoin_balance?: number; // Adding for compatibility
+  isCreator?: boolean; // Adding isCreator flag
   // Add other user properties as needed
 }
 
@@ -48,6 +51,7 @@ export interface UserProfile {
   is_verified?: boolean;
   ubx_balance?: number;
   lucoin_balance?: number;
+  role?: string; // Adding role for backwards compatibility
 }
 
 // Add ServiceTypeFilter definition

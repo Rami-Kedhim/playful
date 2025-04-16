@@ -8,11 +8,10 @@ import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
 import { verificationFormSchema, VerificationFormValues, DOCUMENT_TYPES } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
-import DocumentImageUpload from './DocumentImageUpload';
+import DocumentUploadHandler from './DocumentUploadHandler';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
-import DocumentUploadHandler from './DocumentUploadHandler';
 
 interface VerificationFormProps {
   onSubmit?: (data: VerificationFormValues) => void;
@@ -35,11 +34,12 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
+  const [documentType, setDocumentType] = useState(DOCUMENT_TYPES.ID_CARD);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: 'id_card',
+      documentType: DOCUMENT_TYPES.ID_CARD,
       documentFrontImage: { preview: '' },
       documentBackImage: { preview: '' },
       selfieImage: { preview: '' },
@@ -63,6 +63,10 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       checkSubmitEligibility();
     }
   }, [user]);
+
+  const handleDocumentTypeChange = (type: string) => {
+    setDocumentType(type);
+  };
 
   const onSubmit = async (data: VerificationFormValues) => {
     if (!user) return;
@@ -131,7 +135,10 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <DocumentTypeSelect form={form} />
+            <DocumentTypeSelect 
+              form={form}
+              onTypeChange={handleDocumentTypeChange}
+            />
             
             <DocumentUploadHandler
               label="Front of ID Document"
@@ -143,6 +150,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
               label="Back of ID Document (Optional for Passport)"
               onFileSelect={(file) => form.setValue('documentBackImage', { file, preview: URL.createObjectURL(file) })}
               error={form.formState.errors.documentBackImage?.message?.toString()}
+              optional={true}
             />
             
             <DocumentUploadHandler

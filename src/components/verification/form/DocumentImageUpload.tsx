@@ -11,13 +11,15 @@ interface DocumentImageUploadProps {
   fieldName: keyof VerificationFormValues;
   label: string;
   description?: string;
+  optional?: boolean; // Added optional prop
 }
 
 const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
   form,
   fieldName,
   label,
-  description
+  description,
+  optional = false // Default to false
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   
@@ -38,7 +40,10 @@ const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
   
   return (
     <FormItem>
-      <FormLabel>{label}</FormLabel>
+      <FormLabel>
+        {label}
+        {optional && <span className="text-sm text-muted-foreground ml-2">(Optional)</span>}
+      </FormLabel>
       <FormControl>
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
           {previewUrl ? (

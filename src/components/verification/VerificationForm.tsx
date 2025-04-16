@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -33,6 +34,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
+  const [documentType, setDocumentType] = useState('id_card');
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
@@ -61,6 +63,10 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       checkSubmitEligibility();
     }
   }, [user]);
+
+  const handleDocumentTypeChange = (type: string) => {
+    setDocumentType(type);
+  };
 
   const onSubmit = async (data: VerificationFormValues) => {
     if (externalSubmit) {
@@ -136,7 +142,10 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <DocumentTypeSelect form={form} />
+            <DocumentTypeSelect 
+              form={form} 
+              onTypeChange={handleDocumentTypeChange} 
+            />
 
             <DocumentImageUpload
               form={form}

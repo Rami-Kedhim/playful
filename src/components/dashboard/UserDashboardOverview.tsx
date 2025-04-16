@@ -14,7 +14,7 @@ const UserDashboardOverview = () => {
     messages: 3,
     reviews: 2,
     upcomingAppointments: 1,
-    lucoinBalance: profile?.lucoin_balance || profile?.lucoinsBalance || 0,
+    lucoinBalance: profile?.lucoin_balance || 0,
     memberSince: new Date(profile?.created_at || new Date()).toLocaleDateString(),
   };
   
@@ -163,11 +163,11 @@ const UserDashboardOverview = () => {
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-gradient-to-r from-primary to-accent" 
-                    style={{ width: `${profile?.profile_completeness || profile?.profileCompleteness || 65}%` }}
+                    style={{ width: `${profile?.profile_completeness || 65}%` }}
                   />
                 </div>
                 <div className="flex justify-end mt-1 text-xs text-muted-foreground">
-                  {profile?.profile_completeness || profile?.profileCompleteness || 65}% complete
+                  {profile?.profile_completeness || 65}% complete
                 </div>
               </div>
             </div>

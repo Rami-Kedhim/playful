@@ -2,10 +2,11 @@
 import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { UserRole } from "@/types/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: string[];
+  allowedRoles?: UserRole[];
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
@@ -25,9 +26,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   }
 
   // If allowedRoles is specified, check if user has one of the allowed roles
-  if (allowedRoles && allowedRoles.length > 0) {
-    const userRole = user?.role || 'user';
-    if (!allowedRoles.includes(userRole)) {
+  if (allowedRoles && allowedRoles.length > 0 && user) {
+    const userRoles = user.roles || ['user'];
+    const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+    
+    if (!hasAllowedRole) {
       // User doesn't have required role, redirect to access-denied
       return <Navigate to="/access-denied" replace />;
     }

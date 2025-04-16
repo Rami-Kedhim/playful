@@ -1,70 +1,102 @@
 
-import { VerificationDocument, VerificationRequest, VerificationStatus } from '@/types/verification';
+import { supabase } from '@/integrations/supabase/client';
+import { VerificationStatus, VerificationRequest, VerificationDocument } from '@/types/verification';
 
-export const isPending = (status?: VerificationStatus): boolean => {
-  return status === 'pending' || status === 'in_review';
-};
-
-export const isApproved = (status?: VerificationStatus): boolean => {
-  return status === 'approved';
-};
-
-export const isRejected = (status?: VerificationStatus): boolean => {
-  return status === 'rejected';
-};
-
-export const isExpired = (status?: VerificationStatus): boolean => {
-  return status === 'expired';
-};
-
-// Mock function to create a verification request
-export const createVerificationRequest = async (
-  userId: string,
-  documentUrls: string[]
-): Promise<VerificationRequest | null> => {
+/**
+ * Check the status of a user's verification request
+ * @param userId User ID to check
+ * @returns The verification status or null if no request found
+ */
+export async function checkVerificationStatus(userId: string): Promise<VerificationStatus | null> {
   try {
-    const request: VerificationRequest = {
-      id: `req-${Date.now()}`,
-      profile_id: userId,
-      status: 'pending',
-      requested_level: 'basic',
-      documents: documentUrls.map((url, index) => ({
-        id: `doc-${Date.now()}-${index}`,
-        verification_id: `ver-${Date.now()}`,
-        document_type: index === 0 ? 'id_front' : index === 1 ? 'id_back' : 'selfie',
-        document_url: url,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        // Backward compatibility fields
-        type: index === 0 ? 'id_front' : index === 1 ? 'id_back' : 'selfie',
-        fileUrl: url,
-        uploadedAt: new Date().toISOString()
-      })),
-      created_at: new Date().toISOString(),
-    };
+    // In a real app, we'd check the database for the user's verification status
+    // This is a mock implementation
+    const response = await getMockVerificationRequest(userId);
     
-    // In a real app this would be saved to a database
-    console.log('Created verification request:', request);
+    if (response) {
+      return response.status;
+    }
     
-    return request;
+    return null;
   } catch (error) {
-    console.error('Error creating verification request:', error);
+    console.error('Error checking verification status:', error);
     return null;
   }
-};
+}
 
-// Mock function to update verification status
-export const updateVerificationStatus = async (
-  requestId: string,
-  status: VerificationStatus,
-  notes?: string
-): Promise<boolean> => {
+/**
+ * Get details of a user's verification request
+ * @param userId User ID to check
+ * @returns The verification request object or null if not found
+ */
+export async function getVerificationRequest(userId: string): Promise<VerificationRequest | null> {
   try {
-    // In a real app this would update a database record
-    console.log(`Updated verification ${requestId} to ${status}${notes ? ` with notes: ${notes}` : ''}`);
-    return true;
+    // In a real app, we'd fetch this from Supabase
+    // This is a mock implementation
+    return getMockVerificationRequest(userId);
   } catch (error) {
-    console.error('Error updating verification status:', error);
-    return false;
+    console.error('Error getting verification request:', error);
+    return null;
   }
-};
+}
+
+// Helper function to generate mock verification data
+function getMockVerificationRequest(userId: string): Promise<VerificationRequest | null> {
+  // Simulate an API call delay
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Generate random status based on user ID
+      const lastChar = userId.slice(-1);
+      const numValue = parseInt(lastChar, 16) || 0;
+      
+      let status: VerificationStatus;
+      if (numValue < 5) {
+        status = 'pending';
+      } else if (numValue < 10) {
+        status = 'approved';
+      } else if (numValue < 13) {
+        status = 'rejected';
+      } else {
+        status = 'in_review';
+      }
+      
+      const documents: VerificationDocument[] = [
+        {
+          id: `doc-front-${userId}`,
+          verification_id: `ver-${userId}`,
+          document_type: 'id_card',
+          document_url: 'https://example.com/mock-doc.jpg',
+          status: status,
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          type: 'id_card',
+          fileUrl: 'https://example.com/mock-doc.jpg',
+          uploadedAt: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          id: `doc-selfie-${userId}`,
+          verification_id: `ver-${userId}`,
+          document_type: 'selfie',
+          document_url: 'https://example.com/mock-selfie.jpg',
+          status: status,
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          type: 'selfie',
+          fileUrl: 'https://example.com/mock-selfie.jpg',
+          uploadedAt: new Date(Date.now() - 86400000).toISOString()
+        }
+      ];
+      
+      resolve({
+        id: `ver-${userId}`,
+        profile_id: userId,
+        status: status,
+        requested_level: 'basic',
+        documents: documents,
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        updated_at: new Date().toISOString(),
+        userId: userId,
+        submittedAt: new Date(Date.now() - 86400000).toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }, 500);
+  });
+}

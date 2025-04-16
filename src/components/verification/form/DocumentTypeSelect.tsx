@@ -7,7 +7,7 @@ import { VerificationFormValues, DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS } from '@/
 
 interface DocumentTypeSelectProps {
   form: UseFormReturn<VerificationFormValues>;
-  onTypeChange: (type: string) => void;
+  onTypeChange?: (type: string) => void;
 }
 
 const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeChange }) => {
@@ -17,14 +17,18 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeCha
     { value: DOCUMENT_TYPES.DRIVERS_LICENSE, label: DOCUMENT_TYPE_LABELS[DOCUMENT_TYPES.DRIVERS_LICENSE] }
   ];
 
+  const handleTypeChange = (value: string) => {
+    form.setValue('documentType', value);
+    if (onTypeChange) {
+      onTypeChange(value);
+    }
+  };
+
   return (
     <FormItem>
       <FormLabel>Document Type</FormLabel>
       <Select
-        onValueChange={(value) => {
-          form.setValue('documentType', value);
-          onTypeChange(value);
-        }}
+        onValueChange={handleTypeChange}
         defaultValue={form.getValues('documentType')}
       >
         <FormControl>

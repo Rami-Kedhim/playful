@@ -13,6 +13,7 @@ export interface UberPersona {
   popularity?: number;
   gender?: string;
   age?: number;
+  ethnicity?: string; // Added ethnicity
   roleFlags: {
     isEscort?: boolean;
     isCreator?: boolean;
@@ -28,6 +29,10 @@ export interface UberPersona {
     hasLiveStream?: boolean;
     hasVirtualMeets?: boolean;
     hasRealMeets?: boolean;
+    hasPhotos?: boolean; // Added hasPhotos
+    hasStories?: boolean; // Added hasStories
+    hasChat?: boolean; // Added hasChat
+    hasBooking?: boolean; // Added hasBooking
   };
   monetization?: {
     acceptsLucoin?: boolean;
