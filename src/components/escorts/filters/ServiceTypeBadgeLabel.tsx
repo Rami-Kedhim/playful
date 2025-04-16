@@ -2,9 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Globe, MapPin, Users } from "lucide-react";
-
-// Export the type directly without redeclaring it
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "";
+import { ServiceTypeFilter } from '@/types/auth';
 
 interface ServiceTypeInfo {
   label: string;

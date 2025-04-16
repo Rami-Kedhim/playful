@@ -5,7 +5,7 @@ import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import DocumentViewer from '@/components/documents/DocumentViewer';
-import { VerificationDocument } from '@/types/escort';
+import { VerificationDocument } from '@/types/auth';
 
 interface DocumentPreviewProps {
   document: VerificationDocument;
@@ -16,9 +16,9 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
   const [isViewerOpen, setIsViewerOpen] = React.useState(false);
 
   // Get the appropriate document properties, supporting both naming conventions
-  const documentType = document.type || document.document_type;
-  const documentUrl = document.fileUrl || document.document_url;
-  const uploadDate = document.uploadedAt || document.created_at;
+  const documentType = document.type || document.document_type || '';
+  const documentUrl = document.fileUrl || document.document_url || '';
+  const uploadDate = document.uploadedAt || document.created_at || '';
 
   return (
     <>
@@ -48,7 +48,7 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
             </div>
           </div>
           <div className="mt-2 text-xs text-muted-foreground">
-            Uploaded: {new Date(uploadDate).toLocaleDateString()}
+            Uploaded: {uploadDate ? new Date(uploadDate).toLocaleDateString() : 'Unknown'}
           </div>
         </CardContent>
       </Card>
