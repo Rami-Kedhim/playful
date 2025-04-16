@@ -2,8 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { EnhancedButton } from '@/components/ui/enhanced-button';
+import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent, EnhancedCardFooter } from '@/components/ui/enhanced-card';
 import { User, Wallet, MessageSquare, Bookmark, Search } from 'lucide-react';
 
 const HomePage = () => {
@@ -19,105 +19,78 @@ const HomePage = () => {
         
         {!isAuthenticated && (
           <Link to="/auth">
-            <Button size="lg" className="font-semibold">
+            <EnhancedButton size="lg" className="font-semibold">
               Sign In
-            </Button>
+            </EnhancedButton>
           </Link>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <User className="mr-2 h-5 w-5" />
-              Profile
-            </CardTitle>
-            <CardDescription>Manage your personal profile</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>View and edit your profile information, update your preferences, and manage your account settings.</p>
-          </CardContent>
-          <CardFooter>
-            <Link to="/profile" className="w-full">
-              <Button variant="outline" className="w-full">Go to Profile</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+        <HomeCard 
+          icon={<User className="mr-2 h-5 w-5" />}
+          title="Profile"
+          description="Manage your personal profile"
+          buttonText="Go to Profile"
+          route="/profile"
+        />
 
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Wallet className="mr-2 h-5 w-5" />
-              Wallet
-            </CardTitle>
-            <CardDescription>Manage your credits and transactions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>View your wallet balance, purchase credits, and see your transaction history.</p>
-          </CardContent>
-          <CardFooter>
-            <Link to="/wallet" className="w-full">
-              <Button variant="outline" className="w-full">Go to Wallet</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+        <HomeCard 
+          icon={<Wallet className="mr-2 h-5 w-5" />}
+          title="Wallet"
+          description="Manage your credits and transactions"
+          buttonText="Go to Wallet"
+          route="/wallet"
+        />
 
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <MessageSquare className="mr-2 h-5 w-5" />
-              Messages
-            </CardTitle>
-            <CardDescription>Connect with others</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Check your messages, start new conversations, and stay connected.</p>
-          </CardContent>
-          <CardFooter>
-            <Link to="/messages" className="w-full">
-              <Button variant="outline" className="w-full">Go to Messages</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+        <HomeCard 
+          icon={<MessageSquare className="mr-2 h-5 w-5" />}
+          title="Messages"
+          description="Connect with others"
+          buttonText="Go to Messages"
+          route="/messages"
+        />
 
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bookmark className="mr-2 h-5 w-5" />
-              Favorites
-            </CardTitle>
-            <CardDescription>Your saved profiles</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Access your favorite profiles and content quickly and easily.</p>
-          </CardContent>
-          <CardFooter>
-            <Link to="/favorites" className="w-full">
-              <Button variant="outline" className="w-full">View Favorites</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+        <HomeCard 
+          icon={<Bookmark className="mr-2 h-5 w-5" />}
+          title="Favorites"
+          description="Your saved profiles"
+          buttonText="View Favorites"
+          route="/favorites"
+        />
 
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Search className="mr-2 h-5 w-5" />
-              Explore
-            </CardTitle>
-            <CardDescription>Discover profiles and content</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Search for profiles, browse categories, and discover new content.</p>
-          </CardContent>
-          <CardFooter>
-            <Link to="/search" className="w-full">
-              <Button variant="outline" className="w-full">Start Exploring</Button>
-            </Link>
-          </CardFooter>
-        </Card>
+        <HomeCard 
+          icon={<Search className="mr-2 h-5 w-5" />}
+          title="Explore"
+          description="Discover profiles and content"
+          buttonText="Start Exploring"
+          route="/search"
+        />
       </div>
     </div>
+  );
+};
+
+const HomeCard = ({ icon, title, description, buttonText, route }) => {
+  return (
+    <EnhancedCard variant="hover" className="flex flex-col">
+      <EnhancedCardHeader>
+        <div className="flex items-center">
+          {icon}
+          <h3 className="text-lg font-semibold">{title}</h3>
+        </div>
+      </EnhancedCardHeader>
+      <EnhancedCardContent className="flex-grow">
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </EnhancedCardContent>
+      <EnhancedCardFooter>
+        <Link to={route} className="w-full">
+          <EnhancedButton variant="outline" className="w-full">
+            {buttonText}
+          </EnhancedButton>
+        </Link>
+      </EnhancedCardFooter>
+    </EnhancedCard>
   );
 };
 
