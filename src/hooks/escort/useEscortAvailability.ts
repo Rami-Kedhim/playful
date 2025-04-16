@@ -1,9 +1,9 @@
+import { useState } from 'react';
+import { Escort, Availability } from '@/types/escorts';
+import { toast } from '@/components/ui/use-toast';
 
-import { useState, useCallback } from 'react';
-import { Escort, EscortAvailability } from '@/types/escort';
-
-export const useEscortAvailability = (initialAvailability?: EscortAvailability) => {
-  const [availability, setAvailability] = useState<EscortAvailability>(
+export const useEscortAvailability = (initialAvailability?: Availability) => {
+  const [availability, setAvailability] = useState<Availability>(
     initialAvailability || {
       days: [],
       hours: [],

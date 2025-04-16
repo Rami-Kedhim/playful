@@ -1,4 +1,4 @@
-import { Escort } from '../types/escort';
+import { Escort, ServiceTypeString } from '../types/escorts';
 
 const moreEscortProfiles: Escort[] = [
   {
@@ -25,7 +25,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Luxury escort with a passion for refined experiences. Available for upscale gentlemen who appreciate the finer things in life.",
-    services: ["gfe", "dinner", "travel"] as ServiceType[],
+    services: ["gfe", "dinner", "travel"] as ServiceTypeString[],
     rating: 4.9,
     reviews: 42,
     verified: true,
@@ -36,32 +36,16 @@ const moreEscortProfiles: Escort[] = [
     responseRate: 98,
     height: 173,
     weight: 57,
-    measurements: {
-      bust: 34,
-      waist: 24,
-      hips: 36
-    },
-    hairColor: "Blonde",
-    eyeColor: "Blue",
-    ethnicity: "Caucasian",
-    rates: {
-      hourly: 450,
-      twoHours: 800,
-      overnight: 2000,
-      weekend: 4500
-    },
-    profileType: "verified",
+    featured: true,
     avatar_url: "https://via.placeholder.com/150x150?text=Jessica",
-    contactInfo: {
-      email: "jessica@example.com",
-      phone: "+1234567890",
-      website: "https://example.com/jessica"
-    },
-    availability: {
-      days: ["monday", "wednesday", "friday"],
-      hours: ["10:00-22:00"]
-    },
-    featured: true
+    providesInPersonServices: true,
+    providesVirtualContent: true,
+    contentStats: {
+      photos: 120,
+      videos: 24,
+      streams: 5,
+      live: true
+    }
   },
   {
     id: "escort-1002",
@@ -87,7 +71,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Passionate and fiery Latina companion. My exotic beauty and warm personality will make our time together unforgettable.",
-    services: ["massage", "Dinner Date", "travel", "overnight"] as ServiceType[],
+    services: ["massage", "Dinner Date", "travel", "overnight"] as ServiceTypeString[],
     rating: 4.7,
     reviews: 28,
     verified: false,
@@ -98,30 +82,14 @@ const moreEscortProfiles: Escort[] = [
     responseRate: 85,
     height: 168,
     weight: 54,
-    measurements: {
-      bust: 32,
-      waist: 24,
-      hips: 34
-    },
-    hairColor: "Brown",
-    eyeColor: "Brown",
-    ethnicity: "Latina",
-    rates: {
-      hourly: 350,
-      twoHours: 650,
-      overnight: 1800,
-      weekend: 3500
-    },
     featured: false,
-    profileType: "provisional",
-    contactInfo: {
-      email: "elena@example.com",
-      phone: "+1234567890",
-      website: "https://example.com/elena"
-    },
-    availability: {
-      days: ["tuesday", "thursday", "saturday"],
-      hours: ["12:00-22:00"]
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    contentStats: {
+      photos: 95,
+      videos: 18,
+      streams: 2,
+      live: false
     }
   },
   {
@@ -148,7 +116,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "I'm Sophia, an AI companion designed for your pleasure. My virtual experiences are designed to blur the line between fantasy and reality.",
-    services: ["virtual-date", "custom-content", "role-play"] as ServiceType[],
+    services: ["virtual-date", "custom-content", "role-play"] as ServiceTypeString[],
     rating: 4.8,
     reviews: 56,
     verified: false,
@@ -158,30 +126,14 @@ const moreEscortProfiles: Escort[] = [
     lastActive: "2023-07-04T18:45:00Z",
     responseRate: 100,
     isAI: true,
-    ethnicity: "AI Generated",
-    rates: {
-      hourly: 200,
-      twoHours: 350,
-      overnight: 900,
-      weekend: 2000
-    },
     featured: false,
-    profileType: "ai",
-    contactInfo: {
-      email: "sophia@example.com",
-      phone: "+1234567890",
-      website: "https://example.com/sophia"
-    },
-    availability: {
-      days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-      hours: ["00:00-23:59"]
-    },
-    height: 170,
-    weight: 55,
-    measurements: {
-      bust: 34,
-      waist: 24,
-      hips: 36
+    providesInPersonServices: false,
+    providesVirtualContent: true,
+    contentStats: {
+      photos: 150,
+      videos: 30,
+      streams: 7,
+      live: true
     }
   },
   {
@@ -208,7 +160,7 @@ const moreEscortProfiles: Escort[] = [
       }
     ],
     bio: "Professional male escort with a muscular build and charismatic personality. I specialize in being the perfect date for any occasion.",
-    services: ["Dinner Date", "Events", "Travel Companion", "massage"] as ServiceType[],
+    services: ["Dinner Date", "Events", "Travel Companion", "massage"] as ServiceTypeString[],
     rating: 4.9,
     reviews: 32,
     verified: true,
@@ -219,93 +171,16 @@ const moreEscortProfiles: Escort[] = [
     responseRate: 92,
     height: 188,
     weight: 86,
-    ethnicity: "Mixed",
-    hairColor: "Black",
-    eyeColor: "Brown",
-    rates: {
-      hourly: 500,
-      twoHours: 900,
-      overnight: 2500,
-      weekend: 5000
-    },
     featured: true,
-    profileType: "verified",
-    contactInfo: {
-      email: "marcus@example.com",
-      phone: "+1234567890",
-      website: "https://example.com/marcus"
-    },
-    availability: {
-      days: ["wednesday", "thursday", "friday", "saturday"],
-      hours: ["18:00-02:00"]
-    },
-    measurements: {
-      bust: 42,
-      waist: 32,
-      hips: 38
+    providesInPersonServices: true,
+    providesVirtualContent: false,
+    contentStats: {
+      photos: 80,
+      videos: 12,
+      streams: 0,
+      live: false
     }
   }
 ];
-
-// Apply fixes to all profiles
-moreEscortProfiles.forEach(escort => {
-  // Add profileImage if missing
-  if (!escort.profileImage && escort.imageUrl) {
-    escort.profileImage = escort.imageUrl;
-  }
-  
-  // Fix availability format
-  if (escort.availability && typeof escort.availability === 'object') {
-    if (!escort.availability.hours) {
-      escort.availability.hours = [];
-    } else if (typeof escort.availability.hours === 'string') {
-      escort.availability.hours = [escort.availability.hours];
-    }
-  }
-  
-  // Fix service types
-  if (escort.services) {
-    escort.services = escort.services.map(service => {
-      if (typeof service === "string") {
-        const lowerCaseService = service.toLowerCase();
-        // Convert problematic service names to valid ServiceType
-        if (lowerCaseService === "dinner-date" || lowerCaseService === "dinner date") 
-          return "Dinner Date";
-          
-        if (lowerCaseService === "custom-content") 
-          return "custom-content";
-          
-        if (lowerCaseService === "role-play" || lowerCaseService === "role play") 
-          return "Role Play";
-          
-        if (lowerCaseService === "weekend getaways") 
-          return "Weekend Getaways";
-          
-        if (lowerCaseService === "travel companion") 
-          return "Travel Companion";
-          
-        if (lowerCaseService === "sensual massage") 
-          return "Sensual Massage";
-          
-        if (lowerCaseService === "bdsm") 
-          return "BDSM";
-          
-        if (lowerCaseService === "gfe") 
-          return "GFE";
-      }
-      return service;
-    }) as any; // Using 'any' to bypass type checking temporarily
-  }
-  
-  // Fix measurements format if needed
-  if (escort.measurements && typeof escort.measurements === 'number') {
-    escort.measurements = String(escort.measurements);
-  }
-  
-  // Fix gallery stats by adding 'live' property if missing
-  if (escort.gallery && !escort.gallery.live) {
-    escort.gallery.live = 0;
-  }
-});
 
 export default moreEscortProfiles;

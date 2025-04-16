@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
-import { VerificationRequest, VerificationStatus } from '@/types/verification';
+import { VerificationRequest, VerificationStatus } from '@/types/auth';
 import { toast } from '@/components/ui/use-toast';
 import VerificationStatusIndicator from './status/VerificationStatusIndicator';
 import VerificationTimeline from './status/VerificationTimeline';
@@ -165,7 +165,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
           </div>
         </div>
 
-        <VerificationTimeline status={status} />
+        <VerificationTimeline verificationRequest={verificationRequest} />
 
         {status === 'rejected' && (
           <Button className="w-full" onClick={() => toast({ title: "New request initiated", description: "Redirecting to verification form..." })}>

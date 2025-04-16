@@ -1,95 +1,120 @@
 
-import { Escort, Video } from '@/types/escort';
-import { useState, useCallback } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { useState } from 'react';
+import { Escort, Video } from '@/types/escorts';
+import { toast } from '@/components/ui/use-toast';
 
-export const useVideoManagement = (updateProfile: (id: string, data: Partial<Escort>) => Promise<Escort | null>) => {
-  const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
+export const useVideoManagement = (profile: Escort | null) => {
+  const [videos, setVideos] = useState<Video[]>(profile?.videos || []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const addVideo = useCallback(async (
-    escortId: string,
-    videoData: string | Video,
-    escortProfile?: Escort
-  ) => {
-    if (!escortProfile) return null;
-
-    setIsUploading(true);
-    try {
-      let updatedVideos: (string | Video)[] = [];
-      
-      // Add the new video to existing videos or create a new array
-      if (escortProfile.videos && Array.isArray(escortProfile.videos)) {
-        updatedVideos = [...escortProfile.videos, videoData];
-      } else {
-        updatedVideos = [videoData];
-      }
-
-      // Update the escort profile with the new videos array
-      const updatedProfile = await updateProfile(escortId, { videos: updatedVideos });
-      
+  const addVideo = async (videoData: Partial<Video>) => {
+    if (!videoData.url) {
       toast({
-        title: 'Video added successfully',
-        description: 'Your video has been added to your gallery',
+        title: "Error",
+        description: "Video URL is required",
+        variant: "destructive"
       });
-      
-      return updatedProfile;
+      return;
+    }
+
+    const newVideo: Video = {
+      id: `video-${Date.now()}`,
+      url: videoData.url,
+      thumbnail: videoData.thumbnail || "",
+      title: videoData.title || "Untitled Video",
+      duration: videoData.duration,
+      isPublic: videoData.isPublic
+    };
+
+    try {
+      setIsSubmitting(true);
+      // In a real app, we would save to the backend here
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+
+      const updatedVideos = [...videos, newVideo];
+      setVideos(updatedVideos);
+
+      toast({
+        title: "Video added",
+        description: "Your video has been added successfully"
+      });
+
+      return updatedVideos;
     } catch (error) {
       toast({
-        title: 'Error adding video',
-        description: error instanceof Error ? error.message : 'An unknown error occurred',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to add video",
+        variant: "destructive"
       });
       return null;
     } finally {
-      setIsUploading(false);
+      setIsSubmitting(false);
     }
-  }, [updateProfile, toast]);
+  };
 
-  const removeVideo = useCallback(async (
-    escortId: string,
-    videoToRemove: string | Video,
-    escortProfile?: Escort
-  ) => {
-    if (!escortProfile) return null;
-    
+  const removeVideo = async (videoId: string) => {
     try {
-      // Filter out the video to remove
-      const updatedVideos = escortProfile.videos ? 
-        escortProfile.videos.filter(video => {
-          if (typeof video === 'string' && typeof videoToRemove === 'string') {
-            return video !== videoToRemove;
-          }
-          
-          if (typeof video !== 'string' && typeof videoToRemove !== 'string') {
-            return video.id !== videoToRemove.id;
-          }
-          
-          return true;
-        }) : [];
-      
-      // Update the escort profile with the filtered videos array
-      const updatedProfile = await updateProfile(escortId, { videos: updatedVideos });
-      
+      setIsSubmitting(true);
+      // In a real app, we would delete from the backend here
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+
+      const updatedVideos = videos.filter(video => video.id !== videoId);
+      setVideos(updatedVideos);
+
       toast({
-        title: 'Video removed successfully',
-        description: 'The video has been removed from your gallery',
+        title: "Video removed",
+        description: "The video has been removed successfully"
       });
-      
-      return updatedProfile;
+
+      return updatedVideos;
     } catch (error) {
       toast({
-        title: 'Error removing video',
-        description: error instanceof Error ? error.message : 'An unknown error occurred',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to remove video",
+        variant: "destructive"
       });
       return null;
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [updateProfile, toast]);
-  
+  };
+
+  const updateVideoDetails = async (videoId: string, details: Partial<Video>) => {
+    try {
+      setIsSubmitting(true);
+      // In a real app, we would update the backend here
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+
+      const updatedVideos = videos.map(video => 
+        video.id === videoId ? { ...video, ...details } : video
+      );
+      
+      setVideos(updatedVideos);
+
+      toast({
+        title: "Video updated",
+        description: "Video details have been updated successfully"
+      });
+
+      return updatedVideos;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update video details",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
-    isUploading,
+    videos,
+    setVideos,
     addVideo,
-    removeVideo
+    removeVideo,
+    updateVideoDetails,
+    isSubmitting
   };
 };

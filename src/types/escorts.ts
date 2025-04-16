@@ -51,6 +51,22 @@ export interface Escort {
   verificationLevel?: string;
   orientation?: string;
   avatar_url?: string;
+  // Fields for service type compatibility
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  // Fields for profiles
+  tags?: string[];
+  price?: number;
+  featured?: boolean;
+  serviceTypes?: string[];
+  profileType?: string;
+  profileImage?: string;
+  imageUrl?: string;
+  availableNow?: boolean;
+  lastActive?: string | Date;
+  responseRate?: number;
+  reviews?: number;
+  sexualOrientation?: string;
 }
 
 export interface Availability {
@@ -107,3 +123,44 @@ export interface Booking {
 }
 
 export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
+
+// Add verification types for compatibility
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+export interface VerificationDocument {
+  id: string;
+  verification_id: string;
+  document_type: string;
+  document_url: string;
+  status: VerificationStatus;
+  notes?: string;
+  created_at: string;
+  updated_at?: string;
+  
+  // Adding these for backwards compatibility
+  type?: string;
+  fileUrl?: string;
+  uploadedAt?: string;
+}
+
+export interface VerificationRequest {
+  id: string;
+  profile_id: string;
+  status: VerificationStatus;
+  requested_level: VerificationLevel;
+  documents: VerificationDocument[];
+  created_at: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+  
+  // Adding these for backwards compatibility
+  submittedAt?: string;
+  updatedAt?: string;
+  verificationLevel?: VerificationLevel;
+  rejectionReason?: string;
+  userId?: string;
+}

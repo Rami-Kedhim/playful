@@ -115,4 +115,3 @@ export interface EscortContent {
   description?: string;
   verificationLevel?: VerificationLevel;
 }
-
