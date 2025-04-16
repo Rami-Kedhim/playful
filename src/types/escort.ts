@@ -69,6 +69,14 @@ export interface Escort {
   metaverse_enabled?: boolean;
   boostLevel?: number;
   verificationLevel?: string; // Added for compatibility
+  orientation?: string; // Added for compatibility
+  contentStats?: { // Added for compatibility
+    photos?: number;
+    videos?: number;
+    streams?: string | number;
+  };
+  subscriptionPrice?: number; // Added for compatibility
+  avatar_url?: string; // Added for compatibility
 }
 
 export interface Video {
@@ -99,7 +107,7 @@ export interface ContactInfo {
 
 export interface Availability {
   days: string[];
-  hours: string[];
+  hours: string[] | string;
 }
 
 export interface EscortFilterOptions {
@@ -234,22 +242,63 @@ export interface VerificationDocument {
   notes?: string;
   created_at: string;
   updated_at?: string;
+  
+  // Adding these for backwards compatibility
+  type?: string;
+  fileUrl?: string;
+  uploadedAt?: string;
 }
 
 export interface VerificationRequest {
   id: string;
   profile_id: string;
   status: VerificationStatus;
-  requested_level: string;
-  documents?: VerificationDocument[];
+  requested_level: VerificationLevel;
+  documents: VerificationDocument[];
   created_at: string;
   updated_at?: string;
   reviewed_at?: string;
   reviewed_by?: string;
   reviewer_notes?: string;
   expires_at?: string;
+  
+  // Adding these for backwards compatibility
   submittedAt?: string;
-  updatedAt?: string; // Added for compatibility
-  verificationLevel?: string; // Added for compatibility
-  rejectionReason?: string; // Added for compatibility
+  updatedAt?: string;
+  verificationLevel?: VerificationLevel;
+  rejectionReason?: string;
+  userId?: string;
+}
+
+// Extend auth types in the same file
+export interface UserProfile {
+  id: string;
+  email: string;
+  username?: string;
+  name?: string;
+  full_name?: string;
+  avatar_url?: string;
+  bio?: string;
+  location?: string;
+  phone_number?: string;
+  is_escort?: boolean;
+  created_at: string;
+  updated_at: string;
+  gender?: string;
+  sexual_orientation?: string;
+  role?: string;
+  isVerified?: boolean;
+  is_verified?: boolean;
+  isCreator?: boolean;
+  is_creator?: boolean;
+  is_boosted?: boolean;
+  isBoosted?: boolean;
+}
+
+export enum DatabaseGender {
+  MALE = 'male',
+  FEMALE = 'female',
+  NON_BINARY = 'non_binary',
+  OTHER = 'other',
+  PREFER_NOT_TO_SAY = 'prefer_not_to_say'
 }

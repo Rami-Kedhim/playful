@@ -1,66 +1,65 @@
 
-export type UserRole = 'admin' | 'escort' | 'client' | 'moderator' | 'creator' | 'user';
+export enum DatabaseGender {
+  MALE = 'male',
+  FEMALE = 'female',
+  NON_BINARY = 'non_binary',
+  OTHER = 'other',
+  PREFER_NOT_TO_SAY = 'prefer_not_to_say'
+}
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  username?: string;
+  name?: string;
+  full_name?: string;
+  avatar_url?: string;
+  avatarUrl?: string; // Alias for compatibility
+  bio?: string;
+  location?: string;
+  phone_number?: string;
+  is_escort?: boolean;
+  created_at: string;
+  updated_at: string;
+  gender?: DatabaseGender | string;
+  sexual_orientation?: string;
+  role?: string;
+  isVerified?: boolean;
+  is_verified?: boolean;
+  isCreator?: boolean;
+  is_creator?: boolean;
+  is_boosted?: boolean;
+  isBoosted?: boolean;
+}
+
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  fileUrl: string;
+  uploadedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  status: VerificationStatus;
+  verificationLevel: VerificationLevel;
+  documents: VerificationDocument[];
+  submittedAt: string;
+  updatedAt?: string;
+  rejectionReason?: string;
+}
 
 export interface AuthUser {
   id: string;
   email?: string;
   username?: string;
-  profileImageUrl?: string;
-  lucoinsBalance?: number;
-  role?: string;
-  avatarUrl?: string;
-  app_metadata?: any;
-  user_metadata?: any;
-  aud?: string;
-  created_at?: string;
-}
-
-export interface UserProfile {
-  id: string;
-  username?: string;
-  full_name?: string;
+  name?: string;
   avatar_url?: string;
-  avatarUrl?: string; // Added alias for compatibility
-  bio?: string;
-  location?: string;
-  website?: string;
-  is_verified?: boolean;
-  isVerified?: boolean; // Added alias for compatibility
-  services?: string[];
-  languages?: string[];
-  availability?: any;
-  rates?: any;
-  created_at?: string;
-  updated_at?: string;
-  verification_level?: string;
-  // Add missing properties
-  lucoin_balance?: number;
-  lucoinsBalance?: number;
-  profile_completeness?: number;
-  profileCompleteness?: number;
-  ubx_balance?: number;
+  isVerified?: boolean;
+  isCreator?: boolean;  
 }
-
-export interface AuthResult {
-  success: boolean;
-  error?: string;
-}
-
-// Add interface for verification request
-export interface VerificationRequest {
-  id: string;
-  profile_id: string;
-  status: string;
-  requested_level: string;
-  documents?: any[];
-  created_at: string;
-  updated_at?: string;
-  reviewed_at?: string;
-  reviewed_by?: string;
-  reviewer_notes?: string;
-  expires_at?: string;
-  submittedAt?: string; // Add this for compatibility with existing code
-}
-
-// Define ServiceTypeFilter type as a string literal union
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | "";

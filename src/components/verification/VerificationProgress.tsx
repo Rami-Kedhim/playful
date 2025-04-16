@@ -1,16 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
-import { VerificationRequest } from '@/types/auth';
-import { 
-  calculateVerificationProgress, 
-  getVerificationStatusMessage, 
-  getVerificationStatusTitle,
-  getEstimatedCompletionTime,
-  isVerificationInProgress
-} from '@/utils/verification/assessmentProgress';
+import { VerificationRequest, VerificationStatus } from '@/types/escort';
 import { toast } from '@/components/ui/use-toast';
 import VerificationStatusIndicator from './status/VerificationStatusIndicator';
 import VerificationTimeline from './status/VerificationTimeline';
@@ -27,7 +21,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   useEffect(() => {
     if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'in_review') {
       const updateRemainingTime = () => {
-        const estimatedCompletionMs = new Date(verificationRequest.submittedAt).getTime() + 48 * 60 * 60 * 1000;
+        const estimatedCompletionMs = new Date(verificationRequest.submittedAt || verificationRequest.created_at).getTime() + 48 * 60 * 60 * 1000;
         const now = Date.now();
         const diffMs = estimatedCompletionMs - now;
 
@@ -76,12 +70,54 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     return null;
   }
 
+  const calculateVerificationProgress = (status: VerificationStatus): number => {
+    switch (status) {
+      case 'pending': return 25;
+      case 'in_review': return 50;
+      case 'approved': return 100;
+      case 'rejected': return 100;
+      default: return 0;
+    }
+  };
+
+  const getVerificationStatusMessage = (status: VerificationStatus): string => {
+    switch (status) {
+      case 'pending': return 'Your verification request has been received and is waiting to be reviewed by our team.';
+      case 'in_review': return 'Our team is currently reviewing your verification documents.';
+      case 'approved': return 'Congratulations! Your verification has been approved.';
+      case 'rejected': return 'Unfortunately, your verification request was rejected. Please check the reason below.';
+      default: return 'Unknown status';
+    }
+  };
+
+  const getVerificationStatusTitle = (status: VerificationStatus): string => {
+    switch (status) {
+      case 'pending': return 'Verification Pending';
+      case 'in_review': return 'Verification In Review';
+      case 'approved': return 'Verification Approved';
+      case 'rejected': return 'Verification Rejected';
+      default: return 'Verification Status';
+    }
+  };
+
+  const getEstimatedCompletionTime = (status: VerificationStatus): string => {
+    switch (status) {
+      case 'pending': return '24-48 hours';
+      case 'in_review': return '24 hours';
+      default: return 'N/A';
+    }
+  };
+
+  const isVerificationInProgress = (status: VerificationStatus): boolean => {
+    return status === 'pending' || status === 'in_review';
+  };
+
   const progressValue = calculateVerificationProgress(verificationRequest.status);
   const statusMessage = getVerificationStatusMessage(verificationRequest.status);
   const statusTitle = getVerificationStatusTitle(verificationRequest.status);
   const estimatedTime = getEstimatedCompletionTime(verificationRequest.status);
   
-  const submittedDate = new Date(verificationRequest.submittedAt).toLocaleDateString();
+  const submittedDate = new Date(verificationRequest.submittedAt || verificationRequest.created_at).toLocaleDateString();
   const updatedDate = verificationRequest.updated_at 
     ? new Date(verificationRequest.updated_at).toLocaleDateString() 
     : '—';

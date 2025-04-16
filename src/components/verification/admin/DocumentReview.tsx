@@ -15,13 +15,18 @@ interface DocumentReviewProps {
 const DocumentReview = ({ document }: DocumentReviewProps) => {
   const [isViewerOpen, setIsViewerOpen] = React.useState(false);
 
+  // Get the appropriate document properties, supporting both naming conventions
+  const documentType = document.type || document.document_type;
+  const documentUrl = document.fileUrl || document.document_url;
+  const uploadDate = document.uploadedAt || document.created_at;
+  
   return (
     <>
       <Card>
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
             <CardTitle className="text-base">
-              {document.type}
+              {documentType}
             </CardTitle>
             <Badge variant={document.status === 'pending' ? 'outline' : document.status === 'approved' ? 'success' : 'destructive'}>
               {document.status}
@@ -31,8 +36,8 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
         <CardContent>
           <div className="aspect-[3/2] relative rounded-md overflow-hidden bg-muted">
             <img 
-              src={document.fileUrl} 
-              alt={document.type}
+              src={documentUrl} 
+              alt={documentType}
               className="object-cover absolute inset-0 w-full h-full"
             />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
@@ -48,7 +53,7 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
             </div>
           </div>
           <div className="mt-2 text-xs text-muted-foreground">
-            Uploaded: {new Date(document.uploadedAt).toLocaleDateString()}
+            Uploaded: {new Date(uploadDate).toLocaleDateString()}
           </div>
         </CardContent>
       </Card>
@@ -56,8 +61,8 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
       <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
         <DialogContent className="max-w-4xl h-[80vh]">
           <DocumentViewer 
-            url={document.fileUrl}
-            type={document.fileUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image'}
+            url={documentUrl}
+            type={documentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image'}
           />
         </DialogContent>
       </Dialog>
