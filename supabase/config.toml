@@ -4,26 +4,42 @@ project_id = "haffqtqpbnaviefewfmn"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage", "graphql_public"]
+schemas = ["public", "storage"]
 
 [db]
 port = 54322
 
-[studio]
-port = 54323
-
-[inbucket]
-port = 54324
-
-[auth]
-enabled = true
-port = 54325
-
 [realtime]
 enabled = true
 
-[storage]
+[studio]
 enabled = true
+port = 54323
 
-[edge_functions]
-[edge_functions.process-verification]
+# Enable realtime functionality for our key tables
+[[realtime.tables]]
+name = "bookings"
+schema = "public"
+
+[[realtime.tables]]
+name = "verification_requests"
+schema = "public"
+
+[[realtime.tables]]
+name = "notifications"
+schema = "public"
+
+[[realtime.tables]]
+name = "content_purchases"
+schema = "public"
+
+[[realtime.tables]]
+name = "messages"
+schema = "public"
+
+[[realtime.tables]]
+name = "content_monetization"
+schema = "public"
+
+[functions.process-content-purchase]
+verify_jwt = true
