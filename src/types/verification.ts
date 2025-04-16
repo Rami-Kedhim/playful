@@ -1,39 +1,32 @@
 
-import { z } from "zod";
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 
-export const DOCUMENT_TYPES = {
-  ID_CARD: 'id_card',
-  PASSPORT: 'passport',
-  DRIVERS_LICENSE: 'drivers_license'
-};
+export interface VerificationRequest {
+  id: string;
+  profile_id: string;
+  status: VerificationStatus;
+  requested_level: VerificationLevel;
+  documents?: any[];
+  created_at: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+}
 
-export const DOCUMENT_TYPE_LABELS = {
-  'id_card': 'ID Card',
-  'passport': 'Passport',
-  'drivers_license': 'Driver\'s License'
-};
-
-export const DOCUMENT_TYPE_REQUIREMENTS = {
-  'id_card': 'Ensure front and back are clearly visible with text legible.',
-  'passport': 'Ensure all the details in the passport are clearly visible.',
-  'drivers_license': 'Ensure front and back are clearly visible with photo and details legible.'
-};
-
-export const verificationFormSchema = z.object({
-  documentType: z.string(),
-  documentFrontImage: z.object({
-    file: z.instanceof(File).optional()
-  }).optional().refine((data) => data && data.file, {
-    message: "Front image is required"
-  }),
-  documentBackImage: z.object({
-    file: z.instanceof(File).optional()
-  }).optional(),
-  selfieImage: z.object({
-    file: z.instanceof(File).optional()
-  }).optional().refine((data) => data && data.file, {
-    message: "Selfie image is required"
-  })
-});
-
-export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
+export interface VerificationFormValues {
+  documentType: string;
+  documentFrontImage: {
+    file?: File;
+    preview: string;
+  };
+  documentBackImage?: {
+    file?: File;
+    preview: string;
+  };
+  selfieImage: {
+    file?: File;
+    preview: string;
+  };
+}

@@ -10,20 +10,32 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  useNotifications, 
-  Notification as NotificationType 
+  useNotifications
 } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
 
+// Define the Notification type since it's not exported from useNotifications
+interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  created_at: string;
+  action_url?: string;
+  action_text?: string;
+}
+
 const NotificationItem = ({ 
   notification, 
   onRead, 
   onDelete 
 }: { 
-  notification: NotificationType, 
+  notification: Notification, 
   onRead: () => void,
   onDelete: () => void 
 }) => {
@@ -102,7 +114,7 @@ export const NotificationsPanel = () => {
   const { 
     notifications, 
     unreadCount, 
-    loading, 
+    isLoading, // Changed from loading to isLoading to match the hook
     markAsRead, 
     markAllAsRead,
     deleteNotification
@@ -153,7 +165,7 @@ export const NotificationsPanel = () => {
         <Separator />
         
         <ScrollArea className="h-[400px] p-1">
-          {loading ? (
+          {isLoading ? ( // Changed from loading to isLoading
             <div className="flex justify-center items-center p-8">
               <span className="text-sm text-muted-foreground">Loading...</span>
             </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -11,6 +10,7 @@ import BookingDialog from './BookingDialog';
 import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BookingFlowProps {
   escort: Escort;
