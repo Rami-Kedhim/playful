@@ -1,192 +1,219 @@
 
 import React, { useState } from 'react';
-import { Bell, Check, Trash2, X } from 'lucide-react';
-import { 
-  Popover, 
-  PopoverContent, 
-  PopoverTrigger 
-} from '@/components/ui/popover';
+import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  useNotifications
-} from '@/hooks/useNotifications';
-import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuth';
-
-// Define the Notification type since it's not exported from useNotifications
-interface Notification {
-  id: string;
-  user_id: string;
-  title: string;
-  message: string;
-  type: string;
-  read: boolean;
-  created_at: string;
-  action_url?: string;
-  action_text?: string;
-}
-
-const NotificationItem = ({ 
-  notification, 
-  onRead, 
-  onDelete 
-}: { 
-  notification: Notification, 
-  onRead: () => void,
-  onDelete: () => void 
-}) => {
-  const timeAgo = (date: string) => {
-    const now = new Date();
-    const past = new Date(date);
-    const seconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-    
-    if (seconds < 60) return 'just now';
-    
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
-    
-    return past.toLocaleDateString();
-  };
-  
-  return (
-    <div className={cn(
-      "flex flex-col gap-1 p-3 hover:bg-accent/50 rounded-md transition-colors",
-      !notification.read && "bg-accent/30"
-    )}>
-      <div className="flex justify-between items-start">
-        <h4 className="font-medium text-sm">{notification.title}</h4>
-        <div className="flex gap-1">
-          {!notification.read && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-5 w-5 text-muted-foreground hover:text-foreground"
-              onClick={onRead}
-            >
-              <Check className="h-3 w-3" />
-              <span className="sr-only">Mark as read</span>
-            </Button>
-          )}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-5 w-5 text-muted-foreground hover:text-destructive"
-            onClick={onDelete}
-          >
-            <Trash2 className="h-3 w-3" />
-            <span className="sr-only">Delete</span>
-          </Button>
-        </div>
-      </div>
-      <p className="text-xs text-muted-foreground">{notification.message}</p>
-      <div className="flex justify-between items-center mt-1">
-        <span className="text-xs text-muted-foreground">{timeAgo(notification.created_at)}</span>
-        
-        {notification.action_url && (
-          <Button 
-            variant="link" 
-            className="text-xs p-0 h-auto" 
-            asChild
-          >
-            <Link to={notification.action_url}>
-              {notification.action_text || 'View'}
-            </Link>
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-};
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export const NotificationsPanel = () => {
-  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
   const { 
     notifications, 
     unreadCount, 
-    isLoading, // Changed from loading to isLoading to match the hook
+    isLoading, 
     markAsRead, 
     markAllAsRead,
-    deleteNotification
+    deleteNotification,
+    refreshNotifications
   } = useNotifications();
-  
-  if (!isAuthenticated) return null;
-  
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead();
+      toast({
+        title: "Success",
+        description: "All notifications marked as read",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to mark notifications as read",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReadNotification = async (id: string) => {
+    try {
+      await markAsRead(id);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to mark notification as read",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteNotification = async (id: string) => {
+    try {
+      await deleteNotification(id);
+      toast({
+        title: "Success",
+        description: "Notification deleted",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete notification",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const renderNotificationItem = (notification: any) => {
+    const isUnread = !notification.read;
+    
+    return (
+      <div 
+        key={notification.id}
+        className={`p-4 border-b last:border-0 ${isUnread ? 'bg-muted/30' : ''}`}
+        onClick={() => isUnread && handleReadNotification(notification.id)}
+      >
+        <div className="flex justify-between items-start mb-1">
+          <h4 className="font-medium text-sm">{notification.title}</h4>
+          {isUnread && (
+            <Badge variant="outline" className="bg-blue-500 text-white text-[10px] py-0 px-1.5">
+              NEW
+            </Badge>
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground mb-2">
+          {notification.message}
+        </p>
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-muted-foreground">
+            {new Date(notification.created_at).toLocaleString()}
+          </span>
+          <div className="flex gap-2">
+            {notification.action_url && (
+              <Button 
+                variant="link" 
+                size="sm" 
+                className="h-auto p-0 text-xs"
+                asChild
+              >
+                <a href={notification.action_url}>
+                  {notification.action_text || 'View'}
+                </a>
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto p-0 text-xs text-muted-foreground hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteNotification(notification.id);
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 
-              className="absolute -top-1 -right-1 px-1 min-w-[1.2rem] h-5"
-              variant="destructive"
+              className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 bg-red-500 text-white"
             >
-              {unreadCount > 99 ? '99+' : unreadCount}
+              {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between p-3">
-          <h3 className="font-medium">Notifications</h3>
-          <div className="flex gap-1">
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle className="flex justify-between items-center">
+            Notifications
             {unreadCount > 0 && (
               <Button 
                 variant="ghost" 
-                size="sm" 
-                className="text-xs h-8"
-                onClick={markAllAsRead}
+                size="sm"
+                onClick={handleMarkAllAsRead}
               >
                 Mark all as read
               </Button>
             )}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8"
-              onClick={() => setOpen(false)}
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
-          </div>
+          </SheetTitle>
+        </SheetHeader>
+        <div className="mt-4">
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="unread">
+                Unread {unreadCount > 0 && `(${unreadCount})`}
+              </TabsTrigger>
+              <TabsTrigger value="important">Important</TabsTrigger>
+            </TabsList>
+            <TabsContent value="all" className="mt-2">
+              <ScrollArea className="h-[calc(100vh-160px)]">
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-40">
+                    <p className="text-sm text-muted-foreground">Loading notifications...</p>
+                  </div>
+                ) : notifications.length > 0 ? (
+                  notifications.map(renderNotificationItem)
+                ) : (
+                  <div className="flex justify-center items-center h-40">
+                    <p className="text-sm text-muted-foreground">No notifications</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="unread" className="mt-2">
+              <ScrollArea className="h-[calc(100vh-160px)]">
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-40">
+                    <p className="text-sm text-muted-foreground">Loading notifications...</p>
+                  </div>
+                ) : notifications.filter(n => !n.read).length > 0 ? (
+                  notifications.filter(n => !n.read).map(renderNotificationItem)
+                ) : (
+                  <div className="flex justify-center items-center h-40">
+                    <p className="text-sm text-muted-foreground">No unread notifications</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="important" className="mt-2">
+              <ScrollArea className="h-[calc(100vh-160px)]">
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-40">
+                    <p className="text-sm text-muted-foreground">Loading notifications...</p>
+                  </div>
+                ) : notifications.filter(n => n.priority === 'high').length > 0 ? (
+                  notifications.filter(n => n.priority === 'high').map(renderNotificationItem)
+                ) : (
+                  <div className="flex justify-center items-center h-40">
+                    <p className="text-sm text-muted-foreground">No important notifications</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
         </div>
-        <Separator />
-        
-        <ScrollArea className="h-[400px] p-1">
-          {isLoading ? ( // Changed from loading to isLoading
-            <div className="flex justify-center items-center p-8">
-              <span className="text-sm text-muted-foreground">Loading...</span>
-            </div>
-          ) : notifications.length > 0 ? (
-            <div className="flex flex-col gap-1">
-              {notifications.map(notification => (
-                <NotificationItem 
-                  key={notification.id}
-                  notification={notification}
-                  onRead={() => markAsRead(notification.id)}
-                  onDelete={() => deleteNotification(notification.id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex justify-center items-center p-8">
-              <span className="text-sm text-muted-foreground">No notifications</span>
-            </div>
-          )}
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+      </SheetContent>
+    </Sheet>
   );
 };
+
+export default NotificationsPanel;

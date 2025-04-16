@@ -18,17 +18,17 @@ export interface Escort {
   bio?: string;
   tags?: string[];
   gallery?: string[];
-  gallery_images?: string[]; // Some components use this instead of gallery
+  gallery_images?: string[]; 
   services?: string[];
-  serviceTypes?: ServiceType[]; // Updated with proper type
+  serviceTypes?: ServiceType[];
   availability?: any;
   reviews?: number;
-  reviewCount?: number; // For components expecting this name
+  reviewCount?: number;
   rating?: number;
   is_verified?: boolean;
-  verified?: boolean; // For components using this version
+  verified?: boolean;
   is_featured?: boolean;
-  featured?: boolean; // For components using this version
+  featured?: boolean;
   
   // Physical attributes and demographics
   age?: number;
@@ -52,8 +52,8 @@ export interface Escort {
   responseTime?: string;
   
   // Media and content
-  imageUrl?: string; // For backward compatibility
-  profileImage?: string; // For backward compatibility
+  imageUrl?: string;
+  profileImage?: string;
   videos?: (string | {
     id: string;
     url: string;
@@ -67,7 +67,7 @@ export interface Escort {
   providesVirtualContent?: boolean;
   languages?: string[];
 
-  // Additional fields needed for compatibility
+  // Additional fields
   contactInfo?: {
     phone?: string;
     email?: string;
@@ -81,6 +81,7 @@ export interface Escort {
   subscriptionPrice?: number;
   isAI?: boolean;
   profileType?: string;
+  boostLevel?: number;
 }
 
 export interface Booking {
@@ -114,6 +115,14 @@ export interface EscortFilterOptions {
   sortBy?: 'price' | 'rating' | 'distance' | 'newest';
   page?: number;
   limit?: number;
+  selectedServices?: string[];
+  selectedGenders?: string[];
+  selectedOrientations?: string[];
+  ageRange?: [number, number];
+  ratingMin?: number;
+  availableNow?: boolean;
+  verifiedOnly?: boolean;
+  languages?: string[];
 }
 
 export interface VerificationDocument {

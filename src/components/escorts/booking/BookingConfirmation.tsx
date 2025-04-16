@@ -1,95 +1,110 @@
 
 import React from 'react';
-import { Escort } from '@/types/escort';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { Escort, BookingStatus } from '@/types/escort';
 
 interface BookingConfirmationProps {
   escort: Escort;
-  status: string;
-  onClose: () => void;
-  bookingDetails?: any;
+  status: BookingStatus;
+  onClose?: () => void;
 }
 
-const BookingConfirmation: React.FC<BookingConfirmationProps> = ({ 
-  escort, 
-  status, 
-  onClose,
-  bookingDetails
+const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
+  escort,
+  status,
+  onClose
 }) => {
-  const getStatusIcon = () => {
-    switch(status) {
-      case 'confirmed':
-        return <CheckCircle className="h-12 w-12 text-green-500 mb-2" />;
+  const renderStatusContent = () => {
+    switch (status) {
       case 'pending':
-        return <Clock className="h-12 w-12 text-amber-500 mb-2" />;
-      case 'rejected':
-        return <AlertCircle className="h-12 w-12 text-red-500 mb-2" />;
-      default:
-        return <Clock className="h-12 w-12 text-blue-500 mb-2" />;
-    }
-  };
-  
-  const getStatusMessage = () => {
-    switch(status) {
+        return (
+          <>
+            <div className="flex items-center gap-2 text-amber-500 mb-4">
+              <Clock className="h-5 w-5" />
+              <h3 className="font-medium text-lg">Request Pending</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Your booking request has been sent to {escort.name}. You'll receive a notification when they respond to your request.
+            </p>
+            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded-md">
+              <h4 className="font-medium">What happens next?</h4>
+              <ul className="mt-2 space-y-1 text-sm list-disc list-inside">
+                <li>{escort.name} will review your booking request</li>
+                <li>You'll receive a notification with their response</li>
+                <li>If confirmed, you'll proceed to payment confirmation</li>
+              </ul>
+            </div>
+          </>
+        );
+      
       case 'confirmed':
-        return `Your booking with ${escort.name} has been confirmed.`;
-      case 'pending':
-        return `Your booking request with ${escort.name} has been submitted and is pending approval.`;
+        return (
+          <>
+            <div className="flex items-center gap-2 text-green-500 mb-4">
+              <CheckCircle className="h-5 w-5" />
+              <h3 className="font-medium text-lg">Booking Confirmed!</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Great news! {escort.name} has confirmed your booking request. Your appointment is now confirmed.
+            </p>
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-md">
+              <h4 className="font-medium">What happens next?</h4>
+              <ul className="mt-2 space-y-1 text-sm list-disc list-inside">
+                <li>You can find the details in your bookings dashboard</li>
+                <li>You'll receive a reminder before your appointment</li>
+                <li>You can message {escort.name} for any questions</li>
+              </ul>
+            </div>
+          </>
+        );
+        
       case 'rejected':
-        return `Your booking request with ${escort.name} has been declined.`;
+        return (
+          <>
+            <div className="flex items-center gap-2 text-red-500 mb-4">
+              <AlertCircle className="h-5 w-5" />
+              <h3 className="font-medium text-lg">Request Declined</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Unfortunately, {escort.name} was unable to accept your booking request at this time.
+            </p>
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md">
+              <h4 className="font-medium">What you can do now:</h4>
+              <ul className="mt-2 space-y-1 text-sm list-disc list-inside">
+                <li>Try another date or time that might work better</li>
+                <li>Message {escort.name} to discuss availability</li>
+                <li>Browse other escorts that match your preferences</li>
+              </ul>
+            </div>
+          </>
+        );
+        
       default:
-        return `Your booking with ${escort.name} is ${status}.`;
+        return (
+          <p className="text-muted-foreground">
+            There was an issue with your booking status. Please check your bookings dashboard for more information.
+          </p>
+        );
     }
   };
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md mx-auto text-center">
-      {getStatusIcon()}
-      
-      <h2 className="text-xl font-semibold mb-2">Booking {status}</h2>
-      
-      <p className="mb-4 text-gray-600 dark:text-gray-300">
-        {getStatusMessage()}
-      </p>
-      
-      {bookingDetails && (
-        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md mb-4 text-left">
-          <h3 className="font-medium mb-2">Booking Details</h3>
-          <p><span className="font-medium">Date:</span> {bookingDetails.date instanceof Date ? 
-            bookingDetails.date.toLocaleDateString() : bookingDetails.date}</p>
-          <p><span className="font-medium">Time:</span> {bookingDetails.time}</p>
-          <p><span className="font-medium">Duration:</span> {bookingDetails.duration}</p>
-          {bookingDetails.location && (
-            <p><span className="font-medium">Location:</span> {bookingDetails.location}</p>
-          )}
-        </div>
-      )}
-      
-      {status === 'confirmed' && (
-        <div className="flex flex-col space-y-2 mb-4">
-          <Button variant="outline">
-            Add to Calendar
-          </Button>
-          <Button variant="outline">
-            Message {escort.name}
+    <Card>
+      <CardHeader>
+        <CardTitle>Booking Status</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {renderStatusContent()}
+        
+        <div className="mt-6">
+          <Button onClick={onClose} className="w-full">
+            Close
           </Button>
         </div>
-      )}
-      
-      {status === 'pending' && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          You will receive a notification when {escort.name} responds to your request.
-        </p>
-      )}
-      
-      <Button 
-        className="w-full"
-        onClick={onClose}
-      >
-        Close
-      </Button>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

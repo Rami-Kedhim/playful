@@ -3,26 +3,36 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { PersonStanding, Laptop, Flower2 } from 'lucide-react';
 
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
+
 interface ServiceTypeBadgeLabelProps {
   type: 'in-person' | 'virtual' | 'both';
   size?: 'sm' | 'md' | 'lg';
 }
+
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  switch (type) {
+    case 'in-person':
+      return 'In-Person';
+    case 'virtual':
+      return 'Virtual Only';
+    case 'both':
+      return 'In-Person & Virtual';
+    default:
+      return '';
+  }
+};
+
+export const getSafeServiceLabel = (type: ServiceTypeFilter) => {
+  return getServiceTypeBadgeLabel(type);
+};
 
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type, 
   size = 'md' 
 }) => {
   const getLabel = () => {
-    switch (type) {
-      case 'in-person':
-        return 'In-Person';
-      case 'virtual':
-        return 'Virtual Only';
-      case 'both':
-        return 'In-Person & Virtual';
-      default:
-        return type;
-    }
+    return getServiceTypeBadgeLabel(type);
   };
   
   const getIcon = () => {

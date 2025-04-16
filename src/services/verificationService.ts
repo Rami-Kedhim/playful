@@ -1,249 +1,195 @@
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
-import { VerificationFormValues, VerificationRequest, VerificationStatus, VerificationLevel } from "@/types/verification";
+
+import { supabase } from '@/integrations/supabase/client';
+import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
 
 export const verificationService = {
-  /**
-   * Check if a user can submit a verification request
-   */
-  async canSubmitVerification(userId: string) {
+  submitVerificationRequest: async (
+    userId: string, 
+    documentType: string,
+    frontImageFile: File,
+    backImageFile: File | null,
+    selfieFile: File
+  ) => {
     try {
-      // Check if user already has a pending verification
-      const { data, error } = await supabase
-        .from("verification_requests")
-        .select("status, created_at")
-        .eq("profile_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== "PGRST116") {
-        throw error;
-      }
-
-      // If no previous request found
-      if (!data) {
-        return { canSubmit: true };
-      }
-
-      // Check status of most recent request
-      if (data.status === "pending" || data.status === "in_review") {
-        return {
-          canSubmit: false,
-          reason: "You already have a pending verification request"
-        };
-      }
-
-      // If recently rejected, enforce cooling period
-      if (data.status === "rejected") {
-        const rejectedDate = new Date(data.created_at);
-        const cooldownDays = 7; // 7 day cooling period
-        const cooldownEnds = new Date(rejectedDate.setDate(rejectedDate.getDate() + cooldownDays));
+      // Upload front image
+      const frontImagePath = `verifications/${userId}/${Date.now()}_front`;
+      const { error: frontUploadError } = await supabase.storage
+        .from('verification_documents')
+        .upload(frontImagePath, frontImageFile);
+      
+      if (frontUploadError) throw new Error('Failed to upload front ID image');
+      
+      // Get public URL for the front image
+      const { data: { publicUrl: frontImageUrl } } = supabase.storage
+        .from('verification_documents')
+        .getPublicUrl(frontImagePath);
+      
+      // Upload back image if provided
+      let backImageUrl = '';
+      if (backImageFile) {
+        const backImagePath = `verifications/${userId}/${Date.now()}_back`;
+        const { error: backUploadError } = await supabase.storage
+          .from('verification_documents')
+          .upload(backImagePath, backImageFile);
         
-        if (new Date() < cooldownEnds) {
-          return {
-            canSubmit: false,
-            reason: `You can submit a new verification request after ${cooldownEnds.toLocaleDateString()}`
-          };
-        }
+        if (backUploadError) throw new Error('Failed to upload back ID image');
+        
+        // Get public URL for the back image
+        const { data: { publicUrl: backUrl } } = supabase.storage
+          .from('verification_documents')
+          .getPublicUrl(backImagePath);
+        
+        backImageUrl = backUrl;
       }
-
-      return { canSubmit: true };
-    } catch (error: any) {
-      console.error("Error checking verification eligibility:", error);
-      return {
-        canSubmit: false,
-        reason: "An error occurred checking eligibility"
-      };
-    }
-  },
-
-  /**
-   * Submit a verification request
-   */
-  async submitVerificationRequest(formData: VerificationFormValues, userId: string) {
-    try {
-      // Upload documents to storage
-      const uploadResults = await Promise.all([
-        this.uploadDocument(formData.documentFrontImage.file!, userId, 'front'),
-        formData.documentBackImage?.file 
-          ? this.uploadDocument(formData.documentBackImage.file, userId, 'back') 
-          : Promise.resolve(null),
-        this.uploadDocument(formData.selfieImage.file!, userId, 'selfie')
-      ]);
-
-      // Filter out null results (in case back image was optional)
-      const documentUrls = uploadResults.filter(Boolean) as string[];
-
-      // Create documents array for the verification request
+      
+      // Upload selfie image
+      const selfiePath = `verifications/${userId}/${Date.now()}_selfie`;
+      const { error: selfieUploadError } = await supabase.storage
+        .from('verification_documents')
+        .upload(selfiePath, selfieFile);
+      
+      if (selfieUploadError) throw new Error('Failed to upload selfie image');
+      
+      // Get public URL for the selfie image
+      const { data: { publicUrl: selfieImageUrl } } = supabase.storage
+        .from('verification_documents')
+        .getPublicUrl(selfiePath);
+      
+      // Create verification documents
       const documents = [
         {
-          type: formData.documentType,
-          category: 'front',
-          fileUrl: uploadResults[0]
+          type: documentType + '_front',
+          fileUrl: frontImageUrl,
+          uploadedAt: new Date().toISOString(),
+          status: 'pending'
         },
-        ...(uploadResults[1] ? [{
-          type: formData.documentType,
-          category: 'back',
-          fileUrl: uploadResults[1]
-        }] : []),
         {
           type: 'selfie',
-          category: 'selfie',
-          fileUrl: uploadResults[2]
+          fileUrl: selfieImageUrl,
+          uploadedAt: new Date().toISOString(),
+          status: 'pending'
         }
-      ].filter(doc => doc.fileUrl);
-
+      ];
+      
+      if (backImageUrl) {
+        documents.push({
+          type: documentType + '_back',
+          fileUrl: backImageUrl,
+          uploadedAt: new Date().toISOString(),
+          status: 'pending'
+        });
+      }
+      
       // Create verification request
       const { data, error } = await supabase
-        .from("verification_requests")
-        .insert({
+        .from('verification_requests')
+        .insert([{
           profile_id: userId,
           status: 'pending',
           requested_level: 'basic',
-          documents,
+          documents: documents,
           created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
+        }])
+        .select();
+      
       if (error) throw error;
-
-      // Update profile to show verification was submitted
-      await supabase
-        .from("profiles")
-        .update({
-          verification_submitted: true,
-          last_verification_request: new Date().toISOString()
-        })
-        .eq("id", userId);
-
+      
       return {
         success: true,
-        verificationId: data.id,
-        message: "Your verification request has been submitted successfully."
+        message: 'Verification request submitted successfully',
+        requestId: data[0].id
       };
     } catch (error: any) {
-      console.error("Error submitting verification:", error);
+      console.error('Verification submission error:', error);
       return {
         success: false,
-        message: error.message || "An unexpected error occurred"
+        message: error.message || 'Failed to submit verification request'
       };
     }
   },
-
-  /**
-   * Upload a document to storage
-   */
-  async uploadDocument(file: File, userId: string, category: string) {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}/${category}_${Date.now()}.${fileExt}`;
-    const filePath = `verification/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('verification-documents')
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data } = supabase.storage
-      .from('verification-documents')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
-  },
-
-  /**
-   * Get verification status for a user
-   */
-  async getVerificationStatus(userId: string) {
+  
+  getVerificationStatus: async (userId: string) => {
     try {
-      // Get the profile's current verification status
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("verification_level, is_verified")
-        .eq("id", userId)
-        .single();
-
-      if (profileError) throw profileError;
-
-      // Get the most recent verification request
-      const { data: request, error: requestError } = await supabase
-        .from("verification_requests")
-        .select("*")
-        .eq("profile_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (requestError && requestError.code !== "PGRST116") {
-        throw requestError;
-      }
-
-      return {
-        success: true,
-        profile,
-        request: request || null
-      };
-    } catch (error: any) {
-      console.error("Error fetching verification status:", error);
-      return {
-        success: false,
-        error: error.message || "Failed to fetch verification status"
-      };
-    }
-  },
-
-  /**
-   * Subscribe to verification status changes
-   */
-  subscribeToVerificationUpdates(userId: string, callback: (verificationRequest: VerificationRequest) => void) {
-    return supabase
-      .channel('public:verification_requests')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'verification_requests',
-          filter: `profile_id=eq.${userId}`
-        },
-        (payload) => {
-          callback(payload.new as VerificationRequest);
-        }
-      )
-      .subscribe();
-  },
-
-  /**
-   * Upgrade verification level
-   */
-  async upgradeVerificationLevel(userId: string, targetLevel: VerificationLevel) {
-    try {
+      // Get latest verification request
       const { data, error } = await supabase
-        .from("verification_requests")
-        .insert({
-          profile_id: userId,
-          status: 'pending',
-          requested_level: targetLevel,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
+        .from('verification_requests')
+        .select('*')
+        .eq('profile_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
       if (error) throw error;
-
-      return {
-        success: true,
-        verificationId: data.id,
-        message: `Your upgrade request to ${targetLevel} level has been submitted.`
-      };
-    } catch (error: any) {
-      console.error("Error upgrading verification level:", error);
-      return {
-        success: false,
-        message: error.message || "Failed to request verification upgrade"
-      };
+      
+      if (data && data.length > 0) {
+        return {
+          status: data[0].status as VerificationStatus,
+          lastRequest: data[0] as VerificationRequest
+        };
+      }
+      
+      return { status: 'pending' as VerificationStatus };
+    } catch (error) {
+      console.error('Get verification status error:', error);
+      return { status: 'pending' as VerificationStatus };
+    }
+  },
+  
+  canSubmitVerification: async (userId: string) => {
+    try {
+      // Check if user has a pending or approved verification request
+      const { data, error } = await supabase
+        .from('verification_requests')
+        .select('*')
+        .eq('profile_id', userId)
+        .in('status', ['pending', 'in_review', 'approved'])
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // User already has a pending or approved request
+        return {
+          canSubmit: false,
+          reason: `You already have a ${data[0].status} verification request`
+        };
+      }
+      
+      // Check if user has a recent rejected request (within last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const { data: rejectedData, error: rejectedError } = await supabase
+        .from('verification_requests')
+        .select('*')
+        .eq('profile_id', userId)
+        .eq('status', 'rejected')
+        .gt('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (rejectedError) throw rejectedError;
+      
+      if (rejectedData && rejectedData.length > 0) {
+        const rejectedDate = new Date(rejectedData[0].created_at);
+        const cooldownEnd = new Date(rejectedDate);
+        cooldownEnd.setDate(cooldownEnd.getDate() + 7);
+        const cooldownHours = Math.ceil((cooldownEnd.getTime() - new Date().getTime()) / (1000 * 60 * 60));
+        
+        return {
+          canSubmit: false,
+          reason: 'Your recent verification request was rejected',
+          cooldownRemaining: cooldownHours
+        };
+      }
+      
+      // User can submit a verification request
+      return { canSubmit: true };
+    } catch (error) {
+      console.error('Check verification eligibility error:', error);
+      return { canSubmit: true }; // Default to allowing submission if there's an error
     }
   }
 };
+
+export default verificationService;

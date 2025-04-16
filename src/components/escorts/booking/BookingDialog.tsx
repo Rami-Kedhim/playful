@@ -3,202 +3,136 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Escort, Booking } from '@/types/escort';
-import { format } from 'date-fns';
+import { format, addHours } from 'date-fns';
 
-export interface BookingDialogProps {
+interface BookingDialogProps {
   escort: Escort;
   onSubmit: (bookingDetails: Partial<Booking>) => Promise<void>;
   onCancel: () => void;
 }
 
 const BookingDialog: React.FC<BookingDialogProps> = ({ escort, onSubmit, onCancel }) => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [timeSlot, setTimeSlot] = useState<string>('');
-  const [duration, setDuration] = useState<string>('1');
-  const [name, setName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [phone, setPhone] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 10; hour <= 22; hour++) {
-      slots.push(`${hour}:00`);
-      if (hour < 22) slots.push(`${hour}:30`);
-    }
-    return slots;
-  };
-
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [startTime, setStartTime] = useState('');
+  const [duration, setDuration] = useState('1');
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !timeSlot || !duration) return;
-
+    
+    if (!selectedDate || !startTime) {
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Calculate start and end times
-    const [hours, minutes] = timeSlot.split(':').map(Number);
-    const startTime = new Date(date);
-    startTime.setHours(hours, minutes, 0, 0);
-    
-    const endTime = new Date(startTime);
-    endTime.setHours(startTime.getHours() + parseInt(duration));
-    
-    const bookingDetails: Partial<Booking> = {
-      escort_id: escort.id,
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      price: (escort.rates?.hourly || 0) * parseInt(duration),
-      notes,
-      status: 'pending',
-    };
-    
     try {
-      await onSubmit(bookingDetails);
+      // Create booking datetime strings
+      const startDateTime = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        parseInt(startTime.split(':')[0]),
+        parseInt(startTime.split(':')[1])
+      );
+      
+      const endDateTime = addHours(startDateTime, parseInt(duration));
+      
+      await onSubmit({
+        start_time: startDateTime.toISOString(),
+        end_time: endDateTime.toISOString(),
+        notes,
+        price: (escort.price || 100) * parseInt(duration),
+        service_type: 'in-person',
+      });
+    } catch (error) {
+      console.error('Booking submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
-
+  
   return (
-    <div className="booking-dialog">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <Dialog open={true} onOpenChange={onCancel}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Book Time with {escort.name}</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="date">Select Date</Label>
             <Calendar
               mode="single"
-              selected={date}
-              onSelect={setDate}
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border"
               disabled={(date) => date < new Date()}
-              className="border rounded-md p-2"
             />
           </div>
-          
-          <div className="space-y-4">
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="timeSlot">Select Time</Label>
-              <Select value={timeSlot} onValueChange={setTimeSlot}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {generateTimeSlots().map((slot) => (
-                    <SelectItem key={slot} value={slot}>{slot}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="time">Start Time</Label>
+              <Input
+                id="time"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                required
+              />
             </div>
             
             <div>
-              <Label htmlFor="duration">Duration</Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 hour</SelectItem>
-                  <SelectItem value="2">2 hours</SelectItem>
-                  <SelectItem value="3">3 hours</SelectItem>
-                  <SelectItem value="4">4 hours</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Duration</Label>
+              <RadioGroup value={duration} onValueChange={setDuration} className="flex gap-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="1" id="1h" />
+                  <Label htmlFor="1h">1h</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="2" id="2h" />
+                  <Label htmlFor="2h">2h</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="3" id="3h" />
+                  <Label htmlFor="3h">3h</Label>
+                </div>
+              </RadioGroup>
             </div>
-            
-            {date && timeSlot && duration && (
-              <div className="p-3 border rounded-md mt-2 bg-secondary/20">
-                <p className="text-sm">
-                  <span className="font-medium">Date:</span> {format(date, 'PPP')}
-                </p>
-                <p className="text-sm">
-                  <span className="font-medium">Time:</span> {timeSlot}
-                </p>
-                <p className="text-sm">
-                  <span className="font-medium">Duration:</span> {duration} hour(s)
-                </p>
-                {escort.rates?.hourly && (
-                  <p className="text-sm font-medium mt-1">
-                    Total: ${parseInt(duration) * escort.rates.hourly}
-                  </p>
-                )}
-              </div>
-            )}
           </div>
-        </div>
-        
-        <div>
-          <Label htmlFor="name">Your Name</Label>
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your full name"
-            required
-          />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
+            <Label htmlFor="notes">Special Requests (Optional)</Label>
+            <Textarea
+              id="notes"
+              placeholder="Any special requests or notes?"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
             />
           </div>
-          
-          <div>
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="Enter your phone number"
-              required
-            />
-          </div>
-        </div>
-        
-        <div>
-          <Label htmlFor="notes">Special Requests or Notes</Label>
-          <Textarea
-            id="notes"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Any specific requirements or information you'd like to share"
-            className="resize-none h-20"
-          />
-        </div>
-        
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onCancel}
-            className="w-full sm:w-auto"
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            className="w-full sm:w-auto"
-            disabled={!date || !timeSlot || !duration || isSubmitting}
-          >
-            {isSubmitting ? 'Submitting...' : 'Book Appointment'}
-          </Button>
-        </DialogFooter>
-      </form>
-    </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={!selectedDate || !startTime || isSubmitting}
+            >
+              {isSubmitting ? "Processing..." : "Continue"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
