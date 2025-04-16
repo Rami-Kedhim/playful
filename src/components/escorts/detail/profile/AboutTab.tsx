@@ -1,3 +1,4 @@
+
 import { Escort } from "@/types/escort";
 
 interface AboutTabProps {
@@ -6,7 +7,7 @@ interface AboutTabProps {
 
 const AboutTab = ({ escort }: AboutTabProps) => {
   // Format measurements as string for display
-  const formatMeasurements = (measurements: { bust?: number; waist?: number; hips?: number; } | string | undefined) => {
+  const formatMeasurements = (measurements: { bust?: number | string; waist?: number | string; hips?: number | string; } | string | undefined) => {
     if (!measurements) return 'N/A';
     if (typeof measurements === 'string') return measurements;
     return `${measurements.bust || '-'}-${measurements.waist || '-'}-${measurements.hips || '-'}`;

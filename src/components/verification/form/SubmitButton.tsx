@@ -1,30 +1,34 @@
 
 import React from 'react';
-import { EnhancedButton } from '@/components/ui/enhanced-button';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface SubmitButtonProps {
-  loading: boolean;
+  loading?: boolean;
   disabled?: boolean;
-  text?: string;
-  loadingText?: string;
+  text: string;
 }
 
-const SubmitButton: React.FC<SubmitButtonProps> = ({ 
-  loading, 
+const SubmitButton: React.FC<SubmitButtonProps> = ({
+  loading = false,
   disabled = false,
-  text = "Submit",
-  loadingText = "Submitting..."
+  text
 }) => {
   return (
-    <EnhancedButton 
-      type="submit" 
-      disabled={disabled}
-      isLoading={loading}
-      loadingText={loadingText}
+    <Button
+      type="submit"
+      disabled={loading || disabled}
       className="w-full"
     >
-      {text}
-    </EnhancedButton>
+      {loading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Processing...
+        </>
+      ) : (
+        text
+      )}
+    </Button>
   );
 };
 

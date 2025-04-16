@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { verificationFormSchema, VerificationFormValues } from '@/types/verification';
+import { verificationFormSchema, VerificationFormValues, DOCUMENT_TYPES } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentImageUpload from './DocumentImageUpload';
 import SubmitButton from './SubmitButton';
@@ -39,9 +40,9 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
       documentType: 'id_card',
-      documentFrontImage: undefined,
-      documentBackImage: undefined,
-      selfieImage: undefined,
+      documentFrontImage: { preview: '' },
+      documentBackImage: { preview: '' },
+      selfieImage: { preview: '' },
     },
   });
 
@@ -134,19 +135,19 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
             
             <DocumentUploadHandler
               label="Front of ID Document"
-              onFileSelect={(file) => form.setValue('documentFrontImage', { file })}
+              onFileSelect={(file) => form.setValue('documentFrontImage', { file, preview: URL.createObjectURL(file) })}
               error={form.formState.errors.documentFrontImage?.message?.toString()}
             />
             
             <DocumentUploadHandler
               label="Back of ID Document (Optional for Passport)"
-              onFileSelect={(file) => form.setValue('documentBackImage', { file })}
+              onFileSelect={(file) => form.setValue('documentBackImage', { file, preview: URL.createObjectURL(file) })}
               error={form.formState.errors.documentBackImage?.message?.toString()}
             />
             
             <DocumentUploadHandler
               label="Selfie with ID"
-              onFileSelect={(file) => form.setValue('selfieImage', { file })}
+              onFileSelect={(file) => form.setValue('selfieImage', { file, preview: URL.createObjectURL(file) })}
               error={form.formState.errors.selfieImage?.message?.toString()}
             />
 

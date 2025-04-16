@@ -1,72 +1,126 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Upload } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { FileUp, X, Image } from 'lucide-react';
 
 interface DocumentUploadHandlerProps {
-  onFileSelect: (file: File) => void;
   label: string;
-  acceptedTypes?: string[];
-  maxSize?: number;
+  onFileSelect: (file: File) => void;
   error?: string;
-  className?: string;
+  optional?: boolean;
 }
 
-const DocumentUploadHandler = ({
-  onFileSelect,
+const DocumentUploadHandler: React.FC<DocumentUploadHandlerProps> = ({
   label,
-  acceptedTypes = ['image/jpeg', 'image/png', 'image/webp'],
-  maxSize = 5 * 1024 * 1024, // 5MB
+  onFileSelect,
   error,
-  className
-}: DocumentUploadHandlerProps) => {
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  optional = false
+}) => {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    if (!acceptedTypes.includes(file.type)) {
-      console.error('Invalid file type');
-      return;
-    }
-
-    if (file.size > maxSize) {
-      console.error('File too large');
-      return;
-    }
-
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
     onFileSelect(file);
   };
 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    onFileSelect(file);
+  };
+
+  const removeFile = () => {
+    setPreview(null);
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+  };
+
   return (
-    <div className={cn("space-y-2", className)}>
-      <Label>{label}</Label>
-      <div
-        className={cn(
-          "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors",
-          error && "border-destructive",
-          "relative"
-        )}
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          accept={acceptedTypes.join(',')}
-          onChange={handleFileChange}
-        />
-        <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          Click to upload or drag and drop
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Maximum file size: {Math.floor(maxSize / 1024 / 1024)}MB
-        </p>
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between">
+        <p className="text-sm font-medium">{label}</p>
+        {optional && <span className="text-xs text-muted-foreground">Optional</span>}
       </div>
+      
+      {preview ? (
+        <Card className="overflow-hidden">
+          <div className="relative">
+            <img 
+              src={preview} 
+              alt={label} 
+              className="w-full h-auto max-h-40 object-cover" 
+            />
+            <Button 
+              type="button"
+              variant="destructive" 
+              size="icon"
+              className="absolute top-2 right-2 h-6 w-6"
+              onClick={removeFile}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <div
+          className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
+            isDragging ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary/50'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => inputRef.current?.click()}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          {isDragging ? (
+            <Image className="h-8 w-8 text-primary mb-2" />
+          ) : (
+            <FileUp className="h-8 w-8 text-muted-foreground mb-2" />
+          )}
+          <p className="text-sm font-medium text-center">
+            {isDragging ? 'Drop to upload' : 'Click to upload or drag and drop'}
+          </p>
+          <p className="text-xs text-muted-foreground text-center mt-1">
+            JPG, PNG or WEBP (max. 5MB)
+          </p>
+        </div>
+      )}
+      
       {error && (
         <p className="text-sm text-destructive">{error}</p>
       )}

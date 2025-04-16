@@ -1,16 +1,62 @@
 
-import { createClient } from '@supabase/supabase-js';
+// Mock Supabase client for development purposes
+// In a real application, this would be replaced with the actual Supabase client
 
-// These should be environment variables in production
-const supabaseUrl = 'https://haffqtqpbnaviefewfmn.supabase.co'; 
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhhZmZxdHFwYm5hdmllZmV3Zm1uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgxMDczNzYsImV4cCI6MjA1MzY4MzM3Nn0.dRqYY5XRNhAoZ1KZAjIz-_eaA9GcR9M3NI5BzQMIMew';
-
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = {
   auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
+    getSession: async () => ({ data: { session: null }, error: null }),
+    onAuthStateChange: (callback: any) => {
+      return { data: { subscription: { unsubscribe: () => {} } } };
+    },
+    signInWithPassword: async ({ email, password }: { email: string; password: string }) => {
+      return { data: { user: { id: 'mock-user-id', email } }, error: null };
+    },
+    signOut: async () => ({ error: null }),
+  },
+  from: (table: string) => ({
+    insert: (data: any) => ({
+      select: () => ({
+        single: async () => {
+          return { 
+            data: { id: `mock-${table}-id`, ...data, created_at: new Date().toISOString() }, 
+            error: null 
+          };
+        }
+      })
+    }),
+    update: (data: any) => ({
+      eq: (column: string, value: any) => ({
+        select: () => ({
+          single: async () => {
+            return { 
+              data: { id: value, ...data, updated_at: new Date().toISOString() }, 
+              error: null 
+            };
+          }
+        })
+      })
+    }),
+    select: (columns = '*') => ({
+      eq: (column: string, value: any) => ({
+        single: async () => {
+          return { 
+            data: { id: value, created_at: new Date().toISOString() }, 
+            error: null 
+          };
+        }
+      })
+    })
+  }),
+  channel: (name: string) => ({
+    on: (event: string, filter: any, callback: any) => ({
+      subscribe: () => {
+        console.log(`Subscribed to ${name} for ${event}`);
+        return { data: { subscription: { unsubscribe: () => {} } } };
+      }
+    })
+  }),
+  removeChannel: (subscription: any) => {
+    console.log('Removed subscription');
+    return true;
   }
-});
-
-export default supabase;
+};

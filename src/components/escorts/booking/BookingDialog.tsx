@@ -1,210 +1,202 @@
 
 import React, { useState } from 'react';
-import { Escort } from '@/types/escort';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Escort, Booking } from '@/types/escort';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 
-interface BookingDialogProps {
+export interface BookingDialogProps {
   escort: Escort;
-  onSubmit: (bookingDetails: any) => void;
+  onSubmit: (bookingDetails: Partial<Booking>) => Promise<void>;
   onCancel: () => void;
 }
 
 const BookingDialog: React.FC<BookingDialogProps> = ({ escort, onSubmit, onCancel }) => {
-  const [bookingDetails, setBookingDetails] = useState({
-    date: new Date(),
-    time: '',
-    duration: '1 hour',
-    location: '',
-    message: ''
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [timeSlot, setTimeSlot] = useState<string>('');
+  const [duration, setDuration] = useState<string>('1');
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [phone, setPhone] = useState<string>('');
+  const [notes, setNotes] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setBookingDetails({
-      ...bookingDetails,
-      [e.target.name]: e.target.value
-    });
-    
-    // Clear error when field is updated
-    if (errors[e.target.name]) {
-      setErrors({
-        ...errors,
-        [e.target.name]: ''
-      });
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 10; hour <= 22; hour++) {
+      slots.push(`${hour}:00`);
+      if (hour < 22) slots.push(`${hour}:30`);
     }
+    return slots;
   };
 
-  const handleSelectChange = (name: string, value: string) => {
-    setBookingDetails({
-      ...bookingDetails,
-      [name]: value
-    });
-    
-    // Clear error when field is updated
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
-    }
-  };
-
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) {
-      setBookingDetails({
-        ...bookingDetails,
-        date
-      });
-      
-      if (errors.date) {
-        setErrors({
-          ...errors,
-          date: ''
-        });
-      }
-    }
-  };
-
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!bookingDetails.time) {
-      newErrors.time = 'Please select a time';
-    }
-    
-    if (!bookingDetails.duration) {
-      newErrors.duration = 'Please select a duration';
-    }
-    
-    if (!bookingDetails.location) {
-      newErrors.location = 'Please enter a location';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!date || !timeSlot || !duration) return;
+
+    setIsSubmitting(true);
     
-    if (validate()) {
-      onSubmit(bookingDetails);
+    // Calculate start and end times
+    const [hours, minutes] = timeSlot.split(':').map(Number);
+    const startTime = new Date(date);
+    startTime.setHours(hours, minutes, 0, 0);
+    
+    const endTime = new Date(startTime);
+    endTime.setHours(startTime.getHours() + parseInt(duration));
+    
+    const bookingDetails: Partial<Booking> = {
+      escort_id: escort.id,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      price: (escort.rates?.hourly || 0) * parseInt(duration),
+      notes,
+      status: 'pending',
+    };
+    
+    try {
+      await onSubmit(bookingDetails);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Book an appointment with {escort.name}</h2>
+    <div className="booking-dialog">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="date">Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !bookingDetails.date && "text-muted-foreground"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="date">Select Date</Label>
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              disabled={(date) => date < new Date()}
+              className="border rounded-md p-2"
+            />
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="timeSlot">Select Time</Label>
+              <Select value={timeSlot} onValueChange={setTimeSlot}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {generateTimeSlots().map((slot) => (
+                    <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="duration">Duration</Label>
+              <Select value={duration} onValueChange={setDuration}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 hour</SelectItem>
+                  <SelectItem value="2">2 hours</SelectItem>
+                  <SelectItem value="3">3 hours</SelectItem>
+                  <SelectItem value="4">4 hours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {date && timeSlot && duration && (
+              <div className="p-3 border rounded-md mt-2 bg-secondary/20">
+                <p className="text-sm">
+                  <span className="font-medium">Date:</span> {format(date, 'PPP')}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Time:</span> {timeSlot}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Duration:</span> {duration} hour(s)
+                </p>
+                {escort.rates?.hourly && (
+                  <p className="text-sm font-medium mt-1">
+                    Total: ${parseInt(duration) * escort.rates.hourly}
+                  </p>
                 )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {bookingDetails.date ? format(bookingDetails.date, "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={bookingDetails.date}
-                onSelect={handleDateChange}
-                initialFocus
-                disabled={(date) => date < new Date()}
-              />
-            </PopoverContent>
-          </Popover>
-          {errors.date && <p className="text-sm text-red-500">{errors.date}</p>}
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="time">Time</Label>
-          <Select
-            value={bookingDetails.time}
-            onValueChange={(value) => handleSelectChange('time', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select time" />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                <SelectItem key={hour} value={`${hour}:00`}>
-                  {`${hour}:00`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.time && <p className="text-sm text-red-500">{errors.time}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="duration">Duration</Label>
-          <Select
-            value={bookingDetails.duration}
-            onValueChange={(value) => handleSelectChange('duration', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select duration" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1 hour">1 hour</SelectItem>
-              <SelectItem value="2 hours">2 hours</SelectItem>
-              <SelectItem value="3 hours">3 hours</SelectItem>
-              <SelectItem value="4 hours">4 hours</SelectItem>
-              <SelectItem value="overnight">Overnight</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.duration && <p className="text-sm text-red-500">{errors.duration}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="location">Location</Label>
+        
+        <div>
+          <Label htmlFor="name">Your Name</Label>
           <Input
-            id="location"
-            name="location"
-            value={bookingDetails.location}
-            onChange={handleChange}
-            placeholder="Enter meeting location"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your full name"
+            required
           />
-          {errors.location && <p className="text-sm text-red-500">{errors.location}</p>}
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="message">Message (Optional)</Label>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Enter your phone number"
+              required
+            />
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="notes">Special Requests or Notes</Label>
           <Textarea
-            id="message"
-            name="message"
-            value={bookingDetails.message}
-            onChange={handleChange}
-            placeholder="Add any special requests or information"
-            rows={3}
+            id="notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Any specific requirements or information you'd like to share"
+            className="resize-none h-20"
           />
         </div>
-
-        <div className="flex justify-between pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            className="w-full sm:w-auto"
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
-          <Button type="submit">
-            Submit Request
+          <Button 
+            type="submit" 
+            className="w-full sm:w-auto"
+            disabled={!date || !timeSlot || !duration || isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Book Appointment'}
           </Button>
-        </div>
+        </DialogFooter>
       </form>
     </div>
   );

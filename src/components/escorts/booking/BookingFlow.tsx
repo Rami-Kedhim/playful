@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -89,7 +90,12 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     setIsSubmitting(true);
     
     try {
-      const result = await bookingService.createBooking(booking);
+      const result = await bookingService.createBooking({
+        ...booking,
+        id: `booking-${Date.now()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as Booking);
       
       if (!result.success) {
         throw new Error(result.error);
@@ -120,6 +126,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
           <BookingDialog
             escort={escort}
             onSubmit={handleDetailsSubmit}
+            onCancel={onClose}
           />
         );
         

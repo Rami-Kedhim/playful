@@ -1,5 +1,8 @@
 
 export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'completed';
+export type ServiceType = 'in-person' | 'virtual' | 'both';
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 
 export interface Escort {
   id: string;
@@ -17,7 +20,7 @@ export interface Escort {
   gallery?: string[];
   gallery_images?: string[]; // Some components use this instead of gallery
   services?: string[];
-  serviceTypes?: string[]; // For backward compatibility
+  serviceTypes?: ServiceType[]; // Updated with proper type
   availability?: any;
   reviews?: number;
   reviewCount?: number; // For components expecting this name
@@ -40,23 +43,44 @@ export interface Escort {
     bust?: number | string;
     waist?: number | string;
     hips?: number | string;
-  };
+  } | string;
   
   // Status and activity
   availableNow?: boolean;
   lastActive?: Date | string;
   responseRate?: number;
+  responseTime?: string;
   
   // Media and content
   imageUrl?: string; // For backward compatibility
   profileImage?: string; // For backward compatibility
-  videos?: string[];
+  videos?: (string | {
+    id: string;
+    url: string;
+    thumbnail: string;
+    title: string;
+  })[];
   
   // Verification and trust signals
-  verificationLevel?: 'none' | 'basic' | 'enhanced' | 'premium';
+  verificationLevel?: VerificationLevel;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
   languages?: string[];
+
+  // Additional fields needed for compatibility
+  contactInfo?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  contentStats?: {
+    totalMedia?: number;
+    photos?: number;
+    videos?: number;
+  };
+  subscriptionPrice?: number;
+  isAI?: boolean;
+  profileType?: string;
 }
 
 export interface Booking {
@@ -76,4 +100,44 @@ export interface Booking {
   special_requests?: string;
   action_url?: string;
   action_text?: string;
+}
+
+export interface EscortFilterOptions {
+  location?: string;
+  priceRange?: [number, number];
+  age?: [number, number];
+  gender?: string[];
+  services?: string[];
+  availability?: string[];
+  verificationLevel?: VerificationLevel[];
+  serviceType?: ServiceType[];
+  sortBy?: 'price' | 'rating' | 'distance' | 'newest';
+  page?: number;
+  limit?: number;
+}
+
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  fileUrl: string;
+  uploadedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+export interface VerificationRequest {
+  id: string;
+  profile_id?: string;
+  userId?: string;
+  status: VerificationStatus;
+  verificationLevel?: VerificationLevel;
+  requested_level: VerificationLevel;
+  documents?: VerificationDocument[];
+  created_at: string;
+  submittedAt?: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+  rejectionReason?: string;
 }

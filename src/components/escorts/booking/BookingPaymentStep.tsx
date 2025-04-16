@@ -1,140 +1,174 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Escort, Booking } from '@/types/escort';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { format } from 'date-fns';
 import { Loader2, CreditCard, Wallet } from 'lucide-react';
-import { ubxWalletService } from '@/services/ubx/UBXWalletService';
-import { toast } from '@/hooks/use-toast';
 
 interface BookingPaymentStepProps {
   escort: Escort;
-  booking: Booking;
-  onPaymentComplete: (paymentId: string) => void;
-  onCancel: () => void;
+  booking: Partial<Booking>;
+  onBack: () => void;
+  onComplete: () => void;
+  isSubmitting?: boolean;
 }
 
 const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
   escort,
   booking,
-  onPaymentComplete,
-  onCancel
+  onBack,
+  onComplete,
+  isSubmitting = false
 }) => {
-  const [paymentMethod, setPaymentMethod] = useState<'ubx' | 'card'>('ubx');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = React.useState<string>('credit_card');
   
-  const handleProcessPayment = async () => {
-    setIsProcessing(true);
-    
-    try {
-      if (paymentMethod === 'ubx') {
-        // Process UBX payment
-        const transaction = await ubxWalletService.processTransaction(
-          booking.client_id,
-          booking.price,
-          'booking',
-          `Booking payment for ${escort.name}`,
-          { bookingId: booking.id }
-        );
-        
-        if (transaction) {
-          onPaymentComplete(transaction.id);
-          toast({
-            title: "Payment successful",
-            description: `Your booking with ${escort.name} has been paid for`,
-          });
-        } else {
-          throw new Error('Payment failed');
-        }
-      } else {
-        // Process card payment
-        // This would integrate with a payment processor like Stripe
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulating API call
-        
-        // Simulate successful payment
-        onPaymentComplete('card_payment_' + Date.now());
-        toast({
-          title: "Payment successful",
-          description: `Your booking with ${escort.name} has been paid for`,
-        });
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: "Payment failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+  const calculateTotal = () => {
+    const basePrice = booking.price || 0;
+    const serviceFee = Math.round(basePrice * 0.05); // 5% service fee
+    return basePrice + serviceFee;
+  };
+  
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return format(date, 'PPP');
+  };
+  
+  const formatTime = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return format(date, 'p');
+  };
+  
+  const getDuration = () => {
+    if (!booking.start_time || !booking.end_time) return '';
+    const startDate = new Date(booking.start_time);
+    const endDate = new Date(booking.end_time);
+    const hours = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60));
+    return `${hours} hour${hours !== 1 ? 's' : ''}`;
   };
 
   return (
-    <Card className="max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Payment</CardTitle>
-        <CardDescription>Complete your booking with {escort.name}</CardDescription>
+    <div className="space-y-6">
+      <CardHeader className="p-0">
+        <CardTitle>Complete Payment</CardTitle>
+        <CardDescription>
+          Please review and complete your booking with {escort.name}.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <h3 className="font-medium mb-2">Booking Summary</h3>
-          <div className="bg-muted p-3 rounded-md">
-            <p><span className="font-medium">Date:</span> {new Date(booking.start_time).toLocaleDateString()}</p>
-            <p><span className="font-medium">Time:</span> {new Date(booking.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-            <p><span className="font-medium">Duration:</span> {
-              Math.round((new Date(booking.end_time).getTime() - new Date(booking.start_time).getTime()) / (60 * 60 * 1000))
-            } hours</p>
-          </div>
-        </div>
-        
-        <div>
-          <h3 className="font-medium mb-2">Total Amount</h3>
-          <p className="text-2xl font-bold">${booking.price.toFixed(2)}</p>
-        </div>
-        
-        <div>
-          <h3 className="font-medium mb-2">Payment Method</h3>
-          <RadioGroup 
-            value={paymentMethod} 
-            onValueChange={(value) => setPaymentMethod(value as 'ubx' | 'card')}
-            className="space-y-3"
-          >
-            <div className="flex items-center space-x-2 border rounded-md p-3">
-              <RadioGroupItem value="ubx" id="ubx" />
-              <Label htmlFor="ubx" className="flex items-center">
-                <Wallet className="mr-2 h-4 w-4" />
-                Pay with UBX
-              </Label>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Booking Summary</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Date:</span>
+              <span>{formatDate(booking.start_time)}</span>
             </div>
-            <div className="flex items-center space-x-2 border rounded-md p-3">
-              <RadioGroupItem value="card" id="card" />
-              <Label htmlFor="card" className="flex items-center">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Credit/Debit Card
-              </Label>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Time:</span>
+              <span>{formatTime(booking.start_time)}</span>
             </div>
-          </RadioGroup>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={onCancel} disabled={isProcessing}>
-          Cancel
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Duration:</span>
+              <span>{getDuration()}</span>
+            </div>
+            <div className="border-t my-2"></div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Base Price:</span>
+              <span>${booking.price}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Service Fee:</span>
+              <span>${Math.round((booking.price || 0) * 0.05)}</span>
+            </div>
+            <div className="flex justify-between font-medium">
+              <span>Total:</span>
+              <span>${calculateTotal()}</span>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Payment Method</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <RadioGroup 
+              value={paymentMethod} 
+              onValueChange={setPaymentMethod}
+            >
+              <div className="flex items-center space-x-2 border rounded-md p-3">
+                <RadioGroupItem value="credit_card" id="credit_card" />
+                <Label htmlFor="credit_card" className="flex items-center">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Credit Card
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 border rounded-md p-3">
+                <RadioGroupItem value="wallet" id="wallet" />
+                <Label htmlFor="wallet" className="flex items-center">
+                  <Wallet className="mr-2 h-4 w-4" />
+                  UBX Wallet
+                </Label>
+              </div>
+            </RadioGroup>
+            
+            {paymentMethod === 'credit_card' && (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="card-number">Card Number</Label>
+                  <Input id="card-number" placeholder="•••• •••• •••• ••••" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="expiry">Expiry Date</Label>
+                    <Input id="expiry" placeholder="MM/YY" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="cvc">CVC</Label>
+                    <Input id="cvc" placeholder="•••" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      
+      <CardFooter className="p-0 flex flex-col sm:flex-row gap-2 pt-4">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onBack}
+          className="w-full sm:w-auto"
+          disabled={isSubmitting}
+        >
+          Back
         </Button>
-        <Button onClick={handleProcessPayment} disabled={isProcessing}>
-          {isProcessing ? (
+        <Button 
+          type="button" 
+          onClick={onComplete}
+          className="w-full sm:w-auto"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processing...
             </>
           ) : (
-            <>Pay Now</>
+            `Pay ${calculateTotal() > 0 ? `$${calculateTotal()}` : ''}`
           )}
         </Button>
       </CardFooter>
-    </Card>
+    </div>
   );
 };
 

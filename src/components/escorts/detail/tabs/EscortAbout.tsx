@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +13,7 @@ const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
   const { t } = useTranslation();
 
   // Format measurements as string for display
-  const formatMeasurements = (measurements: { bust?: number; waist?: number; hips?: number; } | string | undefined) => {
+  const formatMeasurements = (measurements: { bust?: number | string; waist?: number | string; hips?: number | string; } | string | undefined) => {
     if (!measurements) return 'N/A';
     if (typeof measurements === 'string') return measurements;
     return `${measurements.bust || '-'}-${measurements.waist || '-'}-${measurements.hips || '-'}`;
@@ -150,42 +151,7 @@ const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
         </Card>
       )}
       
-      {escort.contactInfo && (
-        <Card className="border-primary/20">
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">{t('Contact Information')}</h3>
-            <div className="space-y-3">
-              {escort.contactInfo.phone && (
-                <div>
-                  <p className="text-sm font-medium">{t('Phone')}</p>
-                  <p className="text-sm">{escort.contactInfo.phone}</p>
-                </div>
-              )}
-              
-              {escort.contactInfo.email && (
-                <div>
-                  <p className="text-sm font-medium">{t('Email')}</p>
-                  <p className="text-sm">{escort.contactInfo.email}</p>
-                </div>
-              )}
-              
-              {escort.contactInfo.website && (
-                <div>
-                  <p className="text-sm font-medium">{t('Website')}</p>
-                  <a 
-                    href={escort.contactInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline"
-                  >
-                    {escort.contactInfo.website}
-                  </a>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Contact information section is removed since contactInfo property doesn't exist in the Escort interface */}
     </div>
   );
 };

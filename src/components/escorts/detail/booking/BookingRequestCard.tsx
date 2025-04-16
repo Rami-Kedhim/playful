@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { CalendarDays, Clock } from 'lucide-react';
 import { Escort } from '@/types/escort';
-import BookingDialog from './BookingDialog';
+import BookingDialog from '../../booking/BookingDialog';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +52,11 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({ escort }) => {
     
     setIsDialogOpen(true);
   };
+
+  const handleSubmit = async (bookingDetails: any) => {
+    console.log("Booking details submitted:", bookingDetails);
+    setIsDialogOpen(false);
+  };
   
   return (
     <>
@@ -78,7 +83,7 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({ escort }) => {
               <span>Response Time</span>
             </div>
             <Badge variant="outline" className="text-xs">
-              {escort.responseTime || "Within 1 hour"}
+              {escort.responseRate ? `${escort.responseRate}%` : "Within 1 hour"}
             </Badge>
           </div>
           
@@ -98,9 +103,8 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({ escort }) => {
       
       <BookingDialog
         escort={escort}
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onBookNow={() => setIsDialogOpen(false)}
+        onSubmit={handleSubmit}
+        onCancel={() => setIsDialogOpen(false)}
       />
     </>
   );
