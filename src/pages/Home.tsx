@@ -41,38 +41,6 @@ const Home: React.FC = () => {
         </div>
       </section>
       
-      {/* Features Section */}
-      <section className="py-16 px-4 md:px-6 bg-muted/30">
-        <div className="container mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-            Platform Features
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FeatureCard 
-              icon={<Users className="h-10 w-10 text-primary" />}
-              title="User Profiles"
-              description="Browse and connect with verified user profiles across our platform."
-            />
-            <FeatureCard 
-              icon={<Image className="h-10 w-10 text-primary" />}
-              title="Content Gallery"
-              description="Explore high-quality content from our top creators."
-            />
-            <FeatureCard 
-              icon={<MessageCircle className="h-10 w-10 text-primary" />}
-              title="Messaging"
-              description="Communicate securely with other users in real-time."
-            />
-            <FeatureCard 
-              icon={<BarChart3 className="h-10 w-10 text-primary" />}
-              title="Analytics"
-              description="Track engagement and performance with detailed analytics."
-            />
-          </div>
-        </div>
-      </section>
-      
       {/* Content Moderation Section */}
       <section className="py-16 px-4 md:px-6">
         <div className="container mx-auto">
@@ -84,9 +52,9 @@ const Home: React.FC = () => {
               <p className="text-muted-foreground mb-6">
                 Our platform uses advanced moderation tools to ensure all content meets our community guidelines. Report inappropriate content with our easy-to-use reporting system.
               </p>
-              <Button variant="default" asChild>
+              <EnhancedButton variant="default" asChild>
                 <Link to="/content-guidelines">Learn More</Link>
-              </Button>
+              </EnhancedButton>
             </div>
             <div className="flex-1 bg-card rounded-lg p-8 shadow-lg border">
               <h3 className="text-xl font-semibold mb-4">Community Guidelines</h3>
@@ -118,9 +86,9 @@ const Home: React.FC = () => {
           <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
             Gain insights into user engagement and platform performance with our comprehensive analytics dashboard.
           </p>
-          <Button asChild>
+          <EnhancedButton asChild>
             <Link to="/analytics">View Analytics Dashboard</Link>
-          </Button>
+          </EnhancedButton>
         </div>
       </section>
       
@@ -153,3 +121,4 @@ const FeatureCard = ({ icon, title, description }: {
 };
 
 export default Home;
+
