@@ -31,10 +31,10 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
   };
   
   const calculateDuration = () => {
-    if (!booking.start_time || !booking.end_time) return 'N/A';
+    if (!booking.startTime || !booking.endTime) return 'N/A';
     
-    const start = parseISO(booking.start_time);
-    const end = parseISO(booking.end_time);
+    const start = parseISO(booking.startTime);
+    const end = parseISO(booking.endTime);
     const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     
     return `${durationHours} ${durationHours === 1 ? 'hour' : 'hours'}`;
@@ -57,22 +57,22 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
             
             <div className="text-muted-foreground">Date:</div>
             <div className="font-medium">
-              {booking.start_time ? format(parseISO(booking.start_time), 'MMM d, yyyy') : 'N/A'}
+              {booking.startTime ? format(parseISO(booking.startTime), 'MMM d, yyyy') : 'N/A'}
             </div>
             
             <div className="text-muted-foreground">Time:</div>
             <div className="font-medium">
-              {booking.start_time ? format(parseISO(booking.start_time), 'h:mm a') : 'N/A'} - 
-              {booking.end_time ? format(parseISO(booking.end_time), 'h:mm a') : 'N/A'}
+              {booking.startTime ? format(parseISO(booking.startTime), 'h:mm a') : 'N/A'} - 
+              {booking.endTime ? format(parseISO(booking.endTime), 'h:mm a') : 'N/A'}
             </div>
             
             <div className="text-muted-foreground">Duration:</div>
             <div className="font-medium">{calculateDuration()}</div>
             
-            {booking.service_type && (
+            {booking.service && (
               <>
                 <div className="text-muted-foreground">Service Type:</div>
-                <div className="font-medium">{booking.service_type}</div>
+                <div className="font-medium">{booking.service}</div>
               </>
             )}
             

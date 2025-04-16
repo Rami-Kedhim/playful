@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
@@ -34,7 +33,6 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     let subscription: any;
     
     if (bookingId) {
-      // Subscribe to real-time updates for this booking
       subscription = bookingService.subscribeToBookingUpdates(
         bookingId,
         (updatedBooking) => {
@@ -76,8 +74,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
     
     setBooking({
-      escort_id: escort.id,
-      client_id: user.id,
+      escortId: escort.id,
+      clientId: user.id,
       ...bookingDetails,
     });
     
@@ -155,10 +153,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   };
   
-  // Reset flow when dialog closes
   useEffect(() => {
     if (!isOpen) {
-      // Wait a bit before resetting to avoid visual glitches
       const timer = setTimeout(() => {
         setCurrentStep('select');
         setBooking(null);

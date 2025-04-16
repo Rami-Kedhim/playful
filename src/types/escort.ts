@@ -57,9 +57,9 @@ export interface Escort {
   name: string;
   age: number;
   location: string;
-  gender: string;
-  services: ServiceTypeString[];
-  price: number; // Required property
+  gender?: string;
+  services?: ServiceTypeString[];
+  price: number;
   rate?: {
     hourly?: number;
     twoHours?: number;
@@ -67,16 +67,16 @@ export interface Escort {
     weekend?: number;
   };
   rates?: Rates;
-  rating: number;
-  reviewCount: number;
+  rating?: number;
+  reviewCount?: number;
   reviews?: number;
-  avatar: string;
+  avatar?: string;
   phone?: string;
   email?: string;
-  verified: boolean;
+  verified?: boolean;
   languages?: string[];
   gallery?: string[];
-  availability?: Availability[];
+  availability?: Availability | Availability[];
   about?: string;
   bio?: string;
   description?: string;
@@ -103,6 +103,18 @@ export interface Escort {
   videos?: Video[];
   boostLevel?: number;
   boostExpiry?: Date;
+  
+  // Physical attributes
+  height?: number | string;
+  weight?: number | string;
+  measurements?: {
+    bust?: number | string;
+    waist?: number | string;
+    hips?: number | string;
+  } | string;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
 }
 
 export interface EscortFilterOptions {
@@ -141,6 +153,9 @@ export interface Booking {
 }
 
 export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
+
+// Export a ServiceTypeFilter type for components that need it
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
 // Import verification types from the verification.ts file to ensure consistency
 import { VerificationDocument, VerificationRequest } from './verification';

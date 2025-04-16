@@ -49,6 +49,8 @@ export interface UserProfile {
   profileCompleteness?: number;
   is_boosted?: boolean;
   isBoosted?: boolean;
+  created_at?: string;
+  is_verified?: boolean;
 }
 
 export interface AuthResult {
@@ -69,3 +71,6 @@ export type VerificationDocument = VerificationDocumentType;
 export type VerificationRequest = VerificationRequestType;
 export type VerificationStatus = VerificationStatusType;
 export type VerificationLevel = VerificationLevelType;
+
+// Export ServiceTypeFilter for components
+export type { ServiceTypeFilter } from './escort';
