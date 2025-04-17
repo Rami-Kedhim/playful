@@ -1,136 +1,148 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
-import { Card } from '@/components/ui/card';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { format, addHours } from 'date-fns';
-import { Escort, Booking } from '@/types/escort';
-import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Textarea } from '@/components/ui/textarea';
+import { Select } from '@/components/ui/select';
+import { Escort, Booking } from '@/types/escort';
 
 interface BookingDialogProps {
   escort: Escort;
-  onSubmit: (bookingDetails: Partial<Booking>) => Promise<void>;
-  onCancel: () => void;
+  open: boolean;
+  onClose: () => void;
+  onBook: (booking: Partial<Booking>) => void;
 }
 
-const BookingDialog: React.FC<BookingDialogProps> = ({ escort, onSubmit, onCancel }) => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+const BookingDialog: React.FC<BookingDialogProps> = ({ escort, open, onClose, onBook }) => {
+  const [date, setDate] = useState<Date | undefined>(new Date());
   const [startTime, setStartTime] = useState('');
-  const [duration, setDuration] = useState('1');
-  const [notes, setNotes] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [duration, setDuration] = useState(1);
+  const [service, setService] = useState('');
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Calculate end time based on start time and duration
+  const getEndTime = (): Date | null => {
+    if (!date || !startTime) return null;
+    
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const start = new Date(date);
+    start.setHours(hours, minutes);
+    
+    const end = new Date(start);
+    end.setHours(end.getHours() + duration);
+    
+    return end;
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedDate || !startTime) {
-      return;
-    }
+    if (!date || !startTime || !service) return;
     
-    setIsSubmitting(true);
+    const startDate = new Date(date);
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    startDate.setHours(startHours, startMinutes);
     
-    try {
-      const startDateTime = new Date(
-        selectedDate.getFullYear(),
-        selectedDate.getMonth(),
-        selectedDate.getDate(),
-        parseInt(startTime.split(':')[0]),
-        parseInt(startTime.split(':')[1])
-      );
-      
-      const endDateTime = addHours(startDateTime, parseInt(duration));
-      
-      await onSubmit({
-        startTime: startDateTime,
-        endTime: endDateTime,
-        notes,
-        price: (escort.price || 100) * parseInt(duration),
-        serviceType: 'in-person',
-      });
-    } catch (error) {
-      console.error('Booking submission error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    const endDate = getEndTime();
+    if (!endDate) return;
+    
+    const booking: Partial<Booking> = {
+      escortId: escort.id,
+      date: format(date, 'yyyy-MM-dd'),
+      startTime: format(startDate, 'yyyy-MM-dd HH:mm'),
+      endTime: format(endDate, 'yyyy-MM-dd HH:mm'),
+      duration,
+      service,
+      serviceType: service,
+      price: (escort.rates?.hourly || 0) * duration
+    };
+    
+    onBook(booking);
   };
   
   return (
-    <Dialog open={true} onOpenChange={onCancel}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Book Time with {escort.name}</DialogTitle>
+          <DialogTitle>Book Session with {escort.name}</DialogTitle>
+          <DialogDescription>
+            Fill in the details below to request a booking with {escort.name}
+          </DialogDescription>
         </DialogHeader>
-        
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="date">Select Date</Label>
+          <div className="space-y-2">
+            <Label htmlFor="date">Date</Label>
             <Calendar
               mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
+              selected={date}
+              onSelect={setDate}
               className="rounded-md border"
               disabled={(date) => date < new Date()}
             />
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="time">Start Time</Label>
-              <Input
-                id="time"
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div>
-              <Label>Duration</Label>
-              <RadioGroup value={duration} onValueChange={setDuration} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="1" id="1h" />
-                  <Label htmlFor="1h">1h</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="2" id="2h" />
-                  <Label htmlFor="2h">2h</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="3" id="3h" />
-                  <Label htmlFor="3h">3h</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="notes">Special Requests (Optional)</Label>
-            <Textarea
-              id="notes"
-              placeholder="Any special requests or notes?"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
+          
+          <div className="space-y-2">
+            <Label htmlFor="time">Start Time</Label>
+            <Input
+              id="time"
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              required
+              className="w-full"
             />
           </div>
-
+          
+          <div className="space-y-2">
+            <Label htmlFor="duration">Duration (hours)</Label>
+            <select 
+              id="duration" 
+              value={duration} 
+              onChange={(e) => setDuration(Number(e.target.value))}
+              className="w-full border border-input bg-background px-3 py-2 rounded-md"
+              required
+            >
+              <option value={1}>1 hour</option>
+              <option value={2}>2 hours</option>
+              <option value={3}>3 hours</option>
+              <option value={4}>4 hours</option>
+              <option value={8}>8 hours (overnight)</option>
+            </select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="service">Service Type</Label>
+            <select 
+              id="service" 
+              value={service} 
+              onChange={(e) => setService(e.target.value)}
+              className="w-full border border-input bg-background px-3 py-2 rounded-md"
+              required
+            >
+              <option value="">Select a service</option>
+              {escort.services?.map((service) => (
+                <option key={service} value={service}>
+                  {service.charAt(0).toUpperCase() + service.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Total Price</Label>
+            <div className="text-xl font-bold">
+              ${(escort.rates?.hourly || 0) * duration}
+            </div>
+          </div>
+          
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={!selectedDate || !startTime || isSubmitting}
-            >
-              {isSubmitting ? "Processing..." : "Continue"}
-            </Button>
+            <Button type="submit">Request Booking</Button>
           </DialogFooter>
         </form>
       </DialogContent>

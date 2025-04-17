@@ -6,11 +6,12 @@ export interface AuthUser {
   avatarUrl?: string;
   profileImageUrl?: string;
   username?: string;
+  name?: string;
   role?: UserRole;
   roles?: UserRole[];
   user_metadata?: Record<string, any>;
   lucoinsBalance?: number;
-  created_at?: string; // Add this property
+  created_at?: string;
 }
 
 export enum UserRole {
@@ -19,7 +20,8 @@ export enum UserRole {
   MODERATOR = "moderator",
   ESCORT = "escort",
   CONTENT_CREATOR = "content_creator",
-  PREMIUM = "premium"
+  PREMIUM = "premium",
+  ANALYST = "analyst"
 }
 
 export enum DatabaseGender {
@@ -51,7 +53,6 @@ export interface AuthResult {
   message?: string;
   error?: string;
   user?: AuthUser;
-  session?: any; // Add session property for compatibility
 }
 
 export interface LoginCredentials {
@@ -77,6 +78,7 @@ export interface UpdatePasswordCredentials {
 // Add AuthContextType interface
 export interface AuthContextType {
   user: AuthUser | null;
+  profile: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -84,4 +86,12 @@ export interface AuthContextType {
   register: (credentials: RegisterCredentials) => Promise<AuthResult>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  signUp: (email: string, password: string) => Promise<AuthResult>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signOut: () => Promise<void>;
+  updateUserProfile: (data: any) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<boolean>;
+  userRoles: UserRole[];
+  checkRole: (role: string | UserRole) => boolean;
 }

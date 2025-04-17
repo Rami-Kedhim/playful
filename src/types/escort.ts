@@ -44,6 +44,9 @@ export interface Availability {
     start: string;
     end: string;
   }[];
+  days?: number[];
+  hours?: number[];
+  customNotes?: string;
 }
 
 // Main Escort interface
@@ -113,6 +116,9 @@ export interface Escort {
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
+  
+  // Deprecated fields (added for backward compatibility)
+  verification_level?: VerificationLevel | string;
 }
 
 export interface Booking {
@@ -120,10 +126,11 @@ export interface Booking {
   escortId: string;
   clientId: string;
   date: string | Date;
-  startTime: string;
-  endTime: string;
+  startTime: string | Date;
+  endTime: string | Date;
   duration: number;
   service: ServiceTypeString;
+  serviceType?: ServiceTypeString;
   status: BookingStatus;
   location?: string;
   price: number;
@@ -162,7 +169,7 @@ export interface VerificationDocument {
 export interface VerificationRequest {
   id: string;
   profile_id: string;
-  userId?: string; // Make userId optional to resolve conflict
+  userId?: string;
   status: VerificationStatus;
   requested_level: VerificationLevel;
   documents: VerificationDocument[];
@@ -182,4 +189,6 @@ export interface VerificationRequest {
   rejection_reason?: string;
   level?: VerificationLevel;
   user_id?: string;
+  reviewedAt?: string;
+  reviewerId?: string;
 }

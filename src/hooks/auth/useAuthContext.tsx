@@ -1,25 +1,8 @@
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { AuthContextType, AuthUser, UserProfile } from '@/types/auth';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { AuthContextType, AuthUser, UserProfile, UserRole } from '@/types/auth';
 
-// Extend the AuthContextType to include the properties that are used in the code but not in the type
-type ExtendedAuthContextType = AuthContextType & {
-  session?: any;
-  login?: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout?: () => Promise<{ success: boolean; error?: string }>;
-  register?: (email: string, password: string, username?: string) => Promise<{ success: boolean; error?: string }>;
-  resetPassword?: (email: string) => Promise<void>;
-  clearError?: () => void;
-  updateAuthState?: (updates: Partial<ExtendedAuthContextType>) => void;
-  updateUser?: (updates: Partial<AuthUser>) => Promise<boolean>;
-  clearSession?: () => void;
-  isLoggedIn?: boolean;
-  isAdmin?: () => boolean;
-  isCreator?: () => boolean;
-  setUser?: (user: AuthUser | null) => void; // Add the setUser method
-};
-
-const DEFAULT_CONTEXT: ExtendedAuthContextType = {
+const DEFAULT_CONTEXT: AuthContextType = {
   user: null,
   profile: null,
   isAuthenticated: false,
@@ -28,27 +11,18 @@ const DEFAULT_CONTEXT: ExtendedAuthContextType = {
   signUp: async () => ({ success: false, error: 'Not implemented' }),
   signIn: async () => ({ success: false, error: 'Not implemented' }),
   signOut: async () => {},
+  login: async () => ({ success: false, error: 'Not implemented' }),
+  register: async () => ({ success: false, error: 'Not implemented' }),
+  logout: async () => {},
   refreshUser: async () => {},
   updateUserProfile: async () => false,
   refreshProfile: async () => {},
   userRoles: [],
   checkRole: () => false,
-  updatePassword: async () => false,
-  logout: async () => ({ success: false, error: 'Not implemented' }),
-  login: async () => ({ success: false, error: 'Not implemented' }),
-  register: async () => ({ success: false, error: 'Not implemented' }),
-  session: null,
-  resetPassword: async () => {}, 
-  updateUser: async () => false, 
-  clearSession: () => {}, 
-  isLoggedIn: false, 
-  isAdmin: () => false, 
-  isCreator: () => false,
-  clearError: () => {},
-  setUser: () => {}, // Initialize setUser
+  updatePassword: async () => false
 };
 
-export const AuthContext = createContext<ExtendedAuthContextType>(DEFAULT_CONTEXT);
+export const AuthContext = createContext<AuthContextType>(DEFAULT_CONTEXT);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -59,20 +33,96 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<ExtendedAuthContextType>(DEFAULT_CONTEXT);
-
-  // Add methods to update state if needed
-  const updateAuthState = useCallback((updates: Partial<ExtendedAuthContextType>) => {
-    setState(prevState => ({ ...prevState, ...updates }));
+  const [state, setState] = useState<AuthContextType>(DEFAULT_CONTEXT);
+  
+  // Mock implementation for role checking
+  const checkRole = useCallback((role: string | UserRole) => {
+    if (!state.user || !state.user.roles) return false;
+    return state.user.roles.includes(role as UserRole);
+  }, [state.user]);
+  
+  // Mock user roles
+  const userRoles = state.user?.roles || [];
+  
+  // Mock implementation for updating user profile
+  const updateUserProfile = useCallback(async (data: any): Promise<boolean> => {
+    console.log('Updating user profile with data:', data);
+    // In a real app, this would call an API
+    return true;
   }, []);
   
-  // Add setUser method
-  const setUser = useCallback((user: AuthUser | null) => {
-    setState(prevState => ({ ...prevState, user, isAuthenticated: !!user }));
+  // Mock implementation for refreshing profile
+  const refreshProfile = useCallback(async (): Promise<void> => {
+    console.log('Refreshing user profile');
+    // In a real app, this would fetch from an API
   }, []);
+  
+  // Mock implementation for updating password
+  const updatePassword = useCallback(async (newPassword: string): Promise<boolean> => {
+    console.log('Updating password');
+    // In a real app, this would call an API
+    return true;
+  }, []);
+  
+  // Mock sign in
+  const signIn = useCallback(async (email: string, password: string) => {
+    return { success: true, user: { id: '1', email, roles: [UserRole.USER] } };
+  }, []);
+  
+  // Mock sign up
+  const signUp = useCallback(async (email: string, password: string) => {
+    return { success: true, user: { id: '1', email, roles: [UserRole.USER] } };
+  }, []);
+  
+  // Mock sign out
+  const signOut = useCallback(async () => {
+    setState(prev => ({...prev, user: null, isAuthenticated: false}));
+  }, []);
+  
+  // For demonstration purposes, simulate a logged in user
+  useEffect(() => {
+    setTimeout(() => {
+      setState(prev => ({
+        ...prev,
+        user: {
+          id: '1',
+          email: 'user@example.com',
+          username: 'user',
+          name: 'Test User',
+          roles: [UserRole.USER]
+        },
+        isAuthenticated: true,
+        isLoading: false,
+        checkRole,
+        userRoles,
+        updateUserProfile,
+        refreshProfile,
+        updatePassword,
+        signIn,
+        signUp,
+        signOut,
+        profile: {
+          id: '1',
+          email: 'user@example.com',
+          name: 'Test User',
+          username: 'user'
+        }
+      }));
+    }, 1000);
+  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, signIn, signUp, signOut]);
   
   return (
-    <AuthContext.Provider value={{ ...state, updateAuthState, setUser }}>
+    <AuthContext.Provider value={{
+      ...state,
+      checkRole,
+      userRoles,
+      updateUserProfile,
+      refreshProfile,
+      updatePassword,
+      signIn,
+      signUp,
+      signOut
+    }}>
       {children}
     </AuthContext.Provider>
   );

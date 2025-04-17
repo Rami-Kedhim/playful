@@ -8,7 +8,6 @@ import VerificationStatusTab from './tabs/VerificationStatusTab';
 import VerificationTypeTab from './tabs/VerificationTypeTab';
 import VerificationSubmitTab from './tabs/VerificationSubmitTab';
 import VerificationUpgradeTab from './tabs/VerificationUpgradeTab';
-import { VerificationStatus } from '@/types/verification';
 
 const VerificationContainer = () => {
   const location = useLocation();
@@ -45,12 +44,12 @@ const VerificationContainer = () => {
     setActiveTab("submit");
   };
 
-  // Use VerificationStatus enum values instead of string literals
+  // Use string values instead of enum values
   const getActiveStatus = () => {
     if (activeTab === "submit") {
-      return VerificationStatus.PENDING;
+      return "pending";
     } else {
-      return VerificationStatus.IN_REVIEW;
+      return "in_review";
     }
   };
 

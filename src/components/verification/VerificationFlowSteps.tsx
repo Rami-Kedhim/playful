@@ -5,15 +5,15 @@ import { cn } from '@/lib/utils';
 import { VerificationStatus } from '@/types/verification';
 
 interface VerificationFlowStepsProps {
-  status: VerificationStatus;
+  status: string; // Changed from VerificationStatus to string to avoid the type usage issue
   className?: string;
 }
 
 const VerificationFlowSteps = ({ status, className }: VerificationFlowStepsProps) => {
   const steps = [
     { id: 1, label: 'Submit Documents', completed: true },
-    { id: 2, label: 'Under Review', completed: status !== VerificationStatus.PENDING },
-    { id: 3, label: 'Verification Complete', completed: status === VerificationStatus.APPROVED || status === VerificationStatus.REJECTED }
+    { id: 2, label: 'Under Review', completed: status !== 'pending' },
+    { id: 3, label: 'Verification Complete', completed: status === 'approved' || status === 'rejected' }
   ];
 
   return (
@@ -25,7 +25,7 @@ const VerificationFlowSteps = ({ status, className }: VerificationFlowStepsProps
               <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-primary mb-2">
                 {step.completed ? (
                   <CheckCircle2 className="w-6 h-6 text-primary" />
-                ) : status === VerificationStatus.PENDING && step.id === 2 ? (
+                ) : status === 'pending' && step.id === 2 ? (
                   <CircleDot className="w-6 h-6 text-primary animate-pulse" />
                 ) : (
                   <Circle className="w-6 h-6 text-muted-foreground" />

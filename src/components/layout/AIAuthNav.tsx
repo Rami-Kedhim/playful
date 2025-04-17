@@ -1,130 +1,147 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/auth/useAuthContext'; // Update this import
-import { LogIn, UserCircle, MessageSquare, User } from 'lucide-react';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import {
+  User,
+  LogOut,
+  Settings,
+  CreditCard,
+  Bell,
+  MessageSquare,
+  Heart,
+  LayoutDashboard
+} from 'lucide-react';
 
-// You'll need to define a minimal recentInteractions interface
-interface RecentInteraction {
-  companionId: string;
+interface AIAuthNavProps {
+  className?: string;
 }
 
-interface AICompanion {
-  id: string;
-  name: string;
-  avatarUrl: string;
-}
+const AIAuthNav: React.FC<AIAuthNavProps> = ({ className }) => {
+  const { isAuthenticated, user, signOut } = useAuth();
 
-const AIAuthNav: React.FC = () => {
-  const { isAuthenticated, logout, user } = useAuth();
-  // Mock these properties that would come from useUserAIContext
-  const currentCompanion: AICompanion | null = null;
-  const clearCurrentCompanion = () => {};
-  const recentInteractions: RecentInteraction[] = [];
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center gap-2">
+        <Button variant="outline" asChild size="sm">
+          <Link to="/auth?tab=login">Login</Link>
+        </Button>
+        <Button asChild size="sm">
+          <Link to="/auth?tab=register">Sign Up</Link>
+        </Button>
+      </div>
+    );
+  }
 
-  const handleLogout = async () => {
-    await logout();
+  // Get user initials for avatar fallback
+  const getInitials = () => {
+    if (!user) return 'U';
+    
+    if (user.username) {
+      return user.username.substring(0, 2).toUpperCase();
+    }
+    
+    // Use the name property if available, fallback to email
+    if (user.name) {
+      return user.name.substring(0, 2).toUpperCase();
+    }
+    
+    if (user.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    
+    return 'U';
   };
+  
+  const displayName = user?.username || user?.name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="flex items-center space-x-4">
-      {/* Show current AI companion if there is one */}
-      {currentCompanion && (
-        <div className="flex items-center mr-2 bg-secondary/30 px-3 py-1 rounded-full">
-          <Avatar className="h-6 w-6 mr-2">
-            <AvatarImage src={currentCompanion.avatarUrl} />
-            <AvatarFallback>{currentCompanion.name[0]}</AvatarFallback>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user?.avatarUrl || user?.avatar_url} alt={displayName} />
+            <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
-          <span className="text-sm">{currentCompanion.name}</span>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="ml-2 h-6 w-6 p-0"
-            onClick={clearCurrentCompanion}
-          >
-            <span className="sr-only">Clear</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </Button>
-        </div>
-      )}
-
-      {isAuthenticated ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative" size="sm">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.avatar_url || user?.avatarUrl || user?.profileImageUrl} />
-                <AvatarFallback>{user?.email?.[0]?.toUpperCase() || <User />}</AvatarFallback>
-              </Avatar>
-              <span className="sr-only">User menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <div className="flex items-center justify-start p-2">
-              <div className="flex flex-col space-y-1">
-                <p className="font-medium text-sm">{user?.username || user?.name || user?.email}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
-              </div>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/profile" className="cursor-pointer">
-                <UserCircle className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link to="/ai-companions" className="cursor-pointer">
-                <MessageSquare className="mr-2 h-4 w-4" />
-                <span>AI Companions</span>
-              </Link>
-            </DropdownMenuItem>
-
-            {recentInteractions.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <p className="text-xs px-2 py-1 text-muted-foreground">Recent Companions</p>
-                {recentInteractions.slice(0, 3).map(interaction => (
-                  <DropdownMenuItem key={interaction.companionId} asChild>
-                    <Link to={`/ai-companions/${interaction.companionId}`} className="cursor-pointer">
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      <span className="truncate max-w-[150px]">
-                        {interaction.companionId.substr(0, 10)}...
-                      </span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-              </>
-            )}
-            
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-              <LogIn className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <Button asChild variant="secondary" size="sm">
-          <Link to="/auth">
-            <LogIn className="mr-2 h-4 w-4" />
-            Sign In
-          </Link>
         </Button>
-      )}
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{displayName}</p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user?.email}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard" className="cursor-pointer flex items-center">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/profile" className="cursor-pointer flex items-center">
+            <User className="mr-2 h-4 w-4" />
+            Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="cursor-pointer flex items-center">
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/wallet" className="cursor-pointer flex items-center">
+            <CreditCard className="mr-2 h-4 w-4" />
+            Wallet
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/messages" className="cursor-pointer flex items-center">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Messages
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/notifications" className="cursor-pointer flex items-center">
+            <Bell className="mr-2 h-4 w-4" />
+            Notifications
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/favorites" className="cursor-pointer flex items-center">
+            <Heart className="mr-2 h-4 w-4" />
+            Favorites
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem 
+          onClick={() => signOut()}
+          className="cursor-pointer flex items-center text-destructive focus:text-destructive"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

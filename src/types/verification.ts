@@ -1,5 +1,4 @@
 
-import { VerificationLevel, VerificationStatus, VerificationDocument } from './escort';
 import { z } from 'zod';
 
 // Document types enumeration for verification
@@ -12,6 +11,9 @@ export const DOCUMENT_TYPES = [
   { value: 'bank_statement', label: 'Bank Statement' },
   { value: 'selfie', label: 'Selfie with ID' },
 ];
+
+// Common ID document type
+export const ID_CARD = 'national_id';
 
 // Verification form schema
 export const verificationFormSchema = z.object({
@@ -26,12 +28,48 @@ export const verificationFormSchema = z.object({
 });
 
 // Form values type for verification
-export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
+export type VerificationFormValues = {
+  documentType: string;
+  documentFile: File;
+  selfieFile?: File;
+  consentChecked: boolean;
+  documentFrontImage?: { file: File; preview: string };
+  documentBackImage?: { file?: File; preview: string };
+  selfieImage?: { file: File; preview: string };
+};
 
-// Re-export types from escort.ts for compatibility
-export type { VerificationLevel, VerificationStatus, VerificationDocument };
+// Verification levels
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  ENHANCED = 'enhanced',
+  PREMIUM = 'premium'
+}
 
-// Export the VerificationRequest interface with required fields to match escort.ts
+// Verification status
+export enum VerificationStatus {
+  PENDING = 'pending',
+  IN_REVIEW = 'in_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired'
+}
+
+export interface VerificationDocument {
+  id: string;
+  verification_id: string;
+  document_type: string;
+  document_url: string;
+  status: VerificationStatus;
+  notes?: string;
+  created_at: string;
+  updated_at?: string;
+  type?: string;
+  url?: string;
+  fileUrl?: string;
+  uploadedAt?: string;
+}
+
 export interface VerificationRequest {
   id: string;
   profile_id: string;
@@ -41,7 +79,6 @@ export interface VerificationRequest {
   documents: VerificationDocument[];
   createdAt: string;
   updatedAt?: string;
-  reviewedAt?: string;
   reviewerId?: string;
   reviewerNotes?: string;
   expiresAt?: string;
@@ -58,4 +95,5 @@ export interface VerificationRequest {
   rejectionReason?: string;
   level?: VerificationLevel;
   user_id?: string;
+  reviewedAt?: string;
 }

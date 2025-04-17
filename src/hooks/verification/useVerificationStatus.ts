@@ -18,18 +18,20 @@ export const useVerificationStatus = (userId?: string) => {
     const fetchStatus = async () => {
       setLoading(true);
       try {
-        // Mock data
+        // Mock data - with properly typed fields
         const mockRequest: VerificationRequest = {
           id: 'ver_123',
           userId: userId, 
           profile_id: userId,
           status: VerificationStatus.PENDING,
-          level: VerificationLevel.BASIC,
           requested_level: VerificationLevel.BASIC,
           documents: [],
           createdAt: new Date().toISOString(),
-          submittedAt: new Date().toISOString(),
+          // Include all required fields plus compatibility fields
           created_at: new Date().toISOString(),
+          level: VerificationLevel.BASIC,
+          verificationLevel: VerificationLevel.BASIC,
+          user_id: userId
         };
         
         // Artificial delay
