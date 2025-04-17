@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -59,6 +58,21 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const formatJoinDate = () => {
+    if (!user) return 'N/A';
+    
+    const joinDate = user.created_at;
+    
+    if (!joinDate) return 'N/A';
+    
+    try {
+      return format(new Date(joinDate), 'MMMM d, yyyy');
+    } catch (err) {
+      console.error('Error formatting date:', err);
+      return joinDate;
     }
   };
 
@@ -219,8 +233,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
               <div className="space-y-2">
                 <Label>Member Since</Label>
                 <div className="text-sm text-muted-foreground">
-                  {new Date(user.created_at).toLocaleDateString()} 
-                  ({new Date(user.created_at).toLocaleTimeString()})
+                  {formatJoinDate()}
                 </div>
               </div>
             )}

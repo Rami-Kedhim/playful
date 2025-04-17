@@ -10,6 +10,7 @@ export interface AuthUser {
   roles?: UserRole[];
   user_metadata?: Record<string, any>;
   lucoinsBalance?: number;
+  created_at?: string; // Add this property
 }
 
 export enum UserRole {
@@ -50,6 +51,7 @@ export interface AuthResult {
   message?: string;
   error?: string;
   user?: AuthUser;
+  session?: any; // Add session property for compatibility
 }
 
 export interface LoginCredentials {
@@ -70,4 +72,16 @@ export interface ResetPasswordCredentials {
 export interface UpdatePasswordCredentials {
   oldPassword: string;
   newPassword: string;
+}
+
+// Add AuthContextType interface
+export interface AuthContextType {
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  login: (credentials: LoginCredentials) => Promise<AuthResult>;
+  register: (credentials: RegisterCredentials) => Promise<AuthResult>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }

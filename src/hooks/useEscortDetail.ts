@@ -1,6 +1,5 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { Escort } from '@/types/escort';
 import { useToast } from '@/components/ui/use-toast';
 import { useWallet } from '@/hooks/useWallet';
@@ -9,7 +8,6 @@ import { useWallet } from '@/hooks/useWallet';
  * Hook for detailed escort profile interactions
  */
 export const useEscortDetail = (escortId?: string) => {
-  const { getEscortById } = useEscortContext();
   const { toast } = useToast();
   const { wallet } = useWallet();
   
@@ -26,27 +24,37 @@ export const useEscortDetail = (escortId?: string) => {
       return;
     }
     
-    try {
-      const foundEscort = getEscortById(escortId);
-      if (foundEscort) {
-        setEscort(foundEscort);
+    // Simulate fetching escort data
+    const fetchEscortData = async () => {
+      try {
+        // Placeholder for actual API call
+        // In a real app this would be from an API
+        const fakeEscort: Escort = {
+          id: escortId,
+          name: "Sample Escort",
+          age: 25,
+          location: "New York",
+          gender: "female",
+          rating: 4.8,
+          reviewCount: 24,
+          verified: true,
+          rates: { hourly: 200 }
+        };
         
-        // Check if escort is favorited (in a real app, fetch from API)
+        setEscort(fakeEscort);
         setIsFavorite(Math.random() > 0.6);
-        
         setError(null);
-      } else {
-        setError("Escort not found");
+      } catch (err) {
+        console.error("Error loading escort details:", err);
+        setError("Failed to load escort details");
         setEscort(null);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error loading escort details:", err);
-      setError("Failed to load escort details");
-      setEscort(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [escortId, getEscortById]);
+    };
+    
+    fetchEscortData();
+  }, [escortId]);
   
   // Handle booking request
   const handleBookingRequest = useCallback((startTime: Date, endTime: Date, serviceType: string) => {
