@@ -1,81 +1,79 @@
+import { useState } from 'react';
+import { Availability } from '@/types/escort';
 
-import { useState, useCallback } from 'react';
-import { Escort, Availability } from '@/types/escort';
+// Update Availability interface to include the missing properties
+interface ExtendedAvailability extends Availability {
+  timeZone?: string;
+  availableNow?: boolean;
+}
 
-export const useEscortAvailability = (updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>) => {
-  const [availability, setAvailability] = useState<Availability>({
+export const useEscortAvailability = (escortId: string) => {
+  // Fix the property references to match the extended interface
+  const [availability, setAvailability] = useState<ExtendedAvailability>({
     days: [],
     hours: [],
-    timeZone: 'UTC',
-    availableNow: false
+    timeZone: "UTC",
+    customNotes: ""
   });
-  
-  const updateAvailability = useCallback(async (
-    escortId: string, 
-    updatedAvailability: Availability
-  ) => {
-    try {
-      const result = await updateEscortProfile(escortId, {
-        availability: updatedAvailability
+
+  const setDays = (days: string[]) => {
+    setAvailability((prev) => ({
+      ...prev,
+      days: days
+    }));
+  };
+
+  const setHours = (hours: string[]) => {
+    setAvailability((prev) => ({
+      ...prev,
+      hours: hours
+    }));
+  };
+
+  const setCustomNotes = (notes: string) => {
+    setAvailability((prev) => ({
+      ...prev,
+      customNotes: notes
+    }));
+  };
+
+  const setTimeZone = (timeZone: string) => {
+    setAvailability((prev) => ({
+      ...prev,
+      timeZone: timeZone
+    }));
+  };
+
+  const checkAvailabilityNow = () => {
+    const now = new Date();
+    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
+    const currentHour = now.getHours();
+
+    const isAvailable =
+      availability.days.includes(currentDay) &&
+      availability.hours.some((hourRange) => {
+        const [start, end] = hourRange.split('-').map(Number);
+        return currentHour >= start && currentHour < end;
       });
-      
-      if (result) {
-        setAvailability(updatedAvailability);
-      }
-      
-      return result;
-    } catch (error) {
-      console.error('Error updating availability:', error);
-      return null;
-    }
-  }, [updateEscortProfile]);
-  
-  const setAvailableNow = useCallback(async (
-    escortId: string,
-    isAvailableNow: boolean
-  ) => {
-    return updateAvailability(escortId, {
-      ...availability,
-      availableNow: isAvailableNow
-    });
-  }, [availability, updateAvailability]);
-  
-  const setDays = useCallback(async (
-    escortId: string,
-    days: string[]
-  ) => {
-    return updateAvailability(escortId, {
-      ...availability,
-      days
-    });
-  }, [availability, updateAvailability]);
-  
-  const setHours = useCallback(async (
-    escortId: string,
-    hours: string[]
-  ) => {
-    return updateAvailability(escortId, {
-      ...availability,
-      hours
-    });
-  }, [availability, updateAvailability]);
-  
-  const setTimeZone = useCallback(async (
-    escortId: string,
-    timeZone: string
-  ) => {
-    return updateAvailability(escortId, {
-      ...availability,
-      timeZone
-    });
-  }, [availability, updateAvailability]);
-  
+
+    // Make sure to match the extended interface
+    setAvailability((prev) => ({
+      ...prev,
+      availableNow: isAvailable
+    }));
+  };
+
+  // Make sure to match the extended interface when returning
   return {
-    availability,
-    updateAvailability,
-    setAvailableNow,
+    ...availability,
+    timeZone: availability.timeZone || "UTC",
+    days: availability.days || [],
+    hours: availability.hours || [],
+    customNotes: availability.customNotes || "",
     setDays,
     setHours,
-    setTimeZone
+    setCustomNotes,
+    setTimeZone,
+    checkAvailabilityNow,
   };
 };

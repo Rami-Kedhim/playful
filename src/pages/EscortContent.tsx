@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
@@ -29,8 +28,9 @@ const EscortContent = () => {
     );
   }
   
-  // Default subscription price if not provided
+  // Updated to handle optional subscriptionPrice
   const defaultSubscriptionPrice = 29.99;
+  const subscriptionPrice = escort?.subscriptionPrice || defaultSubscriptionPrice;
   
   return (
     <MainLayout>
@@ -77,7 +77,7 @@ const EscortContent = () => {
                   <div className="p-4 border rounded-md bg-muted/30">
                     <div className="flex justify-between mb-2">
                       <span className="font-medium">Monthly</span>
-                      <span className="font-bold">${escort.subscriptionPrice || defaultSubscriptionPrice}/mo</span>
+                      <span className="font-bold">${subscriptionPrice}/mo</span>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">
                       Access to all photos and videos
@@ -88,7 +88,7 @@ const EscortContent = () => {
                   <div className="p-4 border rounded-md border-primary/30 bg-primary/5">
                     <div className="flex justify-between mb-2">
                       <span className="font-medium">Premium</span>
-                      <span className="font-bold">${(escort.subscriptionPrice || defaultSubscriptionPrice) * 2}/mo</span>
+                      <span className="font-bold">${subscriptionPrice * 2}/mo</span>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">
                       Everything from Monthly + private messaging and live streams

@@ -1,67 +1,20 @@
+import { useCallback } from 'react';
+import { useAuth } from './useAuthContext';
+import { AuthUser } from '@/types/auth';
 
-import { useState } from "react";
-import { AuthUser } from "@/types/auth";
-import { supabase } from "@/integrations/supabase/client";
+export const useAuthState = () => {
+  const { user } = useAuth();
 
-export type AuthState = {
-  user: AuthUser | null;
-  profile: any | null;
-  isLoading: boolean;
-  userRoles: string[];
-};
+  const isAdmin = useCallback((user: AuthUser | null) => {
+    return user?.roles?.includes('admin') || false;
+  }, []);
 
-export function useAuthState() {
-  const [state, setState] = useState<AuthState>({
-    user: null,
-    profile: null,
-    isLoading: true,
-    userRoles: []
-  });
-
-  const setIsLoading = (loading: boolean) => {
-    setState(prev => ({ ...prev, isLoading: loading }));
-  };
-
-  const setUser = (user: AuthUser | null) => {
-    if (user) {
-      const roles = user.role ? [user.role] : ['user'];
-      setState(prev => ({ ...prev, user, userRoles: roles }));
-    } else {
-      setState(prev => ({ ...prev, user: null, userRoles: [], profile: null }));
-    }
-  };
-
-  const setProfile = (profile: any | null) => {
-    setState(prev => ({ ...prev, profile }));
-  };
-
-  const refreshProfile = async () => {
-    if (!state.user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', state.user.id)
-        .single();
-      
-      if (error) throw error;
-      
-      if (data) {
-        setProfile(data);
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    }
-  };
+  const isCreator = useCallback((user: AuthUser | null) => {
+    return user?.roles?.includes('creator') || false;
+  }, []);
 
   return {
-    authState: state,
-    setIsLoading,
-    setUser,
-    setProfile,
-    refreshProfile
+    isAdmin: isAdmin(user),
+    isCreator: isCreator(user),
   };
 }
-
-export default useAuthState;

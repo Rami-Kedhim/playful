@@ -11,17 +11,30 @@ export const serviceTypeInfoMap = {
   'in-person': {
     label: 'In-Person',
     icon: Users,
-    class: 'bg-indigo-100 text-indigo-800 border-indigo-300'
+    class: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+    filterLabel: 'In-Person Only',
+    description: 'Physical meetings'
   },
   'virtual': {
     label: 'Virtual',
     icon: Monitor,
-    class: 'bg-purple-100 text-purple-800 border-purple-300'
+    class: 'bg-purple-100 text-purple-800 border-purple-300',
+    filterLabel: 'Virtual Only',
+    description: 'Online services'
   },
   'both': {
     label: 'Both',
     icon: Globe,
-    class: 'bg-blue-100 text-blue-800 border-blue-300'
+    class: 'bg-blue-100 text-blue-800 border-blue-300',
+    filterLabel: 'Both Services',
+    description: 'In-person & virtual'
+  },
+  '': {
+    label: 'Any',
+    icon: null,
+    class: 'bg-gray-100 text-gray-800 border-gray-300',
+    filterLabel: 'Any Type',
+    description: 'All service types'
   }
 };
 
@@ -29,8 +42,12 @@ export const getServiceTypeInfo = (type: ServiceTypeFilter) => {
   return serviceTypeInfoMap[type] || null;
 };
 
-export const getSafeServiceLabel = (type: ServiceTypeFilter) => {
-  return serviceTypeInfoMap[type]?.label || 'Unknown';
+export const getSafeServiceLabel = (type: string) => {
+  if (type in serviceTypeInfoMap) {
+    return serviceTypeInfoMap[type as ServiceTypeFilter].label;
+  }
+  // Fallback for other service types
+  return type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1');
 };
 
 export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {

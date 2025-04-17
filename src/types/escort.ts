@@ -8,6 +8,7 @@ export type Availability = {
   days: string[];
   hours: string[];
   customNotes?: string;
+  timeZone?: string; // Add missing property
 };
 export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
@@ -26,15 +27,15 @@ export interface Booking {
   escortId: string;
   userId: string;
   clientId?: string; // Added for backward compatibility
-  startTime: Date;
-  endTime: Date;
+  startTime: Date | string;  // Modified to accept both Date and string
+  endTime: Date | string;    // Modified to accept both Date and string
   serviceType?: string;
   service?: string; // For backward compatibility
   location: string;
   status: BookingStatus;
   totalPrice: number;
   price?: number; // For backward compatibility
-  createdAt: Date;
+  createdAt: Date | string;  // Modified to accept both Date and string
   notes?: string;
   isPaid?: boolean;
   paymentId?: string;
@@ -131,6 +132,9 @@ export interface Escort {
     streams?: number;
     live?: boolean;
   };
+  profileType?: 'verified' | 'ai' | 'provisional';
+  boostLevel?: number;
+  subscriptionPrice?: number;
 }
 
 // Verification related types

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AppLayout from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -54,7 +53,10 @@ const Profile = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left sidebar */}
           <div className="space-y-6">
-            <UserProfileSummary />
+            <UserProfileSummary 
+              user={user} 
+              profile={profile}
+            />
             
             <UBXWallet 
               showRefresh={true}

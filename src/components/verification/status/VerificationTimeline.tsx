@@ -1,85 +1,98 @@
 
 import React from 'react';
-import { CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react';
-import { VerificationRequest, VerificationStatus } from '@/types/escort';
+import { CheckCircle, Clock, AlertCircle, Circle, XCircle } from 'lucide-react';
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
 interface VerificationTimelineProps {
-  request: VerificationRequest;
+  verificationRequest: VerificationRequest;
 }
 
-const VerificationTimeline: React.FC<VerificationTimelineProps> = ({ request }) => {
-  const status = request.status;
-  const submittedAt = new Date(request.created_at);
-  const reviewedAt = request.reviewed_at ? new Date(request.reviewed_at) : null;
-  
-  const getStatusIcon = (stepStatus: VerificationStatus) => {
-    switch (stepStatus) {
-      case 'pending':
-        return <Clock className="h-6 w-6 text-blue-500" />;
-      case 'in_review':
-        return <AlertCircle className="h-6 w-6 text-yellow-500" />;
-      case 'approved':
-        return <CheckCircle className="h-6 w-6 text-green-500" />;
-      case 'rejected':
-        return <XCircle className="h-6 w-6 text-red-500" />;
-      case 'expired':
-        return <XCircle className="h-6 w-6 text-gray-500" />;
-      default:
-        return <Clock className="h-6 w-6 text-gray-400" />;
+const VerificationTimeline: React.FC<VerificationTimelineProps> = ({ verificationRequest }) => {
+  const steps = [
+    { 
+      id: 'submitted', 
+      label: 'Submitted', 
+      date: verificationRequest.submittedAt || verificationRequest.created_at, 
+      status: 'complete' as const
+    },
+    { 
+      id: 'review',
+      label: 'In Review',
+      date: verificationRequest.status === 'in_review' ? verificationRequest.updated_at : null,
+      status: getStepStatus('in_review', verificationRequest.status)
+    },
+    { 
+      id: 'approved',
+      label: 'Approved',
+      date: verificationRequest.status === 'approved' ? verificationRequest.updated_at || verificationRequest.reviewed_at : null,
+      status: getStepStatus('approved', verificationRequest.status)
+    },
+    { 
+      id: 'rejected',
+      label: 'Rejected',
+      date: verificationRequest.status === 'rejected' ? verificationRequest.updated_at || verificationRequest.reviewed_at : null,
+      status: getStepStatus('rejected', verificationRequest.status)
     }
-  };
+  ];
+
+  function getStepStatus(step: string, currentStatus: string): 'pending' | 'current' | 'complete' | 'error' {
+    if (currentStatus === 'rejected' && step === 'rejected') return 'error';
+    if (currentStatus === 'approved' && step === 'approved') return 'complete';
+    
+    switch(step) {
+      case 'in_review':
+        if (currentStatus === 'in_review') return 'current';
+        if (['approved', 'rejected'].includes(currentStatus)) return 'complete';
+        return 'pending';
+      case 'approved':
+        if (currentStatus === 'approved') return 'complete';
+        return 'pending';
+      case 'rejected':
+        if (currentStatus === 'rejected') return 'error';
+        return 'pending';
+      default:
+        return 'pending';
+    }
+  }
+
+  function getStepIcon(status: 'pending' | 'current' | 'complete' | 'error') {
+    switch(status) {
+      case 'complete': return <CheckCircle className="h-6 w-6 text-green-500" />;
+      case 'current': return <Clock className="h-6 w-6 text-blue-500 animate-pulse" />;
+      case 'error': return <XCircle className="h-6 w-6 text-red-500" />;
+      case 'pending': return <Circle className="h-6 w-6 text-gray-300" />;
+    }
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          {getStatusIcon('pending')}
-        </div>
-        <div className="ml-4">
-          <h3 className="text-lg font-medium">Verification Requested</h3>
-          <p className="text-sm text-gray-500">
-            {submittedAt.toLocaleDateString()} at {submittedAt.toLocaleTimeString()}
-          </p>
-        </div>
-      </div>
-      
-      <div className="h-10 border-l-2 border-gray-200 ml-3"></div>
-      
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          {status === 'in_review' || status === 'approved' || status === 'rejected' 
-            ? getStatusIcon('in_review') 
-            : <div className="h-6 w-6 rounded-full border-2 border-gray-300"></div>}
-        </div>
-        <div className="ml-4">
-          <h3 className="text-lg font-medium">Under Review</h3>
-          {status === 'in_review' && (
-            <p className="text-sm text-gray-500">Your documents are being reviewed</p>
-          )}
-        </div>
-      </div>
-      
-      <div className="h-10 border-l-2 border-gray-200 ml-3"></div>
-      
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          {status === 'approved' || status === 'rejected' 
-            ? getStatusIcon(status) 
-            : <div className="h-6 w-6 rounded-full border-2 border-gray-300"></div>}
-        </div>
-        <div className="ml-4">
-          <h3 className="text-lg font-medium">
-            {status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Decision'}
-          </h3>
-          {reviewedAt && (status === 'approved' || status === 'rejected') && (
-            <p className="text-sm text-gray-500">
-              {reviewedAt.toLocaleDateString()} at {reviewedAt.toLocaleTimeString()}
-            </p>
-          )}
-          {status === 'rejected' && request.reviewer_notes && (
-            <p className="mt-1 text-sm text-red-600">{request.reviewer_notes}</p>
-          )}
-        </div>
+    <div className="space-y-4">
+      <h3 className="font-medium mb-2">Progress Timeline</h3>
+      <div className="space-y-4">
+        {steps.map((step, index) => (
+          <div key={step.id} className="flex items-start">
+            <div className="mr-3 mt-0.5">
+              {getStepIcon(step.status)}
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between items-center">
+                <h4 className={`font-medium ${
+                  step.status === 'current' ? 'text-blue-600' : 
+                  step.status === 'error' ? 'text-red-600' : 
+                  step.status === 'complete' ? 'text-green-600' : 
+                  'text-gray-600'
+                }`}>{step.label}</h4>
+                {step.date && (
+                  <span className="text-xs text-gray-500">
+                    {new Date(step.date).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+              {index < steps.length - 1 && step.status !== 'pending' && (
+                <div className="ml-3 mt-1 mb-1 w-0.5 h-6 bg-gray-200 dark:bg-gray-700" />
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

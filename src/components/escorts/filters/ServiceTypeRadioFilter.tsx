@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -45,8 +46,8 @@ const ServiceTypeRadioFilter: React.FC<ServiceTypeRadioFilterProps> = ({
                 className="flex items-center gap-2 cursor-pointer"
               >
                 {type && <ServiceTypeIcon type={type} size={16} variant="colored" />}
-                <span>{info.filterLabel}</span>
-                {info.description && (
+                <span>{info?.filterLabel || type || "Any"}</span>
+                {info?.description && (
                   <span className="text-xs text-muted-foreground">
                     ({info.description})
                   </span>
@@ -75,14 +76,14 @@ const ServiceTypeRadioFilter: React.FC<ServiceTypeRadioFilterProps> = ({
                     <TooltipTrigger asChild>
                       <div 
                         className={`flex items-center space-x-2 p-2 rounded-md 
-                          ${selectedSpecializedTypes.includes(serviceType as any) 
+                          ${selectedSpecializedTypes.includes(serviceType) 
                             ? 'bg-primary/10 border-primary' 
                             : 'bg-secondary/40'} 
                           cursor-pointer hover:bg-secondary/60`}
-                        onClick={() => toggleSpecializedType(serviceType as any)}
+                        onClick={() => toggleSpecializedType(serviceType)}
                       >
-                        <span className="text-xs">{getSafeServiceLabel(serviceType)}</span>
-                        {selectedSpecializedTypes.includes(serviceType as any) && (
+                        <span className="text-xs">{getSafeServiceLabel(serviceType as any)}</span>
+                        {selectedSpecializedTypes.includes(serviceType) && (
                           <div className="ml-auto w-3 h-3 bg-primary rounded-full"></div>
                         )}
                       </div>

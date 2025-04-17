@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { VerifiedMark } from "@/components/shared/VerifiedMark";
@@ -22,7 +23,7 @@ const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({ user, profile, 
     if (roles.includes('escort')) {
       return 'secondary';
     } else if (roles.includes('creator')) {
-      return 'accent';
+      return 'default'; // Changed from 'accent' to 'default' to match the allowed variants
     }
     return 'outline';
   };

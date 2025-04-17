@@ -5,6 +5,7 @@ const moreEscortProfiles: Escort[] = [
   {
     id: "escort-1001",
     name: "Jessica Moore",
+    username: "jessicamoore",  // Added required username
     age: 28,
     location: "Los Angeles, CA",
     price: 450,
@@ -53,6 +54,7 @@ const moreEscortProfiles: Escort[] = [
   {
     id: "escort-1002",
     name: "Elena Rodriguez",
+    username: "elenarodriguez",  // Added required username
     age: 25,
     location: "Miami, FL",
     price: 350,
@@ -99,6 +101,7 @@ const moreEscortProfiles: Escort[] = [
   {
     id: "escort-1003",
     name: "Marcus Reid",
+    username: "marcusreid",  // Added required username
     age: 30,
     location: "New York, NY",
     price: 500,
@@ -147,6 +150,7 @@ const moreEscortProfiles: Escort[] = [
   {
     id: "escort-1004",
     name: "Sophia Chen",
+    username: "sophiachen",  // Added required username
     age: 27,
     location: "San Francisco, CA",
     price: 400,

@@ -1,5 +1,15 @@
-
 import { Escort } from '@/types/escort';
+
+export interface ProfileProps {
+  id: string;
+  name: string;
+  image: string;
+  rating?: number;
+  location?: string;
+  tags?: string[];
+  price?: number;
+  description?: string;
+}
 
 export const featuredEscorts: Escort[] = [
   {

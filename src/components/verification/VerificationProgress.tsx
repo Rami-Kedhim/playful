@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -95,7 +94,6 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     }
   };
 
-  // Ensure the status is a valid VerificationStatus
   const safeStatus = (statusValue: string): VerificationStatus => {
     const validStatuses: VerificationStatus[] = ['pending', 'in_review', 'approved', 'rejected', 'expired'];
     return validStatuses.includes(statusValue as VerificationStatus) 
