@@ -8,7 +8,7 @@ import VerificationLevelOptions from './VerificationLevelOptions';
 import VerificationLevelRequirements from './VerificationLevelRequirements';
 import VerificationPaymentStep from './upgrade/VerificationPaymentStep';
 import VerificationProcessingStep from './upgrade/VerificationProcessingStep';
-import { VerificationLevel } from '@/types/escort';
+import { VerificationLevel } from '@/types/verification';
 
 type UpgradeStep = 'select' | 'requirements' | 'payment' | 'processing';
 
@@ -19,10 +19,11 @@ const VerificationLevelUpgrade = () => {
   const [loading, setLoading] = useState(false);
   
   // Get the current verification level, supporting both property names
-  const currentLevel: VerificationLevel = 
+  const currentLevel = 
     (verificationRequest?.verificationLevel || 
      verificationRequest?.requested_level || 
-     'none') as VerificationLevel;
+     verificationRequest?.level ||
+     VerificationLevel.NONE) as VerificationLevel;
   
   const handleSelectLevel = (level: VerificationLevel) => {
     setTargetLevel(level);

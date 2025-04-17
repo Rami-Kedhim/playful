@@ -3,26 +3,27 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, AlertCircle } from 'lucide-react';
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationLevelRequirementsProps {
-  currentLevel: string;
-  targetLevel: string;
+  currentLevel: VerificationLevel;
+  targetLevel: VerificationLevel;
   onComplete: () => void;
 }
 
 const LEVEL_REQUIREMENTS = {
-  basic: [
+  [VerificationLevel.BASIC]: [
     'Government-issued ID',
     'Selfie verification',
     'Valid email address'
   ],
-  enhanced: [
+  [VerificationLevel.ENHANCED]: [
     'All Basic requirements',
     'Phone number verification',
     'Proof of address',
     'Background check consent'
   ],
-  premium: [
+  [VerificationLevel.PREMIUM]: [
     'All Enhanced requirements',
     'Business registration documents',
     'Professional references',
@@ -35,7 +36,7 @@ const VerificationLevelRequirements = ({
   targetLevel,
   onComplete
 }: VerificationLevelRequirementsProps) => {
-  const requirements = LEVEL_REQUIREMENTS[targetLevel as keyof typeof LEVEL_REQUIREMENTS] || [];
+  const requirements = LEVEL_REQUIREMENTS[targetLevel] || [];
 
   return (
     <Card>

@@ -3,8 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Shield, ShieldCheck, ShieldPlus } from 'lucide-react';
-
-type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationLevelOptionsProps {
   currentLevel: VerificationLevel;
@@ -12,19 +11,19 @@ interface VerificationLevelOptionsProps {
 }
 
 const LEVEL_INFO = {
-  basic: {
+  [VerificationLevel.BASIC]: {
     title: 'Basic Verification',
     description: 'Simple ID verification for basic account features',
     icon: Shield,
     benefits: ['ID verification badge', 'Access to basic features', 'Improved trust score']
   },
-  enhanced: {
+  [VerificationLevel.ENHANCED]: {
     title: 'Enhanced Verification',
     description: 'Additional verification for enhanced features and trust',
     icon: ShieldCheck,
     benefits: ['Enhanced verification badge', 'Priority support', 'Higher visibility in search']
   },
-  premium: {
+  [VerificationLevel.PREMIUM]: {
     title: 'Premium Verification',
     description: 'Comprehensive verification for maximum trust and features',
     icon: ShieldPlus,
@@ -38,7 +37,7 @@ const VerificationLevelOptions = ({
 }: VerificationLevelOptionsProps) => {
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      {(Object.keys(LEVEL_INFO) as Array<keyof typeof LEVEL_INFO>).map((level) => {
+      {(Object.keys(LEVEL_INFO) as Array<VerificationLevel>).map((level) => {
         const info = LEVEL_INFO[level];
         const isCurrentLevel = currentLevel === level;
         

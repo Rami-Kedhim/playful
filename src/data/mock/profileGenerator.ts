@@ -10,45 +10,45 @@ export function generateRandomEscort(): Escort {
   const services = generateServices(gender, providesInPerson, providesVirtual);
   
   // Generate a random number of reviews (0-15)
-  const reviewCount = Math.floor(Math.random() * 16);
+  const reviewCount = faker.datatype.number({ min: 0, max: 15 });
 
   return {
     id: faker.string.uuid(),
     name: faker.person.firstName(gender === 'female' ? 'female' : 'male'),
     location: `${faker.location.city()}, ${faker.location.state({ abbreviated: true })}`,
-    age: faker.number.int({ min: 21, max: 45 }),
+    age: faker.datatype.number({ min: 21, max: 45 }),
     gender,
     bio: faker.lorem.paragraph(),
-    profileImage: `/images/escorts/${faker.number.int({ min: 1, max: 20 })}.jpg`,
-    images: Array.from({ length: faker.number.int({ min: 3, max: 10 }) }, () => 
-      `/images/escorts/${faker.number.int({ min: 1, max: 20 })}.jpg`
+    profileImage: `/images/escorts/${faker.datatype.number({ min: 1, max: 20 })}.jpg`,
+    images: Array.from({ length: faker.datatype.number({ min: 3, max: 10 }) }, () => 
+      `/images/escorts/${faker.datatype.number({ min: 1, max: 20 })}.jpg`
     ),
     services,
-    rating: faker.number.float({ min: 3.5, max: 5, precision: 0.1 }),
-    price: faker.number.int({ min: 200, max: 1500 }),
+    rating: faker.datatype.number({ min: 35, max: 50, precision: 0.1 }) / 10,
+    price: faker.datatype.number({ min: 200, max: 1500 }),
     currency: 'USD',
     isVerified,
     verification_level: isVerified ? faker.helpers.arrayElement(['basic', 'standard', 'premium']) : 'none',
     availableNow: faker.datatype.boolean(0.3),
     lastActive: faker.date.recent().toISOString(),
-    responseRate: faker.number.int({ min: 70, max: 100 }),
+    responseRate: faker.datatype.number({ min: 70, max: 100 }),
     providesInPersonServices: providesInPerson,
     providesVirtualContent: providesVirtual,
     serviceTypes: generateServiceTypes(providesInPerson, providesVirtual),
     tags: generateTags(gender),
     reviewCount,
     stats: {
-      views: faker.number.int({ min: 100, max: 10000 }),
-      favorites: faker.number.int({ min: 10, max: 500 }),
-      reviews: faker.number.int({ min: 0, max: 50 })
+      views: faker.datatype.number({ min: 100, max: 10000 }),
+      favorites: faker.datatype.number({ min: 10, max: 500 }),
+      reviews: faker.datatype.number({ min: 0, max: 50 })
     },
     description: faker.lorem.paragraphs(3),
     measurements: {
-      height: faker.number.int({ min: 160, max: 190 }),
-      weight: `${faker.number.int({ min: 45, max: 90 })}kg`,
+      height: faker.datatype.number({ min: 160, max: 190 }),
+      weight: `${faker.datatype.number({ min: 45, max: 90 })}kg`,
       bust: faker.helpers.arrayElement(['32A', '32B', '34B', '34C', '36C', '36D']),
-      waist: `${faker.number.int({ min: 22, max: 32 })}`,
-      hips: `${faker.number.int({ min: 32, max: 40 })}`
+      waist: `${faker.datatype.number({ min: 22, max: 32 })}`,
+      hips: `${faker.datatype.number({ min: 32, max: 40 })}`
     }
   };
 }
@@ -94,7 +94,7 @@ function generateTags(gender: string): string[] {
   // Get random subset of tags
   return faker.helpers.arrayElements(
     potentialTags,
-    Math.floor(Math.random() * 5) + 3
+    faker.datatype.number({ min: 3, max: 8 })
   );
 }
 

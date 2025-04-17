@@ -1,108 +1,87 @@
 
-import { DatabaseGender, UserRole } from './auth';
+// Define the verification related types used across the application
+
+// VerificationLevel enum for use across the application
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  ENHANCED = 'enhanced', 
+  PREMIUM = 'premium'
+}
 
 export enum VerificationStatus {
+  NOT_STARTED = 'not_started',
   PENDING = 'pending',
   IN_REVIEW = 'in_review',
   APPROVED = 'approved',
   REJECTED = 'rejected',
-  EXPIRED = 'expired',
-  CANCELED = 'canceled'
-}
-
-export enum VerificationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  STANDARD = 'standard',
-  PREMIUM = 'premium',
-  PLATINUM = 'platinum',
-  ENHANCED = 'enhanced'
+  EXPIRED = 'expired'
 }
 
 export interface VerificationDocument {
   id: string;
   type: string;
-  file_url: string;
-  uploaded_at: string;
-  verification_id: string;
-  status?: VerificationStatus;
-  notes?: string;
-  rejected_reason?: string;
-  document_type?: string;
-  document_url?: string;
-  created_at?: string;
-  // For backward compatibility
-  fileUrl?: string;
-  uploadedAt?: string;
+  url: string;
+  status: 'pending' | 'approved' | 'rejected';
+  uploadedAt: string;
+  reviewedAt?: string;
 }
 
 export interface VerificationRequest {
   id: string;
-  profile_id: string;
-  user_id?: string;
-  requested_level: VerificationLevel;
-  status: VerificationStatus;
+  userId: string;
+  status: VerificationStatus | string;
+  level: VerificationLevel | string;
+  verificationLevel?: VerificationLevel | string; // For backwards compatibility
+  requested_level?: VerificationLevel | string; // For backwards compatibility
+  submittedAt: string;
+  reviewedAt?: string;
   documents: VerificationDocument[];
-  created_at: string;
-  updated_at?: string;
-  reviewed_at?: string;
-  reviewer_id?: string;
-  rejection_reason?: string;
-  reviewer_notes?: string;
-  notes?: string;
-  expiry_date?: string;
-  verification_code?: string;
-  // For backward compatibility
-  userId?: string;
-  submittedAt?: string;
-  updatedAt?: string;
-  verificationLevel?: VerificationLevel;
   rejectionReason?: string;
+  expiresAt?: string;
 }
 
-export interface VerificationTimelineProps {
-  verificationRequest: VerificationRequest;
-}
-
-export interface VerificationFormData {
-  fullName: string;
-  dateOfBirth: string;
-  gender: DatabaseGender;
-  idType: string;
-  idNumber: string;
-  address: string;
-  phone: string;
-  requestedLevel: VerificationLevel;
+export interface VerificationFormValues {
+  documentType: string;
+  documentFrontImage: {
+    file?: File;
+    preview: string;
+  };
+  documentBackImage?: {
+    file?: File;
+    preview: string;
+  };
+  selfieImage: {
+    file?: File;
+    preview: string;
+  };
 }
 
 export const DOCUMENT_TYPES = {
   ID_CARD: 'id_card',
   PASSPORT: 'passport',
-  DRIVERS_LICENSE: 'drivers_license',
-  RESIDENCE_PERMIT: 'residence_permit'
+  DRIVING_LICENSE: 'driving_license'
 };
 
-export interface VerificationFormValues {
-  documentType: string;
-  documentFrontImage: { file?: File; preview: string };
-  documentBackImage?: { file?: File; preview: string };
-  selfieImage: { file?: File; preview: string };
-}
-
-// Adding missing types needed by other components
-export const DOCUMENT_TYPE_LABELS = {
-  [DOCUMENT_TYPES.ID_CARD]: 'ID Card',
-  [DOCUMENT_TYPES.PASSPORT]: 'Passport',
-  [DOCUMENT_TYPES.DRIVERS_LICENSE]: 'Driver\'s License',
-  [DOCUMENT_TYPES.RESIDENCE_PERMIT]: 'Residence Permit'
+// Document requirements for different document types
+export const DOCUMENT_REQUIREMENTS: Record<string, {
+  frontRequired: boolean;
+  backRequired: boolean;
+  selfieRequired: boolean;
+}> = {
+  [DOCUMENT_TYPES.ID_CARD]: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  },
+  [DOCUMENT_TYPES.PASSPORT]: {
+    frontRequired: true,
+    backRequired: false,
+    selfieRequired: true
+  },
+  [DOCUMENT_TYPES.DRIVING_LICENSE]: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  }
 };
-
-export const DOCUMENT_TYPE_REQUIREMENTS = {
-  [DOCUMENT_TYPES.ID_CARD]: ['Front and back images required', 'Must be valid and not expired'],
-  [DOCUMENT_TYPES.PASSPORT]: ['Main page with photo required', 'Must be valid and not expired'],
-  [DOCUMENT_TYPES.DRIVERS_LICENSE]: ['Front and back images required', 'Must be valid and not expired'],
-  [DOCUMENT_TYPES.RESIDENCE_PERMIT]: ['Front and back images required', 'Must be valid and not expired']
-};
-
-// Define verification form schema placeholder
-export const verificationFormSchema = {} as any; // This is a placeholder, we'll implement the real schema later

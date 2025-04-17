@@ -3,6 +3,19 @@
 import { Escort } from '@/types/escort';
 import { UberPersona } from '@/types/uberPersona';
 
+// Define ProfileProps interface to fix the FeaturedContentSection error
+export interface ProfileProps {
+  id: string;
+  name: string;
+  location: string;
+  avatar: string;
+  serviceType?: 'in-person' | 'virtual' | 'both';
+  verified?: boolean;
+  featured?: boolean;
+  isLive?: boolean;
+  rating?: number;
+}
+
 // Sample data for testing
 export const featuredEscorts: Escort[] = [
   {
@@ -23,7 +36,7 @@ export const featuredEscorts: Escort[] = [
     responseRate: 98,
     verification_level: 'premium',
     lastActive: new Date().toISOString(),
-    reviews: [],
+    reviewCount: 12, // Changed from reviews: [] to reviewCount: 12
     tags: ['luxury', 'model', 'vip'],
     providesInPersonServices: true,
     providesVirtualContent: true,
@@ -60,7 +73,7 @@ export const featuredEscorts: Escort[] = [
     responseRate: 95,
     verification_level: 'premium',
     lastActive: new Date().toISOString(),
-    reviews: [],
+    reviewCount: 9, // Changed from reviews: [] to reviewCount: 9
     tags: ['elegant', 'sophisticated', 'exclusive'],
     providesInPersonServices: true,
     providesVirtualContent: false,

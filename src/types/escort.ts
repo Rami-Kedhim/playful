@@ -35,8 +35,8 @@ export interface Escort {
   availableNow?: boolean;
   lastActive?: string;
   responseRate?: number;
-  reviews?: number; // Changed to number type
-  reviewCount?: number; // Alternative reviews count field
+  reviews?: EscortReview[]; // Array of review objects
+  reviewCount?: number; // Simple review count
   tags?: string[];
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
@@ -49,6 +49,7 @@ export interface Escort {
     waist?: string;
     hips?: string;
   };
+  orientation?: string; // Added to fix filter issues
   // Additional fields for compatibility with other parts of the app
   imageUrl?: string;
   gallery?: string[] | any;
@@ -177,5 +178,44 @@ export type ServiceType = ServiceTypeString;
 
 export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
-// Re-export verification types to ensure consistency
-export { VerificationLevel, VerificationStatus, VerificationDocument, VerificationRequest } from './verification';
+// Export VerificationLevel locally
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  STANDARD = 'standard',
+  PREMIUM = 'premium'
+}
+
+// Export VerificationStatus
+export enum VerificationStatus {
+  NOT_STARTED = 'not_started',
+  PENDING = 'pending',
+  IN_REVIEW = 'in_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired'
+}
+
+// Export VerificationDocument and VerificationRequest interfaces
+export interface VerificationDocument {
+  id: string;
+  type: string;
+  url: string;
+  status: 'pending' | 'approved' | 'rejected';
+  uploadedAt: string;
+  reviewedAt?: string;
+}
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  status: VerificationStatus | string;
+  level: VerificationLevel | string;
+  verificationLevel?: VerificationLevel | string;
+  requested_level?: VerificationLevel | string;
+  submittedAt: string;
+  reviewedAt?: string;
+  documents: VerificationDocument[];
+  rejectionReason?: string;
+  expiresAt?: string;
+}
