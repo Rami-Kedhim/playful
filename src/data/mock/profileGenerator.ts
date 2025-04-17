@@ -8,44 +8,47 @@ export function generateRandomEscort(): Escort {
   const providesInPerson = faker.datatype.boolean(0.9);
   const providesVirtual = faker.datatype.boolean(0.7);
   const services = generateServices(gender, providesInPerson, providesVirtual);
+  
+  // Generate a random number of reviews (0-15)
+  const reviewCount = Math.floor(Math.random() * 16);
 
   return {
     id: faker.string.uuid(),
     name: faker.person.firstName(gender === 'female' ? 'female' : 'male'),
     location: `${faker.location.city()}, ${faker.location.state({ abbreviated: true })}`,
-    age: faker.datatype.number({ min: 21, max: 45 }).toString(), // Convert to string
+    age: faker.number.int({ min: 21, max: 45 }),
     gender,
     bio: faker.lorem.paragraph(),
-    profileImage: `/images/escorts/${faker.datatype.number({ min: 1, max: 20 })}.jpg`,
-    images: Array.from({ length: faker.datatype.number({ min: 3, max: 10 }) }, () => 
-      `/images/escorts/${faker.datatype.number({ min: 1, max: 20 })}.jpg`
+    profileImage: `/images/escorts/${faker.number.int({ min: 1, max: 20 })}.jpg`,
+    images: Array.from({ length: faker.number.int({ min: 3, max: 10 }) }, () => 
+      `/images/escorts/${faker.number.int({ min: 1, max: 20 })}.jpg`
     ),
     services,
-    rating: faker.datatype.float({ min: 3.5, max: 5, precision: 0.1 }),
-    price: faker.datatype.number({ min: 200, max: 1500 }),
+    rating: faker.number.float({ min: 3.5, max: 5, precision: 0.1 }),
+    price: faker.number.int({ min: 200, max: 1500 }),
     currency: 'USD',
     isVerified,
     verification_level: isVerified ? faker.helpers.arrayElement(['basic', 'standard', 'premium']) : 'none',
     availableNow: faker.datatype.boolean(0.3),
     lastActive: faker.date.recent().toISOString(),
-    responseRate: faker.datatype.number({ min: 70, max: 100 }),
+    responseRate: faker.number.int({ min: 70, max: 100 }),
     providesInPersonServices: providesInPerson,
     providesVirtualContent: providesVirtual,
     serviceTypes: generateServiceTypes(providesInPerson, providesVirtual),
     tags: generateTags(gender),
-    reviews: Array.from({ length: faker.datatype.number({ min: 0, max: 15 }) }, generateReview),
+    reviewCount,
     stats: {
-      views: faker.datatype.number({ min: 100, max: 10000 }),
-      favorites: faker.datatype.number({ min: 10, max: 500 }),
-      reviews: faker.datatype.number({ min: 0, max: 50 })
+      views: faker.number.int({ min: 100, max: 10000 }),
+      favorites: faker.number.int({ min: 10, max: 500 }),
+      reviews: faker.number.int({ min: 0, max: 50 })
     },
     description: faker.lorem.paragraphs(3),
     measurements: {
-      height: faker.datatype.number({ min: 160, max: 190 }),
-      weight: `${faker.datatype.number({ min: 45, max: 90 })}kg`,
+      height: faker.number.int({ min: 160, max: 190 }),
+      weight: `${faker.number.int({ min: 45, max: 90 })}kg`,
       bust: faker.helpers.arrayElement(['32A', '32B', '34B', '34C', '36C', '36D']),
-      waist: `${faker.datatype.number({ min: 22, max: 32 })}`,
-      hips: `${faker.datatype.number({ min: 32, max: 40 })}`
+      waist: `${faker.number.int({ min: 22, max: 32 })}`,
+      hips: `${faker.number.int({ min: 32, max: 40 })}`
     }
   };
 }
@@ -91,7 +94,7 @@ function generateTags(gender: string): string[] {
   // Get random subset of tags
   return faker.helpers.arrayElements(
     potentialTags,
-    faker.datatype.number({ min: 3, max: Math.min(5, potentialTags.length) })
+    Math.floor(Math.random() * 5) + 3
   );
 }
 
@@ -102,18 +105,10 @@ function generateServiceTypes(providesInPerson: boolean, providesVirtual: boolea
   return types;
 }
 
-function generateReview() {
-  return {
-    id: faker.string.uuid(),
-    userId: faker.string.uuid(),
-    userName: faker.person.firstName(),
-    rating: faker.datatype.number({ min: 3, max: 5 }),
-    comment: faker.lorem.paragraph(),
-    date: faker.date.recent().toISOString(),
-    verifiedBooking: faker.datatype.boolean(0.8)
-  };
-}
+// Add this helper function to generate a single mock escort profile
+export const generateMockEscortProfile = () => generateRandomEscort();
 
+// Generate multiple random escorts
 export function generateRandomEscorts(count: number): Escort[] {
   return Array.from({ length: count }, generateRandomEscort);
 }

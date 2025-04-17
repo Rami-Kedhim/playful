@@ -4,16 +4,18 @@ import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Shield, ShieldAlert, BadgeCheck } from 'lucide-react';
 import { VerificationLevel } from '@/types/verification';
 
-interface VerificationBadgeProps {
+export interface VerificationBadgeProps {
   level: VerificationLevel | string;
   showLabel?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  showTooltip?: boolean;
 }
 
 const VerificationBadge: React.FC<VerificationBadgeProps> = ({ 
   level, 
   showLabel = true,
-  size = 'md'
+  size = 'md',
+  showTooltip = false
 }) => {
   const iconSizes = {
     sm: 'h-3 w-3',

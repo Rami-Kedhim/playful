@@ -1,7 +1,7 @@
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { ServiceTypeFilter } from '@/types/escort';
+import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 import { MapPin, Laptop, Users } from 'lucide-react';
 
 interface ServiceTypeRadioFilterProps {

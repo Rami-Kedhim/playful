@@ -1,93 +1,46 @@
 
-/**
- * 🛡️ Ethical, Inclusive & AI-Integrated Service Type Rules for UberEscorts
- * This module defines the core categories of escort services allowed on UberEscorts,
- * aligned with platform values of respect, elegance, legality, and intelligent client satisfaction.
- *
- * These service definitions are enforced by Brain Hub (Uber Core), validated by ORUS,
- * and dynamically interpreted by the Hermes + Oxum engine for semantic mapping.
- * They are also exposed to UberEscorts AI APIs to ensure coherent user experience across UI/UX, filters, and language models.
- */
-
+// Define service types enum
 export enum ServiceType {
-  Companionship = "Companionship",
-  EroticMassage = "Erotic Massage",
-  Roleplay = "Roleplay & Scenarios",
-  OpenMinded = "Open-Minded Encounter",
-  Tantric = "Tantric Experience",
-  SensualDuo = "Sensual Duo (Couple Friendly)",
-  PowerPlay = "Power Play (Soft Dom/Sub)",
-  Fantasy = "Fantasy Fulfillment",
-  Adventurous = "Adventurous Date",
-  GentleFetish = "Gentle Fetish Play",
-  GFE = "GFE / Boyfriend Experience",
-  MutualSatisfaction = "Mutual Satisfaction",
-  LateNight = "Late Night Escape",
-  VIPCompanion = "VIP Party Companion",
-  Midnight = "Midnight Confessions",
-  Seduction = "Seduction Game",
-  SweetSurrender = "Sweet Surrender (Light BDSM)",
-  LingerieShow = "Lingerie Private Show",
-  ExoticTease = "Exotic Tease & Please",
-  TravelCompanion = "Travel Companion",
-  DiscreetFun = "Discreet Fun",
-  HiddenDesires = "Hidden Desires",
-  ConfidentKinky = "Confident & Kinky (Soft Limit)",
-  // Add more compatible service types to fix issues in escortProfiles.ts
-  "massage" = "massage",
-  "roleplay" = "roleplay",
-  "bdsm" = "bdsm",
-  "overnight" = "overnight",
-  "Dinner Date" = "Dinner Date",
-  "Travel Companion" = "Travel Companion",
-  "Events" = "Events",
-  "Weekend Getaways" = "Weekend Getaways",
-  "BDSM" = "BDSM",
-  "Sensual Massage" = "Sensual Massage",
-  "Role Play" = "Role Play",
-  "events" = "events",
-  "travel" = "travel"
+  DINNER = 'dinner',
+  EVENTS = 'events',
+  TRAVEL = 'travel',
+  COMPANIONSHIP = 'companionship',
+  OVERNIGHT = 'overnight',
+  MASSAGE = 'massage',
+  ROLEPLAY = 'roleplay'
 }
 
-/**
- * 🚫 ForbiddenTerms are filtered at input, search, and system-level layers.
- * These must never appear in public UI nor be suggested by UberEscorts AI.
- */
+// List of terms that should not be used in service names
 export const ForbiddenTerms: string[] = [
-  "anal", "cim", "facial", "deepthroat", "facefuck", "humiliation",
-  "degradation", "cbt", "bukkake", "rapeplay", "watersports",
-  "dehumanization", "spitting", "slapping", "fisting", "abuse"
+  'explicit',
+  'sexual',
+  'xxx',
+  'nsfw',
+  'adult',
+  'illegal'
 ];
 
-/**
- * ✅ isValidServiceType confirms that a given service is compliant and usable in the ecosystem.
- */
-export function isValidServiceType(label: string): boolean {
-  return Object.values(ServiceType).includes(label as ServiceType);
-}
+// Check if a service name is valid
+export const isValidServiceType = (name: string): boolean => {
+  // Convert to lowercase for comparison
+  const normalizedName = name.toLowerCase().trim();
+  
+  // Check if it's in our ServiceType enum
+  return Object.values(ServiceType).includes(normalizedName as ServiceType);
+};
 
-/**
- * 🔁 remapUnsafeService transforms explicit or unsafe inputs into compliant equivalents.
- * This function is used by Hermes, ORUS, and UberAI at multiple layers: NLP, semantic filtering, and moderation.
- */
-export function remapUnsafeService(label: string): ServiceType | null {
-  const map: Record<string, ServiceType> = {
-    anal: ServiceType.Adventurous,
-    cim: ServiceType.MutualSatisfaction,
-    facial: ServiceType.HiddenDesires,
-    deepthroat: ServiceType.Seduction,
-    facefuck: ServiceType.ExoticTease,
-    humiliation: ServiceType.PowerPlay,
-    degradation: ServiceType.PowerPlay,
-    cbt: ServiceType.GentleFetish,
-    bukkake: ServiceType.HiddenDesires,
-    rapeplay: ServiceType.Roleplay,
-    watersports: ServiceType.DiscreetFun,
-    dehumanization: ServiceType.Roleplay,
-    slapping: ServiceType.PowerPlay,
-    spitting: ServiceType.Seduction,
-    fisting: ServiceType.GentleFetish,
-    abuse: ServiceType.PowerPlay
+// Map unsafe service names to safe ones
+export const remapUnsafeService = (name: string): ServiceType | null => {
+  const normalizedName = name.toLowerCase().trim();
+  
+  // Map of unsafe terms to safe alternatives
+  const remappings: Record<string, ServiceType> = {
+    'date': ServiceType.DINNER,
+    'intimate': ServiceType.COMPANIONSHIP,
+    'overnight stay': ServiceType.OVERNIGHT,
+    'body work': ServiceType.MASSAGE,
+    'fantasy': ServiceType.ROLEPLAY
   };
-  return map[label.toLowerCase()] || null;
-}
+  
+  return remappings[normalizedName] || null;
+};

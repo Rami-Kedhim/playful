@@ -1,6 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import FilterBadge from "./filters/FilterBadge";
-import { ServiceTypeFilter, getServiceTypeBadgeLabel } from "./filters/ServiceTypeBadgeLabel";
+import { ServiceTypeFilter } from "./filters/ServiceTypeBadgeLabel";
+import { getServiceTypeBadgeLabel } from "./filters/ServiceTypeBadgeLabel";
 import { FilterX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ServiceTypeIcon from "./filters/ServiceTypeIcon";

@@ -2,12 +2,23 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Laptop, SquareUserRound } from 'lucide-react';
-import { ServiceTypeFilter } from '@/types/escort';
+
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   className?: string;
 }
+
+// Helper function to get the label for a service type
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  switch (type) {
+    case 'in-person': return 'In Person';
+    case 'virtual': return 'Virtual';
+    case 'both': return 'In Person & Virtual';
+    default: return '';
+  }
+};
 
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type, className }) => {
   switch (type) {
@@ -38,4 +49,3 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type, cla
 };
 
 export default ServiceTypeBadgeLabel;
-export type { ServiceTypeFilter };
