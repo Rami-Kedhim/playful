@@ -47,14 +47,14 @@ const RoleGuard = ({
   }
   
   // Special handling for admin (admins can access everything)
-  if (isAdmin()) {
+  if (isAdmin) {
     return <>{children}</>;
   }
 
   // Check if user has required role(s)
   const hasAccess = requireAllRoles 
-    ? hasAllRoles(allowedRoles as UserRole[])
-    : hasRole(allowedRoles as UserRole[]);
+    ? hasAllRoles(allowedRoles)
+    : hasRole(allowedRoles);
 
   // If user doesn't have required role(s)
   if (!hasAccess) {

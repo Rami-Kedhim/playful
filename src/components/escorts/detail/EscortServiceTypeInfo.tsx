@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Escort } from '@/types/escort';
@@ -5,38 +6,38 @@ import { ServiceTypeFilter } from '@/types/escort';
 
 interface EscortServiceTypeInfoProps {
   escort: Escort;
-  serviceTypeFilter: ServiceTypeFilter;
 }
 
-const EscortServiceTypeInfo: React.FC<EscortServiceTypeInfoProps> = ({ escort, serviceTypeFilter }) => {
-  const renderServiceTypes = () => {
-    if (!escort.serviceTypes || escort.serviceTypes.length === 0) {
-      return <Badge variant="secondary">No Services Listed</Badge>;
+const EscortServiceTypeInfo: React.FC<EscortServiceTypeInfoProps> = ({ escort }) => {
+  // Get service type from escort
+  const getServiceType = (): ServiceTypeFilter => {
+    if (escort.services && escort.services.includes('in-person') && escort.services.includes('virtual')) {
+      return 'both';
+    } else if (escort.services && escort.services.includes('in-person')) {
+      return 'in-person';
+    } else if (escort.services && escort.services.includes('virtual')) {
+      return 'virtual';
     }
-
-    return escort.serviceTypes.map((service, index) => (
-      <Badge key={index} variant="secondary">{service}</Badge>
-    ));
+    return '';
   };
 
-  const renderServiceTypeFilter = () => {
-    switch (serviceTypeFilter) {
-      case 'in-person':
-        return <Badge variant="outline">In-Person Services</Badge>;
-      case 'virtual':
-        return <Badge variant="outline">Virtual Services</Badge>;
-      case 'both':
-        return <Badge variant="outline">Both In-Person & Virtual</Badge>;
-      default:
-        return <Badge variant="outline">All Services</Badge>;
-    }
-  };
-
+  const serviceType = getServiceType();
+  
+  if (!serviceType) return null;
+  
   return (
-    <div className="flex flex-wrap gap-2">
-      {renderServiceTypes()}
-      {renderServiceTypeFilter()}
-    </div>
+    <Badge 
+      variant="outline"
+      className={`
+        ${serviceType === 'in-person' && 'bg-indigo-100 text-indigo-800 border-indigo-200'}
+        ${serviceType === 'virtual' && 'bg-purple-100 text-purple-800 border-purple-200'}
+        ${serviceType === 'both' && 'bg-blue-100 text-blue-800 border-blue-200'}
+      `}
+    >
+      {serviceType === 'in-person' && 'In-Person Services'}
+      {serviceType === 'virtual' && 'Virtual Services'}
+      {serviceType === 'both' && 'In-Person & Virtual'}
+    </Badge>
   );
 };
 

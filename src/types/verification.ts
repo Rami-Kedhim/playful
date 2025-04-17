@@ -11,10 +11,13 @@ export enum VerificationStatus {
 }
 
 export enum VerificationLevel {
+  NONE = 'none',
   BASIC = 'basic',
   STANDARD = 'standard',
   PREMIUM = 'premium',
-  PLATINUM = 'platinum'
+  PLATINUM = 'platinum',
+  // Add these for backward compatibility
+  ENHANCED = 'enhanced'
 }
 
 export interface VerificationDocument {

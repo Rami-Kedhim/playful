@@ -1,132 +1,132 @@
 
 import React from 'react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from "@/components/ui/badge";
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { useNavigate } from 'react-router-dom';
 import { Escort, Booking } from '@/types/escort';
+import { formatDistanceStrict } from 'date-fns';
+import { CircleDollarSign, Clock, MapPin } from 'lucide-react';
 
-interface BookingPaymentStepProps {
+export interface BookingPaymentStepProps {
+  escort: Escort;
   booking: Partial<Booking>;
-  onConfirm: () => void;
-  onCancel: () => void;
-  escort?: Escort;
-  onComplete?: () => Promise<void>;
-  isSubmitting?: boolean;
-  onBack?: () => void;
+  onBack: () => void;
+  onComplete: () => Promise<void>;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  isSubmitting: boolean;
 }
 
 const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ 
+  escort, 
   booking, 
-  onConfirm, 
+  onBack, 
+  onComplete, 
+  onConfirm,
   onCancel,
-  escort,
-  onComplete,
-  isSubmitting,
-  onBack
+  isSubmitting 
 }) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  if (!user) {
-    return (
-      <div className="p-4">
-        <p>Please log in to confirm your booking.</p>
-        <Button onClick={() => navigate('/auth')}>Log In</Button>
-      </div>
-    );
-  }
-
+  // Calculate duration if start and end times are available
   const calculateDuration = () => {
-    if (!booking.startTime || !booking.endTime) return 0;
+    if (!booking.startTime || !booking.endTime) return 'Not specified';
     
-    // Handle both string and Date types
-    const startTime = booking.startTime instanceof Date 
-      ? booking.startTime.getTime() 
-      : new Date(booking.startTime).getTime();
+    const start = booking.startTime instanceof Date ? 
+      booking.startTime : new Date(booking.startTime);
+    const end = booking.endTime instanceof Date ? 
+      booking.endTime : new Date(booking.endTime);
     
-    const endTime = booking.endTime instanceof Date 
-      ? booking.endTime.getTime() 
-      : new Date(booking.endTime).getTime();
-    
-    return (endTime - startTime) / (1000 * 60 * 60); // Convert to hours
+    return formatDistanceStrict(end, start);
   };
 
-  const duration = calculateDuration();
-
   const handleConfirm = () => {
-    // When using the legacy onConfirm prop
     if (onConfirm) {
       onConfirm();
-    } 
-    // When using the newer onComplete prop
-    else if (onComplete) {
+    } else {
       onComplete();
     }
   };
 
   const handleCancel = () => {
-    // When using the legacy onCancel prop
     if (onCancel) {
       onCancel();
-    }
-    // When using the newer onBack prop
-    else if (onBack) {
+    } else {
       onBack();
     }
   };
 
-  // When formatting dates
-  const formatDateDisplay = (dateValue: string | Date) => {
-    const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
-    return date.toLocaleString();
-  };
-
-  // Update service-related properties
-  const serviceInfo = booking.serviceType ? 
-    <div className="flex items-center gap-2">
-      <span>Service Type:</span>
-      <Badge>{booking.serviceType}</Badge>
-    </div> : null;
-
-  // Update price reference
-  const priceDisplay = booking.price !== undefined && (
-    <div className="text-xl font-semibold">
-      ${booking.price}
-    </div>
-  );
-
   return (
-    <Card className="w-full">
+    <Card className="max-w-lg mx-auto">
       <CardHeader>
-        <CardTitle>Confirm Your Booking</CardTitle>
-        <CardDescription>Review details and confirm your booking.</CardDescription>
+        <CardTitle className="text-xl">Confirm & Payment</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="flex items-center gap-2">
-          <span>Escort:</span>
-          <span>{booking.escortName}</span>
+      
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-4">
+          <img 
+            src={escort.imageUrl || escort.profileImage}
+            alt={escort.name}
+            className="w-16 h-16 rounded-full object-cover"
+          />
+          <div>
+            <h3 className="text-lg font-medium">{escort.name}</h3>
+            <p className="text-muted-foreground text-sm">{escort.location}</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span>Date:</span>
-          <span>{booking.startTime ? formatDateDisplay(booking.startTime) : 'Not specified'}</span>
+        
+        <div className="border-t border-b py-4 space-y-3">
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Date & Time</span>
+            </div>
+            <span className="text-sm font-medium">
+              {booking.date ? new Date(booking.date).toLocaleDateString() : 'Not specified'} {booking.time || ''}
+            </span>
+          </div>
+          
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Duration</span>
+            </div>
+            <span className="text-sm font-medium">{calculateDuration()}</span>
+          </div>
+          
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Location</span>
+            </div>
+            <span className="text-sm font-medium">
+              {booking.location || 'Not specified'}
+            </span>
+          </div>
+          
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Total Price</span>
+            </div>
+            <span className="font-bold">${booking.price || escort.price}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span>Duration:</span>
-          <span>{duration} hours</span>
+        
+        <div className="rounded-lg bg-primary/10 p-4">
+          <h4 className="font-medium mb-2">Payment Details</h4>
+          <p className="text-sm text-muted-foreground">
+            Payment will be processed securely through our platform.
+          </p>
         </div>
-        {serviceInfo}
-        {priceDisplay}
       </CardContent>
-      <div className="flex justify-between p-4">
+      
+      <CardFooter className="flex justify-between">
         <Button variant="outline" onClick={handleCancel}>
-          Cancel
+          Back
         </Button>
+        
         <Button onClick={handleConfirm} disabled={isSubmitting}>
-          {isSubmitting ? 'Processing...' : 'Confirm Booking'}
+          {isSubmitting ? 'Processing...' : 'Confirm & Pay'}
         </Button>
-      </div>
+      </CardFooter>
     </Card>
   );
 };

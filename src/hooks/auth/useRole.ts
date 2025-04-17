@@ -10,8 +10,15 @@ export const useRole = () => {
     return user?.roles || [];
   }, [user]);
 
-  const hasRole = (role: UserRole): boolean => {
+  const hasRole = (role: UserRole | UserRole[]): boolean => {
+    if (Array.isArray(role)) {
+      return role.some(r => userRoles.includes(r));
+    }
     return userRoles.includes(role);
+  };
+  
+  const hasAllRoles = (roles: UserRole[]): boolean => {
+    return roles.every(role => userRoles.includes(role));
   };
 
   const isAdmin = useMemo(() => {
@@ -33,6 +40,7 @@ export const useRole = () => {
   return {
     userRoles,
     hasRole,
+    hasAllRoles,
     isAdmin,
     isCreator,
     isModerator,

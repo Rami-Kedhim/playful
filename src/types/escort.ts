@@ -18,6 +18,8 @@ export enum ServiceType {
   Both = 'both'
 }
 
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
+
 export interface GalleryType {
   imageUrls: string[];
   videoUrls?: string[];
@@ -73,6 +75,12 @@ export interface Booking {
   notes?: string;
 }
 
+export interface Measurements {
+  bust?: number | string;
+  waist?: number | string;
+  hips?: number | string;
+}
+
 export interface Escort {
   id: string;
   username: string;
@@ -109,6 +117,19 @@ export interface Escort {
   videos?: Video[];
   subscriptionPrice?: number;
   orientation?: string; // Added for backward compatibility
+  
+  // Additional properties needed by components
+  reviews?: number;
+  tags?: string[];
+  availableNow?: boolean;
+  lastActive?: Date | string;
+  responseRate?: number;
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  serviceTypes?: string[];
+  images?: string[];
+  measurements?: Measurements | string;
+  description?: string;
 }
 
 export interface EscortFilter {

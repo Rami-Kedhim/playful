@@ -1,184 +1,111 @@
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/auth/useAuthContext";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/auth/useAuth";
-import { Heart, MessageSquare, Star, Users, Calendar, Award } from "lucide-react";
+import { ArrowRight, Calendar, DollarSign, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 import { featuredEscorts, featuredCreators } from "@/data/mockData";
 
 const UserDashboardOverview = () => {
-  const { user, profile } = useAuth();
-  
-  const userActivity = {
-    favorites: 7,
-    messages: 3,
-    reviews: 2,
-    upcomingAppointments: 1,
-    lucoinBalance: profile?.lucoin_balance || 0,
-    memberSince: new Date(profile?.created_at || new Date()).toLocaleDateString(),
-  };
-  
+  const { user } = useAuth();
+
+  if (!user) {
+    return <p>Loading user data...</p>;
+  }
+
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Favorites</CardTitle>
-            <Heart className="w-4 h-4 text-muted-foreground" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Earnings
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userActivity.favorites}</div>
-            <p className="text-xs text-muted-foreground">
-              Profiles you've added to favorites
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Messages</CardTitle>
-            <MessageSquare className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userActivity.messages}</div>
-            <p className="text-xs text-muted-foreground">
-              Unread messages in your inbox
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Reviews</CardTitle>
-            <Star className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userActivity.reviews}</div>
-            <p className="text-xs text-muted-foreground">
-              Reviews you've submitted
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Appointments</CardTitle>
-            <Calendar className="w-4 h-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userActivity.upcomingAppointments}</div>
-            <p className="text-xs text-muted-foreground">
-              Upcoming appointments
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Recent Favorites</CardTitle>
-            <CardDescription>
-              Profiles you've recently added to favorites
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {featuredEscorts.slice(0, 2).map((escort) => (
-                <div key={escort.id} className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full overflow-hidden">
-                    <img
-                      src={escort.avatar}
-                      alt={escort.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{escort.name}</h4>
-                    <p className="text-sm text-muted-foreground">{escort.location}</p>
-                  </div>
-                  <Button variant="ghost" size="icon">
-                    <Heart className="h-4 w-4" fill="currentColor" />
-                  </Button>
-                </div>
-              ))}
-              {featuredCreators.slice(0, 1).map((creator) => (
-                <div key={creator.id} className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full overflow-hidden">
-                    <img
-                      src={creator.avatar}
-                      alt={creator.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{creator.name}</h4>
-                    <p className="text-sm text-muted-foreground">{creator.location}</p>
-                  </div>
-                  <Button variant="ghost" size="icon">
-                    <Heart className="h-4 w-4" fill="currentColor" />
-                  </Button>
-                </div>
-              ))}
+            <div className="flex items-center">
+              <DollarSign className="h-4 w-4 text-muted-foreground mr-1" />
+              <span className="text-2xl font-bold">$4,320</span>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              +12% from last month
+            </p>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" className="w-full">
-              View All Favorites
-            </Button>
-          </CardFooter>
         </Card>
         
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Account Summary</CardTitle>
-            <CardDescription>
-              Your account details and membership status
-            </CardDescription>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Profile Views
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Member Since</div>
-                  <div className="text-xl font-bold">{userActivity.memberSince}</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-lucoin/20 flex items-center justify-center">
-                  <Award className="h-6 w-6 text-lucoin" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Lucoin Balance</div>
-                  <div className="text-xl font-bold">{userActivity.lucoinBalance} LC</div>
-                </div>
-              </div>
-              
-              <div className="pt-2">
-                <div className="text-sm mb-1.5">Profile Completion</div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary to-accent" 
-                    style={{ width: `${profile?.profile_completeness || 65}%` }}
-                  />
-                </div>
-                <div className="flex justify-end mt-1 text-xs text-muted-foreground">
-                  {profile?.profile_completeness || 65}% complete
-                </div>
-              </div>
+            <div className="flex items-center">
+              <Users className="h-4 w-4 text-muted-foreground mr-1" />
+              <span className="text-2xl font-bold">1,234</span>
             </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              +5.2% from last week
+            </p>
           </CardContent>
-          <CardFooter>
-            <Button variant="default" className="w-full">
-              Upgrade to Premium
-            </Button>
-          </CardFooter>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Upcoming Appointments
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <Calendar className="h-4 w-4 text-muted-foreground mr-1" />
+              <span className="text-2xl font-bold">3</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Next: Today at 3:00 PM
+            </p>
+          </CardContent>
         </Card>
       </div>
+      
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Featured Profiles</CardTitle>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/explore">
+                View All <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {featuredEscorts.slice(0, 4).map((escort) => (
+              <Link
+                key={escort.id}
+                to={`/escorts/${escort.id}`}
+                className="group"
+              >
+                <div className="aspect-square relative overflow-hidden rounded-md">
+                  <img
+                    src={escort.imageUrl}
+                    alt={escort.name}
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-2">
+                    <div className="text-white font-medium text-sm">
+                      {escort.name}, {escort.age}
+                    </div>
+                    <div className="text-white/90 text-xs">{escort.location}</div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
