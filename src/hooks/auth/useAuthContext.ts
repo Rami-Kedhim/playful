@@ -24,10 +24,10 @@ export const AuthContext = createContext<AuthContextType>(DEFAULT_CONTEXT);
 
 export const useAuth = () => useContext(AuthContext);
 
-// Export AuthProvider component
+// Export AuthProvider component with explicit typing
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // This is a stub - the real implementation will be in useAuthContext.tsx
-  return <AuthContext.Provider value={DEFAULT_CONTEXT}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={DEFAULT_CONTEXT as AuthContextType}>{children}</AuthContext.Provider>;
 };
 
 export default useAuth;
