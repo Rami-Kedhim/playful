@@ -28,6 +28,9 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
   const { toggleFavorite, isFavorite } = useFavorites();
   const favorite = isFavorite(escort.id);
   
+  // Get consistent reviews count
+  const reviewsCount = typeof escort.reviews === 'number' ? escort.reviews : (escort.reviewCount || 0);
+  
   const handleFavoriteToggle = () => {
     toggleFavorite(escort.id);
   };
@@ -71,7 +74,7 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
             <StarRating rating={escort.rating} size={18} />
             <span className="ml-2 text-sm">{escort.rating.toFixed(1)}</span>
             <span className="ml-auto text-sm text-muted-foreground">
-              {escort.reviews || 0} reviews
+              {reviewsCount} reviews
             </span>
           </div>
         </div>

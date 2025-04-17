@@ -7,7 +7,7 @@ import { Escort, BookingStatus } from '@/types/escort';
 
 interface BookingConfirmationProps {
   escort: Escort;
-  status: BookingStatus;
+  status: BookingStatus | string;
   onClose?: () => void;
 }
 

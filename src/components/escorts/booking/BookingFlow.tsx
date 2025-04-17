@@ -37,7 +37,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       subscription = bookingService.subscribeToBookingUpdates(
         bookingId,
         (updatedBooking) => {
-          setRealTimeStatus(updatedBooking.status);
+          setRealTimeStatus(updatedBooking.status as BookingStatus);
           
           if (updatedBooking.status === BookingStatus.CONFIRMED) {
             toast({
@@ -77,7 +77,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     
     setBooking({
       escortId: escort.id,
-      userId: user.id,
+      clientId: user.id,
       ...bookingDetails,
     });
     
@@ -90,13 +90,16 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     setIsSubmitting(true);
     
     try {
-      const result = await bookingService.createBooking({
+      // Create booking with the right types
+      const bookingData = {
         ...booking,
         id: `booking-${Date.now()}`,
         createdAt: new Date(),
         status: BookingStatus.PENDING,
         totalPrice: booking.price || 0
-      } as Booking);
+      } as unknown as Booking;
+      
+      const result = await bookingService.createBooking(bookingData);
       
       if (!result.success) {
         throw new Error(result.error);

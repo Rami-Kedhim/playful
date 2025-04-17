@@ -9,6 +9,10 @@ interface EscortReviewsProps {
 }
 
 const EscortReviews: React.FC<EscortReviewsProps> = ({ escort }) => {
+  // Use a consistent way to get the review count
+  const reviewsCount = typeof escort.reviews === 'number' ? escort.reviews : 
+                      (escort.reviewCount || 0);
+  
   return (
     <Card className="p-6">
       <h3 className="text-xl font-semibold mb-4 flex items-center">
@@ -32,12 +36,12 @@ const EscortReviews: React.FC<EscortReviewsProps> = ({ escort }) => {
           </div>
           <span className="text-lg font-bold">{escort.rating?.toFixed(1) || 'No rating'}</span>
           <span className="text-muted-foreground">
-            ({escort.reviews || 0} {escort.reviews === 1 ? 'review' : 'reviews'})
+            ({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})
           </span>
         </div>
       </div>
       
-      {escort.reviews && escort.reviews > 0 ? (
+      {reviewsCount > 0 ? (
         <div className="space-y-4">
           <p className="text-muted-foreground">Review data will be loaded here.</p>
         </div>

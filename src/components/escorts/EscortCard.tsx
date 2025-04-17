@@ -22,6 +22,7 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
     location,
     rating = 0,
     reviews = 0,
+    reviewCount = 0,
     tags = [],
     imageUrl,
     profileImage,
@@ -37,6 +38,8 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
     languages = []
   } = escort;
 
+  // Use reviewCount as a fallback if reviews is an array
+  const reviewsCount = typeof reviews === 'number' ? reviews : (reviewCount || 0);
   const displayImage = profileImage || imageUrl || "https://via.placeholder.com/300x400";
   
   const formatLastActive = () => {
@@ -122,7 +125,7 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
             <div className="flex items-center">
               <Star className="h-4 w-4 text-yellow-400 mr-1" />
               <span className="font-medium">{rating.toFixed(1)}</span>
-              <span className="text-gray-500 text-sm ml-1">({reviews})</span>
+              <span className="text-gray-500 text-sm ml-1">({reviewsCount})</span>
             </div>
             <span className="font-bold text-green-600">${price}/hr</span>
           </div>

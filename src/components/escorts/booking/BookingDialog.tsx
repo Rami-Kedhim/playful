@@ -44,6 +44,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({ escort, onSubmit, onCance
       
       const endDateTime = addHours(startDateTime, parseInt(duration));
       
+      // Pass date objects directly, the type now supports both string and Date
       await onSubmit({
         startTime: startDateTime,
         endTime: endDateTime,

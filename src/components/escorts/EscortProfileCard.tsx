@@ -20,11 +20,15 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort, className
     verified, 
     rating, 
     reviews, 
+    reviewCount,
     profileImage, 
     imageUrl,
     availability,
     gallery
   } = escort;
+
+  // Get review count consistently
+  const reviewsCount = typeof reviews === 'number' ? reviews : (reviewCount || 0);
 
   // Helper to safely get images
   const getImages = () => {
@@ -93,7 +97,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort, className
     
     return {
       height: height ? `${height} cm` : "Not specified",
-      weight: weight ? `${weight} kg` : "Not specified",
+      weight: weight ? `${weight}` : "Not specified",
       measurements: formattedMeasurements,
       hairColor: hairColor || "Not specified",
       eyeColor: eyeColor || "Not specified",
@@ -130,7 +134,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort, className
         <div className="flex items-center mt-2">
           <Star className="h-4 w-4 text-yellow-500 mr-1" />
           <span className="text-sm font-medium">{rating?.toFixed(1) || 'N/A'}</span>
-          <span className="text-gray-500 text-sm ml-1">({reviews || 0} reviews)</span>
+          <span className="text-gray-500 text-sm ml-1">({reviewsCount} reviews)</span>
         </div>
         
         <Tabs defaultValue="about" className="mt-4">

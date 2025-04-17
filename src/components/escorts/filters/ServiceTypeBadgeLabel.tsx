@@ -1,108 +1,35 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Monitor, Users, Globe } from 'lucide-react';
-import { ServiceType } from '@/types/escort';
-
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
-
-// Service type information and mappings
-export const serviceTypeInfoMap = {
-  'in-person': {
-    label: 'In-Person',
-    icon: Users,
-    class: 'bg-indigo-100 text-indigo-800 border-indigo-300',
-    filterLabel: 'In-Person Only',
-    description: 'Physical meetings'
-  },
-  'virtual': {
-    label: 'Virtual',
-    icon: Monitor,
-    class: 'bg-purple-100 text-purple-800 border-purple-300',
-    filterLabel: 'Virtual Only',
-    description: 'Online services'
-  },
-  'both': {
-    label: 'Both',
-    icon: Globe,
-    class: 'bg-blue-100 text-blue-800 border-blue-300',
-    filterLabel: 'Both Services',
-    description: 'In-person & virtual'
-  },
-  '': {
-    label: 'Any',
-    icon: null,
-    class: 'bg-gray-100 text-gray-800 border-gray-300',
-    filterLabel: 'Any Type',
-    description: 'All service types'
-  }
-};
-
-export const getServiceTypeInfo = (type: ServiceTypeFilter) => {
-  return serviceTypeInfoMap[type] || null;
-};
-
-export const getSafeServiceLabel = (type: string) => {
-  if (type in serviceTypeInfoMap) {
-    return serviceTypeInfoMap[type as ServiceTypeFilter].label;
-  }
-  // Fallback for other service types
-  return type.charAt(0).toUpperCase() + type.slice(1).replace(/([A-Z])/g, ' $1');
-};
-
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  switch (type) {
-    case 'in-person': return 'In-Person';
-    case 'virtual': return 'Virtual';
-    case 'both': return 'Both';
-    default: return '';
-  }
-};
+import { MapPin, Laptop, SquareUserRound } from 'lucide-react';
+import { ServiceTypeFilter } from '@/types/escort';
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
-  showIcon?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
-  type,
-  showIcon = true,
-  size = 'sm'
-}) => {
-  if (!type) return null;
-
-  const getIconSize = () => {
-    switch (size) {
-      case 'lg': return 18;
-      case 'md': return 14;
-      case 'sm': 
-      default:   return 12;
-    }
-  };
-
-  const iconSize = getIconSize();
-
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type, className }) => {
   switch (type) {
     case 'in-person':
       return (
-        <Badge variant="outline" className="bg-indigo-100 text-indigo-800 border-indigo-300">
-          {showIcon && <Users size={iconSize} className="mr-1" />}
-          In-Person
+        <Badge className={`bg-blue-600 text-white border-0 flex items-center gap-1 ${className}`}>
+          <MapPin className="h-3 w-3" />
+          <span>In Person</span>
         </Badge>
       );
     case 'virtual':
       return (
-        <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">
-          {showIcon && <Monitor size={iconSize} className="mr-1" />}
-          Virtual
+        <Badge className={`bg-purple-600 text-white border-0 flex items-center gap-1 ${className}`}>
+          <Laptop className="h-3 w-3" />
+          <span>Virtual</span>
         </Badge>
       );
     case 'both':
       return (
-        <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
-          {showIcon && <Globe size={iconSize} className="mr-1" />}
-          Both
+        <Badge className={`bg-green-600 text-white border-0 flex items-center gap-1 ${className}`}>
+          <SquareUserRound className="h-3 w-3" />
+          <span>In Person & Virtual</span>
         </Badge>
       );
     default:
@@ -111,3 +38,4 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
 };
 
 export default ServiceTypeBadgeLabel;
+export type { ServiceTypeFilter };

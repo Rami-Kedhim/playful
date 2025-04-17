@@ -15,8 +15,11 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
   const { isFavorite } = useFavorites();
   
-  // Convert verificationLevel to the expected type from verification.ts
-  const verificationLevel = (escort.verificationLevel || "none") as any;
+  // Use verification_level property and convert to expected type
+  const verificationLevel = (escort.verification_level || escort.verificationLevel || "none") as any;
+  
+  // Ensure reviews is a number
+  const reviewCount = typeof escort.reviews === 'number' ? escort.reviews : (escort.reviewCount || 0);
   
   return (
     <>
@@ -60,12 +63,12 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
         <div className="bg-gray-800 rounded-md px-3 py-1 flex items-center gap-1">
           <StarRating rating={escort.rating} size={14} />
           <span className="ml-1">{escort.rating.toFixed(1)}</span>
-          <span className="text-gray-400 ml-1">({escort.reviews})</span>
+          <span className="text-gray-400 ml-1">({reviewCount})</span>
         </div>
         
         {escort.price && (
-          <div className="ml-auto text-xl font-bold text-lucoin">
-            {escort.price} LC/hr
+          <div className="ml-auto text-xl font-bold text-ubx">
+            {escort.price} UBX/hr
           </div>
         )}
       </div>

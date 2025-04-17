@@ -21,6 +21,8 @@ export const moreEscortProfiles: Escort[] = [
       favorites: 340,
       reviews: 42
     },
+    reviews: 42,
+    reviewCount: 42,
     availableNow: true,
     lastActive: new Date().toISOString(),
     responseRate: 97,
@@ -48,6 +50,8 @@ export const moreEscortProfiles: Escort[] = [
       favorites: 220,
       reviews: 28
     },
+    reviews: 28,
+    reviewCount: 28,
     availableNow: false,
     lastActive: new Date().toISOString(),
     responseRate: 94,

@@ -1,113 +1,72 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Shield, CheckCircle, BadgeCheck, User } from "lucide-react";
-import { VerificationLevel } from "@/types/escort";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from '@/components/ui/badge';
+import { ShieldCheck, Shield, ShieldAlert, BadgeCheck } from 'lucide-react';
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationBadgeProps {
-  level: VerificationLevel;
-  showTooltip?: boolean;
-  size?: "sm" | "md" | "lg";
-  className?: string;
+  level: VerificationLevel | string;
+  showLabel?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-const VerificationBadge = ({ 
+const VerificationBadge: React.FC<VerificationBadgeProps> = ({ 
   level, 
-  showTooltip = true,
-  size = "md",
-  className = ""
-}: VerificationBadgeProps) => {
-  const getBadgeContent = () => {
-    const classes = {
-      sm: "text-xs py-0.5 px-1.5",
-      md: "text-sm py-1 px-2",
-      lg: "py-1.5 px-3"
-    };
-    
-    const iconSize = {
-      sm: 12,
-      md: 14,
-      lg: 16
-    };
-    
-    const sizeClass = classes[size];
-    const iconWidth = iconSize[size];
-    
+  showLabel = true,
+  size = 'md'
+}) => {
+  const iconSizes = {
+    sm: 'h-3 w-3',
+    md: 'h-4 w-4',
+    lg: 'h-5 w-5'
+  };
+  
+  const textSizes = {
+    sm: 'text-xs',
+    md: 'text-sm',
+    lg: 'text-base'
+  };
+  
+  const getVerificationDetails = () => {
     switch (level) {
       case 'premium':
-        return (
-          <Badge 
-            className={`bg-primary hover:bg-primary ${sizeClass} ${className}`}
-          >
-            <BadgeCheck className={`w-${iconWidth} h-${iconWidth} mr-1`} />
-            Premium
-          </Badge>
-        );
+        return {
+          icon: <ShieldCheck className={`${iconSizes[size]} mr-1 fill-green-300`} />,
+          label: 'Platinum Verified',
+          className: 'bg-green-600 text-white hover:bg-green-700'
+        };
       case 'enhanced':
-        return (
-          <Badge 
-            className={`bg-blue-500 hover:bg-blue-600 ${sizeClass} ${className}`}
-          >
-            <CheckCircle className={`w-${iconWidth} h-${iconWidth} mr-1`} />
-            Enhanced
-          </Badge>
-        );
+      case 'standard':
+        return {
+          icon: <Shield className={`${iconSizes[size]} mr-1 fill-blue-300`} />,
+          label: 'Enhanced Verified',
+          className: 'bg-blue-600 text-white hover:bg-blue-700'
+        };
       case 'basic':
-        return (
-          <Badge 
-            className={`bg-green-500 hover:bg-green-600 ${sizeClass} ${className}`}
-          >
-            <Shield className={`w-${iconWidth} h-${iconWidth} mr-1`} />
-            Basic
-          </Badge>
-        );
-      case 'none':
+        return {
+          icon: <ShieldAlert className={`${iconSizes[size]} mr-1 fill-amber-300`} />,
+          label: 'Basic Verified',
+          className: 'bg-amber-500 text-white hover:bg-amber-600'
+        };
       default:
-        return (
-          <Badge 
-            variant="outline" 
-            className={`text-muted-foreground ${sizeClass} ${className}`}
-          >
-            <User className={`w-${iconWidth} h-${iconWidth} mr-1`} />
-            Not Verified
-          </Badge>
-        );
+        return {
+          icon: <BadgeCheck className={`${iconSizes[size]} mr-1`} />,
+          label: 'Unverified',
+          className: 'bg-gray-500 text-white hover:bg-gray-600'
+        };
     }
   };
-
-  const getTooltipContent = () => {
-    switch (level) {
-      case 'premium':
-        return "Premium verification includes government ID, selfie, background check, and personal references";
-      case 'enhanced':
-        return "Enhanced verification includes government ID, selfie, and background check";
-      case 'basic':
-        return "Basic verification includes government ID and selfie verification";
-      case 'none':
-      default:
-        return "This profile has not completed verification";
-    }
-  };
-
-  const badge = getBadgeContent();
-
-  if (showTooltip) {
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {badge}
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{getTooltipContent()}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
-
-  return badge;
+  
+  const { icon, label, className } = getVerificationDetails();
+  
+  if (level === 'none') return null;
+  
+  return (
+    <Badge className={`${className} ${textSizes[size]} flex items-center`}>
+      {icon}
+      {showLabel && <span>{label}</span>}
+    </Badge>
+  );
 };
 
 export default VerificationBadge;

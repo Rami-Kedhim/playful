@@ -9,6 +9,12 @@ interface MediaSectionProps {
   initialTab?: string;
 }
 
+interface VideoItem {
+  url: string;
+  title?: string;
+  thumbnail?: string;
+}
+
 const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photos" }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
   
@@ -20,14 +26,40 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photo
   } else if (Array.isArray(escort.gallery)) {
     galleryImages = escort.gallery;
   } else if (escort.images && Array.isArray(escort.images)) {
-    galleryImages = escort.images;
+    galleryImages = escort.images as string[];
   }
   
-  // Filter videos that are actual video objects or strings
-  const videos = escort.videos?.filter(video => 
-    typeof video === 'string' || 
-    (typeof video === 'object' && video !== null && 'url' in video)
-  ) || [];
+  // Process videos to ensure they're in a consistent format
+  const processVideos = (): VideoItem[] => {
+    if (!escort.videos || !Array.isArray(escort.videos)) return [];
+    
+    return escort.videos.map((video, index) => {
+      // Handle string URLs
+      if (typeof video === 'string') {
+        return { 
+          url: video,
+          title: `Video ${index + 1}`
+        };
+      }
+      
+      // Handle object videos
+      if (typeof video === 'object' && video !== null) {
+        return {
+          url: (video as any).url || '',
+          title: (video as any).title || `Video ${index + 1}`,
+          thumbnail: (video as any).thumbnail
+        };
+      }
+      
+      // Default fallback
+      return {
+        url: '',
+        title: `Video ${index + 1}`
+      };
+    }).filter(video => video.url); // Filter out videos with empty URLs
+  };
+  
+  const videos = processVideos();
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -58,24 +90,19 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photo
       
       <TabsContent value="videos" className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {videos.map((video, index) => {
-            const videoUrl = typeof video === 'string' ? video : (video && 'url' in video) ? video.url : '';
-            const videoTitle = typeof video === 'string' ? `Video ${index + 1}` : (video && 'title' in video) ? video.title : `Video ${index + 1}`;
-            
-            return (
-              <div key={index} className="space-y-1">
-                <AspectRatio ratio={16/9} className="overflow-hidden rounded-md bg-black">
-                  <video 
-                    src={videoUrl} 
-                    controls 
-                    className="w-full h-full object-contain" 
-                    poster={typeof video === 'object' && video !== null && 'thumbnail' in video ? video.thumbnail : undefined}
-                  />
-                </AspectRatio>
-                <p className="text-sm font-medium">{videoTitle}</p>
-              </div>
-            );
-          })}
+          {videos.map((video, index) => (
+            <div key={index} className="space-y-1">
+              <AspectRatio ratio={16/9} className="overflow-hidden rounded-md bg-black">
+                <video 
+                  src={video.url} 
+                  controls 
+                  className="w-full h-full object-contain" 
+                  poster={video.thumbnail}
+                />
+              </AspectRatio>
+              <p className="text-sm font-medium">{video.title}</p>
+            </div>
+          ))}
           
           {videos.length === 0 && (
             <div className="col-span-full p-8 text-center text-gray-500">

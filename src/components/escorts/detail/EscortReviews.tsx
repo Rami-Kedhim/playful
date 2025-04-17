@@ -54,6 +54,9 @@ const EscortReviews = ({ escort }: EscortReviewsProps) => {
   
   const [reviews, setReviews] = useState<Review[]>(mockReviews);
   
+  // Get consistent reviews count
+  const reviewsCount = typeof escort.reviews === 'number' ? escort.reviews : (escort.reviewCount || 0);
+  
   const toggleLike = (reviewId: string) => {
     setReviews(prevReviews => 
       prevReviews.map(review => {
@@ -77,7 +80,7 @@ const EscortReviews = ({ escort }: EscortReviewsProps) => {
             <div className="text-4xl font-bold mr-3">{escort.rating.toFixed(1)}</div>
             <div>
               <StarRating rating={escort.rating} size={18} />
-              <div className="text-sm text-gray-400">{escort.reviews} reviews</div>
+              <div className="text-sm text-gray-400">{reviewsCount} reviews</div>
             </div>
           </div>
           
@@ -113,9 +116,9 @@ const EscortReviews = ({ escort }: EscortReviewsProps) => {
           ))}
         </div>
         
-        {escort.reviews > 3 && (
+        {reviewsCount > 3 && (
           <Button variant="ghost" className="w-full mt-4">
-            See All {escort.reviews} Reviews
+            See All {reviewsCount} Reviews
           </Button>
         )}
       </CardContent>
