@@ -38,11 +38,54 @@ export interface UberPersona {
     isFeatured?: boolean;
     isAI?: boolean;
   };
+  roleFlags?: {
+    isUser?: boolean;
+    isEscort?: boolean;
+    isCreator?: boolean;
+    isLivecam?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+    isAI?: boolean;
+  };
   escort?: Escort;
   creator?: ContentCreator;
   capabilities?: Capabilities;
   ethnicity?: string;
   language?: string | string[];
+  displayName?: string;  // Added displayName
+  bio?: string;  // Added bio
+  age?: number;  // Added age
+  system?: {  // Added system object
+    lastActiveAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    totalViews?: number;
+    totalLikes?: number;
+    rank?: number;
+    isAI?: boolean;
+  };
+  monetization?: {  // Added monetization
+    enabled?: boolean;
+    methods?: string[];
+    rates?: {
+      message?: number;
+    };
+    subscription?: {
+      price?: number;
+      interval?: string;
+      features?: string[];
+    };
+    acceptsLucoin?: boolean;
+    pricePerMessage?: number;
+    subscriptionPrice?: number;
+    videoChatPrice?: number;
+    meetingPrice?: number;
+  };
+  contentCount?: {  // Added contentCount
+    photos?: number;
+    videos?: number;
+    streams?: number;
+  };
 }
 
 export interface Capabilities {
@@ -54,6 +97,9 @@ export interface Capabilities {
   hasChat?: boolean;
   hasStories?: boolean;
   hasSubscription?: boolean;
+  hasContent?: boolean;
+  hasRealMeets?: boolean;
+  hasVirtualMeets?: boolean;
 }
 
 export interface UberPersonaResponse {

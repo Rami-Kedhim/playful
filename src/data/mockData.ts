@@ -1,124 +1,237 @@
-// Mock escort profiles
-export const escortProfiles = [
+export const mockEscortProfiles = [
   {
-    id: "esc-001",
-    name: "Sophia Rose",
-    age: 28,
-    gender: "female",
-    location: "Miami, FL",
-    bio: "Adventurous and open-minded companion for unforgettable experiences",
+    id: '1',
+    name: 'Alice Wonderland',
+    age: 25,
+    gender: 'female',
+    location: 'New York, USA',
+    bio: 'Friendly and adventurous escort ready to make your dreams come true.',
     rating: 4.8,
     price: 300,
-    images: ["https://i.imgur.com/randomimage1.jpg"],
+    images: [
+      '/images/escorts/profile1.jpg',
+      '/images/escorts/gallery1.jpg',
+      '/images/escorts/gallery2.jpg'
+    ],
+    services: ['GFE', 'Domination', 'Massage'],
     isVerified: true,
     featured: true,
-    isContentCreator: false
+    contactInfo: {
+      email: 'alice@example.com',
+      phone: '+1 (212) 123-4567',
+      website: 'www.alicewonderland.com'
+    }
   },
   {
-    id: "esc-002",
-    name: "Emma Davis",
-    age: 25,
-    gender: "female",
-    location: "Seattle, WA",
-    bio: "Intellectual and passionate escort for meaningful connections",
-    rating: 4.6,
-    price: 280,
-    images: ["https://i.imgur.com/randomimage2.jpg"],
-    isVerified: true,
+    id: '2',
+    name: 'Bob The Builder',
+    age: 32,
+    gender: 'male',
+    location: 'Los Angeles, USA',
+    bio: 'Experienced and professional escort ready to fulfill your desires.',
+    rating: 4.5,
+    price: 250,
+    images: [
+      '/images/escorts/profile2.jpg',
+      '/images/escorts/gallery3.jpg',
+      '/images/escorts/gallery4.jpg'
+    ],
+    services: ['BDSM', 'Roleplay', 'Outcall'],
+    isVerified: false,
     featured: false,
-    isContentCreator: true
+    contactInfo: {
+      email: 'bob@example.com',
+      phone: '+1 (310) 234-5678',
+      website: 'www.bobthebuilder.com'
+    }
   },
   {
-    id: "esc-003",
-    name: "Olivia Johnson",
-    age: 30,
-    gender: "female",
-    location: "New York, NY",
-    bio: "Elegant and sophisticated companion for high-class events",
+    id: '3',
+    name: 'Charlie Chaplin',
+    age: 28,
+    gender: 'male',
+    location: 'Chicago, USA',
+    bio: 'Passionate and discreet escort ready to provide unforgettable experiences.',
     rating: 4.9,
     price: 350,
-    images: ["https://i.imgur.com/randomimage3.jpg"],
+    images: [
+      '/images/escorts/profile3.jpg',
+      '/images/escorts/gallery5.jpg',
+      '/images/escorts/gallery6.jpg'
+    ],
+    services: ['Anal', 'COB', 'Incall'],
     isVerified: true,
     featured: true,
-    isContentCreator: true
+    contactInfo: {
+      email: 'charlie@example.com',
+      phone: '+1 (312) 345-6789',
+      website: 'www.charliechaplin.com'
+    }
   },
   {
-    id: "esc-004",
-    name: "Ava Wilson",
-    age: 27,
-    gender: "female",
-    location: "Los Angeles, CA",
-    bio: "Playful and energetic escort for exciting adventures",
-    rating: 4.7,
-    price: 320,
-    images: ["https://i.imgur.com/randomimage4.jpg"],
-    isVerified: true,
-    featured: true,
-    isContentCreator: false
-  },
-  {
-    id: "esc-005",
-    name: "Isabella Martinez",
+    id: '4',
+    name: 'Diana Prince',
     age: 29,
-    gender: "female",
-    location: "Chicago, IL",
-    bio: "Sensual and attentive companion for intimate moments",
-    rating: 4.5,
-    price: 290,
-    images: ["https://i.imgur.com/randomimage5.jpg"],
+    gender: 'female',
+    location: 'Houston, USA',
+    bio: 'Elegant and charming escort ready to cater to your every need.',
+    rating: 4.7,
+    price: 400,
+    images: [
+      '/images/escorts/profile4.jpg',
+      '/images/escorts/gallery7.jpg',
+      '/images/escorts/gallery8.jpg'
+    ],
+    services: ['Deepthroat', 'Fellatio', 'Erotic Massage'],
     isVerified: false,
     featured: false,
-    isContentCreator: true
+    contactInfo: {
+      email: 'diana@example.com',
+      phone: '+1 (713) 456-7890',
+      website: 'www.dianaprince.com'
+    }
   },
   {
-    id: "esc-006",
-    name: "Mia Thompson",
-    age: 26,
-    gender: "female",
-    location: "Dallas, TX",
-    bio: "Charming and witty escort for stimulating conversations",
-    rating: 4.4,
-    price: 270,
-    images: ["https://i.imgur.com/randomimage6.jpg"],
-    isVerified: true,
-    featured: false,
-    isContentCreator: true
-  },
-  {
-    id: "esc-007",
-    name: "Charlotte Garcia",
+    id: '5',
+    name: 'Eve Harrington',
     age: 31,
-    gender: "female",
-    location: "Houston, TX",
-    bio: "Exotic and mysterious companion for unforgettable nights",
-    rating: 4.8,
-    price: 330,
-    images: ["https://i.imgur.com/randomimage7.jpg"],
+    gender: 'female',
+    location: 'Phoenix, USA',
+    bio: 'Sophisticated and sensual escort ready to indulge your fantasies.',
+    rating: 4.6,
+    price: 300,
+    images: [
+      '/images/escorts/profile5.jpg',
+      '/images/escorts/gallery9.jpg',
+      '/images/escorts/gallery10.jpg'
+    ],
+    services: ['Footjob', 'Bondage', 'Striptease'],
     isVerified: true,
-    featured: true,
-    isContentCreator: false
+    featured: false,
+    contactInfo: {
+      email: 'eve@example.com',
+      phone: '+1 (602) 567-8901',
+      website: 'www.eveharrington.com'
+    }
   },
   {
-    id: "esc-008",
-    name: "Amelia Rodriguez",
-    age: 24,
-    gender: "female",
-    location: "San Francisco, CA",
-    bio: "Sweet and caring escort for genuine connections",
-    rating: 4.6,
-    price: 260,
-    images: ["https://i.imgur.com/randomimage8.jpg"],
+    id: '6',
+    name: 'Frank Underwood',
+    age: 35,
+    gender: 'male',
+    location: 'Philadelphia, USA',
+    bio: 'Intelligent and discreet escort ready to provide stimulating companionship.',
+    rating: 4.4,
+    price: 200,
+    images: [
+      '/images/escorts/profile6.jpg',
+      '/images/escorts/gallery11.jpg',
+      '/images/escorts/gallery12.jpg'
+    ],
+    services: ['Roleplay', 'BBJ', 'Wax Play'],
     isVerified: false,
     featured: false,
-    isContentCreator: true
+    contactInfo: {
+      email: 'frank@example.com',
+      phone: '+1 (215) 678-9012',
+      website: 'www.frankunderwood.com'
+    }
+  },
+  {
+    id: '7',
+    name: 'Grace Kelly',
+    age: 27,
+    gender: 'female',
+    location: 'San Antonio, USA',
+    bio: 'Elegant and refined escort ready to offer unforgettable moments.',
+    rating: 4.7,
+    price: 380,
+    images: [
+      '/images/escorts/profile7.jpg',
+      '/images/escorts/gallery13.jpg',
+      '/images/escorts/gallery14.jpg'
+    ],
+    services: ['Vanilla Sex', 'Light bondage', 'Teasing'],
+    isVerified: true,
+    featured: false,
+    contactInfo: {
+      email: 'grace@example.com',
+      phone: '+1 (210) 789-0123',
+      website: 'www.gracekelly.com'
+    }
+  },
+  {
+    id: '8',
+    name: 'Hans Gruber',
+    age: 39,
+    gender: 'male',
+    location: 'San Diego, USA',
+    bio: 'Sophisticated and worldly escort ready to provide unique experiences.',
+    rating: 4.6,
+    price: 280,
+    images: [
+      '/images/escorts/profile8.jpg',
+      '/images/escorts/gallery15.jpg',
+      '/images/escorts/gallery16.jpg'
+    ],
+    services: ['COB', 'Watersports', 'Fisting'],
+    isVerified: false,
+    featured: false,
+    contactInfo: {
+      email: 'hans@example.com',
+      phone: '+1 (619) 890-1234',
+      website: 'www.hansgruber.com'
+    }
+  },
+  {
+    id: '9',
+    name: 'Ivy Smith',
+    age: 26,
+    gender: 'female',
+    location: 'Dallas, USA',
+    bio: 'Alluring and passionate escort ready to fulfill your deepest desires.',
+    rating: 4.9,
+    price: 320,
+    images: [
+      '/images/escorts/profile9.jpg',
+      '/images/escorts/gallery17.jpg',
+      '/images/escorts/gallery18.jpg'
+    ],
+    services: ['Grope', 'Kissing', 'Roleplay'],
+    isVerified: true,
+    featured: false,
+    contactInfo: {
+      email: 'ivy@example.com',
+      phone: '+1 (214) 901-2345',
+      website: 'www.ivysmith.com'
+    }
+  },
+  {
+    id: '10',
+    name: 'Jack Torrance',
+    age: 42,
+    gender: 'male',
+    location: 'San Francisco, USA',
+    bio: 'Intense and mysterious escort ready to offer unforgettable encounters.',
+    rating: 4.5,
+    price: 220,
+    images: [
+      '/images/escorts/profile10.jpg',
+      '/images/escorts/gallery19.jpg',
+      '/images/escorts/gallery20.jpg'
+    ],
+    services: ['BDSM', 'Domination', 'Submission'],
+    isVerified: false,
+    featured: false,
+    contactInfo: {
+      email: 'jack@example.com',
+      phone: '+1 (415) 123-4567',
+      website: 'www.jacktorrance.com'
+    }
   }
 ];
 
-// Export featured escorts and creators explicitly
-export const featuredEscorts = escortProfiles.filter(escort => escort.featured).slice(0, 4);
-export const featuredCreators = escortProfiles.filter(escort => escort.isContentCreator).slice(0, 4);
-
-// Export ProfileProps interface
+// Add export for ProfileProps
 export interface ProfileProps {
   id: string;
   name: string;
@@ -129,403 +242,65 @@ export interface ProfileProps {
   price?: number;
 }
 
-// Mock escort profiles for export
-export const mockEscortProfiles = escortProfiles;
-
-// Mock creator profiles
-export const creatorProfiles = [
+// Export featured escorts and creators
+export const featuredEscorts = [
+  // Add mock data for featured escorts
   {
-    id: "creator-001",
-    name: "Lily Chen",
-    username: "lilychen",
-    bio: "Passionate content creator sharing intimate moments",
-    followers: 15000,
-    posts: 120,
-    subscription: 9.99,
-    profileImage: "https://i.imgur.com/randomcreator1.jpg",
-    coverImage: "https://i.imgur.com/randomcover1.jpg",
-    isVerified: true,
-    featured: true
-  },
-  {
-    id: "creator-002",
-    name: "Jasmine Taylor",
-    username: "jasminetaylor",
-    bio: "Exclusive adult content for my dedicated fans",
-    followers: 25000,
-    posts: 200,
-    subscription: 14.99,
-    profileImage: "https://i.imgur.com/randomcreator2.jpg",
-    coverImage: "https://i.imgur.com/randomcover2.jpg",
-    isVerified: true,
-    featured: true
-  },
-  {
-    id: "creator-003",
-    name: "Zoe Williams",
-    username: "zoewilliams",
-    bio: "Sharing my wild adventures and intimate life",
-    followers: 18000,
-    posts: 150,
-    subscription: 12.99,
-    profileImage: "https://i.imgur.com/randomcreator3.jpg",
-    coverImage: "https://i.imgur.com/randomcover3.jpg",
-    isVerified: false,
-    featured: false
-  },
-  {
-    id: "creator-004",
-    name: "Ruby Johnson",
-    username: "rubyjohnson",
-    bio: "Uncensored content and personal interactions",
-    followers: 30000,
-    posts: 250,
-    subscription: 19.99,
-    profileImage: "https://i.imgur.com/randomcreator4.jpg",
-    coverImage: "https://i.imgur.com/randomcover4.jpg",
-    isVerified: true,
-    featured: true
-  }
-];
-
-// Mock livecam profiles
-export const livecamProfiles = [
-  {
-    id: "livecam-001",
-    name: "Crystal Sky",
-    username: "crystalsky",
-    isLive: true,
-    viewers: 245,
-    tags: ["blonde", "busty", "toys"],
-    thumbnail: "https://i.imgur.com/randomlive1.jpg",
-    isVerified: true
-  },
-  {
-    id: "livecam-002",
-    name: "Violet Dreams",
-    username: "violetdreams",
-    isLive: true,
-    viewers: 189,
-    tags: ["brunette", "petite", "roleplay"],
-    thumbnail: "https://i.imgur.com/randomlive2.jpg",
-    isVerified: true
-  },
-  {
-    id: "livecam-003",
-    name: "Scarlett Rose",
-    username: "scarlettrose",
-    isLive: false,
-    viewers: 0,
-    tags: ["redhead", "curvy", "fetish"],
-    thumbnail: "https://i.imgur.com/randomlive3.jpg",
-    isVerified: true
-  },
-  {
-    id: "livecam-004",
-    name: "Luna Star",
-    username: "lunastar",
-    isLive: true,
-    viewers: 312,
-    tags: ["latina", "dance", "tease"],
-    thumbnail: "https://i.imgur.com/randomlive4.jpg",
-    isVerified: false
-  }
-];
-
-// Mock user profiles
-export const userProfiles = [
-  {
-    id: "user-001",
-    username: "john_doe",
-    email: "john@example.com",
-    name: "John Doe",
-    avatar: "https://i.imgur.com/randomuser1.jpg",
-    isVerified: true,
-    memberSince: "2022-01-15"
-  },
-  {
-    id: "user-002",
-    username: "jane_smith",
-    email: "jane@example.com",
-    name: "Jane Smith",
-    avatar: "https://i.imgur.com/randomuser2.jpg",
-    isVerified: true,
-    memberSince: "2022-03-22"
-  },
-  {
-    id: "user-003",
-    username: "mike_johnson",
-    email: "mike@example.com",
-    name: "Mike Johnson",
-    avatar: "https://i.imgur.com/randomuser3.jpg",
-    isVerified: false,
-    memberSince: "2022-05-10"
-  },
-  {
-    id: "user-004",
-    username: "sarah_williams",
-    email: "sarah@example.com",
-    name: "Sarah Williams",
-    avatar: "https://i.imgur.com/randomuser4.jpg",
-    isVerified: true,
-    memberSince: "2022-02-28"
-  }
-];
-
-// Mock reviews
-export const reviews = [
-  {
-    id: "review-001",
-    userId: "user-001",
-    escortId: "esc-001",
-    rating: 5,
-    comment: "Amazing experience! Sophia was charming and attentive.",
-    date: "2023-01-15"
-  },
-  {
-    id: "review-002",
-    userId: "user-002",
-    escortId: "esc-001",
-    rating: 4,
-    comment: "Great company, would book again.",
-    date: "2023-02-20"
-  },
-  {
-    id: "review-003",
-    userId: "user-003",
-    escortId: "esc-002",
-    rating: 5,
-    comment: "Emma is intelligent and a great conversationalist.",
-    date: "2023-01-30"
-  },
-  {
-    id: "review-004",
-    userId: "user-004",
-    escortId: "esc-003",
-    rating: 5,
-    comment: "Olivia is the perfect companion for high-class events.",
-    date: "2023-03-05"
-  }
-];
-
-// Mock bookings
-export const bookings = [
-  {
-    id: "booking-001",
-    userId: "user-001",
-    escortId: "esc-001",
-    date: "2023-04-15",
-    time: "19:00",
-    duration: "2 hours",
-    status: "confirmed",
-    location: "Miami, FL",
-    price: 600
-  },
-  {
-    id: "booking-002",
-    userId: "user-002",
-    escortId: "esc-002",
-    date: "2023-04-20",
-    time: "20:00",
-    duration: "3 hours",
-    status: "pending",
-    location: "Seattle, WA",
-    price: 840
-  },
-  {
-    id: "booking-003",
-    userId: "user-003",
-    escortId: "esc-003",
-    date: "2023-04-25",
-    time: "18:00",
-    duration: "4 hours",
-    status: "confirmed",
-    location: "New York, NY",
-    price: 1400
-  },
-  {
-    id: "booking-004",
-    userId: "user-004",
-    escortId: "esc-004",
-    date: "2023-04-30",
-    time: "19:30",
-    duration: "2 hours",
-    status: "cancelled",
-    location: "Los Angeles, CA",
-    price: 640
-  }
-];
-
-// Mock messages
-export const messages = [
-  {
-    id: "msg-001",
-    senderId: "user-001",
-    receiverId: "esc-001",
-    content: "Hello, I'm interested in booking you for an event next week.",
-    timestamp: "2023-04-01T14:30:00Z",
-    read: true
-  },
-  {
-    id: "msg-002",
-    senderId: "esc-001",
-    receiverId: "user-001",
-    content: "Hi there! I'd be happy to accompany you. What kind of event is it?",
-    timestamp: "2023-04-01T14:35:00Z",
-    read: true
-  },
-  {
-    id: "msg-003",
-    senderId: "user-002",
-    receiverId: "esc-002",
-    content: "Hi Emma, are you available this Saturday evening?",
-    timestamp: "2023-04-02T10:15:00Z",
-    read: false
-  },
-  {
-    id: "msg-004",
-    senderId: "esc-003",
-    receiverId: "user-003",
-    content: "Thank you for your booking! I'm looking forward to meeting you.",
-    timestamp: "2023-04-03T16:45:00Z",
-    read: true
-  }
-];
-
-// Mock content
-export const content = [
-  {
-    id: "content-001",
-    creatorId: "creator-001",
-    type: "image",
-    url: "https://i.imgur.com/randomcontent1.jpg",
-    caption: "Enjoying my vacation in paradise",
-    likes: 1250,
-    comments: 45,
-    isPremium: false,
-    createdAt: "2023-03-15T12:30:00Z"
-  },
-  {
-    id: "content-002",
-    creatorId: "creator-001",
-    type: "video",
-    url: "https://i.imgur.com/randomvideo1.mp4",
-    thumbnail: "https://i.imgur.com/randomthumbnail1.jpg",
-    caption: "Behind the scenes of my latest photoshoot",
-    likes: 2100,
-    comments: 78,
+    id: "e1",
+    name: "Sophia James",
+    imageUrl: "/images/escorts/profile1.jpg",
+    location: "New York",
+    rating: 4.9,
     isPremium: true,
-    createdAt: "2023-03-18T15:45:00Z"
+    price: 300
   },
   {
-    id: "content-003",
-    creatorId: "creator-002",
-    type: "image",
-    url: "https://i.imgur.com/randomcontent2.jpg",
-    caption: "New lingerie set just arrived",
-    likes: 1800,
-    comments: 62,
+    id: "e2",
+    name: "Emma Davis",
+    imageUrl: "/images/escorts/profile2.jpg",
+    location: "Los Angeles",
+    rating: 4.8,
     isPremium: false,
-    createdAt: "2023-03-20T09:15:00Z"
+    price: 250
   },
   {
-    id: "content-004",
-    creatorId: "creator-002",
-    type: "video",
-    url: "https://i.imgur.com/randomvideo2.mp4",
-    thumbnail: "https://i.imgur.com/randomthumbnail2.jpg",
-    caption: "Exclusive content for my subscribers",
-    likes: 3200,
-    comments: 105,
+    id: "e3",
+    name: "Olivia Wilson",
+    imageUrl: "/images/escorts/profile3.jpg",
+    location: "Miami",
+    rating: 4.7,
     isPremium: true,
-    createdAt: "2023-03-22T18:20:00Z"
+    price: 350
   }
 ];
 
-// Mock subscriptions
-export const subscriptions = [
+export const featuredCreators = [
+  // Add mock data for featured creators
   {
-    id: "sub-001",
-    userId: "user-001",
-    creatorId: "creator-001",
-    tier: "basic",
-    price: 9.99,
-    startDate: "2023-02-15",
-    endDate: "2023-03-15",
-    autoRenew: true,
-    status: "active"
+    id: "c1",
+    name: "Mia Thompson",
+    imageUrl: "/images/creators/creator1.jpg",
+    location: "Las Vegas",
+    rating: 4.9,
+    isPremium: true,
+    price: 15
   },
   {
-    id: "sub-002",
-    userId: "user-002",
-    creatorId: "creator-002",
-    tier: "premium",
-    price: 19.99,
-    startDate: "2023-02-20",
-    endDate: "2023-03-20",
-    autoRenew: false,
-    status: "active"
+    id: "c2",
+    name: "Ava Johnson",
+    imageUrl: "/images/creators/creator2.jpg",
+    location: "Chicago",
+    rating: 4.8,
+    isPremium: true,
+    price: 12
   },
   {
-    id: "sub-003",
-    userId: "user-003",
-    creatorId: "creator-003",
-    tier: "basic",
-    price: 12.99,
-    startDate: "2023-01-10",
-    endDate: "2023-02-10",
-    autoRenew: true,
-    status: "expired"
-  },
-  {
-    id: "sub-004",
-    userId: "user-004",
-    creatorId: "creator-004",
-    tier: "vip",
-    price: 29.99,
-    startDate: "2023-03-01",
-    endDate: "2023-04-01",
-    autoRenew: true,
-    status: "active"
-  }
-];
-
-// Mock transactions
-export const transactions = [
-  {
-    id: "trans-001",
-    userId: "user-001",
-    type: "subscription",
-    amount: 9.99,
-    description: "Monthly subscription to Lily Chen",
-    date: "2023-02-15",
-    status: "completed"
-  },
-  {
-    id: "trans-002",
-    userId: "user-002",
-    type: "booking",
-    amount: 840,
-    description: "Booking with Emma Davis",
-    date: "2023-04-20",
-    status: "pending"
-  },
-  {
-    id: "trans-003",
-    userId: "user-003",
-    type: "tip",
-    amount: 50,
-    description: "Tip to Zoe Williams",
-    date: "2023-03-25",
-    status: "completed"
-  },
-  {
-    id: "trans-004",
-    userId: "user-004",
-    type: "subscription",
-    amount: 29.99,
-    description: "Monthly subscription to Ruby Johnson",
-    date: "2023-03-01",
-    status: "completed"
+    id: "c3",
+    name: "Charlotte Brown",
+    imageUrl: "/images/creators/creator3.jpg",
+    location: "Austin",
+    rating: 4.7,
+    isPremium: false,
+    price: 10
   }
 ];

@@ -1,128 +1,121 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { useToast } from '@/components/ui/use-toast';
 
-const ResetPasswordForm = () => {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [tokenError, setTokenError] = useState(false);
-  const { updatePassword } = useAuth();
-  const navigate = useNavigate();
+interface ResetPasswordFormProps {
+  onComplete?: () => void;
+}
 
-  useEffect(() => {
-    // Check if we have a hash fragment in the URL (Supabase adds it)
-    const hash = window.location.hash;
-    if (!hash || !hash.includes("access_token=")) {
-      setTokenError(true);
-      toast({
-        title: "Invalid or expired link",
-        description: "This password reset link is invalid or has expired. Please request a new one.",
-        variant: "destructive",
-      });
-    }
-  }, []);
+const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSent, setIsSent] = useState(false);
+  const { toast } = useToast();
+  const auth = useAuth();
+  
+  // Update to check if resetPassword exists in the auth object
+  const resetPasswordFn = auth.resetPassword || auth.resetPassword;
 
-  const handleResetPassword = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password.length < 6) {
+    if (!email) {
       toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters",
+        title: "Error",
+        description: "Please enter your email address",
         variant: "destructive",
       });
       return;
     }
     
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    setIsSubmitting(true);
+    
     try {
-      setLoading(true);
-      // Fix: provide a dummy value for oldPassword since we're resetting
-      await updatePassword("", password);
-      
+      // Check if the function exists and call it appropriately
+      if (resetPasswordFn) {
+        // Use only email argument as per the corrected type signature
+        await resetPasswordFn(email);
+        
+        setIsSent(true);
+        toast({
+          title: "Reset link sent",
+          description: "Check your email for password reset instructions",
+        });
+        
+        if (onComplete) {
+          onComplete();
+        }
+      } else {
+        throw new Error("Reset password function not available");
+      }
+    } catch (error: any) {
       toast({
-        title: "Password reset successful",
-        description: "Your password has been reset. You can now log in with your new password.",
-      });
-      
-      navigate("/auth");
-    } catch (error) {
-      console.error("Password reset error:", error);
-      toast({
-        title: "Error resetting password",
-        description: "Failed to reset your password. This link may have expired.",
+        title: "Error",
+        description: error.message || "Failed to send reset email. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  if (tokenError) {
+  if (isSent) {
     return (
-      <div className="text-center">
-        <h2 className="text-xl font-semibold mb-2">Invalid Reset Link</h2>
-        <p className="mb-4">This password reset link is invalid or has expired.</p>
-        <Button onClick={() => navigate("/auth")}>Return to Login</Button>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Check your email</CardTitle>
+          <CardDescription>
+            We've sent you a password reset link. Please check your inbox.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            If you don't see the email, check your spam folder. The link will expire after 24 hours.
+          </p>
+          <Button 
+            variant="outline" 
+            className="mt-4 w-full"
+            onClick={() => setIsSent(false)}
+          >
+            Send another link
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleResetPassword} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="new-password">New Password</Label>
-        <Input
-          id="new-password"
-          type="password"
-          placeholder="Enter your new password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <p className="text-xs text-muted-foreground">
-          Password must be at least 6 characters long
-        </p>
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="confirm-password">Confirm Password</Label>
-        <Input
-          id="confirm-password"
-          type="password"
-          placeholder="Confirm your new password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-      </div>
-      
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Resetting password...
-          </>
-        ) : (
-          "Reset Password"
-        )}
-      </Button>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Reset your password</CardTitle>
+        <CardDescription>
+          Enter your email address and we'll send you a link to reset your password
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Sending..." : "Send reset link"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

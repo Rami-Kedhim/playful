@@ -1,109 +1,111 @@
+
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AreaChart, BadgeDollarSign, Calendar, LayoutGrid, MessageSquare, Star, Users } from 'lucide-react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Link } from 'react-router-dom';
+import { DollarSign, ArrowRight } from 'lucide-react';
 import { featuredEscorts, featuredCreators } from '@/data/mockData';
-import EscortCard from '../escorts/EscortCard';
 import CreatorCard from '../creators/CreatorCard';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 
 const UserDashboardOverview = () => {
   const { user } = useAuth();
 
-  if (!user) {
-    return <p>Loading user data...</p>;
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Earnings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center">
-              <DollarSign className="h-4 w-4 text-muted-foreground mr-1" />
-              <span className="text-2xl font-bold">$4,320</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +12% from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Profile Views
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center">
-              <Users className="h-4 w-4 text-muted-foreground mr-1" />
-              <span className="text-2xl font-bold">1,234</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              +5.2% from last week
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Upcoming Appointments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center">
-              <Calendar className="h-4 w-4 text-muted-foreground mr-1" />
-              <span className="text-2xl font-bold">3</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Next: Today at 3:00 PM
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Card>
+    <div className="grid gap-4 md:gap-8 grid-cols-1 md:grid-cols-2">
+      {/* Account Summary Card */}
+      <Card className="col-span-1 md:col-span-2">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Featured Profiles</CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/explore">
-                View All <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+          <CardTitle>Account Summary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {featuredEscorts.slice(0, 4).map((escort) => (
-              <Link
-                key={escort.id}
-                to={`/escorts/${escort.id}`}
-                className="group"
-              >
-                <div className="aspect-square relative overflow-hidden rounded-md">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-muted rounded-lg p-4 flex items-center">
+              <div className="bg-primary/10 p-3 rounded-full mr-4">
+                <DollarSign className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Balance</p>
+                <h4 className="font-semibold text-xl">{user?.lucoinsBalance || 0} Credits</h4>
+              </div>
+            </div>
+            {/* Add other summary items as needed */}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent Activity */}
+      <Card className="col-span-1 md:col-span-2">
+        <CardHeader>
+          <CardTitle>Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">No recent activity.</p>
+        </CardContent>
+      </Card>
+
+      {/* Recommended Escorts */}
+      <Card className="col-span-1">
+        <CardHeader>
+          <CardTitle>Recommended Escorts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4">
+            {featuredEscorts.length > 0 ? (
+              featuredEscorts.slice(0, 2).map((escort) => (
+                <div key={escort.id} className="flex items-center space-x-4">
                   <img
                     src={escort.imageUrl}
                     alt={escort.name}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform"
+                    className="w-16 h-16 rounded-md object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-2">
-                    <div className="text-white font-medium text-sm">
-                      {escort.name}, {escort.age}
-                    </div>
-                    <div className="text-white/90 text-xs">{escort.location}</div>
+                  <div className="flex-1">
+                    <h4 className="font-medium">{escort.name}</h4>
+                    <p className="text-sm text-muted-foreground">{escort.location}</p>
                   </div>
                 </div>
-              </Link>
-            ))}
+              ))
+            ) : (
+              <p className="text-muted-foreground">No recommendations available.</p>
+            )}
+            <Link to="/escorts">
+              <Button variant="outline" size="sm" className="w-full mt-2">
+                View All <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Recommended Creators */}
+      <Card className="col-span-1">
+        <CardHeader>
+          <CardTitle>Top Creators</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4">
+            {featuredCreators.length > 0 ? (
+              featuredCreators.slice(0, 2).map((creator) => (
+                <div key={creator.id} className="flex items-center space-x-4">
+                  <img
+                    src={creator.imageUrl}
+                    alt={creator.name}
+                    className="w-16 h-16 rounded-md object-cover"
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-medium">{creator.name}</h4>
+                    <p className="text-sm text-muted-foreground">{creator.location}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground">No creators available.</p>
+            )}
+            <Link to="/creators">
+              <Button variant="outline" size="sm" className="w-full mt-2">
+                View All <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
