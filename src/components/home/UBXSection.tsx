@@ -1,4 +1,3 @@
-
 import { Check, Coins, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,11 +59,14 @@ const UBXSection = () => {
             </div>
           </div>
           <div className="flex justify-center">
-            <div className="w-48 h-48 rounded-full bg-blue-500/20 flex items-center justify-center relative animate-float">
-              <div className="w-36 h-36 rounded-full bg-blue-500/30 absolute animate-pulse-slow" />
-              <div className="text-4xl font-bold text-white flex items-center gap-2">
-                <Coins className="h-8 w-8 text-blue-500" />
-                <span>UBX</span>
+            <div className="relative">
+              <div className="w-48 h-48 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center relative animate-float">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/10 to-purple-500/10 animate-pulse-slow"></div>
+                <div className="absolute -inset-2 rounded-full bg-gradient-to-bl from-blue-500/5 to-purple-500/5 animate-spin-slow"></div>
+                <div className="relative flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text">
+                  <Coins className="h-10 w-10 text-blue-500" />
+                  <span className="text-4xl font-bold text-transparent">UBX</span>
+                </div>
               </div>
             </div>
           </div>
