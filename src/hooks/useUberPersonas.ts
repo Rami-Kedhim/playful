@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { UberPersona } from '@/types/uberPersona';
 
 const mockPersonas: UberPersona[] = [
@@ -76,31 +76,60 @@ const mockPersonas: UberPersona[] = [
 
 export function useUberPersonas() {
   const [personas, setPersonas] = useState<UberPersona[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchPersonas = async () => {
-      try {
-        setLoading(true);
-        
-        // In a real app, this would be an API call
-        // For now, simulate delay and return mock data
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setPersonas(mockPersonas);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load personas');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchPersonas();
+  const loadPersonas = useCallback(async (useCache = false) => {
+    try {
+      setIsLoading(true);
+      
+      // In a real app, this would be an API call
+      // For now, simulate delay and return mock data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setPersonas(mockPersonas);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load personas');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  return { personas, loading, error };
+  useEffect(() => {
+    loadPersonas();
+  }, [loadPersonas]);
+
+  // Add helper functions to filter personas by role
+  const getEscorts = () => {
+    return personas.filter(persona => persona.roleFlags.isEscort);
+  };
+
+  const getCreators = () => {
+    return personas.filter(persona => persona.roleFlags.isCreator);
+  };
+
+  const getLivecams = () => {
+    return personas.filter(persona => 
+      persona.roleFlags.isLivecam || 
+      (persona.capabilities && persona.capabilities.hasLiveStream)
+    );
+  };
+
+  const getPersonaById = (id: string) => {
+    return personas.find(persona => persona.id === id);
+  };
+
+  return { 
+    personas, 
+    isLoading, 
+    error, 
+    loadPersonas, 
+    getEscorts, 
+    getCreators, 
+    getLivecams, 
+    getPersonaById 
+  };
 }
 
 export default useUberPersonas;
