@@ -5,7 +5,7 @@ export interface Escort {
   id: string;
   name: string;
   location?: string;
-  age: string; // Changed to string to match usage in components
+  age: string | number; // Can be either string or number based on usage
   gender: string;
   rating?: number;
   price?: number;
@@ -21,7 +21,7 @@ export interface Escort {
     favorites: number;
     reviews: number;
   };
-  // Added fields to match component usage
+  // Additional fields to match component usage
   availableNow?: boolean;
   lastActive?: string;
   responseRate?: number;
@@ -38,6 +38,31 @@ export interface Escort {
     waist: string;
     hips: string;
   };
+  // Additional fields for compatibility with other parts of the app
+  imageUrl?: string;
+  gallery?: string[] | any;
+  verified?: boolean;
+  featured?: boolean;
+  isAI?: boolean;
+  isScraped?: boolean;
+  profileType?: 'verified' | 'ai' | 'provisional';
+  boostLevel?: number;
+  languages?: string[];
+  avatar?: string;
+  avatar_url?: string;
+  ethnicity?: string;
+  hairColor?: string;
+  eyeColor?: string;
+  height?: number;
+  weight?: string;
+  sexualOrientation?: string;
+  availability?: Availability | Availability[];
+  rates?: Rates;
+  reviewCount?: number;
+  subscriptionPrice?: number;
+  contentStats?: ContentStats;
+  gallery_images?: string[];
+  videos?: string[];
 }
 
 export interface EscortReview {
@@ -105,6 +130,28 @@ export interface BookingPaymentStepProps {
   onBack: () => void;
   onComplete: () => Promise<void>;
   isSubmitting: boolean;
-  onConfirm: () => Promise<void>; // Added missing prop
-  onCancel: () => void; // Added missing prop
+  onConfirm: () => Promise<void>;
+  onCancel: () => void;
 }
+
+export interface Availability {
+  days?: string[];
+  hours?: string[];
+  customNotes?: string;
+}
+
+export interface Rates {
+  hourly?: number;
+  twoHours?: number;
+  overnight?: number;
+  weekend?: number;
+}
+
+export interface ContentStats {
+  photos?: number;
+  videos?: number;
+  streams?: string;
+  live?: boolean;
+}
+
+export type ServiceTypeString = 'dinner' | 'events' | 'travel' | 'companionship' | 'overnight' | 'massage' | 'roleplay' | 'in-person' | 'virtual';
