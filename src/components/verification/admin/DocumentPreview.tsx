@@ -1,9 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import DocumentViewer from '@/components/documents/DocumentViewer';
 import { VerificationDocument } from '@/types/verification';
 
 interface DocumentPreviewProps {
@@ -16,8 +16,8 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
 
   // Get the appropriate document properties, supporting both naming conventions
   const documentType = document.type || document.document_type || '';
-  const documentUrl = document.fileUrl || document.document_url || '';
-  const uploadDate = document.uploadedAt || document.created_at || '';
+  const documentUrl = document.url || document.fileUrl || document.file_url || document.document_url || '';
+  const uploadDate = document.uploadedAt || document.uploaded_at || document.created_at || '';
 
   return (
     <>
@@ -54,10 +54,13 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
 
       <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
         <DialogContent className="max-w-4xl h-[80vh]">
-          <DocumentViewer 
-            url={documentUrl}
-            type={documentUrl.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image'}
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <img 
+              src={documentUrl}
+              alt={documentType}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </>

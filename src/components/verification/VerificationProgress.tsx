@@ -111,7 +111,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   };
 
   // Handle status value
-  const status = safeStatus(verificationRequest.status);
+  const status = safeStatus(verificationRequest.status as string);
   const progress = calculateVerificationProgress(status);
 
   return (
@@ -147,7 +147,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Level requested</span>
               <span className="text-sm capitalize">
-                {verificationRequest.verificationLevel || verificationRequest.requested_level || 'basic'}
+                {verificationRequest.level || verificationRequest.verificationLevel || verificationRequest.requested_level || 'basic'}
               </span>
             </div>
             <div className="flex justify-between">
@@ -162,11 +162,11 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
                 <span className="text-sm">{timeRemaining}</span>
               </div>
             )}
-            {status === VerificationStatus.REJECTED && (verificationRequest.rejection_reason || verificationRequest.reviewer_notes) && (
+            {status === VerificationStatus.REJECTED && (verificationRequest.rejectionReason || verificationRequest.rejection_reason || verificationRequest.reviewer_notes) && (
               <div className="mt-2">
                 <span className="text-sm text-muted-foreground block">Rejection reason:</span>
                 <p className="text-sm mt-1 p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
-                  {verificationRequest.rejection_reason || verificationRequest.reviewer_notes}
+                  {verificationRequest.rejectionReason || verificationRequest.rejection_reason || verificationRequest.reviewer_notes}
                 </p>
               </div>
             )}

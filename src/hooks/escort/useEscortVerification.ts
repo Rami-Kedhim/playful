@@ -11,34 +11,35 @@ const fetchVerificationStatus = async (userId: string) => {
   // Return mock data
   return {
     id: '123456',
-    profile_id: userId,
-    user_id: userId,
+    userId: userId,
+    level: VerificationLevel.BASIC,
     status: VerificationStatus.PENDING,
-    requested_level: VerificationLevel.BASIC,
     documents: [
       {
         id: '1',
-        verification_id: '123456',
         type: 'id_card',
-        file_url: '/images/mock/id-card-front.jpg',
-        uploaded_at: new Date().toISOString(),
+        url: '/images/mock/id-card-front.jpg',
+        uploadedAt: new Date().toISOString(),
+        status: 'pending',
+        // For backward compatibility
+        verification_id: '123456',
         document_type: 'id_card',
         document_url: '/images/mock/id-card-front.jpg',
-        status: VerificationStatus.PENDING,
-        created_at: new Date().toISOString(),
-        // For backward compatibility
+        file_url: '/images/mock/id-card-front.jpg',
         fileUrl: '/images/mock/id-card-front.jpg',
-        uploadedAt: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        uploaded_at: new Date().toISOString()
       }
     ],
+    submittedAt: new Date().toISOString(),
+    // For backward compatibility
+    user_id: userId,
+    profile_id: userId,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    // For backward compatibility
-    userId: userId,
-    submittedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    verificationLevel: VerificationLevel.BASIC
-  };
+    verificationLevel: VerificationLevel.BASIC,
+    requested_level: VerificationLevel.BASIC
+  } as VerificationRequest;
 };
 
 export const useEscortVerification = () => {
@@ -84,15 +85,18 @@ export const useEscortVerification = () => {
       // Create a "submitted" request
       setVerificationRequest({
         id: Math.random().toString(36).substring(2, 11),
-        profile_id: user.id,
-        user_id: user.id,
-        status: VerificationStatus.PENDING,
-        requested_level: VerificationLevel.BASIC,
-        documents: [],
-        created_at: new Date().toISOString(),
-        // For backward compatibility
         userId: user.id,
-        submittedAt: new Date().toISOString()
+        level: VerificationLevel.BASIC,
+        status: VerificationStatus.PENDING,
+        documents: [],
+        submittedAt: new Date().toISOString(),
+        // For backward compatibility
+        user_id: user.id,
+        profile_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        verificationLevel: VerificationLevel.BASIC,
+        requested_level: VerificationLevel.BASIC
       });
       
       return { success: true };

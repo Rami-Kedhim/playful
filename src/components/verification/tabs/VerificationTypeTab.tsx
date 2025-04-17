@@ -2,6 +2,7 @@
 import React from 'react';
 import VerificationLevelType from '../level/VerificationLevelType';
 import VerificationLevelRequirements from '../level/VerificationLevelRequirements';
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationTypeTabProps {
   showRequirements: boolean;
@@ -16,10 +17,20 @@ const VerificationTypeTab: React.FC<VerificationTypeTabProps> = ({
   onSelectType,
   onCompleteRequirements,
 }) => {
+  // Convert verificationType to VerificationLevel enum
+  const getVerificationLevel = (type: string | null): VerificationLevel => {
+    switch (type) {
+      case 'personal': return VerificationLevel.BASIC;
+      case 'business': return VerificationLevel.ENHANCED;
+      case 'premium': return VerificationLevel.PREMIUM;
+      default: return VerificationLevel.NONE;
+    }
+  };
+
   return showRequirements ? (
     <VerificationLevelRequirements
-      currentLevel="none"
-      targetLevel={verificationType || 'basic'}
+      currentLevel={VerificationLevel.NONE}
+      targetLevel={getVerificationLevel(verificationType)}
       onComplete={onCompleteRequirements}
     />
   ) : (

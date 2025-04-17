@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { verificationFormSchema, VerificationFormValues, DOCUMENT_TYPES } from '@/types/verification';
+import { VerificationFormValues, DOCUMENT_TYPES, verificationFormSchema } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentUploadHandler from './DocumentUploadHandler';
 import SubmitButton from './SubmitButton';

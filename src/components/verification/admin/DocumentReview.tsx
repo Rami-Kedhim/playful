@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { VerificationDocument } from '@/types/verification';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { File } from 'lucide-react';
+import { VerificationDocument } from '@/types/verification';
 
 interface DocumentReviewProps {
   document: VerificationDocument;
@@ -18,8 +18,8 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
   };
   
   const documentType = document.type || document.document_type || 'Unknown';
-  const imageUrl = document.file_url || document.fileUrl || document.document_url || '';
-  const uploadedAt = document.uploaded_at || document.uploadedAt || document.created_at || new Date().toISOString();
+  const imageUrl = document.url || document.file_url || document.fileUrl || document.document_url || '';
+  const uploadedAt = document.uploadedAt || document.uploaded_at || document.created_at || new Date().toISOString();
 
   return (
     <Card>

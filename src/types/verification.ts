@@ -25,6 +25,15 @@ export interface VerificationDocument {
   status: 'pending' | 'approved' | 'rejected';
   uploadedAt: string;
   reviewedAt?: string;
+  
+  // For backward compatibility with older code
+  verification_id?: string;
+  document_type?: string;
+  document_url?: string;
+  file_url?: string;
+  fileUrl?: string;
+  created_at?: string;
+  uploaded_at?: string;
 }
 
 export interface VerificationRequest {
@@ -32,13 +41,21 @@ export interface VerificationRequest {
   userId: string;
   status: VerificationStatus | string;
   level: VerificationLevel | string;
-  verificationLevel?: VerificationLevel | string; // For backwards compatibility
-  requested_level?: VerificationLevel | string; // For backwards compatibility
   submittedAt: string;
   reviewedAt?: string;
   documents: VerificationDocument[];
   rejectionReason?: string;
   expiresAt?: string;
+  
+  // For backward compatibility with older code
+  verificationLevel?: VerificationLevel | string;
+  requested_level?: VerificationLevel | string;
+  user_id?: string;
+  profile_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  reviewer_notes?: string;
+  rejection_reason?: string;
 }
 
 export interface VerificationFormValues {
@@ -60,7 +77,8 @@ export interface VerificationFormValues {
 export const DOCUMENT_TYPES = {
   ID_CARD: 'id_card',
   PASSPORT: 'passport',
-  DRIVING_LICENSE: 'driving_license'
+  DRIVING_LICENSE: 'driving_license',
+  RESIDENCE_PERMIT: 'residence_permit'
 };
 
 // Document requirements for different document types
@@ -83,5 +101,40 @@ export const DOCUMENT_REQUIREMENTS: Record<string, {
     frontRequired: true,
     backRequired: true,
     selfieRequired: true
+  },
+  [DOCUMENT_TYPES.RESIDENCE_PERMIT]: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
   }
 };
+
+// Add verification form schema for form validation
+import { z } from 'zod';
+
+// File validation helpers
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
+
+const fileSchema = z.instanceof(File)
+  .refine(file => file.size <= MAX_FILE_SIZE, 'File must be less than 5MB')
+  .refine(
+    file => ACCEPTED_IMAGE_TYPES.includes(file.type),
+    'Only JPG, JPEG, and PNG formats are supported'
+  );
+
+export const verificationFormSchema = z.object({
+  documentType: z.string(),
+  documentFrontImage: z.object({
+    file: fileSchema.optional(),
+    preview: z.string()
+  }),
+  documentBackImage: z.object({
+    file: fileSchema.optional(),
+    preview: z.string()
+  }).optional(),
+  selfieImage: z.object({
+    file: fileSchema.optional(),
+    preview: z.string()
+  }),
+});

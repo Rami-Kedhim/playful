@@ -33,7 +33,7 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeCha
             <SelectContent>
               <SelectItem value={DOCUMENT_TYPES.ID_CARD}>ID Card</SelectItem>
               <SelectItem value={DOCUMENT_TYPES.PASSPORT}>Passport</SelectItem>
-              <SelectItem value={DOCUMENT_TYPES.DRIVERS_LICENSE}>Driver's License</SelectItem>
+              <SelectItem value={DOCUMENT_TYPES.DRIVING_LICENSE}>Driver's License</SelectItem>
               <SelectItem value={DOCUMENT_TYPES.RESIDENCE_PERMIT}>Residence Permit</SelectItem>
             </SelectContent>
           </Select>

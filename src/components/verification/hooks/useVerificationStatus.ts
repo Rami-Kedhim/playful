@@ -12,15 +12,17 @@ const fetchVerificationStatus = async (userId: string): Promise<VerificationRequ
   if (Math.random() > 0.5) {
     return {
       id: '1234567890',
-      profile_id: userId,
+      userId: userId,
       status: VerificationStatus.PENDING,
-      requested_level: VerificationLevel.BASIC,
+      level: VerificationLevel.BASIC,
       documents: [],
-      created_at: new Date().toISOString(),
-      user_id: userId,
-      // Backward compatibility fields
       submittedAt: new Date().toISOString(),
-      verificationLevel: VerificationLevel.BASIC
+      // For backward compatibility
+      user_id: userId,
+      profile_id: userId,
+      created_at: new Date().toISOString(),
+      verificationLevel: VerificationLevel.BASIC,
+      requested_level: VerificationLevel.BASIC
     };
   }
   

@@ -33,7 +33,7 @@ const ReviewRequestModal = ({
   if (!request) return null;
 
   // Get the user ID, supporting both naming conventions
-  const userId = request.user_id || request.profile_id;
+  const userId = request.userId || request.user_id || request.profile_id;
   const submittedAt = request.submittedAt || request.created_at;
 
   return (
@@ -50,8 +50,8 @@ const ReviewRequestModal = ({
                 <AlertTitle>Verification Details</AlertTitle>
                 <AlertDescription>
                   <div className="grid gap-2 mt-2 text-sm">
-                    <div>Submitted: {new Date(submittedAt).toLocaleString()}</div>
-                    <div>User ID: {userId}</div>
+                    <div>Submitted: {submittedAt ? new Date(submittedAt).toLocaleString() : 'Unknown'}</div>
+                    <div>User ID: {userId || 'Unknown'}</div>
                     <div>Documents: {request.documents.length} submitted</div>
                   </div>
                 </AlertDescription>
@@ -82,11 +82,11 @@ const ReviewRequestModal = ({
                 onClick={() => onReject(rejectionReason)}
                 disabled={!rejectionReason}
               >
-                <XCircle className="w-4 h-4 mr-2" />
+                <XCircle className="w-4 w-4 mr-2" />
                 Reject Request
               </Button>
               <Button onClick={onApprove}>
-                <CheckCircle2 className="w-4 h-4 mr-2" />
+                <CheckCircle2 className="w-4 w-4 mr-2" />
                 Approve Request
               </Button>
             </div>
