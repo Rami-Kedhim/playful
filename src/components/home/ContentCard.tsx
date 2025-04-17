@@ -3,16 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
-
-export interface ProfileProps {
-  id: string;
-  name: string;
-  imageUrl: string;
-  location?: string;
-  rating?: number;
-  isPremium?: boolean;
-  price?: number;
-}
+import { ProfileProps } from '@/data/mockData';
 
 const ContentCard: React.FC<ProfileProps> = ({
   id,

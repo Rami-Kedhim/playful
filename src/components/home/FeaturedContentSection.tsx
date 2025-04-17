@@ -12,7 +12,7 @@ interface FeaturedContentSectionProps {
   viewMoreLink: string;
 }
 
-const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, profiles, viewMoreLink }) => {
+const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, profiles = [], viewMoreLink }) => {
   // Create a safe description text that avoids the toLowerCase error
   const getDescriptionText = () => {
     if (!title) return "Check out our featured content";
@@ -31,18 +31,25 @@ const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, 
       <CardContent className="pl-4 pb-4">
         <ScrollArea className="h-[250px] w-full">
           <div className="flex space-x-4">
-            {profiles.map(profile => (
-              <ContentCard
-                key={profile.id}
-                id={profile.id}
-                name={profile.name}
-                imageUrl={profile.imageUrl}
-                location={profile.location}
-                rating={profile.rating}
-                isPremium={profile.isPremium}
-                price={profile.price}
-              />
-            ))}
+            {/* Add null check before mapping over profiles */}
+            {Array.isArray(profiles) && profiles.length > 0 ? (
+              profiles.map(profile => (
+                <ContentCard
+                  key={profile.id}
+                  id={profile.id}
+                  name={profile.name}
+                  imageUrl={profile.imageUrl}
+                  location={profile.location}
+                  rating={profile.rating}
+                  isPremium={profile.isPremium}
+                  price={profile.price}
+                />
+              ))
+            ) : (
+              <div className="p-4 text-muted-foreground text-center w-full">
+                No profiles available to display
+              </div>
+            )}
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
