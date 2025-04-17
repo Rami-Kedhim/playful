@@ -89,5 +89,20 @@ export interface VerificationFormValues {
   selfieImage: { file?: File; preview: string };
 }
 
+// Adding missing types needed by other components
+export const DOCUMENT_TYPE_LABELS = {
+  [DOCUMENT_TYPES.ID_CARD]: 'ID Card',
+  [DOCUMENT_TYPES.PASSPORT]: 'Passport',
+  [DOCUMENT_TYPES.DRIVERS_LICENSE]: 'Driver\'s License',
+  [DOCUMENT_TYPES.RESIDENCE_PERMIT]: 'Residence Permit'
+};
+
+export const DOCUMENT_TYPE_REQUIREMENTS = {
+  [DOCUMENT_TYPES.ID_CARD]: ['Front and back images required', 'Must be valid and not expired'],
+  [DOCUMENT_TYPES.PASSPORT]: ['Main page with photo required', 'Must be valid and not expired'],
+  [DOCUMENT_TYPES.DRIVERS_LICENSE]: ['Front and back images required', 'Must be valid and not expired'],
+  [DOCUMENT_TYPES.RESIDENCE_PERMIT]: ['Front and back images required', 'Must be valid and not expired']
+};
+
 // Define verification form schema placeholder
 export const verificationFormSchema = {} as any; // This is a placeholder, we'll implement the real schema later

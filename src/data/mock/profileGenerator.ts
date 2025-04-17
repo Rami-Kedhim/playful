@@ -1,96 +1,119 @@
 
 import { faker } from '@faker-js/faker';
-import { Escort, ServiceType } from '@/types/escort';
-import { DatabaseGender } from '@/types/auth';
+import { Escort } from '@/types/escort';
 
-export const generateRandomProfile = (): Escort => {
-  const gender = faker.helpers.arrayElement(['male', 'female']) as string;
-  const firstName = gender === 'female' ? faker.person.firstName('female') : faker.person.firstName('male');
-  const age = faker.number.int({ min: 21, max: 45 });
-  const id = `profile-${faker.string.uuid()}`;
-  
-  // Create a consistent image based on the profile ID
-  const imageNumber = faker.number.int({ min: 1, max: 1000 });
-  const profileImage = `https://picsum.photos/id/${imageNumber}/800/1200`;
-  
-  const rates = {
-    hourly: faker.number.int({ min: 100, max: 500 }),
-    twoHours: faker.number.int({ min: 200, max: 900 }),
-    overnight: faker.number.int({ min: 500, max: 2000 })
-  };
+export function generateRandomEscort(): Escort {
+  const gender = faker.helpers.arrayElement(['female', 'male', 'non-binary']);
+  const isVerified = faker.datatype.boolean(0.7);
+  const providesInPerson = faker.datatype.boolean(0.9);
+  const providesVirtual = faker.datatype.boolean(0.7);
+  const services = generateServices(gender, providesInPerson, providesVirtual);
 
   return {
-    id,
-    name: `${firstName}`,
-    username: firstName.toLowerCase() + faker.string.numeric(3),
-    age,
+    id: faker.string.uuid(),
+    name: faker.person.firstName(gender === 'female' ? 'female' : 'male'),
+    location: `${faker.location.city()}, ${faker.location.state({ abbreviated: true })}`,
+    age: faker.datatype.number({ min: 21, max: 45 }).toString(), // Convert to string
     gender,
-    location: faker.location.city(),
-    price: rates.hourly,
-    rates: rates,
-    rating: faker.number.float({ min: 3.5, max: 5, fractionDigits: 1 }),
-    reviewCount: faker.number.int({ min: 0, max: 100 }),
-    reviews: faker.number.int({ min: 0, max: 100 }),
-    verified: faker.datatype.boolean(),
-    description: faker.lorem.paragraph(),
-    bio: faker.lorem.paragraphs(2),
-    tags: generateRandomTags(),
-    languages: [faker.location.country(), faker.location.country()].slice(0, faker.number.int({ min: 1, max: 2 })),
-    availableNow: faker.datatype.boolean(),
-    avatar: profileImage,
-    profileImage: profileImage,
-    imageUrl: profileImage,
-    gallery: {
-      imageUrls: Array.from({ length: faker.number.int({ min: 3, max: 8 }) }, 
-        () => `https://picsum.photos/id/${faker.number.int({ min: 1, max: 1000 })}/800/800`)
+    bio: faker.lorem.paragraph(),
+    profileImage: `/images/escorts/${faker.datatype.number({ min: 1, max: 20 })}.jpg`,
+    images: Array.from({ length: faker.datatype.number({ min: 3, max: 10 }) }, () => 
+      `/images/escorts/${faker.datatype.number({ min: 1, max: 20 })}.jpg`
+    ),
+    services,
+    rating: faker.datatype.float({ min: 3.5, max: 5, precision: 0.1 }),
+    price: faker.datatype.number({ min: 200, max: 1500 }),
+    currency: 'USD',
+    isVerified,
+    verification_level: isVerified ? faker.helpers.arrayElement(['basic', 'standard', 'premium']) : 'none',
+    availableNow: faker.datatype.boolean(0.3),
+    lastActive: faker.date.recent().toISOString(),
+    responseRate: faker.datatype.number({ min: 70, max: 100 }),
+    providesInPersonServices: providesInPerson,
+    providesVirtualContent: providesVirtual,
+    serviceTypes: generateServiceTypes(providesInPerson, providesVirtual),
+    tags: generateTags(gender),
+    reviews: Array.from({ length: faker.datatype.number({ min: 0, max: 15 }) }, generateReview),
+    stats: {
+      views: faker.datatype.number({ min: 100, max: 10000 }),
+      favorites: faker.datatype.number({ min: 10, max: 500 }),
+      reviews: faker.datatype.number({ min: 0, max: 50 })
     },
-    height: faker.number.int({ min: 155, max: 190 }),
-    weight: faker.number.int({ min: 45, max: 85 }),
-    hairColor: faker.helpers.arrayElement(['blonde', 'brunette', 'black', 'red', 'brown']),
-    eyeColor: faker.helpers.arrayElement(['blue', 'green', 'brown', 'hazel']),
-    ethnicity: faker.helpers.arrayElement(['caucasian', 'asian', 'latin', 'african', 'mixed']),
+    description: faker.lorem.paragraphs(3),
     measurements: {
-      bust: faker.number.int({ min: 80, max: 110 }),
-      waist: faker.number.int({ min: 60, max: 90 }),
-      hips: faker.number.int({ min: 85, max: 115 })
-    },
-    providesInPersonServices: faker.datatype.boolean(),
-    providesVirtualContent: faker.datatype.boolean(),
-    lastActive: faker.date.recent(),
-    responseRate: faker.number.int({ min: 70, max: 100 }),
-    isAI: faker.datatype.boolean(),
-    videos: Array.from({ length: faker.number.int({ min: 0, max: 3 }) }, () => ({
-      id: faker.string.uuid(),
-      url: 'https://example.com/video.mp4',
-      thumbnail: `https://picsum.photos/id/${faker.number.int({ min: 1, max: 1000 })}/400/300`,
-      title: faker.lorem.words(3),
-      duration: faker.number.int({ min: 60, max: 300 }),
-      isPublic: faker.datatype.boolean()
-    }))
-  };
-};
-
-export const generateMockEscortProfile = (): Escort => {
-  return generateRandomProfile();
-};
-
-const generateRandomTags = (): string[] => {
-  const allServices = [
-    'massage', 'escort', 'companionship', 'fetish', 'bdsm', 'virtual',
-    'GFE', 'Couples', 'Duos', 'Fetish Friendly', 'Lingerie', 'Party', 'Travel'
-  ];
-  
-  const numberOfTags = faker.number.int({ min: 2, max: 5 });
-  let selectedTags: string[] = [];
-  
-  for (let i = 0; i < numberOfTags; i++) {
-    const randomTag = faker.helpers.arrayElement(allServices);
-    if (!selectedTags.includes(randomTag)) {
-      selectedTags.push(randomTag);
+      height: faker.datatype.number({ min: 160, max: 190 }),
+      weight: `${faker.datatype.number({ min: 45, max: 90 })}kg`,
+      bust: faker.helpers.arrayElement(['32A', '32B', '34B', '34C', '36C', '36D']),
+      waist: `${faker.datatype.number({ min: 22, max: 32 })}`,
+      hips: `${faker.datatype.number({ min: 32, max: 40 })}`
     }
+  };
+}
+
+function generateServices(gender: string, providesInPerson: boolean, providesVirtual: boolean): string[] {
+  const services = [];
+  
+  if (providesInPerson) {
+    services.push(
+      'companionship',
+      'dinner dates',
+      'events'
+    );
   }
   
-  return selectedTags;
-};
+  if (providesVirtual) {
+    services.push(
+      'video chat',
+      'private media'
+    );
+  }
+  
+  return services;
+}
 
-export default generateRandomProfile;
+function generateTags(gender: string): string[] {
+  const commonTags = ['luxury', 'vip', 'exclusive', 'educated', 'travel', 'gfe'];
+  
+  const femaleSpecificTags = ['model', 'slim', 'curvy', 'busty', 'petite', 'mature'];
+  const maleSpecificTags = ['athletic', 'muscular', 'tall', 'fit', 'mature'];
+  const nonBinaryTags = ['unique', 'alternative', 'androgynous'];
+  
+  let potentialTags = [...commonTags];
+  
+  if (gender === 'female') {
+    potentialTags = [...potentialTags, ...femaleSpecificTags];
+  } else if (gender === 'male') {
+    potentialTags = [...potentialTags, ...maleSpecificTags];
+  } else {
+    potentialTags = [...potentialTags, ...nonBinaryTags];
+  }
+  
+  // Get random subset of tags
+  return faker.helpers.arrayElements(
+    potentialTags,
+    faker.datatype.number({ min: 3, max: Math.min(5, potentialTags.length) })
+  );
+}
+
+function generateServiceTypes(providesInPerson: boolean, providesVirtual: boolean): string[] {
+  const types = [];
+  if (providesInPerson) types.push('in-person');
+  if (providesVirtual) types.push('virtual');
+  return types;
+}
+
+function generateReview() {
+  return {
+    id: faker.string.uuid(),
+    userId: faker.string.uuid(),
+    userName: faker.person.firstName(),
+    rating: faker.datatype.number({ min: 3, max: 5 }),
+    comment: faker.lorem.paragraph(),
+    date: faker.date.recent().toISOString(),
+    verifiedBooking: faker.datatype.boolean(0.8)
+  };
+}
+
+export function generateRandomEscorts(count: number): Escort[] {
+  return Array.from({ length: count }, generateRandomEscort);
+}

@@ -1,55 +1,56 @@
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { useAuth } from './useAuthContext';
-import { UserRole } from '@/types/auth';
 
 export const useRole = () => {
-  const { user } = useAuth();
-  
-  const userRoles = useMemo(() => {
-    return user?.roles || [];
-  }, [user]);
+  const { user, userRoles } = useAuth();
 
-  const hasRole = (role: UserRole | UserRole[]): boolean => {
+  const hasRole = useCallback((role: string | string[]) => {
+    if (!user || !userRoles) return false;
+    
     if (Array.isArray(role)) {
       return role.some(r => userRoles.includes(r));
     }
+    
     return userRoles.includes(role);
-  };
-  
-  const hasAllRoles = (roles: UserRole[]): boolean => {
+  }, [user, userRoles]);
+
+  const hasAllRoles = useCallback((roles: string[]) => {
+    if (!user || !userRoles) return false;
+    
     return roles.every(role => userRoles.includes(role));
-  };
+  }, [user, userRoles]);
 
-  const isAdmin = useMemo(() => {
+  const isAdmin = useCallback(() => {
     return hasRole('admin');
-  }, [userRoles]);
+  }, [hasRole]);
 
-  const isCreator = useMemo(() => {
-    return hasRole('creator');
-  }, [userRoles]);
-
-  const isModerator = useMemo(() => {
+  const isModerator = useCallback(() => {
     return hasRole('moderator');
-  }, [userRoles]);
+  }, [hasRole]);
 
-  const isEscort = useMemo(() => {
+  const isCreator = useCallback(() => {
+    return hasRole('creator');
+  }, [hasRole]);
+
+  const isEscort = useCallback(() => {
     return hasRole('escort');
-  }, [userRoles]);
-  
-  const canAccessAdminFeatures = useMemo(() => {
+  }, [hasRole]);
+
+  // Add the canAccessAdminFeatures function
+  const canAccessAdminFeatures = useCallback(() => {
     return hasRole(['admin', 'moderator']);
-  }, [userRoles]);
+  }, [hasRole]);
 
   return {
     userRoles,
     hasRole,
     hasAllRoles,
-    isAdmin,
-    isCreator,
-    isModerator,
-    isEscort,
-    canAccessAdminFeatures
+    isAdmin: isAdmin(),
+    isCreator: isCreator(),
+    isModerator: isModerator(),
+    isEscort: isEscort(),
+    canAccessAdminFeatures: canAccessAdminFeatures()
   };
 };
 

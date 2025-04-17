@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Session,
@@ -24,12 +23,13 @@ export interface AuthContextType {
   isAdmin: (user: AuthUser | null) => boolean;
   isCreator: (user: AuthUser | null) => boolean;
   isAuthenticated: boolean;
-  checkRole: (role: string) => boolean;
+  checkRole: (role: string | string[]) => boolean;
   profile: UserProfile | null;
   refreshProfile: () => Promise<void>;
   updateUserProfile: (updates: any) => Promise<boolean>;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: () => Promise<AuthResult>;
+  userRoles: string[];
 }
 
 export interface AuthProviderProps {
@@ -39,6 +39,7 @@ export interface AuthProviderProps {
 interface UserMetadata {
   full_name?: string;
   avatar_url?: string;
+  username?: string;
 }
 
 // Create the context
@@ -50,6 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   const { profile, loadProfile } = useProfile();
   
   useEffect(() => {
@@ -82,6 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await loadProfile(session.user.id);
       } else {
         setUser(null);
+        setUserRoles([]);
       }
     });
   }, [loadProfile]);
@@ -113,6 +116,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   
   useEffect(() => {
     setUser(session?.user ? authUser : null);
+    
+    // Extract and set roles
+    if (authUser && authUser.roles) {
+      setUserRoles(authUser.roles);
+    } else {
+      setUserRoles(['user']); // Default role
+    }
   }, [authUser, session]);
   
   const signInWithEmail = async (email: string, password: string): Promise<AuthResult> => {
@@ -295,6 +305,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const clearSession = () => {
     setSession(null);
     setUser(null);
+    setUserRoles([]);
   };
   
   const isLoggedIn = !!session?.user;
@@ -308,10 +319,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return user?.roles?.includes('creator') || false;
   }, []);
   
-  const checkRole = useCallback((role: string) => {
-    if (!user || !user.roles) return false;
-    return user.roles.includes(role);
-  }, [user]);
+  const checkRole = useCallback((role: string | string[]) => {
+    if (!user || !userRoles.length) return false;
+    
+    // If role is an array, check if user has any of those roles
+    if (Array.isArray(role)) {
+      return role.some(r => userRoles.includes(r));
+    }
+    
+    // Otherwise check for a single role
+    return userRoles.includes(role);
+  }, [user, userRoles]);
   
   const refreshProfile = async (): Promise<void> => {
     if (user?.id) {
@@ -327,8 +345,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return signUpWithEmail(email, password, metadata);
   };
   
-  const signOut = (): Promise<AuthResult> => {
-    return logout();
+  const signOut = (): Promise<void> => {
+    return logout().then(() => {});
   };
   
   const value = {
@@ -352,6 +370,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateUserProfile,
     updatePassword,
     logout,
+    userRoles,
   };
   
   return (
@@ -369,3 +388,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export default useAuth;

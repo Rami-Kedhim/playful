@@ -1,3 +1,4 @@
+
 // Add this to your existing auth.ts file or create it if it doesn't exist
 
 export enum DatabaseGender {
@@ -80,4 +81,13 @@ export interface AuthContextType {
   updateUserProfile: (updates: Partial<AuthUser>) => Promise<boolean>;
   refreshProfile: () => Promise<void>;
   userRoles: string[]; // Adding userRoles to the context
+  checkRole: (role: string | string[]) => boolean; // Add checkRole function
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>; // Add updatePassword function
+  logout: () => Promise<AuthResult>; // Add logout function
+}
+
+export interface UserMetadata {
+  full_name?: string;
+  avatar_url?: string;
+  username?: string;
 }

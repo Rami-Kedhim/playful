@@ -45,6 +45,15 @@ const VerificationContainer = () => {
     setActiveTab("submit");
   };
 
+  // Use VerificationStatus enum values instead of string literals
+  const getActiveStatus = () => {
+    if (activeTab === "submit") {
+      return VerificationStatus.PENDING;
+    } else {
+      return VerificationStatus.IN_REVIEW;
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <h1 className="text-2xl font-bold mb-2 flex items-center">
@@ -57,7 +66,7 @@ const VerificationContainer = () => {
       
       <div className="grid gap-6">
         <VerificationFlowSteps 
-          status={activeTab === "submit" ? VerificationStatus.PENDING : VerificationStatus.IN_REVIEW} 
+          status={getActiveStatus()}
         />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

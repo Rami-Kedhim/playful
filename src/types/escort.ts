@@ -1,167 +1,110 @@
 
-import { VerificationLevel, VerificationStatus } from './verification';
-import { DatabaseGender } from './auth';
+import { VerificationLevel } from './verification';
 
-export enum BookingStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  DECLINED = 'declined',
-  CANCELED = 'canceled',
-  COMPLETED = 'completed',
-  REJECTED = 'rejected'
+export interface Escort {
+  id: string;
+  name: string;
+  location?: string;
+  age: string; // Changed to string to match usage in components
+  gender: string;
+  rating?: number;
+  price?: number;
+  currency?: string;
+  profileImage: string;
+  images?: string[] | GalleryType;
+  bio?: string;
+  services?: string[];
+  isVerified?: boolean;
+  verification_level?: string;
+  stats?: {
+    views: number;
+    favorites: number;
+    reviews: number;
+  };
+  // Added fields to match component usage
+  availableNow?: boolean;
+  lastActive?: string;
+  responseRate?: number;
+  reviews?: EscortReview[];
+  tags?: string[];
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  serviceTypes?: string[];
+  description?: string;
+  measurements?: {
+    height: number;
+    weight: string;
+    bust: string;
+    waist: string;
+    hips: string;
+  };
 }
 
-export enum ServiceType {
-  InPerson = 'in-person',
-  Virtual = 'virtual',
-  Companionship = 'companionship',
-  Both = 'both'
+export interface EscortReview {
+  id: string;
+  userId: string;
+  userName: string;
+  userImage?: string;
+  rating: number;
+  comment: string;
+  date: string;
+  verifiedBooking?: boolean;
 }
-
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
 export interface GalleryType {
   imageUrls: string[];
   videoUrls?: string[];
-  length?: number;
 }
 
-export interface Video {
-  id: string;
-  url: string;
-  thumbnail: string;
-  title: string;
-  duration?: number;
-  isPublic?: boolean;
-}
-
-export interface Rates {
-  hourly?: number;
-  twoHours?: number;
-  additional?: number;
-  overnight?: number;
-  weekend?: number;
-  custom?: Record<string, number>;
-}
-
-export interface Availability {
-  days: string[];
-  hours: string[];
-  customNotes: string;
-  timeZone?: string;
-  availableNow?: boolean;
+export interface EscortFilterOptions {
+  availability?: 'online' | 'all';
+  verifiedOnly?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+  minAge?: number;
+  maxAge?: number;
+  gender?: string[];
+  services?: string[];
+  location?: string;
+  rating?: number;
+  priceRange?: [number, number];
+  ageRange?: [number, number];
+  selectedServices?: string[];
+  selectedGenders?: string[];
 }
 
 export interface Booking {
   id: string;
   escortId: string;
-  userId: string;
-  clientId?: string; // Added for compatibility
-  date: Date | string;
-  time: string;
-  duration: string;
-  location: string;
+  clientId: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  duration: number; // in hours
+  location?: {
+    address?: string;
+    city?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    }
+  };
   price: number;
-  status: BookingStatus;
-  message?: string;
-  serviceType?: string;
-  service?: string; // Added for compatibility
-  createdAt: Date | string;
-  updatedAt: Date | string;
-  startTime?: Date | string;
-  endTime?: Date | string;
-  escortName?: string;
-  totalPrice?: number;
+  currency: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'canceled';
+  serviceType: 'in-person' | 'virtual';
+  paymentStatus: 'pending' | 'paid' | 'refunded';
   notes?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-export interface Measurements {
-  bust?: number | string;
-  waist?: number | string;
-  hips?: number | string;
+export interface BookingPaymentStepProps {
+  escort: Escort;
+  booking: Partial<Booking>;
+  onBack: () => void;
+  onComplete: () => Promise<void>;
+  isSubmitting: boolean;
+  onConfirm: () => Promise<void>; // Added missing prop
+  onCancel: () => void; // Added missing prop
 }
-
-export interface Escort {
-  id: string;
-  username: string;
-  name: string;
-  age: number;
-  location: string;
-  price: number;
-  gender: string;
-  sexualOrientation: string;
-  imageUrl: string;
-  profileImage: string;
-  bio?: string;
-  height?: string;
-  weight?: string;
-  bodyType?: string;
-  hairColor?: string;
-  eyeColor?: string;
-  ethnicity?: string;
-  languages?: string[];
-  services?: string[];
-  availability?: Availability | Availability[];
-  rating: number;
-  reviewCount?: number;
-  verified?: boolean;
-  featured?: boolean;
-  verificationLevel?: VerificationLevel;
-  gallery?: GalleryType | string[];
-  rates?: Rates;
-  profileType?: 'verified' | 'provisional' | 'ai';
-  isAI?: boolean;
-  isScraped?: boolean;
-  boostLevel?: number;
-  avatar_url?: string; // Added for profileMapping.ts
-  videos?: Video[];
-  subscriptionPrice?: number;
-  orientation?: string; // Added for backward compatibility
-  
-  // Additional properties needed by components
-  reviews?: number;
-  tags?: string[];
-  availableNow?: boolean;
-  lastActive?: Date | string;
-  responseRate?: number;
-  providesInPersonServices?: boolean;
-  providesVirtualContent?: boolean;
-  serviceTypes?: string[];
-  images?: string[];
-  measurements?: Measurements | string;
-  description?: string;
-}
-
-export interface EscortFilter {
-  location?: string;
-  priceRange?: [number, number];
-  gender?: string[];
-  age?: [number, number];
-  services?: string[];
-  languages?: string[];
-  bodyType?: string[];
-  ethnicity?: string[];
-  verified?: boolean;
-  rating?: number;
-  availability?: string[];
-  serviceType?: ServiceType | string;
-}
-
-export interface EscortFilterOptions {
-  location: string[];
-  services: string[];
-  bodyTypes: string[];
-  ethnicities: string[];
-  genders: string[];
-  languages: string[];
-  // Additional properties needed by EscortFilterControls
-  priceRange?: [number, number];
-  ageRange?: [number, number];
-  selectedServices?: string[];
-  selectedGenders?: string[];
-  verifiedOnly?: boolean;
-  rating?: number;
-}
-
-// Export types from verification.ts here
-export type { VerificationDocument, VerificationRequest, VerificationStatus, VerificationLevel } from './verification';

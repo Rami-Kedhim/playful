@@ -1,97 +1,104 @@
 
-import { useState } from 'react';
-import { Escort } from "@/types/escort";
-import { VerificationStatus, VerificationRequest, VerificationDocument } from "@/types/verification";
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { VerificationStatus, VerificationLevel, VerificationDocument, VerificationRequest } from '@/types/verification';
 
-type UpdateVerificationFn = (id: string, updates: Partial<VerificationRequest>) => Promise<VerificationRequest | null>;
-
-export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
-  const checkVerificationStatus = async (escortId: string): Promise<VerificationStatus | null> => {
-    try {
-      setLoading(true);
-      
-      // This would be an API call in a real application
-      // For now we'll simulate by returning random statuses based on escort ID
-      
-      // Use last character of ID to determine status for demo purposes
-      const lastChar = escortId.slice(-1);
-      const numValue = parseInt(lastChar, 16) || 0;
-      
-      // Return different statuses based on the ID for demonstration
-      if (numValue < 5) {
-        return 'pending';
-      } else if (numValue < 10) {
-        return 'approved';
-      } else {
-        return 'rejected';
-      }
-    } catch (error) {
-      console.error('Error checking verification status:', error);
-      toast({
-        title: 'Error checking verification',
-        description: 'Could not fetch verification status',
-        variant: 'destructive',
-      });
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const submitVerification = async (
-    userId: string,
-    documentUrls: string[]
-  ): Promise<VerificationRequest | null> => {
-    try {
-      setLoading(true);
-      
-      // Convert string URLs to document objects
-      const documents: VerificationDocument[] = documentUrls.map((url, index) => ({
-        id: `doc-${index}`,
-        verification_id: `verification-${userId}`,
-        document_type: 'id-verification',
-        document_url: url,
-        status: 'pending',
+// Mock API function to get verification status
+const fetchVerificationStatus = async (userId: string) => {
+  // Simulate an API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Return mock data
+  return {
+    id: '123456',
+    profile_id: userId,
+    user_id: userId,
+    status: VerificationStatus.PENDING,
+    requested_level: VerificationLevel.BASIC,
+    documents: [
+      {
+        id: '1',
+        verification_id: '123456',
+        type: 'id_card',
+        file_url: '/images/mock/id-card-front.jpg',
+        uploaded_at: new Date().toISOString(),
+        document_type: 'id_card',
+        document_url: '/images/mock/id-card-front.jpg',
+        status: VerificationStatus.PENDING,
         created_at: new Date().toISOString(),
-        // Backward compatibility fields
-        type: 'id-verification',
-        fileUrl: url,
+        // For backward compatibility
+        fileUrl: '/images/mock/id-card-front.jpg',
         uploadedAt: new Date().toISOString()
-      }));
+      }
+    ],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    // For backward compatibility
+    userId: userId,
+    submittedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    verificationLevel: VerificationLevel.BASIC
+  };
+};
+
+export const useEscortVerification = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
+
+  useEffect(() => {
+    const getVerificationStatus = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       
-      // Create verification request object
-      const verificationRequest: Partial<VerificationRequest> = {
-        userId,
-        profile_id: userId,
-        status: 'pending',
-        documents,
-        submittedAt: new Date().toISOString(),
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const data = await fetchVerificationStatus(user.id);
+        setVerificationRequest(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch verification status');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    getVerificationStatus();
+  }, [user]);
+
+  const submitVerification = async (formData: FormData) => {
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Mock submission
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create a "submitted" request
+      setVerificationRequest({
+        id: Math.random().toString(36).substring(2, 11),
+        profile_id: user.id,
+        user_id: user.id,
+        status: VerificationStatus.PENDING,
+        requested_level: VerificationLevel.BASIC,
+        documents: [],
         created_at: new Date().toISOString(),
-        requested_level: 'basic'
-      };
-      
-      // In a real app, this would send the data to an API
-      const result = await updateFn(userId, verificationRequest);
-      
-      // Show success message
-      toast({
-        title: 'Verification submitted',
-        description: 'Your verification request has been submitted and is under review.',
+        // For backward compatibility
+        userId: user.id,
+        submittedAt: new Date().toISOString()
       });
       
-      return result;
-    } catch (error) {
-      console.error('Error submitting verification:', error);
-      toast({
-        title: 'Error submitting verification',
-        description: 'Failed to submit verification request',
-        variant: 'destructive',
-      });
-      return null;
+      return { success: true };
+    } catch (err: any) {
+      setError(err.message || 'Failed to submit verification request');
+      return { success: false, error: err.message };
     } finally {
       setLoading(false);
     }
@@ -99,7 +106,10 @@ export const useEscortVerification = (updateFn: UpdateVerificationFn) => {
 
   return {
     loading,
-    checkVerificationStatus,
-    submitVerification,
+    error,
+    verificationRequest,
+    submitVerification
   };
 };
+
+export default useEscortVerification;
