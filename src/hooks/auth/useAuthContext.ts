@@ -1,52 +1,38 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Session,
-  User as SupabaseUser,
-} from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { UserProfile } from '@/types/escort';
-import { useProfile } from '../useProfile';
-import { AuthUser, AuthResult, UserRole } from '@/types/auth';
 
-export interface AuthContextType {
-  user: AuthUser | null;
-  session: Session | null;
-  isLoading: boolean;
-  error: string | null;
-  signIn: (email: string, password: string) => Promise<AuthResult>;
-  signUp: (email: string, password: string, metadata?: UserMetadata) => Promise<AuthResult>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updateUser: (updates: Partial<AuthUser>) => Promise<void>;
-  clearSession: () => void;
-  isLoggedIn: boolean;
-  isAdmin: (user: AuthUser | null) => boolean;
-  isCreator: (user: AuthUser | null) => boolean;
-  isAuthenticated: boolean;
-  checkRole: (role: string | string[]) => boolean;
-  profile: UserProfile | null;
-  refreshProfile: () => Promise<void>;
-  updateUserProfile: (updates: any) => Promise<boolean>;
-  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
-  logout: () => Promise<AuthResult>;
-  userRoles: string[];
-}
+import { createContext, useContext } from 'react';
+import { AuthContextType } from '@/types/auth';
 
-export interface AuthProviderProps {
-  children: React.ReactNode;
-}
+const DEFAULT_CONTEXT: AuthContextType = {
+  user: null,
+  profile: null,
+  isAuthenticated: false,
+  isLoading: true,
+  error: '',
+  signUp: async () => ({ success: false, error: 'Not implemented' }),
+  signIn: async () => ({ success: false, error: 'Not implemented' }),
+  signOut: async () => {},
+  refreshUser: async () => {},
+  updateUserProfile: async () => false,
+  refreshProfile: async () => {},
+  userRoles: [],
+  checkRole: () => false,
+  updatePassword: async () => false,
+  logout: async () => ({ success: false, error: 'Not implemented' }),
+  session: null,
+  resetPassword: async () => {}, 
+  updateUser: async () => {}, 
+  clearSession: () => {}, 
+  isLoggedIn: false, 
+  isAdmin: () => false, 
+  isCreator: () => false
+};
 
-interface UserMetadata {
-  full_name?: string;
-  avatar_url?: string;
-  username?: string;
-}
+export const AuthContext = createContext<AuthContextType>(DEFAULT_CONTEXT);
 
-// Create the context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const useAuth = () => useContext(AuthContext);
 
-// Create the provider
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+// Export AuthProvider component with explicit typing
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <AuthContext.Provider value={DEFAULT_CONTEXT}>{children}</AuthContext.Provider>;
 };
 
