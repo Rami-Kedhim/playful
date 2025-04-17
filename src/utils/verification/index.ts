@@ -17,7 +17,7 @@ export {
 export { 
   uploadVerificationDocuments,
   getDocumentUploadStatus 
-} from './documentUpload';
+} from './uploadVerificationDocuments';
 
 export {
   calculateVerificationProgress,

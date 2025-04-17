@@ -1,4 +1,11 @@
 
+/**
+ * Upload a verification document to storage
+ * @param file The file to upload
+ * @param documentType The type of document 
+ * @param userId The user ID
+ * @returns The URL of the uploaded file or null if upload failed
+ */
 export const uploadVerificationDocument = async (
   file: File,
   documentType: string,
@@ -18,3 +25,6 @@ export const uploadVerificationDocument = async (
     return null;
   }
 };
+
+// Export additional functions
+export { uploadVerificationDocuments, getDocumentUploadStatus } from './uploadVerificationDocuments';

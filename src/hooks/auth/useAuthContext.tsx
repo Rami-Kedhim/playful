@@ -11,6 +11,11 @@ type ExtendedAuthContextType = AuthContextType & {
   resetPassword?: (email: string) => Promise<void>;
   clearError?: () => void;
   updateAuthState?: (updates: Partial<ExtendedAuthContextType>) => void;
+  updateUser?: (updates: Partial<AuthUser>) => Promise<boolean>;
+  clearSession?: () => void;
+  isLoggedIn?: boolean;
+  isAdmin?: () => boolean;
+  isCreator?: () => boolean;
 };
 
 const DEFAULT_CONTEXT: ExtendedAuthContextType = {
@@ -33,7 +38,7 @@ const DEFAULT_CONTEXT: ExtendedAuthContextType = {
   register: async () => ({ success: false, error: 'Not implemented' }),
   session: null,
   resetPassword: async () => {}, 
-  updateUser: async () => {}, 
+  updateUser: async () => false, 
   clearSession: () => {}, 
   isLoggedIn: false, 
   isAdmin: () => false, 

@@ -57,15 +57,15 @@ export function generateRandomEscort(): Escort {
       hips: faker.number.int({ min: 75, max: 120 }).toString()
     },
     nationality: faker.location.country(),
-    availability: {  // Changed from availabilitySchedule back to availability, assuming this is the correct field name
-      monday: faker.datatype.boolean(),
-      tuesday: faker.datatype.boolean(),
-      wednesday: faker.datatype.boolean(),
-      thursday: faker.datatype.boolean(),
-      friday: faker.datatype.boolean(),
-      saturday: faker.datatype.boolean(),
-      sunday: faker.datatype.boolean()
-    },
+    availability: [
+      { day: 'monday', available: faker.datatype.boolean() },
+      { day: 'tuesday', available: faker.datatype.boolean() },
+      { day: 'wednesday', available: faker.datatype.boolean() },
+      { day: 'thursday', available: faker.datatype.boolean() },
+      { day: 'friday', available: faker.datatype.boolean() },
+      { day: 'saturday', available: faker.datatype.boolean() },
+      { day: 'sunday', available: faker.datatype.boolean() }
+    ],
     images: Array.from({ length: faker.number.int({ min: 3, max: 10 }) }, () => faker.image.url()),
     videos: Array.from({ length: faker.number.int({ min: 0, max: 3 }) }, () => faker.image.url()),
     tags: Array.from({ length: faker.number.int({ min: 3, max: 8 }) }, () => 
@@ -83,3 +83,6 @@ export function generateRandomEscort(): Escort {
 export function generateRandomEscorts(count: number): Escort[] {
   return Array.from({ length: count }, generateRandomEscort);
 }
+
+// Export the function to be used by UberPersonaService
+export const generateRandomProfile = generateRandomEscort;
