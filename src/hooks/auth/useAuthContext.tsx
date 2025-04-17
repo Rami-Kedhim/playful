@@ -16,6 +16,7 @@ type ExtendedAuthContextType = AuthContextType & {
   isLoggedIn?: boolean;
   isAdmin?: () => boolean;
   isCreator?: () => boolean;
+  setUser?: (user: AuthUser | null) => void; // Add the setUser method
 };
 
 const DEFAULT_CONTEXT: ExtendedAuthContextType = {
@@ -44,6 +45,7 @@ const DEFAULT_CONTEXT: ExtendedAuthContextType = {
   isAdmin: () => false, 
   isCreator: () => false,
   clearError: () => {},
+  setUser: () => {}, // Initialize setUser
 };
 
 export const AuthContext = createContext<ExtendedAuthContextType>(DEFAULT_CONTEXT);
@@ -64,8 +66,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setState(prevState => ({ ...prevState, ...updates }));
   }, []);
   
+  // Add setUser method
+  const setUser = useCallback((user: AuthUser | null) => {
+    setState(prevState => ({ ...prevState, user, isAuthenticated: !!user }));
+  }, []);
+  
   return (
-    <AuthContext.Provider value={{ ...state, updateAuthState }}>
+    <AuthContext.Provider value={{ ...state, updateAuthState, setUser }}>
       {children}
     </AuthContext.Provider>
   );

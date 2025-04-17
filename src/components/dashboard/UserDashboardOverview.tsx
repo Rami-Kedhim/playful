@@ -1,11 +1,12 @@
-
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/hooks/auth/useAuthContext";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, DollarSign, Users } from "lucide-react";
-import { Link } from "react-router-dom";
-import { featuredEscorts, featuredCreators } from "@/data/mockData";
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { AreaChart, BadgeDollarSign, Calendar, LayoutGrid, MessageSquare, Star, Users } from 'lucide-react';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { featuredEscorts, featuredCreators } from '@/data/mockData';
+import EscortCard from '../escorts/EscortCard';
+import CreatorCard from '../creators/CreatorCard';
 
 const UserDashboardOverview = () => {
   const { user } = useAuth();

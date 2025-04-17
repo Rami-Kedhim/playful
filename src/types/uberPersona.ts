@@ -1,68 +1,35 @@
 
-export enum RoleFlags {
-  USER = 1,
-  CREATOR = 2,
-  ESCORT = 4,
-  ADMIN = 8,
-  MODERATOR = 16,
-  VERIFIED = 32
-}
-
-export interface Capabilities {
-  canPostContent: boolean;
-  canMessage: boolean;
-  canStream: boolean;
-  canFavorite: boolean;
-  canBoost: boolean;
-  canVerify: boolean;
-  // Added for component compatibility
-  hasContent?: boolean;
-  hasLiveStream?: boolean;
-  hasVirtualMeets?: boolean;
-  hasRealMeets?: boolean;
-}
-
-export interface Monetization {
-  enabled: boolean;
-  methods: string[];
-  rates?: Record<string, number>;
-  subscription?: {
-    price: number;
-    interval: 'monthly' | 'quarterly' | 'yearly';
-    features: string[];
-  };
-  // Added for component compatibility
-  acceptsLucoin?: boolean;
-  pricePerMessage?: number;
-  subscriptionPrice?: number;
-  meetingPrice?: number;
-  videoChatPrice?: number;
-}
-
-export interface SystemMetadata {
-  createdAt: string;
-  updatedAt: string;
-  lastActiveAt: string;
-  totalViews: number;
-  totalLikes: number;
-  totalBookmarks: number;
-  rank: number;
-  score: number;
-  isAI?: boolean;
-}
+import { Escort } from './escort';
+import { ContentCreator } from './creator';
 
 export interface UberPersona {
   id: string;
-  username: string;
-  displayName: string;
-  avatarUrl: string;
-  profileBanner?: string;
-  bio?: string;
-  location?: string;
-  age?: number;
+  name: string;
+  image?: string;
+  avatarUrl?: string;
+  imageUrl?: string;
+  profileType: 'escort' | 'creator' | 'user' | 'livecam' | 'ai';
+  description?: string;
   rating?: number;
+  price?: number;
+  location?: string;
+  tags?: string[];
+  isVerified?: boolean;
+  isActive?: boolean;
   isOnline?: boolean;
-  roleFlags: number | {
+  lastActive?: string;
+  contactInfo?: {
+    email?: string;
+    phone?: string;
+    website?: string;
+    socials?: {
+      twitter?: string;
+      instagram?: string;
+      tiktok?: string;
+      onlyfans?: string;
+    }
+  };
+  personaFlags?: {
     isUser?: boolean;
     isEscort?: boolean;
     isCreator?: boolean;
@@ -71,16 +38,27 @@ export interface UberPersona {
     isFeatured?: boolean;
     isAI?: boolean;
   };
-  verified: boolean;
-  verificationLevel?: string;
-  capabilities: Capabilities;
-  monetization?: Monetization;
-  contentCount: {
-    photos: number;
-    videos: number;
-    streams: number;
-  };
-  system: SystemMetadata;
-  // Added for component compatibility
-  tags?: string[];
+  escort?: Escort;
+  creator?: ContentCreator;
+  capabilities?: Capabilities;
+  ethnicity?: string;
+  language?: string | string[];
+}
+
+export interface Capabilities {
+  hasPhotos?: boolean;
+  hasVideos?: boolean;
+  hasLivestream?: boolean;
+  hasVirtual?: boolean;
+  hasBooking?: boolean;
+  hasChat?: boolean;
+  hasStories?: boolean;
+  hasSubscription?: boolean;
+}
+
+export interface UberPersonaResponse {
+  personas: UberPersona[];
+  total: number;
+  page: number;
+  totalPages: number;
 }

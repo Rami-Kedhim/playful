@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 // Verification status as an enum with values that can be used as both type and value
@@ -10,15 +9,15 @@ export enum VerificationStatus {
   EXPIRED = 'expired'
 }
 
-// Verification level enum
-export enum VerificationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  ENHANCED = 'enhanced',
-  PREMIUM = 'premium',
-  PERSONAL = 'personal',
-  BUSINESS = 'business'
-}
+// Verification level as constants that can be used as values
+export const VerificationLevel = {
+  NONE: 'none',
+  BASIC: 'basic',
+  ENHANCED: 'enhanced',
+  PREMIUM: 'premium',
+  PERSONAL: 'personal',
+  BUSINESS: 'business'
+} as const;
 
 // Document type constants
 export const DOCUMENT_TYPES = {
@@ -62,7 +61,7 @@ export const DOCUMENT_REQUIREMENTS = {
 export interface VerificationDocument {
   id: string;
   verification_id: string;
-  type: string;
+  type?: string;
   document_type?: string;
   document_url?: string;
   fileUrl?: string;
