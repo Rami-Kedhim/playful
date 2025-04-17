@@ -57,7 +57,7 @@ export function generateRandomEscort(): Escort {
       hips: faker.number.int({ min: 75, max: 120 }).toString()
     },
     nationality: faker.location.country(),
-    availabilitySchedule: {
+    availability: {  // Changed from availabilitySchedule back to availability, assuming this is the correct field name
       monday: faker.datatype.boolean(),
       tuesday: faker.datatype.boolean(),
       wednesday: faker.datatype.boolean(),

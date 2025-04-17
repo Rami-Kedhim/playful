@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { verificationFormSchema, VerificationFormValues } from '@/types/verification';
+import { VerificationFormValues, DOCUMENT_TYPES, verificationFormSchema } from '@/types/verification';
 import DocumentTypeSelect from './form/DocumentTypeSelect';
-import DocumentImageUpload from './form/DocumentImageUpload';
+import DocumentUploadHandler from './form/DocumentUploadHandler';
 import SubmitButton from './form/SubmitButton';
 import SubmissionAlert from './form/SubmissionAlert';
 import SuccessCard from './form/SuccessCard';
@@ -34,15 +34,15 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
-  const [documentType, setDocumentType] = useState('id_card');
+  const [documentType, setDocumentType] = useState(DOCUMENT_TYPES.ID_CARD);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: 'id_card',
-      documentFrontImage: undefined,
-      documentBackImage: undefined,
-      selfieImage: undefined,
+      documentType: DOCUMENT_TYPES.ID_CARD,
+      documentFrontImage: { preview: '' },
+      documentBackImage: { preview: '' },
+      selfieImage: { preview: '' },
     },
   });
 
@@ -69,11 +69,6 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   };
 
   const onSubmit = async (data: VerificationFormValues) => {
-    if (externalSubmit) {
-      externalSubmit(data);
-      return;
-    }
-
     if (!user) return;
     
     setLoading(true);
@@ -95,8 +90,6 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       if (result.success) {
         setSubmitted(true);
         form.reset();
-        
-        // Call onSubmissionComplete callback if provided
         if (onSubmissionComplete) {
           onSubmissionComplete();
         }
@@ -143,30 +136,27 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <DocumentTypeSelect 
-              form={form} 
-              onTypeChange={handleDocumentTypeChange} 
-            />
-
-            <DocumentImageUpload
               form={form}
-              fieldName="documentFrontImage"
+              onTypeChange={handleDocumentTypeChange}
+            />
+            
+            <DocumentUploadHandler
               label="Front of ID Document"
-              description="Upload a clear photo of the front of your ID document. Max 5MB."
+              onFileSelect={(file) => form.setValue('documentFrontImage', { file, preview: URL.createObjectURL(file) })}
+              error={form.formState.errors.documentFrontImage?.message?.toString()}
             />
-
-            <DocumentImageUpload
-              form={form}
-              fieldName="documentBackImage"
+            
+            <DocumentUploadHandler
               label="Back of ID Document (Optional for Passport)"
-              description="Upload a clear photo of the back of your ID document. Required for ID cards and driver's licenses."
+              onFileSelect={(file) => form.setValue('documentBackImage', { file, preview: URL.createObjectURL(file) })}
+              error={form.formState.errors.documentBackImage?.message?.toString()}
               optional={true}
             />
-
-            <DocumentImageUpload
-              form={form}
-              fieldName="selfieImage"
+            
+            <DocumentUploadHandler
               label="Selfie with ID"
-              description="Upload a selfie of yourself holding your ID document next to your face. Your face and the ID must be clearly visible."
+              onFileSelect={(file) => form.setValue('selfieImage', { file, preview: URL.createObjectURL(file) })}
+              error={form.formState.errors.selfieImage?.message?.toString()}
             />
 
             <SubmitButton 
@@ -178,7 +168,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         </Form>
       </CardContent>
       <CardFooter className="flex flex-col">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Your verification information is encrypted and only used for identity verification purposes.
           We follow strict privacy guidelines and never share your personal information.
         </p>

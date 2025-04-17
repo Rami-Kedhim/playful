@@ -2,7 +2,18 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { AuthContextType, AuthUser, UserProfile } from '@/types/auth';
 
-const DEFAULT_CONTEXT: AuthContextType = {
+// Extend the AuthContextType to include the properties that are used in the code but not in the type
+type ExtendedAuthContextType = AuthContextType & {
+  session?: any;
+  login?: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout?: () => Promise<{ success: boolean; error?: string }>;
+  register?: (email: string, password: string, username?: string) => Promise<{ success: boolean; error?: string }>;
+  resetPassword?: (email: string) => Promise<void>;
+  clearError?: () => void;
+  updateAuthState?: (updates: Partial<ExtendedAuthContextType>) => void;
+};
+
+const DEFAULT_CONTEXT: ExtendedAuthContextType = {
   user: null,
   profile: null,
   isAuthenticated: false,
@@ -18,16 +29,19 @@ const DEFAULT_CONTEXT: AuthContextType = {
   checkRole: () => false,
   updatePassword: async () => false,
   logout: async () => ({ success: false, error: 'Not implemented' }),
+  login: async () => ({ success: false, error: 'Not implemented' }),
+  register: async () => ({ success: false, error: 'Not implemented' }),
   session: null,
   resetPassword: async () => {}, 
   updateUser: async () => {}, 
   clearSession: () => {}, 
   isLoggedIn: false, 
   isAdmin: () => false, 
-  isCreator: () => false
+  isCreator: () => false,
+  clearError: () => {},
 };
 
-export const AuthContext = createContext<AuthContextType>(DEFAULT_CONTEXT);
+export const AuthContext = createContext<ExtendedAuthContextType>(DEFAULT_CONTEXT);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -38,10 +52,10 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<AuthContextType>(DEFAULT_CONTEXT);
+  const [state, setState] = useState<ExtendedAuthContextType>(DEFAULT_CONTEXT);
 
   // Add methods to update state if needed
-  const updateAuthState = useCallback((updates: Partial<AuthContextType>) => {
+  const updateAuthState = useCallback((updates: Partial<ExtendedAuthContextType>) => {
     setState(prevState => ({ ...prevState, ...updates }));
   }, []);
   
