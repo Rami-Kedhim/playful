@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Escort } from '@/types/escort';
 
 export const moreEscortProfiles: Escort[] = [
