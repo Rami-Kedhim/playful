@@ -1,93 +1,83 @@
+import { useState, useEffect } from 'react';
+import { Video } from '@/types/escort';
 
-import { useState } from 'react';
-import { Escort } from '@/types/escort';
-
-// Define Video type
-interface Video {
-  id: string;
-  url: string;
-  thumbnail: string;
-  title: string;
-  duration?: number;
-  isPublic?: boolean;
+interface UseVideoManagementProps {
+  initialVideos: string[];
 }
 
-export const useVideoManagement = (escortData?: Escort) => {
-  const [videos, setVideos] = useState<Video[]>(() => {
-    if (!escortData) return [];
-    
-    // Convert the videos from the escort data to a proper Video array
-    if (Array.isArray(escortData.videos)) {
-      return escortData.videos as Video[];
-    }
-    
-    // Return an empty array if no videos
-    return [];
-  });
+const useVideoManagement = ({ initialVideos }: UseVideoManagementProps) => {
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [newVideoUrl, setNewVideoUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const uploadVideo = async (file: File): Promise<boolean> => {
+  useEffect(() => {
+    // When processing videos from string[] to Video[]
+    const processVideos = (videoUrls: string[]): Video[] => {
+      return videoUrls.map((url, index) => ({
+        id: `video-${index}`,
+        url,
+        title: `Video ${index + 1}`
+      }));
+    };
+
+    setVideos(processVideos(initialVideos));
+  }, [initialVideos]);
+
+  const addVideo = async () => {
+    setIsLoading(true);
+    setError(null);
+
     try {
-      // Mock implementation - in a real app this would upload to storage
-      const videoUrl = URL.createObjectURL(file);
+      // Basic validation
+      if (!newVideoUrl.trim()) {
+        throw new Error('Video URL cannot be empty');
+      }
+
+      // Optimistic update
       const newVideo: Video = {
         id: `video-${Date.now()}`,
-        url: videoUrl,
-        thumbnail: videoUrl, // In real implementation, generate a thumbnail
-        title: file.name,
-        isPublic: false,
+        url: newVideoUrl,
+        title: `Video ${videos.length + 1}`
       };
-      
-      setVideos(prev => [...prev, newVideo]);
-      return true;
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      return false;
+      setVideos(prevVideos => [...prevVideos, newVideo]);
+      setNewVideoUrl('');
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (err: any) {
+      setError(err.message || 'Failed to add video');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const deleteVideo = (videoId: string): boolean => {
-    try {
-      setVideos(prev => prev.filter(video => video.id !== videoId));
-      return true;
-    } catch (error) {
-      console.error("Error deleting video:", error);
-      return false;
-    }
-  };
+  const deleteVideo = async (videoId: string) => {
+    setIsLoading(true);
+    setError(null);
 
-  const updateVideoVisibility = (videoId: string, isPublic: boolean): boolean => {
     try {
-      setVideos(prev => 
-        prev.map(video => 
-          video.id === videoId ? { ...video, isPublic } : video
-        )
-      );
-      return true;
-    } catch (error) {
-      console.error("Error updating video visibility:", error);
-      return false;
-    }
-  };
+      // Optimistic update
+      setVideos(prevVideos => prevVideos.filter(video => video.id !== videoId));
 
-  const updateVideoTitle = (videoId: string, title: string): boolean => {
-    try {
-      setVideos(prev => 
-        prev.map(video => 
-          video.id === videoId ? { ...video, title } : video
-        )
-      );
-      return true;
-    } catch (error) {
-      console.error("Error updating video title:", error);
-      return false;
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete video');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
     videos,
-    uploadVideo,
+    newVideoUrl,
+    setNewVideoUrl,
+    addVideo,
     deleteVideo,
-    updateVideoVisibility,
-    updateVideoTitle,
+    isLoading,
+    error
   };
 };
+
+export default useVideoManagement;

@@ -47,12 +47,39 @@ export interface Escort {
   body_type: string;
   is_featured: boolean;
   rating: number;
-  contactInfo?: ContactInfo; // Adding this to fix the error in useEscortProfile.ts
-  serviceLocations?: string[]; // Adding this to support escortService.ts
-  verified?: boolean; // Alias for is_verified
+  
+  // Additional properties required by components
+  contactInfo?: ContactInfo;
+  serviceLocations?: string[];
+  verified?: boolean;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
   price?: number;
+  
+  // Added properties to fix errors
+  imageUrl?: string;
+  profileImage?: string;
+  gallery?: string[] | { imageUrls: string[] };
+  reviewCount?: number;
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  lastActive?: string | Date;
+  responseRate?: number;
+  description?: string;
+  featured?: boolean;
+  hairColor?: string;
+  eyeColor?: string;
+  rates?: {
+    hourly?: number;
+    twoHours?: number;
+    overnight?: number;
+    weekend?: number;
+  };
+  isScraped?: boolean;
+  profileType?: string;
+  serviceTypes?: string[];
+  boostLevel?: number;
+  verificationLevel?: VerificationLevel;
 }
 
 export interface ContactInfo {
@@ -75,6 +102,10 @@ export interface Review {
 export interface Availability {
   day: string;
   available: boolean;
+  // Added properties to fix errors
+  days?: string[];
+  hours?: string[];
+  customNotes?: string;
 }
 
 export interface VerificationRequest {
@@ -118,4 +149,25 @@ export interface Video {
   thumbnail?: string;
   title?: string;
   description?: string;
+}
+
+// Adding booking-related types
+export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected' | 'declined';
+
+export interface Booking {
+  id: string;
+  escortId: string;
+  clientId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  service: string;
+  status: BookingStatus;
+  location?: string;
+  price: number;
+  deposit?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
 }

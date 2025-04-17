@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort, ContactInfo } from '@/types/escort';
 import { useToast } from '@/components/ui/use-toast';
 import { escortService } from '@/services/escorts/escortService';
 
@@ -42,10 +41,20 @@ export const useEscortProfile = (initialEscort?: Escort) => {
   /**
    * Update escort profile data
    */
-  const updateEscortProfile = async (id: string, updates: Partial<Escort>) => {
+  const updateProfile = async (updates: Partial<Escort>) => {
     try {
+      // Extract contactInfo if it exists in updates
+      const { contactInfo, ...otherUpdates } = updates;
+      
+      // Create new updates object with proper types
+      const profileUpdates: Partial<Escort> = {
+        ...otherUpdates,
+        // If contactInfo exists in updates, add it directly since we've now added it to the Escort interface
+        ...(contactInfo && { contactInfo })
+      };
+      
       setIsSaving(true);
-      const updatedEscort = await escortService.updateEscortProfile(id, updates);
+      const updatedEscort = await escortService.updateEscortProfile(id, profileUpdates);
       
       if (updatedEscort) {
         setEscort(updatedEscort);
@@ -78,7 +87,7 @@ export const useEscortProfile = (initialEscort?: Escort) => {
     website?: string;
     social?: Record<string, string>;
   }) => {
-    return updateEscortProfile(id, { 
+    return updateProfile(id, { 
       contactInfo: contactInfo 
     });
   };
@@ -88,7 +97,7 @@ export const useEscortProfile = (initialEscort?: Escort) => {
     isLoading,
     isSaving,
     fetchEscortProfile,
-    updateEscortProfile,
+    updateProfile,
     updateContactInfo
   };
 };

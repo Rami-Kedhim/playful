@@ -1,8 +1,8 @@
-
 import React from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Escort, Booking } from '@/types/escort';
 import { Button } from '@/components/ui/button';
+import { FormField, FormItem, FormControl, FormLabel } from '@/components/ui/form';
+import { Escort, Booking } from '@/types/escort';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow, isAfter } from 'date-fns';
 import { Check, Clock, CreditCard } from 'lucide-react';

@@ -1,14 +1,11 @@
-
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import React from 'react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
+import { CalendarIcon, Clock, MapPin } from 'lucide-react';
+import { format } from 'date-fns';
 import { Escort, Booking } from '@/types/escort';
-import { format, addHours } from 'date-fns';
 
 interface BookingDialogProps {
   escort: Escort;
@@ -33,7 +30,6 @@ const BookingDialog: React.FC<BookingDialogProps> = ({ escort, onSubmit, onCance
     setIsSubmitting(true);
     
     try {
-      // Create booking datetime strings
       const startDateTime = new Date(
         selectedDate.getFullYear(),
         selectedDate.getMonth(),
@@ -44,7 +40,6 @@ const BookingDialog: React.FC<BookingDialogProps> = ({ escort, onSubmit, onCance
       
       const endDateTime = addHours(startDateTime, parseInt(duration));
       
-      // Pass date objects directly, the type now supports both string and Date
       await onSubmit({
         startTime: startDateTime,
         endTime: endDateTime,

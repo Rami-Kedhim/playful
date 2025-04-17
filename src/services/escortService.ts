@@ -37,18 +37,22 @@ const escortService = {
       if (filter) {
         escorts = escorts.filter(escort => {
           if (filter === 'in-person') {
-            return escort.serviceLocations?.includes('incall') || 
-                   escort.serviceLocations?.includes('outcall') || 
-                   escort.serviceLocations?.includes('both');
+            return escort.providesInPersonServices || 
+                   escort.serviceTypes?.includes('incall') || 
+                   escort.serviceTypes?.includes('outcall') || 
+                   escort.serviceTypes?.includes('both');
           }
           if (filter === 'virtual') {
-            return escort.serviceLocations?.includes('virtual');
+            return escort.providesVirtualContent || 
+                   escort.serviceTypes?.includes('virtual');
           }
           if (filter === 'both') {
-            return (escort.serviceLocations?.includes('incall') || 
-                   escort.serviceLocations?.includes('outcall') || 
-                   escort.serviceLocations?.includes('both')) && 
-                   escort.serviceLocations?.includes('virtual');
+            return (escort.providesInPersonServices || 
+                  escort.serviceTypes?.includes('incall') || 
+                  escort.serviceTypes?.includes('outcall') || 
+                  escort.serviceTypes?.includes('both')) && 
+                  (escort.providesVirtualContent || 
+                  escort.serviceTypes?.includes('virtual'));
           }
           return true;
         });
