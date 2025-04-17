@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { AuthContextType } from '@/types/auth';
+import { AuthContextType, AuthUser, UserProfile } from '@/types/auth';
 
 const DEFAULT_CONTEXT: AuthContextType = {
   user: null,
