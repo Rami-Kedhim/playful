@@ -66,3 +66,18 @@ export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
 // Re-export verification types from verification.ts to maintain compatibility
 export type { VerificationDocument, VerificationRequest, VerificationStatus } from '../types/verification';
+
+export interface AuthContextType {
+  user: AuthUser | null;
+  profile: UserProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string;
+  signUp: (email: string, password: string, metadata?: UserMetadata) => Promise<AuthResult>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  updateUserProfile: (updates: Partial<AuthUser>) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
+  userRoles: string[]; // Adding userRoles to the context
+}

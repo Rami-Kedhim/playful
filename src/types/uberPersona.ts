@@ -59,13 +59,17 @@ export interface UberPersona {
   profileBanner?: string;
   bio?: string;
   location?: string;
+  age?: number;
+  rating?: number;
+  isOnline?: boolean;
   roleFlags: number | {
-    isEscort: boolean;
-    isCreator: boolean;
-    isLivecam: boolean;
-    isVerified: boolean;
-    isFeatured: boolean;
-    isAI: boolean;
+    isUser?: boolean;
+    isEscort?: boolean;
+    isCreator?: boolean;
+    isLivecam?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+    isAI?: boolean;
   };
   verified: boolean;
   verificationLevel?: string;

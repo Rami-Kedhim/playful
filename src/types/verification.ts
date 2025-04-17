@@ -3,11 +3,11 @@ import { DatabaseGender, UserRole } from './auth';
 
 export enum VerificationStatus {
   PENDING = 'pending',
+  IN_REVIEW = 'in_review',
   APPROVED = 'approved',
   REJECTED = 'rejected',
   EXPIRED = 'expired',
-  CANCELED = 'canceled',
-  IN_REVIEW = 'in_review'
+  CANCELED = 'canceled'
 }
 
 export enum VerificationLevel {
@@ -16,7 +16,6 @@ export enum VerificationLevel {
   STANDARD = 'standard',
   PREMIUM = 'premium',
   PLATINUM = 'platinum',
-  // Add these for backward compatibility
   ENHANCED = 'enhanced'
 }
 
@@ -29,6 +28,12 @@ export interface VerificationDocument {
   status?: VerificationStatus;
   notes?: string;
   rejected_reason?: string;
+  document_type?: string;
+  document_url?: string;
+  created_at?: string;
+  // For backward compatibility
+  fileUrl?: string;
+  uploadedAt?: string;
 }
 
 export interface VerificationRequest {
@@ -43,9 +48,16 @@ export interface VerificationRequest {
   reviewed_at?: string;
   reviewer_id?: string;
   rejection_reason?: string;
+  reviewer_notes?: string;
   notes?: string;
   expiry_date?: string;
   verification_code?: string;
+  // For backward compatibility
+  userId?: string;
+  submittedAt?: string;
+  updatedAt?: string;
+  verificationLevel?: VerificationLevel;
+  rejectionReason?: string;
 }
 
 export interface VerificationTimelineProps {
@@ -62,3 +74,20 @@ export interface VerificationFormData {
   phone: string;
   requestedLevel: VerificationLevel;
 }
+
+export const DOCUMENT_TYPES = {
+  ID_CARD: 'id_card',
+  PASSPORT: 'passport',
+  DRIVERS_LICENSE: 'drivers_license',
+  RESIDENCE_PERMIT: 'residence_permit'
+};
+
+export interface VerificationFormValues {
+  documentType: string;
+  documentFrontImage: { file?: File; preview: string };
+  documentBackImage?: { file?: File; preview: string };
+  selfieImage: { file?: File; preview: string };
+}
+
+// Define verification form schema placeholder
+export const verificationFormSchema = {} as any; // This is a placeholder, we'll implement the real schema later

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { VerificationRequest } from '@/types/escort';
+import { VerificationRequest } from '@/types/verification';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import DocumentReview from './DocumentReview';
@@ -33,7 +33,7 @@ const ReviewRequestModal = ({
   if (!request) return null;
 
   // Get the user ID, supporting both naming conventions
-  const userId = request.userId || request.profile_id;
+  const userId = request.user_id || request.profile_id;
   const submittedAt = request.submittedAt || request.created_at;
 
   return (

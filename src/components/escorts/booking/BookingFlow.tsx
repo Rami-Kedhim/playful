@@ -139,6 +139,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
             onBack={() => setCurrentStep('select')}
             onComplete={handlePaymentComplete}
             isSubmitting={isSubmitting}
+            onConfirm={handlePaymentComplete}
+            onCancel={() => setCurrentStep('select')}
           />
         );
         

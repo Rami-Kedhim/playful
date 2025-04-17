@@ -8,6 +8,7 @@ import VerificationStatusTab from './tabs/VerificationStatusTab';
 import VerificationTypeTab from './tabs/VerificationTypeTab';
 import VerificationSubmitTab from './tabs/VerificationSubmitTab';
 import VerificationUpgradeTab from './tabs/VerificationUpgradeTab';
+import { VerificationStatus } from '@/types/verification';
 
 const VerificationContainer = () => {
   const location = useLocation();
@@ -56,7 +57,7 @@ const VerificationContainer = () => {
       
       <div className="grid gap-6">
         <VerificationFlowSteps 
-          status={activeTab === "submit" ? "pending" : "in_review"} 
+          status={activeTab === "submit" ? VerificationStatus.PENDING : VerificationStatus.IN_REVIEW} 
         />
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

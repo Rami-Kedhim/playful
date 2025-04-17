@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,8 +13,13 @@ interface UberPersonaCardProps {
 }
 
 const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ persona, className }) => {
-  // Ensure roleFlags exists
-  const roleFlags = persona.roleFlags || {};
+  // Ensure roleFlags exists and handle both object and number types
+  const roleFlags = typeof persona.roleFlags === 'object' 
+    ? persona.roleFlags 
+    : { 
+        isVerified: !!(persona.roleFlags & 32),
+        isFeatured: false
+      };
   
   // Ensure capabilities exists
   const capabilities = persona.capabilities || {
@@ -79,7 +85,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ persona, className })
               </p>
             </div>
             <div className="flex items-center">
-              {persona.rating && (
+              {persona.rating !== undefined && (
                 <span className="flex items-center bg-muted text-xs rounded px-1.5 py-0.5">
                   <Star className="h-3 w-3 fill-yellow-400 stroke-yellow-400 mr-0.5" />
                   {persona.rating}

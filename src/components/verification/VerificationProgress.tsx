@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -18,8 +19,9 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   
   useEffect(() => {
-    if (verificationRequest?.status === 'pending' || verificationRequest?.status === 'in_review') {
+    if (verificationRequest?.status === VerificationStatus.PENDING || verificationRequest?.status === VerificationStatus.IN_REVIEW) {
       const updateRemainingTime = () => {
+        // Use either submittedAt or created_at
         const submittedAt = verificationRequest.submittedAt || verificationRequest.created_at;
         if (!submittedAt) return;
         
@@ -74,33 +76,41 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
 
   const calculateVerificationProgress = (status: VerificationStatus): number => {
     switch (status) {
-      case 'pending': return 25;
-      case 'in_review': return 50;
-      case 'approved': return 100;
-      case 'rejected': return 100;
-      case 'expired': return 100;
+      case VerificationStatus.PENDING: return 25;
+      case VerificationStatus.IN_REVIEW: return 50;
+      case VerificationStatus.APPROVED: return 100;
+      case VerificationStatus.REJECTED: return 100;
+      case VerificationStatus.EXPIRED: return 100;
       default: return 0;
     }
   };
 
   const getVerificationStatusMessage = (status: VerificationStatus): string => {
     switch (status) {
-      case 'pending': return 'Your verification request has been received and is waiting to be reviewed by our team.';
-      case 'in_review': return 'Our team is currently reviewing your verification documents.';
-      case 'approved': return 'Congratulations! Your verification has been approved.';
-      case 'rejected': return 'Unfortunately, your verification request was rejected. Please check the reason below.';
-      case 'expired': return 'Your verification has expired. Please submit a new verification request.';
+      case VerificationStatus.PENDING: return 'Your verification request has been received and is waiting to be reviewed by our team.';
+      case VerificationStatus.IN_REVIEW: return 'Our team is currently reviewing your verification documents.';
+      case VerificationStatus.APPROVED: return 'Congratulations! Your verification has been approved.';
+      case VerificationStatus.REJECTED: return 'Unfortunately, your verification request was rejected. Please check the reason below.';
+      case VerificationStatus.EXPIRED: return 'Your verification has expired. Please submit a new verification request.';
       default: return 'Unknown status';
     }
   };
 
   const safeStatus = (statusValue: string): VerificationStatus => {
-    const validStatuses: VerificationStatus[] = ['pending', 'in_review', 'approved', 'rejected', 'expired'];
+    const validStatuses: VerificationStatus[] = [
+      VerificationStatus.PENDING, 
+      VerificationStatus.IN_REVIEW,
+      VerificationStatus.APPROVED,
+      VerificationStatus.REJECTED,
+      VerificationStatus.EXPIRED
+    ];
+    
     return validStatuses.includes(statusValue as VerificationStatus) 
       ? (statusValue as VerificationStatus) 
-      : 'pending';
+      : VerificationStatus.PENDING;
   };
 
+  // Handle status value
   const status = safeStatus(verificationRequest.status);
   const progress = calculateVerificationProgress(status);
 
@@ -146,17 +156,17 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
                 {verificationRequest.documents?.length || 0}
               </span>
             </div>
-            {status === 'in_review' && timeRemaining && (
+            {status === VerificationStatus.IN_REVIEW && timeRemaining && (
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Estimated time</span>
                 <span className="text-sm">{timeRemaining}</span>
               </div>
             )}
-            {status === 'rejected' && (verificationRequest.rejectionReason || verificationRequest.reviewer_notes) && (
+            {status === VerificationStatus.REJECTED && (verificationRequest.rejection_reason || verificationRequest.reviewer_notes) && (
               <div className="mt-2">
                 <span className="text-sm text-muted-foreground block">Rejection reason:</span>
                 <p className="text-sm mt-1 p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
-                  {verificationRequest.rejectionReason || verificationRequest.reviewer_notes}
+                  {verificationRequest.rejection_reason || verificationRequest.reviewer_notes}
                 </p>
               </div>
             )}
@@ -165,13 +175,13 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
 
         <VerificationTimeline verificationRequest={verificationRequest} />
 
-        {status === 'rejected' && (
+        {status === VerificationStatus.REJECTED && (
           <Button className="w-full" onClick={() => toast({ title: "New request initiated", description: "Redirecting to verification form..." })}>
             Submit New Request
           </Button>
         )}
 
-        {status === 'approved' && (
+        {status === VerificationStatus.APPROVED && (
           <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md border border-green-200 dark:border-green-900/30 flex items-center gap-3">
             <CheckCircle className="text-green-500 h-5 w-5 flex-shrink-0" />
             <div>
