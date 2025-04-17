@@ -36,6 +36,10 @@ export const useRole = () => {
   const isEscort = useMemo(() => {
     return hasRole('escort');
   }, [userRoles]);
+  
+  const canAccessAdminFeatures = useMemo(() => {
+    return hasRole(['admin', 'moderator']);
+  }, [userRoles]);
 
   return {
     userRoles,
@@ -44,7 +48,8 @@ export const useRole = () => {
     isAdmin,
     isCreator,
     isModerator,
-    isEscort
+    isEscort,
+    canAccessAdminFeatures
   };
 };
 

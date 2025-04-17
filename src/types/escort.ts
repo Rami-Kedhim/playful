@@ -101,7 +101,7 @@ export interface Escort {
   ethnicity?: string;
   languages?: string[];
   services?: string[];
-  availability?: Availability;
+  availability?: Availability | Availability[];
   rating: number;
   reviewCount?: number;
   verified?: boolean;
@@ -154,6 +154,13 @@ export interface EscortFilterOptions {
   ethnicities: string[];
   genders: string[];
   languages: string[];
+  // Additional properties needed by EscortFilterControls
+  priceRange?: [number, number];
+  ageRange?: [number, number];
+  selectedServices?: string[];
+  selectedGenders?: string[];
+  verifiedOnly?: boolean;
+  rating?: number;
 }
 
 // Export types from verification.ts here

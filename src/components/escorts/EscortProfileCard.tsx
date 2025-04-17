@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +29,8 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort, className
   // Helper to safely get images
   const getImages = () => {
     if (Array.isArray(escort.images)) return escort.images;
-    if (gallery && Array.isArray(gallery.imageUrls)) return gallery.imageUrls;
+    if (Array.isArray(gallery)) return gallery;
+    if (gallery && Array.isArray((gallery as any).imageUrls)) return (gallery as any).imageUrls;
     return [];
   };
 
@@ -43,13 +45,13 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort, className
       // Handle array of availability objects
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {availability.map((avail, index) => (
+          {availability.map((avail: any, index: number) => (
             <div key={index} className="p-2 bg-secondary/10 rounded-md">
               <div className="font-medium">
-                {avail.days.join(', ')}
+                {avail.days && avail.days.join(', ')}
               </div>
               <div className="text-sm text-muted-foreground">
-                {avail.hours.join(', ')}
+                {avail.hours && avail.hours.join(', ')}
               </div>
               {avail.customNotes && (
                 <div className="text-xs italic mt-1">{avail.customNotes}</div>
@@ -63,10 +65,10 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort, className
       return (
         <div className="p-2 bg-secondary/10 rounded-md">
           <div className="font-medium">
-            {availability.days.join(', ')}
+            {availability.days && availability.days.join(', ')}
           </div>
           <div className="text-sm text-muted-foreground">
-            {availability.hours.join(', ')}
+            {availability.hours && availability.hours.join(', ')}
           </div>
           {availability.customNotes && (
             <div className="text-xs italic mt-1">{availability.customNotes}</div>
@@ -100,7 +102,6 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ escort, className
   };
 
   const bodyStats = getBodyStats();
-
   
   return (
     <Card className={`overflow-hidden ${className}`}>

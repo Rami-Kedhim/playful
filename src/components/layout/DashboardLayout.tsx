@@ -1,201 +1,295 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import {
-  ChevronLeft,
-  ChevronRight,
-  Menu,
-  Settings,
-  LayoutDashboard,
-  Users,
-  Store,
-  BarChart4,
-  MessageSquare,
-  Bell,
-  ShieldCheck,
-  Search,
-  HelpCircle,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { useRole } from '@/hooks/auth/useRole';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 
-interface DashboardLayoutProps {
-  children: React.ReactNode;
+import React, { useState } from 'react';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import {
+  CreditCard,
+  Home,
+  Menu,
+  PanelLeft,
+  Settings,
+  ShieldCheck,
+  Users,
+  X,
+  User,
+  Camera,
+  Calendar,
+  MessageSquare,
+  LogOut,
+  Bell,
+  Shield,
+} from "lucide-react";
+import { Link, useLocation, Outlet } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/auth/useAuthContext";
+import { useRole } from "@/hooks/auth/useRole";
+
+interface NavItemProps {
+  icon: React.ReactNode;
+  title: string;
+  href: string;
+  isActive?: boolean;
+  alert?: boolean;
+  collapsed?: boolean;
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const location = useLocation();
-  const { isAdmin, isModerator, isCreator } = useRole();
+const sidebarLinks = [
+  {
+    title: "Home",
+    icon: <Home className="h-5 w-5" />,
+    href: "/dashboard",
+    roles: ["user", "creator", "escort", "admin", "moderator"],
+  },
+  {
+    title: "Profile",
+    icon: <User className="h-5 w-5" />,
+    href: "/profile",
+    roles: ["user", "creator", "escort"],
+  },
+  {
+    title: "Content",
+    icon: <Camera className="h-5 w-5" />,
+    href: "/content",
+    roles: ["creator", "escort"],
+  },
+  {
+    title: "Bookings",
+    icon: <Calendar className="h-5 w-5" />,
+    href: "/bookings",
+    roles: ["escort"],
+  },
+  {
+    title: "Messages",
+    icon: <MessageSquare className="h-5 w-5" />,
+    href: "/messages",
+    roles: ["user", "creator", "escort"],
+  },
+  {
+    title: "Users",
+    icon: <Users className="h-5 w-5" />,
+    href: "/admin/users",
+    roles: ["admin", "moderator"],
+  },
+  {
+    title: "Verification",
+    icon: <ShieldCheck className="h-5 w-5" />,
+    href: "/admin/verification",
+    roles: ["admin", "moderator"],
+  },
+  {
+    title: "Settings",
+    icon: <Settings className="h-5 w-5" />,
+    href: "/settings",
+    roles: ["user", "creator", "escort", "admin", "moderator"],
+  },
+];
+
+export default function DashboardLayout() {
+  const [collapsed, setCollapsed] = useState(false);
   const { user } = useAuth();
-  
-  const isActive = (path: string) => location.pathname.startsWith(path);
-  
-  const navigationItems = [
-    {
-      title: 'Dashboard',
-      href: '/dashboard',
-      icon: <LayoutDashboard className="h-4 w-4" />,
-      show: true,
-    },
-    {
-      title: 'Analytics',
-      href: '/dashboard/analytics',
-      icon: <BarChart4 className="h-4 w-4" />,
-      show: isCreator() || isAdmin(),
-    },
-    {
-      title: 'Content',
-      href: '/dashboard/content',
-      icon: <Store className="h-4 w-4" />,
-      show: isCreator() || isAdmin(),
-    },
-    {
-      title: 'Messages',
-      href: '/dashboard/messages',
-      icon: <MessageSquare className="h-4 w-4" />,
-      show: true,
-    },
-    {
-      title: 'Users',
-      href: '/dashboard/users',
-      icon: <Users className="h-4 w-4" />,
-      show: isAdmin() || isModerator(),
-    },
-    {
-      title: 'Moderation',
-      href: '/dashboard/moderation',
-      icon: <ShieldCheck className="h-4 w-4" />,
-      show: isAdmin() || isModerator(),
-    },
-    {
-      title: 'Settings',
-      href: '/dashboard/settings',
-      icon: <Settings className="h-4 w-4" />,
-      show: true,
-    },
-    {
-      title: 'Help',
-      href: '/dashboard/help',
-      icon: <HelpCircle className="h-4 w-4" />,
-      show: true,
-    },
-    {
-      title: 'Verifications',
-      href: '/admin/verifications',
-      icon: <ShieldCheck className="h-4 w-4" />,
-      show: isAdmin() || isModerator(),
-    },
-  ];
-  
-  const filteredItems = navigationItems.filter(item => item.show);
-  
-  const Sidebar = (
-    <div className={`flex flex-col border-r bg-background/60 backdrop-blur-sm ${sidebarCollapsed ? 'w-[70px]' : 'w-[240px]'}`}>
-      <div className="flex h-14 items-center px-4">
-        {!sidebarCollapsed && (
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center text-white">A</div>
-            <span>Admin Panel</span>
-          </Link>
+  const { hasRole, isAdmin } = useRole();
+  const location = useLocation();
+
+  const isActive = (href: string): boolean => {
+    return location.pathname === href || location.pathname.startsWith(`${href}/`);
+  };
+
+  const filteredLinks = sidebarLinks.filter((link) => {
+    if (isAdmin) return true;
+    if (link.roles) return link.roles.some(role => hasRole(role));
+    return true;
+  });
+
+  const NavItem: React.FC<NavItemProps> = ({
+    icon,
+    title,
+    href,
+    isActive = false,
+    alert = false,
+    collapsed = false,
+  }) => {
+    return (
+      <Link
+        to={href}
+        className={cn(
+          "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+          isActive
+            ? "bg-accent text-accent-foreground"
+            : "hover:bg-accent/50 hover:text-accent-foreground"
         )}
-        {sidebarCollapsed && (
-          <Link to="/" className="mx-auto">
-            <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center text-white">A</div>
-          </Link>
-        )}
-      </div>
-      <div className={`flex-1 ${sidebarCollapsed ? 'px-2' : 'px-4'} py-4`}>
-        <nav className="grid gap-1">
-          {filteredItems.map((item) => (
-            <Button
-              key={item.href}
-              variant={isActive(item.href) ? 'secondary' : 'ghost'}
-              size={sidebarCollapsed ? 'icon' : 'sm'}
-              asChild
-              className={`${sidebarCollapsed ? 'justify-center' : 'justify-start'}`}
-            >
-              <Link to={item.href} className={`${sidebarCollapsed ? '' : 'flex items-center gap-3'}`}>
-                {item.icon}
-                {!sidebarCollapsed && <span>{item.title}</span>}
-              </Link>
-            </Button>
-          ))}
-        </nav>
-      </div>
-      <div className="mt-auto p-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="mx-auto"
-        >
-          {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
-      </div>
-    </div>
-  );
-  
+      >
+        <div className="relative">
+          {icon}
+          {alert && (
+            <span className="absolute -right-1 -top-1 block h-2 w-2 rounded-full bg-destructive" />
+          )}
+        </div>
+        {!collapsed && <span>{title}</span>}
+      </Link>
+    );
+  };
+
   return (
-    <div className="flex min-h-screen">
-      <div className="hidden lg:block">
-        {Sidebar}
+    <div className="grid min-h-screen w-full lg:grid-cols-[auto_1fr]">
+      <div
+        className={cn(
+          "hidden border-r bg-card lg:block",
+          collapsed ? "lg:w-[80px]" : "lg:w-[280px]"
+        )}
+      >
+        <div className="flex h-full flex-col gap-2">
+          <div className="flex h-14 items-center justify-between border-b px-3">
+            <Link
+              to="/"
+              className={cn(
+                "flex items-center gap-2 font-semibold",
+                collapsed && "justify-center w-full"
+              )}
+            >
+              <Shield className="h-6 w-6" />
+              {!collapsed && <span>Escort Dashboard</span>}
+            </Link>
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex"
+            >
+              <PanelLeft className="h-5 w-5" />
+            </Button>
+          </div>
+          <ScrollArea className="flex-1 py-2">
+            <nav className="grid gap-1 px-3">
+              {filteredLinks.map((link) => (
+                <NavItem
+                  key={link.href}
+                  icon={link.icon}
+                  title={link.title}
+                  href={link.href}
+                  isActive={isActive(link.href)}
+                  collapsed={collapsed}
+                />
+              ))}
+            </nav>
+          </ScrollArea>
+          <div className="mt-auto border-t p-3">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user?.profileImageUrl || ""} />
+                <AvatarFallback>
+                  {user?.username?.substring(0, 2).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              {!collapsed && (
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{user?.username}</span>
+                  <Link to="/profile" className="text-xs text-muted-foreground">
+                    View Profile
+                  </Link>
+                </div>
+              )}
+              {!collapsed && (
+                <Button size="icon" variant="ghost" className="ml-auto">
+                  <LogOut className="h-5 w-5" />
+                  <span className="sr-only">Log Out</span>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div className="flex flex-col flex-1">
-        <header className="flex h-14 lg:h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
+      <div className="flex flex-col">
+        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 lg:px-6">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="lg:hidden">
-                <Menu className="h-4 w-4" />
+              <Button size="icon" variant="outline" className="lg:hidden">
+                <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[240px] p-0">
-              <ScrollArea className="h-full">
-                {Sidebar}
-              </ScrollArea>
-            </SheetContent>
-          </Sheet>
-          
-          <div className="hidden md:flex gap-2 ml-auto items-center">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon">
-                <Bell className="h-4 w-4" />
-              </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <div className="flex items-center gap-4">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.profileImageUrl || ''} />
-                  <AvatarFallback>
-                    {user?.username?.substring(0, 2).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="hidden lg:block">
-                  <p className="text-sm font-medium">{user?.username}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <SheetContent side="left" className="w-[240px] sm:w-[280px]">
+              <div className="flex h-full flex-col gap-2">
+                <div className="flex h-14 items-center justify-between border-b px-3">
+                  <Link to="/" className="flex items-center gap-2 font-semibold">
+                    <Shield className="h-6 w-6" />
+                    <span>Escort Dashboard</span>
+                  </Link>
+                  <SheetTrigger asChild>
+                    <Button size="icon" variant="ghost">
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                </div>
+                <ScrollArea className="flex-1 py-2">
+                  <nav className="grid gap-1 px-3">
+                    {filteredLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        to={link.href}
+                        className={cn(
+                          "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
+                          isActive(link.href)
+                            ? "bg-accent text-accent-foreground"
+                            : "hover:bg-accent/50 hover:text-accent-foreground"
+                        )}
+                      >
+                        {link.icon}
+                        <span>{link.title}</span>
+                      </Link>
+                    ))}
+                  </nav>
+                </ScrollArea>
+                <div className="mt-auto border-t p-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user?.profileImageUrl || ""} />
+                      <AvatarFallback>
+                        {user?.username?.substring(0, 2).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {user?.username}
+                      </span>
+                      <Link
+                        to="/profile"
+                        className="text-xs text-muted-foreground"
+                      >
+                        View Profile
+                      </Link>
+                    </div>
+                    <Button size="icon" variant="ghost" className="ml-auto">
+                      <LogOut className="h-5 w-5" />
+                      <span className="sr-only">Log Out</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </SheetContent>
+          </Sheet>
+          <div className="flex-1">
+            <h1 className="text-lg font-semibold">Dashboard</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button size="icon" variant="outline">
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Notifications</span>
+            </Button>
+            <Avatar className="h-8 w-8 lg:hidden">
+              <AvatarImage src={user?.profileImageUrl || ""} />
+              <AvatarFallback>
+                {user?.username?.substring(0, 2).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
           </div>
         </header>
-        
-        <main className="flex-1 overflow-auto">
-          <div className="container py-6 md:py-8 lg:py-10">
-            {children}
-          </div>
+        <main className="flex-1 p-4 lg:p-6">
+          <Outlet />
         </main>
       </div>
     </div>
   );
-};
-
-export default DashboardLayout;
+}

@@ -2,7 +2,8 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Escort } from '@/types/escort';
-import { ServiceTypeFilter } from '@/types/escort';
+
+type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
 interface EscortServiceTypeInfoProps {
   escort: Escort;

@@ -1,150 +1,109 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Calendar, Clock, DollarSign } from 'lucide-react';
 import { UberPersona } from '@/types/uberPersona';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Clock, MapPin, CreditCard } from 'lucide-react';
 
 interface PersonaBookingTabProps {
   persona: UberPersona;
 }
 
 const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
-
-  // Default monetization if not present
-  const monetization = persona.monetization || {
-    acceptsLucoin: true,
-    meetingPrice: 150,
-    videoChatPrice: 50
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
+  
+  // Get meeting price safely
+  const getMeetingPrice = () => {
+    if (typeof persona.monetization === 'object') {
+      return persona.monetization.meetingPrice || 0;
+    }
+    return 0;
   };
   
-  // Calculate price
-  const calculatePrice = () => {
-    if (selectedDuration === null) return monetization.meetingPrice || 150;
-    return (selectedDuration * (monetization.meetingPrice || 150));
-  };
+  const meetingPrice = getMeetingPrice();
   
-  // Mock available times
-  const availableTimes = ['10:00 AM', '1:00 PM', '3:30 PM', '7:00 PM', '9:00 PM'];
-  
-  // Mock duration options
-  const durationOptions = [
-    { value: 1, label: '1 hour' },
-    { value: 2, label: '2 hours' },
-    { value: 3, label: '3 hours' },
-    { value: 12, label: 'Overnight (12 hours)' },
+  // Generate available dates (just for demo)
+  const availableDates = [
+    '2023-08-01', '2023-08-02', '2023-08-03', 
+    '2023-08-04', '2023-08-05', '2023-08-06'
   ];
-
+  
+  // Generate available times (just for demo)
+  const availableTimes = [
+    '10:00 AM', '11:00 AM', '1:00 PM', 
+    '2:00 PM', '4:00 PM', '7:00 PM'
+  ];
+  
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Book an Appointment</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardContent className="space-y-4 p-6">
-            <h3 className="text-lg font-medium">Select a Date</h3>
-            
-            {/* Calendar placeholder component */}
-            <div className="bg-muted/30 rounded-lg p-4 h-64 flex items-center justify-center border">
-              <div className="text-center">
-                <CalendarIcon className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                <span className="text-muted-foreground">Calendar Placeholder</span>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium">Book an Appointment</h3>
+            <div className="flex items-center">
+              <DollarSign className="h-4 w-4 text-green-500" />
+              <span className="font-medium">
+                ${meetingPrice} / hour
+              </span>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                <Calendar className="h-4 w-4 inline mr-2" />
+                Select Date
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {availableDates.map((date) => (
+                  <Button
+                    key={date}
+                    variant={selectedDate === date ? "default" : "outline"}
+                    onClick={() => setSelectedDate(date)}
+                    size="sm"
+                    className="w-full"
+                  >
+                    {new Date(date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </Button>
+                ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
-        
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium mb-4">Available Times</h3>
-              
-              <div className="grid grid-cols-2 gap-2">
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                <Clock className="h-4 w-4 inline mr-2" />
+                Select Time
+              </label>
+              <div className="grid grid-cols-3 gap-2">
                 {availableTimes.map((time) => (
                   <Button
                     key={time}
                     variant={selectedTime === time ? "default" : "outline"}
                     onClick={() => setSelectedTime(time)}
-                    className="justify-start"
+                    size="sm"
+                    className="w-full"
                   >
-                    <Clock className="h-4 w-4 mr-2" />
                     {time}
                   </Button>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-medium mb-4">Select Duration</h3>
-              
-              <div className="grid grid-cols-2 gap-2">
-                {durationOptions.map((option) => (
-                  <Button
-                    key={option.value}
-                    variant={selectedDuration === option.value ? "default" : "outline"}
-                    onClick={() => setSelectedDuration(option.value)}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      
-      <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-medium mb-4">Appointment Summary</h3>
-          
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-                <h4 className="font-medium">Location</h4>
-                <p className="text-muted-foreground">In-call • Downtown Area</p>
-              </div>
             </div>
             
-            <div className="flex items-start gap-3">
-              <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-                <h4 className="font-medium">Date & Time</h4>
-                <p className="text-muted-foreground">
-                  {selectedDate ? selectedDate.toLocaleDateString() : 'Not selected'} • 
-                  {selectedTime ? ` ${selectedTime}` : ' Time not selected'}
-                </p>
-              </div>
-            </div>
+            <Button 
+              className="w-full mt-6" 
+              disabled={!selectedDate || !selectedTime}
+            >
+              Book Now
+            </Button>
             
-            <div className="flex items-start gap-3">
-              <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-                <h4 className="font-medium">Duration</h4>
-                <p className="text-muted-foreground">
-                  {selectedDuration ? `${selectedDuration} hour${selectedDuration > 1 ? 's' : ''}` : 'Not selected'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-                <h4 className="font-medium">Price</h4>
-                <p className="font-semibold text-lg">${calculatePrice()}</p>
-                <p className="text-xs text-muted-foreground">50% deposit required to confirm booking</p>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              You won't be charged until your booking is confirmed
+            </p>
           </div>
-          
-          <Button className="w-full mt-6" size="lg">
-            Request Booking
-          </Button>
         </CardContent>
       </Card>
     </div>

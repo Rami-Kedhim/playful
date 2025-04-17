@@ -15,8 +15,8 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
   const { isFavorite } = useFavorites();
   
-  // Convert verificationLevel to the expected type
-  const verificationLevel = (escort.verificationLevel || "none") as "none" | "basic" | "enhanced" | "premium";
+  // Convert verificationLevel to the expected type from verification.ts
+  const verificationLevel = (escort.verificationLevel || "none") as any;
   
   return (
     <>

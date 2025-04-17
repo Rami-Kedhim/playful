@@ -1,130 +1,135 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Escort, Booking } from '@/types/escort';
-import { formatDistanceStrict } from 'date-fns';
-import { CircleDollarSign, Clock, MapPin } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow, isAfter } from 'date-fns';
+import { Check, Clock, CreditCard } from 'lucide-react';
 
 export interface BookingPaymentStepProps {
   escort: Escort;
   booking: Partial<Booking>;
   onBack: () => void;
   onComplete: () => Promise<void>;
-  onConfirm?: () => void;
-  onCancel?: () => void;
   isSubmitting: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
-const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ 
-  escort, 
-  booking, 
-  onBack, 
-  onComplete, 
+const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
+  escort,
+  booking,
+  onBack,
+  onComplete,
+  isSubmitting,
   onConfirm,
-  onCancel,
-  isSubmitting 
+  onCancel
 }) => {
-  // Calculate duration if start and end times are available
-  const calculateDuration = () => {
-    if (!booking.startTime || !booking.endTime) return 'Not specified';
+  // Calculate time until booking
+  const getTimeUntil = () => {
+    if (!booking.startTime) return '';
     
-    const start = booking.startTime instanceof Date ? 
-      booking.startTime : new Date(booking.startTime);
-    const end = booking.endTime instanceof Date ? 
-      booking.endTime : new Date(booking.endTime);
-    
-    return formatDistanceStrict(end, start);
+    const startTime = typeof booking.startTime === 'string' 
+      ? new Date(booking.startTime) 
+      : booking.startTime;
+      
+    return formatDistanceToNow(startTime, { addSuffix: true });
   };
 
-  const handleConfirm = () => {
-    if (onConfirm) {
-      onConfirm();
-    } else {
-      onComplete();
-    }
+  // Check if booking is in the future
+  const isUpcoming = () => {
+    if (!booking.startTime) return false;
+    
+    const startTime = typeof booking.startTime === 'string'
+      ? new Date(booking.startTime)
+      : booking.startTime;
+      
+    return isAfter(startTime, new Date());
   };
 
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    } else {
-      onBack();
-    }
+  // Format date string
+  const formatDate = (date: string | Date | undefined) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
-    <Card className="max-w-lg mx-auto">
-      <CardHeader>
-        <CardTitle className="text-xl">Confirm & Payment</CardTitle>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
-          <img 
-            src={escort.imageUrl || escort.profileImage}
-            alt={escort.name}
-            className="w-16 h-16 rounded-full object-cover"
-          />
-          <div>
-            <h3 className="text-lg font-medium">{escort.name}</h3>
-            <p className="text-muted-foreground text-sm">{escort.location}</p>
-          </div>
+    <Card className="w-full max-w-md mx-auto">
+      <CardContent className="pt-6">
+        <div className="mb-4 text-center">
+          <h2 className="text-xl font-semibold">Booking Summary</h2>
+          <p className="text-muted-foreground">Review your booking details and complete payment</p>
         </div>
         
-        <div className="border-t border-b py-4 space-y-3">
-          <div className="flex justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Date & Time</span>
-            </div>
-            <span className="text-sm font-medium">
-              {booking.date ? new Date(booking.date).toLocaleDateString() : 'Not specified'} {booking.time || ''}
-            </span>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b pb-2">
+            <span className="font-medium">Escort</span>
+            <span className="font-medium">{escort.name}</span>
           </div>
           
-          <div className="flex justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Duration</span>
-            </div>
-            <span className="text-sm font-medium">{calculateDuration()}</span>
+          <div className="flex items-center justify-between border-b pb-2">
+            <span className="text-muted-foreground">Date & Time</span>
+            <span>{formatDate(booking.startTime)}</span>
           </div>
           
-          <div className="flex justify-between">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Location</span>
-            </div>
-            <span className="text-sm font-medium">
-              {booking.location || 'Not specified'}
-            </span>
+          <div className="flex items-center justify-between border-b pb-2">
+            <span className="text-muted-foreground">Duration</span>
+            <span>{booking.duration}</span>
           </div>
           
-          <div className="flex justify-between">
-            <div className="flex items-center gap-2">
-              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Total Price</span>
-            </div>
-            <span className="font-bold">${booking.price || escort.price}</span>
+          <div className="flex items-center justify-between border-b pb-2">
+            <span className="text-muted-foreground">Service Type</span>
+            <span className="capitalize">{booking.serviceType}</span>
           </div>
-        </div>
-        
-        <div className="rounded-lg bg-primary/10 p-4">
-          <h4 className="font-medium mb-2">Payment Details</h4>
-          <p className="text-sm text-muted-foreground">
-            Payment will be processed securely through our platform.
-          </p>
+          
+          {isUpcoming() && (
+            <div className="flex items-center gap-2 justify-center bg-muted/50 p-2 rounded-md">
+              <Clock size={16} />
+              <span className="text-sm">Upcoming {getTimeUntil()}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-lg font-medium">Total Price</span>
+            <span className="text-lg font-bold">${booking.price}</span>
+          </div>
+          
+          <div className="border rounded-md p-4 mt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <CreditCard size={20} />
+              <span className="font-medium">Payment Method</span>
+            </div>
+            <div className="flex items-center justify-between mb-2">
+              <span>Credit Card</span>
+              <Badge variant="outline">
+                <Check size={12} className="mr-1" /> Verified
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your payment information is securely processed. No charges will be applied until the escort accepts your booking request.
+            </p>
+          </div>
         </div>
       </CardContent>
       
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={handleCancel}>
+      <CardFooter className="flex justify-between pt-2">
+        <Button variant="outline" onClick={onBack} disabled={isSubmitting}>
           Back
         </Button>
-        
-        <Button onClick={handleConfirm} disabled={isSubmitting}>
-          {isSubmitting ? 'Processing...' : 'Confirm & Pay'}
+        <Button 
+          onClick={onConfirm || onComplete} 
+          disabled={isSubmitting}
+          className="bg-primary text-white"
+        >
+          {isSubmitting ? 'Processing...' : 'Complete Booking'}
         </Button>
       </CardFooter>
     </Card>

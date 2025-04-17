@@ -1,146 +1,165 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Send, Info } from 'lucide-react';
 import { UberPersona } from '@/types/uberPersona';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SendHorizonal, PenSquare, Smile, Paperclip, Image } from 'lucide-react';
 
 interface PersonaChatTabProps {
   persona: UberPersona;
 }
 
-const PersonaChatTab: React.FC<PersonaChatTabProps> = ({ persona }) => {
-  const [message, setMessage] = useState('');
-  
-  // Mock chat messages
-  const [messages, setMessages] = useState([
-    { id: 1, sender: 'persona', content: `Hello! I'm ${persona.displayName}. How can I assist you today?`, timestamp: '2:30 PM' },
-  ]);
-  
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-    
-    // Add user message
-    const userMessage = {
-      id: messages.length + 1,
-      sender: 'user',
-      content: message,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    setMessages([...messages, userMessage]);
-    setMessage('');
-    
-    // Simulate persona response after a delay
-    setTimeout(() => {
-      let responseContent = "Thank you for your message! I'll respond as soon as I can.";
-      
-      // Default roleFlags if missing
-      const roleFlags = persona.roleFlags || {};
+interface Message {
+  id: string;
+  content: string;
+  sender: 'user' | 'persona';
+  timestamp: Date;
+}
 
-      if (roleFlags.isAI) {
-        // If AI persona, generate more dynamic response
-        const responses = [
-          `That's interesting! I'd love to chat more about it.`,
-          `Thanks for reaching out! I'm happy to connect with you.`,
-          `I appreciate your message. How is your day going?`,
-          `Great to hear from you! What else would you like to know?`
-        ];
-        responseContent = responses[Math.floor(Math.random() * responses.length)];
-      }
+const PersonaChatTab: React.FC<PersonaChatTabProps> = ({ persona }) => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      content: `Hi there! I'm ${persona.displayName}. How can I help you today?`,
+      sender: 'persona',
+      timestamp: new Date()
+    }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSendMessage = () => {
+    if (!inputValue.trim()) return;
+
+    // Add user message
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      content: inputValue,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    setMessages([...messages, newMessage]);
+    setInputValue('');
+
+    // Simulate persona response
+    setTimeout(() => {
+      let responseContent = '';
       
-      const personaMessage = {
-        id: messages.length + 2,
-        sender: 'persona',
+      // Check if persona is AI for more personalized responses
+      const isAI = typeof persona.roleFlags === 'object' ? 
+        persona.roleFlags.isAI : 
+        false;
+      
+      if (inputValue.toLowerCase().includes('hello') || 
+          inputValue.toLowerCase().includes('hi')) {
+        responseContent = `Hello! It's great to hear from you! How are you doing today?`;
+      } else if (inputValue.toLowerCase().includes('price') || 
+                 inputValue.toLowerCase().includes('cost')) {
+        responseContent = `My rates are available on my profile. Would you like to book some time with me?`;
+      } else if (inputValue.toLowerCase().includes('available')) {
+        responseContent = `Yes, I'm available for bookings! You can check my calendar and book a time that works for you.`;
+      } else if (inputValue.toLowerCase().includes('how are you')) {
+        responseContent = isAI ?
+          `I'm just a virtual assistant, but I'm functioning perfectly! How can I help you?` :
+          `I'm doing great, thanks for asking! How about you?`;
+      } else {
+        responseContent = `Thanks for your message! I'd be happy to chat more about what you're looking for. Let me know if you have any specific questions.`;
+      }
+
+      const personaResponse: Message = {
+        id: Date.now().toString(),
         content: responseContent,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        sender: 'persona',
+        timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, personaMessage]);
+      setMessages(prev => [...prev, personaResponse]);
     }, 1000);
   };
-  
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
       handleSendMessage();
     }
   };
   
-  // Default monetization if not present
-  const monetization = persona.monetization || {
-    acceptsLucoin: false,
-    pricePerMessage: 0
+  // Check if messages require payment (just for demo)
+  const requiresPayment = () => {
+    // Determine if persona requires payment for messages
+    if (typeof persona.monetization === 'object') {
+      return persona.monetization.acceptsLucoin && messages.length > 5;
+    }
+    return false;
   };
 
   return (
-    <div className="flex flex-col h-[600px]">
-      <h2 className="text-2xl font-semibold mb-4">Chat with {persona.displayName}</h2>
-      
+    <div className="h-[500px] flex flex-col">
       <Card className="flex-1 flex flex-col overflow-hidden">
-        <CardContent className="flex-1 p-4 overflow-y-auto">
-          <div className="flex flex-col gap-4">
-            {messages.map((msg) => (
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {messages.map((message) => (
               <div 
-                key={msg.id} 
-                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                key={message.id} 
+                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
+                {message.sender === 'persona' && (
+                  <Avatar className="h-8 w-8 mr-2">
+                    <AvatarImage src={persona.avatarUrl} />
+                    <AvatarFallback>{persona.displayName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                )}
                 <div 
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    msg.sender === 'user' 
+                  className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                    message.sender === 'user' 
                       ? 'bg-primary text-primary-foreground' 
                       : 'bg-muted'
                   }`}
                 >
-                  <p className="text-sm">{msg.content}</p>
-                  <span className={`text-xs mt-1 block ${
-                    msg.sender === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                  }`}>
-                    {msg.timestamp}
-                  </span>
+                  <p>{message.content}</p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
                 </div>
+                {message.sender === 'user' && (
+                  <Avatar className="h-8 w-8 ml-2">
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
+                )}
               </div>
             ))}
           </div>
-        </CardContent>
+        </ScrollArea>
         
-        <div className="p-4 border-t">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
-              <PenSquare className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Paperclip className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Image className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <Input 
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={`Message ${persona.displayName}...`}
-              className="flex-1"
-            />
-            <Button variant="ghost" size="icon">
-              <Smile className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <Button 
-              onClick={handleSendMessage} 
-              disabled={!message.trim()}
-              size="icon"
-            >
-              <SendHorizonal className="h-5 w-5" />
+        {requiresPayment() && (
+          <div className="p-2 bg-amber-50 border-t border-amber-200 flex items-center">
+            <Info className="h-4 w-4 text-amber-500 mr-2" />
+            <span className="text-xs text-amber-800">
+              Continued conversation requires credits. 1 credit per message.
+            </span>
+            <Button size="sm" variant="outline" className="ml-auto text-xs">
+              Add Credits
             </Button>
           </div>
-          
-          {monetization.acceptsLucoin && (
-            <div className="text-xs text-muted-foreground text-center mt-2">
-              Chat costs: {persona.roleFlags?.isAI ? '1 LC' : '2 LC'} per message
-            </div>
-          )}
-        </div>
+        )}
+        
+        <CardContent className="p-4 border-t">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Type your message..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <Button size="icon" onClick={handleSendMessage} disabled={!inputValue.trim()}>
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

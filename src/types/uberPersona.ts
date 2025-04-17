@@ -15,6 +15,11 @@ export interface Capabilities {
   canFavorite: boolean;
   canBoost: boolean;
   canVerify: boolean;
+  // Added for component compatibility
+  hasContent?: boolean;
+  hasLiveStream?: boolean;
+  hasVirtualMeets?: boolean;
+  hasRealMeets?: boolean;
 }
 
 export interface Monetization {
@@ -26,6 +31,12 @@ export interface Monetization {
     interval: 'monthly' | 'quarterly' | 'yearly';
     features: string[];
   };
+  // Added for component compatibility
+  acceptsLucoin?: boolean;
+  pricePerMessage?: number;
+  subscriptionPrice?: number;
+  meetingPrice?: number;
+  videoChatPrice?: number;
 }
 
 export interface SystemMetadata {
@@ -37,6 +48,7 @@ export interface SystemMetadata {
   totalBookmarks: number;
   rank: number;
   score: number;
+  isAI?: boolean;
 }
 
 export interface UberPersona {
@@ -47,7 +59,14 @@ export interface UberPersona {
   profileBanner?: string;
   bio?: string;
   location?: string;
-  roleFlags: number;
+  roleFlags: number | {
+    isEscort: boolean;
+    isCreator: boolean;
+    isLivecam: boolean;
+    isVerified: boolean;
+    isFeatured: boolean;
+    isAI: boolean;
+  };
   verified: boolean;
   verificationLevel?: string;
   capabilities: Capabilities;
@@ -58,4 +77,6 @@ export interface UberPersona {
     streams: number;
   };
   system: SystemMetadata;
+  // Added for component compatibility
+  tags?: string[];
 }

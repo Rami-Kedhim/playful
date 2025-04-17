@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -5,16 +6,24 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { EscortFilterOptions } from "@/types/escort";
 
-interface EscortFilterControlsProps {
-  filters: Partial<EscortFilterOptions>;
-  onUpdateFilter: (key: keyof EscortFilterOptions, value: any) => void;
+// Define a custom interface for this component's props that extends EscortFilterOptions 
+// with the additional properties needed by this component
+interface EscortFilterControlProps {
+  filters: {
+    location?: string;
+    priceRange?: [number, number]; 
+    ageRange?: [number, number];
+    selectedServices?: string[];
+    selectedGenders?: string[];
+    verifiedOnly?: boolean;
+  };
+  onUpdateFilter: (key: string, value: any) => void;
   onClearFilters: () => void;
   onApplyFilters: () => void;
 }
 
-const EscortFilterControls: React.FC<EscortFilterControlsProps> = ({
+const EscortFilterControls: React.FC<EscortFilterControlProps> = ({
   filters,
   onUpdateFilter,
   onClearFilters,
@@ -68,7 +77,6 @@ const EscortFilterControls: React.FC<EscortFilterControlsProps> = ({
     if (filters.selectedServices && filters.selectedServices.length > 0) count += filters.selectedServices.length;
     if (filters.selectedGenders && filters.selectedGenders.length > 0) count += filters.selectedGenders.length;
     if (filters.verifiedOnly) count++;
-    if (filters.languages && filters.languages.length > 0) count += filters.languages.length;
     
     // Only count price range if it's not the default
     if (filters.priceRange && 
