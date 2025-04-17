@@ -23,7 +23,7 @@ export const PersonaProvider: React.FC<{ children: ReactNode }> = ({ children })
     isLoading,
     error,
     loadPersonas,
-    getEscorts,
+    getEscorts: getEscortPersonas,
     getCreators,
     getLivecams,
     getPersonaById
@@ -39,7 +39,7 @@ export const PersonaProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const value = {
     personas,
-    escortPersonas: getEscorts(),
+    escortPersonas: getEscortPersonas(),
     creatorPersonas: getCreators(),
     livecamPersonas: getLivecams(),
     isLoading,
