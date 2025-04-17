@@ -56,7 +56,7 @@ export interface Escort {
   providesVirtualContent?: boolean;
   price?: number;
   
-  // Added properties to fix errors
+  // Properties for fixing errors
   imageUrl?: string;
   profileImage?: string;
   gallery?: string[] | { imageUrls: string[] };
@@ -80,6 +80,12 @@ export interface Escort {
   serviceTypes?: string[];
   boostLevel?: number;
   verificationLevel?: VerificationLevel;
+  contentStats?: {
+    photos?: string;
+    videos?: string;
+    streams?: string;
+  };
+  subscriptionPrice?: number;
 }
 
 export interface ContactInfo {
@@ -113,27 +119,13 @@ export interface Availability {
   friday?: boolean;
   saturday?: boolean;
   sunday?: boolean;
+  timeZone?: string;
 }
 
-export interface VerificationRequest {
-  id: string;
-  userId: string;
-  profile_id?: string;
-  user_id?: string;
-  status: VerificationStatus;
-  level: VerificationLevel;
-  verificationLevel?: VerificationLevel;
-  requested_level?: VerificationLevel;
-  documents: VerificationDocument[];
-  submittedAt?: string;
-  reviewedAt?: string;
-  updated_at?: string;
-  created_at?: string;
-  reviewed_at?: string;
-  reviewer_id?: string;
-  reviewer_notes?: string;
-  rejectionReason?: string;
-  rejection_reason?: string;
+export interface ExtendedAvailability extends Availability {
+  // This extends the base Availability interface
+  // with any additional properties needed
+  timeZone?: string;
 }
 
 export interface VerificationDocument {
@@ -149,6 +141,27 @@ export interface VerificationDocument {
   created_at?: string;
   uploadedAt?: string;
   uploaded_at?: string;
+}
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  user_id?: string;
+  profile_id?: string;
+  status: VerificationStatus;
+  level: VerificationLevel;
+  verificationLevel?: VerificationLevel;
+  requested_level?: VerificationLevel;
+  documents: VerificationDocument[];
+  submittedAt?: string;
+  reviewedAt?: string;
+  updated_at?: string;
+  created_at?: string;
+  reviewed_at?: string;
+  reviewer_id?: string;
+  reviewer_notes?: string;
+  rejectionReason?: string;
+  rejection_reason?: string;
 }
 
 export interface Video {
@@ -196,4 +209,23 @@ export interface Booking {
   notes?: string;
   createdAt: string;
   updatedAt?: string;
+}
+
+export enum ServiceType {
+  IN_PERSON = 'in_person',
+  VIRTUAL = 'virtual',
+  BOTH = 'both'
+}
+
+export interface EscortFilterOptions {
+  age?: [number, number];
+  gender?: string[];
+  location?: string;
+  services?: string[];
+  priceRange?: [number, number];
+  availability?: string[];
+  languages?: string[];
+  bodyType?: string[];
+  ethnicities?: string[];
+  serviceTypes?: ServiceType[];
 }

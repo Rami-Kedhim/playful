@@ -1,4 +1,8 @@
 
-export { useGalleryManagement } from './useGalleryManagement';
-export { useProfileImageManagement } from './useProfileImageManagement';
-export { useVideoManagement } from './useVideoManagement';
+import useVideoManagement from './useVideoManagement';
+import usePhotoManagement from './usePhotoManagement';
+
+export {
+  useVideoManagement,
+  usePhotoManagement
+};

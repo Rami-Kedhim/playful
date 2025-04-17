@@ -96,14 +96,8 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     }
   };
 
-  const safeStatus = (statusValue: string): VerificationStatus => {
-    const validStatuses = [
-      VerificationStatus.PENDING, 
-      VerificationStatus.IN_REVIEW,
-      VerificationStatus.APPROVED,
-      VerificationStatus.REJECTED,
-      VerificationStatus.EXPIRED
-    ];
+  const safeStatus = (statusValue: VerificationStatus | string): VerificationStatus => {
+    const validStatuses = Object.values(VerificationStatus);
     
     return validStatuses.includes(statusValue as VerificationStatus) 
       ? (statusValue as VerificationStatus) 
@@ -111,7 +105,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   };
 
   // Handle status value
-  const status = safeStatus(verificationRequest.status as string);
+  const status = safeStatus(verificationRequest.status);
   const progress = calculateVerificationProgress(status);
 
   return (

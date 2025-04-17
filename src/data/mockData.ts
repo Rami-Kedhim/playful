@@ -1,234 +1,151 @@
+import { Escort, Review } from '@/types/escort';
+import { VerificationLevel } from '@/types/verification';
 
-// Add missing mock data exports to prevent errors
-import { Escort } from '@/types/escort';
-import { UberPersona } from '@/types/uberPersona';
-
-// Define ProfileProps interface to fix the FeaturedContentSection error
-export interface ProfileProps {
-  id: string;
-  name: string;
-  location: string;
-  avatar: string;
-  serviceType?: 'in-person' | 'virtual' | 'both';
-  verified?: boolean;
-  featured?: boolean;
-  isLive?: boolean;
-  rating?: number;
-}
-
-// Sample data for testing
-export const featuredEscorts: Escort[] = [
+// Sample reviews data
+const reviews: Review[] = [
   {
-    id: '1',
-    name: 'Victoria',
-    location: 'New York City',
-    age: '25',
-    gender: 'female',
-    rating: 4.9,
-    price: 300,
-    currency: 'USD',
-    profileImage: '/images/escorts/1.jpg',
-    images: ['/images/escorts/1.jpg', '/images/escorts/2.jpg'],
-    bio: 'Luxury companion available for dinner dates and more',
-    services: ['companionship', 'dinner-dates', 'events'],
-    isVerified: true,
-    availableNow: true,
-    responseRate: 98,
-    verification_level: 'premium',
-    lastActive: new Date().toISOString(),
-    reviewCount: 12, // Changed from reviews: [] to reviewCount: 12
-    tags: ['luxury', 'model', 'vip'],
-    providesInPersonServices: true,
-    providesVirtualContent: true,
-    serviceTypes: ['in-person', 'virtual'],
-    stats: {
-      views: 1234,
-      favorites: 56,
-      reviews: 12
-    },
-    measurements: {
-      height: 175,
-      weight: '55kg',
-      bust: '34C',
-      waist: '26',
-      hips: '36'
-    },
-    description: 'High-class companion with a taste for the finer things in life. Available for exclusive dates.'
+    id: "1",
+    userId: "user123",
+    userName: "Michael",
+    rating: 5,
+    comment: "Amazing experience, highly professional",
+    date: "2023-05-15",
+    verifiedBooking: true
   },
   {
-    id: '2',
-    name: 'Sophia',
-    location: 'Los Angeles',
-    age: '27',
-    gender: 'female',
-    rating: 4.8,
-    price: 350,
-    currency: 'USD',
-    profileImage: '/images/escorts/3.jpg',
-    images: ['/images/escorts/3.jpg', '/images/escorts/4.jpg'],
-    bio: 'Elite companion for private events and quiet evenings',
-    services: ['companionship', 'events', 'travel'],
-    isVerified: true,
-    availableNow: false,
-    responseRate: 95,
-    verification_level: 'premium',
-    lastActive: new Date().toISOString(),
-    reviewCount: 9, // Changed from reviews: [] to reviewCount: 9
-    tags: ['elegant', 'sophisticated', 'exclusive'],
-    providesInPersonServices: true,
-    providesVirtualContent: false,
-    serviceTypes: ['in-person'],
-    stats: {
-      views: 987,
-      favorites: 42,
-      reviews: 9
-    },
-    measurements: {
-      height: 170,
-      weight: '52kg',
-      bust: '32B',
-      waist: '24',
-      hips: '34'
-    },
-    description: 'Sophisticated and well-educated companion available for discerning clients.'
+    id: "2",
+    userId: "user456",
+    userName: "Jessica",
+    rating: 4,
+    comment: "Great service, very friendly and accommodating",
+    date: "2023-06-01",
+    verifiedBooking: true
+  },
+  {
+    id: "3",
+    userId: "user789",
+    userName: "David",
+    rating: 3,
+    comment: "Good but could improve on punctuality",
+    date: "2023-06-10",
+    verifiedBooking: false
   }
 ];
 
-export const featuredCreators: UberPersona[] = [
+// Sample escort profiles
+export const escorts: Escort[] = [
   {
-    id: '101',
-    username: 'emma_crystal',
-    displayName: 'Emma Crystal',
-    avatarUrl: '/images/creators/1.jpg',
-    profileBanner: '/images/banners/1.jpg',
-    bio: 'Content creator specializing in artistic photography and creative videos',
-    location: 'Miami, FL',
-    age: 24,
-    rating: 4.9,
-    isOnline: true,
-    roleFlags: {
-      isCreator: true,
-      isVerified: true,
-      isFeatured: true
+    id: "1",
+    user_id: "user1",
+    name: "Sophia",
+    email: "sophia@example.com",
+    avatar: "/images/profiles/sophia.jpg",
+    gender: "female",
+    age: 24, // Changed from string to number
+    bio: "Elegant, sophisticated, and attentive companion.",
+    location: "Los Angeles",
+    phone: "+1234567890",
+    website: "https://example.com",
+    social_media: {
+      instagram: "@sophiaescort",
+      twitter: "@sophiaLA"
     },
-    verified: true,
-    verificationLevel: 'premium',
-    capabilities: {
-      canPostContent: true,
-      canMessage: true,
-      canStream: true,
-      canFavorite: true,
-      canBoost: true,
-      canVerify: false,
-      hasContent: true,
-      hasLiveStream: true,
-      hasVirtualMeets: true,
-      hasRealMeets: false
+    hourly_rate: "$300",
+    is_verified: true,
+    verification_level: VerificationLevel.BASIC, // Changed from string to enum
+    created_at: "2023-01-15T00:00:00Z",
+    updated_at: "2023-06-20T00:00:00Z",
+    reviews: reviews.slice(0, 3),
+    services: ["Girlfriend Experience", "Dinner Date", "Travel Companion"],
+    languages: ["English", "French", "Spanish"],
+    height: "5'9\"",
+    weight: "125 lbs",
+    hair_color: "Blonde",
+    eye_color: "Blue",
+    measurements: {
+      bust: "36C",
+      waist: "24",
+      hips: "36"
     },
-    monetization: {
-      enabled: true,
-      methods: ['subscription', 'tips', 'ppv'],
-      rates: {
-        message: 5,
-        photoSet: 15,
-        videoChat: 50
-      },
-      subscription: {
-        price: 12.99,
-        interval: 'monthly',
-        features: ['Exclusive content', 'Direct messaging', 'Live streams']
-      },
-      acceptsLucoin: true,
-      pricePerMessage: 5,
-      subscriptionPrice: 12.99,
-      meetingPrice: 0,
-      videoChatPrice: 50
-    },
-    contentCount: {
-      photos: 156,
-      videos: 24,
-      streams: 12
-    },
-    system: {
-      createdAt: '2023-01-15T10:30:00Z',
-      updatedAt: '2023-05-20T14:45:00Z',
-      lastActiveAt: new Date().toISOString(),
-      totalViews: 45600,
-      totalLikes: 8700,
-      totalBookmarks: 1200,
-      rank: 12,
-      score: 92.5,
-      isAI: false
-    },
-    tags: ['photography', 'creative', 'fitness', 'travel']
+    nationality: "American",
+    availability: [
+      { day: "monday", available: true },
+      { day: "tuesday", available: true },
+      { day: "wednesday", available: false },
+      { day: "thursday", available: true },
+      { day: "friday", available: true }
+    ],
+    images: [
+      "/images/profiles/sophia1.jpg",
+      "/images/profiles/sophia2.jpg",
+      "/images/profiles/sophia3.jpg"
+    ],
+    videos: [
+      "/videos/sophia_intro.mp4"
+    ],
+    tags: ["luxury", "high-class", "elite", "model"],
+    orientation: "straight",
+    ethnicity: "Caucasian",
+    body_type: "Slim",
+    is_featured: true,
+    rating: 4.8
   },
   {
-    id: '102',
-    username: 'jake_visuals',
-    displayName: 'Jake Visuals',
-    avatarUrl: '/images/creators/2.jpg',
-    profileBanner: '/images/banners/2.jpg',
-    bio: 'Filmmaker and visual artist creating immersive video experiences',
-    location: 'Los Angeles, CA',
-    age: 29,
-    rating: 4.7,
-    isOnline: false,
-    roleFlags: {
-      isCreator: true,
-      isVerified: true,
-      isFeatured: false
+    id: "2",
+    user_id: "user2",
+    name: "Isabella",
+    email: "isabella@example.com",
+    avatar: "/images/profiles/isabella.jpg",
+    gender: "female",
+    age: 26, // Changed from string to number
+    bio: "Vibrant, passionate, and adventurous companion.",
+    location: "Miami",
+    phone: "+1987654321",
+    website: "https://example.com",
+    social_media: {
+      instagram: "@isabellaescort",
+      twitter: "@isabellaMiami"
     },
-    verified: true,
-    verificationLevel: 'standard',
-    capabilities: {
-      canPostContent: true,
-      canMessage: true,
-      canStream: true,
-      canFavorite: true,
-      canBoost: true,
-      canVerify: false,
-      hasContent: true,
-      hasLiveStream: true,
-      hasVirtualMeets: false,
-      hasRealMeets: false
+    hourly_rate: "$250",
+    is_verified: true,
+    verification_level: VerificationLevel.BASIC, // Changed from string to enum
+    created_at: "2023-02-20T00:00:00Z",
+    updated_at: "2023-06-15T00:00:00Z",
+    reviews: reviews.slice(2),
+    services: ["Girlfriend Experience", "Dinner Date", "Party Date"],
+    languages: ["English", "Italian", "Portuguese"],
+    height: "5'7\"",
+    weight: "120 lbs",
+    hair_color: "Brunette",
+    eye_color: "Brown",
+    measurements: {
+      bust: "34C",
+      waist: "26",
+      hips: "36"
     },
-    monetization: {
-      enabled: true,
-      methods: ['subscription', 'tips'],
-      rates: {
-        message: 3,
-        videoChat: 0
-      },
-      subscription: {
-        price: 9.99,
-        interval: 'monthly',
-        features: ['Exclusive videos', 'Behind the scenes', 'Early access']
-      },
-      acceptsLucoin: true,
-      pricePerMessage: 3,
-      subscriptionPrice: 9.99,
-      meetingPrice: 0,
-      videoChatPrice: 0
-    },
-    contentCount: {
-      photos: 48,
-      videos: 86,
-      streams: 5
-    },
-    system: {
-      createdAt: '2023-03-10T08:15:00Z',
-      updatedAt: '2023-05-18T16:30:00Z',
-      lastActiveAt: '2023-05-25T22:10:00Z',
-      totalViews: 38200,
-      totalLikes: 6400,
-      totalBookmarks: 980,
-      rank: 24,
-      score: 87.3,
-      isAI: false
-    },
-    tags: ['filmmaker', 'visual-arts', 'cinematography', 'editing']
+    nationality: "Italian-American",
+    availability: [
+      { day: "monday", available: false },
+      { day: "tuesday", available: true },
+      { day: "wednesday", available: true },
+      { day: "thursday", available: true },
+      { day: "friday", available: true }
+    ],
+    images: [
+      "/images/profiles/isabella1.jpg",
+      "/images/profiles/isabella2.jpg",
+      "/images/profiles/isabella3.jpg"
+    ],
+    videos: [
+      "/videos/isabella_intro.mp4"
+    ],
+    tags: ["energetic", "party", "fun", "adventurous"],
+    orientation: "bisexual",
+    ethnicity: "Mediterranean",
+    body_type: "Athletic",
+    is_featured: false,
+    rating: 4.7
   }
 ];
 
-export const popularEscorts = featuredEscorts;
-export const newEscorts = featuredEscorts;
+export default escorts;

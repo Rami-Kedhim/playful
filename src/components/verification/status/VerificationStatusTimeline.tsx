@@ -2,7 +2,7 @@
 import React from 'react';
 import { CheckCircle2, Clock, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VerificationStatus } from '@/types/escort';
+import { VerificationStatus } from '@/types/verification';
 
 interface TimelineStep {
   title: string;
@@ -25,22 +25,22 @@ export function VerificationStatusTimeline({ status, className }: VerificationSt
     {
       title: 'Initial Review',
       description: 'Documents are being reviewed by our system',
-      status: status === 'pending' ? 'current' : 
-             status === 'in_review' || status === 'approved' || status === 'rejected' ? 'completed' : 
+      status: status === VerificationStatus.PENDING ? 'current' : 
+             status === VerificationStatus.IN_REVIEW || status === VerificationStatus.APPROVED || status === VerificationStatus.REJECTED ? 'completed' : 
              'upcoming'
     },
     {
       title: 'Manual Verification',
       description: 'Documents are being verified by our team',
-      status: status === 'in_review' ? 'current' :
-             status === 'approved' || status === 'rejected' ? 'completed' :
+      status: status === VerificationStatus.IN_REVIEW ? 'current' :
+             status === VerificationStatus.APPROVED || status === VerificationStatus.REJECTED ? 'completed' :
              'upcoming'
     },
     {
       title: 'Final Decision',
       description: 'Verification process complete',
-      status: status === 'approved' ? 'completed' :
-             status === 'rejected' ? 'error' :
+      status: status === VerificationStatus.APPROVED ? 'completed' :
+             status === VerificationStatus.REJECTED ? 'error' :
              'upcoming'
     }
   ];
@@ -88,3 +88,5 @@ export function VerificationStatusTimeline({ status, className }: VerificationSt
     </div>
   );
 }
+
+export default VerificationStatusTimeline;

@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MainLayout from "@/components/layout/MainLayout";
@@ -31,6 +32,16 @@ const EscortContent = () => {
   // Updated to handle optional subscriptionPrice
   const defaultSubscriptionPrice = 29.99;
   const subscriptionPrice = escort?.subscriptionPrice || defaultSubscriptionPrice;
+  
+  // Default stats for content if not provided
+  const defaultContentStats = {
+    photos: "50+",
+    videos: "12",
+    streams: "Weekly"
+  };
+  
+  // Use either provided contentStats or default ones
+  const contentStats = escort?.contentStats || defaultContentStats;
   
   return (
     <MainLayout>
@@ -106,15 +117,15 @@ const EscortContent = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Photos</span>
-                    <span className="font-medium">{escort.contentStats?.photos || "50+"}</span>
+                    <span className="font-medium">{contentStats.photos || "50+"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Videos</span>
-                    <span className="font-medium">{escort.contentStats?.videos || "12"}</span>
+                    <span className="font-medium">{contentStats.videos || "12"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Live streams</span>
-                    <span className="font-medium">{escort.contentStats?.streams || "Weekly"}</span>
+                    <span className="font-medium">{contentStats.streams || "Weekly"}</span>
                   </div>
                 </div>
               </div>

@@ -1,246 +1,136 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { Escort, EscortFilterOptions } from '@/types/escort';
-import { EscortScraper } from '@/services/scrapers/EscortScraper';
-import { useToast } from '@/components/ui/use-toast';
-import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Escort, EscortFilterOptions, ServiceType } from '@/types/escort';
+import { fetchEscorts } from '../../../services/escortService';
 
-// Types
-interface EscortState {
+interface EscortContextProps {
   escorts: Escort[];
-  featuredEscorts: Escort[];
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
-  filters: {
-    location: string;
-    serviceTypes: string[];
-    priceRange: [number, number];
-    gender: string[];
-    orientation: string[];
-    ageRange: [number, number];
-    rating: number;
-    verified: boolean;
-    availableNow: boolean;
-    escortType: "verified" | "ai" | "provisional" | "all";
-    language: string[];
-  };
+  filters: EscortFilterOptions;
+  setFilters: (filters: EscortFilterOptions) => void;
+  filteredEscorts: Escort[];
+  fetchEscorts: () => Promise<void>;
 }
 
-interface EscortContextValue {
-  state: EscortState;
-  loadEscorts: (useNeuralProcessing?: boolean) => Promise<Escort[]>;
-  getEscortById: (id: string) => Escort | undefined;
-  getFeaturedEscorts: () => Escort[];
-  updateFilters: (newFilters: Partial<EscortState['filters']>) => void;
-  escortScraper: EscortScraper;
-}
+const EscortContext = createContext<EscortContextProps | undefined>(undefined);
 
 interface EscortProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-// Actions
-type EscortAction =
-  | { type: 'SET_ESCORTS'; payload: Escort[] }
-  | { type: 'SET_FEATURED_ESCORTS'; payload: Escort[] }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'UPDATE_FILTERS'; payload: Partial<EscortState['filters']> };
-
-// Initial state
-const initialState: EscortState = {
-  escorts: [],
-  featuredEscorts: [],
-  isLoading: false,
-  error: null,
-  filters: {
-    location: '',
-    serviceTypes: [],
-    priceRange: [0, 1000],
-    gender: [],
-    orientation: [],
-    ageRange: [18, 99],
-    rating: 0,
-    verified: false,
-    availableNow: false,
-    escortType: "all",
-    language: [],
-  },
-};
-
-// Reducer
-const escortReducer = (state: EscortState, action: EscortAction): EscortState => {
-  switch (action.type) {
-    case 'SET_ESCORTS':
-      return { ...state, escorts: action.payload };
-    case 'SET_FEATURED_ESCORTS':
-      return { ...state, featuredEscorts: action.payload };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    case 'UPDATE_FILTERS':
-      return {
-        ...state,
-        filters: { ...state.filters, ...action.payload },
-      };
-    default:
-      return state;
-  }
-};
-
-// Context
-const EscortContext = createContext<EscortContextValue | undefined>(undefined);
-
-// Provider
 export const EscortProvider: React.FC<EscortProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(escortReducer, initialState);
-  const { toast } = useToast();
-  
-  let user = null;
-  try {
-    const { useAuth } = require('@/hooks/auth/useAuthContext');
+  const [escorts, setEscorts] = useState<Escort[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<EscortFilterOptions>({});
+  const [filteredEscorts, setFilteredEscorts] = useState<Escort[]>([]);
+
+  const fetchEscortsData = async () => {
+    setLoading(true);
     try {
-      const auth = useAuth();
-      user = auth?.user || null;
-    } catch (error) {
-      console.log('Auth not available, proceeding without user data');
-    }
-  } catch (error) {
-    console.log('Auth module not available');
-  }
-  
-  const escortScraper = React.useMemo(() => EscortScraper.getInstance(), []);
-
-  const loadEscorts = useCallback(async (useNeuralProcessing = false): Promise<Escort[]> => {
-    try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      dispatch({ type: 'SET_ERROR', payload: null });
-
-      if (state.filters.location) {
-        escortScraper.setFilters({
-          region: state.filters.location,
-        });
-      }
-      
-      let processedEscorts: Escort[] = [];
-      
-      if (!useNeuralProcessing) {
-        processedEscorts = escortScraper.getCachedResults();
-      } else {
-        try {
-          const neuralQuery = {
-            filters: state.filters,
-            boostingEnabled: escortsNeuralService.config.boostingEnabled,
-            boostingAlgorithm: escortsNeuralService.config.boostingAlgorithm,
-            orderByBoost: escortsNeuralService.config.orderByBoost
-          };
-          
-          processedEscorts = await neuralHub.processQuery(
-            'escorts',
-            neuralQuery
-          ) as Escort[];
-          
-          processedEscorts = processedEscorts.map(escort => ({
-            ...escort,
-            profileType: escort.verified ? 'verified' : 
-                      escort.isAI ? 'ai' : 'provisional'
-          }));
-          
-          if (escortsNeuralService.config.orderByBoost) {
-            processedEscorts = processedEscorts.sort((a, b) => {
-              const boostDiff = (b.boostLevel || 0) - (a.boostLevel || 0);
-              if (boostDiff !== 0) return boostDiff;
-              
-              if (a.verified && !b.verified) return -1;
-              if (!a.verified && b.verified) return 1;
-              
-              return b.rating - a.rating;
-            });
-          }
-        } catch (err) {
-          console.error("Error in neural processing:", err);
-          processedEscorts = escortScraper.getCachedResults();
-        }
-      }
-
-      const featured = processedEscorts
-        .filter(escort => escort.featured || (escort.boostLevel && escort.boostLevel > 2))
-        .slice(0, 8);
-
-      dispatch({ type: 'SET_ESCORTS', payload: processedEscorts });
-      dispatch({ type: 'SET_FEATURED_ESCORTS', payload: featured });
-      return processedEscorts;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to load escorts";
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      toast({
-        title: "Failed to load escorts",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return [];
+      const data = await fetchEscorts();
+      setEscorts(data);
+      setFilteredEscorts(data);
+    } catch (err: any) {
+      setError(err.message || 'Could not fetch escorts');
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      setLoading(false);
     }
-  }, [escortScraper, state.filters, toast]);
+  };
 
-  const getEscortById = useCallback(
-    (id: string) => state.escorts.find(escort => escort.id === id),
-    [state.escorts]
-  );
-
-  const getFeaturedEscorts = useCallback(
-    () => state.featuredEscorts,
-    [state.featuredEscorts]
-  );
-
-  const updateFilters = useCallback((newFilters: Partial<EscortState['filters']>) => {
-    dispatch({ type: 'UPDATE_FILTERS', payload: newFilters });
+  useEffect(() => {
+    fetchEscortsData();
   }, []);
 
   useEffect(() => {
-    try {
-      if (escortsNeuralService) {
-        const userPrefs = user ? { userId: user.id } : {};
-        escortsNeuralService.updateConfig({ 
-          ...userPrefs,
-          enabled: true,
-          priority: 70,
-          autonomyLevel: 60,
-          resourceAllocation: 50,
-          boostingEnabled: true,
-          boostingAlgorithm: "OxumAlgorithm",
-          orderByBoost: true
+    // Apply filters whenever escorts or filters change
+    const applyFilters = () => {
+      let results = [...escorts];
+
+      if (filters.age && filters.age.length === 2) {
+        results = results.filter(escort => escort.age >= filters.age![0] && escort.age <= filters.age![1]);
+      }
+
+      if (filters.gender && filters.gender.length > 0) {
+        results = results.filter(escort => filters.gender!.includes(escort.gender));
+      }
+
+      if (filters.location) {
+        results = results.filter(escort => escort.location.toLowerCase().includes(filters.location!.toLowerCase()));
+      }
+
+      if (filters.services && filters.services.length > 0) {
+        results = results.filter(escort => filters.services!.every(service => escort.services.includes(service)));
+      }
+
+      if (filters.priceRange && filters.priceRange.length === 2) {
+        const [min, max] = filters.priceRange;
+        results = results.filter(escort => {
+          const hourlyRate = parseInt(escort.hourly_rate.replace('$', ''), 10);
+          return hourlyRate >= min && hourlyRate <= max;
         });
       }
-    } catch (err) {
-      console.error("Error initializing neural service:", err);
-    }
 
-    const timer = setTimeout(() => {
-      loadEscorts(true);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [loadEscorts, user]);
+      if (filters.availability && filters.availability.length > 0) {
+        results = results.filter(escort =>
+          filters.availability!.every(day =>
+            Array.isArray(escort.availability) ?
+              escort.availability.some(avail => avail.day.toLowerCase() === day.toLowerCase() && avail.available) :
+              (escort.availability as any).day.toLowerCase() === day.toLowerCase() && (escort.availability as any).available
+          )
+        );
+      }
 
-  const value: EscortContextValue = {
-    state,
-    loadEscorts,
-    getEscortById,
-    getFeaturedEscorts,
-    updateFilters,
-    escortScraper,
+      if (filters.languages && filters.languages.length > 0) {
+        results = results.filter(escort => filters.languages!.every(language => escort.languages.includes(language)));
+      }
+
+      if (filters.bodyType && filters.bodyType.length > 0) {
+        results = results.filter(escort => filters.bodyType!.includes(escort.body_type));
+      }
+
+      if (filters.ethnicities && filters.ethnicities.length > 0) {
+        results = results.filter(escort => filters.ethnicities!.includes(escort.ethnicity));
+      }
+
+      if (filters.serviceTypes && filters.serviceTypes.length > 0) {
+        results = results.filter(escort => {
+          if (filters.serviceTypes!.includes(ServiceType.BOTH)) {
+            return true;
+          }
+          const hasInPerson = filters.serviceTypes!.includes(ServiceType.IN_PERSON) && escort.providesInPersonServices;
+          const hasVirtual = filters.serviceTypes!.includes(ServiceType.VIRTUAL) && escort.providesVirtualContent;
+          return hasInPerson || hasVirtual;
+        });
+      }
+
+      setFilteredEscorts(results);
+    };
+
+    applyFilters();
+  }, [escorts, filters]);
+
+  const value: EscortContextProps = {
+    escorts,
+    loading,
+    error,
+    filters,
+    setFilters,
+    filteredEscorts,
+    fetchEscorts: fetchEscortsData,
   };
 
-  return <EscortContext.Provider value={value}>{children}</EscortContext.Provider>;
+  return (
+    <EscortContext.Provider value={value}>
+      {children}
+    </EscortContext.Provider>
+  );
 };
 
-export const useEscortContext = (): EscortContextValue => {
+export const useEscortContext = () => {
   const context = useContext(EscortContext);
-  if (context === undefined) {
-    throw new Error('useEscortContext must be used within an EscortProvider');
+  if (!context) {
+    throw new Error('useEscortContext must be used within a EscortProvider');
   }
   return context;
 };

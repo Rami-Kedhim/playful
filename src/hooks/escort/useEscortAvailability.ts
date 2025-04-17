@@ -1,78 +1,50 @@
 
 import { useState } from 'react';
-import { Availability } from '@/types/escort';
+import { Availability, ExtendedAvailability } from '@/types/escort';
 
-interface ExtendedAvailability extends Availability {
-  timeZone?: string;
-  availableNow?: boolean;
-}
-
-export const useEscortAvailability = (escortId: string) => {
-  // Initialize with the extended interface
-  const [availability, setAvailability] = useState<ExtendedAvailability>({
+export const useEscortAvailability = (initialAvailability?: Availability[] | Availability) => {
+  const defaultAvailability: ExtendedAvailability = {
+    day: 'all',
+    available: true,
     days: [],
     hours: [],
-    customNotes: "",
-    timeZone: "UTC",
-  });
-
-  const setDays = (days: string[]) => {
-    setAvailability((prev) => ({
-      ...prev,
-      days: days
-    }));
+    customNotes: '',
+    timeZone: 'UTC'
   };
 
-  const setHours = (hours: string[]) => {
-    setAvailability((prev) => ({
-      ...prev,
-      hours: hours
-    }));
+  const [availability, setAvailability] = useState<ExtendedAvailability>(
+    Array.isArray(initialAvailability) ? 
+      initialAvailability[0] || defaultAvailability : 
+      initialAvailability || defaultAvailability
+  );
+
+  // Function to update availability
+  const updateAvailability = (updates: Partial<ExtendedAvailability>) => {
+    setAvailability(prev => ({ ...prev, ...updates }));
   };
 
-  const setCustomNotes = (notes: string) => {
-    setAvailability((prev) => ({
-      ...prev,
-      customNotes: notes
-    }));
+  // Function to set specific days
+  const updateDays = (days: string[]) => {
+    updateAvailability({ days });
   };
 
-  const setTimeZone = (timeZone: string) => {
-    setAvailability((prev) => ({
-      ...prev,
-      timeZone: timeZone
-    }));
+  // Function to set hours
+  const updateHours = (hours: string[]) => {
+    updateAvailability({ hours });
   };
 
-  const checkAvailabilityNow = () => {
-    const now = new Date();
-    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
-    const currentHour = now.getHours();
-
-    const isAvailable =
-      availability.days.includes(currentDay) &&
-      availability.hours.some((hourRange) => {
-        const [start, end] = hourRange.split('-').map(Number);
-        return currentHour >= start && currentHour < end;
-      });
-
-    // Update with availableNow property
-    setAvailability((prev) => ({
-      ...prev,
-      availableNow: isAvailable
-    }));
+  // Function to set custom notes
+  const updateCustomNotes = (customNotes: string) => {
+    updateAvailability({ customNotes });
   };
 
   return {
-    days: availability.days || [],
-    hours: availability.hours || [],
-    customNotes: availability.customNotes || "",
-    timeZone: availability.timeZone || "UTC",
-    availableNow: availability.availableNow || false,
-    setDays,
-    setHours,
-    setCustomNotes,
-    setTimeZone,
-    checkAvailabilityNow,
+    availability,
+    updateAvailability,
+    updateDays,
+    updateHours,
+    updateCustomNotes,
   };
 };
+
+export default useEscortAvailability;

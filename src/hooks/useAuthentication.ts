@@ -1,167 +1,114 @@
 
-import { useState } from "react";
-import { User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
-import { useProfile } from "./useProfile";
+// Import necessary modules
+import { useState } from 'react';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useToast } from '@/components/ui/use-toast';
+import { useProfile } from '@/hooks/useProfile';
 
-export const useAuthentication = (
-  setIsLoading: (value: boolean) => void,
-  refreshProfile: () => Promise<void>
-) => {
-  const { fetchProfile, updateProfile } = useProfile();
+export const useAuthentication = () => {
+  const auth = useAuth();
+  const { toast } = useToast();
+  const { loadProfile, profile, updateProfile } = useProfile();
+  const [loading, setLoading] = useState(false);
 
-  // Sign up function
-  const signUp = async (email: string, password: string, userData?: Record<string, any>) => {
+  const login = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: userData || {}
-        }
+      // Simulate login
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Mock login success
+      auth.setUser({
+        id: '123',
+        email,
+        name: 'User',
+        roles: ['user']
       });
       
-      if (error) {
-        toast({
-          title: "Sign up failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
+      // Load profile after login
+      if (auth.user) {
+        await loadProfile(auth.user.id);
       }
       
       toast({
-        title: "Sign up successful",
-        description: "Please check your email to verify your account",
+        title: 'Welcome back!',
+        description: 'You have been successfully logged in.',
       });
+      
+      return true;
     } catch (error: any) {
-      console.error("Error signing up:", error.message);
-      throw error;
+      toast({
+        title: 'Login failed',
+        description: error.message || 'An error occurred during login',
+        variant: 'destructive',
+      });
+      return false;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Sign in function
-  const signIn = async (email: string, password: string) => {
+  const register = async (email: string, password: string, name: string) => {
+    setLoading(true);
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      // Simulate registration
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (error) {
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
+      // Mock register success
+      auth.setUser({
+        id: '123',
+        email,
+        name,
+        roles: ['user']
+      });
       
       toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in",
+        title: 'Registration successful!',
+        description: 'Your account has been created.',
       });
       
-      // Update last_online status in profile
-      const userData = await supabase.auth.getUser();
-      if (userData.data.user) {
-        await supabase
-          .from('profiles')
-          .update({ last_online: new Date().toISOString() })
-          .eq('id', userData.data.user.id);
-      }
+      return true;
     } catch (error: any) {
-      console.error("Error signing in:", error.message);
-      throw error;
+      toast({
+        title: 'Registration failed',
+        description: error.message || 'An error occurred during registration',
+        variant: 'destructive',
+      });
+      return false;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // Sign out function
-  const signOut = async () => {
+  const logout = async () => {
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
+      // Simulate logout
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      if (error) {
-        toast({
-          title: "Sign out failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
+      // Clear user data
+      auth.setUser(null);
       
       toast({
-        title: "Signed out",
-        description: "You have been signed out successfully",
+        title: 'Logged out',
+        description: 'You have been successfully logged out.',
       });
     } catch (error: any) {
-      console.error("Error signing out:", error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Reset password function
-  const resetPassword = async (email: string) => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      
-      if (error) {
-        toast({
-          title: "Password reset failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-      
       toast({
-        title: "Password reset email sent",
-        description: "Please check your email for the password reset link",
+        title: 'Logout failed',
+        description: error.message || 'An error occurred during logout',
+        variant: 'destructive',
       });
-    } catch (error: any) {
-      console.error("Error resetting password:", error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Update password function
-  const updatePassword = async (newPassword: string) => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      
-      if (error) {
-        toast({
-          title: "Password update failed",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-      
-      toast({
-        title: "Password updated",
-        description: "Your password has been updated successfully",
-      });
-    } catch (error: any) {
-      console.error("Error updating password:", error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+  return {
+    login,
+    register,
+    logout,
+    loading,
+    user: auth.user,
+    isAuthenticated: !!auth.user
   };
-
-  return { signUp, signIn, signOut, resetPassword, updatePassword };
 };
+
+export default useAuthentication;

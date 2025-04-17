@@ -73,10 +73,9 @@ export const useEscortProfile = (initialEscort?: Escort) => {
    * Update contact information
    */
   const updateContactInfo = async (id: string, contactInfo: ContactInfo) => {
-    // Since contactInfo is now defined in the Escort interface, we can include it directly
     return updateProfile(id, { 
       contactInfo 
-    });
+    } as Partial<Escort>);
   };
   
   return {

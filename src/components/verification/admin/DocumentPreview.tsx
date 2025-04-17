@@ -17,7 +17,7 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
   // Get the appropriate document properties, supporting both naming conventions
   const documentType = document.type || document.document_type || '';
   const documentUrl = document.url || document.fileUrl || document.file_url || document.document_url || '';
-  const uploadDate = document.uploadedAt || document.uploaded_at || document.created_at || '';
+  const uploadDate = document.uploadedAt || document.created_at || '';
 
   return (
     <>

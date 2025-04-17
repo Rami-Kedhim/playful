@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import VerificationReviewPanel from './VerificationReviewPanel';
 import ReviewRequestModal from './ReviewRequestModal';
-import { VerificationRequest } from '@/types/escort';
+import { VerificationRequest } from '@/types/verification'; // Import from verification types
 
 const AdminVerificationDashboard = () => {
   const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);

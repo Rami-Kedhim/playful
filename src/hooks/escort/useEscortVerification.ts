@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
-import { VerificationStatus, VerificationLevel, VerificationDocument, VerificationRequest } from '@/types/verification';
+import { VerificationRequest, VerificationLevel, VerificationStatus, VerificationDocument } from '@/types/verification';
 
 // Mock API function to get verification status
 const fetchVerificationStatus = async (userId: string) => {
@@ -9,28 +9,28 @@ const fetchVerificationStatus = async (userId: string) => {
   await new Promise(resolve => setTimeout(resolve, 500));
   
   // Return mock data
+  const mockDocuments: VerificationDocument[] = [
+    {
+      id: '1',
+      type: 'id_card',
+      url: '/images/mock/id-card-front.jpg',
+      uploadedAt: new Date().toISOString(),
+      status: VerificationStatus.PENDING,
+      verification_id: '123456',
+      document_type: 'id_card',
+      document_url: '/images/mock/id-card-front.jpg',
+      file_url: '/images/mock/id-card-front.jpg',
+      fileUrl: '/images/mock/id-card-front.jpg',
+      created_at: new Date().toISOString()
+    }
+  ];
+
   return {
     id: '123456',
     userId: userId,
     level: VerificationLevel.BASIC,
     status: VerificationStatus.PENDING,
-    documents: [
-      {
-        id: '1',
-        type: 'id_card',
-        url: '/images/mock/id-card-front.jpg',
-        uploadedAt: new Date().toISOString(),
-        status: 'pending',
-        // For backward compatibility
-        verification_id: '123456',
-        document_type: 'id_card',
-        document_url: '/images/mock/id-card-front.jpg',
-        file_url: '/images/mock/id-card-front.jpg',
-        fileUrl: '/images/mock/id-card-front.jpg',
-        created_at: new Date().toISOString(),
-        uploaded_at: new Date().toISOString()
-      }
-    ],
+    documents: mockDocuments,
     submittedAt: new Date().toISOString(),
     // For backward compatibility
     user_id: userId,
@@ -82,13 +82,25 @@ export const useEscortVerification = () => {
       // Mock submission
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Create mock documents for the request
+      const mockDocuments: VerificationDocument[] = [
+        {
+          id: Math.random().toString(36).substring(2, 11),
+          verification_id: '123456',
+          type: 'id_card',
+          url: '/images/mock/id-card-front.jpg',
+          status: VerificationStatus.PENDING,
+          created_at: new Date().toISOString()
+        }
+      ];
+      
       // Create a "submitted" request
       setVerificationRequest({
         id: Math.random().toString(36).substring(2, 11),
         userId: user.id,
         level: VerificationLevel.BASIC,
         status: VerificationStatus.PENDING,
-        documents: [],
+        documents: mockDocuments,
         submittedAt: new Date().toISOString(),
         // For backward compatibility
         user_id: user.id,

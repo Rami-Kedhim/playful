@@ -18,8 +18,8 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
   };
   
   const documentType = document.type || document.document_type || 'Unknown';
-  const imageUrl = document.url || document.file_url || document.fileUrl || document.document_url || '';
-  const uploadedAt = document.uploadedAt || document.uploaded_at || document.created_at || new Date().toISOString();
+  const imageUrl = document.url || document.fileUrl || document.file_url || document.document_url || '';
+  const uploadedAt = document.uploadedAt || document.created_at || new Date().toISOString();
 
   return (
     <Card>

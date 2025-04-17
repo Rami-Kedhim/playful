@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 
-// Verification status as an enum with values
+// Verification status as an enum with values that can be used as both type and value
 export enum VerificationStatus {
   PENDING = 'pending',
   IN_REVIEW = 'in_review',
@@ -29,6 +29,35 @@ export const DOCUMENT_TYPES = {
   RESIDENCE_PERMIT: 'residence_permit'
 };
 
+// Document requirements
+export const DOCUMENT_REQUIREMENTS = {
+  id_card: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  },
+  passport: {
+    frontRequired: true,
+    backRequired: false,
+    selfieRequired: true
+  },
+  driving_license: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  },
+  drivers_license: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  },
+  residence_permit: {
+    frontRequired: true,
+    backRequired: true,
+    selfieRequired: true
+  }
+};
+
 // Interfaces for verification entities
 export interface VerificationDocument {
   id: string;
@@ -38,10 +67,11 @@ export interface VerificationDocument {
   document_url?: string;
   fileUrl?: string;
   url?: string;
+  file_url?: string;
   status?: VerificationStatus;
   created_at?: string;
   uploadedAt?: string;
-  file_url?: string;
+  uploaded_at?: string;
 }
 
 export interface VerificationRequest {

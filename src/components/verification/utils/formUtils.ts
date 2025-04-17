@@ -14,7 +14,7 @@ export const getDocumentRequirements = (documentType: string) => {
     };
   }
   
-  return DOCUMENT_REQUIREMENTS[documentType];
+  return DOCUMENT_REQUIREMENTS[documentType as keyof typeof DOCUMENT_REQUIREMENTS];
 };
 
 export const isBackSideRequired = (documentType: string): boolean => {
