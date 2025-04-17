@@ -56,6 +56,7 @@ export interface VerificationRequest {
   updated_at?: string;
   reviewer_notes?: string;
   rejection_reason?: string;
+  reviewed_at?: string;
 }
 
 export interface VerificationFormValues {
@@ -124,10 +125,10 @@ const fileSchema = z.instanceof(File)
   );
 
 export const verificationFormSchema = z.object({
-  documentType: z.string(),
+  documentType: z.string().min(1, "Document type is required"),
   documentFrontImage: z.object({
     file: fileSchema.optional(),
-    preview: z.string()
+    preview: z.string().min(1, "Front image is required")
   }),
   documentBackImage: z.object({
     file: fileSchema.optional(),
@@ -135,6 +136,6 @@ export const verificationFormSchema = z.object({
   }).optional(),
   selfieImage: z.object({
     file: fileSchema.optional(),
-    preview: z.string()
+    preview: z.string().min(1, "Selfie image is required")
   }),
 });

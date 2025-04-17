@@ -24,13 +24,13 @@ const VerificationTimeline: React.FC<VerificationTimelineProps> = ({ verificatio
     { 
       id: 'approved',
       label: 'Approved',
-      date: verificationRequest.status === 'approved' ? verificationRequest.updated_at || verificationRequest.reviewedAt || verificationRequest.reviewed_at : null,
+      date: verificationRequest.status === 'approved' ? verificationRequest.updated_at || verificationRequest.reviewedAt : null,
       status: getStepStatus('approved', verificationRequest.status)
     },
     { 
       id: 'rejected',
       label: 'Rejected',
-      date: verificationRequest.status === 'rejected' ? verificationRequest.updated_at || verificationRequest.reviewedAt || verificationRequest.reviewed_at : null,
+      date: verificationRequest.status === 'rejected' ? verificationRequest.updated_at || verificationRequest.reviewedAt : null,
       status: getStepStatus('rejected', verificationRequest.status)
     }
   ];

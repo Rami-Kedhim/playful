@@ -19,8 +19,11 @@ export const getDocumentRequirements = (documentType: string) => {
 
 export const isBackSideRequired = (documentType: string): boolean => {
   const requirements = getDocumentRequirements(documentType);
-  // Use optional chaining to safely access properties
-  return requirements?.backRequired ?? false;
+  // Check if requirements is an object with backRequired property
+  if (typeof requirements === 'object' && 'backRequired' in requirements) {
+    return requirements.backRequired;
+  }
+  return false;
 };
 
 export const validateDocumentImage = (file: File | undefined): string | null => {

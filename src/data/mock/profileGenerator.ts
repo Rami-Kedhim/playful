@@ -27,7 +27,7 @@ export function generateRandomEscort(): Escort {
       twitter: `@${firstName.toLowerCase()}${faker.number.int(1000)}`,
       onlyfans: `${firstName.toLowerCase()}${faker.number.int(1000)}`
     },
-    hourly_rate: faker.number.int({ min: 100, max: 500 }),
+    hourly_rate: faker.number.int({ min: 100, max: 500 }).toString(),
     is_verified: faker.datatype.boolean(),
     verification_level: faker.helpers.arrayElement(Object.values(VerificationLevel)),
     created_at: faker.date.past().toISOString(),
@@ -47,17 +47,17 @@ export function generateRandomEscort(): Escort {
     languages: Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, () => 
       faker.helpers.arrayElement(['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Japanese', 'Chinese', 'Russian'])
     ),
-    height: faker.number.int({ min: 150, max: 190 }),
-    weight: faker.number.int({ min: 45, max: 100 }),
+    height: faker.number.int({ min: 150, max: 190 }).toString(),
+    weight: faker.number.int({ min: 45, max: 100 }).toString(),
     hair_color: faker.helpers.arrayElement(['black', 'blonde', 'brown', 'red', 'white', 'grey', 'other']),
     eye_color: faker.helpers.arrayElement(['blue', 'brown', 'green', 'hazel', 'grey', 'other']),
     measurements: {
-      bust: faker.number.int({ min: 75, max: 110 }),
-      waist: faker.number.int({ min: 50, max: 90 }),
-      hips: faker.number.int({ min: 75, max: 120 })
+      bust: faker.number.int({ min: 75, max: 110 }).toString(),
+      waist: faker.number.int({ min: 50, max: 90 }).toString(),
+      hips: faker.number.int({ min: 75, max: 120 }).toString()
     },
     nationality: faker.location.country(),
-    availability: {
+    availabilitySchedule: {
       monday: faker.datatype.boolean(),
       tuesday: faker.datatype.boolean(),
       wednesday: faker.datatype.boolean(),
