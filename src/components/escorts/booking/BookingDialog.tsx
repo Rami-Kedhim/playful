@@ -1,11 +1,17 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { CalendarIcon, Clock, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, addHours } from 'date-fns';
 import { Escort, Booking } from '@/types/escort';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
 
 interface BookingDialogProps {
   escort: Escort;

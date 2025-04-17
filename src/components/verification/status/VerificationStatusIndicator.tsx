@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
-import { VerificationStatus } from '@/types/escort';
+import { VerificationStatus } from '@/types/verification';
 
 interface VerificationStatusIndicatorProps {
   status: VerificationStatus;
@@ -26,7 +26,7 @@ const VerificationStatusIndicator = ({
   const iconSize = size === 'sm' ? 'h-3 w-3 mr-1' : size === 'lg' ? 'h-5 w-5 mr-1.5' : 'h-4 w-4 mr-1';
 
   switch (status) {
-    case 'approved':
+    case VerificationStatus.APPROVED:
       return (
         <Badge 
           variant="outline" 
@@ -36,7 +36,7 @@ const VerificationStatusIndicator = ({
           {showLabel && 'Approved'}
         </Badge>
       );
-    case 'rejected':
+    case VerificationStatus.REJECTED:
       return (
         <Badge 
           variant="outline" 
@@ -46,7 +46,7 @@ const VerificationStatusIndicator = ({
           {showLabel && 'Rejected'}
         </Badge>
       );
-    case 'in_review':
+    case VerificationStatus.IN_REVIEW:
       return (
         <Badge 
           variant="outline" 
@@ -56,7 +56,7 @@ const VerificationStatusIndicator = ({
           {showLabel && 'In Review'}
         </Badge>
       );
-    case 'pending':
+    case VerificationStatus.PENDING:
       return (
         <Badge 
           variant="outline" 

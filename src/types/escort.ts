@@ -106,6 +106,13 @@ export interface Availability {
   days?: string[];
   hours?: string[];
   customNotes?: string;
+  monday?: boolean;
+  tuesday?: boolean;
+  wednesday?: boolean;
+  thursday?: boolean;
+  friday?: boolean;
+  saturday?: boolean;
+  sunday?: boolean;
 }
 
 export interface VerificationRequest {
@@ -138,6 +145,7 @@ export interface VerificationDocument {
   document_url?: string;
   file_url?: string;
   fileUrl?: string;
+  url?: string;
   created_at?: string;
   uploadedAt?: string;
   uploaded_at?: string;
@@ -151,18 +159,36 @@ export interface Video {
   description?: string;
 }
 
-// Adding booking-related types
-export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected' | 'declined';
+// Convert BookingStatus from just a type to an enum with values
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
+  REJECTED = 'rejected',
+  DECLINED = 'declined'
+}
+
+// Expose the BookingStatus as a value as well
+export const BookingStatuses = {
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  CANCELED: 'canceled',
+  COMPLETED: 'completed',
+  REJECTED: 'rejected',
+  DECLINED: 'declined'
+} as const;
 
 export interface Booking {
   id: string;
   escortId: string;
   clientId: string;
   date: string;
-  startTime: string;
-  endTime: string;
+  startTime: string | Date;
+  endTime: string | Date;
   duration: number;
   service: string;
+  serviceType?: string;
   status: BookingStatus;
   location?: string;
   price: number;

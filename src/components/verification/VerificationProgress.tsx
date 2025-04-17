@@ -97,7 +97,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   };
 
   const safeStatus = (statusValue: string): VerificationStatus => {
-    const validStatuses: VerificationStatus[] = [
+    const validStatuses = [
       VerificationStatus.PENDING, 
       VerificationStatus.IN_REVIEW,
       VerificationStatus.APPROVED,

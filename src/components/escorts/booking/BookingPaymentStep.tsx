@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FormField, FormItem, FormControl, FormLabel } from '@/components/ui/form';
@@ -85,10 +86,12 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
             <span>{booking.duration}</span>
           </div>
           
-          <div className="flex items-center justify-between border-b pb-2">
-            <span className="text-muted-foreground">Service Type</span>
-            <span className="capitalize">{booking.serviceType}</span>
-          </div>
+          {booking.serviceType && (
+            <div className="flex items-center justify-between border-b pb-2">
+              <span className="text-muted-foreground">Service Type</span>
+              <span className="capitalize">{booking.serviceType}</span>
+            </div>
+          )}
           
           {isUpcoming() && (
             <div className="flex items-center gap-2 justify-center bg-muted/50 p-2 rounded-md">

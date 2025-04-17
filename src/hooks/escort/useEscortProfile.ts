@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Escort, ContactInfo } from '@/types/escort';
 import { useToast } from '@/components/ui/use-toast';
-import { escortService } from '@/services/escorts/escortService';
+import escortService from '@/services/escortService';
 
 /**
  * Hook to manage escort profile data
@@ -41,20 +42,10 @@ export const useEscortProfile = (initialEscort?: Escort) => {
   /**
    * Update escort profile data
    */
-  const updateProfile = async (updates: Partial<Escort>) => {
+  const updateProfile = async (id: string, updates: Partial<Escort>) => {
     try {
-      // Extract contactInfo if it exists in updates
-      const { contactInfo, ...otherUpdates } = updates;
-      
-      // Create new updates object with proper types
-      const profileUpdates: Partial<Escort> = {
-        ...otherUpdates,
-        // If contactInfo exists in updates, add it directly since we've now added it to the Escort interface
-        ...(contactInfo && { contactInfo })
-      };
-      
       setIsSaving(true);
-      const updatedEscort = await escortService.updateEscortProfile(id, profileUpdates);
+      const updatedEscort = await escortService.updateEscortProfile(id, updates);
       
       if (updatedEscort) {
         setEscort(updatedEscort);
@@ -81,14 +72,10 @@ export const useEscortProfile = (initialEscort?: Escort) => {
   /**
    * Update contact information
    */
-  const updateContactInfo = async (id: string, contactInfo: {
-    email?: string;
-    phone?: string;
-    website?: string;
-    social?: Record<string, string>;
-  }) => {
+  const updateContactInfo = async (id: string, contactInfo: ContactInfo) => {
+    // Since contactInfo is now defined in the Escort interface, we can include it directly
     return updateProfile(id, { 
-      contactInfo: contactInfo 
+      contactInfo 
     });
   };
   

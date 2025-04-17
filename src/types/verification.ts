@@ -1,8 +1,14 @@
 
 import { z } from 'zod';
 
-// Verification status constants
-export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
+// Verification status as an enum with values
+export enum VerificationStatus {
+  PENDING = 'pending',
+  IN_REVIEW = 'in_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired'
+}
 
 // Verification level enum
 export enum VerificationLevel {
@@ -31,9 +37,11 @@ export interface VerificationDocument {
   document_type?: string;
   document_url?: string;
   fileUrl?: string;
+  url?: string;
   status?: VerificationStatus;
   created_at?: string;
   uploadedAt?: string;
+  file_url?: string;
 }
 
 export interface VerificationRequest {
@@ -100,3 +108,12 @@ export interface VerificationStatusResponse {
   status: VerificationStatus;
   lastRequest?: VerificationRequest;
 }
+
+// Explicitly export the VerificationStatus values for use in components
+export const VerificationStatuses = {
+  PENDING: VerificationStatus.PENDING,
+  IN_REVIEW: VerificationStatus.IN_REVIEW,
+  APPROVED: VerificationStatus.APPROVED,
+  REJECTED: VerificationStatus.REJECTED,
+  EXPIRED: VerificationStatus.EXPIRED
+};
