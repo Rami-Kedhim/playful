@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,11 +13,20 @@ interface FeaturedContentSectionProps {
 }
 
 const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, profiles, viewMoreLink }) => {
+  // Create a safe description text that avoids the toLowerCase error
+  const getDescriptionText = () => {
+    if (!title) return "Check out our featured content";
+    
+    // Extract the content type from the title, safely handling undefined
+    const contentType = title.replace('Featured ', '').toLowerCase();
+    return `Check out our featured ${contentType}`;
+  };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>Check out our featured {title.toLowerCase().replace('featured ', '')}</CardDescription>
+        <CardDescription>{getDescriptionText()}</CardDescription>
       </CardHeader>
       <CardContent className="pl-4 pb-4">
         <ScrollArea className="h-[250px] w-full">
