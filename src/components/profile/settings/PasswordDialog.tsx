@@ -50,7 +50,8 @@ const PasswordDialog = ({
     setIsLoading(true);
     
     try {
-      const success = await updatePassword(oldPassword, newPassword);
+      // Fixed: updatePassword expects only 1 argument now
+      const success = await updatePassword(newPassword);
       
       if (success) {
         toast({

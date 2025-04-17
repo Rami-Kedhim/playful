@@ -34,7 +34,7 @@ const ReviewRequestModal = ({
 
   // Get the user ID, supporting both naming conventions
   const userId = request.userId || request.user_id || request.profile_id;
-  const submittedAt = request.submittedAt || request.created_at;
+  const submittedDate = request.submittedAt || request.createdAt || request.created_at;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,7 +50,7 @@ const ReviewRequestModal = ({
                 <AlertTitle>Verification Details</AlertTitle>
                 <AlertDescription>
                   <div className="grid gap-2 mt-2 text-sm">
-                    <div>Submitted: {submittedAt ? new Date(submittedAt).toLocaleString() : 'Unknown'}</div>
+                    <div>Submitted: {submittedDate ? new Date(submittedDate).toLocaleString() : 'Unknown'}</div>
                     <div>User ID: {userId || 'Unknown'}</div>
                     <div>Documents: {request.documents.length} submitted</div>
                   </div>

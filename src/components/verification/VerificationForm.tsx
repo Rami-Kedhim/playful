@@ -40,9 +40,9 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
       documentType: DOCUMENT_TYPES.ID_CARD,
-      documentFrontImage: { preview: '' },
-      documentBackImage: { preview: '' },
-      selfieImage: { preview: '' },
+      documentFrontImage: { file: undefined as unknown as File, preview: '' },
+      documentBackImage: { file: undefined as unknown as File, preview: '' },
+      selfieImage: { file: undefined as unknown as File, preview: '' },
     },
   });
 

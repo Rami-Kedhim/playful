@@ -21,7 +21,7 @@ const VerificationTypeTab: React.FC<VerificationTypeTabProps> = ({
   const getVerificationLevel = (type: string | null): VerificationLevel => {
     switch (type) {
       case 'personal': return VerificationLevel.BASIC;
-      case 'business': return VerificationLevel.ENHANCED;
+      case 'business': return VerificationLevel.ENHANCED; // Now this enum exists
       case 'premium': return VerificationLevel.PREMIUM;
       default: return VerificationLevel.NONE;
     }
