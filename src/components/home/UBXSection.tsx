@@ -1,3 +1,4 @@
+
 import { Check, Coins, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,12 +61,17 @@ const UBXSection = () => {
           </div>
           <div className="flex justify-center">
             <div className="relative">
-              <div className="w-48 h-48 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center relative animate-float">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/10 to-purple-500/10 animate-pulse-slow"></div>
-                <div className="absolute -inset-2 rounded-full bg-gradient-to-bl from-blue-500/5 to-purple-500/5 animate-spin-slow"></div>
-                <div className="relative flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text">
-                  <Coins className="h-10 w-10 text-blue-500" />
-                  <span className="text-4xl font-bold text-transparent">UBX</span>
+              {/* Enhanced UBX Coin Symbol */}
+              <div className="w-48 h-48 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center relative animate-float">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500/20 to-purple-500/20 animate-pulse-slow"></div>
+                <div className="absolute -inset-2 rounded-full bg-gradient-to-bl from-blue-600/10 to-purple-500/10 animate-spin-slow"></div>
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/5 to-purple-500/5 flex items-center justify-center">
+                  <div className="w-36 h-36 rounded-full bg-gradient-to-br from-blue-600/40 to-purple-600/40 flex items-center justify-center backdrop-blur-sm border border-white/10">
+                    <div className="flex items-center gap-1 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
+                      <Coins className="h-8 w-8 text-blue-400" />
+                      <span className="text-4xl font-bold text-transparent">UBX</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
