@@ -18,13 +18,13 @@ const DEFAULT_CONTEXT: AuthContextType = {
   checkRole: () => false,
   updatePassword: async () => false,
   logout: async () => ({ success: false, error: 'Not implemented' }),
-  session: null, // Adding missing session property
-  resetPassword: async () => {}, // Adding missing resetPassword method
-  updateUser: async () => {}, // Adding missing updateUser method
-  clearSession: () => {}, // Adding missing clearSession method
-  isLoggedIn: false, // Adding missing isLoggedIn property
-  isAdmin: () => false, // Adding missing isAdmin method
-  isCreator: () => false, // Adding missing isCreator method
+  session: null,
+  resetPassword: async () => {}, 
+  updateUser: async () => {}, 
+  clearSession: () => {}, 
+  isLoggedIn: false, 
+  isAdmin: () => false, 
+  isCreator: () => false
 };
 
 export const AuthContext = createContext<AuthContextType>(DEFAULT_CONTEXT);
