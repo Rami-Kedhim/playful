@@ -1,4 +1,3 @@
-
 // Add this to your existing auth.ts file or create it if it doesn't exist
 
 export enum DatabaseGender {
@@ -34,6 +33,9 @@ export interface AuthUser {
   lucoinsBalance?: number;
   lucoin_balance?: number; // Adding for compatibility
   isCreator?: boolean;
+  // Added properties to fix errors
+  phone_number?: string;
+  is_escort?: boolean;
 }
 
 export interface UserProfile {
@@ -44,20 +46,23 @@ export interface UserProfile {
   email: string;
   bio?: string;
   location?: string;
-  gender: DatabaseGender;
+  gender?: DatabaseGender;
   sexual_orientation?: string;
   profile_completeness?: number;
   is_boosted?: boolean;
-  created_at: string;
+  created_at?: string;
   is_verified?: boolean;
   ubx_balance?: number;
   lucoin_balance?: number;
   role?: string; // Adding role for backwards compatibility
   roles?: UserRole[]; // Adding roles array
+  // Added properties to fix errors
+  phone_number?: string;
+  is_escort?: boolean;
 }
 
 // Add ServiceTypeFilter definition
 export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
 // Re-export verification types from verification.ts to maintain compatibility
-export { VerificationDocument, VerificationRequest, VerificationStatus } from '../types/verification';
+export type { VerificationDocument, VerificationRequest, VerificationStatus } from '../types/verification';

@@ -2,43 +2,43 @@
 import React from 'react';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormValues } from '@/types/verification';
-import { FileUploader } from '@/components/shared/FileUploader';
+import FileUploader from '@/components/shared/FileUploader';
 
-export interface DocumentImageUploadProps {
-  form: UseFormReturn<VerificationFormValues>;
-  fieldName: string;
+interface DocumentImageUploadProps {
+  form: UseFormReturn<any>;
+  name: string;
   label: string;
-  description: string;
-  optional?: boolean;
+  description?: string;
+  accept?: string;
+  maxSize?: number;
+  required?: boolean;
 }
 
 const DocumentImageUpload: React.FC<DocumentImageUploadProps> = ({
   form,
-  fieldName,
+  name,
   label,
   description,
-  optional = false
+  accept = "image/*",
+  maxSize = 5,
+  required = false
 }) => {
   return (
     <FormField
       control={form.control}
-      name={fieldName as any}
+      name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>
-            {label} {optional && <span className="text-muted-foreground text-sm">(Optional)</span>}
-          </FormLabel>
+          <FormLabel>{label}{required && <span className="text-destructive ml-1">*</span>}</FormLabel>
           <FormControl>
             <FileUploader
-              value={field.value}
-              onChange={field.onChange}
-              accept="image/*"
-              maxSizeInMB={5}
-              className="h-32"
+              accept={accept}
+              maxSize={maxSize}
+              onFileSelect={(file) => field.onChange(file)}
+              buttonText="Upload Document"
             />
           </FormControl>
-          <FormDescription>{description}</FormDescription>
+          {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
         </FormItem>
       )}

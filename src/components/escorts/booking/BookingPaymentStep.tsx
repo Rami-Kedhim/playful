@@ -1,17 +1,31 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Escort, Booking } from '@/types/escort';
 
 interface BookingPaymentStepProps {
-  booking: any;
+  booking: Partial<Booking>;
   onConfirm: () => void;
   onCancel: () => void;
+  escort?: Escort;
+  onComplete?: () => Promise<void>;
+  isSubmitting?: boolean;
+  onBack?: () => void;
 }
 
-const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ booking, onConfirm, onCancel }) => {
+const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ 
+  booking, 
+  onConfirm, 
+  onCancel,
+  escort,
+  onComplete,
+  isSubmitting,
+  onBack
+}) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -42,12 +56,25 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ booking, onConf
   const duration = calculateDuration();
 
   const handleConfirm = () => {
-    // Implement payment processing logic here
-    onConfirm();
+    // When using the legacy onConfirm prop
+    if (onConfirm) {
+      onConfirm();
+    } 
+    // When using the newer onComplete prop
+    else if (onComplete) {
+      onComplete();
+    }
   };
 
   const handleCancel = () => {
-    onCancel();
+    // When using the legacy onCancel prop
+    if (onCancel) {
+      onCancel();
+    }
+    // When using the newer onBack prop
+    else if (onBack) {
+      onBack();
+    }
   };
 
   // When formatting dates
@@ -83,7 +110,7 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ booking, onConf
         </div>
         <div className="flex items-center gap-2">
           <span>Date:</span>
-          <span>{formatDateDisplay(booking.startTime)}</span>
+          <span>{booking.startTime ? formatDateDisplay(booking.startTime) : 'Not specified'}</span>
         </div>
         <div className="flex items-center gap-2">
           <span>Duration:</span>
@@ -96,7 +123,9 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ booking, onConf
         <Button variant="outline" onClick={handleCancel}>
           Cancel
         </Button>
-        <Button onClick={handleConfirm}>Confirm Booking</Button>
+        <Button onClick={handleConfirm} disabled={isSubmitting}>
+          {isSubmitting ? 'Processing...' : 'Confirm Booking'}
+        </Button>
       </div>
     </Card>
   );

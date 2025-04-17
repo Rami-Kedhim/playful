@@ -1,51 +1,43 @@
 
-import { useAuth } from "./useAuthContext";
-import { UserRole } from "@/types/auth";
+import { useMemo } from 'react';
+import { useAuth } from './useAuthContext';
+import { UserRole } from '@/types/auth';
 
-export function useRole() {
-  const { userRoles, checkRole } = useAuth();
+export const useRole = () => {
+  const { user } = useAuth();
+  
+  const userRoles = useMemo(() => {
+    return user?.roles || [];
+  }, [user]);
 
-  const hasRole = (role: UserRole | UserRole[]): boolean => {
-    if (Array.isArray(role)) {
-      return role.some(r => checkRole(r));
-    }
-    return checkRole(role);
+  const hasRole = (role: UserRole): boolean => {
+    return userRoles.includes(role);
   };
 
-  const hasAllRoles = (roles: UserRole[]): boolean => {
-    return roles.every(role => checkRole(role));
-  };
+  const isAdmin = useMemo(() => {
+    return hasRole('admin');
+  }, [userRoles]);
 
-  const isAdmin = (): boolean => {
-    return checkRole('admin');
-  };
+  const isCreator = useMemo(() => {
+    return hasRole('creator');
+  }, [userRoles]);
 
-  const isModerator = (): boolean => {
-    return checkRole('moderator');
-  };
+  const isModerator = useMemo(() => {
+    return hasRole('moderator');
+  }, [userRoles]);
 
-  const isEscort = (): boolean => {
-    return checkRole('escort');
-  };
-
-  const isCreator = (): boolean => {
-    return checkRole('creator');
-  };
-
-  const canAccessAdminFeatures = (): boolean => {
-    return isAdmin() || isModerator();
-  };
+  const isEscort = useMemo(() => {
+    return hasRole('escort');
+  }, [userRoles]);
 
   return {
-    roles: userRoles,
+    userRoles,
     hasRole,
-    hasAllRoles,
     isAdmin,
-    isModerator,
-    isEscort,
     isCreator,
-    canAccessAdminFeatures
+    isModerator,
+    isEscort
   };
-}
+};
 
 export default useRole;
