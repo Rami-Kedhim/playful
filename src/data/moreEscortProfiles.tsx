@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Escort } from '@/types/escort';
 
 export const moreEscortProfiles: Escort[] = [
@@ -6,7 +7,7 @@ export const moreEscortProfiles: Escort[] = [
     id: 'escort-3',
     name: 'Alexandra',
     location: 'Chicago, IL',
-    age: '27',
+    age: 27,
     gender: 'female',
     rating: 4.9,
     price: 450,
@@ -52,7 +53,7 @@ export const moreEscortProfiles: Escort[] = [
     id: 'escort-4',
     name: 'Marcus',
     location: 'Miami, FL',
-    age: '29',
+    age: 29,
     gender: 'male',
     rating: 4.8,
     price: 400,
@@ -98,7 +99,7 @@ export const moreEscortProfiles: Escort[] = [
     id: 'escort-5',
     name: 'Jasmine',
     location: 'San Francisco, CA',
-    age: '25',
+    age: 25,
     gender: 'female',
     rating: 4.7,
     price: 500,
@@ -144,7 +145,7 @@ export const moreEscortProfiles: Escort[] = [
     id: 'escort-6',
     name: 'Eliana',
     location: 'New York, NY',
-    age: '31',
+    age: 31,
     gender: 'female',
     rating: 4.9,
     price: 600,
@@ -190,7 +191,7 @@ export const moreEscortProfiles: Escort[] = [
     id: 'escort-7',
     name: 'Dominic',
     location: 'London, UK',
-    age: '33',
+    age: 33,
     gender: 'male',
     rating: 4.8,
     price: 550,
