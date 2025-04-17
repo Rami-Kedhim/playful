@@ -1,19 +1,19 @@
+
 import { useState } from 'react';
 import { Availability } from '@/types/escort';
 
-// Update Availability interface to include the missing properties
 interface ExtendedAvailability extends Availability {
   timeZone?: string;
   availableNow?: boolean;
 }
 
 export const useEscortAvailability = (escortId: string) => {
-  // Fix the property references to match the extended interface
+  // Initialize with the extended interface
   const [availability, setAvailability] = useState<ExtendedAvailability>({
     days: [],
     hours: [],
+    customNotes: "",
     timeZone: "UTC",
-    customNotes: ""
   });
 
   const setDays = (days: string[]) => {
@@ -56,20 +56,19 @@ export const useEscortAvailability = (escortId: string) => {
         return currentHour >= start && currentHour < end;
       });
 
-    // Make sure to match the extended interface
+    // Update with availableNow property
     setAvailability((prev) => ({
       ...prev,
       availableNow: isAvailable
     }));
   };
 
-  // Make sure to match the extended interface when returning
   return {
-    ...availability,
-    timeZone: availability.timeZone || "UTC",
     days: availability.days || [],
     hours: availability.hours || [],
     customNotes: availability.customNotes || "",
+    timeZone: availability.timeZone || "UTC",
+    availableNow: availability.availableNow || false,
     setDays,
     setHours,
     setCustomNotes,

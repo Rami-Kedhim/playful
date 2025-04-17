@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUserAIContext } from '@/hooks/useUserAIContext';
+import { useAuth } from '@/hooks/auth/useAuthContext'; // Update this import
 import { LogIn, UserCircle, MessageSquare, User } from 'lucide-react';
 import {
   DropdownMenu,
@@ -13,15 +13,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// You'll need to define a minimal recentInteractions interface
+interface RecentInteraction {
+  companionId: string;
+}
+
+interface AICompanion {
+  id: string;
+  name: string;
+  avatarUrl: string;
+}
+
 const AIAuthNav: React.FC = () => {
-  const { 
-    isAuthenticated, 
-    logout, 
-    user, 
-    currentCompanion,
-    clearCurrentCompanion,
-    recentInteractions
-  } = useUserAIContext();
+  const { isAuthenticated, logout, user } = useAuth();
+  // Mock these properties that would come from useUserAIContext
+  const currentCompanion: AICompanion | null = null;
+  const clearCurrentCompanion = () => {};
+  const recentInteractions: RecentInteraction[] = [];
 
   const handleLogout = async () => {
     await logout();
@@ -57,7 +65,7 @@ const AIAuthNav: React.FC = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative" size="sm">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.profileImageUrl} />
+                <AvatarImage src={user?.avatar_url || user?.avatarUrl || user?.profileImageUrl} />
                 <AvatarFallback>{user?.email?.[0]?.toUpperCase() || <User />}</AvatarFallback>
               </Avatar>
               <span className="sr-only">User menu</span>
@@ -66,7 +74,7 @@ const AIAuthNav: React.FC = () => {
           <DropdownMenuContent align="end">
             <div className="flex items-center justify-start p-2">
               <div className="flex flex-col space-y-1">
-                <p className="font-medium text-sm">{user?.username || user?.email}</p>
+                <p className="font-medium text-sm">{user?.username || user?.name || user?.email}</p>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </div>

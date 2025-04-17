@@ -1,91 +1,93 @@
 
 import { useState } from 'react';
-import { Escort, Video } from '@/types/escort';
-import { v4 as uuidv4 } from 'uuid';
+import { Escort } from '@/types/escort';
 
-export const useVideoManagement = (
-  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
-) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const addVideo = async (escortId: string, videoUrl: string) => {
-    setIsLoading(true);
-    setError(null);
+// Define Video type
+interface Video {
+  id: string;
+  url: string;
+  thumbnail: string;
+  title: string;
+  duration?: number;
+  isPublic?: boolean;
+}
+
+export const useVideoManagement = (escortData?: Escort) => {
+  const [videos, setVideos] = useState<Video[]>(() => {
+    if (!escortData) return [];
     
+    // Convert the videos from the escort data to a proper Video array
+    if (Array.isArray(escortData.videos)) {
+      return escortData.videos as Video[];
+    }
+    
+    // Return an empty array if no videos
+    return [];
+  });
+
+  const uploadVideo = async (file: File): Promise<boolean> => {
     try {
-      // Get current escort data first
-      const escort = await updateEscortProfile(escortId, {});
-      
-      if (!escort) {
-        throw new Error('Escort not found');
-      }
-      
-      // Create new video object
+      // Mock implementation - in a real app this would upload to storage
+      const videoUrl = URL.createObjectURL(file);
       const newVideo: Video = {
-        id: uuidv4(),
+        id: `video-${Date.now()}`,
         url: videoUrl,
-        thumbnail: videoUrl.replace(/\.[^/.]+$/, "_thumb.jpg") // Generate simple thumbnail URL
+        thumbnail: videoUrl, // In real implementation, generate a thumbnail
+        title: file.name,
+        isPublic: false,
       };
       
-      // Add video to videos array
-      const currentVideos = escort.videos || [];
-      const updatedVideos = [...currentVideos, newVideo];
-      
-      // Update escort with new videos
-      const updatedEscort = await updateEscortProfile(escortId, {
-        videos: updatedVideos
-      });
-      
-      return updatedEscort;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add video';
-      setError(errorMessage);
-      console.error('Error adding video:', err);
-      return null;
-    } finally {
-      setIsLoading(false);
+      setVideos(prev => [...prev, newVideo]);
+      return true;
+    } catch (error) {
+      console.error("Error uploading video:", error);
+      return false;
     }
   };
-  
-  const removeVideo = async (escortId: string, videoIdOrUrl: string) => {
-    setIsLoading(true);
-    setError(null);
-    
+
+  const deleteVideo = (videoId: string): boolean => {
     try {
-      // Get current escort data first
-      const escort = await updateEscortProfile(escortId, {});
-      
-      if (!escort) {
-        throw new Error('Escort not found');
-      }
-      
-      // Remove the video from videos array
-      const currentVideos = escort.videos || [];
-      const updatedVideos = currentVideos.filter(
-        video => video.id !== videoIdOrUrl && video.url !== videoIdOrUrl
-      );
-      
-      // Update escort with new videos
-      const updatedEscort = await updateEscortProfile(escortId, {
-        videos: updatedVideos
-      });
-      
-      return updatedEscort;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to remove video';
-      setError(errorMessage);
-      console.error('Error removing video:', err);
-      return null;
-    } finally {
-      setIsLoading(false);
+      setVideos(prev => prev.filter(video => video.id !== videoId));
+      return true;
+    } catch (error) {
+      console.error("Error deleting video:", error);
+      return false;
     }
   };
-  
+
+  const updateVideoVisibility = (videoId: string, isPublic: boolean): boolean => {
+    try {
+      setVideos(prev => 
+        prev.map(video => 
+          video.id === videoId ? { ...video, isPublic } : video
+        )
+      );
+      return true;
+    } catch (error) {
+      console.error("Error updating video visibility:", error);
+      return false;
+    }
+  };
+
+  const updateVideoTitle = (videoId: string, title: string): boolean => {
+    try {
+      setVideos(prev => 
+        prev.map(video => 
+          video.id === videoId ? { ...video, title } : video
+        )
+      );
+      return true;
+    } catch (error) {
+      console.error("Error updating video title:", error);
+      return false;
+    }
+  };
+
   return {
-    addVideo,
-    removeVideo,
-    isLoading,
-    error
+    videos,
+    uploadVideo,
+    deleteVideo,
+    updateVideoVisibility,
+    updateVideoTitle,
   };
 };

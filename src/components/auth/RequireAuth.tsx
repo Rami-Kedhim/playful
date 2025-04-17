@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useUserAIContext } from '@/hooks/useUserAIContext';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -20,7 +20,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({
   requiredRoles = [],
   redirectPath = '/auth',
 }) => {
-  const { isAuthenticated, isLoading, userRoles } = useUserAIContext();
+  const { isAuthenticated, isLoading, checkRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,7 +42,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({
     // If roles are specified, check if user has any of the required roles
     if (requiredRoles.length > 0) {
       const hasRequiredRole = requiredRoles.some(role => 
-        userRoles.includes(role)
+        checkRole(role)
       );
 
       if (!hasRequiredRole) {
@@ -53,7 +53,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({
         return;
       }
     }
-  }, [isAuthenticated, isLoading, navigate, location, requiredRoles, userRoles, redirectPath]);
+  }, [isAuthenticated, isLoading, navigate, location, requiredRoles, checkRole, redirectPath]);
 
   if (isLoading) {
     return (
@@ -75,7 +75,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({
   // Check for required roles
   if (requiredRoles.length > 0) {
     const hasRequiredRole = requiredRoles.some(role => 
-      userRoles.includes(role)
+      checkRole(role)
     );
     
     if (!hasRequiredRole) {

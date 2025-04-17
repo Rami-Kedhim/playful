@@ -3,12 +3,13 @@ import { Escort } from '@/types/escort';
 export interface ProfileProps {
   id: string;
   name: string;
-  image: string;
-  rating?: number;
-  location?: string;
-  tags?: string[];
-  price?: number;
+  avatar?: string;
+  verified?: boolean;
+  featured?: boolean;
+  isLive?: boolean;
+  serviceType?: string;
   description?: string;
+  location?: string;
 }
 
 export const featuredEscorts: Escort[] = [

@@ -1,13 +1,21 @@
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { AuthResult } from "@/types/auth";
-import { toast } from "@/components/ui/use-toast";
 
-export function useAuthActions() {
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { AuthResult } from '@/types/auth';
+import { useAuth } from './useAuthContext';
+
+export const useAuthActions = () => {
   const [isLoading, setIsLoading] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
+  const { refreshProfile } = useAuth();
+  
+  /**
+   * Log in a user with email and password
+   */
   const login = async (email: string, password: string): Promise<AuthResult> => {
     setIsLoading(true);
+    setError(null);
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ 
@@ -17,21 +25,26 @@ export function useAuthActions() {
       
       if (error) throw error;
       
+      // Auth state listener will handle setting user, session, etc.
       return { success: true };
     } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.message || "Failed to login. Please check your credentials." 
-      };
+      const errorMessage = error.message || "Failed to login. Please check your credentials.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
 
+  /**
+   * Register a new user with email and password
+   */
   const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
     setIsLoading(true);
+    setError(null);
     
     try {
+      // Register with Supabase
       const { data, error } = await supabase.auth.signUp({ 
         email, 
         password,
@@ -44,25 +57,54 @@ export function useAuthActions() {
       });
       
       if (error) throw error;
-      
+
       toast({
         title: "Registration successful",
         description: "Your account has been created successfully.",
       });
       
+      // Auth state listener will handle the rest
       return { success: true };
     } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.message || "Registration failed. Please try again." 
-      };
+      const errorMessage = error.message || "Registration failed. Please try again.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
 
+  /**
+   * Social authentication with OAuth providers
+   */
+  const socialAuth = async (provider: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({ 
+        provider: provider as any
+      });
+      
+      if (error) throw error;
+      
+      return { success: true };
+    } catch (error: any) {
+      const errorMessage = error.message || "Authentication failed. Please try again.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Log out the current user
+   */
   const logout = async (): Promise<AuthResult> => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       const { error } = await supabase.auth.signOut();
       
@@ -75,104 +117,25 @@ export function useAuthActions() {
       
       return { success: true };
     } catch (error: any) {
-      return { 
-        success: false, 
-        error: error.message || "Failed to logout. Please try again." 
-      };
+      const errorMessage = error.message || "Failed to logout. Please try again.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signInWithEmail = async (email: string, password: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password 
-      });
-      
-      if (error) throw error;
-      
-      return {
-        success: true,
-        user: null,
-        session: null
-      };
-    } catch (error) {
-      return {
-        success: false,
-        user: null,
-        session: null,
-        error
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signInWithProvider = async (provider: Provider): Promise<AuthResult> => {
-    setIsLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithProvider({ 
-        provider 
-      });
-      
-      if (error) throw error;
-      
-      return {
-        success: true,
-        user: null,
-        session: null
-      };
-    } catch (error) {
-      return {
-        success: false,
-        user: null,
-        session: null,
-        error
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signOut = async (): Promise<AuthResult> => {
-    setIsLoading(true);
-    
-    try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
-      
-      return {
-        success: true,
-        user: null,
-        session: null
-      };
-    } catch (error) {
-      return {
-        success: false,
-        user: null,
-        session: null,
-        error
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return { 
-    login, 
-    register, 
+  const clearError = () => setError(null);
+  
+  return {
+    login,
+    register,
     logout,
-    signInWithEmail,
-    signInWithProvider,
-    signOut,
-    isLoading 
+    socialAuth,
+    isLoading,
+    error,
+    clearError,
   };
-}
+};
 
 export default useAuthActions;

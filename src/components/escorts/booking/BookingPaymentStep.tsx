@@ -1,144 +1,103 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Escort, Booking } from '@/types/escort';
-import { Loader2, ArrowLeft, CreditCard, Wallet } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { format } from 'date-fns';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface BookingPaymentStepProps {
-  escort: Escort;
-  booking: Partial<Booking>;
-  onBack: () => void;
-  onComplete: () => void;
-  isSubmitting?: boolean;
+  booking: any;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
-const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
-  escort,
-  booking,
-  onBack,
-  onComplete,
-  isSubmitting = false
-}) => {
-  const [paymentMethod, setPaymentMethod] = useState('credits');
-  
-  const formatDateTime = (dateTime?: Date) => {
-    if (!dateTime) return 'N/A';
-    return format(dateTime, 'MMM d, yyyy h:mm a');
-  };
-  
+const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({ booking, onConfirm, onCancel }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  if (!user) {
+    return (
+      <div className="p-4">
+        <p>Please log in to confirm your booking.</p>
+        <Button onClick={() => navigate('/auth')}>Log In</Button>
+      </div>
+    );
+  }
+
   const calculateDuration = () => {
-    if (!booking.startTime || !booking.endTime) return 'N/A';
+    if (!booking.startTime || !booking.endTime) return 0;
     
-    const start = booking.startTime;
-    const end = booking.endTime;
-    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    // Handle both string and Date types
+    const startTime = booking.startTime instanceof Date 
+      ? booking.startTime.getTime() 
+      : new Date(booking.startTime).getTime();
     
-    return `${durationHours} ${durationHours === 1 ? 'hour' : 'hours'}`;
+    const endTime = booking.endTime instanceof Date 
+      ? booking.endTime.getTime() 
+      : new Date(booking.endTime).getTime();
+    
+    return (endTime - startTime) / (1000 * 60 * 60); // Convert to hours
   };
 
+  const duration = calculateDuration();
+
+  const handleConfirm = () => {
+    // Implement payment processing logic here
+    onConfirm();
+  };
+
+  const handleCancel = () => {
+    onCancel();
+  };
+
+  // When formatting dates
+  const formatDateDisplay = (dateValue: string | Date) => {
+    const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+    return date.toLocaleString();
+  };
+
+  // Update service-related properties
+  const serviceInfo = booking.serviceType ? 
+    <div className="flex items-center gap-2">
+      <span>Service Type:</span>
+      <Badge>{booking.serviceType}</Badge>
+    </div> : null;
+
+  // Update price reference
+  const priceDisplay = booking.price !== undefined && (
+    <div className="text-xl font-semibold">
+      ${booking.price}
+    </div>
+  );
+
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Review & Payment</CardTitle>
-        <CardDescription>
-          Review your booking details and confirm payment
-        </CardDescription>
+        <CardTitle>Confirm Your Booking</CardTitle>
+        <CardDescription>Review details and confirm your booking.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium">Booking Summary</h3>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="text-muted-foreground">Escort:</div>
-            <div className="font-medium">{escort.name}</div>
-            
-            <div className="text-muted-foreground">Date:</div>
-            <div className="font-medium">
-              {booking.startTime ? format(booking.startTime, 'MMM d, yyyy') : 'N/A'}
-            </div>
-            
-            <div className="text-muted-foreground">Time:</div>
-            <div className="font-medium">
-              {booking.startTime ? format(booking.startTime, 'h:mm a') : 'N/A'} - 
-              {booking.endTime ? format(booking.endTime, 'h:mm a') : 'N/A'}
-            </div>
-            
-            <div className="text-muted-foreground">Duration:</div>
-            <div className="font-medium">{calculateDuration()}</div>
-            
-            {booking.serviceType && (
-              <>
-                <div className="text-muted-foreground">Service Type:</div>
-                <div className="font-medium">{booking.serviceType}</div>
-              </>
-            )}
-            
-            {booking.notes && (
-              <>
-                <div className="text-muted-foreground">Special Requests:</div>
-                <div className="font-medium">{booking.notes}</div>
-              </>
-            )}
-          </div>
+      <CardContent className="grid gap-4">
+        <div className="flex items-center gap-2">
+          <span>Escort:</span>
+          <span>{booking.escortName}</span>
         </div>
-        
-        <div className="border-t border-b py-4">
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Total Amount</span>
-            <span className="text-xl font-bold">${booking.price || booking.totalPrice}</span>
-          </div>
+        <div className="flex items-center gap-2">
+          <span>Date:</span>
+          <span>{formatDateDisplay(booking.startTime)}</span>
         </div>
-        
-        <div className="space-y-3">
-          <h3 className="text-lg font-medium">Payment Method</h3>
-          <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-            <div className="flex items-center space-x-2 border rounded-md p-3">
-              <RadioGroupItem value="credits" id="credits" />
-              <Label htmlFor="credits" className="flex items-center cursor-pointer">
-                <Wallet className="h-4 w-4 mr-2" />
-                <div>
-                  <div>Account Credits</div>
-                  <div className="text-xs text-muted-foreground">Pay using your account balance</div>
-                </div>
-              </Label>
-            </div>
-            
-            <div className="flex items-center space-x-2 border rounded-md p-3">
-              <RadioGroupItem value="card" id="card" />
-              <Label htmlFor="card" className="flex items-center cursor-pointer">
-                <CreditCard className="h-4 w-4 mr-2" />
-                <div>
-                  <div>Credit Card</div>
-                  <div className="text-xs text-muted-foreground">Pay securely with your card</div>
-                </div>
-              </Label>
-            </div>
-          </RadioGroup>
+        <div className="flex items-center gap-2">
+          <span>Duration:</span>
+          <span>{duration} hours</span>
         </div>
+        {serviceInfo}
+        {priceDisplay}
       </CardContent>
-      <CardFooter className="flex gap-3">
-        <Button variant="outline" onClick={onBack} disabled={isSubmitting}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+      <div className="flex justify-between p-4">
+        <Button variant="outline" onClick={handleCancel}>
+          Cancel
         </Button>
-        <Button 
-          className="flex-1"
-          onClick={onComplete}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            'Confirm & Pay'
-          )}
-        </Button>
-      </CardFooter>
+        <Button onClick={handleConfirm}>Confirm Booking</Button>
+      </div>
     </Card>
   );
 };

@@ -2,80 +2,59 @@
 import { useState } from 'react';
 import { Escort } from '@/types/escort';
 
-export const useGalleryManagement = (
-  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
-) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const addGalleryImage = async (escortId: string, imageUrl: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Get current escort data first
-      const escort = await updateEscortProfile(escortId, {});
-      
-      if (!escort) {
-        throw new Error('Escort not found');
-      }
-      
-      // Add image to gallery
-      const currentGallery = escort.gallery || [];
-      const updatedGallery = [...currentGallery, imageUrl];
-      
-      // Update escort with new gallery
-      const updatedEscort = await updateEscortProfile(escortId, {
-        gallery: updatedGallery
-      });
-      
-      return updatedEscort;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add image to gallery';
-      setError(errorMessage);
-      console.error('Error adding gallery image:', err);
-      return null;
-    } finally {
-      setIsLoading(false);
+interface Gallery {
+  imageUrls: string[];
+  videoUrls?: string[];
+}
+
+export const useGalleryManagement = (escortData?: Escort) => {
+  const [gallery, setGallery] = useState<Gallery>(() => {
+    if (!escortData?.gallery) {
+      return { imageUrls: [] };
     }
-  };
-  
-  const removeGalleryImage = async (escortId: string, imageUrl: string) => {
-    setIsLoading(true);
-    setError(null);
     
-    try {
-      // Get current escort data first
-      const escort = await updateEscortProfile(escortId, {});
-      
-      if (!escort) {
-        throw new Error('Escort not found');
-      }
-      
-      // Remove the image from gallery
-      const currentGallery = escort.gallery || [];
-      const updatedGallery = currentGallery.filter(img => img !== imageUrl);
-      
-      // Update escort with new gallery
-      const updatedEscort = await updateEscortProfile(escortId, {
-        gallery: updatedGallery
-      });
-      
-      return updatedEscort;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to remove image from gallery';
-      setError(errorMessage);
-      console.error('Error removing gallery image:', err);
-      return null;
-    } finally {
-      setIsLoading(false);
+    if (Array.isArray(escortData.gallery)) {
+      // Handle case where gallery is an array of strings (legacy data)
+      return { imageUrls: escortData.gallery as string[] };
     }
+    
+    // Handle case where gallery is an object with imageUrls property
+    return {
+      imageUrls: (escortData.gallery as Gallery).imageUrls || [],
+      videoUrls: (escortData.gallery as Gallery).videoUrls || [],
+    };
+  });
+
+  const addImage = (imageUrl: string) => {
+    setGallery(prev => ({
+      ...prev,
+      imageUrls: [...prev.imageUrls, imageUrl]
+    }));
   };
-  
+
+  const removeImage = (imageUrl: string) => {
+    setGallery(prev => ({
+      ...prev,
+      imageUrls: prev.imageUrls.filter(url => url !== imageUrl)
+    }));
+  };
+
+  const reorderImages = (fromIndex: number, toIndex: number) => {
+    const newImageUrls = [...gallery.imageUrls];
+    const [movedItem] = newImageUrls.splice(fromIndex, 1);
+    newImageUrls.splice(toIndex, 0, movedItem);
+    
+    setGallery(prev => ({
+      ...prev,
+      imageUrls: newImageUrls
+    }));
+  };
+
   return {
-    addGalleryImage,
-    removeGalleryImage,
-    isLoading,
-    error
+    gallery,
+    addImage,
+    removeImage,
+    reorderImages,
+    setGallery,
   };
 };

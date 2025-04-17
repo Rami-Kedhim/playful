@@ -22,17 +22,18 @@ export interface AuthUser {
   id: string;
   email: string;
   username?: string;
+  name?: string;
   roles?: UserRole[];
   aud?: string;
   avatarUrl?: string;
+  avatar_url?: string; // Keeping for backward compatibility
   profileImageUrl?: string;
   user_metadata?: any;
-  app_metadata?: any; // Adding app_metadata property
+  app_metadata?: any;
   created_at?: string;
   lucoinsBalance?: number;
   lucoin_balance?: number; // Adding for compatibility
-  isCreator?: boolean; // Adding isCreator flag
-  // Add other user properties as needed
+  isCreator?: boolean;
 }
 
 export interface UserProfile {
@@ -52,6 +53,7 @@ export interface UserProfile {
   ubx_balance?: number;
   lucoin_balance?: number;
   role?: string; // Adding role for backwards compatibility
+  roles?: UserRole[]; // Adding roles array
 }
 
 // Add ServiceTypeFilter definition

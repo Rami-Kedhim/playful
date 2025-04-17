@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { brainHub } from '@/services/neural/HermesOxumBrainHub';
 import { useToast } from '@/components/ui/use-toast';
 import AIEscortSuggestions from './AIEscortSuggestions';
-import { useUserAIContext } from '@/hooks/useUserAIContext';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 import AICompanionChat from './AICompanionChat';
 import { AIAnalyticsService } from '@/services/ai/aiAnalyticsService';
 
@@ -44,7 +44,7 @@ const AIProfileDetail: React.FC<AIProfileDetailProps> = ({ profileId }) => {
   const [activeTab, setActiveTab] = useState('chat');
   const [showChat, setShowChat] = useState(false);
   const { toast } = useToast();
-  const { isAuthenticated, user } = useUserAIContext();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     const loadProfile = async () => {

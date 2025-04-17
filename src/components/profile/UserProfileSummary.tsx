@@ -12,8 +12,8 @@ interface UserProfileSummaryProps {
 }
 
 const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({ user, profile, isLoading }) => {
-  const avatarUrl = profile?.avatar_url || user?.avatar_url || "";
-  const name = profile?.name || user?.name || "User";
+  const avatarUrl = profile?.avatar_url || user?.avatarUrl || user?.avatar_url || user?.profileImageUrl || "";
+  const name = profile?.name || user?.username || user?.name || "User";
   const location = profile?.location || user?.location || "Unknown";
   const bio = profile?.bio || user?.bio || "No bio available";
 
@@ -23,7 +23,7 @@ const UserProfileSummary: React.FC<UserProfileSummaryProps> = ({ user, profile, 
     if (roles.includes('escort')) {
       return 'secondary';
     } else if (roles.includes('creator')) {
-      return 'default'; // Changed from 'accent' to 'default' to match the allowed variants
+      return 'default';
     }
     return 'outline';
   };
