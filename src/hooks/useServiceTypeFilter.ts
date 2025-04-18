@@ -1,125 +1,100 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useServiceType } from '@/components/escorts/context/ServiceTypeContext';
+import { useCallback } from 'react';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
-import { useToast } from '@/hooks/use-toast';
+import { useServiceType } from '@/components/escorts/context/ServiceTypeContext';
+import { getServiceTypeBadgeLabel } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 /**
- * Hook to manage service type filtering with URL param sync
+ * A hook to handle service type filtering operations
  */
-export const useServiceTypeFilter = (options?: {
-  onChange?: (type: ServiceTypeFilter) => void;
-  syncWithUrl?: boolean;
-  paramName?: string;
-  initialType?: ServiceTypeFilter;
-}) => {
+export const useServiceTypeFilter = () => {
   const {
-    syncWithUrl = true,
-    paramName = 'service_type',
-    initialType = '',
-    onChange
-  } = options || {};
+    serviceType,
+    setServiceType,
+    selectedSpecializedTypes,
+    toggleSpecializedType,
+    isInPersonService,
+    isVirtualService,
+    isBothServiceTypes,
+    isAnyServiceType,
+    clearServiceType,
+    specializedServiceTypes
+  } = useServiceType();
   
-  // Get search params for URL sync
-  const [searchParams, setSearchParams] = useSearchParams();
-  
-  // Get context if available
-  const serviceTypeContext = useServiceType();
-  
-  // Local state as fallback if context is not available
-  const [localServiceType, setLocalServiceType] = useState<ServiceTypeFilter>(initialType);
-  
-  const { toast } = useToast();
-  
-  // Determine if we should use context or local state
-  const useContextState = !!serviceTypeContext;
-  
-  // Current service type is from context if available, otherwise local state
-  const serviceType = useContextState 
-    ? serviceTypeContext.serviceType
-    : localServiceType;
-  
-  // Initialize from URL if needed
-  useEffect(() => {
-    if (syncWithUrl) {
-      const urlType = searchParams.get(paramName) as ServiceTypeFilter;
-      if (urlType && ['in-person', 'virtual', 'both'].includes(urlType)) {
-        if (useContextState) {
-          serviceTypeContext.setServiceType(urlType);
-        } else {
-          setLocalServiceType(urlType);
-        }
-      }
-    }
-  }, [syncWithUrl, paramName, searchParams, useContextState]);
-  
-  // Update service type
-  const setServiceType = useCallback((type: ServiceTypeFilter) => {
-    // Update state (context or local)
-    if (useContextState) {
-      serviceTypeContext.setServiceType(type);
-    } else {
-      setLocalServiceType(type);
-    }
-    
-    // Sync with URL if enabled
-    if (syncWithUrl) {
-      // Create a new URL params object
-      const newParams = new URLSearchParams(searchParams.toString());
-      
-      // If type is empty, remove the param, otherwise set it
-      if (!type) {
-        newParams.delete(paramName);
-      } else {
-        newParams.set(paramName, type);
-      }
-      
-      // Update the URL
-      setSearchParams(newParams);
-    }
-    
-    // Call onChange callback if provided
-    if (onChange) {
-      onChange(type);
-    }
-  }, [useContextState, syncWithUrl, searchParams, setSearchParams, paramName, onChange]);
-  
-  // Toggle service type
+  // Toggle the service type (select if not selected, or clear if already selected)
   const toggleServiceType = useCallback((type: ServiceTypeFilter) => {
-    const newType = serviceType === type ? '' : type;
-    setServiceType(newType);
-    
-    // Show toast notification
-    if (newType) {
-      toast({
-        title: "Service Type Updated",
-        description: useContextState 
-          ? serviceTypeContext.getServiceTypeLabel()
-          : `Showing ${type === 'in-person' ? 'In-Person' : type === 'virtual' ? 'Virtual' : type === 'both' ? 'Both' : 'All'} Service Types`,
-      });
+    if (serviceType === type) {
+      clearServiceType();
     } else {
-      toast({
-        title: "Service Type Cleared",
-        description: "Showing all service types",
-      });
+      setServiceType(type);
     }
-  }, [serviceType, setServiceType, toast, useContextState]);
+  }, [serviceType, setServiceType, clearServiceType]);
   
-  // Clear service type
-  const clearServiceType = useCallback(() => {
-    setServiceType('');
-  }, [setServiceType]);
+  // Check if a service type is selected
+  const isServiceTypeSelected = useCallback((type: ServiceTypeFilter) => {
+    return serviceType === type;
+  }, [serviceType]);
+  
+  // Filter escorts by service type
+  const filterByServiceType = useCallback((escorts: any[]) => {
+    if (!serviceType || escorts.length === 0) {
+      return escorts;
+    }
+    
+    return escorts.filter(escort => {
+      if (serviceType === 'in-person') {
+        return escort.providesInPersonServices;
+      }
+      if (serviceType === 'virtual') {
+        return escort.providesVirtualContent;
+      }
+      if (serviceType === 'both') {
+        return escort.providesInPersonServices && escort.providesVirtualContent;
+      }
+      // For specialized service types like 'massage', 'dinner', etc.
+      return escort.serviceTypes?.includes(serviceType) || 
+             escort.services?.includes(serviceType) ||
+             escort.tags?.includes(serviceType);
+    });
+  }, [serviceType]);
+  
+  // Filter by specialized service types
+  const filterBySpecializedTypes = useCallback((escorts: any[]) => {
+    if (selectedSpecializedTypes.length === 0) {
+      return escorts;
+    }
+    
+    return escorts.filter(escort => {
+      const services = [
+        ...(escort.serviceTypes || []),
+        ...(escort.services || []),
+        ...(escort.tags || [])
+      ];
+      
+      return selectedSpecializedTypes.some(type => 
+        services.some(service => 
+          service.toLowerCase() === type.toLowerCase()
+        )
+      );
+    });
+  }, [selectedSpecializedTypes]);
   
   return {
     serviceType,
     setServiceType,
     toggleServiceType,
+    isServiceTypeSelected,
     clearServiceType,
-    isInPersonService: serviceType === 'in-person' || serviceType === 'both',
-    isVirtualService: serviceType === 'virtual' || serviceType === 'both',
-    isBothServiceTypes: serviceType === 'both',
-    isAnyServiceType: serviceType === '',
+    filterByServiceType,
+    isInPersonService,
+    isVirtualService,
+    isBothServiceTypes,
+    isAnyServiceType,
+    selectedSpecializedTypes,
+    toggleSpecializedType,
+    specializedServiceTypes,
+    filterBySpecializedTypes,
+    getServiceTypeLabel: getServiceTypeBadgeLabel
   };
 };
 

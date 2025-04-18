@@ -1,9 +1,11 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { AppRoutes } from '@/utils/navigation';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 // Auth page
 import AuthPage from './pages/AuthPage';
@@ -39,6 +41,8 @@ const LoadingFallback = () => (
 );
 
 const RoutesComponent: React.FC = () => {
+  const { user, profile } = useAuth();
+  
   return (
     <Suspense fallback={<LoadingFallback />}>
       <RouterRoutes>
@@ -47,7 +51,20 @@ const RoutesComponent: React.FC = () => {
         
         {/* Routes using AppLayout */}
         <Route path={AppRoutes.HOME} element={<AppLayout><HomePage /></AppLayout>} />
-        <Route path={AppRoutes.PROFILE} element={<ProtectedRoute><AppLayout><ProfilePage /></AppLayout></ProtectedRoute>} />
+        <Route 
+          path={AppRoutes.PROFILE} 
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                {user && profile ? (
+                  <ProfilePage user={user} profile={profile} initialTab="about" />
+                ) : (
+                  <LoadingFallback />
+                )}
+              </AppLayout>
+            </ProtectedRoute>
+          } 
+        />
         <Route path={AppRoutes.FAVORITES} element={<ProtectedRoute><AppLayout><FavoritesPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.MESSAGES} element={<ProtectedRoute><AppLayout><MessagesPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.METAVERSE} element={<AppLayout><MetaversePage /></AppLayout>} />

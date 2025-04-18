@@ -1,54 +1,57 @@
 
-// Define specialized service type enum
-export enum ServiceType {
-  MASSAGE = 'Massage',
-  COMPANIONSHIP = 'Companionship',
-  ROLE_PLAY = 'Role Play',
-  DINNER_DATE = 'Dinner Date',
-  TRAVEL_COMPANION = 'Travel Companion',
-  SOCIAL_EVENTS = 'Social Events',
-  COUPLES_DATE = 'Couples Date',
-  VIDEO_CHAT = 'Video Chat',
-  PHONE_CHAT = 'Phone Chat',
-  LIVE_STREAM = 'Live Stream',
-  CONTENT_CREATION = 'Content Creation',
-  PRIVATE_SHOWS = 'Private Shows',
-}
+// Define possible service types
+export type ServiceType = 
+  | 'Massage'
+  | 'Dinner Date'
+  | 'Companionship'
+  | 'Travel'
+  | 'Overnight'
+  | 'Events'
+  | 'Roleplay'
+  | 'Escort'
+  | 'Dating'
+  | 'Dancing'
+  | string;
 
-// List of forbidden terms for safety/compliance
-export const ForbiddenTerms = [
-  'illegal',
-  'drugs',
-  'weapons',
-  'underage',
-  'trafficking',
-  'exploitation',
-  // Add other terms that should be filtered
-];
-
-// Map of potentially unsafe terms to safe alternatives
-const UnsafeTermMappings: Record<string, ServiceType> = {
-  'explicit': ServiceType.CONTENT_CREATION,
-  'adult': ServiceType.CONTENT_CREATION,
-  'exotic': ServiceType.MASSAGE,
-  'special': ServiceType.COMPANIONSHIP,
-  // Add other mappings as needed
+// Function to check if a service type is allowed
+export const isAllowedServiceType = (type: string): boolean => {
+  // This would be more complex in a real application with forbidden terms checking
+  const forbiddenTerms = [
+    'illegal',
+    'underage',
+    'trafficking'
+  ];
+  
+  return !forbiddenTerms.some(term => 
+    type.toLowerCase().includes(term.toLowerCase())
+  );
 };
 
-// Helper function to check if a service type is valid
-export function isValidServiceType(type: string): boolean {
-  return Object.values(ServiceType).includes(type as ServiceType);
-}
+// Function to return a safe version of a service name
+export const getSafeServiceName = (name: string): ServiceType => {
+  // In a real app, this would sanitize or remap problematic terms
+  return name as ServiceType;
+};
 
-// Helper function to remap potentially unsafe terms to safe service types
-export function remapUnsafeService(term: string): ServiceType | null {
-  const lowerTerm = term.toLowerCase();
-  
-  for (const [unsafeTerm, safeType] of Object.entries(UnsafeTermMappings)) {
-    if (lowerTerm.includes(unsafeTerm.toLowerCase())) {
-      return safeType;
-    }
-  }
-  
-  return null;
-}
+// Maps services to their categories
+export const serviceCategories = {
+  'Massage': 'Wellness',
+  'Dinner Date': 'Social',
+  'Companionship': 'Social',
+  'Travel': 'Companion',
+  'Overnight': 'Extended',
+  'Events': 'Social',
+  'Roleplay': 'Entertainment',
+  'Escort': 'Companion',
+  'Dating': 'Social',
+  'Dancing': 'Entertainment'
+};
+
+// Export default service categories
+export const DEFAULT_SERVICE_CATEGORIES = [
+  'Social',
+  'Companion',
+  'Entertainment',
+  'Wellness',
+  'Extended'
+];

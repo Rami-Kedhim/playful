@@ -27,7 +27,7 @@ export interface Escort {
   gallery?: string[];
   availability?: Availability[];
   about?: string;
-  bio?: string;
+  bio: string;
   // Adding fields needed by components
   description?: string;
   subscriptionPrice?: number;
@@ -48,8 +48,8 @@ export interface Escort {
   providesVirtualContent?: boolean;
   // Fields for profiles
   tags?: string[];
-  price?: number;
-  featured?: boolean;
+  price: number;
+  featured: boolean;
   serviceTypes?: string[];
   profileType?: string;
   profileImage?: string;
@@ -67,10 +67,17 @@ export interface Escort {
   bodyType?: string;
   isAI?: boolean;
   is_verified?: boolean;
+  isVerified: boolean;
+  images: string[];
   videos?: Array<{ url: string; title?: string; thumbnail?: string } | string>;
   isScraped?: boolean;
   boostLevel?: number;
   hasBeenVerified?: boolean;
+  contactInfo: {
+    email: string;
+    phone: string;
+    website: string;
+  };
 }
 
 export interface Availability {
@@ -122,7 +129,34 @@ export interface EnhancedEscortFilters extends EscortFilterOptions {
     days: string[],
     hours: string[]
   };
+  height?: [number, number];
+  bodyType?: string[];
+  hairColor?: string[];
+  eyeColor?: string[];
+  ethnicity?: string[];
 }
+
+// Add gender options constant
+export const ESCORT_GENDER_OPTIONS = [
+  { value: 'female', label: 'Female' },
+  { value: 'male', label: 'Male' },
+  { value: 'transgender', label: 'Transgender' },
+  { value: 'non-binary', label: 'Non-Binary' },
+  { value: 'other', label: 'Other' }
+];
+
+// Add service types constant
+export const ESCORT_SERVICE_TYPES = [
+  { value: 'massage', label: 'Massage' },
+  { value: 'companionship', label: 'Companionship' },
+  { value: 'dinner', label: 'Dinner Date' },
+  { value: 'overnight', label: 'Overnight' },
+  { value: 'travel', label: 'Travel Companion' },
+  { value: 'roleplay', label: 'Role Play' },
+  { value: 'gfe', label: 'GFE' },
+  { value: 'bdsm', label: 'BDSM' },
+  { value: 'events', label: 'Events' }
+];
 
 export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
 export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
@@ -130,7 +164,7 @@ export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
 
 export interface VerificationDocument {
   id: string;
-  verification_id: string;
+  verification_id?: string;
   document_type: string;
   document_url: string;
   status: VerificationStatus;
@@ -165,24 +199,30 @@ export interface VerificationRequest {
   userId?: string;
 }
 
-// Add gender options constant
-export const ESCORT_GENDER_OPTIONS = [
-  { value: 'female', label: 'Female' },
-  { value: 'male', label: 'Male' },
-  { value: 'transgender', label: 'Transgender' },
-  { value: 'non-binary', label: 'Non-Binary' },
-  { value: 'other', label: 'Other' }
-];
+// Export Video interface to fix the errors in the hooks
+export interface Video {
+  id: string;
+  url: string;
+  title?: string;
+  thumbnail?: string;
+  duration?: number;
+  isPublic?: boolean;
+}
 
-// Add service types constant
-export const ESCORT_SERVICE_TYPES = [
-  { value: 'massage', label: 'Massage' },
-  { value: 'companionship', label: 'Companionship' },
-  { value: 'dinner', label: 'Dinner Date' },
-  { value: 'overnight', label: 'Overnight' },
-  { value: 'travel', label: 'Travel Companion' },
-  { value: 'roleplay', label: 'Role Play' },
-  { value: 'gfe', label: 'GFE' },
-  { value: 'bdsm', label: 'BDSM' },
-  { value: 'events', label: 'Events' }
-];
+export interface Booking {
+  id: string;
+  escortId: string;
+  clientId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  service: string;
+  status: BookingStatus;
+  location?: string;
+  price: number;
+  deposit?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}

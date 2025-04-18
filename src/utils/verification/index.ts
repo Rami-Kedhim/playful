@@ -6,7 +6,9 @@ export {
   isRejected, 
   isExpired,
   createVerificationRequest,
-  updateVerificationStatus 
+  updateVerificationStatus,
+  checkVerificationStatus,
+  getVerificationRequest
 } from './statusCheck';
 
 export { 

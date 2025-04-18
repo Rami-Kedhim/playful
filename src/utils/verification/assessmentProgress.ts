@@ -1,80 +1,88 @@
 
-import { VerificationStatus } from "@/types/escort";
+import { VerificationStatus } from '@/types/verification';
 
 /**
- * Calculate verification progress percentage based on status
+ * Calculate the verification progress percentage based on status
  */
-export const calculateVerificationProgress = (status: VerificationStatus): number => {
-  switch (status) {
-    case 'pending':
-      return 30;
-    case 'in_review':
-      return 60;
-    case 'approved':
+export function calculateVerificationProgress(status: VerificationStatus | string): number {
+  switch(status) {
+    case VerificationStatus.PENDING:
+      return 0;
+    case VerificationStatus.IN_REVIEW:
+      return 50;
+    case VerificationStatus.APPROVED:
       return 100;
-    case 'rejected':
+    case VerificationStatus.REJECTED:
+      return 100;
+    case VerificationStatus.EXPIRED:
       return 100;
     default:
       return 0;
   }
-};
+}
 
 /**
- * Get user-friendly status message based on verification status
+ * Get appropriate status message for verification status
  */
-export const getVerificationStatusMessage = (status: VerificationStatus): string => {
-  switch (status) {
-    case 'pending':
-      return 'Your verification request has been submitted and is in the queue for review. We\'ll notify you once it begins processing.';
-    case 'in_review':
-      return 'Our team is currently reviewing your verification documents. We\'ll update you once the review is complete.';
-    case 'approved':
-      return 'Congratulations! Your identity has been successfully verified. You now have full access to all platform features.';
-    case 'rejected':
-      return 'Unfortunately, your verification request was not approved. Please review the reason below and submit a new request with the necessary corrections.';
+export function getVerificationStatusMessage(status: VerificationStatus | string): string {
+  switch(status) {
+    case VerificationStatus.PENDING:
+      return 'Your verification request has been submitted and is waiting to be reviewed.';
+    case VerificationStatus.IN_REVIEW:
+      return 'Your verification documents are currently being reviewed by our team.';
+    case VerificationStatus.APPROVED:
+      return 'Congratulations! Your verification has been approved.';
+    case VerificationStatus.REJECTED:
+      return 'Your verification request has been rejected. Please check the reason and try again.';
+    case VerificationStatus.EXPIRED:
+      return 'Your verification request has expired. Please submit a new request.';
     default:
-      return 'Unknown verification status.';
+      return 'Status information unavailable.';
   }
-};
+}
 
 /**
- * Get appropriate status title based on verification status
+ * Get appropriate title for verification status
  */
-export const getVerificationStatusTitle = (status: VerificationStatus): string => {
-  switch (status) {
-    case 'pending':
-      return 'Verification Pending';
-    case 'in_review':
-      return 'Verification In Review';
-    case 'approved':
-      return 'Verification Approved';
-    case 'rejected':
-      return 'Verification Rejected';
+export function getVerificationStatusTitle(status: VerificationStatus | string): string {
+  switch(status) {
+    case VerificationStatus.PENDING:
+      return 'Pending';
+    case VerificationStatus.IN_REVIEW:
+      return 'In Review';
+    case VerificationStatus.APPROVED:
+      return 'Approved';
+    case VerificationStatus.REJECTED:
+      return 'Rejected';
+    case VerificationStatus.EXPIRED:
+      return 'Expired';
     default:
-      return 'Verification Status';
+      return 'Unknown Status';
   }
-};
+}
 
 /**
- * Get estimated completion time based on verification status
+ * Calculate estimated completion time based on status
  */
-export const getEstimatedCompletionTime = (status: VerificationStatus): string => {
-  switch (status) {
-    case 'pending':
+export function getEstimatedCompletionTime(status: VerificationStatus | string): string {
+  switch(status) {
+    case VerificationStatus.PENDING:
       return '24-48 hours';
-    case 'in_review':
+    case VerificationStatus.IN_REVIEW:
       return '12-24 hours';
-    case 'approved':
-    case 'rejected':
+    case VerificationStatus.APPROVED:
+    case VerificationStatus.REJECTED:
+    case VerificationStatus.EXPIRED:
       return 'Completed';
     default:
       return 'Unknown';
   }
-};
+}
 
 /**
- * Check if verification is currently in progress
+ * Check if verification is in progress
  */
-export const isVerificationInProgress = (status: VerificationStatus): boolean => {
-  return status === 'pending' || status === 'in_review';
-};
+export function isVerificationInProgress(status: VerificationStatus | string): boolean {
+  return status === VerificationStatus.PENDING || 
+         status === VerificationStatus.IN_REVIEW;
+}

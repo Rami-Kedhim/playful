@@ -14,7 +14,8 @@ export async function checkVerificationStatus(userId: string): Promise<Verificat
     const response = await getMockVerificationRequest(userId);
     
     if (response) {
-      return response.status;
+      // Convert string to enum
+      return response.status as VerificationStatus;
     }
     
     return null;
@@ -40,6 +41,40 @@ export async function getVerificationRequest(userId: string): Promise<Verificati
   }
 }
 
+// Helper functions for status checking
+export function isPending(status: VerificationStatus): boolean {
+  return status === VerificationStatus.PENDING;
+}
+
+export function isApproved(status: VerificationStatus): boolean {
+  return status === VerificationStatus.APPROVED;
+}
+
+export function isRejected(status: VerificationStatus): boolean {
+  return status === VerificationStatus.REJECTED;
+}
+
+export function isExpired(status: VerificationStatus): boolean {
+  return status === VerificationStatus.EXPIRED;
+}
+
+export function createVerificationRequest(userId: string, level: string): Promise<VerificationRequest> {
+  // Mock implementation
+  return Promise.resolve({
+    id: `ver-${userId}`,
+    status: VerificationStatus.PENDING,
+    userId,
+    submittedAt: new Date().toISOString(),
+    documents: [],
+    requestedLevel: level
+  } as unknown as VerificationRequest);
+}
+
+export function updateVerificationStatus(requestId: string, status: VerificationStatus): Promise<void> {
+  console.log(`Updating request ${requestId} to status ${status}`);
+  return Promise.resolve();
+}
+
 // Helper function to generate mock verification data
 function getMockVerificationRequest(userId: string): Promise<VerificationRequest | null> {
   // Simulate an API call delay
@@ -51,19 +86,18 @@ function getMockVerificationRequest(userId: string): Promise<VerificationRequest
       
       let status: VerificationStatus;
       if (numValue < 5) {
-        status = 'pending';
+        status = VerificationStatus.PENDING;
       } else if (numValue < 10) {
-        status = 'approved';
+        status = VerificationStatus.APPROVED;
       } else if (numValue < 13) {
-        status = 'rejected';
+        status = VerificationStatus.REJECTED;
       } else {
-        status = 'in_review';
+        status = VerificationStatus.IN_REVIEW;
       }
       
       const documents: VerificationDocument[] = [
         {
           id: `doc-front-${userId}`,
-          verification_id: `ver-${userId}`,
           document_type: 'id_card',
           document_url: 'https://example.com/mock-doc.jpg',
           status: status,
@@ -71,10 +105,9 @@ function getMockVerificationRequest(userId: string): Promise<VerificationRequest
           type: 'id_card',
           fileUrl: 'https://example.com/mock-doc.jpg',
           uploadedAt: new Date(Date.now() - 86400000).toISOString()
-        },
+        } as VerificationDocument,
         {
           id: `doc-selfie-${userId}`,
-          verification_id: `ver-${userId}`,
           document_type: 'selfie',
           document_url: 'https://example.com/mock-selfie.jpg',
           status: status,
@@ -82,7 +115,7 @@ function getMockVerificationRequest(userId: string): Promise<VerificationRequest
           type: 'selfie',
           fileUrl: 'https://example.com/mock-selfie.jpg',
           uploadedAt: new Date(Date.now() - 86400000).toISOString()
-        }
+        } as VerificationDocument
       ];
       
       resolve({
@@ -92,11 +125,9 @@ function getMockVerificationRequest(userId: string): Promise<VerificationRequest
         requested_level: 'basic',
         documents: documents,
         created_at: new Date(Date.now() - 86400000).toISOString(),
-        updated_at: new Date().toISOString(),
         userId: userId,
-        submittedAt: new Date(Date.now() - 86400000).toISOString(),
-        updatedAt: new Date().toISOString()
-      });
+        submittedAt: new Date(Date.now() - 86400000).toISOString()
+      } as VerificationRequest);
     }, 500);
   });
 }

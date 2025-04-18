@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { ServiceTypeProvider as ServiceTypeContextProvider } from '../context/ServiceTypeContext';
 import { ServiceType } from '../filters/ServiceTypeFilterRules';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ServiceTypeProviderProps {
   children: ReactNode;

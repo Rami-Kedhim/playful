@@ -42,6 +42,7 @@ export interface VerificationDocument {
   uploaded_at?: string;
   uploadedAt?: string;
   created_at?: string;
+  verification_id?: string;
 }
 
 export interface VerificationRequest {
@@ -61,6 +62,7 @@ export interface VerificationRequest {
   profile_id?: string;
   createdAt?: string;
   level?: string;
+  updated_at?: string;
 }
 
 export interface VerificationFormValues {
