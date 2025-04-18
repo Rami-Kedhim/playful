@@ -1,5 +1,4 @@
 
-
 export interface NeuralModel {
   id: string;
   name: string;
@@ -53,14 +52,14 @@ export interface NeuralSystemMetricsResult {
 
 // Updated TrainingProgress with epoch and timeRemaining
 export interface TrainingProgress {
-  id?: string; // Made optional to work with both interfaces
+  id: string; // Made required
   modelId: string;
   progress: number;
   epoch: number;
   accuracy: number;
   loss: number;
   timeRemaining: number;
-  status?: 'training' | 'paused' | 'completed' | 'failed';
+  status: 'training' | 'paused' | 'completed' | 'failed';
   type?: string;
   startTime?: Date;
   currentEpoch?: number;
@@ -68,4 +67,3 @@ export interface TrainingProgress {
   targetAccuracy?: number;
   estimatedCompletionTime?: Date;
 }
-

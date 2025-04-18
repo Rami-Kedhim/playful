@@ -1,5 +1,4 @@
 
-
 export interface User {
   id: string;
   username: string;
@@ -19,11 +18,11 @@ export interface UserProfile {
   location: string;
   bio: string;
   isVerified: boolean;
-  website: string; // Added property
+  website: string; // Property explicitly defined
   avatarUrl: string;
   joinedDate: Date;
   avatar_url: string;
-  phone: string; // Added property
+  phone: string; // Property explicitly defined
 }
 
 // Add AuthResult type needed for SignInForm and SignUpForm
@@ -34,4 +33,3 @@ export interface AuthResult {
   token?: string;
   error?: string;
 }
-

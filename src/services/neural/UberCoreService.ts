@@ -3,13 +3,13 @@ export interface UberCoreService {
   configure: (config: any) => Promise<boolean>;
   getStatus: () => Promise<any>;
   processUserInput: (input: string) => Promise<any>;
-  initialize?: () => Promise<void>;
-  shutdown?: () => Promise<void>;
-  getSettings?: () => any;
-  updateSettings?: (settings: any) => void;
-  searchPersonas?: (filters: any) => any[];
-  findNearestNeighbors?: (personaId: string, count: number) => any[];
-  convertToUberPersona?: (source: any) => any;
+  initialize: () => Promise<boolean>;
+  shutdown: () => Promise<void>;
+  getSettings: () => any;
+  updateSettings: (settings: any) => void;
+  searchPersonas: (filters: any) => any[];
+  findNearestNeighbors: (personaId: string, count: number) => any[];
+  convertToUberPersona: (source: any) => any;
 }
 
 export const uberCoreService: UberCoreService = {
@@ -34,8 +34,9 @@ export const uberCoreService: UberCoreService = {
     };
   },
   
-  initialize: async (): Promise<void> => {
+  initialize: async (): Promise<boolean> => {
     console.log("Initializing UberCore");
+    return true;
   },
   
   shutdown: async (): Promise<void> => {

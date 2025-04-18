@@ -1,13 +1,29 @@
 
-import { DocumentType, DOCUMENT_TYPE_OPTIONS } from "@/types/verification";
+import { DocumentType } from '@/types/verification';
 
-// Get label for document type
-export const getDocumentTypeLabel = (type: DocumentType): string => {
-  const option = DOCUMENT_TYPE_OPTIONS.find(option => option.value === type);
-  return option ? option.label : type;
+/**
+ * Safely converts a string to a DocumentType enum
+ */
+export const toDocumentType = (value: string): DocumentType => {
+  switch (value) {
+    case 'id_card':
+      return 'id_card';
+    case 'passport':
+      return 'passport';
+    case 'drivers_license':
+      return 'drivers_license';
+    default:
+      return 'id_card'; // Default value
+  }
 };
 
-// Format document type options for select component
+/**
+ * Gets all document type options
+ */
 export const getDocumentTypeOptions = () => {
-  return DOCUMENT_TYPE_OPTIONS;
+  return [
+    { value: 'id_card', label: 'ID Card' },
+    { value: 'passport', label: 'Passport' },
+    { value: 'drivers_license', label: "Driver's License" }
+  ];
 };

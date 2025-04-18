@@ -1,5 +1,4 @@
 
-
 export interface UberPersona {
   id: string;
   name: string;
@@ -72,5 +71,8 @@ export interface UberPersona {
   isOnline?: boolean;
   rating?: number;
   age?: number;
+  profileType?: string; // Added for UberPersonaContext
+  services?: string[]; // Added for UberPersonaContext
+  isAI?: boolean; // Added for UberPersonaContext
+  featured?: boolean; // For rankPersonas function
 }
-

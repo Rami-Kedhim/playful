@@ -8,10 +8,10 @@ import {
 } from '@/types/verification';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useToast } from '@/components/ui/use-toast';
-import { randomUUID } from 'crypto';
 
 interface UseVerificationStatusResult {
   verification: VerificationRequest | null;
+  verificationRequest: VerificationRequest | null; // Added alias
   loading: boolean;
   error: string | null;
   createVerificationRequest: (document_type: string) => Promise<void>;
@@ -64,11 +64,12 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
     setError(null);
     
     try {
-      const randomId = randomUUID();
+      // Generate a random ID for the document
+      const documentId = Math.random().toString(36).substring(2, 15);
 
       // Now includes the required 'type' property
       const pendingDoc: VerificationDocument = {
-        id: randomId,
+        id: documentId,
         type: document_type,
         document_type: document_type,
         status: VerificationStatus.PENDING,
@@ -113,6 +114,7 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
   
   return {
     verification,
+    verificationRequest: verification, // Add alias for components using verificationRequest
     loading,
     error,
     createVerificationRequest,
