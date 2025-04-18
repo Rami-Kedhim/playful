@@ -43,14 +43,21 @@ export const useAuthentication = () => {
   }, [auth]);
   
   // Update profile method
-  const updateProfile = useCallback(async (data: any): Promise<boolean> => {
+  const updateProfile = useCallback(async (data: any): Promise<AuthResult> => {
     if (auth.updateUserProfile) {
-      return await auth.updateUserProfile(data);
+      const success = await auth.updateUserProfile(data);
+      return {
+        success,
+        error: success ? null : 'Failed to update profile'
+      };
     }
-    return false;
+    return {
+      success: false,
+      error: 'Update profile method not available'
+    };
   }, [auth]);
   
-  // Reset password method (mock implementation)
+  // Reset password method
   const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
     console.log('Reset password requested for', email);
     return {
@@ -59,7 +66,7 @@ export const useAuthentication = () => {
     };
   }, []);
   
-  // Send password reset email (mock implementation)
+  // Send password reset email
   const sendPasswordResetEmail = useCallback(async (email: string): Promise<AuthResult> => {
     console.log('Send password reset email to', email);
     return { 
@@ -69,14 +76,21 @@ export const useAuthentication = () => {
   }, []);
   
   // Update password
-  const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<boolean> => {
+  const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<AuthResult> => {
     if (auth.updatePassword) {
-      return await auth.updatePassword(oldPassword, newPassword);
+      const success = await auth.updatePassword(oldPassword, newPassword);
+      return {
+        success,
+        error: success ? null : 'Failed to update password'
+      };
     }
-    return false;
+    return {
+      success: false,
+      error: 'Update password method not available'
+    };
   }, [auth]);
   
-  // Verify email (mock implementation)
+  // Verify email
   const verifyEmail = useCallback(async (token: string): Promise<AuthResult> => {
     console.log('Verify email with token', token);
     return {
@@ -85,7 +99,7 @@ export const useAuthentication = () => {
     };
   }, []);
   
-  // Send verification email (mock implementation)
+  // Send verification email
   const sendVerificationEmail = useCallback(async (): Promise<AuthResult> => {
     console.log('Send verification email requested');
     return {

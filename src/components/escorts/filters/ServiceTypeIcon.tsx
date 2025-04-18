@@ -1,60 +1,44 @@
 
 import React from 'react';
-import { Bed, Video, BedDouble, Utensils, type LucideProps } from 'lucide-react';
-import { type ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import { Users, Video, Home, Utensils, Mail } from 'lucide-react';
+import { ServiceTypeFilter } from '@/components/escorts/context/ServiceTypeContext';
 
-export interface ServiceTypeIconProps {
-  type: string;
-  size?: number;
-  className?: string;
+interface ServiceTypeIconProps {
+  type: ServiceTypeFilter | string;
   variant?: 'default' | 'colored';
+  size?: number;
+  className?: string; // Added className prop
 }
 
-export const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
-  type, 
-  size = 18,
-  className = '',
-  variant = 'default'
+const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
+  type,
+  variant = 'default',
+  size = 16,
+  className = ''
 }) => {
-  const iconProps: LucideProps = { 
-    size, 
-    className: variant === 'colored' 
-      ? `${className} ${getColorForServiceType(type)}` 
-      : className
-  };
+  const isColored = variant === 'colored';
   
-  switch (type.toLowerCase()) {
-    case 'in-person':
-      return <Bed {...iconProps} />;
-    case 'virtual':
-      return <Video {...iconProps} />;
-    case 'both':
-      return <BedDouble {...iconProps} />;
-    case 'massage':
-      return <BedDouble {...iconProps} />; // Could use a more appropriate icon if available
-    case 'dinner':
-      return <Utensils {...iconProps} />;
-    default:
-      return <Bed {...iconProps} />;
-  }
-};
+  // Function to render the appropriate icon based on type
+  const renderIcon = () => {
+    const stringType = String(type);
+    
+    switch (stringType) {
+      case 'in-person':
+        return <Users size={size} className={`${isColored ? 'text-blue-500' : ''} ${className}`} />;
+      case 'virtual':
+        return <Video size={size} className={`${isColored ? 'text-purple-500' : ''} ${className}`} />;
+      case 'both':
+        return <Home size={size} className={`${isColored ? 'text-green-500' : ''} ${className}`} />;
+      case 'massage':
+        return <Users size={size} className={`${isColored ? 'text-indigo-500' : ''} ${className}`} />;
+      case 'dinner':
+        return <Utensils size={size} className={`${isColored ? 'text-amber-500' : ''} ${className}`} />;
+      default:
+        return <Mail size={size} className={`${isColored ? 'text-gray-500' : ''} ${className}`} />;
+    }
+  };
 
-// Helper function to get color class based on service type
-function getColorForServiceType(type: string): string {
-  switch (type.toLowerCase()) {
-    case 'in-person':
-      return 'text-blue-500';
-    case 'virtual':
-      return 'text-purple-500';
-    case 'both':
-      return 'text-green-500';
-    case 'massage':
-      return 'text-indigo-500';
-    case 'dinner':
-      return 'text-amber-500';
-    default:
-      return 'text-gray-500';
-  }
-}
+  return renderIcon();
+};
 
 export default ServiceTypeIcon;

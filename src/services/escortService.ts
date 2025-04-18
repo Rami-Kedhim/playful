@@ -1,5 +1,4 @@
-
-import { Escort, ContactInfo } from '@/types/escort';
+import { Escort, ContactInfo } from '@/types/index';
 
 // Mock escort data generator function since generateRandomEscort is missing
 const generateRandomEscort = (id: string = `escort-${Date.now()}`): Escort => {

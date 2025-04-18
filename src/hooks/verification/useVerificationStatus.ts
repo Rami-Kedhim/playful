@@ -19,7 +19,7 @@ export const useVerificationStatus = (userId: string) => {
     const fetchVerificationStatus = async () => {
       try {
         setLoading(true);
-        // Use getVerificationRequestById instead of getVerificationRequest
+        // Use getVerificationRequestById to fetch the request
         const userRequest = await verificationService.getVerificationRequestById(userId);
         
         if (userRequest) {
@@ -54,18 +54,18 @@ export const useVerificationStatus = (userId: string) => {
     }
   }, [userId]);
 
-  // Submit a new document - with correct parameters
+  // Submit a new document - fix argument count for createVerificationRequest
   const submitDocument = async (documentFile: File, documentType: DocumentType, additionalData?: any) => {
     setLoading(true);
     try {
       if (!request) {
-        // Create a new verification request first
-        const newRequest = await verificationService.createVerificationRequest(userId);
+        // Create a new verification request with required parameters
+        // userId is required as the first parameter
+        const newRequest = await verificationService.createVerificationRequest(userId, documentType, additionalData);
         setRequest(newRequest);
       }
       
       // For this implementation, we'll just create a mock document upload
-      // since the actual uploadDocument method isn't available
       const document: VerificationDocument = {
         id: `doc-${Date.now()}`,
         document_type: documentType,

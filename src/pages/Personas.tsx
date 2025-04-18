@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
@@ -33,12 +32,10 @@ const PersonasPage: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Load escorts if they haven't been loaded yet
         if (state.escorts.length === 0) {
           await loadEscorts(true);
         }
         
-        // Map escorts to UberPersona format
         const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
         setAllPersonas(mappedPersonas);
       } catch (error) {
@@ -79,7 +76,6 @@ const PersonasPage: React.FC = () => {
         <h1 className="text-3xl font-bold mb-8">Personas</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          {/* Sidebar filters */}
           <Card className="p-4 lg:col-span-1">
             <div className="space-y-6">
               <div>
@@ -142,9 +138,7 @@ const PersonasPage: React.FC = () => {
             </div>
           </Card>
           
-          {/* Main content */}
           <div className="lg:col-span-3">
-            {/* Active filters */}
             <div className="flex flex-wrap gap-2 mb-4">
               {getActiveFilters().map((filter) => (
                 <FilterBadge 
@@ -184,7 +178,6 @@ const PersonasPage: React.FC = () => {
               )}
             </div>
             
-            {/* Personas grid */}
             <UberPersonaGrid 
               personas={filteredPersonas} 
               loading={loading} 

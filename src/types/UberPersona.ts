@@ -1,10 +1,12 @@
 
+// Updated UberPersona.ts - standardizing with more properties
+
 export interface UberPersona {
   id: string;
+  name: string;
   username?: string;
   displayName?: string;
-  name: string;
-  avatarUrl: string;
+  avatarUrl?: string;
   imageUrl?: string;
   type: 'escort' | 'creator' | 'livecam' | 'ai';
   tagline?: string;
@@ -32,6 +34,8 @@ export interface UberPersona {
   location?: string;
   age?: number;
   price?: number;
+  ethnicity?: string; // Added for PersonaProfile.tsx
+  language?: string[]; // Added for PersonaProfile.tsx
   roleFlags?: {
     isEscort: boolean;
     isCreator: boolean;
@@ -62,4 +66,18 @@ export interface UberPersona {
   };
   isOnline?: boolean;
   rating?: number;
+  traits?: {
+    intelligence: number;
+    creativity: number;
+    charisma: number;
+    empathy: number;
+    assertiveness: number;
+  };
+  description?: string;
+  background?: string;
+  limitations?: string[];
+  conversationStyle?: string;
+  knowledgeDomains?: string[];
+  specialization?: string;
+  systemMetadata?: any; // Added for UberCore.ts
 }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,22 +9,42 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
-import { VerificationRequest, VerificationDocument, VerificationStatus } from '@/types/escort';
+import { VerificationRequest, VerificationStatus } from '@/types/escort';
 import { getAllVerificationRequests, approveVerificationRequest, rejectVerificationRequest } from '@/services/verificationService';
 import { toast } from '@/components/ui/use-toast';
 import DocumentReviewModal from '@/components/admin/DocumentReviewModal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle, XCircle } from 'lucide-react';
 
+// Updated interface to handle inconsistencies between types
+interface NormalizedVerificationRequest extends VerificationRequest {
+  userId: string;
+  requestedLevel?: string;
+  requested_level?: string;
+}
+
+interface NormalizedVerificationDocument {
+  id: string;
+  document_type: string;
+  status: string;
+  url?: string;
+  file_url?: string;
+  fileUrl?: string;
+  document_url?: string;
+  uploaded_at?: string;
+  created_at?: string;
+  verification_request_id?: string;
+}
+
 const VerificationDashboard: React.FC = () => {
-  const [requests, setRequests] = useState<VerificationRequest[]>([]);
+  const [requests, setRequests] = useState<NormalizedVerificationRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<VerificationStatus | ''>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
-  const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<NormalizedVerificationDocument | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<NormalizedVerificationRequest | null>(null);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -34,7 +55,13 @@ const VerificationDashboard: React.FC = () => {
     setLoading(true);
     try {
       const data = await getAllVerificationRequests();
-      setRequests(data);
+      // Normalize the verification requests
+      const normalizedRequests = data.map(request => ({
+        ...request,
+        userId: request.userId || request.user_id || '',
+        requestedLevel: request.requestedLevel || request.requested_level || ''
+      }));
+      setRequests(normalizedRequests as NormalizedVerificationRequest[]);
     } catch (error) {
       console.error('Error fetching verification requests:', error);
       toast({
@@ -93,7 +120,7 @@ const VerificationDashboard: React.FC = () => {
     return searchMatch && statusMatch;
   });
 
-  const handleDocumentClick = (document: VerificationDocument, request: VerificationRequest) => {
+  const handleDocumentClick = (document: NormalizedVerificationDocument, request: NormalizedVerificationRequest) => {
     setSelectedDocument(document);
     setSelectedRequest(request);
     setIsModalOpen(true);
@@ -103,6 +130,7 @@ const VerificationDashboard: React.FC = () => {
     setSelectedStatus(status);
   };
 
+  // Modified to handle the normalized document and request types
   const renderDocumentReviewModal = () => {
     if (!selectedDocument || !selectedRequest) return null;
     
@@ -110,10 +138,10 @@ const VerificationDashboard: React.FC = () => {
       <DocumentReviewModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        document={selectedDocument}
-        request={selectedRequest}
-        onApprove={handleApproveDocument}
-        onReject={handleRejectDocument}
+        document={selectedDocument as any}
+        request={selectedRequest as any}
+        onApprove={handleApproveDocument as any}
+        onReject={handleRejectDocument as any}
       />
     );
   };
@@ -184,14 +212,22 @@ const VerificationDashboard: React.FC = () => {
                       <span>{request.status}</span>
                     )}
                   </TableCell>
-                  <TableCell>{request.requestedLevel}</TableCell>
+                  <TableCell>{request.requestedLevel || request.requested_level}</TableCell>
                   <TableCell>{new Date(request.submittedAt || request.created_at || "").toLocaleDateString()}</TableCell>
                   <TableCell>
                     {request.documents && request.documents.length > 0 ? (
                       <Button 
                         variant="secondary" 
                         size="sm"
-                        onClick={() => handleDocumentClick(request.documents[0], request)}
+                        onClick={() => handleDocumentClick(
+                          {
+                            id: request.documents[0].id,
+                            document_type: request.documents[0].document_type || request.documents[0].type || '',
+                            status: request.documents[0].status || 'pending',
+                            url: request.documents[0].url || request.documents[0].file_url || '',
+                          } as NormalizedVerificationDocument, 
+                          request
+                        )}
                       >
                         Review Document
                       </Button>
