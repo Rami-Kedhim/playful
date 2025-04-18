@@ -1,27 +1,23 @@
 
-import { BaseNeuralService } from './BaseNeuralService';
-import { ModuleType } from '../registry/NeuralServiceRegistry';
+import { BaseNeuralService } from '../types/NeuralService';
 
 export class CreatorsNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
-    super({
+    super(
       moduleId,
-      moduleType: 'creators' as ModuleType,
-      moduleName: 'Content Creators Neural Service',
-      description: 'Provides content analysis and recommendations for creators',
-      version: '1.0.0',
-      enabled: true
-    });
+      'creators',
+      'Content Creators Neural Service',
+      'Enhances content discovery and creator promotion'
+    );
   }
-
+  
   getCapabilities(): string[] {
     return [
-      'content-analysis',
-      'audience-matching',
-      'trending-detection',
-      'performance-tracking'
+      'content-recommendation',
+      'creator-matching',
+      'monetization-optimization',
+      'engagement-prediction',
+      'content-analysis'
     ];
   }
 }
-
-export const creatorsNeuralService = new CreatorsNeuralService('creators-neural-primary');

@@ -1,16 +1,16 @@
 
-import PersonaAboutTab from './PersonaAboutTab';
+import { PersonaAboutTab } from './PersonaAboutTab';
+import PersonaBookingTab from './PersonaBookingTab';
+import PersonaChatTab from './PersonaChatTab';
 import PersonaContentTab from './PersonaContentTab';
 import PersonaLiveTab from './PersonaLiveTab';
 import PersonaStoriesTab from './PersonaStoriesTab';
-import PersonaChatTab from './PersonaChatTab';
-import PersonaBookingTab from './PersonaBookingTab';
 
 export {
   PersonaAboutTab,
+  PersonaBookingTab,
+  PersonaChatTab,
   PersonaContentTab,
   PersonaLiveTab,
-  PersonaStoriesTab,
-  PersonaChatTab,
-  PersonaBookingTab
+  PersonaStoriesTab
 };

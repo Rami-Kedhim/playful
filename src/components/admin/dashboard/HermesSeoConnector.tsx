@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useHermesSeo } from '@/hooks/useHermesSeo';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
@@ -10,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { Brain, RefreshCw, Activity } from 'lucide-react';
 import { SeoOptimizationResult } from '@/services/seo/HermesSeoService';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
+import { neuralHub } from '@/services/neural';
 
 interface HermesSeoConnectorProps {
   userId?: string;

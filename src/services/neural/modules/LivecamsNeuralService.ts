@@ -1,27 +1,23 @@
 
-import { BaseNeuralService } from './BaseNeuralService';
-import { ModuleType } from '../registry/NeuralServiceRegistry';
+import { BaseNeuralService } from '../types/NeuralService';
 
 export class LivecamsNeuralService extends BaseNeuralService {
   constructor(moduleId: string) {
-    super({
+    super(
       moduleId,
-      moduleType: 'livecams' as ModuleType,
-      moduleName: 'Livecams Neural Service',
-      description: 'Provides streaming and content matching for live cam services',
-      version: '1.0.0',
-      enabled: true
-    });
+      'livecams',
+      'Livecam Neural Service',
+      'Optimizes livecam discovery and scheduling'
+    );
   }
-
+  
   getCapabilities(): string[] {
     return [
-      'stream-quality-optimization',
-      'viewer-matching',
-      'performance-analytics',
-      'trending-detection'
+      'schedule-optimization',
+      'audience-matching',
+      'peak-time-prediction',
+      'stream-quality-enhancement',
+      'audience-engagement-boost'
     ];
   }
 }
-
-export const livecamsNeuralService = new LivecamsNeuralService('livecams-neural-primary');

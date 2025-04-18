@@ -6,11 +6,13 @@ import { ShieldCheck } from 'lucide-react';
 interface VerificationBadgeProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  level?: 'basic' | 'advanced' | 'premium';
 }
 
 export const VerificationBadge: React.FC<VerificationBadgeProps> = ({ 
   size = 'md', 
-  className = '' 
+  className = '',
+  level = 'basic'
 }) => {
   const sizeClasses = {
     sm: 'text-xs py-0 px-1',
@@ -28,3 +30,5 @@ export const VerificationBadge: React.FC<VerificationBadgeProps> = ({
     </Badge>
   );
 };
+
+export default VerificationBadge;

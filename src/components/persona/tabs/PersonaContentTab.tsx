@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona }) => {
   
   // Check if persona has content features
   const hasContentFeatures = () => {
-    if (typeof persona.capabilities === 'object') {
+    if (typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities)) {
       return Boolean(persona.capabilities.hasExclusiveContent);
     }
     return false;

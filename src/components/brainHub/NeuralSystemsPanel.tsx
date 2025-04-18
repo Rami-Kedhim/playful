@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { neuralHub } from '@/services/neural';
 import { TrainingProgress, NeuralModel } from '@/types/neural/NeuralSystemMetrics';
@@ -10,23 +9,18 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { TrashIcon, PauseIcon, PlayIcon } from 'lucide-react';
 
-// Main component for managing neural systems
 const NeuralSystemsPanel = () => {
   const [activeJobs, setActiveJobs] = useState<TrainingProgress[]>([]);
   const [neuralModels, setNeuralModels] = useState<NeuralModel[]>([]);
   
-  // Load initial data
   useEffect(() => {
     loadData();
-    // Regular refresh
     const refreshInterval = setInterval(loadData, 30000);
     return () => clearInterval(refreshInterval);
   }, []);
   
-  // Function to load data from neural hub
   const loadData = () => {
     try {
-      // Get active training jobs
       const jobs = neuralHub.getActiveTrainingJobs().map(job => ({
         id: job.id,
         modelId: job.id.split('-')[0],
@@ -35,7 +29,6 @@ const NeuralSystemsPanel = () => {
         startTime: new Date(),
         currentEpoch: Math.floor(job.progress * 100),
         totalEpochs: 100,
-        // Adding missing required properties
         epoch: Math.floor(job.progress * 100),
         loss: 0.1 + Math.random() * 0.2,
         accuracy: 0.7 + Math.random() * 0.25,
@@ -47,13 +40,11 @@ const NeuralSystemsPanel = () => {
       
       setActiveJobs(jobs);
       
-      // Get available models
       const models = neuralHub.getModels().map(model => ({
         id: model.id,
         name: model.name,
         type: model.type,
         version: model.version,
-        // Added required properties
         specialization: model.type,
         size: 128,
         precision: 0.92,
@@ -75,7 +66,6 @@ const NeuralSystemsPanel = () => {
     }
   };
   
-  // Function to start a new training job
   const startTraining = async (type: string) => {
     try {
       const result = await neuralHub.startTraining(type);
@@ -84,7 +74,6 @@ const NeuralSystemsPanel = () => {
         description: `Training job started: ${result.jobId}`
       });
       
-      // Refresh data
       loadData();
     } catch (error) {
       toast({
@@ -93,7 +82,6 @@ const NeuralSystemsPanel = () => {
     }
   };
   
-  // Function to stop a training job
   const stopTraining = async (jobId: string) => {
     try {
       await neuralHub.stopTraining(jobId);
@@ -102,7 +90,6 @@ const NeuralSystemsPanel = () => {
         description: `Training job ${jobId} stopped`
       });
       
-      // Refresh data after stopping
       setActiveJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
     } catch (error) {
       toast({
@@ -111,7 +98,6 @@ const NeuralSystemsPanel = () => {
     }
   };
   
-  // Reset system to default params and settings
   const resetSystem = async () => {
     try {
       const result = await neuralHub.resetSystem();
@@ -135,7 +121,6 @@ const NeuralSystemsPanel = () => {
 
   return (
     <div className="space-y-8">
-      {/* Active Training Jobs */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Active Training Jobs</h2>
@@ -207,7 +192,6 @@ const NeuralSystemsPanel = () => {
         )}
       </div>
       
-      {/* Available Models */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Available Models</h2>
         <div className="overflow-x-auto">
@@ -244,7 +228,6 @@ const NeuralSystemsPanel = () => {
         </div>
       </div>
       
-      {/* System Actions */}
       <div className="flex justify-end">
         <Button 
           variant="outline" 

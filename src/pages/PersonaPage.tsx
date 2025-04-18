@@ -10,12 +10,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { PersonaAboutTab } from '@/components/persona/tabs/PersonaAboutTab';
-import { PersonaBookingTab } from '@/components/persona/tabs/PersonaBookingTab';
-import { PersonaChatTab } from '@/components/persona/tabs/PersonaChatTab';
-import { PersonaContentTab } from '@/components/persona/tabs/PersonaContentTab';
-import { PersonaLiveTab } from '@/components/persona/tabs/PersonaLiveTab';
-import { PersonaStoriesTab } from '@/components/persona/tabs/PersonaStoriesTab';
+import PersonaAboutTab from '@/components/persona/tabs/PersonaAboutTab';
+import PersonaBookingTab from '@/components/persona/tabs/PersonaBookingTab';
+import PersonaChatTab from '@/components/persona/tabs/PersonaChatTab';
+import PersonaContentTab from '@/components/persona/tabs/PersonaContentTab';
+import PersonaLiveTab from '@/components/persona/tabs/PersonaLiveTab';
+import PersonaStoriesTab from '@/components/persona/tabs/PersonaStoriesTab';
 
 /**
  * Unified Persona Profile Page

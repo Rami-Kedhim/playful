@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 import UberPersonaCard from './UberPersonaCard';
 import { Skeleton } from '@/components/ui/skeleton';
 

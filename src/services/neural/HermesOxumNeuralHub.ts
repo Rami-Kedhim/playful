@@ -1,3 +1,4 @@
+
 import { ContactInfo } from '@/types/escort';
 import { NeuralModel } from '@/types/UberPersona';
 
@@ -135,7 +136,72 @@ class HermesOxumNeuralHub {
       model.capabilities.includes(capability) && model.status === 'active'
     );
   }
+  
+  // Additional methods for NeuralSystemsPanel
+  getHealthMetrics() {
+    return {
+      load: Math.random() * 0.8 + 0.1,
+      userEngagement: Math.random() * 0.9 + 0.1,
+      lastUpdated: Date.now()
+    };
+  }
+  
+  getActiveTrainingJobs() {
+    return [
+      { id: 'job1', type: 'model-training', progress: Math.random() },
+      { id: 'job2', type: 'data-processing', progress: Math.random() * 0.7 }
+    ];
+  }
+  
+  async startTraining(type: string) {
+    // Simulate starting a training job
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return {
+      success: true,
+      jobId: `${type}-${Date.now()}`
+    };
+  }
+  
+  async stopTraining(jobId: string) {
+    // Simulate stopping a training job
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return true;
+  }
+  
+  async resetSystem() {
+    // Simulate system reset
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return true;
+  }
+  
+  getModelsByCapability(capability: string): NeuralModel[] {
+    return this.models.filter(model => 
+      model.capabilities.includes(capability) && model.status === 'active'
+    );
+  }
+  
+  async runInference(modelId: string, input: any) {
+    // Simulate inference
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return { result: `Processed with ${modelId}: ${JSON.stringify(input)}` };
+  }
+  
+  getModelParameters() {
+    return {
+      decayConstant: 0.2,
+      growthFactor: 1.5,
+      cyclePeriod: 24,
+      harmonicCount: 3,
+      bifurcationPoint: 0.6,
+      attractorStrength: 0.6
+    };
+  }
+  
+  updateModelParameters(params: any) {
+    console.log('Updated model parameters:', params);
+    return true;
+  }
 }
 
 // Export singleton instance
-export const brainHub = new HermesOxumNeuralHub();
+export const neuralHub = new HermesOxumNeuralHub();

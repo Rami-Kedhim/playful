@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import { UberCoreSettings, UberSearchFilters } from '@/types/uber-ecosystem';
-import { uberCore } from '@/services/neural/UberCore';
+import { uberCore } from '@/services/neural';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { toast } from '@/components/ui/use-toast';
 
@@ -48,7 +48,15 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [personas, setPersonas] = useState<UberPersona[]>([]);
-  const [settings, setSettings] = useState<UberCoreSettings>(uberCore.getSettings());
+  const [settings, setSettings] = useState<UberCoreSettings>({
+    boostingEnabled: true,
+    boostingAlgorithm: 'OxumAlgorithm',
+    orderByBoost: true,
+    autonomyLevel: 65,
+    resourceAllocation: 80,
+    hilbertDimension: 8,
+    aiEnhancementLevel: 40
+  });
   
   // Get data sources
   const { escorts } = useEscortContext();
@@ -71,7 +79,7 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
             
             // Convert escorts to UberPersonas
             for (const escort of escorts) {
-              const persona = uberCore.convertToUberPersona(escort);
+              const persona = convertToUberPersona(escort);
               if (persona) {
                 uberPersonas.push(persona);
               }
@@ -107,22 +115,146 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
     };
   }, [escorts]);
   
+  // Helper function to convert escort to UberPersona
+  const convertToUberPersona = (escort: any): UberPersona => {
+    return {
+      id: escort.id,
+      name: escort.name,
+      displayName: escort.displayName || escort.name,
+      type: 'escort',
+      avatarUrl: escort.profileImage || escort.images?.[0],
+      imageUrl: escort.images?.[0],
+      bio: escort.description || escort.bio,
+      location: escort.location,
+      age: escort.age,
+      ethnicity: escort.ethnicity,
+      isVerified: escort.isVerified || false,
+      isActive: escort.isActive || true,
+      rating: escort.rating,
+      tags: escort.tags || [],
+      featured: escort.featured || false,
+      roleFlags: {
+        isEscort: true,
+        isCreator: false,
+        isLivecam: false,
+        isAI: false,
+        isVerified: escort.isVerified || false,
+        isFeatured: escort.featured || false
+      },
+      capabilities: {
+        hasPhotos: true,
+        hasVideos: !!escort.videos?.length,
+        hasStories: false,
+        hasChat: true,
+        hasVoice: false,
+        hasBooking: true,
+        hasLiveStream: false,
+        hasExclusiveContent: false,
+        hasContent: !!escort.videos?.length || !!escort.images?.length,
+        hasRealMeets: true,
+        hasVirtualMeets: false
+      },
+      monetization: {
+        acceptsLucoin: true,
+        acceptsTips: true,
+        subscriptionPrice: 0,
+        unlockingPrice: 0,
+        boostingActive: escort.featured || false,
+        meetingPrice: escort.price || 0
+      },
+      price: escort.price || 0
+    };
+  };
+  
   // Update settings function
   const updateSettings = (newSettings: Partial<UberCoreSettings>) => {
-    uberCore.updateSettings(newSettings);
-    setSettings(uberCore.getSettings());
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      ...newSettings
+    }));
   };
   
   // Search personas function
   const searchPersonas = (filters: UberSearchFilters): UberPersona[] => {
     if (!isInitialized) return [];
-    return uberCore.searchPersonas(filters);
+    
+    // Simple search implementation
+    return personas.filter(persona => {
+      // Type filter
+      if (filters.type && filters.type.length > 0 && !filters.type.includes(persona.type)) {
+        return false;
+      }
+      
+      // Location filter
+      if (filters.location && 
+          persona.location && 
+          !persona.location.toLowerCase().includes(filters.location.toLowerCase())) {
+        return false;
+      }
+      
+      // Rating filter
+      if (typeof filters.minRating === 'number' && 
+          (typeof persona.rating !== 'number' || persona.rating < filters.minRating)) {
+        return false;
+      }
+      
+      // Price filter
+      if (typeof filters.maxPrice === 'number' && 
+          (typeof persona.price === 'number' && persona.price > filters.maxPrice)) {
+        return false;
+      }
+      
+      // Verification filter
+      if (filters.isVerified === true && !persona.isVerified) {
+        return false;
+      }
+      
+      // Tags filter
+      if (filters.tags && 
+          filters.tags.length > 0 && 
+          (!persona.tags || !filters.tags.some(tag => persona.tags!.includes(tag)))) {
+        return false;
+      }
+      
+      return true;
+    });
   };
   
   // Find similar profiles function
   const findSimilarProfiles = (personaId: string, count: number = 5): UberPersona[] => {
     if (!isInitialized) return [];
-    return uberCore.findNearestNeighbors(personaId, count);
+    
+    const sourcePersona = personas.find(p => p.id === personaId);
+    if (!sourcePersona) return [];
+    
+    // Simple similarity calculation based on tags and type
+    return personas
+      .filter(p => p.id !== personaId)
+      .map(p => {
+        // Calculate similarity score
+        let score = 0;
+        
+        // Same type
+        if (p.type === sourcePersona.type) score += 2;
+        
+        // Similar age (within 5 years)
+        if (typeof p.age === 'number' && 
+            typeof sourcePersona.age === 'number' && 
+            Math.abs(p.age - sourcePersona.age) <= 5) {
+          score += 1;
+        }
+        
+        // Tags overlap
+        if (p.tags && sourcePersona.tags) {
+          const overlap = p.tags.filter(tag => sourcePersona.tags!.includes(tag)).length;
+          score += overlap * 0.5;
+        }
+        
+        return { persona: p, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, count)
+      .map(item => item.persona);
   };
   
   // Get persona by ID function
@@ -141,7 +273,7 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
         
         // Convert escorts to UberPersonas
         for (const escort of escorts) {
-          const persona = uberCore.convertToUberPersona(escort);
+          const persona = convertToUberPersona(escort);
           if (persona) {
             uberPersonas.push(persona);
           }

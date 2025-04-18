@@ -1,17 +1,35 @@
 
-import { UberCoreSettings, UberSearchFilters } from '@/types/uber-ecosystem';
 import { UberPersona } from '@/types/UberPersona';
-import { SystemHealthMetrics } from '@/types/neural/NeuralSystemMetrics';
+
+export interface UberCoreSettings {
+  boostingEnabled: boolean;
+  boostingAlgorithm: "OxumAlgorithm" | "HermesAlgorithm" | "StandardAlgorithm";
+  orderByBoost: boolean;
+  autonomyLevel: number;
+  resourceAllocation: number;
+  hilbertDimension: number;
+  aiEnhancementLevel: number;
+}
+
+export interface UberSearchFilters {
+  type?: string[];
+  location?: string;
+  services?: string[];
+  tags?: string[];
+  minRating?: number;
+  maxPrice?: number;
+  isVerified?: boolean;
+  isOnline?: boolean;
+  hasBooking?: boolean;
+  hasContent?: boolean;
+}
 
 export interface UberCoreService {
-  initialize: () => Promise<boolean>;
-  shutdown: () => Promise<void>;
-  getSettings: () => UberCoreSettings;
-  updateSettings: (settings: Partial<UberCoreSettings>) => void;
-  findNearestNeighbors: (personaId: string, count?: number) => UberPersona[];
-  searchPersonas: (filters: UberSearchFilters) => UberPersona[];
-  convertToUberPersona: (entity: any) => UberPersona | null;
-  getStatus: () => Promise<{ status: string; metrics: SystemHealthMetrics }> | any;
-  configure: (config: any) => Promise<void>;
-  processUserInput: (userId: string, input: string, options?: any) => Promise<any>;
+  initialize(): Promise<boolean>;
+  shutdown(): Promise<void>;
+  getSettings(): UberCoreSettings;
+  updateSettings(settings: Partial<UberCoreSettings>): void;
+  searchPersonas(filters: UberSearchFilters): UberPersona[];
+  findNearestNeighbors(personaId: string, count: number): UberPersona[];
+  convertToUberPersona(entity: any): UberPersona;
 }

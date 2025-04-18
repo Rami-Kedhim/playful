@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +12,7 @@ import {
   CreatorsNeuralService,
   LivecamsNeuralService
 } from "@/services/neural";
-import { NeuralModel } from '@/services/neural/types/neuralHub';
+import { NeuralModel } from '@/types/UberPersona';
 import NeuralModuleRegistration from './NeuralModuleRegistration';
 import NeuralServiceCard from './NeuralServiceCard';
 import EmptyServiceState from './EmptyServiceState';

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { AppRoutes } from '@/utils/navigation';
-import VerificationBadge from '../verification/VerificationBadge';
+import { VerificationBadge } from '../verification/VerificationBadge';
 
 // Import from the uppercase version to avoid casing issues
 import { Escort } from '@/types/Escort';
