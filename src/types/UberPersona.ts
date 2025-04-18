@@ -1,8 +1,11 @@
 
 export interface UberPersona {
   id: string;
+  username?: string;
+  displayName?: string;
   name: string;
   avatarUrl: string;
+  imageUrl?: string;
   type: 'escort' | 'creator' | 'livecam' | 'ai';
   tagline?: string;
   profileType?: string;
@@ -22,5 +25,41 @@ export interface UberPersona {
     responseTime?: number;
   };
   featured?: boolean;
-  isAI?: boolean; // Added missing property
+  isAI?: boolean;
+  updatedAt?: Date;
+  bio?: string;
+  tags?: string[];
+  location?: string;
+  age?: number;
+  price?: number;
+  roleFlags?: {
+    isEscort: boolean;
+    isCreator: boolean;
+    isLivecam: boolean;
+    isAI: boolean;
+    isVerified: boolean;
+    isFeatured: boolean;
+  };
+  capabilities?: string[] | {
+    hasPhotos: boolean;
+    hasVideos: boolean;
+    hasStories: boolean;
+    hasChat: boolean;
+    hasBooking: boolean;
+    hasLiveStream: boolean;
+    hasExclusiveContent: boolean;
+    hasContent: boolean;
+    hasRealMeets: boolean;
+    hasVirtualMeets: boolean;
+  };
+  monetization?: {
+    acceptsLucoin: boolean;
+    acceptsTips: boolean;
+    subscriptionPrice: number;
+    unlockingPrice: number;
+    boostingActive: boolean;
+    meetingPrice: number;
+  };
+  isOnline?: boolean;
+  rating?: number;
 }
