@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -65,10 +66,10 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
     try {
       const randomId = randomUUID();
 
-      // Update the object to include the required 'type' property
+      // Now includes the required 'type' property
       const pendingDoc: VerificationDocument = {
         id: randomId,
-        type: document_type, // Add the missing property
+        type: document_type,
         document_type: document_type,
         status: VerificationStatus.PENDING,
         uploaded_at: new Date()

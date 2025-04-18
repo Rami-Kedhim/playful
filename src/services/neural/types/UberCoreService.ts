@@ -16,3 +16,4 @@ export interface UberCoreService {
   configure: (config: any) => Promise<void>;
   processUserInput: (userId: string, input: string, options?: any) => Promise<any>;
 }
+

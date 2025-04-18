@@ -5,7 +5,8 @@ export enum VerificationStatus {
   APPROVED = 'approved',
   REJECTED = 'rejected',
   REVIEWING = 'reviewing',
-  EXPIRED = 'expired'
+  EXPIRED = 'expired',
+  IN_REVIEW = 'in_review' // Added for compatibility
 }
 
 // Adding VerificationLevel enum that's missing
@@ -14,7 +15,8 @@ export enum VerificationLevel {
   BASIC = 'basic',
   STANDARD = 'standard',
   VERIFIED = 'verified',
-  PREMIUM = 'premium'
+  PREMIUM = 'premium',
+  ENHANCED = 'enhanced' // Added for compatibility
 }
 
 export interface VerificationRequest {
@@ -28,6 +30,9 @@ export interface VerificationRequest {
   level?: string;
   verificationLevel?: string;
   requested_level?: string;
+  profile_id?: string;
+  submittedAt?: string | Date; // Added for compatibility
+  requestedLevel?: VerificationLevel; // Added for compatibility
 }
 
 export interface VerificationDocument {
@@ -70,3 +75,4 @@ export const DOCUMENT_TYPE_OPTIONS = [
   { value: 'passport', label: 'Passport' },
   { value: 'drivers_license', label: 'Driver\'s License' }
 ];
+

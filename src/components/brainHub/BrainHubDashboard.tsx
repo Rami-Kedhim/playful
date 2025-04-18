@@ -13,17 +13,18 @@ const BrainHubDashboard: React.FC = () => {
       id: 'model-1',
       name: 'Cognitive Analyzer',
       version: '1.0.0',
-      type: 'analyzer', // Added required type property
+      specialization: 'cognitive analysis',
+      size: 32, // Added required property
+      precision: 0.95, // Added required property
+      type: 'analyzer',
       capabilities: ['pattern recognition', 'information processing'],
       status: 'active',
       performance: {
         accuracy: 0.95,
         latency: 120,
-        resourceUsage: 0.75
       },
       createdAt: new Date(),
-      updatedAt: new Date(),
-      specialization: 'cognitive analysis'
+      updatedAt: new Date()
     }
   ];
 

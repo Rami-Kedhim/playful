@@ -10,6 +10,7 @@ export interface NeuralModel {
   performance: {
     accuracy: number;
     latency: number;
+    resourceUsage?: number; // Added optional resourceUsage
   };
   // Add these fields needed by NeuralSystemsPanel
   type?: string;
@@ -17,7 +18,6 @@ export interface NeuralModel {
   capabilities?: string[];
   createdAt?: Date;
   updatedAt?: Date;
-  resourceUsage?: number;
 }
 
 export interface SystemHealthMetrics {
@@ -51,12 +51,21 @@ export interface NeuralSystemMetricsResult {
   stopMonitoring: () => void;
 }
 
-// Add TrainingProgress type needed by NeuralSystemsPanel
+// Updated TrainingProgress with epoch and timeRemaining
 export interface TrainingProgress {
+  id?: string; // Made optional to work with both interfaces
   modelId: string;
   progress: number;
   epoch: number;
   accuracy: number;
   loss: number;
   timeRemaining: number;
+  status?: 'training' | 'paused' | 'completed' | 'failed';
+  type?: string;
+  startTime?: Date;
+  currentEpoch?: number;
+  totalEpochs?: number;
+  targetAccuracy?: number;
+  estimatedCompletionTime?: Date;
 }
+

@@ -35,12 +35,15 @@ const NeuralSystemsPanel = () => {
         startTime: new Date(),
         currentEpoch: Math.floor(job.progress * 100),
         totalEpochs: 100,
+        // Adding missing required properties
+        epoch: Math.floor(job.progress * 100),
         loss: 0.1 + Math.random() * 0.2,
         accuracy: 0.7 + Math.random() * 0.25,
+        timeRemaining: Math.floor((1 - job.progress) * 3600),
         type: job.type,
         targetAccuracy: 0.95,
         estimatedCompletionTime: new Date(Date.now() + (1 - job.progress) * 3600000)
-      }));
+      })) as TrainingProgress[];
       
       setActiveJobs(jobs);
       
@@ -50,16 +53,19 @@ const NeuralSystemsPanel = () => {
         name: model.name,
         type: model.type,
         version: model.version,
+        // Added required properties
+        specialization: model.type,
+        size: 128,
+        precision: 0.92,
         status: 'active' as 'active' | 'inactive' | 'training' | 'error',
         capabilities: [model.type, 'analysis', 'prediction'],
         performance: {
           accuracy: 0.7 + Math.random() * 0.25,
-          latency: 150 + Math.random() * 100,
-          resourceUsage: 0.3 + Math.random() * 0.4
+          latency: 150 + Math.random() * 100
         },
         createdAt: new Date(),
         updatedAt: new Date()
-      }));
+      })) as NeuralModel[];
       
       setNeuralModels(models);
     } catch (error) {
@@ -169,14 +175,14 @@ const NeuralSystemsPanel = () => {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => stopTraining(job.id)}
+                      onClick={() => stopTraining(job.id as string)}
                     >
                       {job.status === 'training' ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      onClick={() => stopTraining(job.id)}
+                      onClick={() => stopTraining(job.id as string)}
                     >
                       <TrashIcon size={16} />
                     </Button>
