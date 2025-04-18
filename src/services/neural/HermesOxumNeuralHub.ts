@@ -1,6 +1,14 @@
 
 import { ContactInfo } from '@/types/escort';
-import { NeuralModel } from '@/types/UberPersona';
+import { ModelParameters } from './types/neuralHub';
+import { calculateSystemEfficiency, validateModelParameters } from './models/modelParameters';
+
+// Type definition for learning service
+export interface OxumLearningService {
+  initialize(config?: any): Promise<boolean>;
+  processUserInput(input: string): Promise<string>;
+  getLearnedPatterns(): Promise<any[]>;
+}
 
 // This creates a default contact info with optional website
 export const createDefaultContactInfo = (): ContactInfo => {
@@ -13,7 +21,7 @@ export const createDefaultContactInfo = (): ContactInfo => {
 
 // Neural Hub implementation
 class HermesOxumNeuralHub {
-  private models: NeuralModel[] = [];
+  private models: any[] = [];
   private isInitialized = false;
   private connectionStatus: 'connected' | 'disconnected' | 'error' = 'disconnected';
   
@@ -86,14 +94,14 @@ class HermesOxumNeuralHub {
     }
   }
   
-  getModels(): NeuralModel[] {
+  getModels(): any[] {
     if (!this.isInitialized) {
       throw new Error('Neural Hub not initialized');
     }
     return this.models;
   }
   
-  getModel(id: string): NeuralModel | undefined {
+  getModel(id: string): any | undefined {
     if (!this.isInitialized) {
       throw new Error('Neural Hub not initialized');
     }
@@ -120,7 +128,7 @@ class HermesOxumNeuralHub {
     
     const capabilities = new Set<string>();
     this.models.forEach(model => {
-      model.capabilities.forEach(capability => capabilities.add(capability));
+      model.capabilities.forEach((capability: string) => capabilities.add(capability));
     });
     
     return Array.from(capabilities);
@@ -174,7 +182,7 @@ class HermesOxumNeuralHub {
     return true;
   }
   
-  getModelsByCapability(capability: string): NeuralModel[] {
+  getModelsByCapability(capability: string): any[] {
     return this.models.filter(model => 
       model.capabilities.includes(capability) && model.status === 'active'
     );
@@ -186,22 +194,40 @@ class HermesOxumNeuralHub {
     return { result: `Processed with ${modelId}: ${JSON.stringify(input)}` };
   }
   
-  getModelParameters() {
+  getModelParameters(): ModelParameters {
     return {
+      learningRate: 0.001,
+      batchSize: 32,
+      epochs: 10,
+      optimizerType: 'adam',
+      dropout: 0.2,
+      activationFunction: 'relu',
+      embeddingSize: 128,
+      hiddenLayers: [64, 32],
       decayConstant: 0.2,
       growthFactor: 1.5,
       cyclePeriod: 24,
       harmonicCount: 3,
       bifurcationPoint: 0.6,
-      attractorStrength: 0.6
+      attractorStrength: 0.7
     };
   }
   
-  updateModelParameters(params: any) {
+  updateModelParameters(params: ModelParameters): boolean {
     console.log('Updated model parameters:', params);
     return true;
+  }
+
+  // Add these methods for compatibility
+  calculateSystemEfficiency(params: ModelParameters): number {
+    return calculateSystemEfficiency(params);
+  }
+
+  validateModelParameters(params: ModelParameters): { valid: boolean, errors?: string[] } {
+    return validateModelParameters(params);
   }
 }
 
 // Export singleton instance
 export const neuralHub = new HermesOxumNeuralHub();
+export default neuralHub;

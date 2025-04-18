@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { AppRoutes } from '@/utils/navigation';
 import { VerificationBadge } from '../verification/VerificationBadge';
+import { getVerificationLevel } from '@/utils/personaHelpers';
 
 // Import from the uppercase version to avoid casing issues
 import { Escort } from '@/types/Escort';
@@ -50,7 +51,7 @@ const EscortCard: React.FC<EscortCardProps> = ({
             <Badge className="bg-primary">Featured</Badge>
           )}
           {(escort.isVerified || escort.is_verified) && (
-            <VerificationBadge level={escort.verificationLevel || 'basic'} />
+            <VerificationBadge level={getVerificationLevel(escort.verificationLevel)} />
           )}
         </div>
       </div>

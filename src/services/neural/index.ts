@@ -1,41 +1,39 @@
 
-// Export core services
+// Export all neural services and types from a centralized location
 import { neuralHub } from './HermesOxumNeuralHub';
 import { neuralService } from './NeuralService';
-import { escortsNeuralService } from './modules/EscortsNeuralService';
+import { escortsNeuralService, EscortsNeuralService } from './modules/EscortsNeuralService';
+import { creatorsNeuralService, CreatorsNeuralService } from './modules/CreatorsNeuralService';
+import { livecamsNeuralService, LivecamsNeuralService } from './modules/LivecamsNeuralService';
+import { aiCompanionNeuralService, AICompanionNeuralService } from './modules/AICompanionNeuralService';
+import { NeuralService, BaseNeuralService, NeuralServiceConfig } from './types/NeuralService';
 import { uberCore } from './UberCore';
+
+// Neural service registry
 import { neuralServiceRegistry } from './registry/NeuralServiceRegistry';
 
-// Export service classes
-import { EscortsNeuralService } from './modules/EscortsNeuralService';
-import { CreatorsNeuralService } from './modules/CreatorsNeuralService';
-import { LivecamsNeuralService } from './modules/LivecamsNeuralService';
-import { AICompanionNeuralService } from './modules/AICompanionNeuralService';
-
-// Export base types
-import { BaseNeuralService, NeuralService, ModuleType } from './types/NeuralService';
-
-// Export everything
+// Re-export all for easy access
 export {
-  // Service instances
+  // Core services
   neuralHub,
   neuralService,
-  escortsNeuralService,
   uberCore,
-  neuralServiceRegistry,
   
-  // Service classes
+  // Module services
+  escortsNeuralService,
   EscortsNeuralService,
+  creatorsNeuralService,
   CreatorsNeuralService,
+  livecamsNeuralService,
   LivecamsNeuralService,
+  aiCompanionNeuralService,
   AICompanionNeuralService,
   
-  // Base types
-  BaseNeuralService
+  // Registry
+  neuralServiceRegistry,
+  
+  // Types
+  NeuralService,
+  BaseNeuralService,
+  NeuralServiceConfig
 };
-
-// Export types
-export type { NeuralService, ModuleType };
-
-// Use export type for TypeScript interfaces when isolatedModules is enabled
-export type { NeuralModel } from '@/types/UberPersona';

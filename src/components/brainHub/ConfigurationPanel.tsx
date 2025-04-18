@@ -1,349 +1,234 @@
+
 import React, { useState, useEffect } from 'react';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
-import { ModelParameters } from '@/services/neural/types/neuralHub';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoIcon, AlertCircle, RefreshCw } from 'lucide-react';
+import { neuralHub } from '@/services/neural';
+import { ModelParameters, initializeDefaultParameters, calculateSystemEfficiency, validateModelParameters } from '@/services/neural/models/modelParameters';
 
-interface ConfigurationPanelProps {
-  advancedMode: boolean;
-}
-
-const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({ advancedMode }) => {
-  const [modelParams, setModelParams] = useState<ModelParameters>(
-    neuralHub.getModelParameters()
-  );
-  const [isModified, setIsModified] = useState(false);
-  const [activeTab, setActiveTab] = useState('basic');
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [efficiency, setEfficiency] = useState(0);
+const ConfigurationPanel: React.FC = () => {
+  const [parameters, setParameters] = useState<ModelParameters>(initializeDefaultParameters());
+  const [efficiency, setEfficiency] = useState<number>(0);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
   
-  // Update efficiency when parameters change
   useEffect(() => {
-    const calculatedEfficiency = neuralHub.calculateSystemEfficiency();
-    setEfficiency(calculatedEfficiency);
-  }, [modelParams]);
+    // Calculate efficiency whenever parameters change
+    const score = calculateSystemEfficiency(parameters);
+    setEfficiency(score);
+  }, [parameters]);
   
-  // Update parameters from neural hub
-  const syncParameters = () => {
-    setModelParams(neuralHub.getModelParameters());
-    setIsModified(false);
-    setValidationErrors([]);
+  const handleOptimize = (goal: 'speed' | 'accuracy' | 'efficiency' | 'balance') => {
+    let optimizedParams: ModelParameters;
+    
+    switch (goal) {
+      case 'speed':
+        optimizedParams = {
+          ...parameters,
+          decayConstant: 0.3,
+          cyclePeriod: 12,
+          harmonicCount: 2,
+          learningRate: 0.002,
+          batchSize: 16
+        };
+        break;
+        
+      case 'accuracy':
+        optimizedParams = {
+          ...parameters,
+          decayConstant: 0.15,
+          growthFactor: 1.8,
+          harmonicCount: 5,
+          bifurcationPoint: 0.7,
+          learningRate: 0.0005,
+          batchSize: 64
+        };
+        break;
+        
+      case 'efficiency':
+        optimizedParams = {
+          ...parameters,
+          decayConstant: 0.25,
+          growthFactor: 1.2,
+          cyclePeriod: 18,
+          harmonicCount: 2,
+          attractorStrength: 0.5,
+          learningRate: 0.001,
+          batchSize: 32
+        };
+        break;
+        
+      case 'balance':
+      default:
+        optimizedParams = {
+          ...parameters,
+          decayConstant: 0.2,
+          growthFactor: 1.5,
+          cyclePeriod: 24,
+          harmonicCount: 3,
+          bifurcationPoint: 0.6,
+          attractorStrength: 0.6,
+          learningRate: 0.001,
+          batchSize: 32
+        };
+        break;
+    }
+    
+    setParameters(optimizedParams);
   };
   
-  // Handle parameter changes
-  const handleParamChange = (param: keyof ModelParameters, value: any) => {
-    setModelParams((prev) => {
-      const updated = { ...prev, [param]: value };
-      setIsModified(true);
-      return updated;
-    });
-  };
-  
-  // Save parameters to neural hub
-  const handleSave = () => {
-    const validation = neuralHub.validateModelParameters(modelParams);
+  const handleSaveParameters = () => {
+    setIsSaving(true);
+    
+    // Validate parameters before saving
+    const validation = validateModelParameters(parameters);
+    
     if (!validation.valid) {
-      setValidationErrors(validation.errors || []);
+      console.error('Invalid parameters:', validation.errors);
+      setIsSaving(false);
       return;
     }
     
-    neuralHub.updateModelParameters(modelParams);
-    setIsModified(false);
-    setValidationErrors([]);
-  };
-  
-  // Reset parameters
-  const handleReset = () => {
-    neuralHub.resetSystem();
-    syncParameters();
+    // Update parameters in neural hub
+    neuralHub.updateModelParameters(parameters);
+    
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 800);
   };
   
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>System Configuration</CardTitle>
-              <CardDescription>Configure neural model parameters and system settings</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={syncParameters} 
-                title="Refresh parameters from system"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
+    <Card className="mb-6 w-full">
+      <CardHeader>
+        <CardTitle>Neural Network Configuration</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <div className="flex justify-between mb-2">
+            <Label>System Efficiency Score</Label>
+            <span className="font-semibold">{efficiency.toFixed(1)}</span>
           </div>
-        </CardHeader>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div 
+              className={`h-full rounded-full ${
+                efficiency > 75 ? 'bg-green-500' : 
+                efficiency > 50 ? 'bg-amber-500' : 
+                'bg-red-500'
+              }`}
+              style={{ width: `${efficiency}%` }}
+            ></div>
+          </div>
+        </div>
         
-        <CardContent>
-          {validationErrors.length > 0 && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Validation Errors</AlertTitle>
-              <AlertDescription>
-                <ul className="list-disc pl-4 mt-2 space-y-1">
-                  {validationErrors.map((error, index) => (
-                    <li key={index} className="text-sm">{error}</li>
-                  ))}
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Decay Constant</Label>
+              <span>{parameters.decayConstant}</span>
+            </div>
+            <Slider
+              value={[parameters.decayConstant * 100]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={(value) => setParameters({
+                ...parameters,
+                decayConstant: value[0] / 100
+              })}
+            />
+          </div>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-2 mb-6">
-              <TabsTrigger value="basic">Basic Settings</TabsTrigger>
-              <TabsTrigger value="advanced" disabled={!advancedMode}>Advanced Settings</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="basic" className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="learningRate">Learning Rate</Label>
-                    <span className="text-sm">{modelParams.learningRate}</span>
-                  </div>
-                  <Slider 
-                    id="learningRate"
-                    min={0.0001} 
-                    max={0.1} 
-                    step={0.0001} 
-                    value={[modelParams.learningRate]}
-                    onValueChange={(value) => handleParamChange('learningRate', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Controls how quickly the neural models learn from new data.
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="batchSize">Batch Size</Label>
-                    <span className="text-sm">{modelParams.batchSize}</span>
-                  </div>
-                  <Slider 
-                    id="batchSize"
-                    min={1} 
-                    max={256} 
-                    step={1} 
-                    value={[modelParams.batchSize]}
-                    onValueChange={(value) => handleParamChange('batchSize', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Number of samples processed before updating model parameters.
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="epochs">Training Epochs</Label>
-                    <span className="text-sm">{modelParams.epochs}</span>
-                  </div>
-                  <Slider 
-                    id="epochs"
-                    min={1} 
-                    max={100} 
-                    step={1} 
-                    value={[modelParams.epochs]}
-                    onValueChange={(value) => handleParamChange('epochs', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Number of complete passes through the training dataset.
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="optimizerType">Optimizer</Label>
-                  <Select 
-                    value={modelParams.optimizerType}
-                    onValueChange={(value) => handleParamChange('optimizerType', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select optimizer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="adam">Adam</SelectItem>
-                      <SelectItem value="sgd">SGD</SelectItem>
-                      <SelectItem value="rmsprop">RMSProp</SelectItem>
-                      <SelectItem value="adagrad">AdaGrad</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Optimization algorithm used to update neural network weights.
-                  </p>
-                </div>
-                
-                {advancedMode && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="dropout">Dropout Rate</Label>
-                      <span className="text-sm">{modelParams.dropout}</span>
-                    </div>
-                    <Slider 
-                      id="dropout"
-                      min={0} 
-                      max={0.9} 
-                      step={0.01} 
-                      value={[modelParams.dropout || 0]}
-                      onValueChange={(value) => handleParamChange('dropout', value[0])}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Fraction of input units to drop during training (prevents overfitting).
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="advanced" className="space-y-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="decayConstant">Decay Constant</Label>
-                    <span className="text-sm">{modelParams.decayConstant}</span>
-                  </div>
-                  <Slider 
-                    id="decayConstant"
-                    min={0} 
-                    max={1} 
-                    step={0.01} 
-                    value={[modelParams.decayConstant || 0.2]}
-                    onValueChange={(value) => handleParamChange('decayConstant', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Controls how quickly old information fades from relevance.
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="growthFactor">Growth Factor</Label>
-                    <span className="text-sm">{modelParams.growthFactor}</span>
-                  </div>
-                  <Slider 
-                    id="growthFactor"
-                    min={0.5} 
-                    max={5} 
-                    step={0.1} 
-                    value={[modelParams.growthFactor || 1.5]}
-                    onValueChange={(value) => handleParamChange('growthFactor', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Expansion rate for neural connectivity and capacity.
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="cyclePeriod">Cycle Period</Label>
-                    <span className="text-sm">{modelParams.cyclePeriod}</span>
-                  </div>
-                  <Slider 
-                    id="cyclePeriod"
-                    min={1} 
-                    max={48} 
-                    step={1} 
-                    value={[modelParams.cyclePeriod || 24]}
-                    onValueChange={(value) => handleParamChange('cyclePeriod', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Time units before adaptive cycle repeats.
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="bifurcationPoint">Bifurcation Point</Label>
-                    <span className="text-sm">{modelParams.bifurcationPoint}</span>
-                  </div>
-                  <Slider 
-                    id="bifurcationPoint"
-                    min={0} 
-                    max={1} 
-                    step={0.01} 
-                    value={[modelParams.bifurcationPoint || 0.6]}
-                    onValueChange={(value) => handleParamChange('bifurcationPoint', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Threshold at which system behavior dramatically shifts.
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="attractorStrength">Attractor Strength</Label>
-                    <span className="text-sm">{modelParams.attractorStrength}</span>
-                  </div>
-                  <Slider 
-                    id="attractorStrength"
-                    min={0} 
-                    max={1} 
-                    step={0.01} 
-                    value={[modelParams.attractorStrength || 0.7]}
-                    onValueChange={(value) => handleParamChange('attractorStrength', value[0])}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Power of convergence to stable system states.
-                  </p>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Growth Factor</Label>
+              <span>{parameters.growthFactor}</span>
+            </div>
+            <Slider
+              value={[parameters.growthFactor * 50]}
+              min={0}
+              max={200}
+              step={1}
+              onValueChange={(value) => setParameters({
+                ...parameters,
+                growthFactor: value[0] / 50
+              })}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Cycle Period</Label>
+              <span>{parameters.cyclePeriod}</span>
+            </div>
+            <Slider
+              value={[parameters.cyclePeriod]}
+              min={1}
+              max={50}
+              step={1}
+              onValueChange={(value) => setParameters({
+                ...parameters,
+                cyclePeriod: value[0]
+              })}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <Label>Harmonic Count</Label>
+              <span>{parameters.harmonicCount}</span>
+            </div>
+            <Slider
+              value={[parameters.harmonicCount]}
+              min={1}
+              max={10}
+              step={1}
+              onValueChange={(value) => setParameters({
+                ...parameters,
+                harmonicCount: value[0]
+              })}
+            />
+          </div>
+        </div>
         
-        <CardFooter className="flex justify-between">
-          <div className="text-sm">
-            System Efficiency: <span className="font-bold">{Math.round(efficiency * 100)}%</span>
-          </div>
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline"
-              onClick={handleReset}
-            >
-              Reset to Defaults
-            </Button>
-            <Button 
-              onClick={handleSave}
-              disabled={!isModified}
-            >
-              Save Configuration
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
-      
-      <Alert>
-        <InfoIcon className="h-4 w-4" />
-        <AlertTitle>Configuration Tips</AlertTitle>
-        <AlertDescription>
-          <ul className="list-disc pl-4 mt-2 space-y-1">
-            <li className="text-sm">Lower learning rates provide stability but slower training</li>
-            <li className="text-sm">Higher batch sizes improve efficiency but require more memory</li>
-            <li className="text-sm">The Adam optimizer works best for most neural models</li>
-            {advancedMode && (
-              <>
-                <li className="text-sm">Increase attractor strength for more focused specialization</li>
-                <li className="text-sm">Decrease decay constant to improve long-term memory retention</li>
-              </>
-            )}
-          </ul>
-        </AlertDescription>
-      </Alert>
-    </div>
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleOptimize('speed')}
+          >
+            Optimize for Speed
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleOptimize('accuracy')}
+          >
+            Optimize for Accuracy
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleOptimize('efficiency')}
+          >
+            Optimize for Efficiency
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleOptimize('balance')}
+          >
+            Balanced Approach
+          </Button>
+        </div>
+        
+        <Button 
+          onClick={handleSaveParameters} 
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Save Parameters'}
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

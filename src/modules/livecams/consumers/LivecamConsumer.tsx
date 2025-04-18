@@ -1,38 +1,47 @@
-
 import React, { useEffect } from 'react';
 import { useLivecamContext } from '../providers/LivecamProvider';
-import { useWallet } from '@/hooks/useWallet';
 import { livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
 
 interface LivecamConsumerProps {
   children: React.ReactNode;
-  isNeuralInitialized: boolean;
 }
 
-export const LivecamConsumer: React.FC<LivecamConsumerProps> = ({ 
-  children,
-  isNeuralInitialized
-}) => {
-  const { state, loadLivecams } = useLivecamContext();
-  const { wallet } = useWallet();
+const LivecamConsumer: React.FC<LivecamConsumerProps> = ({ children }) => {
+  const { livecams, loading, error } = useLivecamContext();
   
-  // Wait for neural system initialization before loading livecams
+  // Connect to neural service when component mounts
   useEffect(() => {
-    if (isNeuralInitialized) {
-      // Configure neural service based on user's wallet balance
-      if (wallet && livecamsNeuralService) {
-        const premiumMode = (wallet.balance > 100);
-        livecamsNeuralService.updateConfig({
-          resourceAllocation: premiumMode ? 60 : 40,
-          priority: premiumMode ? 85 : 50,
-          boostingEnabled: true // Use boostingEnabled property for configuration
+    const connectToNeuralService = async () => {
+      try {
+        // Configure neural service for livecam optimization
+        livecamsNeuralService.configure({
+          priority: 70,
+          autonomyLevel: 60,
+          enabled: true
         });
+        
+        // Log successful connection
+        console.log('Connected to Livecams Neural Service:', livecamsNeuralService.getId());
+        
+        // Check if livecams are loaded and log
+        if (livecams && livecams.length > 0) {
+          console.log(`Loaded ${livecams.length} livecams for neural processing`);
+        }
+      } catch (err) {
+        console.error('Failed to connect to Livecams Neural Service:', err);
       }
-      
-      // Refresh livecams with neural processing
-      loadLivecams(true);
-    }
-  }, [isNeuralInitialized, wallet?.balance, loadLivecams]);
+    };
+    
+    connectToNeuralService();
+    
+    // Cleanup on unmount
+    return () => {
+      console.log('Disconnecting from Livecams Neural Service');
+    };
+  }, [livecams]);
   
+  // Render children
   return <>{children}</>;
 };
+
+export default LivecamConsumer;

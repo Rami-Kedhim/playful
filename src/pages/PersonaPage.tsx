@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUberPersona } from '@/hooks/useUberPersona';
@@ -10,12 +9,22 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import PersonaAboutTab from '@/components/persona/tabs/PersonaAboutTab';
-import PersonaBookingTab from '@/components/persona/tabs/PersonaBookingTab';
-import PersonaChatTab from '@/components/persona/tabs/PersonaChatTab';
-import PersonaContentTab from '@/components/persona/tabs/PersonaContentTab';
-import PersonaLiveTab from '@/components/persona/tabs/PersonaLiveTab';
-import PersonaStoriesTab from '@/components/persona/tabs/PersonaStoriesTab';
+import { 
+  PersonaAboutTab, 
+  PersonaBookingTab, 
+  PersonaChatTab, 
+  PersonaContentTab,
+  PersonaLiveTab,
+  PersonaStoriesTab 
+} from '@/components/persona/tabs';
+import { 
+  hasRealMeets, 
+  hasVirtualMeets, 
+  hasContent, 
+  hasLiveStream, 
+  hasChat, 
+  hasStories 
+} from '@/utils/personaHelpers';
 
 /**
  * Unified Persona Profile Page

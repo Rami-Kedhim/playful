@@ -1,44 +1,49 @@
 
 import React, { useEffect } from 'react';
 import { useEscortContext } from '../providers/EscortProvider';
-import { useWallet } from '@/hooks/useWallet';
 import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
+import { toast } from '@/components/ui/use-toast';
 
 interface EscortConsumerProps {
   children: React.ReactNode;
-  isNeuralInitialized: boolean;
 }
 
-export const EscortConsumer: React.FC<EscortConsumerProps> = ({ 
-  children,
-  isNeuralInitialized
-}) => {
-  const { state, loadEscorts } = useEscortContext();
-  const { wallet } = useWallet();
+const EscortConsumer: React.FC<EscortConsumerProps> = ({ children }) => {
+  const { escorts, loading, error } = useEscortContext();
   
-  // Wait for neural system initialization before loading escorts
+  // Connect to neural service when component mounts
   useEffect(() => {
-    if (isNeuralInitialized) {
-      // Configure neural service based on user's wallet balance
-      if (wallet && escortsNeuralService) {
-        const premiumMode = (wallet.balance > 100);
-        
-        // Apply OxumAlgorithm boost settings based on user's premium status
-        escortsNeuralService.updateConfig({
-          enabled: true,
-          priority: premiumMode ? 80 : 40,
-          autonomyLevel: premiumMode ? 70 : 40,
-          resourceAllocation: premiumMode ? 50 : 25,
-          boostingEnabled: true, // Enable boosting logic as per request
-          boostingAlgorithm: "OxumAlgorithm",
-          orderByBoost: true // As specified in the module requirements
+    const connectToNeuralService = async () => {
+      try {
+        // Configure neural service for escort optimization
+        escortsNeuralService.configure({
+          priority: 80,
+          autonomyLevel: 65,
+          enabled: true
         });
+        
+        // Log successful connection
+        console.log('Connected to Escorts Neural Service:', escortsNeuralService.getId());
+        
+        // Check if escorts are loaded and log
+        if (escorts && escorts.length > 0) {
+          console.log(`Loaded ${escorts.length} escorts for neural processing`);
+        }
+      } catch (err) {
+        console.error('Failed to connect to Escorts Neural Service:', err);
       }
-      
-      // Refresh escorts with neural processing (not raw scraping)
-      loadEscorts(true);
-    }
-  }, [isNeuralInitialized, wallet?.balance, loadEscorts]);
+    };
+    
+    connectToNeuralService();
+    
+    // Cleanup on unmount
+    return () => {
+      console.log('Disconnecting from Escorts Neural Service');
+    };
+  }, [escorts]);
   
+  // Render children
   return <>{children}</>;
 };
+
+export default EscortConsumer;

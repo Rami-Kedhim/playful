@@ -1,38 +1,47 @@
-
 import React, { useEffect } from 'react';
 import { useCreatorContext } from '../providers/CreatorProvider';
-import { useWallet } from '@/hooks/useWallet';
 import { creatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
 
 interface CreatorConsumerProps {
   children: React.ReactNode;
-  isNeuralInitialized: boolean;
 }
 
-export const CreatorConsumer: React.FC<CreatorConsumerProps> = ({ 
-  children,
-  isNeuralInitialized
-}) => {
-  const { state, loadCreators } = useCreatorContext();
-  const { wallet } = useWallet();
+const CreatorConsumer: React.FC<CreatorConsumerProps> = ({ children }) => {
+  const { creators, loading, error } = useCreatorContext();
   
-  // Wait for neural system initialization before loading creators
+  // Connect to neural service when component mounts
   useEffect(() => {
-    if (isNeuralInitialized) {
-      // Configure neural service based on user's wallet balance
-      if (wallet && creatorsNeuralService) {
-        const premiumMode = (wallet.balance > 100);
-        creatorsNeuralService.updateConfig({
-          resourceAllocation: premiumMode ? 60 : 40,
-          priority: premiumMode ? 85 : 50,
-          boostingEnabled: true // Use boostingEnabled property for configuration
+    const connectToNeuralService = async () => {
+      try {
+        // Configure neural service for creator optimization
+        creatorsNeuralService.configure({
+          priority: 80,
+          autonomyLevel: 65,
+          enabled: true
         });
+        
+        // Log successful connection
+        console.log('Connected to Creators Neural Service:', creatorsNeuralService.getId());
+        
+        // Check if creators are loaded and log
+        if (creators && creators.length > 0) {
+          console.log(`Loaded ${creators.length} creators for neural processing`);
+        }
+      } catch (err) {
+        console.error('Failed to connect to Creators Neural Service:', err);
       }
-      
-      // Refresh creators with neural processing
-      loadCreators(true);
-    }
-  }, [isNeuralInitialized, wallet?.balance, loadCreators]);
+    };
+    
+    connectToNeuralService();
+    
+    // Cleanup on unmount
+    return () => {
+      console.log('Disconnecting from Creators Neural Service');
+    };
+  }, [creators]);
   
+  // Render children
   return <>{children}</>;
 };
+
+export default CreatorConsumer;

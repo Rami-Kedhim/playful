@@ -1,22 +1,31 @@
-
 import React from 'react';
-import { useNeuralServices } from '@/hooks/useNeuralServices';
+import { Routes, Route } from 'react-router-dom';
 import { creatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
-import { CreatorConsumer } from './consumers/CreatorConsumer';
-import { CreatorProvider } from './providers/CreatorProvider';
+import CreatorProvider from './providers/CreatorProvider';
+import CreatorList from '@/pages/CreatorList';
+import CreatorProfile from '@/pages/CreatorProfile';
+import CreatorContent from '@/pages/CreatorContent';
 
-/**
- * Creators Module - Main container component that integrates with the Brain Hub
- * and initializes the neural services for content creators functionality
- */
-export const CreatorsModule: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const { isInitialized } = useNeuralServices(creatorsNeuralService);
-
+const CreatorsModule: React.FC = () => {
   return (
     <CreatorProvider>
-      <CreatorConsumer isNeuralInitialized={isInitialized}>
-        {children}
-      </CreatorConsumer>
+      <Routes>
+        <Route path="/" element={<CreatorList />} />
+        <Route path="/directory" element={<CreatorDirectory />} />
+        <Route path="/:creatorId" element={<CreatorProfile />} />
+        <Route path="/:creatorId/content" element={<CreatorContent />} />
+      </Routes>
     </CreatorProvider>
   );
 };
+
+const CreatorDirectory: React.FC = () => {
+  return (
+    <div>
+      <h2>Creator Directory</h2>
+      <p>Browse all content creators</p>
+    </div>
+  );
+};
+
+export default CreatorsModule;

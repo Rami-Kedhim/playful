@@ -76,14 +76,18 @@ export interface ServiceProvider {
 // Unified search filters for the Uber ecosystem
 export interface UberSearchFilters {
   serviceTypes?: UberServiceType[];
+  type?: string | string[];
   minPrice?: number;
   maxPrice?: number;
   location?: string;
   verifiedOnly?: boolean;
+  isVerified?: boolean;
   availableNow?: boolean;
   genders?: string[];
   specialties?: string[];
   languages?: string[];
+  tags?: string[];
+  minRating?: number;
   ageRange?: {
     min: number;
     max: number;

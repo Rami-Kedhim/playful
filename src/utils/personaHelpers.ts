@@ -2,53 +2,76 @@
 import { UberPersona } from '@/types/UberPersona';
 
 /**
- * Helper to check for persona capabilities safely
+ * Helper functions to safely check UberPersona capabilities
  */
-export const hasCapability = (persona: UberPersona, capability: string): boolean => {
-  if (!persona) return false;
+
+export const hasCapability = (
+  persona: UberPersona, 
+  capability: string
+): boolean => {
+  // Check if capabilities exists and is an object
+  if (!persona.capabilities) return false;
   
-  // Check roleFlags first
-  if (persona.roleFlags) {
-    const roleKey = `is${capability.charAt(0).toUpperCase() + capability.slice(1)}` as keyof typeof persona.roleFlags;
-    if (persona.roleFlags[roleKey] === true) return true;
-  }
-  
-  // Check type (e.g., type === 'escort')
-  if (persona.type && persona.type.toLowerCase() === capability.toLowerCase()) {
-    return true;
-  }
-  
-  // Check capabilities as object
-  if (persona.capabilities && typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities)) {
-    const capKey = `has${capability.charAt(0).toUpperCase() + capability.slice(1)}` as keyof typeof persona.capabilities;
-    return Boolean(persona.capabilities[capKey]);
-  }
-  
-  // Check capabilities as array
-  if (persona.capabilities && Array.isArray(persona.capabilities)) {
+  // If capabilities is an array of strings
+  if (Array.isArray(persona.capabilities)) {
     return persona.capabilities.includes(capability);
+  }
+  
+  // If capabilities is an object with boolean properties
+  if (typeof persona.capabilities === 'object') {
+    return Boolean(persona.capabilities[capability as keyof typeof persona.capabilities]);
   }
   
   return false;
 };
 
+export const hasRealMeets = (persona: UberPersona): boolean => {
+  return hasCapability(persona, 'hasRealMeets') || 
+    (persona.roleFlags?.isEscort === true) ||
+    persona.type === 'escort';
+};
+
+export const hasVirtualMeets = (persona: UberPersona): boolean => {
+  return hasCapability(persona, 'hasVirtualMeets') || 
+    (persona.roleFlags?.isLivecam === true) ||
+    persona.type === 'livecam';
+};
+
+export const hasContent = (persona: UberPersona): boolean => {
+  return hasCapability(persona, 'hasContent') || 
+    (persona.roleFlags?.isCreator === true) ||
+    persona.type === 'creator';
+};
+
+export const hasLiveStream = (persona: UberPersona): boolean => {
+  return hasCapability(persona, 'hasLiveStream') || 
+    (persona.roleFlags?.isLivecam === true) ||
+    persona.type === 'livecam';
+};
+
+export const hasExclusiveContent = (persona: UberPersona): boolean => {
+  return hasCapability(persona, 'hasExclusiveContent') || 
+    (persona.roleFlags?.isCreator === true && persona.monetization?.subscriptionPrice !== 0);
+};
+
+export const hasChat = (persona: UberPersona): boolean => {
+  return hasCapability(persona, 'hasChat') || 
+    persona.type === 'ai' ||
+    persona.roleFlags?.isAI === true;
+};
+
+export const hasStories = (persona: UberPersona): boolean => {
+  return hasCapability(persona, 'hasStories');
+};
+
 /**
- * Helper to get monetization data safely
+ * Get verification level with proper type
  */
-export const getMonetizationValue = (
-  persona: UberPersona, 
-  key: keyof Required<UberPersona>['monetization'], 
-  defaultValue: number = 0
-): number => {
-  if (!persona.monetization) return defaultValue;
-  
-  if (typeof persona.monetization === 'object' && key in persona.monetization) {
-    return (persona.monetization[key] as number) || defaultValue;
+export const getVerificationLevel = (
+  level: string | undefined
+): "basic" | "advanced" | "premium" => {
+  if (level === "basic" || level === "advanced" || level === "premium") {
+    return level;
   }
-  
-  if (key === 'meetingPrice' && typeof persona.price === 'number') {
-    return persona.price;
-  }
-  
-  return defaultValue;
+  return "basic"; // Default to basic if undefined or invalid
 };

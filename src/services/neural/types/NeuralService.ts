@@ -1,91 +1,82 @@
 
-/**
- * Base interface for all neural services
- */
-export interface NeuralService {
-  moduleId: string;
-  moduleType: ModuleType;
-  moduleName: string;
-  description: string;
-  version: string;
-  config: NeuralServiceConfig;
-  status: 'online' | 'offline' | 'error' | 'initializing';
-  
-  initialize(): Promise<boolean>;
-  shutdown(): Promise<boolean>;
-  getCapabilities(): string[];
-  getStatus(): string;
-  updateConfig(config: Partial<NeuralServiceConfig>): void;
-}
-
-export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion';
-
-export interface NeuralServiceConfig {
-  enabled: boolean;
-  autonomyLevel: number;
-  resourceAllocation: number;
-  priority: number;
-}
-
-/**
- * Base class implementing common neural service functionality
- */
-export abstract class BaseNeuralService implements NeuralService {
-  moduleId: string;
-  moduleType: ModuleType;
-  moduleName: string;
-  description: string;
-  version: string = '1.0.0';
-  status: 'online' | 'offline' | 'error' | 'initializing' = 'offline';
-  
-  config: NeuralServiceConfig = {
-    enabled: false,
+// Base Neural Service abstract class
+export abstract class BaseNeuralService {
+  // Common properties
+  protected moduleId: string;
+  protected moduleType: string;
+  protected moduleName: string;
+  protected description: string;
+  protected config: NeuralServiceConfig = {
+    priority: 50,
     autonomyLevel: 50,
-    resourceAllocation: 30,
-    priority: 1
+    enabled: true
   };
-  
-  constructor(moduleId: string, moduleType: ModuleType, moduleName: string, description: string) {
+
+  constructor(
+    moduleId: string,
+    moduleType: string,
+    moduleName: string,
+    description: string
+  ) {
     this.moduleId = moduleId;
     this.moduleType = moduleType;
     this.moduleName = moduleName;
     this.description = description;
   }
-  
-  async initialize(): Promise<boolean> {
-    try {
-      this.status = 'initializing';
-      // Simulate initialization delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-      this.status = 'online';
-      return true;
-    } catch (error) {
-      this.status = 'error';
-      console.error(`Failed to initialize neural service: ${this.moduleId}`, error);
-      return false;
-    }
+
+  // Getters for basic properties
+  getId(): string {
+    return this.moduleId;
   }
-  
-  async shutdown(): Promise<boolean> {
-    try {
-      this.status = 'offline';
-      return true;
-    } catch (error) {
-      this.status = 'error';
-      console.error(`Failed to shutdown neural service: ${this.moduleId}`, error);
-      return false;
-    }
+
+  getType(): string {
+    return this.moduleType;
   }
-  
-  getCapabilities(): string[] {
-    return [];
+
+  getName(): string {
+    return this.moduleName;
   }
-  
-  getStatus(): string {
-    return this.status;
+
+  getDescription(): string {
+    return this.description;
   }
-  
-  updateConfig(config: Partial<NeuralServiceConfig>): void {
-    this.config = { ...this.config, ...config };
+
+  // Abstract methods that must be implemented by subclasses
+  abstract getCapabilities(): string[];
+  abstract configure(config: Record<string, any>): boolean;
+  abstract getMetrics(): Record<string, any>;
+  abstract isEnabled(): boolean;
+  abstract getConfig(): Record<string, any>;
+
+  // Common methods all neural services can use
+  updateConfig(partialConfig: Partial<NeuralServiceConfig>): void {
+    this.config = {
+      ...this.config,
+      ...partialConfig
+    };
   }
+}
+
+// Neural Service Configuration interface
+export interface NeuralServiceConfig {
+  priority: number;
+  autonomyLevel: number;
+  enabled: boolean;
+}
+
+// Neural Service Types
+export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion';
+
+// Neural Service interface
+export interface NeuralService {
+  getId(): string;
+  getType(): string;
+  getName(): string;
+  getDescription(): string;
+  getCapabilities(): string[];
+  configure(config: Record<string, any>): boolean;
+  getMetrics(): Record<string, any>;
+  isEnabled(): boolean;
+  getConfig(): Record<string, any>;
+  updateConfig(config: Partial<NeuralServiceConfig>): void;
 }

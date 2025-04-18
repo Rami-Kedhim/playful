@@ -1,22 +1,21 @@
-
 import React from 'react';
-import { useNeuralServices } from '@/hooks/useNeuralServices';
-import { livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
-import { LivecamConsumer } from './consumers/LivecamConsumer';
-import { LivecamProvider } from './providers/LivecamProvider';
+import { Routes, Route } from 'react-router-dom';
+import { LivecamNeuralService, livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
+import LivecamProvider from './providers/LivecamProvider';
+import LivecamList from '@/pages/LivecamList';
+import LivecamRoom from '@/pages/LivecamRoom';
+import LivecamDirectory from '@/pages/LivecamDirectory';
 
-/**
- * Livecams Module - Main container component that integrates with the Brain Hub
- * and initializes the neural services for livecam functionality
- */
-export const LivecamsModule: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const { isInitialized } = useNeuralServices(livecamsNeuralService);
-
+const LivecamsModule: React.FC = () => {
   return (
     <LivecamProvider>
-      <LivecamConsumer isNeuralInitialized={isInitialized}>
-        {children}
-      </LivecamConsumer>
+      <Routes>
+        <Route path="/" element={<LivecamList />} />
+        <Route path="/directory" element={<LivecamDirectory />} />
+        <Route path="/:livecamId" element={<LivecamRoom />} />
+      </Routes>
     </LivecamProvider>
   );
 };
+
+export default LivecamsModule;

@@ -20,6 +20,31 @@ export class EscortsNeuralService extends BaseNeuralService {
       'real-meet-optimization'
     ];
   }
+  
+  // Implementation for BaseNeuralService abstract methods
+  configure(config: Record<string, any>): boolean {
+    console.log('Configuring EscortsNeuralService:', config);
+    return true;
+  }
+  
+  getMetrics(): Record<string, any> {
+    return {
+      activeProfiles: Math.floor(Math.random() * 200),
+      matchScore: Math.random(),
+      bookingRate: Math.random() * 0.5
+    };
+  }
+  
+  isEnabled(): boolean {
+    return true;
+  }
+  
+  getConfig(): Record<string, any> {
+    return {
+      priority: 85,
+      autonomyLevel: 70
+    };
+  }
 }
 
 // Export a default instance for compatibility

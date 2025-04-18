@@ -1,137 +1,89 @@
+import React, { useEffect, useState } from 'react';
+import { useCreators } from '@/hooks/useCreators';
+import { CreatorCard } from '@/components/creators/CreatorCard';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, SlidersHorizontal, Star } from 'lucide-react';
+import { creatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
 
-import React from "react";
-import { Helmet } from "react-helmet-async";
-import { Button } from "@/components/ui/button";
-import { useNotifications } from "@/contexts/NotificationsContext";
-import { CreatorsModule } from "@/modules/creators/CreatorsModule";
-import { useCreatorContext } from "@/modules/creators/providers/CreatorProvider";
-import MainLayout from "@/components/layout/MainLayout";
-import CreatorFilters from "@/components/creators/CreatorFilters";
-import CreatorGrid from "@/components/creators/CreatorGrid";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Settings, SlidersHorizontal } from "lucide-react";
-import { creatorsNeuralService } from "@/services/neural/modules/CreatorsNeuralService";
+const Creators = () => {
+  const { creators, loading, error } = useCreators();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('relevance');
 
-const Creators: React.FC = () => {
+  useEffect(() => {
+    if (creatorsNeuralService) {
+      console.log('Creators Neural Service is available');
+    }
+  }, []);
+
+  const filteredCreators = creators
+    ? creators.filter(creator =>
+        creator.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        (filterCategory === 'all' || creator.category === filterCategory)
+      )
+    : [];
+
+  const sortedCreators = [...filteredCreators].sort((a, b) => {
+    if (sortBy === 'relevance') {
+      return 0;
+    } else if (sortBy === 'rating') {
+      const ratingA = a.rating || 0;
+      const ratingB = b.rating || 0;
+      return ratingB - ratingA;
+    } else {
+      return 0;
+    }
+  });
+
   return (
-    <CreatorsModule>
-      <CreatorPageContent />
-    </CreatorsModule>
-  );
-};
-
-const CreatorPageContent: React.FC = () => {
-  const { state, loadCreators, updateFilters } = useCreatorContext();
-  const { showInfo } = useNotifications();
-  
-  const handleRefresh = () => {
-    loadCreators(true); // Force refresh with neural processing
-    if (showInfo) showInfo("Refreshing Data", "Getting the latest content creators");
-  };
-  
-  const isEnabled = creatorsNeuralService.config.enabled;
-  const neuralStatus = isEnabled
-    ? `Neural processing active (${creatorsNeuralService.config.autonomyLevel}%)`
-    : "Neural processing disabled";
-  
-  return (
-    <>
-      <Helmet>
-        <title>Premium Content Creators | Subscribe to Exclusive Content</title>
-        <meta name="description" content="Browse our premium content creators. Subscribe for exclusive photos, videos, and livestreams." />
-      </Helmet>
-      
-      <MainLayout>
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-bold">Content Creators</h1>
-                {isEnabled && (
-                  <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full flex items-center">
-                    <Brain className="h-3 w-3 mr-1" />
-                    Neural Enhanced
-                  </span>
-                )}
-              </div>
-              <p className="text-muted-foreground">Subscribe to exclusive content from premium creators</p>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-1"
-                onClick={() => updateFilters({ 
-                  sortBy: state.filters.sortBy === 'recommended' ? 'mostSubscribers' : 'recommended' 
-                })}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                {state.filters.sortBy === 'recommended' ? 'Neural' : 'Standard'} Sorting
-              </Button>
-              <Button onClick={handleRefresh} disabled={state.isLoading}>
-                {state.isLoading ? "Refreshing..." : "Refresh"}
-              </Button>
-            </div>
+    <div className="container mx-auto py-10">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-semibold">Content Creators</h1>
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Search creators..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-10"
+            />
+            <Search className="absolute top-2.5 right-3 h-5 w-5 text-gray-500" />
           </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1">
-              <CreatorFilters 
-                filters={state.filters} 
-                onFilterChange={updateFilters}
-              />
-              
-              <div className="mt-4 text-xs text-muted-foreground">
-                {neuralStatus}
-              </div>
-            </div>
-            
-            <div className="lg:col-span-3">
-              {state.error ? (
-                <div className="p-4 bg-red-500/10 border border-red-500 rounded-md text-center mb-6">
-                  <p className="text-red-500">Error: {state.error}</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleRefresh}
-                    className="mt-2"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              ) : state.isLoading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {Array(8).fill(0).map((_, i) => (
-                    <div key={i} className="rounded-lg overflow-hidden">
-                      <Skeleton className="w-full aspect-square" />
-                      <div className="p-3">
-                        <Skeleton className="w-2/3 h-5 mb-2" />
-                        <Skeleton className="w-1/2 h-4" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <CreatorGrid creators={state.creators} />
-              )}
-              
-              {!state.isLoading && state.creators.length === 0 && !state.error && (
-                <div className="text-center py-12">
-                  <p className="text-lg font-medium">No creators found matching your criteria</p>
-                  <p className="text-muted-foreground">Try adjusting your filters</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => window.location.reload()}
-                    className="mt-4"
-                  >
-                    Reset All Filters
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
+          <Button variant="outline">
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            Filters
+          </Button>
         </div>
-      </MainLayout>
-    </>
+      </div>
+
+      <Tabs defaultValue="all" className="mb-4">
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="premium">Premium</TabsTrigger>
+          <TabsTrigger value="new">New</TabsTrigger>
+          <TabsTrigger value="popular">Popular</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {loading ? (
+          <p>Loading creators...</p>
+        ) : error ? (
+          <p>Error: {error}</p>
+        ) : sortedCreators.length > 0 ? (
+          sortedCreators.map(creator => (
+            <CreatorCard key={creator.id} creator={creator} />
+          ))
+        ) : (
+          <p>No creators found.</p>
+        )}
+      </div>
+    </div>
   );
 };
 

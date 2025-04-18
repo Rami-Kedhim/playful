@@ -1,9 +1,11 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Lock, Image, Video, Play } from 'lucide-react';
 import { UberPersona } from '@/types/UberPersona';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Lock, Image, Video, Crown } from 'lucide-react';
+import { hasExclusiveContent } from '@/utils/personaHelpers';
 
 interface PersonaContentTabProps {
   persona: UberPersona;
