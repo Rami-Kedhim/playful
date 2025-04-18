@@ -34,6 +34,13 @@ const VerificationPage = lazy(() => import('@/pages/VerificationPage'));
 const PersonasPage = lazy(() => import('@/pages/Personas'));
 const VerificationDashboard = lazy(() => import('@/pages/admin/VerificationDashboard'));
 
+// Loading component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen">
+    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+  </div>
+);
+
 const RoutesComponent: React.FC = () => {
   const { user: authUser, profile: authProfile } = useAuth();
   
@@ -117,12 +124,5 @@ const RoutesComponent: React.FC = () => {
     </Suspense>
   );
 };
-
-// Loading component
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen">
-    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-  </div>
-);
 
 export default RoutesComponent;
