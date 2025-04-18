@@ -1,65 +1,101 @@
 
 import React from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Video, Users } from 'lucide-react';
-import { ServiceTypeFilter as ServiceTypeFilterType } from '@/types/filters';
+import { cn } from '@/lib/utils';
 
-// Export the type for other components to use
-export type ServiceTypeFilter = ServiceTypeFilterType;
-
-// Helper function to get label text for a service type
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  switch(type) {
-    case 'in-person':
-      return 'In Person';
-    case 'virtual':
-      return 'Virtual';
-    case 'both':
-      return 'Both';
-    default:
-      return type.charAt(0).toUpperCase() + type.slice(1);
-  }
-};
+export type ServiceTypeFilter = "in-person" | "virtual" | "both" | null | "";
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
-  showIcon?: boolean;
-  variant?: 'default' | 'outline' | 'secondary';
-  size?: 'default' | 'sm';
+  variant?: 'small' | 'default' | 'colored';
+  className?: string;
 }
 
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type, 
-  showIcon = true, 
   variant = 'default',
-  size = 'default'
+  className 
 }) => {
   if (!type) return null;
   
-  const getLabel = () => {
-    return getServiceTypeBadgeLabel(type);
-  };
-  
-  const getIcon = () => {
+  const getTypeDetails = (type: ServiceTypeFilter) => {
     switch(type) {
-      case 'in-person':
-        return <MapPin className="h-3 w-3 mr-1" />;
-      case 'virtual':
-        return <Video className="h-3 w-3 mr-1" />;
-      case 'both':
-        return <Users className="h-3 w-3 mr-1" />;
+      case "in-person":
+        return {
+          label: "In Person",
+          color: "bg-blue-500/10 text-blue-600 border-blue-200",
+          colorDark: "dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
+          icon: "🏠"
+        };
+      case "virtual":
+        return {
+          label: "Virtual",
+          color: "bg-purple-500/10 text-purple-600 border-purple-200",
+          colorDark: "dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
+          icon: "💻"
+        };
+      case "both":
+        return {
+          label: "In Person & Virtual",
+          color: "bg-green-500/10 text-green-600 border-green-200",
+          colorDark: "dark:bg-green-900/30 dark:text-green-400 dark:border-green-800",
+          icon: "✓"
+        };
       default:
-        return null;
+        return {
+          label: "Unknown",
+          color: "bg-gray-500/10 text-gray-600 border-gray-200",
+          colorDark: "dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-800",
+          icon: "?"
+        };
     }
   };
   
-  const sizeClasses = size === 'sm' ? 'text-xs py-0 px-2' : '';
+  const details = getTypeDetails(type);
+  
+  if (variant === 'small') {
+    return (
+      <Badge
+        variant="outline"
+        className={cn(
+          details.color,
+          details.colorDark,
+          "font-normal text-xs py-0 h-5",
+          className
+        )}
+      >
+        {details.label}
+      </Badge>
+    );
+  }
+  
+  if (variant === 'colored') {
+    return (
+      <div className={cn("flex items-center gap-1.5", className)}>
+        <Avatar className="h-5 w-5">
+          <AvatarFallback className={cn(
+            "text-[10px]",
+            details.color,
+            details.colorDark
+          )}>
+            {details.icon}
+          </AvatarFallback>
+        </Avatar>
+        <span className="text-sm">{details.label}</span>
+      </div>
+    );
+  }
   
   return (
-    <Badge variant={variant} className={sizeClasses}>
-      {showIcon && getIcon()}
-      {getLabel()}
-    </Badge>
+    <div className={cn("flex items-center gap-1.5", className)}>
+      <Avatar className="h-5 w-5">
+        <AvatarFallback className="bg-muted text-[10px]">
+          {details.icon}
+        </AvatarFallback>
+      </Avatar>
+      <span className="text-sm">{details.label}</span>
+    </div>
   );
 };
 

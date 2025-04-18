@@ -6,7 +6,10 @@ import { DocumentType } from '@/types/verification';
  */
 export const toDocumentType = (value: string): DocumentType => {
   // Cast as unknown first, then as DocumentType to satisfy TypeScript
-  return value as unknown as DocumentType;
+  return {
+    value: value,
+    label: getDocumentTypeDisplayName(value)
+  } as DocumentType;
 };
 
 /**

@@ -41,7 +41,7 @@ export interface NeuralModel {
   name: string;
   type: string;
   version: string;
-  capabilities: string[];
+  capabilities: string[] | string; // Fix: Allow both string[] and string
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
     accuracy: number;
@@ -50,7 +50,7 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
-  specialization?: string; // Added for BrainHubDashboard
+  specialization?: string;
 }
 
 export interface SystemHealthMetrics {

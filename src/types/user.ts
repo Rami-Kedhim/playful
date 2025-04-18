@@ -18,11 +18,11 @@ export interface UserProfile {
   location: string;
   bio: string;
   isVerified: boolean;
-  website: string; // Added missing property
+  website: string;
   avatarUrl: string;
   joinedDate: Date;
   avatar_url: string; // For backward compatibility
-  phone: string; // Added missing property
+  phone: string;
 }
 
 export interface AuthResult {

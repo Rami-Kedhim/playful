@@ -28,13 +28,40 @@ export interface Escort {
   ethnicity?: string;
   hairColor?: string;
   eyeColor?: string;
-  profileType?: string; // Added for compatibility
-  orientation?: string; // Added for compatibility
+  
+  // Additional properties used in components
+  profileType?: string;
+  orientation?: string;
+  reviews?: number | any[];
+  tags?: string[];
+  imageUrl?: string;
+  profileImage?: string;
+  avatar?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+  verified?: boolean;
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  lastActive?: Date | string;
+  responseRate?: number;
+  gallery?: string[];
+  gallery_images?: string[];
+  images?: string[];
+  videos?: any[];
+  verificationLevel?: string;
+  featured?: boolean;
   price?: number;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
-  serviceTypes?: string[]; // Added for compatibility
-  featured?: boolean; // Added missing property
+  serviceTypes?: string[];
+  boostLevel?: number;
+  contactInfo?: {
+    email: string;
+    phone: string;
+    website?: string;
+  };
+  isFavorited?: boolean;
+  isPremium?: boolean;
 }
 
 // Export Availability interface since it's used in useEscortAvailability.ts
@@ -50,10 +77,38 @@ export interface Video {
   title: string;
   description?: string;
   thumbnailUrl: string;
-  videoUrl: string; // Added missing videoUrl property
+  videoUrl: string;
   duration: number;
   views: number;
   createdAt: Date;
   isPublished: boolean;
   escortId: string;
+  viewCount?: number;
+  isPremium?: boolean;
+}
+
+// Add Booking and BookingStatus for Booking-related components
+export interface Booking {
+  id: string;
+  escortId: string;
+  clientId: string;
+  date: string;
+  time: string;
+  duration: number;
+  service?: string;
+  serviceType?: string;
+  price?: number;
+  status: BookingStatus;
+  notes?: string;
+  createdAt: Date;
+  totalPrice: number;
+}
+
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  REJECTED = 'rejected',
+  DECLINED = 'declined',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed'
 }
