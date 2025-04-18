@@ -18,6 +18,7 @@ export interface ServiceTypeContextType {
   clearServiceType: () => void;
   validateServiceName: (name: string) => boolean;
   getSafeServiceName: (name: string) => string;
+  getServiceTypeLabel?: (type: ServiceTypeFilter) => string;
 }
 
 // Helper function to get label for service type
@@ -59,6 +60,7 @@ const ServiceTypeContext = createContext<ServiceTypeContextType>({
   clearServiceType: () => {},
   validateServiceName: () => true,
   getSafeServiceName: (name) => name,
+  getServiceTypeLabel: getServiceTypeBadgeLabel,
 });
 
 interface ServiceTypeProviderProps {
@@ -79,7 +81,7 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
   
   // Define available specialized service types
   const specializedServiceTypes = supportedServiceTypes 
-    ? supportedServiceTypes.map(type => typeof type === 'string' ? type : type.toString())
+    ? supportedServiceTypes.map(type => typeof type === 'string' ? type : String(type))
     : DEFAULT_SPECIALIZED_SERVICES;
 
   // Toggle specialized service type selection
@@ -133,7 +135,8 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
       isAnyServiceType,
       clearServiceType,
       validateServiceName,
-      getSafeServiceName
+      getSafeServiceName,
+      getServiceTypeLabel: getServiceTypeBadgeLabel
     }}>
       {children}
     </ServiceTypeContext.Provider>

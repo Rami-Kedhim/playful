@@ -21,19 +21,21 @@ interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   className?: string;
   showIcon?: boolean;
+  showLabel?: boolean; // Added showLabel prop
 }
 
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type, 
   className = "",
-  showIcon = true
+  showIcon = true,
+  showLabel = true // Default to showing the label
 }) => {
   if (!type) return null;
   
   return (
     <Badge variant="outline" className={className}>
       {showIcon && <ServiceTypeIcon type={type} size={14} className="mr-1" />}
-      <span>{getServiceTypeBadgeLabel(type)}</span>
+      {showLabel && <span>{getServiceTypeBadgeLabel(type)}</span>}
     </Badge>
   );
 };

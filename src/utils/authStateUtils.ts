@@ -1,105 +1,80 @@
 
-import { AuthState, UserRole } from "@/types/user";
+import { User, UserRole } from '@/types/user';
+import { User as AuthUser } from '@/types/auth';
 
-// Initial auth state
-export const initialAuthState: AuthState = {
-  isAuthenticated: false,
-  user: null,
-  profile: null,
-  loading: true,
-  error: null
+/**
+ * Get user roles from user object
+ */
+export const getUserRoles = (user: AuthUser | User): string[] => {
+  if (!user) return [];
+  
+  // Handle array roles
+  if (user.roles && Array.isArray(user.roles)) {
+    return user.roles.map(role => role.toString());
+  }
+  
+  // Handle single role
+  if (user.role) {
+    if (typeof user.role === 'string') {
+      return [user.role];
+    }
+    return [user.role.toString()];
+  }
+  
+  // Check user_metadata for roles
+  if (user.user_metadata?.roles) {
+    if (Array.isArray(user.user_metadata.roles)) {
+      return user.user_metadata.roles;
+    }
+    return [user.user_metadata.roles];
+  }
+  
+  // Check app_metadata for roles
+  if (user.app_metadata?.roles) {
+    if (Array.isArray(user.app_metadata.roles)) {
+      return user.app_metadata.roles;
+    }
+    return [user.app_metadata.roles];
+  }
+  
+  // Default role
+  return ['user'];
 };
 
-// Create admin user state
-export const createAdminState = (): AuthState => ({
-  isAuthenticated: true,
-  user: {
-    id: '1',
-    email: 'admin@example.com',
-    name: 'Admin User',
-    role: UserRole.ADMIN,
-    isVerified: true,
-    createdAt: new Date().toISOString(),
-  },
-  profile: null,
-  loading: false,
-  error: null,
-});
+/**
+ * Check if user has a specific role
+ */
+export const hasRole = (user: User | AuthUser | null, role: string): boolean => {
+  if (!user) return false;
+  
+  const roles = getUserRoles(user);
+  return roles.includes(role);
+};
 
-// Create moderator user state
-export const createModeratorState = (): AuthState => ({
-  isAuthenticated: true,
-  user: {
-    id: '2',
-    email: 'mod@example.com',
-    name: 'Moderator User',
-    role: UserRole.MODERATOR,
-    isVerified: true,
-    createdAt: new Date().toISOString(),
-  },
-  profile: null,
-  loading: false,
-  error: null,
-});
+/**
+ * Check if user is an admin
+ */
+export const isAdmin = (user: User | AuthUser | null): boolean => {
+  return hasRole(user, 'admin');
+};
 
-// Create escort user state
-export const createEscortState = (): AuthState => ({
-  isAuthenticated: true,
-  user: {
-    id: '3',
-    email: 'escort@example.com',
-    name: 'Escort User',
-    role: UserRole.ESCORT,
-    isVerified: true,
-    createdAt: new Date().toISOString(),
-  },
-  profile: {
-    id: '3',
-    userId: '3',
-    bio: 'Professional escort with 5 years of experience',
-    location: 'New York, NY',
-    verified: true,
-    verification_level: 'enhanced',
-    lucoin_balance: 1000,
-    is_boosted: true,
-    created_at: new Date().toISOString(),
-    sexual_orientation: 'Heterosexual'
-  },
-  loading: false,
-  error: null,
-});
+/**
+ * Check if user is a moderator
+ */
+export const isModerator = (user: User | AuthUser | null): boolean => {
+  return hasRole(user, 'moderator');
+};
 
-// Create user state based on role
-export const createUserStateByRole = (role: UserRole): AuthState => {
-  switch (role) {
-    case UserRole.ADMIN:
-      return createAdminState();
-    case UserRole.MODERATOR:
-      return createModeratorState();
-    case UserRole.ESCORT:
-      return createEscortState();
-    default:
-      return {
-        isAuthenticated: true,
-        user: {
-          id: '4',
-          email: 'user@example.com',
-          name: 'Regular User',
-          role: UserRole.USER,
-          isVerified: true,
-          createdAt: new Date().toISOString(),
-        },
-        profile: {
-          id: '4',
-          userId: '4',
-          bio: 'Regular user profile',
-          location: 'Chicago, IL',
-          verified: false,
-          lucoin_balance: 500,
-          created_at: new Date().toISOString(),
-        },
-        loading: false,
-        error: null,
-      };
-  }
+/**
+ * Check if user is an escort
+ */
+export const isEscort = (user: User | AuthUser | null): boolean => {
+  return hasRole(user, 'escort');
+};
+
+/**
+ * Check if user has premium features
+ */
+export const isPremium = (user: User | AuthUser | null): boolean => {
+  return hasRole(user, 'premium');
 };

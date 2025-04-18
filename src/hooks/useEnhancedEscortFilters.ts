@@ -25,7 +25,9 @@ const defaultFilters: EnhancedEscortFilters = {
   },
   sortBy: "newest",
   useBoostSorting: true,
-  selectedFilters: []
+  selectedFilters: [],
+  localOnly: false,
+  useNeuralSuggestions: false,
 };
 
 export const useEnhancedEscortFilters = () => {

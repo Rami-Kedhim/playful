@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SignInForm from '@/components/auth/SignInForm';
 import SignUpForm from '@/components/auth/SignUpForm';
 import { useNavigate } from 'react-router-dom';
-import { UserRole, AuthResult } from '@/types/user';
+import { UserRole } from '@/types/user';
+import { AuthResult } from '@/types/user';
 
 const AuthPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,7 @@ const AuthPage: React.FC = () => {
           user: {
             id: '123',
             email: email,
-            name: 'Admin User',
+            username: 'admin',
             role: UserRole.ADMIN,
             isVerified: true,
             createdAt: new Date().toISOString()
@@ -46,7 +47,7 @@ const AuthPage: React.FC = () => {
           user: {
             id: '456',
             email: email,
-            name: 'Regular User',
+            username: 'user',
             role: UserRole.USER,
             isVerified: true,
             createdAt: new Date().toISOString()
@@ -80,7 +81,7 @@ const AuthPage: React.FC = () => {
         user: {
           id: '789',
           email: email,
-          name: name || 'New User',
+          username: name || 'newuser',
           role: UserRole.USER,
           isVerified: false,
           createdAt: new Date().toISOString()

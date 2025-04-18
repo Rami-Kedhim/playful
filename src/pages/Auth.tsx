@@ -82,6 +82,39 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onRegister }) => {
 
 export default function Auth() {
   const { login, register } = useAuth();
+  
+  // Type conversion functions for auth result compatibility
+  const handleLogin = async (email: string, password: string): Promise<AuthResult> => {
+    const result = await login(email, password);
+    return {
+      success: result.success,
+      message: result.error || '',
+      user: result.user ? {
+        id: result.user.id,
+        username: result.user.username || '',
+        email: result.user.email,
+        role: result.user.role || 'user',
+        createdAt: result.user.created_at || new Date().toISOString(),
+      } : undefined,
+      token: ''
+    };
+  };
+  
+  const handleRegister = async (email: string, password: string, name?: string): Promise<AuthResult> => {
+    const result = await register(email, password, name);
+    return {
+      success: result.success,
+      message: result.error || '',
+      user: result.user ? {
+        id: result.user.id,
+        username: result.user.username || '',
+        email: result.user.email,
+        role: result.user.role || 'user',
+        createdAt: result.user.created_at || new Date().toISOString(),
+      } : undefined,
+      token: ''
+    };
+  };
 
   return (
     <div className="container relative flex flex-col items-center justify-center min-h-screen md:grid lg:max-w-none lg:px-0">
@@ -97,7 +130,7 @@ export default function Auth() {
               <CardDescription>Enter your credentials to access your account</CardDescription>
             </CardHeader>
             <CardContent>
-              <SignInForm onLogin={login} />
+              <SignInForm onLogin={handleLogin} />
             </CardContent>
           </TabsContent>
           <TabsContent value="register">
@@ -106,7 +139,7 @@ export default function Auth() {
               <CardDescription>Enter your details to create a new account</CardDescription>
             </CardHeader>
             <CardContent>
-              <SignUpForm onRegister={register} />
+              <SignUpForm onRegister={handleRegister} />
             </CardContent>
           </TabsContent>
         </Tabs>

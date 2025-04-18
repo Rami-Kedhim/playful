@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -6,6 +5,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { AppRoutes } from '@/utils/navigation';
 import { useAuth } from '@/hooks/auth/useAuth';
+import { User, UserProfile } from '@/types/user';
 
 // Auth page
 import AuthPage from './pages/AuthPage';
@@ -41,7 +41,31 @@ const LoadingFallback = () => (
 );
 
 const RoutesComponent: React.FC = () => {
-  const { user, profile } = useAuth();
+  const { user: authUser, profile: authProfile } = useAuth();
+  
+  const user: User | null = authUser ? {
+    id: authUser.id,
+    username: authUser.username || '',
+    email: authUser.email,
+    role: authUser.role || 'user',
+    name: authUser.name || authUser.username || authUser.full_name || '',
+    isVerified: authUser.isVerified,
+    createdAt: authUser.created_at || new Date().toISOString(),
+  } : null;
+  
+  const profile: UserProfile | null = authProfile ? {
+    id: authProfile.id,
+    userId: authProfile.id,
+    email: authProfile.email || (authUser?.email || ''),
+    name: authProfile.name || authProfile.full_name || (authUser?.name || ''),
+    avatar_url: authProfile.avatar_url || authProfile.profileImageUrl,
+    phone: authProfile.phone || authProfile.phone_number,
+    phone_number: authProfile.phone_number || authProfile.phone,
+    location: authProfile.location,
+    bio: authProfile.bio,
+    verified: authProfile.is_verified,
+    website: authProfile.website || '',
+  } : null;
   
   return (
     <Suspense fallback={<LoadingFallback />}>

@@ -5,7 +5,7 @@ import ProfileHeader from '@/components/profile/ProfileHeader';
 import { Loader2 } from 'lucide-react';
 import { User, UserProfile } from '@/types/user';
 
-interface ProfilePageProps {
+export interface ProfilePageProps {
   user: User;
   profile: UserProfile;
   initialTab?: string;

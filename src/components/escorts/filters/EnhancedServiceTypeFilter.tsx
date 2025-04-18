@@ -31,6 +31,12 @@ const EnhancedServiceTypeFilter: React.FC<EnhancedServiceTypeFilterProps> = ({
     specializedServiceTypes
   } = useServiceType();
 
+  const handleFilterToggle = (type: string) => {
+    if (toggleSpecializedType) {
+      toggleSpecializedType(type);
+    }
+  };
+
   return (
     <Card className={className}>
       <CardHeader className={compact ? "pb-2" : "pb-4"}>
@@ -49,28 +55,28 @@ const EnhancedServiceTypeFilter: React.FC<EnhancedServiceTypeFilterProps> = ({
           )}
           
           <div className="flex flex-wrap gap-1.5">
-            {specializedServiceTypes.slice(0, compact ? 8 : undefined).map((type) => (
+            {specializedServiceTypes?.slice(0, compact ? 8 : undefined).map((type) => (
               <Badge
                 key={type}
-                variant={selectedSpecializedTypes.includes(type) ? "default" : "outline"}
+                variant={selectedSpecializedTypes?.includes(type) ? "default" : "outline"}
                 className={`
                   cursor-pointer transition-colors py-1 px-2.5 
-                  ${selectedSpecializedTypes.includes(type) ? "bg-primary/20 hover:bg-primary/30 text-foreground" : "hover:bg-accent"}
+                  ${selectedSpecializedTypes?.includes(type) ? "bg-primary/20 hover:bg-primary/30 text-foreground" : "hover:bg-accent"}
                 `}
-                onClick={() => toggleSpecializedType(type)}
+                onClick={() => handleFilterToggle(type)}
               >
                 <span className="text-xs font-normal">{type}</span>
-                {selectedSpecializedTypes.includes(type) && (
+                {selectedSpecializedTypes?.includes(type) && (
                   <X className="ml-1 h-3 w-3 cursor-pointer" onClick={(e) => {
                     e.stopPropagation();
-                    toggleSpecializedType(type);
+                    handleFilterToggle(type);
                   }} />
                 )}
               </Badge>
             ))}
           </div>
           
-          {compact && specializedServiceTypes.length > 8 && (
+          {compact && specializedServiceTypes && specializedServiceTypes.length > 8 && (
             <div className="text-xs text-muted-foreground mt-1">
               +{specializedServiceTypes.length - 8} more services available
             </div>

@@ -1,37 +1,33 @@
 
 import React from 'react';
-import { Users, Monitor, Globe } from 'lucide-react';
-import { ServiceTypeFilter } from '../escorts/filters/ServiceTypeBadgeLabel';
+import { MapPin, Video, UserCheck, SunMoon, UtensilsCrossed } from 'lucide-react';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
-interface ServiceTypeIconProps {
+export interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
   size?: number;
-  variant?: 'regular' | 'colored';
+  className?: string; // Added className prop
 }
 
 const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
   type, 
-  size = 18,
-  variant = 'regular'
+  size = 16,
+  className = ""
 }) => {
-  const getIcon = () => {
-    switch (type) {
-      case 'in-person':
-        return <Users size={size} className={variant === 'colored' ? "text-indigo-500" : ""} />;
-      case 'virtual':
-        return <Monitor size={size} className={variant === 'colored' ? "text-purple-500" : ""} />;
-      case 'both':
-        return <Globe size={size} className={variant === 'colored' ? "text-blue-500" : ""} />;
-      case 'massage':
-        return <span>💆</span>;
-      case 'dinner':
-        return <span>🍽️</span>;
-      default:
-        return null;
-    }
-  };
-
-  return <>{getIcon()}</>;
+  switch(type) {
+    case 'in-person':
+      return <MapPin size={size} className={className} />;
+    case 'virtual':
+      return <Video size={size} className={className} />;
+    case 'both':
+      return <UserCheck size={size} className={className} />;
+    case 'massage':
+      return <SunMoon size={size} className={className} />;
+    case 'dinner':
+      return <UtensilsCrossed size={size} className={className} />;
+    default:
+      return null;
+  }
 };
 
 export default ServiceTypeIcon;
