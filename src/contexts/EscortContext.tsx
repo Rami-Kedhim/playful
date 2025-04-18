@@ -49,7 +49,17 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           tags: ["massage", "dinner", "events"],
           price: 250,
           imageUrl: "https://example.com/emma.jpg",
-          availableNow: true
+          availableNow: true,
+          bio: "Professional companion for your special events",
+          services: ["Dinner Date", "Event Companion"],
+          images: ["/assets/escorts/profile1.jpg"],
+          isVerified: true,
+          featured: false,
+          contactInfo: {
+            email: "emma@example.com",
+            phone: "+1234567890",
+            website: "https://example.com/emma"
+          }
         },
         {
           id: "2",
@@ -63,7 +73,17 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           tags: ["companionship", "travel", "dinner"],
           price: 300,
           imageUrl: "https://example.com/sophia.jpg",
-          availableNow: false
+          availableNow: false,
+          bio: "Elegant companion for all occasions",
+          services: ["Dinner Date", "Travel Companion"],
+          images: ["/assets/escorts/profile2.jpg"],
+          isVerified: true,
+          featured: true,
+          contactInfo: {
+            email: "sophia@example.com",
+            phone: "+1234567891",
+            website: "https://example.com/sophia"
+          }
         }
       ];
       

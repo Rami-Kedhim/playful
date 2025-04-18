@@ -55,7 +55,17 @@ export const useUberPersona = (escortId: string) => {
           price: 250,
           verified: true,
           tags: ['Elite', 'VIP'],
-          languages: ['English', 'French']
+          languages: ['English', 'French'],
+          bio: "Professional companion for your special events",
+          images: ["/assets/escorts/profile1.jpg"],
+          services: ["Dinner Date", "Event Companion"],
+          isVerified: true,
+          featured: false,
+          contactInfo: {
+            email: "sample@example.com",
+            phone: "+1234567890",
+            website: "https://example.com/sample"
+          }
         };
         resolve(mockEscort);
       }, 500);

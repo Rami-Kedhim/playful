@@ -1,57 +1,73 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { AuthResult } from '@/types/user';
 import SignInForm from '@/components/auth/SignInForm';
 import SignUpForm from '@/components/auth/SignUpForm';
 
+// Define the props interfaces for the form components
+interface SignInFormProps {
+  onLogin: (email: string, password: string) => Promise<AuthResult>;
+}
+
+interface SignUpFormProps {
+  onRegister: (email: string, password: string, name?: string) => Promise<AuthResult>;
+}
+
 const AuthPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const tab = searchParams.get('tab') || 'signin';
+  const [activeTab, setActiveTab] = useState<string>('login');
+  const { login, register } = useAuth();
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading, signIn, signUp } = useAuth();
-
-  // Redirect to home if already authenticated
-  React.useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate('/');
+  
+  const handleLogin = async (email: string, password: string) => {
+    const result = await login(email, password);
+    
+    if (result.success) {
+      navigate('/dashboard');
     }
-  }, [isAuthenticated, isLoading, navigate]);
-
-  const handleTabChange = (value: string) => {
-    navigate(`/auth?tab=${value}`);
+    
+    return result;
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
-  // Don't show auth forms if already authenticated and still on this page
-  if (isAuthenticated) {
-    return null;
-  }
-
+  
+  const handleRegister = async (email: string, password: string, name?: string) => {
+    const result = await register(email, password, name);
+    
+    if (result.success) {
+      navigate('/onboarding');
+    }
+    
+    return result;
+  };
+  
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background/80 to-background p-4">
-      <div className="w-full max-w-md">
-        <Tabs defaultValue={tab} onValueChange={handleTabChange}>
-          <TabsList>
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          <TabsContent value="signin">
-            <SignInForm onSignIn={signIn} />
-          </TabsContent>
-          <TabsContent value="signup">
-            <SignUpForm onSignUp={signUp} />
-          </TabsContent>
-        </Tabs>
-      </div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Welcome</CardTitle>
+          <CardDescription className="text-center">
+            Sign in to your account or create a new one
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid grid-cols-2 mb-8">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Register</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <SignInForm onLogin={handleLogin} />
+            </TabsContent>
+            
+            <TabsContent value="register">
+              <SignUpForm onRegister={handleRegister} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

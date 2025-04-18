@@ -1,5 +1,6 @@
+
 import { Escort } from "@/types/escort";
-import { UberPersona, RoleFlags, Capabilities, Monetization, SystemMetadata } from "@/types/uberPersona";
+import { UberPersona } from "@/types/uberPersona";
 
 /**
  * Maps a legacy Escort object to the new UberPersona structure
@@ -22,44 +23,33 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
   };
   
   // Extract role flags
-  const roleFlags: RoleFlags = {
+  const roleFlags = {
     isEscort: true,
-    isCreator: !!escort.gallery?.length || !!escort.gallery_images?.length,
-    isLivecam: false, // Default value, can be updated if needed
+    isCreator: false,
+    isLivecam: false,
     isAI: escort.isAI || false,
     isVerified: escort.verified || false,
     isFeatured: escort.featured || false
   };
   
   // Extract capabilities
-  const capabilities: Capabilities = {
-    hasPhotos: !!(escort.gallery?.length || escort.gallery_images?.length),
-    hasVideos: !!escort.videos?.length,
-    hasStories: false, // Default value, can be updated if needed
+  const capabilities = {
+    hasPhotos: false,
+    hasVideos: false,
+    hasStories: false,
     hasChat: true,
-    hasVoice: false, // Default value, can be updated if needed
     hasBooking: true,
-    hasLiveStream: false, // Default value, can be updated if needed
-    hasExclusiveContent: !!escort.providesVirtualContent
+    hasLiveStream: false,
+    hasExclusiveContent: false
   };
   
   // Extract monetization
-  const monetization: Monetization = {
+  const monetization = {
     acceptsLucoin: true,
     acceptsTips: true,
-    subscriptionPrice: escort.subscriptionPrice,
+    subscriptionPrice: escort.subscriptionPrice || undefined,
     unlockingPrice: escort.price,
     boostingActive: escort.boostLevel ? escort.boostLevel > 0 : false
-  };
-  
-  // Extract system metadata
-  const systemMetadata: SystemMetadata = {
-    source: escort.isScraped ? 'scraped' : escort.isAI ? 'ai_generated' : 'manual',
-    lastSynced: undefined,  // No direct mapping available
-    aiPersonality: escort.isAI ? 'friendly' : undefined,
-    aiMood: escort.isAI ? 'happy' : undefined,
-    aiEngine: escort.isAI ? 'GPT' : undefined,
-    tagsGeneratedByAI: escort.isAI || escort.isScraped || false
   };
   
   // Return the complete UberPersona
@@ -67,8 +57,7 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     ...baseProfile,
     roleFlags,
     capabilities,
-    monetization,
-    systemMetadata
+    monetization
   };
 };
 
@@ -103,6 +92,5 @@ export const mapProfileToType = (profileData: any): any => {
     roleFlags: profileData.roleFlags,
     capabilities: profileData.capabilities,
     monetization: profileData.monetization,
-    systemMetadata: profileData.systemMetadata
   };
 };

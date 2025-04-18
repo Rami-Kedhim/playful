@@ -32,7 +32,7 @@ export interface Escort {
   };
   // Additional fields referenced in components
   isAI?: boolean;
-  profileType?: 'verified' | 'ai' | 'provisional';
+  profileType?: 'verified' | 'ai' | 'provisional' | 'scraped';
   rates?: Rates;
   availability?: string[] | any;
   reviewCount?: number;
@@ -63,21 +63,57 @@ export interface Escort {
   // Adding missing properties referenced in components
   imageUrl?: string;
   sexualOrientation?: string;
+  orientation?: string; // Alternative to sexualOrientation
   lastActive?: Date | string;
   responseRate?: number;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
   serviceTypes?: string[];
   description?: string;
-  height?: number;
-  weight?: number;
+  height?: number | string;
+  weight?: number | string;
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
+  bodyType?: string;
   avatar_url?: string;
   verification_level?: string;
   verificationLevel?: string;
   videos?: Array<{ url: string; title?: string; thumbnail?: string } | string>;
+  subscriptionPrice?: number;
+  contentStats?: ContentStats;
+}
+
+// Add Video interface
+export interface Video {
+  id: string;
+  url: string;
+  title?: string;
+  thumbnail?: string;
+  duration?: number;
+  isPublic?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Add ContentStats interface
+export interface ContentStats {
+  photos: string | number;
+  videos: string | number;
+  streams?: string | number;
+  live?: boolean | string | number;
+}
+
+// Add Availability interface
+export interface Availability {
+  day: string;
+  slots: {
+    start: string;
+    end: string;
+  }[];
+  days?: string[];
+  hours?: number[];
+  customNotes?: string;
 }
 
 // Add BookingStatus enum
@@ -170,10 +206,4 @@ export enum VerificationStatus {
   APPROVED = 'approved',
   REJECTED = 'rejected',
   EXPIRED = 'expired'
-}
-
-export interface ContentStats {
-  photos: string;
-  videos: string;
-  streams?: string;
 }

@@ -1,83 +1,151 @@
 
-import { useState, useEffect } from 'react';
-import { Video } from '@/types/escort';
+import { useState, useEffect, useCallback } from 'react';
+import { Escort, Video } from '@/types/escort';
+import { useToast } from '@/components/ui/use-toast';
 
 interface UseVideoManagementProps {
-  initialVideos: string[];
+  escortId: string;
 }
 
-const useVideoManagement = ({ initialVideos }: UseVideoManagementProps) => {
+export const useVideoManagement = ({ escortId }: UseVideoManagementProps) => {
   const [videos, setVideos] = useState<Video[]>([]);
-  const [newVideoUrl, setNewVideoUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    // When processing videos from string[] to Video[]
-    const processVideos = (videoUrls: string[]): Video[] => {
-      return videoUrls.map((url, index) => ({
-        id: `video-${index}`,
-        url,
-        title: `Video ${index + 1}`
-      }));
-    };
-
-    setVideos(processVideos(initialVideos));
-  }, [initialVideos]);
-
-  const addVideo = async () => {
-    setIsLoading(true);
+  // Fetch videos
+  const fetchVideos = useCallback(async () => {
+    if (!escortId) return;
+    
+    setLoading(true);
     setError(null);
-
+    
     try {
-      // Basic validation
-      if (!newVideoUrl.trim()) {
-        throw new Error('Video URL cannot be empty');
-      }
+      // In a real app, this would be an API call
+      const mockVideos: Video[] = [
+        {
+          id: '1',
+          url: 'https://example.com/video1.mp4',
+          title: 'Introduction Video',
+          thumbnail: 'https://example.com/thumbnail1.jpg',
+          duration: 120,
+          isPublic: true,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: '2',
+          url: 'https://example.com/video2.mp4',
+          title: 'Private Message',
+          thumbnail: 'https://example.com/thumbnail2.jpg',
+          duration: 45,
+          isPublic: false,
+          createdAt: new Date().toISOString(),
+        }
+      ];
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setVideos(mockVideos);
+    } catch (err) {
+      console.error('Error fetching videos:', err);
+      setError('Failed to load videos. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  }, [escortId]);
 
-      // Optimistic update
+  // Upload a new video
+  const uploadVideo = useCallback(async (file: File, metadata: { title: string; isPublic: boolean }) => {
+    setUploading(true);
+    setError(null);
+    
+    try {
+      // In a real app, this would upload to a server
+      console.log('Uploading video:', file.name, metadata);
+      
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Create a mock video entry
       const newVideo: Video = {
         id: `video-${Date.now()}`,
-        url: newVideoUrl,
-        title: `Video ${videos.length + 1}`
+        url: URL.createObjectURL(file),
+        title: metadata.title,
+        thumbnail: 'https://example.com/default-thumbnail.jpg',
+        duration: 60, // Mock duration
+        isPublic: metadata.isPublic,
+        createdAt: new Date().toISOString(),
       };
-      setVideos(prevVideos => [...prevVideos, newVideo]);
-      setNewVideoUrl('');
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (err: any) {
-      setError(err.message || 'Failed to add video');
+      
+      setVideos(prev => [newVideo, ...prev]);
+      
+      toast({
+        title: 'Video uploaded successfully',
+        description: `"${metadata.title}" has been added to your gallery.`,
+      });
+      
+      return newVideo;
+    } catch (err) {
+      console.error('Error uploading video:', err);
+      setError('Failed to upload video. Please try again.');
+      
+      toast({
+        title: 'Upload failed',
+        description: 'There was a problem uploading your video. Please try again.',
+        variant: 'destructive',
+      });
+      
+      return null;
     } finally {
-      setIsLoading(false);
+      setUploading(false);
     }
-  };
+  }, [toast]);
 
-  const deleteVideo = async (videoId: string) => {
-    setIsLoading(true);
-    setError(null);
-
+  // Delete a video
+  const deleteVideo = useCallback(async (videoId: string) => {
     try {
-      // Optimistic update
-      setVideos(prevVideos => prevVideos.filter(video => video.id !== videoId));
-
-      // Simulate API call
+      // In a real app, this would be an API call
+      console.log('Deleting video:', videoId);
+      
+      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete video');
-    } finally {
-      setIsLoading(false);
+      
+      setVideos(prev => prev.filter(video => video.id !== videoId));
+      
+      toast({
+        title: 'Video deleted',
+        description: 'The video has been removed from your gallery.',
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('Error deleting video:', err);
+      
+      toast({
+        title: 'Delete failed',
+        description: 'There was a problem deleting your video. Please try again.',
+        variant: 'destructive',
+      });
+      
+      return false;
     }
-  };
+  }, [toast]);
+
+  // Load videos on mount
+  useEffect(() => {
+    fetchVideos();
+  }, [fetchVideos]);
 
   return {
     videos,
-    newVideoUrl,
-    setNewVideoUrl,
-    addVideo,
-    deleteVideo,
-    isLoading,
-    error
+    loading,
+    uploading,
+    error,
+    fetchVideos,
+    uploadVideo,
+    deleteVideo
   };
 };
 

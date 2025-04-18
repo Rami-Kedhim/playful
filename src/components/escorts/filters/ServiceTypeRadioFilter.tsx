@@ -1,40 +1,59 @@
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import React from 'react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
-import { MapPin, Laptop, Users } from 'lucide-react';
 
-interface ServiceTypeRadioFilterProps {
-  value: ServiceTypeFilter;
+export interface ServiceTypeRadioFilterProps {
+  selectedType: ServiceTypeFilter;
   onChange: (value: ServiceTypeFilter) => void;
+  includeSpecializedTypes?: boolean;
 }
 
-const ServiceTypeRadioFilter: React.FC<ServiceTypeRadioFilterProps> = ({ value, onChange }) => {
+const ServiceTypeRadioFilter: React.FC<ServiceTypeRadioFilterProps> = ({
+  selectedType,
+  onChange,
+  includeSpecializedTypes = false
+}) => {
   return (
-    <RadioGroup value={value} onValueChange={onChange as any} className="grid grid-cols-3 gap-2">
-      <div className="flex flex-col items-center space-y-1 border rounded-md p-2 cursor-pointer hover:bg-secondary/20 transition-colors">
-        <RadioGroupItem value="in-person" id="in-person" className="sr-only" />
-        <Label htmlFor="in-person" className="cursor-pointer text-center flex flex-col items-center gap-1">
-          <MapPin className="h-5 w-5 text-blue-500" />
-          <span>In Person</span>
-        </Label>
+    <RadioGroup
+      value={selectedType}
+      onValueChange={(value) => onChange(value as ServiceTypeFilter)}
+      className="space-y-3"
+    >
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="" id="service-all" />
+        <Label htmlFor="service-all" className="cursor-pointer">All services</Label>
       </div>
       
-      <div className="flex flex-col items-center space-y-1 border rounded-md p-2 cursor-pointer hover:bg-secondary/20 transition-colors">
-        <RadioGroupItem value="virtual" id="virtual" className="sr-only" />
-        <Label htmlFor="virtual" className="cursor-pointer text-center flex flex-col items-center gap-1">
-          <Laptop className="h-5 w-5 text-purple-500" />
-          <span>Virtual</span>
-        </Label>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="in-person" id="service-in-person" />
+        <Label htmlFor="service-in-person" className="cursor-pointer">In-person only</Label>
       </div>
       
-      <div className="flex flex-col items-center space-y-1 border rounded-md p-2 cursor-pointer hover:bg-secondary/20 transition-colors">
-        <RadioGroupItem value="both" id="both" className="sr-only" />
-        <Label htmlFor="both" className="cursor-pointer text-center flex flex-col items-center gap-1">
-          <Users className="h-5 w-5 text-green-500" />
-          <span>Both</span>
-        </Label>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="virtual" id="service-virtual" />
+        <Label htmlFor="service-virtual" className="cursor-pointer">Virtual only</Label>
       </div>
+      
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="both" id="service-both" />
+        <Label htmlFor="service-both" className="cursor-pointer">Both service types</Label>
+      </div>
+      
+      {includeSpecializedTypes && (
+        <>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="massage" id="service-massage" />
+            <Label htmlFor="service-massage" className="cursor-pointer">Massage</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="dinner" id="service-dinner" />
+            <Label htmlFor="service-dinner" className="cursor-pointer">Dinner Date</Label>
+          </div>
+        </>
+      )}
     </RadioGroup>
   );
 };

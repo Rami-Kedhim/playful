@@ -1,134 +1,82 @@
 
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Label } from '@/components/ui/label';
+import { AlertCircle } from 'lucide-react';
+import { AuthResult } from '@/types/user';
 
-const formSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address' }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
-interface SignInFormProps {
-  onSuccess?: () => void;
+export interface SignInFormProps {
+  onLogin: (email: string, password: string) => Promise<AuthResult>;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
-  const { signIn } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+const SignInForm: React.FC<SignInFormProps> = ({ onLogin }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const handleSignIn = async (data: FormData) => {
-    setIsLoading(true);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     setError(null);
-
+    
     try {
-      const result = await signIn(data.email, data.password);
-
-      if (result.success) {
-        toast({
-          title: 'Signed in successfully',
-          description: 'Welcome back!',
-        });
-        
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          navigate('/');
-        }
-      } else {
-        setError(result.error || 'Failed to sign in. Please check your credentials.');
+      const result = await onLogin(email, password);
+      
+      if (!result.success && result.message) {
+        setError(result.message);
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Login error:', err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-
+  
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
-        <CardDescription>Enter your credentials to access your account.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-4">
-            {error && (
-              <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                {error}
-              </div>
-            )}
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="you@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="text-sm text-right">
-              <Link to="/auth/forgot-password" className="text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-      <CardFooter className="flex flex-col">
-        <div className="text-sm text-center">
-          Don't have an account?{' '}
-          <Link to="/auth?tab=signup" className="text-primary hover:underline">
-            Sign Up
-          </Link>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="bg-red-50 text-red-800 p-3 rounded-md flex items-start">
+          <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+          <p className="text-sm">{error}</p>
         </div>
-      </CardFooter>
-    </Card>
+      )}
+      
+      <div className="space-y-1">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="yourname@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+      
+      <div className="space-y-1">
+        <div className="flex justify-between items-center">
+          <Label htmlFor="password">Password</Label>
+          <a href="/forgot-password" className="text-sm text-primary hover:underline">
+            Forgot password?
+          </a>
+        </div>
+        <Input
+          id="password"
+          type="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Signing in...' : 'Sign in'}
+      </Button>
+    </form>
   );
 };
 

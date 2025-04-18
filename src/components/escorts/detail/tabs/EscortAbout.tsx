@@ -31,7 +31,7 @@ const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
     if (Array.isArray(escort.availability) && typeof escort.availability[0] === 'object') {
       // Handle object format
       const availObj = escort.availability[0];
-      if (availObj.days && Array.isArray(availObj.days)) {
+      if (availObj && availObj.days && Array.isArray(availObj.days)) {
         return availObj.days.join(', ');
       }
     }

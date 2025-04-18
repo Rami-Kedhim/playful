@@ -1,123 +1,124 @@
-import { useState, useCallback } from "react";
-import { Escort, ServiceType } from "@/types/escort";
-import { toast } from "@/components/ui/use-toast";
 
-/**
- * Custom hook for managing escort services
- */
-export const useEscortServices = (
-  updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
-) => {
-  /**
-   * Adds a service to the escort's profile
-   */
-  const addService = useCallback(async (id: string, service: ServiceType, escort?: Escort | null) => {
-    if (!id) {
-      toast({
-        title: "Error adding service",
-        description: "Profile ID is required",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    if (!escort) {
-      toast({
-        title: "Error adding service",
-        description: "Escort profile is required",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    const updatedServices = [...(escort.services || []), service];
-    
-    try {
-      return await updateEscortProfile(id, { services: updatedServices });
-    } catch (err) {
-      console.error("Error adding service:", err);
-      return null;
-    }
-  }, [updateEscortProfile]);
-  
-  /**
-   * Removes a service from the escort's profile
-   */
-  const removeService = useCallback(async (id: string, service: ServiceType, escort?: Escort | null) => {
-    if (!id) {
-      toast({
-        title: "Error removing service",
-        description: "Profile ID is required",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    if (!escort) {
-      toast({
-        title: "Error removing service",
-        description: "Escort profile is required",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    const updatedServices = (escort.services || []).filter(s => s !== service);
-    
-    try {
-      return await updateEscortProfile(id, { services: updatedServices });
-    } catch (err) {
-      console.error("Error removing service:", err);
-      return null;
-    }
-  }, [updateEscortProfile]);
+import { useState, useEffect, useCallback } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 
-  /**
-   * Updates the rates for the escort
-   */
-  const updateRates = useCallback(async (id: string, rates: Escort['rates']) => {
-    if (!id) {
-      toast({
-        title: "Error updating rates",
-        description: "Profile ID is required",
-        variant: "destructive",
-      });
-      return null;
+// Service type enum
+export enum ServiceType {
+  Massage = 'massage',
+  Roleplay = 'roleplay',
+  Overnight = 'overnight',
+  Companionship = 'companionship',
+  Dinner = 'dinner',
+  Events = 'events',
+  Travel = 'travel',
+  BDSM = 'bdsm'
+}
+
+interface ServiceOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
+interface UseEscortServicesProps {
+  escortId?: string;
+  initialServices?: string[];
+}
+
+export const useEscortServices = ({
+  escortId,
+  initialServices = []
+}: UseEscortServicesProps) => {
+  const [services, setServices] = useState<string[]>(initialServices);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Available service options
+  const serviceOptions: ServiceOption[] = [
+    { value: ServiceType.Massage, label: 'Massage', description: 'Professional massage services' },
+    { value: ServiceType.Roleplay, label: 'Role Play', description: 'Customized role play experiences' },
+    { value: ServiceType.Overnight, label: 'Overnight', description: 'Overnight companionship' },
+    { value: ServiceType.Companionship, label: 'Companionship', description: 'General companionship services' },
+    { value: ServiceType.Dinner, label: 'Dinner Date', description: 'Accompaniment for dinner engagements' },
+    { value: ServiceType.Events, label: 'Event Companion', description: 'Accompaniment for various events' },
+    { value: ServiceType.Travel, label: 'Travel Companion', description: 'Accompaniment for travel' },
+    { value: ServiceType.BDSM, label: 'BDSM', description: 'BDSM experiences' }
+  ];
+
+  // Toggle a service
+  const toggleService = useCallback((serviceValue: string) => {
+    setServices(prev => {
+      if (prev.includes(serviceValue)) {
+        return prev.filter(s => s !== serviceValue);
+      } else {
+        return [...prev, serviceValue];
+      }
+    });
+  }, []);
+
+  // Check if a service is selected
+  const isServiceSelected = useCallback((serviceValue: string) => {
+    return services.includes(serviceValue);
+  }, [services]);
+
+  // Save services to the server
+  const saveServices = useCallback(async () => {
+    if (!escortId) {
+      setError('Escort ID is required to save services');
+      return false;
     }
+
+    setSaving(true);
+    setError(null);
 
     try {
-      return await updateEscortProfile(id, { rates });
-    } catch (err) {
-      console.error("Error updating rates:", err);
-      return null;
-    }
-  }, [updateEscortProfile]);
-
-  /**
-   * Updates the availability for the escort
-   */
-  const updateAvailability = useCallback(async (id: string, availability: Escort['availability']) => {
-    if (!id) {
+      // In a real app, this would be an API call
+      console.log('Saving services for escort:', escortId, services);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       toast({
-        title: "Error updating availability",
-        description: "Profile ID is required",
-        variant: "destructive",
+        title: 'Services updated',
+        description: 'Your service offerings have been saved.',
       });
-      return null;
-    }
-
-    try {
-      return await updateEscortProfile(id, { availability });
+      
+      return true;
     } catch (err) {
-      console.error("Error updating availability:", err);
-      return null;
+      console.error('Error saving services:', err);
+      setError('Failed to save services. Please try again.');
+      
+      toast({
+        title: 'Save failed',
+        description: 'There was a problem updating your services. Please try again.',
+        variant: 'destructive',
+      });
+      
+      return false;
+    } finally {
+      setSaving(false);
     }
-  }, [updateEscortProfile]);
+  }, [escortId, services, toast]);
+
+  // Get services by category
+  const getServicesByCategory = useCallback((category: 'all' | 'basic' | 'premium') => {
+    // In a real app, you would have categories defined for services
+    return services;
+  }, [services]);
 
   return {
-    addService,
-    removeService,
-    updateRates,
-    updateAvailability
+    services,
+    serviceOptions,
+    loading,
+    saving,
+    error,
+    toggleService,
+    isServiceSelected,
+    saveServices,
+    getServicesByCategory
   };
 };
+
+export default useEscortServices;

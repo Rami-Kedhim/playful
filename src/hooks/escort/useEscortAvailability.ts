@@ -1,99 +1,149 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Escort, Availability } from '@/types/escort';
+import { useToast } from '@/components/ui/use-toast';
 
-interface AvailabilityHook {
-  isAvailableNow: boolean;
-  availableToday: boolean;
-  availabilityText: string;
-  formattedAvailability: {
-    days: string[];
-    hours: number[];
-    customNotes: string;
-  }
+interface UseEscortAvailabilityProps {
+  escortId?: string;
+  initialAvailability?: Availability[];
 }
 
-export const useEscortAvailability = (escort: Escort): AvailabilityHook => {
-  const [isAvailableNow, setIsAvailableNow] = useState<boolean>(escort.availableNow || false);
+export const useEscortAvailability = ({ 
+  escortId, 
+  initialAvailability = [] 
+}: UseEscortAvailabilityProps) => {
+  const [availability, setAvailability] = useState<Availability[]>(initialAvailability);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Days of the week
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   
-  // Process availability data into a consistent format
-  const formattedAvailability = useMemo(() => {
-    // Default empty availability
-    const defaultAvailability = {
-      days: [] as string[],
-      hours: [] as number[],
-      customNotes: ''
-    };
-    
-    if (!escort.availability) return defaultAvailability;
-    
-    // Handle array of availability objects
-    if (Array.isArray(escort.availability)) {
-      // Convert to our format
-      const days = escort.availability.map(a => a.day || '').filter(Boolean);
+  // Default time slots for adding new availability
+  const defaultTimeSlots = [
+    { start: "09:00", end: "17:00" }
+  ];
+
+  // Add a new day of availability
+  const addAvailabilityDay = useCallback((day: string) => {
+    setAvailability(prev => [
+      ...prev,
+      {
+        day,
+        slots: [...defaultTimeSlots]
+      }
+    ]);
+  }, []);
+
+  // Remove a day of availability
+  const removeAvailabilityDay = useCallback((index: number) => {
+    setAvailability(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Add a time slot to a specific day
+  const addTimeSlot = useCallback((dayIndex: number) => {
+    setAvailability(prev => {
+      const updatedAvailability = [...prev];
+      updatedAvailability[dayIndex] = {
+        ...updatedAvailability[dayIndex],
+        slots: [
+          ...updatedAvailability[dayIndex].slots,
+          { start: "12:00", end: "17:00" }
+        ]
+      };
+      return updatedAvailability;
+    });
+  }, []);
+
+  // Remove a time slot from a specific day
+  const removeTimeSlot = useCallback((dayIndex: number, slotIndex: number) => {
+    setAvailability(prev => {
+      const updatedAvailability = [...prev];
+      updatedAvailability[dayIndex] = {
+        ...updatedAvailability[dayIndex],
+        slots: updatedAvailability[dayIndex].slots.filter((_, i) => i !== slotIndex)
+      };
+      return updatedAvailability;
+    });
+  }, []);
+
+  // Update a time slot
+  const updateTimeSlot = useCallback((dayIndex: number, slotIndex: number, field: 'start' | 'end', value: string) => {
+    setAvailability(prev => {
+      const updatedAvailability = [...prev];
+      updatedAvailability[dayIndex].slots[slotIndex] = {
+        ...updatedAvailability[dayIndex].slots[slotIndex],
+        [field]: value
+      };
+      return updatedAvailability;
+    });
+  }, []);
+
+  // Save availability to the server
+  const saveAvailability = useCallback(async () => {
+    if (!escortId) {
+      setError('Escort ID is required to save availability');
+      return false;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      // In a real app, this would be an API call
+      console.log('Saving availability for escort:', escortId, availability);
       
-      // Extract hours from availability if they exist in the right format
-      let hours: number[] = [];
-      let customNotes = '';
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      escort.availability.forEach(avail => {
-        // Check if this availability item has hours property that's an array
-        if (avail.hours && Array.isArray(avail.hours)) {
-          hours = [...hours, ...avail.hours];
-        }
-        
-        // Check if this availability item has a customNotes property
-        if (avail.customNotes) {
-          customNotes += (customNotes ? ' ' : '') + avail.customNotes;
-        }
+      toast({
+        title: 'Availability updated',
+        description: 'Your availability settings have been saved.',
       });
       
-      return {
-        days,
-        hours,
-        customNotes
-      };
-    }
-    
-    // Handle single availability object
-    if (typeof escort.availability === 'object' && !Array.isArray(escort.availability)) {
-      const avail = escort.availability as Availability;
+      return true;
+    } catch (err) {
+      console.error('Error saving availability:', err);
+      setError('Failed to save availability. Please try again.');
       
-      return {
-        days: avail.days || [],
-        hours: avail.hours || [],
-        customNotes: avail.customNotes || ''
-      };
+      toast({
+        title: 'Save failed',
+        description: 'There was a problem updating your availability. Please try again.',
+        variant: 'destructive',
+      });
+      
+      return false;
+    } finally {
+      setSaving(false);
     }
-    
-    return defaultAvailability;
-  }, [escort.availability]);
-  
-  // Check if escort is available today
-  const availableToday = useMemo(() => {
-    if (escort.availableNow) return true;
-    
-    const today = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-    return formattedAvailability.days.some(day => 
-      day.toLowerCase().includes(today)
-    );
-  }, [escort.availableNow, formattedAvailability.days]);
-  
-  // Generate availability text
-  const availabilityText = useMemo(() => {
-    if (escort.availableNow) return "Available now";
-    if (availableToday) return "Available today";
-    if (formattedAvailability.days.length > 0) {
-      return `Available on ${formattedAvailability.days.slice(0, 3).join(', ')}${formattedAvailability.days.length > 3 ? '...' : ''}`;
-    }
-    return "Contact for availability";
-  }, [escort.availableNow, availableToday, formattedAvailability.days]);
-  
+  }, [escortId, availability, toast]);
+
+  // Get available days (for display or logic)
+  const getAvailableDays = useCallback(() => {
+    return availability.map(a => a.day);
+  }, [availability]);
+
+  // Check if a specific day is available
+  const isDayAvailable = useCallback((day: string) => {
+    return availability.some(a => a.day === day);
+  }, [availability]);
+
   return {
-    isAvailableNow,
-    availableToday,
-    availabilityText,
-    formattedAvailability
+    availability,
+    days,
+    loading,
+    saving,
+    error,
+    addAvailabilityDay,
+    removeAvailabilityDay,
+    addTimeSlot,
+    removeTimeSlot,
+    updateTimeSlot,
+    saveAvailability,
+    getAvailableDays,
+    isDayAvailable
   };
 };
 

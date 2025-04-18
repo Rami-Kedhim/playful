@@ -23,12 +23,27 @@ export interface EscortContextProps {
   updateFilters: (filters: Partial<EscortFilterOptions>) => void;
 }
 
+// Default empty filter object
+const defaultFilters: EscortFilterOptions = {
+  gender: [],
+  serviceType: [],
+  serviceTypes: [],
+  priceRange: [0, 1000],
+  ageRange: [18, 99],
+  language: [],
+  location: "",
+  verified: false,
+  rating: 0,
+  availableNow: false,
+  escortType: "all"
+};
+
 export const EscortContext = createContext<EscortContextProps>({
   state: {
     escorts: [],
     loading: false,
     error: null,
-    filters: {},
+    filters: defaultFilters,
     totalPages: 1,
     currentPage: 1,
     featuredEscorts: [],
@@ -47,7 +62,7 @@ export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     escorts: [],
     loading: false,
     error: null,
-    filters: {},
+    filters: defaultFilters,
     totalPages: 1,
     currentPage: 1,
     featuredEscorts: [],
@@ -64,7 +79,7 @@ export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Fetch escorts on initial load
   useEffect(() => {
-    loadEscorts();
+    loadEscorts(defaultFilters);
   }, []);
 
   // Fetch escorts when filters change
@@ -72,7 +87,7 @@ export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     loadEscorts(state.filters);
   }, [state.filters]);
 
-  const loadEscorts = async (filters: EscortFilterOptions | boolean = {}) => {
+  const loadEscorts = async (filters: EscortFilterOptions | boolean = defaultFilters) => {
     try {
       setState(prev => ({ ...prev, loading: true, isLoading: true, error: null }));
       

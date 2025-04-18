@@ -38,7 +38,18 @@ export const useEscortDetail = (escortId?: string) => {
           rating: 4.8,
           reviewCount: 24,
           verified: true,
-          rates: { hourly: 200 }
+          rates: { hourly: 200 },
+          bio: "Professional companion for your special events",
+          price: 200,
+          images: ["/assets/escorts/profile1.jpg"],
+          services: ["Dinner Date", "Event Companion"],
+          isVerified: true,
+          featured: false,
+          contactInfo: {
+            email: "sample@example.com",
+            phone: "+1234567890",
+            website: "https://example.com/sample"
+          }
         };
         
         setEscort(fakeEscort);

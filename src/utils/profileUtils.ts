@@ -1,70 +1,74 @@
 
-import { DatabaseGender, UserProfile } from '@/types/auth';
+// Define database gender types
+export enum DatabaseGender {
+  FEMALE = 'female',
+  MALE = 'male',
+  TRANSGENDER_FEMALE = 'transgender_female',
+  TRANSGENDER_MALE = 'transgender_male',
+  NON_BINARY = 'non_binary',
+  OTHER = 'other'
+}
 
-// Generate avatar URL from initials for use when no image is provided
-export const getInitialsAvatar = (name: string): string => {
-  const initials = name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
-    
-  // Use a placeholder service that generates an image with the initials
-  const backgroundColor = stringToColor(name);
-  return `https://ui-avatars.com/api/?name=${initials}&background=${backgroundColor.replace('#', '')}&color=ffffff`;
-};
+// Gender options for UI
+export const GENDER_OPTIONS = [
+  { value: 'female', label: 'Female' },
+  { value: 'male', label: 'Male' },
+  { value: 'transgender_female', label: 'Transgender Female' },
+  { value: 'transgender_male', label: 'Transgender Male' },
+  { value: 'non_binary', label: 'Non-Binary' },
+  { value: 'other', label: 'Other' }
+];
 
-// Convert string to color for consistent avatar background colors
-const stringToColor = (str: string): string => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  
-  let color = '#';
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xFF;
-    color += ('00' + value.toString(16)).substr(-2);
-  }
-  
-  return color;
-};
-
-// Maps string gender values to DatabaseGender enum
-export const mapStringToGender = (gender?: string): DatabaseGender => {
-  if (!gender) return DatabaseGender.OTHER;
-  
+// Map display name to database value
+export const mapGenderToDatabase = (gender: string): string => {
   switch (gender.toLowerCase()) {
-    case 'male':
-      return DatabaseGender.MALE;
     case 'female':
-      return DatabaseGender.FEMALE;
+      return 'female';
+    case 'male':
+      return 'male';
+    case 'transgender female':
+      return 'transgender_female';
+    case 'transgender male':
+      return 'transgender_male';
+    case 'non-binary':
+    case 'nonbinary':
+      return 'non_binary';
     default:
-      return DatabaseGender.OTHER;
+      return 'other';
   }
 };
 
-// Upload avatar to storage (mock implementation)
-export const uploadAvatar = async (file: File): Promise<string> => {
-  // In a real implementation, this would upload to a storage service
-  // For now, we'll return a fake URL
-  return URL.createObjectURL(file);
+// Map database value to display name
+export const mapGenderFromDatabase = (gender: string): string => {
+  switch (gender) {
+    case 'female':
+      return 'Female';
+    case 'male':
+      return 'Male';
+    case 'transgender_female':
+      return 'Transgender Female';
+    case 'transgender_male':
+      return 'Transgender Male';
+    case 'non_binary':
+      return 'Non-Binary';
+    default:
+      return 'Other';
+  }
 };
 
-// Validate gender string against allowed values
-export const validateGender = (gender: string): boolean => {
-  return ['male', 'female', 'other', 'non-binary', 'trans'].includes(gender.toLowerCase());
+// Format age range for display
+export const formatAgeRange = (min: number, max: number): string => {
+  if (min === max) return `${min}`;
+  if (min === 18 && max === 99) return 'Any age';
+  if (min === 18) return `Up to ${max}`;
+  if (max === 99) return `${min}+`;
+  return `${min} - ${max}`;
 };
 
-// Format profile data for display
-export const formatProfileData = (profile: UserProfile) => {
-  return {
-    ...profile,
-    displayName: profile.full_name || profile.username || 'Anonymous',
-    memberSince: profile.created_at 
-      ? new Date(profile.created_at).toLocaleDateString() 
-      : 'Unknown',
-    verified: profile.is_verified || false
-  };
+// Format price range for display
+export const formatPriceRange = (min: number, max: number): string => {
+  if (min === 0 && max === 1000) return 'Any price';
+  if (min === 0) return `Up to $${max}`;
+  if (max === 1000) return `$${min}+`;
+  return `$${min} - $${max}`;
 };

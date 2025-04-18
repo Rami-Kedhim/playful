@@ -1,80 +1,66 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Video, RadioTower } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Monitor, Users, Globe } from 'lucide-react';
 
-export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both';
+export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both' | 'massage' | 'dinner';
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
-  showEmpty?: boolean;
-  variant?: 'default' | 'outline' | 'secondary';
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
+  showLabel?: boolean;
 }
 
-// Use this function to get the service type badge label
-export function getServiceTypeBadgeLabel(type: ServiceTypeFilter): string {
-  switch (type) {
-    case 'in-person':
-      return 'In Person';
-    case 'virtual':
-      return 'Virtual';
-    case 'both':
-      return 'In Person & Virtual';
-    default:
-      return 'All Service Types';
-  }
-}
-
-// Use this to get the icon component for a service type
-export function ServiceTypeIcon({ 
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type, 
-  size = 16,
-  variant = 'default'
-}: { 
-  type: ServiceTypeFilter; 
-  size?: number;
-  variant?: 'default' | 'colored';
-}) {
-  switch (type) {
-    case 'in-person':
-      return <MapPin size={size} className={variant === 'colored' ? 'text-blue-500' : ''} />;
-    case 'virtual':
-      return <Video size={size} className={variant === 'colored' ? 'text-green-500' : ''} />;
-    case 'both':
-      return <RadioTower size={size} className={variant === 'colored' ? 'text-purple-500' : ''} />;
-    default:
-      return null;
-  }
-}
-
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
-  type,
-  showEmpty = false,
-  variant = 'default',
-  size = 'md',
-  className
+  showLabel = true 
 }) => {
-  if (!type && !showEmpty) return null;
+  const getIconAndText = () => {
+    switch (type) {
+      case 'in-person':
+        return {
+          icon: <Users className="h-3 w-3" />,
+          text: 'In-Person',
+          color: 'bg-indigo-500 hover:bg-indigo-600'
+        };
+      case 'virtual':
+        return {
+          icon: <Monitor className="h-3 w-3" />,
+          text: 'Virtual',
+          color: 'bg-purple-500 hover:bg-purple-600'
+        };
+      case 'both':
+        return {
+          icon: <Globe className="h-3 w-3" />,
+          text: 'In-Person & Virtual',
+          color: 'bg-blue-500 hover:bg-blue-600'
+        };
+      case 'massage':
+        return {
+          icon: <span>💆</span>,
+          text: 'Massage',
+          color: 'bg-green-500 hover:bg-green-600'
+        };
+      case 'dinner':
+        return {
+          icon: <span>🍽️</span>,
+          text: 'Dinner Date',
+          color: 'bg-amber-500 hover:bg-amber-600'
+        };
+      default:
+        return null;
+    }
+  };
+
+  const badgeData = getIconAndText();
   
-  const label = getServiceTypeBadgeLabel(type);
-  const sizeClass = size === 'sm' ? 'text-xs py-0.5 px-2' : 
-                   size === 'lg' ? 'text-sm py-1.5 px-3' : 
-                   'text-xs py-1 px-2.5';
-  
+  if (!badgeData) return null;
+
   return (
     <Badge 
-      variant={variant}
-      className={cn(
-        "flex items-center gap-1.5 font-medium",
-        sizeClass,
-        className
-      )}
+      className={`flex items-center gap-1 ${badgeData.color} text-white border-0`}
     >
-      <ServiceTypeIcon type={type} size={size === 'sm' ? 12 : size === 'lg' ? 18 : 14} />
-      <span>{label}</span>
+      {badgeData.icon}
+      {showLabel && <span>{badgeData.text}</span>}
     </Badge>
   );
 };
