@@ -7,7 +7,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Check, Info } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+// Import ServiceTypeFilter from the correct component
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import { useServiceType } from '@/contexts/ServiceTypeContext';
 
 // Simple ServiceTypeIcon component

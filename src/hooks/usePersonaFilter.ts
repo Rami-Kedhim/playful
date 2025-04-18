@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 import { useDebounce } from '@/hooks/useDebounce';
 
 interface UsePersonaFilterProps {
@@ -42,7 +42,7 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
   const debouncedLocation = useDebounce(locationFilter, 300);
 
   // Toggle a role filter
-  const toggleRoleFilter = (role: keyof UberPersona['roleFlags']) => {
+  const toggleRoleFilter = (role: string) => {
     setRoleFilters(prev => ({
       ...prev,
       [role]: !prev[role]
@@ -50,7 +50,7 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
   };
 
   // Toggle a capability filter
-  const toggleCapabilityFilter = (capability: keyof UberPersona['capabilities']) => {
+  const toggleCapabilityFilter = (capability: string) => {
     setCapabilityFilters(prev => ({
       ...prev,
       [capability]: !prev[capability]
@@ -64,15 +64,15 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
       if (debouncedSearch) {
         const searchLower = debouncedSearch.toLowerCase();
         const matchesSearch = 
-          persona.displayName.toLowerCase().includes(searchLower) ||
-          persona.bio.toLowerCase().includes(searchLower) ||
-          persona.tags.some(tag => tag.toLowerCase().includes(searchLower));
+          persona.displayName?.toLowerCase().includes(searchLower) || 
+          persona.bio?.toLowerCase().includes(searchLower) ||
+          persona.tags?.some(tag => tag.toLowerCase().includes(searchLower));
         
         if (!matchesSearch) return false;
       }
       
       // Location filter
-      if (debouncedLocation) {
+      if (debouncedLocation && persona.location) {
         const locationLower = debouncedLocation.toLowerCase();
         if (!persona.location.toLowerCase().includes(locationLower)) {
           return false;
@@ -81,9 +81,9 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
       
       // Role filters
       const hasActiveRoleFilters = Object.values(roleFilters).some(value => value);
-      if (hasActiveRoleFilters) {
+      if (hasActiveRoleFilters && persona.roleFlags) {
         const matchesRoleFilter = Object.entries(roleFilters).some(([role, isActive]) => {
-          return isActive && persona.roleFlags[role as keyof UberPersona['roleFlags']];
+          return isActive && persona.roleFlags && persona.roleFlags[role as keyof typeof persona.roleFlags];
         });
         
         if (!matchesRoleFilter) return false;
@@ -91,9 +91,17 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
       
       // Capability filters
       const hasActiveCapabilityFilters = Object.values(capabilityFilters).some(value => value);
-      if (hasActiveCapabilityFilters) {
+      if (hasActiveCapabilityFilters && persona.capabilities) {
         const matchesCapabilityFilter = Object.entries(capabilityFilters).some(([capability, isActive]) => {
-          return isActive && persona.capabilities[capability as keyof UberPersona['capabilities']];
+          if (!isActive) return false;
+          
+          // Handle different capability structures
+          if (typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities)) {
+            return persona.capabilities[capability as keyof typeof persona.capabilities];
+          } else if (Array.isArray(persona.capabilities)) {
+            return persona.capabilities.includes(capability);
+          }
+          return false;
         });
         
         if (!matchesCapabilityFilter) return false;

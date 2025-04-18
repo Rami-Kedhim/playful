@@ -1,4 +1,3 @@
-
 import { Escort } from '@/types/escort';
 import { SystemHealthMetrics } from '@/types/neural';
 
@@ -39,7 +38,10 @@ export class HermesOxumNeuralHub {
         isVerified: i % 2 === 0,
         services: ['Companionship', 'Massage', 'Dinner Date'],
         images: [`https://picsum.photos/seed/neural${i}/800/1200`],
-        contactInfo: { email: `neural${i}@example.com` },
+        contactInfo: {
+          email: `neural${i}@example.com`,
+          phone: 'N/A'
+        },
         isAI: true
       });
     }

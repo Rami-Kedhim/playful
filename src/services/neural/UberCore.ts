@@ -1,10 +1,9 @@
-
+import { UberPersona } from '@/types/UberPersona';
 import { UberCoreSettings, UberSearchFilters, HilbertSpacePosition } from '@/types/uber-ecosystem';
-import { UberPersona } from '@/types/uberPersona';
-import { mapEscortToUberPersona, mapCreatorToUberPersona, mapLivecamToUberPersona } from '@/utils/profileMapping';
 import { Escort } from '@/types/escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
+import { mapEscortToUberPersona, mapCreatorToUberPersona, mapLivecamToUberPersona } from '@/utils/profileMapping';
 
 /**
  * UberCore - The central neural service for the Uber ecosystem
