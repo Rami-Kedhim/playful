@@ -1,5 +1,5 @@
 
-import { useAuth, AuthProvider } from '@/hooks/auth/useAuthContext.tsx';
+import { useAuth as useAuthFromContext } from './useAuthContext';
 
-export { useAuth, AuthProvider };
+export const useAuth = useAuthFromContext;
 export default useAuth;

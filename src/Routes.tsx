@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -62,7 +61,7 @@ const RoutesComponent: React.FC = () => {
     userId: authProfile.id,
     username: authProfile.username || '',
     email: authProfile.email || '',
-    displayName: authProfile.name || authProfile.full_name || authUser?.name || '',
+    displayName: authProfile.name || authProfile.full_name || (authUser?.name || ''),
     location: authProfile.location || '',
     bio: authProfile.bio || '',
     isVerified: authProfile.is_verified || false,

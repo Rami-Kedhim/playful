@@ -80,3 +80,32 @@ export const formatRelativeTime = (date?: Date | string | null): string => {
   const diffInYears = Math.floor(diffInMonths / 12);
   return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
 };
+
+// Add missing utility functions for content components
+export const calculateExpiryDate = (startDate: Date | string, duration: number): Date => {
+  const date = safelyParseDate(startDate, true) as Date;
+  date.setDate(date.getDate() + duration);
+  return date;
+};
+
+export const calculateDaysRemaining = (expiryDate: Date | string): number => {
+  const expiry = safelyParseDate(expiryDate);
+  if (!expiry) return 0;
+  
+  const now = new Date();
+  const diffInDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffInDays);
+};
+
+export const determineContentStatus = (expiryDate: Date | string): 'active' | 'expiring' | 'expired' => {
+  const daysRemaining = calculateDaysRemaining(expiryDate);
+  
+  if (daysRemaining <= 0) return 'expired';
+  if (daysRemaining <= 7) return 'expiring';
+  return 'active';
+};
+
+export const calculateRenewalCost = (basePrice: number, duration: number): number => {
+  // Simple calculation, adjust as needed
+  return basePrice * (duration / 30); // Assuming duration is in days
+};

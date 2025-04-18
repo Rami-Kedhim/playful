@@ -1,204 +1,196 @@
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthUser, AuthResult, AuthContextType } from '@/types/authTypes';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, UserRole } from '@/types/user';
 
-// Create the auth context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Define AuthUser type for components using it
+export interface AuthUser {
+  id: string;
+  email: string;
+  username?: string;
+  name?: string;
+  role: UserRole;
+  isVerified: boolean;
+  avatarUrl?: string;
+  created_at?: string;
+  phone_number?: string;
+  phone?: string;
+  website?: string;
+  full_name?: string;
+}
 
-// Provider component
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export interface AuthContextType {
+  user: AuthUser | null;
+  profile: any | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, username: string) => Promise<boolean>;
+  signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+}
+
+// Create context with default values
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  profile: null,
+  isAuthenticated: false,
+  isLoading: true,
+  error: null,
+  signIn: async () => false,
+  signUp: async () => false,
+  signOut: async () => {},
+  refreshUser: async () => {},
+});
+
+// Auth provider component
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userRoles, setUserRoles] = useState<string[]>([]);
-  
+
+  // Check for existing session on mount
   useEffect(() => {
-    // Initialize auth state
-    const checkAuth = async () => {
+    const checkSession = async () => {
       try {
         setIsLoading(true);
-        // Implementation would go here in a real app
-        setIsLoading(false);
+        // Mock auth logic - in a real app this would check with your backend
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setProfile(parsedUser); // Simplified for this example
+        }
       } catch (err) {
-        setError('Authentication error');
+        console.error("Error checking session:", err);
+        setError("Session check failed");
+      } finally {
         setIsLoading(false);
       }
     };
     
-    checkAuth();
+    checkSession();
   }, []);
-  
-  const login = async (email: string, password: string): Promise<AuthResult> => {
+
+  // Sign in function
+  const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // Mock implementation
+      // Mock authentication - replace with actual auth logic
       const mockUser: AuthUser = {
-        id: '123',
+        id: '1',
         email,
-        app_metadata: {},
-        user_metadata: {},
-        aud: 'authenticated'
+        username: email.split('@')[0],
+        name: email.split('@')[0],
+        role: UserRole.USER,
+        isVerified: true,
+        avatarUrl: '',
       };
       
       setUser(mockUser);
-      return { success: true, user: mockUser };
+      setProfile(mockUser); // Simplified
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
+      return true;
     } catch (err: any) {
-      setError(err.message || 'Login failed');
-      return { success: false, error: err.message };
+      console.error("Sign in error:", err);
+      setError(err.message || "Failed to sign in");
+      return false;
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const logout = async (): Promise<void> => {
+
+  // Sign up function
+  const signUp = async (email: string, password: string, username: string): Promise<boolean> => {
     try {
       setIsLoading(true);
       setError(null);
       
-      setUser(null);
-      setProfile(null);
-      setUserRoles([]);
-    } catch (err: any) {
-      setError(err.message || 'Logout failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const register = async (email: string, password: string, username?: string): Promise<AuthResult> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Mock implementation
+      // Mock user registration
       const mockUser: AuthUser = {
-        id: '123',
+        id: '1',
         email,
         username,
-        app_metadata: {},
-        user_metadata: {},
-        aud: 'authenticated'
+        name: username,
+        role: UserRole.USER,
+        isVerified: false,
+        avatarUrl: '',
       };
       
       setUser(mockUser);
-      return { success: true, user: mockUser };
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
-      return { success: false, error: err.message };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const resetPassword = async (email: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      setError(null);
+      setProfile(mockUser); // Simplified
+      localStorage.setItem('user', JSON.stringify(mockUser));
       
-      // Mock implementation
       return true;
     } catch (err: any) {
-      setError(err.message || 'Password reset failed');
+      console.error("Sign up error:", err);
+      setError(err.message || "Failed to sign up");
       return false;
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const updateUserProfile = async (userData: Partial<AuthUser>): Promise<boolean> => {
+
+  // Sign out function
+  const signOut = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      setError(null);
       
-      // Mock implementation
-      if (user) {
-        setUser({ ...user, ...userData });
+      // Clear authentication state
+      localStorage.removeItem('user');
+      setUser(null);
+      setProfile(null);
+    } catch (err: any) {
+      console.error("Sign out error:", err);
+      setError(err.message || "Failed to sign out");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Refresh user data
+  const refreshUser = async (): Promise<void> => {
+    try {
+      setIsLoading(true);
+      
+      // In a real app, fetch updated user data
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setProfile(parsedUser); // Simplified
       }
-      
-      return true;
     } catch (err: any) {
-      setError(err.message || 'Profile update failed');
-      return false;
+      console.error("Refresh user error:", err);
+      setError(err.message || "Failed to refresh user data");
     } finally {
       setIsLoading(false);
     }
   };
-  
-  const clearError = () => {
-    setError(null);
-  };
-  
-  const refreshProfile = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Mock implementation
-      // Would typically fetch user profile here
-    } catch (err: any) {
-      setError(err.message || 'Profile refresh failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const checkRole = (role: string): boolean => {
-    return userRoles.includes(role);
-  };
-  
-  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Mock implementation
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'Password update failed');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Create the context value
-  const contextValue: AuthContextType = {
+
+  // Auth context value
+  const value: AuthContextType = {
     user,
-    login,
-    logout,
+    profile,
+    isAuthenticated: !!user,
     isLoading,
     error,
-    isAuthenticated: !!user,
-    userRoles,
-    register,
-    resetPassword,
-    updateUserProfile,
-    clearError,
-    profile,
-    refreshProfile,
-    checkRole,
-    updatePassword
+    signIn,
+    signUp,
+    signOut,
+    refreshUser
   };
-  
+
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 // Custom hook to use the auth context
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
-};
-
-export default useAuth;
+export const useAuth = () => useContext(AuthContext);

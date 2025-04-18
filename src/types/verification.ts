@@ -47,3 +47,6 @@ export enum VerificationLevel {
   ENHANCED = 'enhanced',
   PREMIUM = 'premium'
 }
+
+// Add DocumentType type for VerificationForm
+export type DocumentType = string;
