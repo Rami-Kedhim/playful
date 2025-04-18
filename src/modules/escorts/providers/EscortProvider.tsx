@@ -5,7 +5,7 @@ import { Escort } from '@/types/escort';
 import escortService from '../../../services/escortService';
 import { EscortFilterOptions } from '@/types/escortTypes';
 
-// Define the EscortFilterOptions interface
+// Define the EscortContextState interface
 export interface EscortContextState {
   escorts: Escort[];
   loading: boolean;
@@ -13,8 +13,8 @@ export interface EscortContextState {
   filters: EscortFilterOptions;
   totalPages: number;
   currentPage: number;
-  featuredEscorts?: Escort[]; // Add featuredEscorts property
-  isLoading?: boolean; // Add isLoading as an alias for loading
+  featuredEscorts: Escort[]; // Add featuredEscorts property
+  isLoading: boolean; // Add isLoading as an alias for loading
 }
 
 export interface EscortContextProps {
@@ -32,8 +32,8 @@ export const EscortContext = createContext<EscortContextProps>({
     filters: {},
     totalPages: 1,
     currentPage: 1,
-    featuredEscorts: [], // Initialize featuredEscorts
-    isLoading: false // Initialize isLoading
+    featuredEscorts: [],
+    isLoading: false
   },
   loadEscorts: async () => {},
   getEscortById: async () => null,

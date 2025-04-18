@@ -1,184 +1,172 @@
-import { Escort } from './escort';
 
-// Enhanced escort filter options
-export interface EnhancedEscortFilters {
-  location: string;
-  serviceTypes: string[];
-  priceRange: [number, number];
-  gender: string[];
-  orientation: string[];
-  ageRange: [number, number];
-  rating: number;
-  verified: boolean;
-  availableNow: boolean;
-  escortType: "verified" | "ai" | "provisional" | "all";
-  language: string[];
-  height: [number, number];
-  weight: [number, number];
-  hairColor: string[];
-  eyeColor: string[];
-  ethnicity: string[];
-  bodyType: string[];
-  availability: {
-    days: string[];
-    hours: string[];
-  };
-  sortBy: string;
-  useBoostSorting: boolean;
+export enum ServiceType {
+  Massage = 'massage',
+  Roleplay = 'roleplay',
+  Overnight = 'overnight',
+  BDSM = 'bdsm',
+  Companionship = 'companionship',
+  Dinner = 'dinner',
+  Events = 'events',
+  Travel = 'travel',
+  // Add other service types as needed
 }
 
-// Update EscortFilterOptions for backward compatibility
-export interface EscortFilterOptions {
-  location?: string;
-  gender?: string[];
-  service?: string[];
-  serviceType?: string[];
+// Also allow string literals for more flexible use in data files
+export type ServiceTypeString = ServiceType | string;
+
+export interface Escort {
+  id: string;
+  name: string;
+  age: number;
+  location: string;
+  gender: string;
+  services: ServiceTypeString[];
+  rate: {
+    hourly?: number;
+    twoHours?: number;
+    overnight?: number;
+    weekend?: number;
+  };
+  rating: number;
+  reviewCount: number;
+  avatar: string;
+  phone?: string;
+  email?: string;
+  verified: boolean;
+  languages?: string[];
+  gallery?: string[];
+  availability?: Availability[];
+  about?: string;
+  bio?: string;
+  // Adding fields needed by components
+  description?: string;
+  subscriptionPrice?: number;
+  contentStats?: {
+    photos?: number;
+    videos?: number;
+    streams?: string | number;
+    live?: boolean | string | number;
+  };
+  gallery_images?: string[];
+  verificationLevel?: string;
+  orientation?: string;
+  avatar_url?: string;
+  // Fields for service type compatibility
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  // Fields for profiles
+  tags?: string[];
+  price?: number;
+  featured?: boolean;
   serviceTypes?: string[];
+  profileType?: string;
+  profileImage?: string;
+  imageUrl?: string;
+  availableNow?: boolean;
+  lastActive?: string | Date;
+  responseRate?: number;
+  reviews?: number;
+  sexualOrientation?: string;
+}
+
+export interface Availability {
+  day: string;
+  slots: {
+    start: string;
+    end: string;
+  }[];
+}
+
+export interface EscortFilterOptions {
+  gender?: string[] | string;
+  service?: ServiceTypeString[];
+  serviceTypes?: ServiceTypeString[];
   priceRange?: [number, number];
   ageRange?: [number, number];
-  language?: string[];
-  orientation?: string[];
+  language?: string[] | string;
+  languages?: string[];
+  location?: string;
   maxDistance?: number;
   availability?: string[];
   rating?: number;
-  verifiedOnly?: boolean;
   verified?: boolean;
+  verifiedOnly?: boolean;
   availableNow?: boolean;
-  escortType?: "verified" | "ai" | "provisional" | "all";
+  escortType?: "all" | "verified" | "ai" | "provisional";
+  orientation?: string | string[];
   sortBy?: string;
-  page?: number;
-  limit?: number;
-  selectedServices?: string[];
+  useBoostSorting?: boolean;
+  // Additional filters used in components
+  selectedServices?: ServiceTypeString[];
   selectedGenders?: string[];
-  languages?: string[];
 }
 
-// Booking form data
-export interface BookingFormData {
-  startTime: Date;
-  endTime: Date;
-  location: string;
-  serviceType: string;
-  specialRequests?: string;
-  contactPreference: 'email' | 'phone' | 'app';
-  agreeToTerms: boolean;
+export interface Video {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title?: string;
+  duration?: number;
+  isPublic?: boolean;
 }
 
-// Contact request form data
-export interface ContactRequestData {
-  name: string;
-  email: string;
-  message: string;
-  subject: string;
-  contactPreference: 'email' | 'phone' | 'app';
-}
-
-// Review submission data
-export interface ReviewSubmissionData {
+export interface Booking {
+  id: string;
   escortId: string;
-  rating: number;
-  title: string;
-  content: string;
-  anonymous: boolean;
-  tags: string[];
+  clientId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  service: ServiceTypeString;
+  status: BookingStatus;
+  location?: string;
+  price: number;
+  deposit?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
-// Verification badge levels
-export enum VerificationBadgeLevel {
-  None = 'none',
-  Basic = 'basic',
-  Enhanced = 'enhanced',
-  Premium = 'premium'
+export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
+
+// Add verification types for compatibility
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected' | 'expired';
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium';
+
+export interface VerificationDocument {
+  id: string;
+  verification_id: string;
+  document_type: string;
+  document_url: string;
+  status: VerificationStatus;
+  notes?: string;
+  created_at: string;
+  updated_at?: string;
+  
+  // Adding these for backwards compatibility
+  type?: string;
+  fileUrl?: string;
+  uploadedAt?: string;
 }
 
-// Common service types
-export const ESCORT_SERVICE_TYPES = [
-  'GFE',
-  'Massage',
-  'Dinner Date',
-  'Overnight',
-  'Travel Companion',
-  'BDSM',
-  'Role Play',
-  'Fetish',
-  'Domination',
-  'Submission',
-  'Couples',
-  'French Kissing',
-  'Lingerie Shows',
-  'Exotic Dancing'
-];
-
-// Escort gender options
-export const ESCORT_GENDER_OPTIONS = [
-  'female',
-  'male',
-  'transgender',
-  'non-binary'
-];
-
-// Escort orientation options
-export const ESCORT_ORIENTATION_OPTIONS = [
-  'straight',
-  'gay',
-  'lesbian',
-  'bisexual',
-  'pansexual'
-];
-
-// Escort ethnicity options
-export const ESCORT_ETHNICITY_OPTIONS = [
-  'caucasian',
-  'asian',
-  'black',
-  'hispanic',
-  'middle-eastern',
-  'indian',
-  'mixed',
-  'other'
-];
-
-// Escort hair color options
-export const ESCORT_HAIR_COLOR_OPTIONS = [
-  'blonde',
-  'brunette',
-  'black',
-  'red',
-  'grey',
-  'other'
-];
-
-// Escort eye color options
-export const ESCORT_EYE_COLOR_OPTIONS = [
-  'blue',
-  'green',
-  'brown',
-  'hazel',
-  'grey',
-  'other'
-];
-
-// Escort body type options
-export const ESCORT_BODY_TYPE_OPTIONS = [
-  'slim',
-  'athletic',
-  'average',
-  'curvy',
-  'plus-size'
-];
-
-// Common languages spoken by escorts
-export const ESCORT_LANGUAGE_OPTIONS = [
-  'english',
-  'spanish',
-  'french',
-  'german',
-  'italian',
-  'russian',
-  'chinese',
-  'japanese',
-  'arabic',
-  'portuguese',
-  'hindi',
-  'korean'
-];
+export interface VerificationRequest {
+  id: string;
+  profile_id: string;
+  status: VerificationStatus;
+  requested_level: VerificationLevel;
+  documents: VerificationDocument[];
+  created_at: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+  
+  // Adding these for backwards compatibility
+  submittedAt?: string;
+  updatedAt?: string;
+  verificationLevel?: VerificationLevel;
+  rejectionReason?: string;
+  userId?: string;
+}

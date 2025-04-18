@@ -38,8 +38,12 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
     try {
       // Check if the function exists and call it appropriately
       if (resetPasswordFn) {
-        // Use only email argument for resetPassword
-        await resetPasswordFn(email);
+        // Check if the function requires a token parameter (which would be null for email request)
+        if (resetPasswordFn === auth.resetPassword) {
+          await resetPasswordFn("", email); // Provide empty token for email request
+        } else {
+          await resetPasswordFn(email);
+        }
         
         setIsSent(true);
         toast({
@@ -120,3 +124,4 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
 };
 
 export default ResetPasswordForm;
+

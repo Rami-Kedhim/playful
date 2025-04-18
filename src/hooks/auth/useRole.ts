@@ -8,10 +8,10 @@ export const useRole = () => {
   
   // Convert string role to UserRole enum
   const getRole = (role: string): UserRole => {
-    const roleValues = Object.values(UserRole);
-    return roleValues.includes(role as UserRole) 
-      ? role as UserRole 
-      : UserRole.USER;
+    if (Object.values(UserRole).includes(role as UserRole)) {
+      return role as UserRole;
+    }
+    return UserRole.USER;
   };
   
   const hasRole = useCallback((role: UserRole | string) => {

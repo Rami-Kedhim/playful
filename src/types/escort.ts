@@ -14,6 +14,7 @@ export interface Escort {
   images?: string[];
   services?: string[];
   isVerified?: boolean;
+  verified?: boolean; // Alias for compatibility
   featured?: boolean;
   isFeatured?: boolean; // Alias for compatibility 
   contactInfo?: ContactInfo;
@@ -24,6 +25,33 @@ export interface Escort {
   subscriptionPrice?: number;
   contentStats?: ContentStats;
   orientation?: string;
+  
+  // Additional properties used in components
+  reviewCount?: number;
+  reviews?: number;
+  tags?: string[];
+  imageUrl?: string;
+  profileImage?: string;
+  avatar?: string;
+  avatar_url?: string;
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  lastActive?: string | Date;
+  responseRate?: number;
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  languages?: string[];
+  rates?: {
+    hourly?: number;
+    twoHours?: number;
+    overnight?: number;
+    weekend?: number;
+  };
+  serviceTypes?: string[];
+  hairColor?: string;
+  eyeColor?: string;
+  height?: number;
+  weight?: number;
 }
 
 export interface Measurements {
@@ -104,5 +132,26 @@ export interface Video {
   isPremium?: boolean;
   price?: number;
   createdAt?: string;
+  updatedAt?: string;
+}
+
+// Add missing types from booking components
+export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
+
+export interface Booking {
+  id: string;
+  escortId: string;
+  clientId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  service: ServiceType;
+  status: BookingStatus;
+  location?: string;
+  price: number;
+  deposit?: number;
+  notes?: string;
+  createdAt: string;
   updatedAt?: string;
 }
