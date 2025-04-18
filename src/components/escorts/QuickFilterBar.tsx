@@ -3,7 +3,6 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import ServiceTypeQuickFilter from '@/components/escorts/filters/ServiceTypeQuickFilter';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import { BadgeCheck, Clock, Map, Star, Tags } from 'lucide-react';
 
@@ -39,17 +38,51 @@ const QuickFilterBar: React.FC<QuickFilterBarProps> = ({
   ratingMin,
   setRatingMin
 }) => {
+  const handleTypeClick = (type: ServiceTypeFilter) => {
+    if (serviceTypeFilter === type) {
+      setServiceTypeFilter('');
+    } else {
+      setServiceTypeFilter(type);
+    }
+  };
+
   return (
     <Card className={className}>
       <CardContent className="p-3">
         <ScrollArea className="w-full whitespace-nowrap">
           <div className="flex items-center gap-3">
-            <ServiceTypeQuickFilter
-              serviceTypeFilter={serviceTypeFilter}
-              setServiceTypeFilter={setServiceTypeFilter}
-              showLabel={false}
-              className="border-none shadow-none bg-transparent"
-            />
+            {/* Service type filters */}
+            <div className="flex gap-1">
+              <Button 
+                variant={serviceTypeFilter === 'in-person' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleTypeClick('in-person')}
+                className="flex items-center gap-1"
+              >
+                <Map className="h-4 w-4" />
+                <span>In Person</span>
+              </Button>
+              
+              <Button 
+                variant={serviceTypeFilter === 'virtual' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleTypeClick('virtual')}
+                className="flex items-center gap-1"
+              >
+                <Map className="h-4 w-4" />
+                <span>Virtual</span>
+              </Button>
+              
+              <Button 
+                variant={serviceTypeFilter === 'both' ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleTypeClick('both')}
+                className="flex items-center gap-1"
+              >
+                <Map className="h-4 w-4" />
+                <span>Both</span>
+              </Button>
+            </div>
             
             {setVerifiedOnly && (
               <Button 

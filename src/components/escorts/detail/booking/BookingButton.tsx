@@ -1,31 +1,28 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CalendarDays } from 'lucide-react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { useNavigate } from 'react-router-dom';
-import BookingDialog from './BookingDialog';
+import { Calendar } from 'lucide-react';
 import { Escort } from '@/types/escort';
 import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
+import BookingDialog from '../../booking/BookingDialog';
 
 interface BookingButtonProps {
   escort: Escort;
-  variant?: 'default' | 'outline' | 'secondary';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-  className?: string;
+  availability?: any;
+  size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'outline' | 'ghost';
+  fullWidth?: boolean;
 }
 
 const BookingButton: React.FC<BookingButtonProps> = ({
   escort,
+  availability,
+  size = 'md',
   variant = 'default',
-  size = 'default',
-  className
+  fullWidth = false
 }) => {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
   
-  // Determine if booking is possible based on service type
   const getServiceType = (): ServiceTypeFilter => {
     if (escort.providesInPersonServices && escort.providesVirtualContent) {
       return "both";
@@ -36,42 +33,29 @@ const BookingButton: React.FC<BookingButtonProps> = ({
     }
     return "";
   };
+
+  const serviceType = getServiceType();
   
-  const canBook = getServiceType() !== "";
-  
-  const handleBookingClick = () => {
-    if (!isAuthenticated) {
-      navigate('/auth', { state: { from: `/escorts/${escort.id}`, action: 'booking' } });
-      return;
-    }
-    
-    setIsDialogOpen(true);
+  const handleBookNow = () => {
+    setShowBookingDialog(true);
   };
-  
-  const handleBookingSuccess = () => {
-    // Additional actions after successful booking can be added here
-    console.log('Booking successful');
-  };
-  
-  if (!canBook) return null;
   
   return (
     <>
       <Button
-        variant={variant}
         size={size}
-        className={className}
-        onClick={handleBookingClick}
+        variant={variant}
+        onClick={handleBookNow}
+        className={fullWidth ? 'w-full' : ''}
       >
-        <CalendarDays className="mr-2 h-4 w-4" />
+        <Calendar className="mr-2 h-4 w-4" />
         Book Now
       </Button>
       
       <BookingDialog
         escort={escort}
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        onBookNow={handleBookingSuccess}
+        isOpen={showBookingDialog}
+        onClose={() => setShowBookingDialog(false)}
       />
     </>
   );

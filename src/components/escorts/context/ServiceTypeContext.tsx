@@ -1,7 +1,6 @@
 
 import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
-import { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
-import { getServiceTypeBadgeLabel } from '../filters/ServiceTypeBadgeLabel';
+import { ServiceTypeFilter, getServiceTypeBadgeLabel } from '../filters/ServiceTypeBadgeLabel';
 import { 
   ServiceType, 
   ForbiddenTerms, 

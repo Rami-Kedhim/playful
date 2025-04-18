@@ -1,8 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import FilterBadge from "./filters/FilterBadge";
-import { ServiceTypeFilter } from "./filters/ServiceTypeBadgeLabel";
-import { getServiceTypeBadgeLabel } from "./filters/ServiceTypeBadgeLabel";
+import { ServiceTypeFilter, getServiceTypeBadgeLabel } from "./filters/ServiceTypeBadgeLabel";
 import { FilterX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ServiceTypeIcon from "./filters/ServiceTypeIcon";
@@ -182,7 +181,7 @@ const AppliedFilters = ({
         <FilterBadge 
           label={getServiceTypeBadgeLabel(serviceTypeFilter)}
           onRemove={() => setServiceTypeFilter("")}
-          icon={<ServiceTypeIcon type={serviceTypeFilter} size={14} variant="colored" />}
+          icon={serviceTypeFilter ? <ServiceTypeIcon type={serviceTypeFilter} size={14} variant="colored" /> : undefined}
           variant="secondary"
         />
       )}

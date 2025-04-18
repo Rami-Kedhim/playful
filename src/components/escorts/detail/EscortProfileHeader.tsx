@@ -4,15 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Clock, CheckCircle2 } from 'lucide-react';
 import { Escort } from '@/types/escort';
-import ServiceTypeBadgeLabel from '../filters/ServiceTypeBadgeLabel';
-import { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
+import ServiceTypeBadgeLabel, { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
 
 interface EscortProfileHeaderProps {
   escort: Escort;
   onContactClick?: () => void;
 }
 
-const EscortProfileHeader = ({ escort, onContactClick }: EscortProfileHeaderProps) => {
+const EscortProfileHeader: React.FC<EscortProfileHeaderProps> = ({ escort, onContactClick }) => {
   // Determine service type based on escort properties
   const getServiceType = (): ServiceTypeFilter => {
     if (escort.providesInPersonServices && escort.providesVirtualContent) {

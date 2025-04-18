@@ -2,36 +2,37 @@
 import React, { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FilterBadgeProps {
   label: string;
   onRemove: () => void;
-  variant?: 'default' | 'secondary' | 'destructive';
   icon?: ReactNode;
+  variant?: "default" | "secondary" | "outline" | "destructive";
+  className?: string;
 }
 
-const FilterBadge: React.FC<FilterBadgeProps> = ({ 
-  label, 
-  onRemove, 
-  variant = 'default',
-  icon
+const FilterBadge: React.FC<FilterBadgeProps> = ({
+  label,
+  onRemove,
+  icon,
+  variant = "default",
+  className
 }) => {
   return (
     <Badge 
       variant={variant} 
-      className="pl-2 pr-1.5 py-1 flex items-center gap-1.5 h-7"
+      className={cn(
+        "flex items-center gap-1.5 py-1 px-2 h-7 cursor-default",
+        className
+      )}
     >
       {icon && <span className="flex items-center">{icon}</span>}
       <span>{label}</span>
-      <button 
-        onClick={(e) => {
-          e.preventDefault();
-          onRemove();
-        }}
-        className="hover:bg-muted/20 rounded-full p-0.5"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
+      <X 
+        className="h-3.5 w-3.5 cursor-pointer hover:text-foreground/80 transition-colors"
+        onClick={onRemove}
+      />
     </Badge>
   );
 };

@@ -1,46 +1,54 @@
 
-// Define service types enum
+// Define specialized service type enum
 export enum ServiceType {
-  DINNER = 'dinner',
-  EVENTS = 'events',
-  TRAVEL = 'travel',
-  COMPANIONSHIP = 'companionship',
-  OVERNIGHT = 'overnight',
-  MASSAGE = 'massage',
-  ROLEPLAY = 'roleplay'
+  MASSAGE = 'Massage',
+  COMPANIONSHIP = 'Companionship',
+  ROLE_PLAY = 'Role Play',
+  DINNER_DATE = 'Dinner Date',
+  TRAVEL_COMPANION = 'Travel Companion',
+  SOCIAL_EVENTS = 'Social Events',
+  COUPLES_DATE = 'Couples Date',
+  VIDEO_CHAT = 'Video Chat',
+  PHONE_CHAT = 'Phone Chat',
+  LIVE_STREAM = 'Live Stream',
+  CONTENT_CREATION = 'Content Creation',
+  PRIVATE_SHOWS = 'Private Shows',
 }
 
-// List of terms that should not be used in service names
-export const ForbiddenTerms: string[] = [
-  'explicit',
-  'sexual',
-  'xxx',
-  'nsfw',
-  'adult',
-  'illegal'
+// List of forbidden terms for safety/compliance
+export const ForbiddenTerms = [
+  'illegal',
+  'drugs',
+  'weapons',
+  'underage',
+  'trafficking',
+  'exploitation',
+  // Add other terms that should be filtered
 ];
 
-// Check if a service name is valid
-export const isValidServiceType = (name: string): boolean => {
-  // Convert to lowercase for comparison
-  const normalizedName = name.toLowerCase().trim();
-  
-  // Check if it's in our ServiceType enum
-  return Object.values(ServiceType).includes(normalizedName as ServiceType);
+// Map of potentially unsafe terms to safe alternatives
+const UnsafeTermMappings: Record<string, ServiceType> = {
+  'explicit': ServiceType.CONTENT_CREATION,
+  'adult': ServiceType.CONTENT_CREATION,
+  'exotic': ServiceType.MASSAGE,
+  'special': ServiceType.COMPANIONSHIP,
+  // Add other mappings as needed
 };
 
-// Map unsafe service names to safe ones
-export const remapUnsafeService = (name: string): ServiceType | null => {
-  const normalizedName = name.toLowerCase().trim();
+// Helper function to check if a service type is valid
+export function isValidServiceType(type: string): boolean {
+  return Object.values(ServiceType).includes(type as ServiceType);
+}
+
+// Helper function to remap potentially unsafe terms to safe service types
+export function remapUnsafeService(term: string): ServiceType | null {
+  const lowerTerm = term.toLowerCase();
   
-  // Map of unsafe terms to safe alternatives
-  const remappings: Record<string, ServiceType> = {
-    'date': ServiceType.DINNER,
-    'intimate': ServiceType.COMPANIONSHIP,
-    'overnight stay': ServiceType.OVERNIGHT,
-    'body work': ServiceType.MASSAGE,
-    'fantasy': ServiceType.ROLEPLAY
-  };
+  for (const [unsafeTerm, safeType] of Object.entries(UnsafeTermMappings)) {
+    if (lowerTerm.includes(unsafeTerm.toLowerCase())) {
+      return safeType;
+    }
+  }
   
-  return remappings[normalizedName] || null;
-};
+  return null;
+}

@@ -1,33 +1,33 @@
 
-import { Checkbox } from "@/components/ui/checkbox";
+import React from 'react';
 import { Label } from "@/components/ui/label";
-import { ESCORT_BODY_TYPE_OPTIONS } from "@/types/escortTypes";
+import { Badge } from "@/components/ui/badge";
+import { ESCORT_BODY_TYPE_OPTIONS } from '@/types/escortTypes';
 
 interface BodyTypeFilterProps {
   selectedBodyTypes: string[];
   toggleBodyType: (bodyType: string) => void;
+  className?: string;
 }
 
-const BodyTypeFilter = ({ selectedBodyTypes, toggleBodyType }: BodyTypeFilterProps) => {
+const BodyTypeFilter: React.FC<BodyTypeFilterProps> = ({
+  selectedBodyTypes,
+  toggleBodyType,
+  className
+}) => {
   return (
-    <div className="space-y-2">
-      <h3 className="text-sm font-medium mb-2">Body Type</h3>
-      
-      <div className="space-y-2">
-        {ESCORT_BODY_TYPE_OPTIONS.map(bodyType => (
-          <div key={bodyType} className="flex items-center space-x-2">
-            <Checkbox 
-              id={`body-type-${bodyType}`}
-              checked={selectedBodyTypes.includes(bodyType)}
-              onCheckedChange={() => toggleBodyType(bodyType)}
-            />
-            <Label 
-              htmlFor={`body-type-${bodyType}`}
-              className="text-sm capitalize cursor-pointer"
-            >
-              {bodyType}
-            </Label>
-          </div>
+    <div className={className}>
+      <Label className="mb-2 block">Body Type</Label>
+      <div className="flex flex-wrap gap-2">
+        {ESCORT_BODY_TYPE_OPTIONS.map((option) => (
+          <Badge
+            key={option.value}
+            variant={selectedBodyTypes.includes(option.value) ? "default" : "outline"}
+            className="cursor-pointer"
+            onClick={() => toggleBodyType(option.value)}
+          >
+            {option.label}
+          </Badge>
         ))}
       </div>
     </div>

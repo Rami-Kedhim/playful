@@ -4,22 +4,21 @@ import { EnhancedEscortFilters } from '@/types/escortTypes';
 
 const defaultFilters: EnhancedEscortFilters = {
   location: '',
-  serviceTypes: [],
-  priceRange: [0, 1000],
+  serviceType: [],
+  price: [0, 1000],
   gender: [],
   orientation: [],
-  ageRange: [21, 50],
+  age: [21, 50],
   rating: 0,
   verified: false,
   availableNow: false,
   escortType: "all",
-  language: [],
+  languages: [],
   height: [140, 200],
-  weight: [40, 120],
+  bodyType: [],
   hairColor: [],
   eyeColor: [],
   ethnicity: [],
-  bodyType: [],
   availability: {
     days: [],
     hours: [],
@@ -45,16 +44,20 @@ export const useEnhancedEscortFilters = () => {
   // Toggle a filter value in an array
   const toggleFilterValue = useCallback((fieldName: keyof EnhancedEscortFilters, value: string) => {
     setFilters(prev => {
-      const currentValues = prev[fieldName] as string[];
-      const exists = currentValues.includes(value);
-      const updatedValues = exists
-        ? currentValues.filter(v => v !== value)
-        : [...currentValues, value];
-      
-      return {
-        ...prev,
-        [fieldName]: updatedValues
-      };
+      // Only handle array type fields
+      if (Array.isArray(prev[fieldName])) {
+        const currentValues = prev[fieldName] as string[];
+        const exists = currentValues.includes(value);
+        const updatedValues = exists
+          ? currentValues.filter(v => v !== value)
+          : [...currentValues, value];
+        
+        return {
+          ...prev,
+          [fieldName]: updatedValues
+        };
+      }
+      return prev;
     });
   }, []);
   
