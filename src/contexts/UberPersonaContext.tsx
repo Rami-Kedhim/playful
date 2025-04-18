@@ -91,17 +91,19 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     persona.profileType === 'verified' || persona.profileType === 'provisional'
   );
   
-  const getCreators = () => allPersonas.filter(persona => 
-    persona.services.some(s => 
+  const getCreators = () => allPersonas.filter(persona => {
+    // Fix: Check if services exists before calling some() on it
+    return persona.services && persona.services.some(s => 
       s.toLowerCase().includes('content') || s.toLowerCase().includes('subscription')
-    )
-  );
+    );
+  });
   
-  const getLivecams = () => allPersonas.filter(persona => 
-    persona.services.some(s => 
+  const getLivecams = () => allPersonas.filter(persona => {
+    // Fix: Check if services exists before calling some() on it
+    return persona.services && persona.services.some(s => 
       s.toLowerCase().includes('cam') || s.toLowerCase().includes('stream') || s.toLowerCase().includes('virtual')
-    )
-  );
+    );
+  });
   
   const getAIPersonas = () => allPersonas.filter(persona => 
     persona.isAI === true || persona.profileType === 'ai'
@@ -125,9 +127,16 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     
     // Apply ranking algorithm with boost factor
     ranked.sort((a, b) => {
+      // Make sure stats exists before accessing its properties
+      // Fix: Check if stats exists before accessing its properties
+      const aRating = a.stats?.rating || 0;
+      const aReviewCount = a.stats?.reviewCount || 0;
+      const bRating = b.stats?.rating || 0;
+      const bReviewCount = b.stats?.reviewCount || 0;
+      
       // Base ranking on stats
-      let aScore = (a.stats.rating * 2) + (a.stats.reviewCount / 10);
-      let bScore = (b.stats.rating * 2) + (b.stats.reviewCount / 10);
+      let aScore = (aRating * 2) + (aReviewCount / 10);
+      let bScore = (bRating * 2) + (bReviewCount / 10);
       
       // Apply boosting
       if (a.featured) aScore *= boostFactor;
