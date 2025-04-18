@@ -23,7 +23,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photo
     let images: string[] = [];
     
     if (escort.gallery) {
-      if (typeof escort.gallery === 'object' && 'imageUrls' in escort.gallery) {
+      if (typeof escort.gallery === 'object' && !Array.isArray(escort.gallery) && 'imageUrls' in escort.gallery) {
         images = Array.isArray(escort.gallery.imageUrls) ? escort.gallery.imageUrls : [];
       } else if (Array.isArray(escort.gallery)) {
         images = escort.gallery;

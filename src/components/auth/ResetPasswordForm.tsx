@@ -41,13 +41,13 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
         // Some auth providers need a token and email, others just email
         // Pass empty string as token when only email is provided
         if (resetPasswordFn === auth.resetPassword) {
-          await resetPasswordFn("", email); // Provide empty token for email request
+          await resetPasswordFn("", email, ""); // Added an empty string as the third argument
         } else if (auth.sendPasswordResetEmail) {
           // For providers that expect just an email
           await auth.sendPasswordResetEmail(email);
         } else {
           // Fallback to using resetPassword with both parameters
-          await auth.resetPassword("", email);
+          await auth.resetPassword("", email, "");
         }
         
         setIsSent(true);
@@ -129,4 +129,3 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
 };
 
 export default ResetPasswordForm;
-

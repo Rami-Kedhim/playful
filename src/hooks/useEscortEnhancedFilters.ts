@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
@@ -22,12 +21,6 @@ const defaultFilters: EnhancedEscortFilters = {
   eyeColor: [],
   ethnicity: [],
   bodyType: [],
-  availability: {
-    days: [],
-    hours: [],
-  },
-  sortBy: "newest",
-  useBoostSorting: true
 };
 
 export const useEscortEnhancedFilters = () => {
@@ -40,33 +33,17 @@ export const useEscortEnhancedFilters = () => {
     setFilters(prev => ({
       ...prev,
       location: state.filters.location || '',
-      serviceTypes: state.filters.serviceTypes || state.filters.serviceType || [],
+      serviceTypes: state.filters.serviceTypes || [],
       priceRange: state.filters.priceRange || [0, 1000],
       gender: state.filters.gender || [],
       orientation: state.filters.orientation || [],
       ageRange: state.filters.ageRange || [21, 50],
       rating: state.filters.rating || 0,
-      verified: state.filters.verified || state.filters.verifiedOnly || false,
+      verified: state.filters.verified || false,
       availableNow: state.filters.availableNow || false,
-      escortType: state.filters.escortType || "all",
       language: state.filters.language || [],
-      useBoostSorting: escortsNeuralService.config.orderByBoost
     }));
-  }, [
-    state.filters.location,
-    state.filters.serviceTypes,
-    state.filters.serviceType,
-    state.filters.priceRange,
-    state.filters.gender,
-    state.filters.orientation,
-    state.filters.ageRange,
-    state.filters.rating,
-    state.filters.verified,
-    state.filters.verifiedOnly,
-    state.filters.availableNow,
-    state.filters.escortType,
-    state.filters.language
-  ]);
+  }, [state.filters]);
   
   // Update neural service config when boost sorting changes
   useEffect(() => {

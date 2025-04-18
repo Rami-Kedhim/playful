@@ -132,6 +132,8 @@ export interface Availability {
   isAvailable?: boolean;
   // Compatibility fields for components that expect 'days'
   days?: string[];
+  hours?: number[];
+  customNotes?: string;
 }
 
 export type ExtendedAvailability = Availability & {
