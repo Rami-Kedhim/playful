@@ -1,7 +1,5 @@
 
-// This file is kept for backward compatibility
-// It re-exports components from the new location
-import { useAuth, AuthProvider } from "@/hooks/auth/useAuthContext";
+import { useAuth, AuthProvider } from "@/hooks/auth/useAuthContext.tsx";
 
 export { useAuth, AuthProvider };
 export default { useAuth, AuthProvider };
