@@ -1,107 +1,93 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { CheckCircle, XCircle } from 'lucide-react';
 import { VerificationDocument, VerificationRequest } from '@/types/escort';
 
-interface DocumentReviewModalProps {
+export interface DocumentReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   document: VerificationDocument;
   request: VerificationRequest;
-  onApprove: (documentId: string, notes: string) => void;
-  onReject: (documentId: string, notes: string) => void;
+  onApprove: (documentId: string, requestId: string) => Promise<void>;
+  onReject: (documentId: string, requestId: string, reason: string) => Promise<void>;
 }
 
-const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
+const DocumentReviewModal = ({
   isOpen,
   onClose,
   document,
   request,
   onApprove,
   onReject
-}) => {
-  const [reason, setReason] = useState('');
+}: DocumentReviewModalProps) => {
+  const [rejectionReason, setRejectionReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const handleApprove = async () => {
-    setIsSubmitting(true);
     try {
-      await onApprove(document.id, reason);
+      setIsSubmitting(true);
+      await onApprove(document.id, request.id);
+      setIsSubmitting(false);
       onClose();
     } catch (error) {
       console.error('Error approving document:', error);
-    } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleReject = async () => {
-    if (!reason) return;
-    
-    setIsSubmitting(true);
     try {
-      await onReject(document.id, reason);
+      setIsSubmitting(true);
+      await onReject(document.id, request.id, rejectionReason);
+      setIsSubmitting(false);
       onClose();
     } catch (error) {
       console.error('Error rejecting document:', error);
-    } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Review Document</DialogTitle>
+          <DialogTitle>Review Verification Document</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
-          <div className="bg-muted p-4 rounded-md">
+          <div className="aspect-video bg-muted rounded-md overflow-hidden">
             <img 
-              src={document?.url || document?.fileUrl || 'no-image.png'} 
+              src={document.fileUrl || document.url || document.document_url} 
               alt="Verification document" 
-              className="w-full h-auto max-h-[400px] object-contain"
+              className="w-full h-full object-contain"
             />
           </div>
           
-          <div>
-            <p><strong>Type:</strong> {document?.type || document?.document_type || 'Unknown'}</p>
-            <p><strong>Uploaded:</strong> {document?.uploadedAt || document?.uploaded_at || 'Unknown'}</p>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="text-muted-foreground">Document Type:</div>
+            <div>{document.documentType || document.document_type || document.type}</div>
+            
+            <div className="text-muted-foreground">Submitted:</div>
+            <div>{new Date(document.uploadedAt || document.uploaded_at || document.created_at || "").toLocaleDateString()}</div>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="rejection-reason">Rejection Reason (if applicable)</Label>
-            <Textarea 
-              id="rejection-reason"
-              placeholder="Explain why the document is being rejected..."
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
+          <Textarea 
+            placeholder="Reason for rejection (required if rejecting)"
+            onChange={(e) => setRejectionReason(e.target.value)}
+            value={rejectionReason}
+          />
           
-          <div className="flex justify-between gap-2">
-            <Button 
-              variant="destructive" 
-              onClick={handleReject} 
-              disabled={!reason || isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? 'Processing...' : 'Reject'}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+              Cancel
             </Button>
-            <Button 
-              variant="default" 
-              onClick={handleApprove} 
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? 'Processing...' : 'Approve'}
+            <Button variant="destructive" onClick={handleReject} disabled={isSubmitting || !rejectionReason.trim()}>
+              Reject
+            </Button>
+            <Button onClick={handleApprove} disabled={isSubmitting}>
+              Approve
             </Button>
           </div>
         </div>

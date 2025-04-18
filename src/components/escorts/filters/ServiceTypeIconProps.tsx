@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users, Monitor, Globe } from 'lucide-react';
+import { Users, Monitor, Globe, SunMoon, UtensilsCrossed } from 'lucide-react';
 
 export type ServiceTypeIconType = 'in-person' | 'virtual' | 'both' | 'massage' | 'dinner';
 
@@ -25,9 +25,9 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
     case 'both':
       return <Globe size={size} className={className} />;
     case 'massage':
-      return <Users size={size} className={className} />;
+      return <SunMoon size={size} className={className} />;
     case 'dinner':
-      return <Users size={size} className={className} />;
+      return <UtensilsCrossed size={size} className={className} />;
     default:
       return <Users size={size} className={className} />;
   }

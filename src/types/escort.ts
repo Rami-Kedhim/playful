@@ -175,6 +175,7 @@ export interface VerificationRequest {
   updated_at?: string;
   verification_id?: string;
   request_id?: string;
+  request?: string;
 }
 
 export interface VerificationDocument {
@@ -194,3 +195,17 @@ export interface VerificationDocument {
   requestId?: string;
   request_id?: string;
 }
+
+// Add service type definitions
+export enum ServiceType {
+  Massage = 'massage',
+  Roleplay = 'roleplay',
+  Overnight = 'overnight',
+  BDSM = 'bdsm',
+  Companionship = 'companionship',
+  Dinner = 'dinner',
+  Events = 'events',
+  Travel = 'travel'
+}
+
+export type ServiceTypeString = ServiceType | string;

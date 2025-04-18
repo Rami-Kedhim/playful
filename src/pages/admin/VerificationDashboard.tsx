@@ -1,229 +1,212 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { VerificationRequest, VerificationStatus } from '@/types/escort';
-import DocumentReviewModal from '@/components/verification/DocumentReviewModal'; 
-
-interface DocumentReviewProps {
-  document: any;
-  isOpen: boolean;
-  onClose: () => void;
-  verification: VerificationRequest;
-  onApprove: () => Promise<void>;
-  onReject: (reason: any) => Promise<void>;
-}
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Input } from '@/components/ui/input';
+import { VerificationRequest, VerificationDocument, VerificationStatus } from '@/types/escort';
+import { getAllVerificationRequests, approveVerificationRequest, rejectVerificationRequest } from '@/services/verificationService';
+import { toast } from '@/components/ui/use-toast';
+import DocumentReviewModal from '@/components/admin/DocumentReviewModal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 const VerificationDashboard: React.FC = () => {
-  const [verificationRequests, setVerificationRequests] = useState<VerificationRequest[]>([]);
+  const [requests, setRequests] = useState<VerificationRequest[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<VerificationStatus | ''>('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<VerificationDocument | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedVerification, setSelectedVerification] = useState<VerificationRequest | null>(null);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-
-  // Fetch verification requests
+  
   useEffect(() => {
-    const fetchVerificationRequests = async () => {
-      try {
-        // Simulating API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockVerifications: VerificationRequest[] = [
-          {
-            id: "ver-1",
-            userId: "user-1",
-            status: VerificationStatus.PENDING,
-            submittedAt: new Date().toISOString(),
-            documents: [
-              {
-                id: "doc-1",
-                requestId: "ver-1",
-                type: "id",
-                url: "https://example.com/id-1.jpg",
-                status: "pending",
-                uploadedAt: new Date().toISOString()
-              },
-              {
-                id: "doc-2",
-                requestId: "ver-1",
-                type: "selfie",
-                url: "https://example.com/selfie-1.jpg",
-                status: "pending",
-                uploadedAt: new Date().toISOString()
-              }
-            ]
-          },
-          {
-            id: "ver-2",
-            userId: "user-2",
-            status: VerificationStatus.REJECTED,
-            submittedAt: new Date(Date.now() - 86400000).toISOString(),
-            rejectionReason: "Documents unclear",
-            documents: [
-              {
-                id: "doc-3",
-                requestId: "ver-2",
-                type: "id",
-                url: "https://example.com/id-2.jpg",
-                status: "rejected",
-                uploadedAt: new Date(Date.now() - 86400000).toISOString()
-              }
-            ],
-            reviewedAt: new Date().toISOString()
-          }
-        ];
-        
-        setVerificationRequests(mockVerifications);
-      } catch (error) {
-        console.error("Error fetching verification requests:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchVerificationRequests();
   }, []);
-
-  // Handle opening the review modal
-  const handleReviewRequest = (verification: VerificationRequest) => {
-    setSelectedVerification(verification);
-    setIsReviewModalOpen(true);
-  };
-
-  // Handle approval of a verification request
-  const handleApproveVerification = async () => {
-    if (!selectedVerification) return;
-    
+  
+  const fetchVerificationRequests = async () => {
+    setLoading(true);
     try {
-      console.log("Approving verification:", selectedVerification.id);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setVerificationRequests(prev => 
-        prev.map(item => 
-          item.id === selectedVerification.id
-            ? { ...item, status: VerificationStatus.APPROVED }
-            : item
-        )
-      );
-      
-      setIsReviewModalOpen(false);
-      setSelectedVerification(null);
+      const data = await getAllVerificationRequests();
+      setRequests(data);
     } catch (error) {
-      console.error("Error approving verification:", error);
-    }
-  };
-
-  // Handle rejection of a verification request
-  const handleRejectVerification = async (reason: string) => {
-    if (!selectedVerification) return;
-    
-    try {
-      console.log("Rejecting verification:", selectedVerification.id, "Reason:", reason);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setVerificationRequests(prev => 
-        prev.map(item => 
-          item.id === selectedVerification.id
-            ? { 
-                ...item, 
-                status: VerificationStatus.REJECTED,
-                rejectionReason: reason 
-              }
-            : item
-        )
-      );
-      
-      setIsReviewModalOpen(false);
-      setSelectedVerification(null);
-    } catch (error) {
-      console.error("Error rejecting verification:", error);
-    }
-  };
-
-  // Status badge component
-  const StatusBadge = ({ status }: { status: VerificationStatus }) => {
-    switch (status) {
-      case VerificationStatus.PENDING:
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Pending</Badge>;
-      case VerificationStatus.APPROVED:
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">Approved</Badge>;
-      case VerificationStatus.REJECTED:
-        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Rejected</Badge>;
-      case VerificationStatus.EXPIRED:
-        return <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-300">Expired</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
+      console.error('Error fetching verification requests:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch verification requests",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
   
-  // Loading state
-  if (loading) {
-    return <div>Loading verification requests...</div>;
-  }
+  const handleApproveDocument = async (documentId: string, requestId: string) => {
+    try {
+      await approveVerificationRequest(requestId);
+      toast({
+        title: "Success",
+        description: "Verification request approved",
+        variant: "success"
+      });
+      fetchVerificationRequests(); // Refresh data
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error approving verification request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to approve verification request",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const handleRejectDocument = async (documentId: string, requestId: string, reason: string) => {
+    try {
+      await rejectVerificationRequest(requestId, reason);
+      toast({
+        title: "Success",
+        description: "Verification request rejected",
+        variant: "success"
+      });
+      fetchVerificationRequests(); // Refresh data
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error rejecting verification request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reject verification request",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  const filteredRequests = requests.filter(request => {
+    const searchMatch = request.userId?.toLowerCase().includes(searchQuery.toLowerCase());
+    const statusMatch = selectedStatus ? request.status === selectedStatus : true;
+    return searchMatch && statusMatch;
+  });
 
+  const handleDocumentClick = (document: VerificationDocument, request: VerificationRequest) => {
+    setSelectedDocument(document);
+    setSelectedRequest(request);
+    setIsModalOpen(true);
+  };
+
+  const handleStatusChange = (status: VerificationStatus | '') => {
+    setSelectedStatus(status);
+  };
+
+  const renderDocumentReviewModal = () => {
+    if (!selectedDocument || !selectedRequest) return null;
+    
+    return (
+      <DocumentReviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        document={selectedDocument}
+        request={selectedRequest}
+        onApprove={handleApproveDocument}
+        onReject={handleRejectDocument}
+      />
+    );
+  };
+  
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Verification Dashboard</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Verification Requests</h1>
       
-      {/* Verification Requests */}
-      <div className="grid gap-4">
-        {verificationRequests.length > 0 ? (
-          verificationRequests.map(verification => (
-            <Card key={verification.id} className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-medium text-lg">{`Request ID: ${verification.id.substring(0, 8)}`}</h3>
-                    <StatusBadge status={verification.status} />
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    <span className="font-medium">User ID:</span> {verification.userId}
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    <span className="font-medium">Submitted:</span> {new Date(verification.submittedAt).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium">Documents:</span> {verification.documents.length}
-                  </p>
-                  
-                  {verification.rejectionReason && (
-                    <p className="text-sm text-red-600 mt-2">
-                      <span className="font-medium">Rejection Reason:</span> {verification.rejectionReason}
-                    </p>
-                  )}
-                </div>
-                
-                <div>
-                  {verification.status === VerificationStatus.PENDING && (
-                    <Button onClick={() => handleReviewRequest(verification)}>
-                      Review
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </Card>
-          ))
-        ) : (
-          <p className="text-center py-8 text-muted-foreground">No verification requests found.</p>
-        )}
+      <div className="flex items-center justify-between mb-4">
+        <Input
+          type="text"
+          placeholder="Search by user ID..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-md"
+        />
+        
+        <Select value={selectedStatus} onValueChange={(value) => handleStatusChange(value as VerificationStatus)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="in_review">In Review</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+            <SelectItem value="expired">Expired</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       
-      {/* Review Modal */}
-      {selectedVerification && (
-        <DocumentReviewModal
-          isOpen={isReviewModalOpen}
-          onClose={() => setIsReviewModalOpen(false)}
-          verification={selectedVerification}
-          onApprove={handleApproveVerification}
-          onReject={handleRejectVerification}
-          document={selectedVerification.documents[0]} // Pass the first document for review
-        />
+      {loading ? (
+        <p>Loading verification requests...</p>
+      ) : (
+        <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+          <Table>
+            <TableCaption>
+              A list of all verification requests.
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User ID</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Requested Level</TableHead>
+                <TableHead>Submitted At</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredRequests.map(request => (
+                <TableRow key={request.id}>
+                  <TableCell>{request.userId}</TableCell>
+                  <TableCell>
+                    {request.status === 'approved' && (
+                      <div className="flex items-center gap-1 text-green-500">
+                        <CheckCircle className="h-4 w-4" />
+                        Approved
+                      </div>
+                    )}
+                    {request.status === 'rejected' && (
+                      <div className="flex items-center gap-1 text-red-500">
+                        <XCircle className="h-4 w-4" />
+                        Rejected
+                      </div>
+                    )}
+                    {request.status !== 'approved' && request.status !== 'rejected' && (
+                      <span>{request.status}</span>
+                    )}
+                  </TableCell>
+                  <TableCell>{request.requestedLevel}</TableCell>
+                  <TableCell>{new Date(request.submittedAt || request.created_at || "").toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {request.documents && request.documents.length > 0 ? (
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={() => handleDocumentClick(request.documents[0], request)}
+                      >
+                        Review Document
+                      </Button>
+                    ) : (
+                      <span>No Documents</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
+      
+      {renderDocumentReviewModal()}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Escort } from '@/types/escort';
 import { EscortFilterOptions } from '@/types/escortFilters';
@@ -10,11 +9,14 @@ interface UseEscortsProps {
 export const useEscorts = ({ initialFilters = {} }: UseEscortsProps = {}) => {
   const [escorts, setEscorts] = useState<Escort[]>([]);
   const [filteredEscorts, setFilteredEscorts] = useState<Escort[]>([]);
+  const [featuredEscorts, setFeaturedEscorts] = useState<Escort[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<EscortFilterOptions>({
     gender: [],
     service: [],
+    serviceType: [],
+    serviceTypes: [],
     priceRange: [0, 1000],
     ageRange: [18, 65],
     languages: [],
@@ -23,6 +25,8 @@ export const useEscorts = ({ initialFilters = {} }: UseEscortsProps = {}) => {
     availability: [],
     rating: 0,
     verified: false,
+    orientation: [],
+    availableNow: false,
     ...initialFilters
   });
 
@@ -54,6 +58,8 @@ export const useEscorts = ({ initialFilters = {} }: UseEscortsProps = {}) => {
       }));
 
       setEscorts(mockEscorts);
+      const featured = mockEscorts.filter(escort => escort.featured);
+      setFeaturedEscorts(featured);
       applyFilters(mockEscorts, filters);
     } catch (err) {
       setError('Failed to fetch escort data');
@@ -113,6 +119,37 @@ export const useEscorts = ({ initialFilters = {} }: UseEscortsProps = {}) => {
         (escort.rating || 0) >= currentFilters.rating
       );
     }
+    
+    // Available now filter
+    if (currentFilters.availableNow) {
+      filtered = filtered.filter(escort => 
+        escort.availableNow === true
+      );
+    }
+    
+    // Service type filter (in-person, virtual, both)
+    if (currentFilters.serviceTypes && currentFilters.serviceTypes.length > 0) {
+      filtered = filtered.filter(escort => {
+        // If escort has explicit serviceTypes property, use that
+        if (escort.serviceTypes && escort.serviceTypes.length > 0) {
+          return currentFilters.serviceTypes?.some(type => escort.serviceTypes?.includes(type));
+        }
+        
+        // Otherwise infer from providesInPerson/Virtual
+        if (currentFilters.serviceTypes?.includes('in-person') && escort.providesInPersonServices) {
+          return true;
+        }
+        if (currentFilters.serviceTypes?.includes('virtual') && escort.providesVirtualContent) {
+          return true;
+        }
+        if (currentFilters.serviceTypes?.includes('both') && 
+            escort.providesInPersonServices && escort.providesVirtualContent) {
+          return true;
+        }
+        
+        return false;
+      });
+    }
 
     setFilteredEscorts(filtered);
   }, []);
@@ -131,6 +168,8 @@ export const useEscorts = ({ initialFilters = {} }: UseEscortsProps = {}) => {
     setFilters({
       gender: [],
       service: [],
+      serviceType: [],
+      serviceTypes: [],
       priceRange: [0, 1000],
       ageRange: [18, 65],
       languages: [],
@@ -138,10 +177,20 @@ export const useEscorts = ({ initialFilters = {} }: UseEscortsProps = {}) => {
       maxDistance: 50,
       availability: [],
       rating: 0,
-      verified: false
+      verified: false,
+      orientation: [],
+      availableNow: false
     });
     setFilteredEscorts(escorts);
   }, [escorts]);
+  
+  // Apply current filters (used for initial load)
+  const applyCurrentFilters = useCallback(() => {
+    applyFilters(escorts, filters);
+  }, [escorts, filters, applyFilters]);
+  
+  // Alias for clearFilters to match interface in Escorts.tsx
+  const clearAllFilters = clearFilters;
 
   // Load escorts initially
   useEffect(() => {
@@ -151,11 +200,14 @@ export const useEscorts = ({ initialFilters = {} }: UseEscortsProps = {}) => {
   return {
     escorts: filteredEscorts,
     allEscorts: escorts,
+    featuredEscorts,
     loading,
     error,
     filters,
     updateFilters,
     clearFilters,
+    clearAllFilters,
+    applyCurrentFilters,
     refetch: fetchEscorts
   };
 };

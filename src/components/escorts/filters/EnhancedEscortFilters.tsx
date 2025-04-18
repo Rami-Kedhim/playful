@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -12,16 +11,16 @@ import { ESCORT_SERVICE_TYPES } from '@/types/escortTypes';
 const EnhancedEscortFilters: React.FC = () => {
   const {
     filters,
-    updateFilter,
+    updateFilters,
     resetFilters,
   } = useEscortEnhancedFilters();
   
   const handlePriceChange = (values: number[]) => {
-    updateFilter('price', [values[0], values[1]]);
+    updateFilters({ price: [values[0], values[1]] as [number, number] });
   };
   
   const handleAgeChange = (values: number[]) => {
-    updateFilter('age', [values[0], values[1]]);
+    updateFilters({ age: [values[0], values[1]] as [number, number] });
   };
   
   const toggleFilterValue = (key: keyof typeof filters, value: string) => {
@@ -32,10 +31,11 @@ const EnhancedEscortFilters: React.FC = () => {
     const currentValues = filters[key] as string[];
     const exists = currentValues.includes(value);
     
-    updateFilter(key, exists 
-      ? currentValues.filter(v => v !== value)
-      : [...currentValues, value]
-    );
+    updateFilters({
+      [key]: exists 
+        ? currentValues.filter(v => v !== value)
+        : [...currentValues, value]
+    });
   };
   
   return (
@@ -92,7 +92,7 @@ const EnhancedEscortFilters: React.FC = () => {
           <Label>Verified Profiles Only</Label>
           <Switch
             checked={!!filters.verified}
-            onCheckedChange={(checked) => updateFilter('verified', checked)}
+            onCheckedChange={(checked) => updateFilters({ verified: checked })}
           />
         </div>
         

@@ -1,4 +1,3 @@
-
 import { generateRandomEscort } from "@/data/mock/profileGenerator";
 import { Escort } from '@/types/escort';
 
@@ -18,7 +17,7 @@ export const uberPersonaService = {
     escortToUberPersona: async (escort: Escort) => {
         return {
             ...escort,
-            profileType: escort.isAI ? 'ai' : escort.is_verified ? 'verified' : 'scraped',
+            profileType: escort.isAI ? 'ai' : escort.isVerified || false ? 'verified' : 'scraped',
             persona_type: 'escort'
         };
     },

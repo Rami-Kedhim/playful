@@ -6,13 +6,15 @@ import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadge
 export interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
   size?: number;
-  className?: string; // Added className prop
+  className?: string;
+  variant?: string;
 }
 
 const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
   type, 
   size = 16,
-  className = ""
+  className = "",
+  variant = "default"
 }) => {
   switch(type) {
     case 'in-person':
