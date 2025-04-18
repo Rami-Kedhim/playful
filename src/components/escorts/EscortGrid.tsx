@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Escort } from '@/types/escort';
+// Fix the import to use consistent casing
+import { Escort } from '@/types/Escort';
 import EscortCard from './EscortCard';
 import { Pagination } from '../ui/pagination';
 import { Skeleton } from '../ui/skeleton';

@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Escort, Video } from '@/types/escort';
+import { Escort } from '@/types/escort';
+import { Video } from '@/types/escort/Video';
 import { useToast } from '@/components/ui/use-toast';
 
 interface UseVideoManagementProps {
@@ -32,7 +33,10 @@ export const useVideoManagement = ({ escortId }: UseVideoManagementProps) => {
           duration: 120,
           viewCount: 42,
           createdAt: new Date().toISOString(),
-          isPremium: false
+          isPremium: false,
+          views: 42,
+          isPublished: true,
+          escortId: escortId
         },
         {
           id: '2',
@@ -42,7 +46,10 @@ export const useVideoManagement = ({ escortId }: UseVideoManagementProps) => {
           duration: 45,
           viewCount: 18,
           createdAt: new Date().toISOString(),
-          isPremium: true
+          isPremium: true,
+          views: 18,
+          isPublished: true,
+          escortId: escortId
         }
       ];
       
@@ -79,7 +86,10 @@ export const useVideoManagement = ({ escortId }: UseVideoManagementProps) => {
         duration: 60, // Mock duration
         viewCount: 0,
         createdAt: new Date().toISOString(),
-        isPremium: !metadata.isPublic
+        isPremium: !metadata.isPublic,
+        views: 0,
+        isPublished: true,
+        escortId: escortId
       };
       
       setVideos(prev => [newVideo, ...prev]);
@@ -104,7 +114,7 @@ export const useVideoManagement = ({ escortId }: UseVideoManagementProps) => {
     } finally {
       setUploading(false);
     }
-  }, [toast]);
+  }, [toast, escortId]);
 
   // Delete a video
   const deleteVideo = useCallback(async (videoId: string) => {

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
-import { SystemHealthMetrics } from '@/types/neural-system';
+import { NeuralSystemMetricsResult, SystemHealthMetrics } from '@/types/neural-system';
 
 // Default system health metrics
 const defaultMetrics: SystemHealthMetrics = {
@@ -25,30 +25,13 @@ const defaultMetrics: SystemHealthMetrics = {
   // Fields that neuralHub.getHealthMetrics() might return
   load: 0.42,
   userEngagement: 0.65,
-  lastUpdated: Date.now()
+  lastUpdated: Date.now(),
+  // Add required properties for NeuralMonitorPanel
+  systemLoad: 0.42,
+  memoryAllocation: 0.38,
+  networkThroughput: 120,
+  requestRate: 120,
 };
-
-export interface NeuralSystemMetricsResult {
-  metrics: SystemHealthMetrics;
-  status: 'optimal' | 'good' | 'warning' | 'critical';
-  recommendations: string[];
-  lastUpdated: Date;
-  hasAnomalies: boolean;
-  anomalies?: {
-    metric: string;
-    value: number;
-    expected: number;
-    severity: 'low' | 'medium' | 'high';
-  }[];
-  logs: any[];
-  performance: any;
-  refreshMetrics: () => void;
-  errorMessage: string | null;
-  isLoading: boolean;
-  isMonitoring: boolean;
-  startMonitoring: () => void;
-  stopMonitoring: () => void;
-}
 
 export const useNeuralSystemMetrics = (
   refreshInterval: number = 60000, // Default refresh every minute
@@ -59,6 +42,17 @@ export const useNeuralSystemMetrics = (
     ...initialMetrics
   });
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [logs, setLogs] = useState<any[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isMonitoring, setIsMonitoring] = useState<boolean>(false);
+  const [performance, setPerformance] = useState<any>({
+    cpuUsage: 0.45,
+    memoryUsage: 0.38,
+    responseTime: 250,
+    accuracy: 0.92,
+    latency: 120
+  });
   
   // Calculate overall system status
   const calculateStatus = (metrics: SystemHealthMetrics): 'optimal' | 'good' | 'warning' | 'critical' => {
@@ -146,35 +140,49 @@ export const useNeuralSystemMetrics = (
     
     return anomalies;
   };
+
+  // Refresh metrics function that can be called externally
+  const refreshMetrics = async () => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    
+    try {
+      const hubMetrics = await neuralHub.getHealthMetrics();
+      
+      setMetrics(prevMetrics => ({
+        ...prevMetrics,
+        ...hubMetrics,
+        cpuUtilization: prevMetrics.cpuUtilization + (Math.random() * 0.1 - 0.05),
+        memoryUtilization: prevMetrics.memoryUtilization + (Math.random() * 0.1 - 0.05),
+        errorFrequency: Math.max(0, prevMetrics.errorFrequency + (Math.random() * 0.01 - 0.005)),
+      }));
+      
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error updating neural system metrics:', error);
+      setErrorMessage('Failed to retrieve system metrics');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Start monitoring function
+  const startMonitoring = () => {
+    setIsMonitoring(true);
+  };
+  
+  // Stop monitoring function
+  const stopMonitoring = () => {
+    setIsMonitoring(false);
+  };
   
   // Effect to periodically refresh metrics
   useEffect(() => {
     // Initial load
-    const updateMetrics = () => {
-      try {
-        // Get metrics from neural hub - fallback to default if not available
-        const hubMetrics = neuralHub.getHealthMetrics();
-        
-        // Update with real-time metrics if available
-        setMetrics(prevMetrics => ({
-          ...prevMetrics,
-          ...hubMetrics,
-          // Randomly fluctuate some values for demonstration
-          cpuUtilization: prevMetrics.cpuUtilization + (Math.random() * 0.1 - 0.05),
-          memoryUtilization: prevMetrics.memoryUtilization + (Math.random() * 0.1 - 0.05),
-          errorFrequency: Math.max(0, prevMetrics.errorFrequency + (Math.random() * 0.01 - 0.005)),
-          lastMaintenanceDate: prevMetrics.lastMaintenanceDate
-        }));
-        setLastUpdated(new Date());
-      } catch (error) {
-        console.error('Error updating neural system metrics:', error);
-      }
-    };
-    
-    updateMetrics();
+    refreshMetrics();
     
     // Set up interval for refreshing
-    const intervalId = setInterval(updateMetrics, refreshInterval);
+    const intervalId = setInterval(refreshMetrics, refreshInterval);
     
     return () => clearInterval(intervalId);
   }, [refreshInterval]);
@@ -190,7 +198,15 @@ export const useNeuralSystemMetrics = (
     recommendations,
     lastUpdated,
     hasAnomalies: anomalies.length > 0,
-    anomalies: anomalies.length > 0 ? anomalies : undefined
+    anomalies: anomalies.length > 0 ? anomalies : undefined,
+    logs,
+    performance,
+    refreshMetrics,
+    errorMessage,
+    isLoading,
+    isMonitoring,
+    startMonitoring,
+    stopMonitoring
   };
 };
 

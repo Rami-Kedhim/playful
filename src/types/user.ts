@@ -33,3 +33,23 @@ export interface AuthResult {
   token?: string;
   error?: string;
 }
+
+// Add these types needed for Auth components
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+// Add UserRole enum for AuthPage
+export enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin',
+  MODERATOR = 'moderator'
+}

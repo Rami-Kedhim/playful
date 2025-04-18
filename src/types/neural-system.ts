@@ -20,6 +20,12 @@ export interface NeuralSystemMetricsResult {
   isMonitoring?: boolean;
   startMonitoring?: () => void;
   stopMonitoring?: () => void;
+  metrics?: SystemHealthMetrics;
+  status?: 'optimal' | 'good' | 'warning' | 'critical';
+  recommendations?: string[];
+  lastUpdated?: Date;
+  hasAnomalies?: boolean;
+  anomalies?: any[];
 }
 
 export interface TrainingProgress {
@@ -80,4 +86,9 @@ export interface SystemHealthMetrics {
   load?: number;
   userEngagement?: number;
   lastUpdated?: number;
+  // Add properties needed for NeuralMonitorPanel
+  systemLoad: number;
+  memoryAllocation: number;
+  networkThroughput: number;
+  requestRate: number;
 }
