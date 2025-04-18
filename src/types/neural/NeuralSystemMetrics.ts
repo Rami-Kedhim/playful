@@ -50,7 +50,7 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
-  specialization?: string;
+  specialization?: string | string[]; // Allow both string and string array
 }
 
 export interface SystemHealthMetrics {

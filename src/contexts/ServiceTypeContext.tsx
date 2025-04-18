@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState } from 'react';
 
-export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | 'in-person' | 'both';
+export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | 'in-person' | 'both' | '';
 
 export interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;

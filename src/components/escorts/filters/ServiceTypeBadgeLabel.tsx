@@ -2,7 +2,8 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+
+export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | 'in-person' | 'both' | '';
 
 export type BadgeStyleProps = {
   label: string;
@@ -55,6 +56,12 @@ const serviceTypeStyles: Record<string, BadgeStyleProps> = {
     color: 'bg-emerald-100 text-emerald-900',
     colorDark: 'dark:bg-emerald-900/30 dark:text-emerald-300',
     icon: 'check-circle'
+  },
+  '': {
+    label: 'Any',
+    color: 'bg-gray-100 text-gray-900',
+    colorDark: 'dark:bg-gray-800 dark:text-gray-100',
+    icon: 'globe'
   }
 };
 

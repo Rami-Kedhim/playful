@@ -4,7 +4,7 @@ import SuperlativeBrainHub from './SuperlativeBrainHub';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon, Brain } from 'lucide-react';
-import { NeuralModel } from '@/services/neural/types/neuralHub';
+import { NeuralModel } from '@/types/neural/NeuralSystemMetrics';
 
 const BrainHubDashboard: React.FC = () => {
   // Mock models data

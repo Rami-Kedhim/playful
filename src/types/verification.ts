@@ -27,6 +27,7 @@ export interface VerificationDocument {
   file_url?: string;
   document_url?: string;
   url?: string;
+  file_path?: string;
   status?: string;
   uploadedAt?: string | Date;
   uploaded_at?: string | Date;
