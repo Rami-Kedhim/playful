@@ -11,6 +11,8 @@ export interface NeuralServiceConfig {
   enabled: boolean;
   priority: number;
   resourceAllocation: number;
+  autonomyLevel: number;
+  boostingEnabled?: boolean;
 }
 
 // Define the interface for a neural service
@@ -27,6 +29,7 @@ export interface NeuralService {
   isEnabled(): boolean;
   getCapabilities(): string[];
   getMetrics(): Record<string, any>;
+  shutdown?(): Promise<boolean>;
 }
 
 // Singleton registry for neural services

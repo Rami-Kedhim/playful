@@ -10,21 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
-  PersonaAboutTab, 
-  PersonaBookingTab, 
-  PersonaChatTab, 
+  PersonaAboutTab,
+  PersonaBookingTab,
+  PersonaChatTab,
   PersonaContentTab,
   PersonaLiveTab,
-  PersonaStoriesTab 
+  PersonaStoriesTab
 } from '@/components/persona/tabs';
-import { 
-  hasRealMeets, 
-  hasVirtualMeets, 
-  hasContent, 
-  hasLiveStream, 
-  hasChat, 
-  hasStories 
-} from '@/utils/personaHelpers';
 
 /**
  * Unified Persona Profile Page

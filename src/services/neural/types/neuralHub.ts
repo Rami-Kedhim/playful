@@ -3,7 +3,7 @@ export interface NeuralModel {
   id: string;
   name: string;
   version: string;
-  type: string; // Added type property
+  type: string;
   capabilities: string[];
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
@@ -13,7 +13,9 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
-  specialization?: string | string[]; // Allow either string or string array
+  specialization?: string | string[];
+  size?: number;
+  precision?: number;
 }
 
 export interface ModelParameters {

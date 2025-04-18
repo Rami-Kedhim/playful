@@ -1,138 +1,130 @@
 
-/**
- * Unified UberPersona type definition for the entire ecosystem
- */
-
+// Enhanced shared UberPersona type definition
 export interface UberPersona {
-  // Core identity fields
   id: string;
   name: string;
-  username?: string;
   displayName?: string;
+  type: 'escort' | 'creator' | 'livecam' | 'ai' | string;
   avatarUrl?: string;
   imageUrl?: string;
-  
-  // Categorization
-  type: 'escort' | 'creator' | 'livecam' | 'ai';
-  profileType?: string;
-  tagline?: string;
-  featured?: boolean;
-  
-  // Content and services
-  services?: string[];
-  tags?: string[];
-  
-  // Profile information
   bio?: string;
   location?: string;
   age?: number;
   ethnicity?: string;
-  language?: string[];
-  description?: string;
-  background?: string;
-  
-  // Role flags - clear way to identify persona types
-  roleFlags?: {
-    isEscort: boolean;
-    isCreator: boolean;
-    isLivecam: boolean;
-    isAI: boolean;
-    isVerified: boolean;
-    isFeatured: boolean;
-  };
-  
-  // Availability information
-  availability?: {
-    status: 'available' | 'busy' | 'offline';
-    nextAvailable?: string;
-  };
-  isOnline?: boolean;
-  
-  // Status and verification
   isVerified?: boolean;
-  isActive: boolean;
-  isLocked?: boolean;
-  isPremium?: boolean;
-  isAI?: boolean;
-  requiredAccessLevel?: string;
-  
-  // Media content capabilities
-  capabilities?: string[] | {
+  isActive?: boolean;
+  rating?: number;
+  stats?: {
+    rating?: number;
+    reviewCount?: number;
+    viewCount?: number;
+    favoriteCount?: number;
+    bookingCount?: number;
+  };
+  reviewCount?: number; // For backward compatibility
+  tags?: string[];
+  featured?: boolean;
+  verificationLevel?: 'basic' | 'advanced' | 'premium';
+  roleFlags?: {
+    isEscort?: boolean;
+    isCreator?: boolean;
+    isLivecam?: boolean;
+    isAI?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+  };
+  capabilities?: {
     hasPhotos: boolean;
     hasVideos: boolean;
     hasStories: boolean;
     hasChat: boolean;
     hasVoice: boolean;
-    hasBooking: boolean;
+    hasBooking: boolean; 
     hasLiveStream: boolean;
     hasExclusiveContent: boolean;
     hasContent: boolean;
     hasRealMeets: boolean;
     hasVirtualMeets: boolean;
-  };
-  
-  // Monetization settings
+  } | string[];
   monetization?: {
-    acceptsLucoin: boolean;
-    acceptsTips: boolean;
-    subscriptionPrice: number;
-    unlockingPrice: number;
-    boostingActive: boolean;
-    meetingPrice: number;
+    acceptsLucoin?: boolean;
+    acceptsTips?: boolean;
+    subscriptionPrice?: number;
+    unlockingPrice?: number;
+    boostingActive?: boolean;
+    meetingPrice?: number; 
   };
   price?: number;
-  
-  // Stats information
-  stats?: {
-    rating: number;
-    reviewCount: number;
-    responseTime?: number;
-    usageCount?: number;
-    favoriteCount?: number;
-    averageRating?: number;
-    totalSessionDuration?: number;
-    viewCount?: number;
-  };
-  rating?: number;
-  
-  // For AI personas
-  traits?: {
-    intelligence: number;
-    creativity: number;
-    charisma: number;
-    empathy: number;
-    assertiveness: number;
-  };
-  limitations?: string[];
-  conversationStyle?: string;
-  knowledgeDomains?: string[];
-  specialization?: string;
-  
-  // System fields
-  systemMetadata?: any;
-  updatedAt?: Date;
-  createdAt?: Date;
 }
 
-// Neural model definition
+// Neural model definition for UberCore
 export interface NeuralModel {
   id: string;
   name: string;
-  type: string;
   version: string;
+  type: string;
   capabilities: string[];
-  status: 'active' | 'inactive' | 'deprecated';
+  status: 'active' | 'inactive' | 'deprecated' | 'training' | 'error';
   performance: {
     accuracy: number;
     latency: number;
-    throughput: number;
+    resourceUsage: number;
   };
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
+  specialization?: string | string[];
   size?: number;
   precision?: number;
 }
 
-export interface SuperlativeBrainHubProps {
-  models: NeuralModel[];
+// Helper functions for type-safe capability checks
+export function hasCapability(persona: UberPersona, capability: string): boolean {
+  if (!persona.capabilities) return false;
+  
+  if (Array.isArray(persona.capabilities)) {
+    return persona.capabilities.includes(capability);
+  }
+  
+  return persona.capabilities[capability as keyof typeof persona.capabilities] === true;
+}
+
+// Helper functions for specific capabilities
+export function hasRealMeets(persona: UberPersona): boolean {
+  if (!persona.capabilities) return false;
+  
+  if (Array.isArray(persona.capabilities)) {
+    return persona.capabilities.includes('hasRealMeets');
+  }
+  
+  return persona.capabilities.hasRealMeets === true;
+}
+
+export function hasVirtualMeets(persona: UberPersona): boolean {
+  if (!persona.capabilities) return false;
+  
+  if (Array.isArray(persona.capabilities)) {
+    return persona.capabilities.includes('hasVirtualMeets');
+  }
+  
+  return persona.capabilities.hasVirtualMeets === true;
+}
+
+export function hasContent(persona: UberPersona): boolean {
+  if (!persona.capabilities) return false;
+  
+  if (Array.isArray(persona.capabilities)) {
+    return persona.capabilities.includes('hasContent');
+  }
+  
+  return persona.capabilities.hasContent === true;
+}
+
+export function hasExclusiveContent(persona: UberPersona): boolean {
+  if (!persona.capabilities) return false;
+  
+  if (Array.isArray(persona.capabilities)) {
+    return persona.capabilities.includes('hasExclusiveContent');
+  }
+  
+  return persona.capabilities.hasExclusiveContent === true;
 }

@@ -6,18 +6,18 @@ export class CreatorsNeuralService extends BaseNeuralService {
     super(
       moduleId,
       'creators',
-      'Content Creators Neural Service',
-      'Enhances content discovery and creator promotion'
+      'Creators Neural Service',
+      'Enhances content creator discovery and monetization'
     );
   }
   
   getCapabilities(): string[] {
     return [
       'content-recommendation',
-      'creator-matching',
+      'audience-targeting',
       'monetization-optimization',
-      'engagement-prediction',
-      'content-analysis'
+      'engagement-analytics',
+      'viral-potential-prediction'
     ];
   }
   
@@ -29,9 +29,9 @@ export class CreatorsNeuralService extends BaseNeuralService {
   
   getMetrics(): Record<string, any> {
     return {
-      activeCreators: Math.floor(Math.random() * 100),
-      contentEngagement: Math.random(),
-      averageSubscribers: Math.floor(Math.random() * 1000)
+      activeCreators: Math.floor(Math.random() * 150) + 50,
+      audienceEngagement: Math.random() * 100,
+      monetizationScore: Math.random() * 100
     };
   }
   
@@ -41,7 +41,7 @@ export class CreatorsNeuralService extends BaseNeuralService {
   
   getConfig(): Record<string, any> {
     return {
-      priority: 80,
+      priority: 75,
       autonomyLevel: 65
     };
   }

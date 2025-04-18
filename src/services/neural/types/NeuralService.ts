@@ -1,12 +1,12 @@
 
 // Base Neural Service abstract class
 export abstract class BaseNeuralService {
-  // Common properties
-  protected moduleId: string;
-  protected moduleType: string;
-  protected moduleName: string;
-  protected description: string;
-  protected config: NeuralServiceConfig = {
+  // Make properties public for access throughout the app
+  public moduleId: string;
+  public moduleType: string;
+  public moduleName: string;
+  public description: string;
+  public config: NeuralServiceConfig = {
     priority: 50,
     autonomyLevel: 50,
     enabled: true
@@ -55,6 +55,15 @@ export abstract class BaseNeuralService {
       ...partialConfig
     };
   }
+
+  // Add initialize and shutdown methods
+  async initialize(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  async shutdown(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
 }
 
 // Neural Service Configuration interface
@@ -62,6 +71,8 @@ export interface NeuralServiceConfig {
   priority: number;
   autonomyLevel: number;
   enabled: boolean;
+  resourceAllocation?: number;
+  boostingEnabled?: boolean;
 }
 
 // Neural Service Types
@@ -69,14 +80,17 @@ export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion';
 
 // Neural Service interface
 export interface NeuralService {
-  getId(): string;
-  getType(): string;
-  getName(): string;
-  getDescription(): string;
+  moduleId: string;
+  moduleType: ModuleType;
+  moduleName: string;
+  description: string;
+  config: NeuralServiceConfig;
   getCapabilities(): string[];
   configure(config: Record<string, any>): boolean;
   getMetrics(): Record<string, any>;
   isEnabled(): boolean;
   getConfig(): Record<string, any>;
   updateConfig(config: Partial<NeuralServiceConfig>): void;
+  initialize(): Promise<boolean>;
+  shutdown?(): Promise<boolean>;
 }

@@ -1,4 +1,3 @@
-
 import { ModelParameters } from '../types/neuralHub';
 
 /**
@@ -85,3 +84,6 @@ export function initializeDefaultParameters(): ModelParameters {
     attractorStrength: 0.7
   };
 }
+
+// Export ModelParameters type for reuse
+export { ModelParameters } from '../types/neuralHub';

@@ -1,10 +1,30 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { LivecamNeuralService, livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
+import { LivecamsNeuralService, livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
 import LivecamProvider from './providers/LivecamProvider';
-import LivecamList from '@/pages/LivecamList';
-import LivecamRoom from '@/pages/LivecamRoom';
-import LivecamDirectory from '@/pages/LivecamDirectory';
+
+// These are placeholder components until the actual pages are implemented
+const LivecamList: React.FC = () => (
+  <div className="p-4">
+    <h2 className="text-2xl font-bold mb-4">Livecam List</h2>
+    <p>Browse all active livecam sessions</p>
+  </div>
+);
+
+const LivecamRoom: React.FC = () => (
+  <div className="p-4">
+    <h2 className="text-2xl font-bold mb-4">Livecam Room</h2>
+    <p>Interactive livecam experience</p>
+  </div>
+);
+
+const LivecamDirectory: React.FC = () => (
+  <div className="p-4">
+    <h2 className="text-2xl font-bold mb-4">Livecam Directory</h2>
+    <p>Search and find livecam performers</p>
+  </div>
+);
 
 const LivecamsModule: React.FC = () => {
   return (

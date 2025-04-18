@@ -2,12 +2,12 @@
 // Export all neural services and types from a centralized location
 import { neuralHub } from './HermesOxumNeuralHub';
 import { neuralService } from './NeuralService';
-import { escortsNeuralService, EscortsNeuralService } from './modules/EscortsNeuralService';
-import { creatorsNeuralService, CreatorsNeuralService } from './modules/CreatorsNeuralService';
-import { livecamsNeuralService, LivecamsNeuralService } from './modules/LivecamsNeuralService';
-import { aiCompanionNeuralService, AICompanionNeuralService } from './modules/AICompanionNeuralService';
-import { NeuralService, BaseNeuralService, NeuralServiceConfig } from './types/NeuralService';
-import { uberCore } from './UberCore';
+import { EscortsNeuralService, escortsNeuralService } from './modules/EscortsNeuralService';
+import { CreatorsNeuralService, creatorsNeuralService } from './modules/CreatorsNeuralService';
+import { LivecamsNeuralService, livecamsNeuralService } from './modules/LivecamsNeuralService';
+import { AICompanionNeuralService, aiCompanionNeuralService } from './modules/AICompanionNeuralService';
+import { NeuralService, BaseNeuralService } from './types/NeuralService';
+import { NeuralServiceConfig } from './types/neuralConfig';
 
 // Neural service registry
 import { neuralServiceRegistry } from './registry/NeuralServiceRegistry';
@@ -17,7 +17,6 @@ export {
   // Core services
   neuralHub,
   neuralService,
-  uberCore,
   
   // Module services
   escortsNeuralService,
@@ -31,9 +30,8 @@ export {
   
   // Registry
   neuralServiceRegistry,
-  
-  // Types
-  NeuralService,
-  BaseNeuralService,
-  NeuralServiceConfig
 };
+
+// Types need to use export type for isolatedModules
+export type { NeuralService, BaseNeuralService };
+export type { NeuralServiceConfig };
