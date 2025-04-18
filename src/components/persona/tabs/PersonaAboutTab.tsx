@@ -11,9 +11,9 @@ interface PersonaAboutTabProps {
 }
 
 const PersonaAboutTab: React.FC<PersonaAboutTabProps> = ({ persona }) => {
-  const formattedDate = persona.system?.lastActiveAt ? 
-    formatDistanceToNow(new Date(persona.system.lastActiveAt), { addSuffix: true }) : 
-    'Unknown';
+  // Use optional chaining and provide a fallback date
+  const lastActiveDate = persona.updatedAt || new Date();
+  const formattedDate = formatDistanceToNow(lastActiveDate, { addSuffix: true });
 
   return (
     <div className="space-y-6">

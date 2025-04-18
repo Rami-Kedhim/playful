@@ -12,6 +12,22 @@ export interface ContactInfo {
   website?: string;
 }
 
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  ENHANCED = 'enhanced',
+  PREMIUM = 'premium'
+}
+
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
+  REJECTED = 'rejected',
+  DECLINED = 'declined'
+}
+
 export interface Escort {
   id: string;
   name: string;
@@ -44,6 +60,7 @@ export interface Escort {
   boostLevel?: number;
   gallery_images?: string[];
   avatarUrl?: string;
+  avatar_url?: string;
   profileImage?: string;
   gallery?: string[] | { imageUrls: string[] };
   availableNow?: boolean;
@@ -76,7 +93,6 @@ export interface Escort {
   eyeColor?: string;
   ethnicity?: string;
   bodyType?: string;
-  avatar_url?: string;
   verification_level?: string;
   verificationLevel?: string;
   videos?: Array<{ url: string; title?: string; thumbnail?: string } | string>;
@@ -114,16 +130,6 @@ export interface Availability {
   days?: string[];
   hours?: number[];
   customNotes?: string;
-}
-
-// Add BookingStatus enum
-export enum BookingStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  CANCELED = 'canceled',
-  COMPLETED = 'completed',
-  REJECTED = 'rejected',
-  DECLINED = 'declined'
 }
 
 // Add Booking interface

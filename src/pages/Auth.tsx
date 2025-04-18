@@ -1,63 +1,116 @@
 
-import React, { useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import SignInForm from '@/components/auth/SignInForm';
-import SignUpForm from '@/components/auth/SignUpForm';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from 'react-router-dom';
+import { AuthResult, LoginCredentials, RegisterCredentials } from '@/types/user';
+import { useAuth } from '@/hooks/useAuth';
 
-const Auth: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const tab = searchParams.get('tab') || 'signin';
+interface SignInFormProps {
+  onLogin: (email: string, password: string) => Promise<AuthResult>;
+}
+
+const SignInForm: React.FC<SignInFormProps> = ({ onLogin }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth();
 
-  // Redirect to home if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      navigate('/');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const result = await onLogin(email, password);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message || 'Login failed');
+      }
+    } catch (error) {
+      setError('An error occurred during login');
+    } finally {
+      setIsLoading(false);
     }
-  }, [isAuthenticated, isLoading, navigate]);
-
-  const handleTabChange = (value: string) => {
-    navigate(`/auth?tab=${value}`);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
-      </div>
-    );
-  }
-
-  // Don't show auth forms if already authenticated and still on this page
-  if (isAuthenticated) {
-    return null;
-  }
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background/80 to-background p-4">
-      <div className="w-full max-w-md">
-        <Tabs defaultValue={tab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          
-          <div className="mt-6">
-            <TabsContent value="signin">
-              <SignInForm />
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <SignUpForm />
-            </TabsContent>
-          </div>
-        </Tabs>
-      </div>
-    </div>
+    <form onSubmit={handleSubmit}>
+      {/* Form content */}
+    </form>
   );
 };
 
-export default Auth;
+interface SignUpFormProps {
+  onRegister: (email: string, password: string, name?: string) => Promise<AuthResult>;
+}
+
+const SignUpForm: React.FC<SignUpFormProps> = ({ onRegister }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const result = await onRegister(email, password, name);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message || 'Registration failed');
+      }
+    } catch (error) {
+      setError('An error occurred during registration');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form content */}
+    </form>
+  );
+};
+
+export default function Auth() {
+  const { login, register } = useAuth();
+
+  return (
+    <div className="container relative flex flex-col items-center justify-center min-h-screen md:grid lg:max-w-none lg:px-0">
+      <Card className="w-full max-w-md mx-auto">
+        <Tabs defaultValue="login" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register">Register</TabsTrigger>
+          </TabsList>
+          <TabsContent value="login">
+            <CardHeader>
+              <CardTitle>Login</CardTitle>
+              <CardDescription>Enter your credentials to access your account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SignInForm onLogin={login} />
+            </CardContent>
+          </TabsContent>
+          <TabsContent value="register">
+            <CardHeader>
+              <CardTitle>Create an account</CardTitle>
+              <CardDescription>Enter your details to create a new account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SignUpForm onRegister={register} />
+            </CardContent>
+          </TabsContent>
+        </Tabs>
+      </Card>
+    </div>
+  );
+}

@@ -10,6 +10,23 @@ interface ServiceTypeBadgeLabelProps {
   showLabel?: boolean;
 }
 
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  switch (type) {
+    case 'in-person':
+      return 'In-Person';
+    case 'virtual':
+      return 'Virtual';
+    case 'both':
+      return 'In-Person & Virtual';
+    case 'massage':
+      return 'Massage';
+    case 'dinner':
+      return 'Dinner Date';
+    default:
+      return '';
+  }
+};
+
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type, 
   showLabel = true 

@@ -17,17 +17,33 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ persona, className })
   const roleFlags = typeof persona.roleFlags === 'object' 
     ? persona.roleFlags 
     : { 
-        isVerified: !!(persona.roleFlags & 32),
-        isFeatured: false
+        isVerified: false,
+        isFeatured: false,
+        isEscort: false,
+        isCreator: false,
+        isLivecam: false,
+        isAI: false
       };
   
   // Ensure capabilities exists
   const capabilities = persona.capabilities || {
-    hasContent: false,
+    hasPhotos: false,
+    hasVideos: false,
+    hasStories: false,
+    hasChat: true,
+    hasBooking: true,
     hasLiveStream: false,
-    hasVirtualMeets: false,
-    hasRealMeets: true
+    hasExclusiveContent: false,
+    hasContent: false,
+    hasRealMeets: true,
+    hasVirtualMeets: false
   };
+
+  // Check if online (fallback to false)
+  const isOnline = Boolean(persona.isOnline);
+
+  // Handle rating safely
+  const rating = persona.rating || 0;
 
   return (
     <Link to={`/personas/${persona.id}`}>
@@ -67,7 +83,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ persona, className })
           />
           
           {/* Online status indicator */}
-          {persona.isOnline && (
+          {isOnline && (
             <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 bg-green-500 rounded-full" />
               <span className="text-xs text-white bg-black/50 px-1.5 py-0.5 rounded">Online</span>
@@ -85,10 +101,10 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ persona, className })
               </p>
             </div>
             <div className="flex items-center">
-              {persona.rating !== undefined && (
+              {rating > 0 && (
                 <span className="flex items-center bg-muted text-xs rounded px-1.5 py-0.5">
                   <Star className="h-3 w-3 fill-yellow-400 stroke-yellow-400 mr-0.5" />
-                  {persona.rating}
+                  {rating.toFixed(1)}
                 </span>
               )}
             </div>

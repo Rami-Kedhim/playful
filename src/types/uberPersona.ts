@@ -17,6 +17,9 @@ export interface Capabilities {
   hasBooking: boolean;
   hasLiveStream: boolean;
   hasExclusiveContent: boolean;
+  hasContent?: boolean;
+  hasRealMeets?: boolean;
+  hasVirtualMeets?: boolean;
 }
 
 export interface Monetization {
@@ -25,6 +28,7 @@ export interface Monetization {
   subscriptionPrice?: number;
   unlockingPrice?: number;
   boostingActive?: boolean;
+  meetingPrice?: number;
 }
 
 export interface SystemMetadata {
@@ -53,6 +57,29 @@ export interface UberPersona {
   capabilities: Capabilities;
   monetization: Monetization;
   systemMetadata?: SystemMetadata;
+  name?: string;
+  image?: string;
+  imageUrl?: string;
+  profileType?: string;
+  description?: string;
+  rating?: number;
+  price?: number;
+  isVerified?: boolean;
+  isActive?: boolean;
+  isOnline?: boolean;
+  personaFlags?: {
+    isEscort?: boolean;
+    isCreator?: boolean;
+    isVerified?: boolean;
+  };
+  contentCount?: {
+    photos: number;
+    videos: number;
+    streams?: number;
+  };
+  system?: {
+    lastActiveAt?: string | Date;
+  };
 }
 
 export interface AIContext {

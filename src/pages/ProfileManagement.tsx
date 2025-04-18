@@ -1,101 +1,100 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle, ArrowLeft } from 'lucide-react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import ProfileHeader from '@/components/profile/ProfileHeader';
-import ProfileEditForm from '@/components/profile/ProfileEditForm';
-import VerificationForm from '@/components/verification/VerificationForm';
-import AccountSettingsForm from '@/components/profile/AccountSettingsForm';
-import escortService from '@/services/escortService';
 
-const ProfileManagement = () => {
-  const { user } = useAuth();
-  const { profile, loading, error } = useProfile();
-  const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const [activeTab, setActiveTab] = useState('edit-profile');
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
+import ProfileEditForm from '@/components/profile/ProfileEditForm';
+import SecuritySettingsForm from '@/components/profile/SecuritySettingsForm';
+import { User, UserProfile } from '@/types/user';
+
+interface ProfileEditFormProps {
+  initialData: UserProfile;
+  onSubmit: (data: Partial<UserProfile>) => Promise<boolean>;
+}
+
+interface ProfileManagementProps {
+  user: User;
+  profile: UserProfile;
+}
+
+const ProfileManagement: React.FC<ProfileManagementProps> = ({ user, profile }) => {
+  const [activeTab, setActiveTab] = useState('profile');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   
-  useEffect(() => {
-    if (pathname.includes('verification')) {
-      setActiveTab('verification');
-    } else if (pathname.includes('settings')) {
-      setActiveTab('settings');
-    } else {
-      setActiveTab('edit-profile');
+  const handleUpdateProfile = async (data: Partial<UserProfile>) => {
+    setIsSubmitting(true);
+    setMessage(null);
+    
+    try {
+      // Simulating API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update successful
+      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      return true;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
+      return false;
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [pathname]);
+  };
   
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex items-center justify-center min-h-[300px]">
-          <p>Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Not Authorized</AlertTitle>
-          <AlertDescription>
-            You must be logged in to view this page.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
+  const handleUpdateSecurity = async (data: any) => {
+    setIsSubmitting(true);
+    setMessage(null);
+    
+    try {
+      // Simulating API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Update successful
+      setMessage({ type: 'success', text: 'Security settings updated successfully!' });
+      return true;
+    } catch (error) {
+      console.error('Error updating security settings:', error);
+      setMessage({ type: 'error', text: 'Failed to update security settings. Please try again.' });
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   return (
-    <div className="container mx-auto px-4 py-12">
-      <Button 
-        variant="ghost" 
-        className="mb-6" 
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
-      </Button>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Profile Management</h1>
       
-      <ProfileHeader title="Profile Management" />
+      {message && (
+        <div className={`p-4 mb-6 rounded-md ${
+          message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+        }`}>
+          {message.text}
+        </div>
+      )}
       
-      <Card>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 max-w-md">
-            <TabsTrigger value="edit-profile">Edit Profile</TabsTrigger>
-            <TabsTrigger value="verification">Verification</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="profile">Profile Information</TabsTrigger>
+          <TabsTrigger value="security">Security Settings</TabsTrigger>
+        </TabsList>
+        
+        <Card>
+          <TabsContent value="profile">
+            <ProfileEditForm 
+              initialData={profile}
+              onSubmit={handleUpdateProfile}
+            />
+          </TabsContent>
           
-          <CardContent className="pt-6">
-            <TabsContent value="edit-profile">
-              <ProfileEditForm 
-                userId={user.id}
-                initialData={profile}
-              />
-            </TabsContent>
-            
-            <TabsContent value="verification">
-              <VerificationForm />
-            </TabsContent>
-            
-            <TabsContent value="settings">
-              <AccountSettingsForm
-                user={user}
-              />
-            </TabsContent>
-          </CardContent>
-        </Tabs>
-      </Card>
+          <TabsContent value="security">
+            <SecuritySettingsForm 
+              user={user}
+              onSubmit={handleUpdateSecurity}
+            />
+          </TabsContent>
+        </Card>
+      </Tabs>
     </div>
   );
 };

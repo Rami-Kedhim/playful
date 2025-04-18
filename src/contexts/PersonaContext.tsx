@@ -28,20 +28,17 @@ export const PersonaProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   // Define filter functions for different persona types
   const getEscorts = () => personas.filter(persona => 
-    persona.profileType === 'escort' || 
-    persona.personaFlags?.isEscort || 
-    persona.roleFlags?.isEscort
+    (persona.roleFlags?.isEscort) || 
+    (persona.roleFlags?.isEscort === true)
   );
   
   const getCreators = () => personas.filter(persona => 
-    persona.profileType === 'creator' || 
-    persona.personaFlags?.isCreator || 
-    persona.roleFlags?.isCreator
+    (persona.roleFlags?.isCreator) || 
+    (persona.roleFlags?.isCreator === true)
   );
   
   const getLivecams = () => personas.filter(persona => 
-    persona.profileType === 'livecam' || 
-    (persona.capabilities?.hasLivestream === true)
+    (persona.capabilities?.hasLiveStream === true)
   );
 
   useEffect(() => {

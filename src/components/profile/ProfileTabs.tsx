@@ -4,77 +4,72 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, UserProfile } from '@/types/user';
 
 interface ProfileTabsProps {
-  initialTab: string;
   user: User;
   profile: UserProfile;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 const ProfileTabs: React.FC<ProfileTabsProps> = ({
-  initialTab,
   user,
-  profile
+  profile,
+  activeTab,
+  onTabChange
 }) => {
+  const handleTabChange = (value: string) => {
+    onTabChange(value);
+  };
+
   return (
-    <Tabs defaultValue={initialTab} className="w-full">
-      <TabsList className="grid grid-cols-3 mb-6">
-        <TabsTrigger value="profile">Profile</TabsTrigger>
+    <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <TabsList className="grid grid-cols-4 mb-8">
+        <TabsTrigger value="about">About</TabsTrigger>
+        <TabsTrigger value="photos">Photos</TabsTrigger>
+        <TabsTrigger value="reviews">Reviews</TabsTrigger>
         <TabsTrigger value="settings">Settings</TabsTrigger>
-        <TabsTrigger value="activity">Activity</TabsTrigger>
       </TabsList>
       
-      <TabsContent value="profile">
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Profile</h2>
+      <TabsContent value="about">
+        <div className="prose dark:prose-invert max-w-none">
+          <h3>Bio</h3>
+          <p>{profile.bio || "No bio information available."}</p>
           
-          <div className="bg-card rounded-lg border p-6">
-            <h3 className="text-lg font-medium mb-3">About</h3>
-            <p className="text-muted-foreground">
-              {profile.bio || "No bio available"}
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground">Location</h4>
-                <p>{profile.location || "Not specified"}</p>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground">Member Since</h4>
-                <p>{new Date(profile.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
-          </div>
+          <h3>Contact Information</h3>
+          <p>Phone: {profile.phone || "Not provided"}</p>
+          <p>Website: {profile.website || "Not provided"}</p>
         </div>
+      </TabsContent>
+      
+      <TabsContent value="photos">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {profile.avatar_url ? (
+            <div className="aspect-square bg-muted rounded-md overflow-hidden">
+              <img 
+                src={profile.avatar_url} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <p>No photos available.</p>
+          )}
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="reviews">
+        <p>No reviews yet.</p>
       </TabsContent>
       
       <TabsContent value="settings">
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Settings</h2>
+          <h3 className="text-lg font-medium">Account Settings</h3>
+          <p>Manage your profile settings and preferences.</p>
           
-          <div className="bg-card rounded-lg border p-6">
-            <h3 className="text-lg font-medium mb-3">Account Settings</h3>
-            <p className="text-muted-foreground mb-4">
-              Manage your account settings and preferences.
-            </p>
-            
-            {/* Add settings content here */}
-            <p>Settings content will go here</p>
-          </div>
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="activity">
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold">Activity</h2>
-          
-          <div className="bg-card rounded-lg border p-6">
-            <h3 className="text-lg font-medium mb-3">Recent Activity</h3>
-            <p className="text-muted-foreground mb-4">
-              View your recent activity and interactions.
-            </p>
-            
-            {/* Add activity content here */}
-            <p>Activity content will go here</p>
+          <div className="border p-4 rounded-md">
+            <h4 className="font-medium mb-2">Personal Information</h4>
+            <p>Name: {user.name}</p>
+            <p>Email: {user.email}</p>
+            <p>Role: {user.role}</p>
           </div>
         </div>
       </TabsContent>

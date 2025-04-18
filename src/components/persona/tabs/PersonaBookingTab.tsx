@@ -16,9 +16,9 @@ const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
   // Get meeting price safely
   const getMeetingPrice = () => {
     if (typeof persona.monetization === 'object') {
-      return persona.monetization.meetingPrice || 0;
+      return persona.monetization.unlockingPrice || persona.price || 0;
     }
-    return 0;
+    return persona.price || 0;
   };
   
   const meetingPrice = getMeetingPrice();

@@ -39,8 +39,10 @@ export interface Escort {
   };
   gallery_images?: string[];
   verificationLevel?: string;
+  verification_level?: string;
   orientation?: string;
   avatar_url?: string;
+  avatarUrl?: string;
   // Fields for service type compatibility
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
@@ -57,6 +59,18 @@ export interface Escort {
   responseRate?: number;
   reviews?: number;
   sexualOrientation?: string;
+  height?: number | string;
+  weight?: number | string;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  bodyType?: string;
+  isAI?: boolean;
+  is_verified?: boolean;
+  videos?: Array<{ url: string; title?: string; thumbnail?: string } | string>;
+  isScraped?: boolean;
+  boostLevel?: number;
+  hasBeenVerified?: boolean;
 }
 
 export interface Availability {
@@ -65,6 +79,8 @@ export interface Availability {
     start: string;
     end: string;
   }[];
+  days?: string[];
+  hours?: number[];
 }
 
 export interface EscortFilterOptions {
@@ -77,7 +93,7 @@ export interface EscortFilterOptions {
   language?: string[];
   location?: string;
   maxDistance?: number;
-  availability?: string[];
+  availability?: string[] | { days: string[], hours: string[] };
   rating?: number;
   verified?: boolean;
   availableNow?: boolean;
@@ -102,6 +118,10 @@ export interface EnhancedEscortFilters extends EscortFilterOptions {
   useNeuralSuggestions: boolean;
   useBoostSorting: boolean;
   availableNow: boolean;
+  availability: {
+    days: string[],
+    hours: string[]
+  };
 }
 
 export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
@@ -152,4 +172,17 @@ export const ESCORT_GENDER_OPTIONS = [
   { value: 'transgender', label: 'Transgender' },
   { value: 'non-binary', label: 'Non-Binary' },
   { value: 'other', label: 'Other' }
+];
+
+// Add service types constant
+export const ESCORT_SERVICE_TYPES = [
+  { value: 'massage', label: 'Massage' },
+  { value: 'companionship', label: 'Companionship' },
+  { value: 'dinner', label: 'Dinner Date' },
+  { value: 'overnight', label: 'Overnight' },
+  { value: 'travel', label: 'Travel Companion' },
+  { value: 'roleplay', label: 'Role Play' },
+  { value: 'gfe', label: 'GFE' },
+  { value: 'bdsm', label: 'BDSM' },
+  { value: 'events', label: 'Events' }
 ];

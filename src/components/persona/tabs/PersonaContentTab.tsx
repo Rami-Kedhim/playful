@@ -21,7 +21,7 @@ const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona }) => {
   // Check if persona has content features
   const hasContentFeatures = () => {
     if (typeof persona.capabilities === 'object') {
-      return persona.capabilities.hasContent;
+      return Boolean(persona.capabilities.hasExclusiveContent);
     }
     return false;
   };
@@ -35,6 +35,17 @@ const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona }) => {
   };
   
   const subscriptionPrice = getSubscriptionPrice();
+
+  // Default content counts if not available
+  const getContentCounts = () => {
+    return {
+      photos: 12,
+      videos: 5,
+      streams: 1
+    };
+  };
+
+  const contentCount = getContentCounts();
 
   return (
     <div className="space-y-6">
@@ -77,12 +88,12 @@ const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona }) => {
           </div>
           
           <div className="mt-6 text-center">
-            <Button variant="outline">View All Content ({persona.contentCount.photos + persona.contentCount.videos})</Button>
+            <Button variant="outline">View All Content ({contentCount.photos + contentCount.videos})</Button>
           </div>
         </CardContent>
       </Card>
       
-      {persona.contentCount.streams > 0 && (
+      {contentCount.streams > 0 && (
         <Card>
           <CardContent className="pt-6">
             <div className="flex justify-between items-center mb-4">

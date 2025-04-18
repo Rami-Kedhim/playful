@@ -1,161 +1,154 @@
 
-import React, { useEffect, useState } from 'react';
-import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
-import { EscortsModule } from '@/modules/escorts/EscortsModule';
-import EnhancedEscortFilters from '@/components/escorts/filters/EnhancedEscortFilters';
-import EscortGrid from '@/components/escorts/EscortGrid';
-import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Filter, SlidersHorizontal, MapPin, Star, Users, Calendar, Heart } from 'lucide-react';
-import { ESCORT_SERVICE_TYPES, ESCORT_GENDER_OPTIONS } from '@/types/escortTypes';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ESCORT_SERVICE_TYPES } from '@/types/escortTypes';
 
-// Escort landing page content that uses the escort hooks
-const EscortsLandingContent = () => {
-  const { 
-    state: { escorts, featuredEscorts, isLoading: loading }, 
-    loadEscorts 
-  } = useEscortContext();
+const EscortsLanding: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [location, setLocation] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   
-  const [selectedTab, setSelectedTab] = useState("all");
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  
-  // Load escorts when component mounts
-  useEffect(() => {
-    loadEscorts(true);
-  }, [loadEscorts]);
-
-  // Filter escorts based on selected tab
-  const filteredEscorts = React.useMemo(() => {
-    switch (selectedTab) {
-      case 'verified':
-        return escorts.filter(escort => escort.verified);
-      case 'available':
-        return escorts.filter(escort => escort.availableNow);
-      case 'featured':
-        return escorts.filter(escort => escort.featured);
-      case 'ai':
-        return escorts.filter(escort => escort.profileType === 'ai');
-      default:
-        return escorts;
-    }
-  }, [escorts, selectedTab]);
-  
-  // Popular categories for quick filters
-  const popularCategories = [
-    { name: 'Massage', icon: <Heart className="h-4 w-4" /> },
-    { name: 'GFE', icon: <Heart className="h-4 w-4" /> },
-    { name: 'Dinner Date', icon: <Calendar className="h-4 w-4" /> },
-    { name: 'Couples', icon: <Users className="h-4 w-4" /> },
-  ];
+  // Let's simulate that we are loading data for now
+  const isLoading = false;
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* Hero section */}
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold mb-4">Premium Escort Directory</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Discover and connect with verified escorts in your area. 
-          Browse profiles, view photos, and book appointments securely.
-        </p>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6">Find Your Perfect Escort</h1>
+      
+      <div className="grid gap-6 mb-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="grid gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <Label htmlFor="search">Search by name or keywords</Label>
+                  <Input 
+                    id="search"
+                    placeholder="Search escorts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                
+                <div className="flex-1">
+                  <Label htmlFor="location">Location</Label>
+                  <Input 
+                    id="location"
+                    placeholder="City or area..."
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                </div>
+                
+                <div className="flex items-end">
+                  <Button className="w-full md:w-auto">
+                    {isLoading ? "Searching..." : "Search"}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  {showFilters ? "Hide filters" : "Show more filters"}
+                </Button>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox id="verified" />
+                  <Label htmlFor="verified">Verified profiles only</Label>
+                </div>
+              </div>
+              
+              {showFilters && (
+                <div className="mt-4 border-t pt-4">
+                  <Tabs defaultValue="services">
+                    <TabsList className="grid grid-cols-3 mb-4">
+                      <TabsTrigger value="services">Services</TabsTrigger>
+                      <TabsTrigger value="attributes">Attributes</TabsTrigger>
+                      <TabsTrigger value="availability">Availability</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="services" className="mt-0">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {ESCORT_SERVICE_TYPES.map((service) => (
+                          <div key={service.value} className="flex items-center space-x-2">
+                            <Checkbox id={`service-${service.value}`} />
+                            <Label htmlFor={`service-${service.value}`}>{service.label}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="attributes" className="mt-0">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="attr-young" />
+                          <Label htmlFor="attr-young">Young (21-25)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="attr-mature" />
+                          <Label htmlFor="attr-mature">Mature (30+)</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="attr-petite" />
+                          <Label htmlFor="attr-petite">Petite</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="attr-curvy" />
+                          <Label htmlFor="attr-curvy">Curvy</Label>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="availability" className="mt-0">
+                      <div className="flex items-center space-x-2 mb-4">
+                        <Checkbox id="available-now" />
+                        <Label htmlFor="available-now">Available now</Label>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
+                        <Button variant="outline" size="sm">Mon</Button>
+                        <Button variant="outline" size="sm">Tue</Button>
+                        <Button variant="outline" size="sm">Wed</Button>
+                        <Button variant="outline" size="sm">Thu</Button>
+                        <Button variant="outline" size="sm">Fri</Button>
+                        <Button variant="outline" size="sm">Sat</Button>
+                        <Button variant="outline" size="sm">Sun</Button>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
-      {/* Featured Escorts Section */}
-      <section className="mb-12">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Featured Escorts</h2>
-          <Button variant="link">View All Featured</Button>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Featured Escorts</h2>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            Newest
+          </Button>
+          <Button variant="outline" size="sm">
+            Popular
+          </Button>
         </div>
-        <FeaturedEscorts escorts={featuredEscorts} loading={loading} />
-      </section>
+      </div>
       
-      {/* Popular Categories */}
-      <section className="mb-10">
-        <h3 className="text-xl font-bold mb-4">Popular Categories</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {popularCategories.map((category) => (
-            <Card key={category.name} className="hover:bg-accent cursor-pointer transition-all">
-              <CardContent className="p-4 flex items-center justify-center flex-col">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  {category.icon}
-                </div>
-                <span className="font-medium">{category.name}</span>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-      
-      {/* Main escort listing section */}
-      <section className="mb-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Find Escorts</h2>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowMobileFilters(!showMobileFilters)}
-              className="sm:hidden flex items-center"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters - Desktop */}
-          <div className="hidden sm:block">
-            <EnhancedEscortFilters />
-          </div>
-          
-          {/* Main content */}
-          <div className="lg:col-span-3">
-            {/* Quick Filter Tabs */}
-            <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
-              <TabsList className="mb-4">
-                <TabsTrigger value="all">All Escorts</TabsTrigger>
-                <TabsTrigger value="verified">Verified</TabsTrigger>
-                <TabsTrigger value="available">Available Now</TabsTrigger>
-                <TabsTrigger value="featured">Featured</TabsTrigger>
-                <TabsTrigger value="ai">AI Models</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value={selectedTab}>
-                {showMobileFilters && (
-                  <div className="sm:hidden mb-6">
-                    <EnhancedEscortFilters />
-                  </div>
-                )}
-                
-                {filteredEscorts.length === 0 && !loading ? (
-                  <div className="text-center py-16">
-                    <p className="text-lg text-muted-foreground">No escorts found matching your criteria</p>
-                    <Button variant="link" onClick={() => loadEscorts(true)}>
-                      Reset filters
-                    </Button>
-                  </div>
-                ) : (
-                  <EscortGrid escorts={filteredEscorts} loading={loading} />
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      </section>
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">
+          No escorts found matching your criteria. Try adjusting your filters.
+        </p>
+      </div>
     </div>
-  );
-};
-
-// Main component that wraps the content with the provider
-const EscortsLanding = () => {
-  return (
-    <EscortsModule>
-      <EscortsLandingContent />
-    </EscortsModule>
   );
 };
 

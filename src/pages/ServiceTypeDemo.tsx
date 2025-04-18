@@ -1,217 +1,185 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import ServiceTypeProvider from '@/components/escorts/providers/ServiceTypeProvider';
-import ServiceTypeSelection from '@/components/escorts/filters/ServiceTypeSelection';
-import ServiceTypeRadioFilter from '@/components/escorts/filters/ServiceTypeRadioFilter';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ServiceTypeBadgeLabel, { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
-import { useServiceType } from '@/components/escorts/context/ServiceTypeContext';
-import { ForbiddenTerms, ServiceType } from '@/components/escorts/filters/ServiceTypeFilterRules';
-import ServiceTypeSelect from '@/components/escorts/filters/ServiceTypeSelect';
-import EnhancedServiceTypeFilter from '@/components/escorts/filters/EnhancedServiceTypeFilter';
+import ServiceTypeRadioFilter from '@/components/escorts/filters/ServiceTypeRadioFilter';
 import { useEscortServiceTypeFilter } from '@/hooks/useEscortServiceTypeFilter';
+import ServiceTypeIcon from '@/components/filters/ServiceTypeIcon';
 
-const ServiceTypeInfo = () => {
-  const {
-    serviceType,
-    selectedSpecializedTypes,
-    validateServiceName,
-    getSafeServiceName
-  } = useServiceType();
-  
-  const [customServiceName, setCustomServiceName] = React.useState('');
-  const [validationResult, setValidationResult] = React.useState<boolean | null>(null);
-  const [safeServiceName, setSafeServiceName] = React.useState<string | null>(null);
-  
-  const handleValidate = () => {
-    const isValid = validateServiceName(customServiceName);
-    setValidationResult(isValid);
-    
-    const safeName = getSafeServiceName(customServiceName);
-    setSafeServiceName(safeName);
-  };
+const ServiceTypeDemo: React.FC = () => {
+  const [selectedType, setSelectedType] = useState<ServiceTypeFilter>('');
+  const { 
+    serviceType, 
+    setServiceType,
+    clearServiceType 
+  } = useEscortServiceTypeFilter();
   
   return (
-    <div className="space-y-4 mt-6">
-      <Separator />
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-8">Service Type Components Demo</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Selected Service Types</CardTitle>
+            <CardTitle>Service Type Badges</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div>
-                <h4 className="text-sm font-medium mb-2">Basic Service Type:</h4>
-                {serviceType ? (
-                  <ServiceTypeBadgeLabel type={serviceType} />
-                ) : (
-                  <span className="text-muted-foreground text-sm">No service type selected</span>
-                )}
+                <h3 className="text-sm font-medium mb-2">In-Person</h3>
+                <ServiceTypeBadgeLabel type="in-person" />
               </div>
               
               <div>
-                <h4 className="text-sm font-medium mb-2">Specialized Service Types:</h4>
-                {selectedSpecializedTypes.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedSpecializedTypes.map(type => (
-                      <div key={type} className="bg-secondary/40 px-3 py-1 rounded-md text-xs">
-                        {type}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-muted-foreground text-sm">No specialized types selected</span>
-                )}
+                <h3 className="text-sm font-medium mb-2">Virtual</h3>
+                <ServiceTypeBadgeLabel type="virtual" />
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium mb-2">Both</h3>
+                <ServiceTypeBadgeLabel type="both" />
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium mb-2">Massage</h3>
+                <ServiceTypeBadgeLabel type="massage" />
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium mb-2">Dinner</h3>
+                <ServiceTypeBadgeLabel type="dinner" />
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium mb-2">Icon Only</h3>
+                <ServiceTypeBadgeLabel type="in-person" showLabel={false} />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Validate Service Name</CardTitle>
-            <CardDescription>Test our ethical service type system</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Service Name</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={customServiceName}
-                    onChange={(e) => setCustomServiceName(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    placeholder="Enter a service name"
-                  />
-                  <Button onClick={handleValidate}>Validate</Button>
-                </div>
-              </div>
-              
-              {validationResult !== null && (
-                <div className="text-sm">
-                  <div className="font-medium mb-1">Result:</div>
-                  <div className={validationResult ? "text-green-500" : "text-red-500"}>
-                    {validationResult ? "Valid service" : "Invalid service"}
-                  </div>
-                  
-                  {safeServiceName && safeServiceName !== customServiceName && (
-                    <div className="mt-2">
-                      <div className="font-medium mb-1">Remapped to:</div>
-                      <div className="bg-secondary/40 px-3 py-1.5 rounded-md">
-                        {safeServiceName}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              <div className="mt-4 border-t pt-4">
-                <div className="text-sm font-medium mb-2">Forbidden Terms:</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {ForbiddenTerms.map(term => (
-                    <div key={term} className="bg-destructive/10 px-2 py-0.5 rounded text-xs">
-                      {term}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-};
-
-const EnhancedFiltersDemo = () => {
-  const [serviceType, setServiceType] = React.useState<ServiceTypeFilter>("");
-  
-  return (
-    <div className="space-y-6 mt-8">
-      <h2 className="text-xl font-semibold">Enhanced Filter Components</h2>
-      <Separator />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div>
-          <h3 className="text-lg font-medium mb-4">Service Type Select</h3>
-          <ServiceTypeSelect 
-            value={serviceType} 
-            onChange={setServiceType} 
-          />
-        </div>
-        
-        <div className="lg:col-span-2">
-          <h3 className="text-lg font-medium mb-4">Enhanced Service Type Filter</h3>
-          <EnhancedServiceTypeFilter 
-            serviceTypeFilter={serviceType}
-            setServiceTypeFilter={setServiceType}
-          />
-        </div>
-      </div>
-      
-      <div className="mt-4">
-        <h3 className="text-lg font-medium mb-4">Compact Version</h3>
-        <div className="max-w-xs">
-          <EnhancedServiceTypeFilter 
-            serviceTypeFilter={serviceType}
-            setServiceTypeFilter={setServiceType}
-            compact={true}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ServiceTypeDemo = () => {
-  const [selectedType, setSelectedType] = React.useState<ServiceTypeFilter>("");
-  
-  return (
-    <div className="container py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Ethical Service Type System</h1>
-          <p className="text-muted-foreground">
-            Demonstrating the UberEscorts ethical service type filtering and validation
-          </p>
-        </div>
-        
-        <ServiceTypeProvider showWarningsOnRemap={true}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Service Type Selection</CardTitle>
-              <CardDescription>
-                Choose service types using our ethical filtering system
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Enhanced Selection</h3>
-                  <ServiceTypeSelection showSpecializedTypes={true} />
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Radio Selection</h3>
-                  <ServiceTypeRadioFilter
+        <Tabs defaultValue="radio">
+          <TabsList className="mb-4">
+            <TabsTrigger value="radio">Radio Filter</TabsTrigger>
+            <TabsTrigger value="icons">Service Icons</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="radio">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Basic Service Types</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ServiceTypeRadioFilter 
                     selectedType={selectedType}
                     onChange={setSelectedType}
+                    includeSpecializedTypes={false}
+                  />
+                  
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="mb-2">Selected service type:</p>
+                    {selectedType ? (
+                      <ServiceTypeBadgeLabel type={selectedType} />
+                    ) : (
+                      <span className="text-muted-foreground">None selected</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>All Service Types</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ServiceTypeRadioFilter 
+                    selectedType={serviceType}
+                    onChange={setServiceType}
                     includeSpecializedTypes={true}
                   />
+                  
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="mb-2">Selected service type:</p>
+                    {serviceType ? (
+                      <ServiceTypeBadgeLabel type={serviceType} />
+                    ) : (
+                      <span className="text-muted-foreground">None selected</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="icons">
+            <Card>
+              <CardHeader>
+                <CardTitle>Service Type Icons</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2">
+                      <ServiceTypeIcon type="in-person" size={24} />
+                    </div>
+                    <p className="text-sm text-center">In-Person</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2">
+                      <ServiceTypeIcon type="virtual" size={24} />
+                    </div>
+                    <p className="text-sm text-center">Virtual</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2">
+                      <ServiceTypeIcon type="both" size={24} />
+                    </div>
+                    <p className="text-sm text-center">Both</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2">
+                      <ServiceTypeIcon type="massage" size={24} />
+                    </div>
+                    <p className="text-sm text-center">Massage</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2">
+                      <ServiceTypeIcon type="dinner" size={24} />
+                    </div>
+                    <p className="text-sm text-center">Dinner</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2 bg-primary/10">
+                      <ServiceTypeIcon type="in-person" size={24} variant="colored" />
+                    </div>
+                    <p className="text-sm text-center">In-Person (Colored)</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2 bg-primary/10">
+                      <ServiceTypeIcon type="virtual" size={24} variant="colored" />
+                    </div>
+                    <p className="text-sm text-center">Virtual (Colored)</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 border rounded-full mb-2 bg-primary/10">
+                      <ServiceTypeIcon type="both" size={24} variant="colored" />
+                    </div>
+                    <p className="text-sm text-center">Both (Colored)</p>
+                  </div>
                 </div>
-              </div>
-              
-              <ServiceTypeInfo />
-              
-              <EnhancedFiltersDemo />
-            </CardContent>
-          </Card>
-        </ServiceTypeProvider>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

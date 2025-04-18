@@ -1,121 +1,116 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { UserProfile } from '@/types/user';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CardContent, CardFooter } from '@/components/ui/card';
+import { UserProfile } from '@/types/user';
 
-export interface ProfileEditFormProps {
+interface ProfileEditFormProps {
   initialData: UserProfile;
-  userId: string;
+  onSubmit: (data: Partial<UserProfile>) => Promise<boolean>;
 }
 
-const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ initialData, userId }) => {
-  const [formData, setFormData] = useState({
-    bio: initialData.bio || '',
-    location: initialData.location || '',
-    phone: initialData.phone || '',
-    website: initialData.website || '',
-    sexual_orientation: initialData.sexual_orientation || ''
-  });
+const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ initialData, onSubmit }) => {
+  const [formData, setFormData] = useState<UserProfile>(initialData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsSubmitting(true);
     
     try {
-      // Mock update profile API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated."
-      });
+      const result = await onSubmit(formData);
+      if (!result) {
+        // Handle error if needed
+      }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive"
-      });
+      console.error('Error submitting form:', error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
-
+  
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-1">
-        <Label htmlFor="bio">Bio</Label>
-        <Textarea
-          id="bio"
-          name="bio"
-          placeholder="Tell us about yourself"
-          rows={4}
-          value={formData.bio}
-          onChange={handleChange}
-        />
-      </div>
+    <form onSubmit={handleSubmit}>
+      <CardContent className="space-y-6 pt-6">
+        <div className="flex flex-col items-center space-y-4">
+          <Avatar className="w-24 h-24">
+            <AvatarImage src={formData.avatar_url || ''} alt="Profile" />
+            <AvatarFallback>
+              {initialData.userId?.charAt(0).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          
+          <Button type="button" variant="outline" size="sm">
+            Change Avatar
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input 
+              id="location" 
+              name="location"
+              value={formData.location || ''}
+              onChange={handleChange}
+              placeholder="City, Country"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input 
+              id="phone" 
+              name="phone"
+              value={formData.phone || ''}
+              onChange={handleChange}
+              placeholder="+X XXX XXX XXXX"
+            />
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="website">Website</Label>
+          <Input 
+            id="website" 
+            name="website"
+            value={formData.website || ''}
+            onChange={handleChange}
+            placeholder="https://"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="bio">Bio</Label>
+          <Textarea 
+            id="bio" 
+            name="bio"
+            value={formData.bio || ''}
+            onChange={handleChange}
+            placeholder="Tell us about yourself"
+            rows={5}
+          />
+        </div>
+      </CardContent>
       
-      <div className="space-y-1">
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          name="location"
-          placeholder="City, Country"
-          value={formData.location}
-          onChange={handleChange}
-        />
-      </div>
-      
-      <div className="space-y-1">
-        <Label htmlFor="phone">Phone Number</Label>
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          placeholder="+1 (555) 123-4567"
-          value={formData.phone}
-          onChange={handleChange}
-        />
-      </div>
-      
-      <div className="space-y-1">
-        <Label htmlFor="website">Website</Label>
-        <Input
-          id="website"
-          name="website"
-          type="url"
-          placeholder="https://yourwebsite.com"
-          value={formData.website}
-          onChange={handleChange}
-        />
-      </div>
-      
-      <div className="space-y-1">
-        <Label htmlFor="sexual_orientation">Sexual Orientation</Label>
-        <Input
-          id="sexual_orientation"
-          name="sexual_orientation"
-          placeholder="Orientation"
-          value={formData.sexual_orientation}
-          onChange={handleChange}
-        />
-      </div>
-      
-      <Button type="submit" disabled={loading}>
-        {loading ? "Saving..." : "Save Changes"}
-      </Button>
+      <CardFooter className="flex justify-between border-t pt-6">
+        <Button type="button" variant="outline">Cancel</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </CardFooter>
     </form>
   );
 };

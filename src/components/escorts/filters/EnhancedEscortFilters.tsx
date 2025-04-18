@@ -12,17 +12,30 @@ import { ESCORT_SERVICE_TYPES } from '@/types/escortTypes';
 const EnhancedEscortFilters: React.FC = () => {
   const {
     filters,
-    updateFilters,
+    updateFilter,
     resetFilters,
-    toggleFilterValue
   } = useEscortEnhancedFilters();
   
   const handlePriceChange = (values: number[]) => {
-    updateFilters({ price: [values[0], values[1]] });
+    updateFilter('price', [values[0], values[1]]);
   };
   
   const handleAgeChange = (values: number[]) => {
-    updateFilters({ age: [values[0], values[1]] });
+    updateFilter('age', [values[0], values[1]]);
+  };
+  
+  const toggleFilterValue = (key: keyof typeof filters, value: string) => {
+    if (!Array.isArray(filters[key])) {
+      return;
+    }
+    
+    const currentValues = filters[key] as string[];
+    const exists = currentValues.includes(value);
+    
+    updateFilter(key, exists 
+      ? currentValues.filter(v => v !== value)
+      : [...currentValues, value]
+    );
   };
   
   return (
@@ -38,7 +51,7 @@ const EnhancedEscortFilters: React.FC = () => {
             {ESCORT_SERVICE_TYPES.map((type) => (
               <Badge
                 key={type.value}
-                variant={filters.serviceType.includes(type.value) ? "default" : "outline"}
+                variant={filters.serviceType?.includes(type.value) ? "default" : "outline"}
                 className="cursor-pointer"
                 onClick={() => toggleFilterValue('serviceType', type.value)}
               >
@@ -78,8 +91,8 @@ const EnhancedEscortFilters: React.FC = () => {
         <div className="flex items-center justify-between">
           <Label>Verified Profiles Only</Label>
           <Switch
-            checked={filters.verified}
-            onCheckedChange={(checked) => updateFilters({ verified: checked })}
+            checked={!!filters.verified}
+            onCheckedChange={(checked) => updateFilter('verified', checked)}
           />
         </div>
         

@@ -20,11 +20,12 @@ const defaultFilters: EnhancedEscortFilters = {
   eyeColor: [],
   ethnicity: [],
   availability: {
-    days: [],
-    hours: [],
+    days: [] as string[],
+    hours: [] as string[]
   },
   sortBy: "newest",
-  useBoostSorting: true
+  useBoostSorting: true,
+  selectedFilters: []
 };
 
 export const useEnhancedEscortFilters = () => {
@@ -32,8 +33,11 @@ export const useEnhancedEscortFilters = () => {
   const [isFiltering, setIsFiltering] = useState(false);
   
   // Update specific filter fields
-  const updateFilters = useCallback((newFilters: Partial<EnhancedEscortFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+  const updateFilter = useCallback(<K extends keyof EnhancedEscortFilters>(
+    key: K, 
+    value: EnhancedEscortFilters[K]
+  ) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
   }, []);
   
   // Reset filters to default
@@ -41,70 +45,27 @@ export const useEnhancedEscortFilters = () => {
     setFilters(defaultFilters);
   }, []);
   
-  // Toggle a filter value in an array
-  const toggleFilterValue = useCallback((fieldName: keyof EnhancedEscortFilters, value: string) => {
-    setFilters(prev => {
-      // Only handle array type fields
-      if (Array.isArray(prev[fieldName])) {
-        const currentValues = prev[fieldName] as string[];
-        const exists = currentValues.includes(value);
-        const updatedValues = exists
-          ? currentValues.filter(v => v !== value)
-          : [...currentValues, value];
-        
-        return {
-          ...prev,
-          [fieldName]: updatedValues
-        };
-      }
-      return prev;
-    });
-  }, []);
-  
-  // Toggle availability day/hour
-  const toggleAvailability = useCallback((type: 'days' | 'hours', value: string) => {
-    setFilters(prev => {
-      const currentValues = prev.availability[type];
-      const exists = currentValues.includes(value);
-      const updatedValues = exists
-        ? currentValues.filter(v => v !== value)
-        : [...currentValues, value];
-      
-      return {
-        ...prev,
-        availability: {
-          ...prev.availability,
-          [type]: updatedValues
-        }
-      };
-    });
-  }, []);
-
-  // Apply filters
-  const applyFilters = useCallback(async () => {
-    setIsFiltering(true);
-    
-    try {
-      // Implementation to apply filters to escorts list
-      // This would typically involve API calls or context updates
-      
-      // For demo purposes, simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error('Error applying filters:', error);
-    } finally {
-      setIsFiltering(false);
-    }
+  // Convert enhanced filters to basic filter options for API calls
+  const toFilterOptions = useCallback(() => {
+    return {
+      gender: filters.gender,
+      serviceType: filters.serviceType,
+      priceRange: filters.price,
+      ageRange: filters.age,
+      language: filters.languages,
+      location: filters.location,
+      verified: filters.verified,
+      availableNow: filters.availableNow,
+      escortType: filters.escortType,
+      orientation: filters.orientation
+    };
   }, [filters]);
-  
+
   return {
     filters,
-    isFiltering,
-    updateFilters,
+    updateFilter,
     resetFilters,
-    applyFilters,
-    toggleFilterValue,
-    toggleAvailability
+    toFilterOptions
   };
 };
 
