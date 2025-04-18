@@ -1,114 +1,196 @@
-
-// Import necessary modules
-import { useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { useToast } from '@/components/ui/use-toast';
-import { useProfile } from '@/hooks/useProfile';
+import { useState, useCallback } from 'react';
+import { useAuth } from './auth/useAuthContext';
+import { AuthResult } from '@/types/auth';
 
 export const useAuthentication = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const auth = useAuth();
-  const { toast } = useToast();
-  const { loadProfile, profile, updateProfile } = useProfile();
-  const [loading, setLoading] = useState(false);
-
-  const login = async (email: string, password: string) => {
-    setLoading(true);
+  
+  const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      // Simulate login
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const result = await auth.signIn(email, password);
       
-      // Mock login success
-      auth.setUser({
-        id: '123',
-        email,
-        name: 'User',
-        roles: ['user']
-      });
-      
-      // Load profile after login
-      if (auth.user) {
-        await loadProfile(auth.user.id);
+      if (result.success) {
+        // Update the context with user data
+        if (auth.setUser && result.user) {
+          auth.setUser(result.user);
+        }
+        return result;
+      } else {
+        setError(result.error || 'Failed to sign in');
+        return result;
       }
+    } catch (err: any) {
+      const errorMessage = err.message || 'An unexpected error occurred during sign in';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [auth]);
+  
+  const signUp = useCallback(async (email: string, password: string, options?: any): Promise<AuthResult> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await auth.signUp(email, password, options);
       
-      toast({
-        title: 'Welcome back!',
-        description: 'You have been successfully logged in.',
-      });
+      if (result.success) {
+        // Update the context with user data if auto sign-in
+        if (auth.setUser && result.user) {
+          auth.setUser(result.user);
+        }
+        return result;
+      } else {
+        setError(result.error || 'Failed to sign up');
+        return result;
+      }
+    } catch (err: any) {
+      const errorMessage = err.message || 'An unexpected error occurred during sign up';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [auth]);
+  
+  const signOut = useCallback(async (): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      await auth.signOut();
       
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Login failed',
-        description: error.message || 'An error occurred during login',
-        variant: 'destructive',
-      });
+      // Clear user from context
+      if (auth.setUser) {
+        auth.setUser(null);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign out');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [auth]);
+  
+  const resetPassword = useCallback(async (email: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const success = await auth.resetPassword(email);
+      if (!success) {
+        setError('Failed to send password reset email');
+      }
+      return success;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to send password reset email';
+      setError(errorMessage);
       return false;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
-
-  const register = async (email: string, password: string, name: string) => {
-    setLoading(true);
+  }, [auth]);
+  
+  const updateProfile = useCallback(async (data: any): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      // Simulate registration
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock register success
-      auth.setUser({
-        id: '123',
-        email,
-        name,
-        roles: ['user']
-      });
-      
-      toast({
-        title: 'Registration successful!',
-        description: 'Your account has been created.',
-      });
-      
-      return true;
-    } catch (error: any) {
-      toast({
-        title: 'Registration failed',
-        description: error.message || 'An error occurred during registration',
-        variant: 'destructive',
-      });
+      const success = await auth.updateProfile(data);
+      if (!success) {
+        setError('Failed to update profile');
+      }
+      return success;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to update profile';
+      setError(errorMessage);
       return false;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
-
-  const logout = async () => {
+  }, [auth]);
+  
+  const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      // Simulate logout
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Clear user data
-      auth.setUser(null);
-      
-      toast({
-        title: 'Logged out',
-        description: 'You have been successfully logged out.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Logout failed',
-        description: error.message || 'An error occurred during logout',
-        variant: 'destructive',
-      });
+      const success = await auth.updatePassword(newPassword);
+      if (!success) {
+        setError('Failed to update password');
+      }
+      return success;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to update password';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-  };
-
+  }, [auth]);
+  
+  const verifyEmail = useCallback(async (token: string): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const success = await auth.verifyEmail(token);
+      if (!success) {
+        setError('Failed to verify email');
+      }
+      return success;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to verify email';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [auth]);
+  
+  const sendVerificationEmail = useCallback(async (): Promise<boolean> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const success = await auth.sendVerificationEmail();
+      if (!success) {
+        setError('Failed to send verification email');
+      }
+      return success;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to send verification email';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [auth]);
+  
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+  
   return {
-    login,
-    register,
-    logout,
-    loading,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    updateProfile,
+    updatePassword,
+    verifyEmail,
+    sendVerificationEmail,
+    isLoading,
+    error,
+    clearError,
     user: auth.user,
-    isAuthenticated: !!auth.user
+    profile: auth.profile,
+    isAuthenticated: auth.isAuthenticated
   };
 };
-
-export default useAuthentication;

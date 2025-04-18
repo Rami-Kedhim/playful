@@ -40,13 +40,13 @@ export const useEscortEnhancedFilters = () => {
     setFilters(prev => ({
       ...prev,
       location: state.filters.location || '',
-      serviceTypes: state.filters.serviceTypes || [],
+      serviceTypes: state.filters.serviceTypes || state.filters.serviceType || [],
       priceRange: state.filters.priceRange || [0, 1000],
       gender: state.filters.gender || [],
       orientation: state.filters.orientation || [],
       ageRange: state.filters.ageRange || [21, 50],
       rating: state.filters.rating || 0,
-      verified: state.filters.verified || false,
+      verified: state.filters.verified || state.filters.verifiedOnly || false,
       availableNow: state.filters.availableNow || false,
       escortType: state.filters.escortType || "all",
       language: state.filters.language || [],
@@ -55,12 +55,14 @@ export const useEscortEnhancedFilters = () => {
   }, [
     state.filters.location,
     state.filters.serviceTypes,
+    state.filters.serviceType,
     state.filters.priceRange,
     state.filters.gender,
     state.filters.orientation,
     state.filters.ageRange,
     state.filters.rating,
     state.filters.verified,
+    state.filters.verifiedOnly,
     state.filters.availableNow,
     state.filters.escortType,
     state.filters.language
@@ -99,6 +101,7 @@ export const useEscortEnhancedFilters = () => {
       // Update context filters with the subset it supports
       updateContextFilters({
         location: filters.location,
+        serviceType: filters.serviceTypes,
         serviceTypes: filters.serviceTypes,
         priceRange: filters.priceRange,
         gender: filters.gender,
@@ -106,6 +109,7 @@ export const useEscortEnhancedFilters = () => {
         ageRange: filters.ageRange,
         rating: filters.rating,
         verified: filters.verified,
+        verifiedOnly: filters.verified,
         availableNow: filters.availableNow,
         escortType: filters.escortType,
         language: filters.language
@@ -123,7 +127,12 @@ export const useEscortEnhancedFilters = () => {
   // Toggle a filter value in an array
   const toggleFilterValue = useCallback((fieldName: keyof EnhancedEscortFilters, value: string) => {
     setFilters(prev => {
+      // Safely handle field as array type
       const currentValues = prev[fieldName] as string[];
+      if (!Array.isArray(currentValues)) {
+        return prev;
+      }
+      
       const exists = currentValues.includes(value);
       const updatedValues = exists
         ? currentValues.filter(v => v !== value)
@@ -164,8 +173,8 @@ export const useEscortEnhancedFilters = () => {
     toggleFilterValue,
     toggleAvailability,
     escorts: state.escorts,
-    featuredEscorts: state.featuredEscorts,
-    loading: state.isLoading,
+    featuredEscorts: state.featuredEscorts || [],
+    loading: state.loading || state.isLoading || false,
     error: state.error
   };
 };

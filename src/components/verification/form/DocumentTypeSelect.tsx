@@ -3,7 +3,8 @@ import React from 'react';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormValues, ID_CARD, PASSPORT, DRIVER_LICENSE, RESIDENCE_PERMIT } from '@/types/verification';
+import { VerificationFormValues } from '@/types/verification';
+import { ID_CARD, PASSPORT, DRIVER_LICENSE, RESIDENCE_PERMIT, DOCUMENT_TYPES } from '@/types/verification';
 
 interface DocumentTypeSelectProps {
   form: UseFormReturn<VerificationFormValues>;

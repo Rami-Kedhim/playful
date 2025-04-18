@@ -1,124 +1,62 @@
 
 import { useState } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { toast } from '@/hooks/use-toast';
+import { AuthResult } from '@/types/auth';
 
-export const useAuthFlow = () => {
+// Auth flow hook
+const useAuthFlow = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, register, resetPassword, logout } = useAuth();
-
-  const handleLogin = async (email: string, password: string) => {
+  const [success, setSuccess] = useState<boolean>(false);
+  
+  // Generic wrapper for auth operations
+  const executeAuthFlow = async <T extends any>(
+    operation: () => Promise<AuthResult>,
+    successMessage?: string
+  ): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);
-
+    setSuccess(false);
+    
     try {
-      const result = await login(email, password);
+      const result = await operation();
       
-      if (!result.success) {
-        setError(result.error || 'Failed to log in');
-        return false;
+      if (result.success) {
+        setSuccess(true);
+        // Success notification logic here if needed
+      } else {
+        setError(result.error || 'An error occurred');
+        // Error notification logic here if needed
       }
       
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-        variant: "success"
-      });
-      
-      return true;
+      return result;
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
-      return false;
+      const errorMessage = err.message || 'An unexpected error occurred';
+      setError(errorMessage);
+      // Error notification logic here if needed
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleRegister = async (email: string, password: string, username?: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Fixed argument count
-      const result = await register(email, password);
-      
-      if (!result.success) {
-        setError(result.error || 'Failed to register');
-        return false;
-      }
-      
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created",
-        variant: "success"
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during registration');
-      return false;
-    } finally {
-      setIsLoading(false);
+  
+  // Execute an auth flow and redirect on success
+  const executeAuthFlowWithRedirect = async (
+    operation: () => Promise<AuthResult>,
+    redirectFn?: () => void
+  ): Promise<void> => {
+    const result = await executeAuthFlow(operation);
+    
+    if (result.success && redirectFn) {
+      redirectFn();
     }
   };
-
-  const handleResetPassword = async (email: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const result = await resetPassword(email);
-      
-      if (!result.success) {
-        setError(result.error || 'Failed to send reset password email');
-        return false;
-      }
-      
-      toast({
-        title: "Password reset email sent",
-        description: "Check your inbox for instructions",
-        variant: "success"
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await logout();
-      
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out",
-      });
-      
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during logout');
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  
   return {
     isLoading,
     error,
-    setError,
-    handleLogin,
-    handleRegister,
-    handleResetPassword,
-    handleLogout
+    success,
+    executeAuthFlow,
+    executeAuthFlowWithRedirect
   };
 };
 

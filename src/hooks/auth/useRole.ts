@@ -1,57 +1,35 @@
 
-import { useCallback } from 'react';
-import { useAuth } from './useAuthContext';
+import { useCallback } from "react";
+import { useAuth } from "./useAuthContext";
+import { UserRole } from "@/types/auth";
 
 export const useRole = () => {
-  const { user, userRoles } = useAuth();
-
-  const hasRole = useCallback((role: string | string[]) => {
-    if (!user || !userRoles) return false;
-    
-    if (Array.isArray(role)) {
-      return role.some(r => userRoles.includes(r));
-    }
-    
-    return userRoles.includes(role);
-  }, [user, userRoles]);
-
-  const hasAllRoles = useCallback((roles: string[]) => {
-    if (!user || !userRoles) return false;
-    
-    return roles.every(role => userRoles.includes(role));
-  }, [user, userRoles]);
-
-  const isAdmin = useCallback(() => {
-    return hasRole('admin');
-  }, [hasRole]);
-
-  const isModerator = useCallback(() => {
-    return hasRole('moderator');
-  }, [hasRole]);
-
-  const isCreator = useCallback(() => {
-    return hasRole('creator');
-  }, [hasRole]);
-
-  const isEscort = useCallback(() => {
-    return hasRole('escort');
-  }, [hasRole]);
-
-  // Add the canAccessAdminFeatures function
-  const canAccessAdminFeatures = useCallback(() => {
-    return hasRole(['admin', 'moderator']);
-  }, [hasRole]);
-
-  return {
-    userRoles,
-    hasRole,
-    hasAllRoles,
-    isAdmin: isAdmin(),
-    isCreator: isCreator(),
-    isModerator: isModerator(),
-    isEscort: isEscort(),
-    canAccessAdminFeatures: canAccessAdminFeatures()
+  const { user } = useAuth();
+  
+  // Convert string role to UserRole enum
+  const getRole = (role: string): UserRole => {
+    return Object.values(UserRole).includes(role as UserRole) 
+      ? role as UserRole 
+      : UserRole.USER;
   };
+  
+  const hasRole = useCallback((role: UserRole | string) => {
+    if (!user || !user.roles) return false;
+    
+    const roleEnum = typeof role === 'string' ? getRole(role) : role;
+    return user.roles.includes(roleEnum);
+  }, [user]);
+  
+  const checkPermission = useCallback((requiredRole: UserRole | string) => {
+    if (!user) return false;
+    
+    const roleEnum = typeof requiredRole === 'string' ? getRole(requiredRole) : requiredRole;
+    
+    // Admin has access to everything
+    if (user.roles?.includes(UserRole.ADMIN)) return true;
+    
+    return user.roles?.includes(roleEnum) || false;
+  }, [user]);
+  
+  return { hasRole, checkPermission };
 };
-
-export default useRole;

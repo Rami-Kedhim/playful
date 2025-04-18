@@ -1,4 +1,3 @@
-
 import { Escort } from './escort';
 
 // Enhanced escort filter options
@@ -26,6 +25,32 @@ export interface EnhancedEscortFilters {
   };
   sortBy: string;
   useBoostSorting: boolean;
+}
+
+// Update EscortFilterOptions for backward compatibility
+export interface EscortFilterOptions {
+  location?: string;
+  gender?: string[];
+  service?: string[];
+  serviceType?: string[];
+  serviceTypes?: string[];
+  priceRange?: [number, number];
+  ageRange?: [number, number];
+  language?: string[];
+  orientation?: string[];
+  maxDistance?: number;
+  availability?: string[];
+  rating?: number;
+  verifiedOnly?: boolean;
+  verified?: boolean;
+  availableNow?: boolean;
+  escortType?: "verified" | "ai" | "provisional" | "all";
+  sortBy?: string;
+  page?: number;
+  limit?: number;
+  selectedServices?: string[];
+  selectedGenders?: string[];
+  languages?: string[];
 }
 
 // Booking form data

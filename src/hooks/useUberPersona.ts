@@ -1,70 +1,68 @@
 
-import { useState, useEffect } from "react";
-import { UberPersona } from "@/types/uberPersona";
-import { mapEscortToUberPersona } from "@/utils/profileMapping";
-import { useEscortContext } from "@/modules/escorts/providers/EscortProvider";
+import { useState, useEffect } from 'react';
+import { Escort } from '@/types/escort';
+import { UberPersona } from '@/types/uberPersona';
+import { mapEscortToUberPersona } from '@/utils/profileMapping';
 
-/**
- * Hook for working with UberPersona profiles
- */
-export const useUberPersona = (escortId?: string) => {
-  const { state, getEscortById } = useEscortContext();
+export const useUberPersona = (escortId: string) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [persona, setPersona] = useState<UberPersona | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [escort, setEscort] = useState<Escort | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Load persona data when escortId changes
+  // Fetch escort data and convert to UberPersona
   useEffect(() => {
-    if (escortId) {
-      setLoading(true);
+    const fetchEscort = async () => {
+      if (!escortId) return;
+      
+      setIsLoading(true);
       setError(null);
       
       try {
-        const escort = getEscortById(escortId);
+        // Mock a fetch for demo purposes
+        const response = await fetchEscortById(escortId);
         
-        if (escort) {
-          // Map the escort to UberPersona format
-          const persona = mapEscortToUberPersona(escort);
-          setPersona(persona);
+        if (response) {
+          setEscort(response);
+          // Map to UberPersona
+          const uberPersona = mapEscortToUberPersona(response);
+          setPersona(uberPersona);
         } else {
-          setError("Profile not found");
+          setError('Escort not found');
         }
-      } catch (err) {
-        console.error("Error loading persona:", err);
-        setError("Failed to load profile data");
+      } catch (err: any) {
+        setError(err.message || 'Failed to load escort data');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
-    }
-  }, [escortId, getEscortById]);
+    };
+    
+    fetchEscort();
+  }, [escortId]);
 
-  /**
-   * Get personas by role flag
-   */
-  const getPersonasByRole = (role: keyof UberPersona["roleFlags"]): UberPersona[] => {
-    // Map all escorts to personas and filter by role flag
-    return state.escorts
-      .map(mapEscortToUberPersona)
-      .filter(persona => persona.roleFlags[role]);
+  // Mock fetch function
+  const fetchEscortById = async (id: string): Promise<Escort> => {
+    // This would be a real API call in production
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const mockEscort: Escort = {
+          id,
+          name: 'Sample Escort',
+          age: 24,
+          gender: 'female',
+          location: 'New York',
+          rating: 4.9,
+          price: 250,
+          verified: true,
+          tags: ['Elite', 'VIP'],
+          languages: ['English', 'French']
+        };
+        resolve(mockEscort);
+      }, 500);
+    });
   };
 
-  /**
-   * Get personas by capability
-   */
-  const getPersonasByCapability = (capability: keyof UberPersona["capabilities"]): UberPersona[] => {
-    // Map all escorts to personas and filter by capability
-    return state.escorts
-      .map(mapEscortToUberPersona)
-      .filter(persona => persona.capabilities[capability]);
-  };
-
-  return {
-    persona,
-    loading,
-    error,
-    getPersonasByRole,
-    getPersonasByCapability
-  };
+  return { persona, escort, isLoading, error };
 };
 
 export default useUberPersona;

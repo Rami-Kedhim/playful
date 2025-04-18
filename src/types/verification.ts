@@ -1,31 +1,30 @@
-
 import { z } from 'zod';
 
-// Document types enumeration for verification
-export const DOCUMENT_TYPES = [
-  { value: 'passport', label: 'Passport' },
-  { value: 'drivers_license', label: 'Driver\'s License' },
-  { value: 'national_id', label: 'National ID Card' },
-  { value: 'residence_permit', label: 'Residence Permit' },
-  { value: 'utility_bill', label: 'Utility Bill' },
-  { value: 'bank_statement', label: 'Bank Statement' },
-  { value: 'selfie', label: 'Selfie with ID' },
-];
-
-// Add these constants for document type access
+// Add constants for document types
 export const ID_CARD = 'national_id';
 export const PASSPORT = 'passport';
 export const DRIVER_LICENSE = 'drivers_license';
 export const RESIDENCE_PERMIT = 'residence_permit';
 
+// Document types enumeration for verification
+export const DOCUMENT_TYPES = [
+  { value: PASSPORT, label: 'Passport' },
+  { value: DRIVER_LICENSE, label: 'Driver\'s License' },
+  { value: ID_CARD, label: 'National ID Card' },
+  { value: RESIDENCE_PERMIT, label: 'Residence Permit' },
+  { value: 'utility_bill', label: 'Utility Bill' },
+  { value: 'bank_statement', label: 'Bank Statement' },
+  { value: 'selfie', label: 'Selfie with ID' },
+];
+
 // File validation constants
 export const MAX_FILE_SIZE = 5000000; // 5MB
 export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 export const DOCUMENT_REQUIREMENTS = {
-  passport: { backRequired: false },
-  drivers_license: { backRequired: true },
-  national_id: { backRequired: true },
-  residence_permit: { backRequired: true },
+  [PASSPORT]: { backRequired: false },
+  [DRIVER_LICENSE]: { backRequired: true },
+  [ID_CARD]: { backRequired: true },
+  [RESIDENCE_PERMIT]: { backRequired: true },
 };
 
 // Verification form schema
@@ -71,48 +70,5 @@ export enum VerificationStatus {
   EXPIRED = 'expired'
 }
 
-export interface VerificationDocument {
-  id: string;
-  verification_id: string;
-  document_type: string;
-  document_url: string;
-  status: VerificationStatus;
-  notes?: string;
-  created_at: string;
-  updated_at?: string;
-  type?: string;
-  url?: string;
-  fileUrl?: string;
-  file_url?: string;
-  uploadedAt?: string;
-}
-
-export interface VerificationRequest {
-  id: string;
-  userId: string;
-  profile_id?: string;
-  status: VerificationStatus;
-  requested_level: VerificationLevel;
-  documents: VerificationDocument[];
-  createdAt: string;
-  updatedAt?: string;
-  reviewerId?: string;
-  reviewerNotes?: string;
-  expiresAt?: string;
-  
-  // For backward compatibility with escort.ts
-  submittedAt?: string;
-  created_at?: string;
-  updated_at?: string;
-  reviewed_by?: string;
-  reviewer_id?: string;
-  reviewer_notes?: string;
-  expires_at?: string;
-  verificationLevel?: VerificationLevel;
-  requestedLevel?: VerificationLevel;
-  rejection_reason?: string;
-  rejectionReason?: string;
-  level?: VerificationLevel;
-  user_id?: string;
-  reviewedAt?: string;
-}
+// Export VerificationDocument and VerificationRequest for reuse
+export type { VerificationDocument, VerificationRequest } from './escort';

@@ -1,3 +1,4 @@
+
 import { Escort } from "@/types/escort";
 import { VerificationLevel } from "@/types/verification";
 
@@ -13,23 +14,26 @@ const moreEscortProfiles: Escort[] = [
     rating: 4.8,
     price: 300,
     images: ["https://i.imgur.com/randomimage1.jpg"],
-    isVerified: true,
+    verified: true,
     verification_level: VerificationLevel.PREMIUM,
     services: ["Dinner Dates", "Overnight", "Travel Companion"],
     languages: ["English", "Spanish"],
     height: "5'8\"",
     weight: "130 lbs",
-    measurements: "34C-24-36",
-    hair_color: "Blonde",
-    eye_color: "Blue",
+    measurements: {
+      bust: 34,
+      waist: 24,
+      hips: 36
+    },
+    hairColor: "Blonde",
+    eyeColor: "Blue",
     ethnicity: "Caucasian",
     availability: ["Weekdays", "Weekends"],
     created_at: "2023-01-15T12:00:00Z",
     updated_at: "2023-06-20T15:30:00Z",
     userId: "user-101",
-    is_verified: true,
-    is_featured: true,
-    tags: ["Luxury", "Elite", "VIP"]
+    tags: ["Luxury", "Elite", "VIP"],
+    featured: true
   },
   {
     id: "esc-102",
@@ -41,22 +45,24 @@ const moreEscortProfiles: Escort[] = [
     rating: 4.6,
     price: 280,
     images: ["https://i.imgur.com/randomimage2.jpg"],
-    isVerified: true,
+    verified: true,
     verification_level: VerificationLevel.BASIC,
     services: ["Dinner Dates", "Cultural Events", "Private Parties"],
     languages: ["English", "French"],
     height: "5'6\"",
     weight: "120 lbs",
-    measurements: "32B-23-34",
-    hair_color: "Brunette",
-    eye_color: "Green",
+    measurements: {
+      bust: 32,
+      waist: 23,
+      hips: 34
+    },
+    hairColor: "Brunette",
+    eyeColor: "Green",
     ethnicity: "Mixed",
     availability: ["Weekends", "Evenings"],
     created_at: "2023-02-10T14:20:00Z",
     updated_at: "2023-06-15T11:45:00Z",
     userId: "user-102",
-    is_verified: true,
-    is_featured: false,
     tags: ["Intellectual", "Cultured", "Elegant"]
   },
   {
@@ -69,23 +75,26 @@ const moreEscortProfiles: Escort[] = [
     rating: 4.9,
     price: 350,
     images: ["https://i.imgur.com/randomimage3.jpg"],
-    isVerified: true,
+    verified: true,
     verification_level: VerificationLevel.ENHANCED,
     services: ["Overnight", "Travel Companion", "Couples"],
     languages: ["English", "Korean", "Japanese"],
     height: "5'5\"",
     weight: "115 lbs",
-    measurements: "34B-24-35",
-    hair_color: "Black",
-    eye_color: "Brown",
+    measurements: {
+      bust: 34,
+      waist: 24,
+      hips: 35
+    },
+    hairColor: "Black",
+    eyeColor: "Brown",
     ethnicity: "Asian",
     availability: ["All Week"],
     created_at: "2023-01-05T09:15:00Z",
     updated_at: "2023-06-25T16:20:00Z",
     userId: "user-103",
-    is_verified: true,
-    is_featured: true,
-    tags: ["Exotic", "Adventurous", "Multilingual"]
+    tags: ["Exotic", "Adventurous", "Multilingual"],
+    featured: true
   },
   {
     id: "esc-104",
@@ -97,22 +106,24 @@ const moreEscortProfiles: Escort[] = [
     rating: 4.7,
     price: 320,
     images: ["https://i.imgur.com/randomimage4.jpg"],
-    isVerified: true,
+    verified: true,
     verification_level: VerificationLevel.PREMIUM,
     services: ["Dinner Dates", "Business Events", "Weekend Getaways"],
     languages: ["English", "Spanish", "Italian"],
     height: "5'9\"",
     weight: "135 lbs",
-    measurements: "36C-26-38",
-    hair_color: "Auburn",
-    eye_color: "Hazel",
+    measurements: {
+      bust: 36,
+      waist: 26,
+      hips: 38
+    },
+    hairColor: "Auburn",
+    eyeColor: "Hazel",
     ethnicity: "Latina",
     availability: ["Weekdays", "Weekends"],
     created_at: "2022-12-20T11:30:00Z",
     updated_at: "2023-06-18T14:10:00Z",
     userId: "user-104",
-    is_verified: true,
-    is_featured: false,
     tags: ["Sophisticated", "Multilingual", "Professional"]
   }
 ];

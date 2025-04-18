@@ -1,7 +1,5 @@
-
 import { faker } from '@faker-js/faker';
-import { Escort } from '@/types/escort';
-import { VerificationLevel } from '@/types/verification';
+import { Escort, VerificationLevel } from '@/types/escort';
 
 // Generate a random escort profile
 export function generateRandomEscort(): Escort {
@@ -12,35 +10,25 @@ export function generateRandomEscort(): Escort {
   
   return {
     id,
-    user_id: id,
+    userId: id,
     name: `${firstName} ${lastName}`,
-    email: faker.internet.email({ firstName, lastName }),
-    avatar: faker.image.avatar(),
     gender,
     age: faker.number.int({ min: 21, max: 45 }),
     bio: faker.lorem.paragraph(),
     location: faker.location.city(),
-    phone: faker.phone.number(),
-    website: faker.internet.url(),
-    social_media: {
-      instagram: `@${firstName.toLowerCase()}${faker.number.int(1000)}`,
-      twitter: `@${firstName.toLowerCase()}${faker.number.int(1000)}`,
-      onlyfans: `${firstName.toLowerCase()}${faker.number.int(1000)}`
+    measurements: {
+      bust: faker.number.int({ min: 32, max: 42 }),
+      waist: faker.number.int({ min: 22, max: 34 }),
+      hips: faker.number.int({ min: 32, max: 44 })
     },
-    hourly_rate: faker.number.int({ min: 100, max: 500 }).toString(),
-    is_verified: faker.datatype.boolean(),
+    reviews: faker.number.int({ min: 0, max: 50 }),
+    hourly_rate: faker.number.int({ min: 100, max: 500 }),
+    verified: faker.datatype.boolean(),
     verification_level: faker.helpers.arrayElement(Object.values(VerificationLevel)),
     created_at: faker.date.past().toISOString(),
     updated_at: faker.date.recent().toISOString(),
-    reviews: Array.from({ length: faker.number.int({ min: 0, max: 10 }) }, () => ({
-      id: faker.string.uuid(),
-      userId: faker.string.uuid(),
-      userName: faker.person.fullName(),
-      rating: faker.number.int({ min: 1, max: 5 }),
-      comment: faker.lorem.sentence(),
-      date: faker.date.recent().toISOString(),
-      verifiedBooking: faker.datatype.boolean()
-    })),
+    reviewCount: faker.number.int({ min: 0, max: 10 }),
+    rating: Number(faker.number.float({ min: 3, max: 5, precision: 0.1 }).toFixed(1)),
     services: Array.from({ length: faker.number.int({ min: 3, max: 8 }) }, () => 
       faker.helpers.arrayElement(['massage', 'companionship', 'dinner_date', 'travel', 'overnight', 'weekend'])
     ),
@@ -51,11 +39,6 @@ export function generateRandomEscort(): Escort {
     weight: faker.number.int({ min: 45, max: 100 }).toString(),
     hair_color: faker.helpers.arrayElement(['black', 'blonde', 'brown', 'red', 'white', 'grey', 'other']),
     eye_color: faker.helpers.arrayElement(['blue', 'brown', 'green', 'hazel', 'grey', 'other']),
-    measurements: {
-      bust: faker.number.int({ min: 75, max: 110 }).toString(),
-      waist: faker.number.int({ min: 50, max: 90 }).toString(),
-      hips: faker.number.int({ min: 75, max: 120 }).toString()
-    },
     nationality: faker.location.country(),
     availability: [
       { day: 'monday', available: faker.datatype.boolean() },

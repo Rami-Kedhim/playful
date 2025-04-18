@@ -1,39 +1,33 @@
 
+export enum UserRole {
+  ADMIN = "admin",
+  MODERATOR = "moderator",
+  USER = "user",
+  ESCORT = "escort",
+  CLIENT = "client",
+  CREATOR = "creator",
+  CUSTOMER = "customer"
+}
+
 export interface AuthUser {
   id: string;
   email?: string;
-  avatar_url?: string;
-  avatarUrl?: string;
-  profileImageUrl?: string;
-  username?: string;
-  name?: string;
+  phone?: string;
   role?: UserRole;
   roles?: UserRole[];
-  user_metadata?: Record<string, any>;
-  lucoinsBalance?: number;
   created_at?: string;
-}
-
-export enum UserRole {
-  USER = "user",
-  ADMIN = "admin",
-  MODERATOR = "moderator",
-  ESCORT = "escort",
-  CONTENT_CREATOR = "content_creator",
-  PREMIUM = "premium",
-  ANALYST = "analyst"
-}
-
-export enum DatabaseGender {
-  MALE = "male",
-  FEMALE = "female",
-  NON_BINARY = "non_binary",
-  OTHER = "other",
-  PREFER_NOT_TO_SAY = "prefer_not_to_say"
+  updated_at?: string;
+  app_metadata?: {
+    provider?: string;
+    [key: string]: any;
+  };
+  user_metadata?: {
+    [key: string]: any;
+  };
 }
 
 export interface UserProfile {
-  id?: string;
+  id: string;
   email?: string;
   name?: string;
   avatar_url?: string;
@@ -41,62 +35,40 @@ export interface UserProfile {
   location?: string;
   bio?: string;
   is_escort?: boolean;
-  is_verified?: boolean; 
+  is_verified?: boolean;
   created_at?: string;
   updated_at?: string;
-  username?: string;
-  full_name?: string;
-  gender?: DatabaseGender;
-  lucoin_balance?: number;
   ubx_balance?: number;
+  lucoin_balance?: number;
+  stripe_account_id?: string;
+  stripe_customer_id?: string;
 }
 
 export interface AuthResult {
   success: boolean;
-  message?: string;
+  user?: AuthUser | null;
+  profile?: UserProfile | null;
   error?: string;
-  user?: AuthUser;
-  session?: any;
+  session?: any; // Allow session property
 }
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterCredentials extends LoginCredentials {
-  username?: string;
-  fullName?: string;
-  inviteCode?: string;
-}
-
-export interface ResetPasswordCredentials {
-  email: string;
-}
-
-export interface UpdatePasswordCredentials {
-  oldPassword: string;
-  newPassword: string;
-}
-
-// Add AuthContextType interface
 export interface AuthContextType {
   user: AuthUser | null;
   profile: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (credentials: LoginCredentials) => Promise<AuthResult>;
-  register: (credentials: RegisterCredentials) => Promise<AuthResult>;
-  logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
-  signUp: (email: string, password: string) => Promise<AuthResult>;
+  signUp: (email: string, password: string, options?: any) => Promise<AuthResult>;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
-  updateUserProfile: (data: any) => Promise<boolean>;
-  refreshProfile: () => Promise<void>;
-  updatePassword: (newPassword: string) => Promise<boolean>;
-  resetPassword: (email: string) => Promise<AuthResult>;
-  userRoles: UserRole[];
-  checkRole: (role: string | UserRole) => boolean;
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  resetPassword: (token: string, newPassword: string) => Promise<boolean>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
+  checkRole: (role: UserRole | string) => boolean;
+  refreshUser: () => Promise<void>;
+  sendVerificationEmail: () => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<boolean>;
+  updateEmail: (email: string) => Promise<boolean>;
+  updatePassword: (password: string) => Promise<boolean>;
+  setUser: (user: AuthUser | null) => void;
 }

@@ -1,159 +1,145 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Escort, Availability } from '@/types/escort';
-import { Shield, Clock, MapPin, Calendar, Languages, Ruler, HeartPulse, Scale, Palette } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Trans, useTranslation } from 'react-i18next';
+import { CalendarIcon, Clock, MapPin, Users } from 'lucide-react';
+import { Escort } from '@/types/escort';
+import { useTranslation } from 'react-i18next';
 
 interface EscortAboutProps {
   escort: Escort;
-  className?: string;
 }
 
-const EscortAbout: React.FC<EscortAboutProps> = ({ escort, className }) => {
+const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
   const { t } = useTranslation();
   
-  // Handle availability display
-  const renderAvailability = () => {
-    if (!escort.availability || (Array.isArray(escort.availability) && escort.availability.length === 0)) {
-      return <span className="text-muted-foreground">{t('Not specified')}</span>;
-    }
-    
-    // If it's a string array, just display the strings
-    if (Array.isArray(escort.availability)) {
-      if (typeof escort.availability[0] === 'string') {
-        return (
-          <div className="flex flex-wrap gap-1">
-            {(escort.availability as string[]).map((day, index) => (
-              <Badge key={index} variant="outline">{day}</Badge>
-            ))}
-          </div>
-        );
-      }
-      
-      // Handle Availability[] type
-      return (
-        <div className="flex flex-col gap-2">
-          {(escort.availability as Availability[]).map((item, index) => (
-            <div key={index} className="text-sm">
-              {item.day && <div className="font-medium">{item.day}</div>}
-              {item.hours && <div className="text-muted-foreground">{item.hours}</div>}
-              {item.slots && item.slots.length > 0 && (
-                <div className="grid grid-cols-2 gap-1 mt-1">
-                  {item.slots.map((slot, slotIdx) => (
-                    <span key={slotIdx} className="text-xs bg-muted/50 px-2 py-1 rounded">
-                      {slot.start} - {slot.end}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    }
-    
-    // Handle any other case
-    return <span className="text-muted-foreground">{t('Contact for details')}</span>;
+  // Helper function to format array data or text
+  const formatList = (items: string[] | undefined) => {
+    if (!items || items.length === 0) return "Not specified";
+    return Array.isArray(items) ? items.join(', ') : items;
   };
-  
+
+  // Format availability information
+  const formatAvailability = () => {
+    if (!escort.availability) return "Not specified";
+    
+    if (Array.isArray(escort.availability) && typeof escort.availability[0] === 'string') {
+      // Handle string array format
+      return escort.availability.join(', ');
+    }
+    
+    if (Array.isArray(escort.availability) && typeof escort.availability[0] === 'object') {
+      // Handle object format
+      const availObj = escort.availability[0];
+      if (availObj.days && Array.isArray(availObj.days)) {
+        return availObj.days.join(', ');
+      }
+    }
+    
+    return "Available upon request";
+  };
+
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>{t('About')} {escort.name}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {escort.bio || escort.description ? (
+    <div className="space-y-6">
+      {/* Bio section */}
+      <Card className="p-4">
+        <h3 className="text-lg font-medium mb-2">{t('About Me')}</h3>
+        <p className="text-muted-foreground">
+          {escort.bio || escort.description || "No bio information available."}
+        </p>
+      </Card>
+      
+      {/* Personal information */}
+      <Card className="p-4">
+        <h3 className="text-lg font-medium mb-4">{t('Personal Information')}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h3 className="text-lg font-medium mb-2">{t('Bio')}</h3>
-            <p className="text-muted-foreground">
-              {escort.bio || escort.description}
-            </p>
+            <p className="text-sm text-muted-foreground mb-1">Age</p>
+            <p className="font-medium">{escort.age || 'Not specified'}</p>
           </div>
-        ) : null}
-        
-        <div>
-          <h3 className="text-lg font-medium mb-3">{t('Details')}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-start">
-                <MapPin className="h-5 w-5 mr-2 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">{t('Location')}</p>
-                  <p className="text-sm text-muted-foreground">{escort.location || t('Not specified')}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Languages className="h-5 w-5 mr-2 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">{t('Languages')}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {escort.languages?.join(', ') || t('Not specified')}
-                  </p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Ruler className="h-5 w-5 mr-2 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">{t('Height')}</p>
-                  <p className="text-sm text-muted-foreground">{escort.height || t('Not specified')}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Scale className="h-5 w-5 mr-2 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">{t('Weight')}</p>
-                  <p className="text-sm text-muted-foreground">{escort.weight || t('Not specified')}</p>
-                </div>
-              </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Gender</p>
+            <p className="font-medium">{escort.gender || 'Not specified'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Ethnicity</p>
+            <p className="font-medium">{escort.ethnicity || 'Not specified'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Body Type</p>
+            <p className="font-medium">{escort.bodyType || 'Not specified'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Height</p>
+            <p className="font-medium">{escort.height || 'Not specified'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Weight</p>
+            <p className="font-medium">{escort.weight || 'Not specified'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Hair Color</p>
+            <p className="font-medium">{escort.hairColor || 'Not specified'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Eye Color</p>
+            <p className="font-medium">{escort.eyeColor || 'Not specified'}</p>
+          </div>
+        </div>
+      </Card>
+      
+      {/* Location and availability */}
+      <Card className="p-4">
+        <h3 className="text-lg font-medium mb-4">{t('Location & Availability')}</h3>
+        <div className="space-y-4">
+          <div className="flex items-start gap-2">
+            <MapPin className="h-5 w-5 text-primary mt-0.5" />
+            <div>
+              <p className="font-medium">{escort.location || 'Location not specified'}</p>
+              <p className="text-sm text-muted-foreground">
+                {escort.services?.includes('Travel') ? 'Available for travel' : 'Local services'}
+              </p>
             </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-start">
-                <HeartPulse className="h-5 w-5 mr-2 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">{t('Hair Color')}</p>
-                  <p className="text-sm text-muted-foreground">{escort.hairColor || escort.hair || t('Not specified')}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Palette className="h-5 w-5 mr-2 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">{t('Eye Color')}</p>
-                  <p className="text-sm text-muted-foreground">{escort.eyeColor || escort.eyes || t('Not specified')}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Shield className="h-5 w-5 mr-2 text-muted-foreground" />
-                <div>
-                  <p className="text-sm font-medium">{t('Body Type')}</p>
-                  <p className="text-sm text-muted-foreground">{escort.bodyType || escort.physique?.bodyType || t('Not specified')}</p>
-                </div>
-              </div>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <CalendarIcon className="h-5 w-5 text-primary mt-0.5" />
+            <div>
+              <p className="font-medium">Availability</p>
+              <p className="text-sm text-muted-foreground">
+                {formatAvailability()}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <Clock className="h-5 w-5 text-primary mt-0.5" />
+            <div>
+              <p className="font-medium">Response Time</p>
+              <p className="text-sm text-muted-foreground">
+                {escort.responseRate ? `${escort.responseRate}% response rate` : 'Usually responds within 24 hours'}
+              </p>
             </div>
           </div>
         </div>
-        
-        <Separator />
-        
-        <div>
-          <h3 className="text-lg font-medium mb-3">{t('Availability')}</h3>
-          <div className="flex items-start">
-            <Calendar className="h-5 w-5 mr-2 text-muted-foreground mt-0.5" />
-            <div className="space-y-1 flex-1">
-              {renderAvailability()}
+      </Card>
+      
+      {/* Languages and other information */}
+      <Card className="p-4">
+        <h3 className="text-lg font-medium mb-4">{t('Additional Information')}</h3>
+        <div className="space-y-4">
+          <div className="flex items-start gap-2">
+            <Users className="h-5 w-5 text-primary mt-0.5" />
+            <div>
+              <p className="font-medium">Languages</p>
+              <p className="text-sm text-muted-foreground">
+                {formatList(escort.languages)}
+              </p>
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 };
 

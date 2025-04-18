@@ -1,10 +1,17 @@
 
-import { VerificationLevel } from './verification';
+export type VerificationStatus = 'pending' | 'in_review' | 'approved' | 'rejected';
+
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  ENHANCED = 'enhanced',
+  PREMIUM = 'premium'
+}
 
 export interface Measurements {
-  bust: string;
-  waist: string;
-  hips: string;
+  bust: string | number;
+  waist: string | number;
+  hips: string | number;
 }
 
 export interface Rates {
@@ -23,11 +30,17 @@ export interface Physique {
 
 export interface Availability {
   day?: string;
-  hours?: string;
+  hours?: string[] | number[] | string;
   available?: boolean;
   slots?: { start: string; end: string }[];
   days?: string[];
   customNotes?: string;
+}
+
+export interface ExtendedAvailability extends Availability {
+  weekdays?: boolean;
+  weekends?: boolean;
+  timeOfDay?: string[];
 }
 
 export interface Video {
@@ -52,12 +65,6 @@ export interface ContactInfo {
   };
 }
 
-export interface ExtendedAvailability extends Availability {
-  weekdays?: boolean;
-  weekends?: boolean;
-  timeOfDay?: string[];
-}
-
 export enum ServiceType {
   MASSAGE = "massage",
   COMPANIONSHIP = "companionship",
@@ -72,6 +79,8 @@ export enum ServiceType {
 export interface Escort {
   id: string;
   name: string;
+  userId?: string;
+  user_id?: string; // For backward compatibility
   gender?: string;
   age?: number;
   location?: string;
@@ -151,4 +160,45 @@ export interface Booking {
   createdAt: Date;
   notes?: string;
   totalPrice?: number;
+}
+
+export interface VerificationDocument {
+  id: string;
+  verification_id: string;
+  document_type: string;
+  document_url: string;
+  status: VerificationStatus;
+  notes?: string;
+  created_at: string;
+  updated_at?: string;
+  type?: string;
+  url?: string;
+  fileUrl?: string;
+  file_url?: string;
+  uploadedAt?: string;
+}
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  profile_id?: string;
+  status: VerificationStatus;
+  requested_level: VerificationLevel;
+  requestedLevel?: VerificationLevel;
+  documents: VerificationDocument[];
+  createdAt: string;
+  created_at?: string;
+  updatedAt?: string;
+  updated_at?: string;
+  reviewerId?: string;
+  reviewer_id?: string;
+  reviewerNotes?: string;
+  reviewer_notes?: string;
+  expiresAt?: string;
+  expires_at?: string;
+  submittedAt?: string;
+  rejectionReason?: string;
+  rejection_reason?: string;
+  level?: VerificationLevel;
+  verificationLevel?: VerificationLevel;
 }
