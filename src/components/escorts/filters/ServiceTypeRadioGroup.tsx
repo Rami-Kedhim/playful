@@ -72,7 +72,11 @@ const ServiceTypeRadioGroup: React.FC<ServiceTypeRadioGroupProps> = ({
             onChange={() => setServiceTypeFilter('in-person')}
             className="sr-only" 
           />
-          <ServiceTypeIcon type="in-person" size={iconSize} variant={serviceTypeFilter === 'in-person' ? 'colored' : 'default'} />
+          <ServiceTypeIcon 
+            type="in-person" 
+            size={iconSize} 
+            className={serviceTypeFilter === 'in-person' ? "text-primary" : ""}
+          />
           {showLabels && <span className={cn(size === 'sm' && "text-xs")}>In Person</span>}
         </Label>
         
@@ -93,7 +97,11 @@ const ServiceTypeRadioGroup: React.FC<ServiceTypeRadioGroupProps> = ({
             onChange={() => setServiceTypeFilter('virtual')}
             className="sr-only" 
           />
-          <ServiceTypeIcon type="virtual" size={iconSize} variant={serviceTypeFilter === 'virtual' ? 'colored' : 'default'} />
+          <ServiceTypeIcon 
+            type="virtual" 
+            size={iconSize} 
+            className={serviceTypeFilter === 'virtual' ? "text-primary" : ""}
+          />
           {showLabels && <span className={cn(size === 'sm' && "text-xs")}>Virtual</span>}
         </Label>
         
@@ -114,7 +122,11 @@ const ServiceTypeRadioGroup: React.FC<ServiceTypeRadioGroupProps> = ({
             onChange={() => setServiceTypeFilter('both')}
             className="sr-only" 
           />
-          <ServiceTypeIcon type="both" size={iconSize} variant={serviceTypeFilter === 'both' ? 'colored' : 'default'} />
+          <ServiceTypeIcon 
+            type="both" 
+            size={iconSize} 
+            className={serviceTypeFilter === 'both' ? "text-primary" : ""}
+          />
           {showLabels && <span className={cn(size === 'sm' && "text-xs")}>Both</span>}
         </Label>
         
@@ -135,7 +147,11 @@ const ServiceTypeRadioGroup: React.FC<ServiceTypeRadioGroupProps> = ({
             onChange={() => setServiceTypeFilter('')}
             className="sr-only" 
           />
-          <ServiceTypeIcon type="" size={iconSize} variant={serviceTypeFilter === '' ? 'colored' : 'default'} />
+          <ServiceTypeIcon 
+            type="" 
+            size={iconSize} 
+            className={serviceTypeFilter === '' ? "text-primary" : ""}
+          />
           {showLabels && <span className={cn(size === 'sm' && "text-xs")}>Any</span>}
         </Label>
       </div>

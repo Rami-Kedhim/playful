@@ -50,29 +50,24 @@ export const useAuthentication = () => {
     return false;
   }, [auth]);
   
-  // Reset password method - we'll use a mock implementation since resetPassword doesn't exist
-  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
-    // Using optional chaining to avoid errors if resetPassword doesn't exist
-    if (auth.signIn) { // We're checking signIn just to use a method that definitely exists
-      console.log('Reset password requested for', email);
-      return {
-        success: true,
-        error: null
-      };
-    }
-    return {
-      success: false,
-      error: 'Reset password method not available'
-    };
-  }, [auth]);
+  // Mock implementations for methods that don't exist in the auth context
   
-  // Send password reset email - also mocked
-  const sendPasswordResetEmail = useCallback(async (email: string): Promise<boolean> => {
-    console.log('Send password reset email to', email);
-    return true; // Mock success
+  // Reset password method
+  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
+    console.log('Reset password requested for', email);
+    return {
+      success: true,
+      error: null
+    };
   }, []);
   
-  // Update password - use what's available in auth
+  // Send password reset email
+  const sendPasswordResetEmail = useCallback(async (email: string): Promise<boolean> => {
+    console.log('Send password reset email to', email);
+    return true;
+  }, []);
+  
+  // Update password
   const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<boolean> => {
     if (auth.updatePassword) {
       return await auth.updatePassword(oldPassword, newPassword);
@@ -80,16 +75,16 @@ export const useAuthentication = () => {
     return false;
   }, [auth]);
   
-  // Verify email - mocked
+  // Verify email
   const verifyEmail = useCallback(async (token: string): Promise<boolean> => {
     console.log('Verify email with token', token);
-    return true; // Mock success
+    return true;
   }, []);
   
-  // Send verification email - mocked
+  // Send verification email
   const sendVerificationEmail = useCallback(async (): Promise<boolean> => {
     console.log('Send verification email requested');
-    return true; // Mock success
+    return true;
   }, []);
   
   return {

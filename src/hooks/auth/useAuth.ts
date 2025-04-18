@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { AuthContextType, User, UserProfile, AuthResult, UserRole } from '@/types/auth';
 
@@ -100,9 +99,8 @@ export const useAuth = (): AuthContextType => {
         bio: '',
         is_verified: user.isVerified || false,
         website: user.website || '',
-        avatarUrl: user.avatarUrl || '',
-        joinedDate: new Date(),
         avatar_url: user.avatar_url || '',
+        joinedDate: new Date(),
         phone: user.phone || '',
         profileImageUrl: user.profileImageUrl || ''
       };

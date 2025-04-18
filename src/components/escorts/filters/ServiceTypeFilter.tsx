@@ -46,7 +46,7 @@ const ServiceTypeFilter: React.FC<ServiceTypeFilterProps> = ({
           >
             <ServiceTypeIcon 
               type={type} 
-              variant={serviceTypeFilter === type ? "colored" : "default"} 
+              className={serviceTypeFilter === type ? "text-primary" : ""}
             />
             <span>{labels[type]}</span>
           </Card>

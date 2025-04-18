@@ -47,7 +47,7 @@ const ServiceTypeQuickFilter: React.FC<ServiceTypeQuickFilterProps> = ({
           >
             <ServiceTypeIcon 
               type={type || ""} 
-              variant={serviceTypeFilter === type ? "colored" : "default"}
+              className={serviceTypeFilter === type ? "text-primary" : ""}
             />
             {showLabel && <span>{labels[type]}</span>}
           </button>

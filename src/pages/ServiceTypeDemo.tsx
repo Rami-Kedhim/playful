@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
-import ServiceTypeIcon from '@/components/filters/ServiceTypeIcon';
+import ServiceTypeIcon from '@/components/escorts/filters/ServiceTypeIcon';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 const ServiceTypeDemo = () => {
