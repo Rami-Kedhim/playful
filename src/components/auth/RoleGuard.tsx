@@ -54,7 +54,7 @@ const RoleGuard = ({
   // Check if user has required role(s)
   const hasAccess = requireAllRoles 
     ? hasAllRoles(allowedRoles)
-    : hasRole(allowedRoles);
+    : allowedRoles.some(role => hasRole(role));
 
   // If user doesn't have required role(s)
   if (!hasAccess) {

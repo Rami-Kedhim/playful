@@ -1,247 +1,128 @@
-
-import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import AppLayout from "@/components/layout/AppLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, Wallet as WalletIcon, History, Gift, Zap, RefreshCw, Shield, ExternalLink } from "lucide-react";
-import UBXBalance from "@/components/profile/settings/UBXBalance";
-import UBXTransactionHistory from "@/components/profile/settings/UBXTransactionHistory";
-import UBXPackageDialog from "@/components/profile/settings/UBXPackageDialog";
-import UBXRechargeDialog from "@/components/profile/settings/UBXRechargeDialog";
-import WalletConnect from "@/components/solana/WalletConnect";
-import { useSolanaWallet } from "@/hooks/useSolanaWallet";
-import { getFantomBalance, getFantomPrice } from "@/services/fantomService";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { blockchainService, NETWORK_CONFIG } from "@/services/blockchainService";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import AppLayout from '@/components/layout/AppLayout';
 
 const UpdatedWallet = () => {
   const { user, profile } = useAuth();
-  const { walletAddress } = useSolanaWallet();
-  const [ftmBalance, setFtmBalance] = useState<number | null>(null);
-  const [ftmPrice, setFtmPrice] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [rechargeDialogOpen, setRechargeDialogOpen] = useState(false);
-  
+  const [isBoosted, setIsBoosted] = useState(false);
+
   useEffect(() => {
-    if (walletAddress) {
-      loadFantomData(walletAddress);
-    } else {
-      setFtmBalance(null);
-    }
-  }, [walletAddress]);
-  
-  const loadFantomData = async (address: string) => {
-    setLoading(true);
-    try {
-      const [balance, price] = await Promise.all([
-        getFantomBalance(address),
-        getFantomPrice()
-      ]);
-      
-      setFtmBalance(balance);
-      setFtmPrice(price);
-    } catch (error) {
-      console.error("Error loading Fantom data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const refreshFantomData = () => {
-    if (walletAddress) {
-      loadFantomData(walletAddress);
-    }
-  };
-  
+    // Simulate fetching boosted status from an API or some other source
+    // In a real application, you would replace this with an actual API call
+    const fetchBoostedStatus = async () => {
+      // Replace this with your actual logic to determine if the user is boosted
+      const boosted = profile?.is_boosted || profile?.isBoosted || false;
+      setIsBoosted(boosted);
+    };
+
+    fetchBoostedStatus();
+  }, [profile]);
+
   return (
     <AppLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Uber Wallet</h1>
-            <p className="text-muted-foreground">Manage your UBX and transactions</p>
-          </div>
-          <div className="flex gap-2">
-            <WalletConnect />
-            <Button variant="outline" size="sm" onClick={() => setRechargeDialogOpen(true)}>
-              Add UBX
+      <div className="container mx-auto py-10">
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-2xl font-bold">
+              My Wallet
+            </CardTitle>
+            <Button variant="outline">
+              Withdraw Funds
             </Button>
-            <UBXRechargeDialog open={rechargeDialogOpen} onClose={() => setRechargeDialogOpen(false)} />
-            <UBXPackageDialog />
-          </div>
-        </div>
-        
-        <div className="grid gap-6 md:grid-cols-3 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-lg">
-                <Coins className="h-5 w-5 text-blue-500 mr-2" />
-                UBX Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{profile?.lucoin_balance || profile?.lucoinsBalance || 0} UBX</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                Virtual credits for platform features
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center text-lg">
-                <Shield className="h-5 w-5 text-primary mr-2" />
-                IOTA Wallet
-              </CardTitle>
-              {walletAddress && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={refreshFantomData}
-                  disabled={loading}
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent>
-              {walletAddress ? (
-                loading ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-8 w-24" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-3xl font-bold">{ftmBalance !== null ? ftmBalance.toFixed(4) : '0.0000'} MIOTA</div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {ftmPrice && ftmBalance !== null ? (
-                        <>≈ ${(ftmBalance * ftmPrice).toFixed(2)} USD</>
-                      ) : (
-                        '—'
-                      )}
-                    </p>
-                  </>
-                )
-              ) : (
-                <div className="text-muted-foreground py-1">
-                  Connect wallet to view balance
-                </div>
-              )}
-              
-              <div className="mt-2 text-xs flex items-center text-muted-foreground">
-                <ExternalLink className="h-3 w-3 mr-1" />
-                <a href="https://firefly.iota.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
-                  Download IOTA Firefly wallet
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center text-lg">
-                <Zap className="h-5 w-5 text-primary mr-2" />
-                Profile Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-medium">
-                {profile?.is_boosted || profile?.isBoosted ? (
-                  <span className="text-green-500">Boosted</span>
-                ) : (
-                  <span className="text-muted-foreground">Standard</span>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {profile?.is_boosted || profile?.isBoosted ? "Your profile is boosted" : "Boost your profile for more visibility"}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <Tabs defaultValue="transactions" className="w-full">
-          <TabsList className="grid w-full md:w-[600px] grid-cols-3">
-            <TabsTrigger value="transactions" className="flex items-center">
-              <History className="mr-2 h-4 w-4" />
-              UBX Transactions
-            </TabsTrigger>
-            <TabsTrigger value="iota" className="flex items-center">
-              <Shield className="mr-2 h-4 w-4" />
-              IOTA Privacy
-            </TabsTrigger>
-            <TabsTrigger value="gifts" className="flex items-center">
-              <Gift className="mr-2 h-4 w-4" />
-              Gifts
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="transactions" className="mt-6">
-            <UBXTransactionHistory />
-          </TabsContent>
-          
-          <TabsContent value="iota" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Privacy with IOTA</CardTitle>
-                <CardDescription>Secure, feeless UBX recharge with IOTA blockchain</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <Shield className="h-12 w-12 text-green-500 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Private Transactions</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    {NETWORK_CONFIG.displayName} transactions are handled with the highest level of privacy. 
-                    Each recharge generates a new one-time address to maximize your anonymity.
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              <div className="flex items-center space-x-4">
+                <Avatar>
+                  <AvatarImage src={profile?.avatar_url} />
+                  <AvatarFallback>
+                    {user?.username?.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="text-lg font-semibold">{user?.username}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {user?.email}
                   </p>
                 </div>
-                
-                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                  <h4 className="font-medium flex items-center">
-                    <Shield className="h-4 w-4 mr-2 text-green-500" />
-                    Key Privacy Benefits
-                  </h4>
-                  <ul className="mt-2 space-y-1 text-sm list-disc pl-5">
-                    <li>No transaction fees, ever</li>
-                    <li>One-time addresses for each recharge</li>
-                    <li>No linking between your identity and blockchain activity</li>
-                    <li>Fast confirmations ({NETWORK_CONFIG.confirmationTime})</li>
-                    <li>Simple QR code scanning from any IOTA wallet</li>
-                  </ul>
-                </div>
-                
-                <div className="pt-2">
-                  <Button variant="outline" size="sm" className="flex items-center gap-2" asChild>
-                    <a href="https://explorer.iota.org/mainnet" target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4" />
-                      IOTA Explorer
-                    </a>
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="text-xl font-semibold">
+                  LuCoins Balance: {profile?.lucoin_balance || profile?.lucoinsBalance || 0} LC
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Use LuCoins to boost your profile, send messages, and more.
+                </p>
+                <Button>
+                  Add LuCoins
+                </Button>
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="text-xl font-semibold">
+                  UBX Balance: {profile?.ubx_balance || 0} UBX
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Use UBX to purchase exclusive content and services.
+                </p>
+                <Button>
+                  Add UBX
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-lg font-semibold">Profile Boost</h4>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {profile?.is_boosted || profile?.isBoosted ? (
+                      <>
+                        <ShieldCheck className="h-5 w-5 text-green-500" />
+                        <p className="text-sm">Your profile is currently boosted!</p>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-5 w-5 text-yellow-500" />
+                        <p className="text-sm">Boost your profile to get more visibility.</p>
+                      </>
+                    )}
+                  </div>
+                  <Button variant="secondary" size="sm">
+                    {profile?.is_boosted || profile?.isBoosted ? "Manage Boost" : "Boost Profile"}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="gifts" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gifts History</CardTitle>
-                <CardDescription>View gifts you've sent and received</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Gift className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No gifts yet</h3>
-                  <p className="text-muted-foreground max-w-md">
-                    When you send or receive gifts, they will appear here. Gifts are a great way to show appreciation to creators and escorts.
-                  </p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-lg font-semibold">Subscription</h4>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {profile?.is_boosted || profile?.isBoosted ? (
+                      <>
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <p className="text-sm">You are currently subscribed!</p>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-5 w-5 text-yellow-500" />
+                        <p className="text-sm">Subscribe to unlock exclusive features.</p>
+                      </>
+                    )}
+                  </div>
+                  <Button variant="secondary" size="sm">
+                    {profile?.is_boosted || profile?.isBoosted ? "Manage Subscription" : "Subscribe"}
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );

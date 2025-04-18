@@ -1,13 +1,13 @@
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, CheckCircle, Clock, File, User, X } from 'lucide-react';
-import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 import DocumentReview from './DocumentReview';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 
 interface VerificationReviewPanelProps {
@@ -45,7 +45,7 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">
           <User className="h-4 w-4" />
-          <span>User ID: {request.userId}</span>
+          <span>User ID: {request.userId || request.user_id}</span>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -54,7 +54,7 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
             Submitted:{' '}
             {request.submittedAt
               ? format(new Date(request.submittedAt), 'MMM dd, yyyy h:mm a')
-              : format(new Date(request.created_at || request.createdAt), 'MMM dd, yyyy h:mm a')}
+              : format(new Date(request.created_at || request.createdAt || new Date()), 'MMM dd, yyyy h:mm a')}
           </span>
         </div>
         

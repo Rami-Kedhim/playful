@@ -9,10 +9,19 @@ export enum UserRole {
   CUSTOMER = "customer"
 }
 
+export enum DatabaseGender {
+  MALE = "male",
+  FEMALE = "female",
+  OTHER = "other",
+  TRANS = "trans",
+  NON_BINARY = "non-binary"
+}
+
 export interface AuthUser {
   id: string;
   email?: string;
   phone?: string;
+  phone_number?: string;  // Added for compatibility
   role?: UserRole;
   roles?: UserRole[];
   created_at?: string;
@@ -24,13 +33,16 @@ export interface AuthUser {
   user_metadata?: {
     [key: string]: any;
   };
-  // Additional properties that are used in components
+  // Additional properties used in components
   username?: string;
   name?: string;
   profileImageUrl?: string;
   avatarUrl?: string;
   avatar_url?: string;
   lucoinsBalance?: number;
+  // Profile properties sometimes accessed directly from user
+  location?: string;
+  bio?: string;
 }
 
 export interface UserProfile {
@@ -47,11 +59,16 @@ export interface UserProfile {
   updated_at?: string;
   ubx_balance?: number;
   lucoin_balance?: number;
+  lucoinsBalance?: number; // Alias for lucoin_balance for compatibility
   stripe_account_id?: string;
   stripe_customer_id?: string;
-  // Additional properties that are used in components
+  // Additional properties used in components
   username?: string;
   full_name?: string;
+  gender?: string;
+  sexual_orientation?: string;
+  is_boosted?: boolean;
+  isBoosted?: boolean;
 }
 
 export interface AuthResult {
@@ -71,6 +88,9 @@ export interface AuthContextType {
   signUp: (email: string, password: string, options?: any) => Promise<AuthResult>;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
+  login?: (email: string, password: string) => Promise<AuthResult>; // Alias for signIn
+  register?: (email: string, password: string, username?: string) => Promise<AuthResult>; // Alias for signUp
+  logout?: () => Promise<void>; // Alias for signOut
   sendPasswordResetEmail: (email: string) => Promise<boolean>;
   resetPassword: (token: string, newPassword: string) => Promise<boolean>;
   updateProfile: (data: Partial<UserProfile>) => Promise<boolean>;
@@ -81,9 +101,9 @@ export interface AuthContextType {
   updateEmail: (email: string) => Promise<boolean>;
   updatePassword: (password: string) => Promise<boolean>;
   setUser: (user: AuthUser | null) => void;
+  clearError?: () => void;
   
   // Additional methods used in components
-  logout?: () => Promise<void>;
   updateUserProfile?: (data: Partial<AuthUser>) => Promise<boolean>;
   refreshProfile?: () => Promise<void>;
   userRoles?: UserRole[];

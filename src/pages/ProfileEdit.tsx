@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -6,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { DatabaseGender } from '@/types/auth';
 
 const ProfileEdit = () => {
   const { user } = useAuth();
@@ -48,23 +48,13 @@ const ProfileEdit = () => {
     e.preventDefault();
     
     try {
-      const genderValue = formData.gender ? 
-        (formData.gender === 'male' ? DatabaseGender.MALE :
-         formData.gender === 'female' ? DatabaseGender.FEMALE :
-         formData.gender === 'other' ? DatabaseGender.OTHER :
-         formData.gender === 'non-binary' ? DatabaseGender.NON_BINARY :
-         formData.gender === 'trans' ? DatabaseGender.TRANS : DatabaseGender.OTHER)
-        : undefined;
-      
       const updatedProfile = await updateProfile({
         id: user?.id as string,
         location: formData.location,
         username: formData.username,
         bio: formData.bio,
-        gender: genderValue,
         avatar_url: formData.avatar_url,
-        full_name: formData.full_name,
-        sexual_orientation: formData.sexual_orientation
+        full_name: formData.full_name
       });
       
       if (updatedProfile) {
@@ -154,38 +144,6 @@ const ProfileEdit = () => {
             id="location"
             name="location"
             value={formData.location}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-          />
-        </div>
-        <div className="mb-4">
-          <Label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-            Gender
-          </Label>
-          <select
-            id="gender"
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-          >
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-            <option value="non-binary">Non-binary</option>
-            <option value="trans">Trans</option>
-          </select>
-        </div>
-        <div className="mb-4">
-          <Label htmlFor="sexual_orientation" className="block text-sm font-medium text-gray-700">
-            Sexual Orientation
-          </Label>
-          <Input
-            type="text"
-            id="sexual_orientation"
-            name="sexual_orientation"
-            value={formData.sexual_orientation}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
           />

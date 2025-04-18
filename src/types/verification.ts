@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 // Add constants for document types
@@ -70,5 +71,50 @@ export enum VerificationStatus {
   EXPIRED = 'expired'
 }
 
-// Export VerificationDocument and VerificationRequest for reuse
-export type { VerificationDocument, VerificationRequest } from './escort';
+export interface VerificationDocument {
+  id: string;
+  documentType?: string;
+  fileUrl?: string;
+  verified?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: string;
+  document_type?: string;
+  file_path?: string;
+  uploaded_at?: string;
+}
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  user_id?: string; // Legacy property for compatibility
+  profile_id?: string; // Legacy property for compatibility
+  status: VerificationStatus;
+  level?: VerificationLevel;
+  documents: VerificationDocument[];
+  submittedAt?: string;
+  createdAt?: string;
+  created_at?: string;
+  updatedAt?: string;
+  updated_at?: string;
+  reviewedAt?: string;
+  reviewerId?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  rejectionReason?: string;
+  verificationLevel?: VerificationLevel;
+  requested_level?: VerificationLevel;
+  requestedLevel?: VerificationLevel;
+  expires_at?: string;
+}
+
+export interface VerificationEligibilityResponse {
+  canSubmit: boolean;
+  reason?: string;
+}
+
+export interface VerificationSubmissionResponse {
+  success: boolean;
+  message: string;
+  requestId?: string;
+}

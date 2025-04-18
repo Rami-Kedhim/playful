@@ -19,6 +19,11 @@ import {
   PersonaBookingTab
 } from '@/components/persona/tabs';
 
+const checkLiveStreamCapability = (capabilities?: any) => {
+  if (!capabilities) return false;
+  return capabilities.hasLivestream || false;
+};
+
 const PersonaProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const { state } = useEscortContext();
@@ -196,7 +201,7 @@ const PersonaProfile: React.FC = () => {
                       </TabsTrigger>
                     )}
                     
-                    {capabilities.hasLiveStream && (
+                    {checkLiveStreamCapability(capabilities) && (
                       <TabsTrigger value="live" className="flex items-center gap-1">
                         <Video className="h-4 w-4" />
                         <span>Live</span>
@@ -235,7 +240,7 @@ const PersonaProfile: React.FC = () => {
                     </TabsContent>
                   )}
                   
-                  {capabilities.hasLiveStream && (
+                  {checkLiveStreamCapability(capabilities) && (
                     <TabsContent value="live" className="p-6">
                       <PersonaLiveTab persona={persona} />
                     </TabsContent>

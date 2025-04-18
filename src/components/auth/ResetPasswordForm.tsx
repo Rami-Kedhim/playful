@@ -19,7 +19,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
   const auth = useAuth();
   
   // Update to check if resetPassword exists in the auth object
-  const resetPasswordFn = auth.resetPassword || auth.resetPassword;
+  const resetPasswordFn = auth.resetPassword || auth.sendPasswordResetEmail;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +38,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
     try {
       // Check if the function exists and call it appropriately
       if (resetPasswordFn) {
-        // Use only email argument as per the corrected type signature
+        // Use only email argument for resetPassword
         await resetPasswordFn(email);
         
         setIsSent(true);

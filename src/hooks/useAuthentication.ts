@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useAuth } from './auth/useAuthContext';
 import { AuthResult } from '@/types/auth';
@@ -83,11 +84,12 @@ export const useAuthentication = () => {
     setError(null);
     
     try {
-      const success = await auth.resetPassword(email);
-      if (!success) {
+      // Pass only the email parameter
+      const result = await auth.sendPasswordResetEmail(email);
+      if (!result) {
         setError('Failed to send password reset email');
       }
-      return success;
+      return !!result;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to send password reset email';
       setError(errorMessage);
@@ -116,7 +118,7 @@ export const useAuthentication = () => {
     }
   }, [auth]);
   
-  const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<boolean> => {
+  const updatePassword = useCallback(async (newPassword: string): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     
@@ -194,3 +196,5 @@ export const useAuthentication = () => {
     isAuthenticated: auth.isAuthenticated
   };
 };
+
+export default useAuthentication;

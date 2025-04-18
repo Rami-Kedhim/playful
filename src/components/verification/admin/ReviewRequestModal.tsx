@@ -1,97 +1,94 @@
 
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Loader2, UserCheck, UserX } from 'lucide-react';
 import { VerificationRequest } from '@/types/verification';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle2, XCircle } from 'lucide-react';
-import DocumentReview from './DocumentReview';
 
 interface ReviewRequestModalProps {
-  request: VerificationRequest | null;
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  onApprove: () => void;
-  onReject: (reason: string) => void;
+  request: VerificationRequest | null;
+  onApprove: (id: string, notes?: string) => Promise<void>;
+  onReject: (id: string, notes?: string) => Promise<void>;
+  isLoading?: boolean;
 }
 
-const ReviewRequestModal = ({
-  request,
-  isOpen,
+const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
+  open,
   onClose,
+  request,
   onApprove,
   onReject,
-}: ReviewRequestModalProps) => {
-  const [rejectionReason, setRejectionReason] = useState('');
-  
-  if (!request) return null;
+  isLoading = false
+}) => {
+  const [notes, setNotes] = useState('');
 
-  // Get the user ID, supporting both naming conventions
-  const userId = request.userId || request.user_id || request.profile_id;
-  const submittedDate = request.submittedAt || request.createdAt || request.created_at;
+  const handleApprove = async () => {
+    if (!request) return;
+    await onApprove(request.id, notes);
+    setNotes('');
+    onClose();
+  };
+
+  const handleReject = async () => {
+    if (!request) return;
+    await onReject(request.id, notes);
+    setNotes('');
+    onClose();
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh]">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Review Verification Request</DialogTitle>
         </DialogHeader>
         
-        <div className="grid gap-6 h-full overflow-hidden">
-          <div className="space-y-4 overflow-y-auto pr-4">
-            <div className="grid gap-4">
-              <Alert>
-                <AlertTitle>Verification Details</AlertTitle>
-                <AlertDescription>
-                  <div className="grid gap-2 mt-2 text-sm">
-                    <div>Submitted: {submittedDate ? new Date(submittedDate).toLocaleString() : 'Unknown'}</div>
-                    <div>User ID: {userId || 'Unknown'}</div>
-                    <div>Documents: {request.documents.length} submitted</div>
-                  </div>
-                </AlertDescription>
-              </Alert>
-
-              <div className="space-y-4">
-                {request.documents.map((doc, index) => (
-                  <DocumentReview key={index} document={doc} />
-                ))}
-              </div>
+        {request && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="font-medium">User ID:</div>
+              <div>{request.userId || request.user_id}</div>
+              
+              <div className="font-medium">Status:</div>
+              <div className="capitalize">{request.status}</div>
+              
+              <div className="font-medium">Requested Level:</div>
+              <div className="capitalize">{request.requestedLevel || request.requested_level}</div>
             </div>
-          </div>
-
-          <div className="space-y-4 mt-auto pt-4 border-t">
-            <Textarea
-              placeholder="Enter rejection reason (required for rejecting verification)"
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              className="min-h-[100px]"
-            />
             
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Review Notes</Label>
+              <Textarea 
+                id="notes" 
+                placeholder="Add notes about this verification request..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-4">
               <Button 
                 variant="destructive" 
-                onClick={() => onReject(rejectionReason)}
-                disabled={!rejectionReason}
+                onClick={handleReject}
+                disabled={isLoading}
               >
-                <XCircle className="w-4 w-4 mr-2" />
-                Reject Request
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserX className="mr-2 h-4 w-4" />}
+                Reject
               </Button>
-              <Button onClick={onApprove}>
-                <CheckCircle2 className="w-4 w-4 mr-2" />
-                Approve Request
+              <Button 
+                onClick={handleApprove}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserCheck className="mr-2 h-4 w-4" />}
+                Approve
               </Button>
             </div>
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
