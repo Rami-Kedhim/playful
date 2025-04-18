@@ -1,4 +1,32 @@
+
 import { useState, useEffect, useCallback } from 'react';
+
+export interface SystemLog {
+  message: string;
+  timestamp: string;
+  level: 'info' | 'warning' | 'error';
+}
+
+export interface SystemPerformance {
+  processingEfficiency: number;
+  processingTrend: 'up' | 'down';
+  accuracyRate: number;
+  accuracyTrend: 'up' | 'down';
+  history: number[];
+  recommendations: string[];
+  cpuUtilization: number;
+  memoryUtilization: number;
+  errorFrequency: number;
+  networkLatency: number;
+  responseTime: number;
+  userSatisfactionScore: number;
+  systemLoad: number;
+  memoryAllocation: number;
+  networkThroughput: number;
+  requestRate: number;
+  averageResponseTime: number;
+  errorRate: number;
+}
 
 export interface SystemHealthMetrics {
   cpuUtilization: number;
@@ -12,20 +40,13 @@ export interface SystemHealthMetrics {
   memoryAllocation: number;
   networkThroughput: number;
   requestRate: number;
+  averageResponseTime: number;
+  errorRate: number;
 }
 
 export interface NeuralSystemMetricsResult {
-  metrics: SystemHealthMetrics;
-  status: 'optimal' | 'good' | 'warning' | 'critical';
-  recommendations: string[];
-  lastUpdated: Date;
-  hasAnomalies: boolean;
-  anomalies: any[];
-  logs: string[];
-  performance: {
-    current: number;
-    historical: number[];
-  };
+  logs: SystemLog[];
+  performance: SystemPerformance;
   refreshMetrics: () => Promise<void>;
   errorMessage: string | null;
   isLoading: boolean;
@@ -35,35 +56,38 @@ export interface NeuralSystemMetricsResult {
 }
 
 export const useNeuralSystemMetrics = (): NeuralSystemMetricsResult => {
-  const [metrics, setMetrics] = useState<SystemHealthMetrics>({
-    cpuUtilization: 42,
-    memoryUtilization: 38,
+  const [logs, setLogs] = useState<SystemLog[]>([]);
+  const [performance, setPerformance] = useState<SystemPerformance>({
+    processingEfficiency: 85,
+    processingTrend: 'up',
+    accuracyRate: 92,
+    accuracyTrend: 'up',
+    history: [65, 70, 72, 78, 80, 85, 82, 88, 85, 92],
+    recommendations: [
+      "Increase CPU allocation by 15%",
+      "Optimize memory usage during peak hours",
+      "Reduce API call rate to external services"
+    ],
+    cpuUtilization: 76,
+    memoryUtilization: 68,
     errorFrequency: 0.5,
-    systemUptime: 86400,
     networkLatency: 120,
     responseTime: 200,
-    userSatisfactionScore: 0.87,
-    systemLoad: 0.65,
-    memoryAllocation: 4096,
-    networkThroughput: 15.7,
-    requestRate: 42
+    userSatisfactionScore: 4.2,
+    systemLoad: 78,
+    memoryAllocation: 72,
+    networkThroughput: 85,
+    requestRate: 125,
+    averageResponseTime: 210,
+    errorRate: 0.8
   });
   
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-  const [status, setStatus] = useState<'optimal' | 'good' | 'warning' | 'critical'>('good');
-  const [recommendations, setRecommendations] = useState<string[]>([]);
-  const [hasAnomalies, setHasAnomalies] = useState<boolean>(false);
-  const [anomalies, setAnomalies] = useState<any[]>([]);
-  const [logs, setLogs] = useState<string[]>([]);
-  const [performance, setPerformance] = useState({ current: 85, historical: [82, 84, 86, 83, 85] });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isMonitoring, setIsMonitoring] = useState<boolean>(false);
-  const [monitoringInterval, setMonitoringInterval] = useState<NodeJS.Timeout | null>(null);
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMonitoring, setIsMonitoring] = useState(false);
   
-
-  const fetchMetrics = useCallback(async () => {
+  // Function to refresh metrics
+  const refreshMetrics = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage(null);
     
@@ -71,141 +95,118 @@ export const useNeuralSystemMetrics = (): NeuralSystemMetricsResult => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Update with random fluctuations
-      setMetrics(prev => ({
-        cpuUtilization: Math.min(100, Math.max(5, prev.cpuUtilization + (Math.random() - 0.5) * 10)),
-        memoryUtilization: Math.min(100, Math.max(5, prev.memoryUtilization + (Math.random() - 0.5) * 8)),
-        errorFrequency: Math.max(0, prev.errorFrequency + (Math.random() - 0.5) * 0.3),
-        systemUptime: prev.systemUptime + 300,
-        networkLatency: Math.max(20, prev.networkLatency + (Math.random() - 0.5) * 30),
-        responseTime: Math.max(50, prev.responseTime + (Math.random() - 0.5) * 40),
-        userSatisfactionScore: Math.min(1, Math.max(0, prev.userSatisfactionScore + (Math.random() - 0.5) * 0.05)),
-        systemLoad: Math.min(1, Math.max(0.1, prev.systemLoad + (Math.random() - 0.5) * 0.1)),
-        memoryAllocation: Math.max(1024, prev.memoryAllocation + (Math.random() - 0.5) * 200),
-        networkThroughput: Math.max(1, prev.networkThroughput + (Math.random() - 0.5) * 3),
-        requestRate: Math.max(1, prev.requestRate + (Math.random() - 0.5) * 10)
-      }));
-      
-      // Update status based on metrics
-      const determineStatus = (metrics: SystemHealthMetrics) => {
-        if (metrics.cpuUtilization > 90 || metrics.memoryUtilization > 90 || metrics.errorFrequency > 5) {
-          return 'critical';
-        } else if (metrics.cpuUtilization > 70 || metrics.memoryUtilization > 70 || metrics.errorFrequency > 2) {
-          return 'warning';
-        } else if (metrics.cpuUtilization > 50 || metrics.memoryUtilization > 50) {
-          return 'good';
-        } else {
-          return 'optimal';
+      // Generate some random logs
+      const newLogs: SystemLog[] = [
+        {
+          message: "Neural system checkpoint completed",
+          timestamp: new Date().toISOString(),
+          level: "info"
+        },
+        {
+          message: "Memory optimization cycle executed",
+          timestamp: new Date(Date.now() - 120000).toISOString(),
+          level: "info"
+        },
+        {
+          message: "Connection timeout detected on external API",
+          timestamp: new Date(Date.now() - 480000).toISOString(),
+          level: "warning"
+        },
+        {
+          message: "Authentication service response degraded",
+          timestamp: new Date(Date.now() - 840000).toISOString(), 
+          level: "warning"
+        },
+        {
+          message: "Failed to process input vector dimensions",
+          timestamp: new Date(Date.now() - 1260000).toISOString(),
+          level: "error"
         }
-      };
+      ];
       
-      // Generate recommendations based on status
-      const generateRecommendations = (metrics: SystemHealthMetrics, status: string) => {
-        const recommendations = [];
+      // Update metrics with slight variations
+      const newPerformance = { ...performance };
+      newPerformance.processingEfficiency = Math.min(100, Math.max(50, performance.processingEfficiency + (Math.random() * 10 - 5)));
+      newPerformance.processingTrend = Math.random() > 0.5 ? 'up' : 'down';
+      
+      newPerformance.accuracyRate = Math.min(100, Math.max(50, performance.accuracyRate + (Math.random() * 6 - 3)));
+      newPerformance.accuracyTrend = Math.random() > 0.5 ? 'up' : 'down';
+      
+      // Shift history and add new value
+      const newHistory = [...performance.history.slice(1), Math.round(newPerformance.processingEfficiency)];
+      newPerformance.history = newHistory;
+      
+      if (Math.random() > 0.7) {
+        // Occasionally update recommendations
+        newPerformance.recommendations = [
+          "Increase CPU allocation by 15%",
+          "Optimize memory usage during peak hours",
+          "Reduce API call rate to external services"
+        ];
         
-        if (metrics.cpuUtilization > 70) {
-          recommendations.push("Consider scaling up CPU resources");
+        if (Math.random() > 0.6) {
+          newPerformance.recommendations.push(
+            "Consider upgrading network infrastructure"
+          );
         }
-        
-        if (metrics.memoryUtilization > 70) {
-          recommendations.push("Memory usage is high, consider optimizing memory-intensive operations");
-        }
-        
-        if (metrics.errorFrequency > 2) {
-          recommendations.push("Error rate is above threshold, investigate error patterns");
-        }
-        
-        if (metrics.networkLatency > 150) {
-          recommendations.push("Network latency is high, check network configuration");
-        }
-        
-        if (metrics.userSatisfactionScore < 0.7) {
-          recommendations.push("User satisfaction metrics are low, review user feedback");
-        }
-        
-        return recommendations;
-      };
-      
-      const newStatus = determineStatus(metrics);
-      const newRecommendations = generateRecommendations(metrics, newStatus);
-      
-      setStatus(newStatus);
-      setRecommendations(newRecommendations);
-      
-      // Generate sample logs
-      const newLog = `[${new Date().toISOString()}] System health check completed. Status: ${newStatus.toUpperCase()}`;
-      setLogs(prev => [newLog, ...prev].slice(0, 50));
-      
-      // Update performance metrics
-      const newPerformanceValue = Math.round(
-        100 - (metrics.cpuUtilization + metrics.memoryUtilization + metrics.errorFrequency * 10) / 3
-      );
-      setPerformance(prev => ({
-        current: newPerformanceValue,
-        historical: [...prev.historical.slice(-19), newPerformanceValue]
-      }));
-      
-      // Check for anomalies
-      const hasNewAnomalies = Math.random() > 0.7;
-      setHasAnomalies(hasNewAnomalies);
-      
-      if (hasNewAnomalies) {
-        const newAnomaly = {
-          id: `anomaly-${Date.now()}`,
-          timestamp: new Date(),
-          metric: ['cpu', 'memory', 'network', 'error'][Math.floor(Math.random() * 4)],
-          value: Math.round(Math.random() * 100),
-          threshold: Math.round(Math.random() * 70),
-          severity: Math.random() > 0.5 ? 'high' : 'medium'
-        };
-        setAnomalies(prev => [newAnomaly, ...prev].slice(0, 10));
       }
       
-      setLastUpdated(new Date());
+      // Update health metrics
+      newPerformance.cpuUtilization = Math.min(100, Math.max(20, performance.cpuUtilization + (Math.random() * 10 - 5)));
+      newPerformance.memoryUtilization = Math.min(100, Math.max(20, performance.memoryUtilization + (Math.random() * 8 - 4)));
+      newPerformance.errorFrequency = Math.max(0, Math.min(5, performance.errorFrequency + (Math.random() * 0.4 - 0.2)));
+      newPerformance.networkLatency = Math.max(50, Math.min(500, performance.networkLatency + (Math.random() * 30 - 15)));
+      newPerformance.systemLoad = Math.min(100, Math.max(20, performance.systemLoad + (Math.random() * 10 - 5)));
+      newPerformance.memoryAllocation = Math.min(100, Math.max(20, performance.memoryAllocation + (Math.random() * 8 - 4)));
+      newPerformance.networkThroughput = Math.min(100, Math.max(20, performance.networkThroughput + (Math.random() * 10 - 5)));
+      newPerformance.requestRate = Math.max(50, Math.min(200, performance.requestRate + (Math.random() * 20 - 10)));
+      newPerformance.averageResponseTime = Math.max(100, Math.min(500, performance.averageResponseTime + (Math.random() * 30 - 15)));
+      newPerformance.errorRate = Math.max(0, Math.min(5, performance.errorRate + (Math.random() * 0.3 - 0.15)));
+      
+      setLogs(newLogs);
+      setPerformance(newPerformance);
     } catch (error) {
-      console.error("Error fetching neural system metrics:", error);
-      setErrorMessage("Failed to retrieve system metrics");
+      setErrorMessage("Failed to refresh neural system metrics");
+      console.error("Error refreshing metrics:", error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  const startMonitoring = useCallback(() => {
-    if (!isMonitoring) {
-      fetchMetrics();
-      const interval = setInterval(fetchMetrics, 30000); // 30 seconds
-      setMonitoringInterval(interval);
-      setIsMonitoring(true);
-    }
-  }, [fetchMetrics, isMonitoring]);
-
-  const stopMonitoring = useCallback(() => {
-    if (monitoringInterval) {
-      clearInterval(monitoringInterval);
-      setMonitoringInterval(null);
-    }
-    setIsMonitoring(false);
-  }, [monitoringInterval]);
-
+  }, [performance]);
+  
+  // Initial load
   useEffect(() => {
-    fetchMetrics();
+    refreshMetrics();
+  }, [refreshMetrics]);
+  
+  // Set up monitoring if active
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (isMonitoring) {
+      interval = setInterval(() => {
+        refreshMetrics();
+      }, 10000);
+    }
+    
     return () => {
-      if (monitoringInterval) {
-        clearInterval(monitoringInterval);
+      if (interval) {
+        clearInterval(interval);
       }
     };
-  }, [fetchMetrics]);
-
+  }, [isMonitoring, refreshMetrics]);
+  
+  const startMonitoring = useCallback(() => {
+    setIsMonitoring(true);
+  }, []);
+  
+  const stopMonitoring = useCallback(() => {
+    setIsMonitoring(false);
+  }, []);
+  
   return {
-    metrics,
-    status,
-    recommendations,
-    lastUpdated,
-    hasAnomalies,
-    anomalies,
     logs,
     performance,
-    refreshMetrics: fetchMetrics,
+    refreshMetrics,
     errorMessage,
     isLoading,
     isMonitoring,
@@ -213,3 +214,5 @@ export const useNeuralSystemMetrics = (): NeuralSystemMetricsResult => {
     stopMonitoring
   };
 };
+
+export default useNeuralSystemMetrics;

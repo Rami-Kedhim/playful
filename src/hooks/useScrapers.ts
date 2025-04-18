@@ -1,132 +1,113 @@
 
-import { useState, useCallback } from 'react';
-import { EscortScraper, ScraperFilters, ScrapeResult } from '@/types/scraper';
+interface EscortScraper {
+  id: string;
+  name: string;
+  url: string;
+  status: 'active' | 'inactive' | 'error';
+  lastRun?: Date;
+  count: number;
+  setFilters: (filters: any) => void;
+  scrape: () => Promise<any>;
+}
+
+interface ScraperFilters {
+  location?: string;
+  minAge?: number;
+  maxAge?: number;
+  services?: string[];
+  verifiedOnly?: boolean;
+}
 
 export const useScrapers = () => {
-  const [scrapers, setScrapers] = useState<EscortScraper[]>([
+  const scrapers: EscortScraper[] = [
     {
       id: 'scraper1',
-      name: 'MainSiteScraper',
-      status: 'idle',
-      lastRun: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      setFilters: async (filters: ScraperFilters) => {
-        console.log('MainSiteScraper filters set:', filters);
+      name: 'Tryst.link',
+      url: 'https://tryst.link',
+      status: 'active',
+      lastRun: new Date('2023-09-15'),
+      count: 1250,
+      setFilters: (filters: ScraperFilters) => {
+        console.log('Setting filters for Tryst.link:', filters);
       },
-      scrape: async (): Promise<ScrapeResult> => {
-        return {
-          id: `scrape-${Date.now()}`,
-          success: true,
-          data: [
-            { id: 'profile1', name: 'Profile 1' },
-            { id: 'profile2', name: 'Profile 2' },
-            { id: 'profile3', name: 'Profile 3' }
-          ],
-          timestamp: new Date()
-        };
+      scrape: async () => {
+        console.log('Scraping Tryst.link...');
+        return { success: true, count: 125 };
       }
     },
     {
       id: 'scraper2',
-      name: 'SecondarySourceScraper',
-      status: 'idle',
-      lastRun: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-      setFilters: async (filters: ScraperFilters) => {
-        console.log('SecondarySourceScraper filters set:', filters);
+      name: 'Eros.com',
+      url: 'https://eros.com',
+      status: 'active',
+      lastRun: new Date('2023-09-10'),
+      count: 840,
+      setFilters: (filters: ScraperFilters) => {
+        console.log('Setting filters for Eros.com:', filters);
       },
-      scrape: async (): Promise<ScrapeResult> => {
-        return {
-          id: `scrape-${Date.now()}`,
-          success: true,
-          data: [
-            { id: 'alt-profile1', name: 'Alt Profile 1' },
-            { id: 'alt-profile2', name: 'Alt Profile 2' }
-          ],
-          timestamp: new Date()
-        };
+      scrape: async () => {
+        console.log('Scraping Eros.com...');
+        return { success: true, count: 84 };
+      }
+    },
+    {
+      id: 'scraper3',
+      name: 'Slixa.com',
+      url: 'https://slixa.com',
+      status: 'inactive',
+      lastRun: new Date('2023-08-05'),
+      count: 620,
+      setFilters: (filters: ScraperFilters) => {
+        console.log('Setting filters for Slixa.com:', filters);
+      },
+      scrape: async () => {
+        console.log('Scraping Slixa.com...');
+        return { success: false, error: 'API rate limit exceeded' };
       }
     }
-  ]);
+  ];
 
-  const [results, setResults] = useState<Record<string, ScrapeResult>>({});
-  const [loading, setLoading] = useState<Record<string, boolean>>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  const setScraperFilters = useCallback(async (scraperId: string, filters: ScraperFilters) => {
-    setLoading(prev => ({ ...prev, [scraperId]: true }));
-    setErrors(prev => ({ ...prev, [scraperId]: '' }));
+  const runScraper = async (id: string, filters?: ScraperFilters) => {
+    const scraper = scrapers.find(s => s.id === id);
+    
+    if (!scraper) {
+      return { success: false, error: 'Scraper not found' };
+    }
+    
+    if (scraper.status !== 'active') {
+      return { success: false, error: `Scraper is ${scraper.status}` };
+    }
+    
+    if (filters) {
+      scraper.setFilters(filters);
+    }
     
     try {
-      const scraper = scrapers.find(s => s.id === scraperId);
-      
-      if (!scraper) {
-        throw new Error(`Scraper with ID ${scraperId} not found`);
-      }
-      
-      await scraper.setFilters(filters);
-      
-      // Update the scraper in state
-      setScrapers(prev => prev.map(s => 
-        s.id === scraperId ? { ...s, lastFiltersSet: new Date() } : s
-      ));
-      
-      return true;
+      return await scraper.scrape();
     } catch (error) {
-      console.error(`Error setting filters for scraper ${scraperId}:`, error);
-      setErrors(prev => ({ ...prev, [scraperId]: `Failed to set filters: ${error}` }));
-      return false;
-    } finally {
-      setLoading(prev => ({ ...prev, [scraperId]: false }));
+      return { success: false, error: (error as Error).message };
     }
-  }, [scrapers]);
-  
-  const runScraper = useCallback(async (scraperId: string) => {
-    setLoading(prev => ({ ...prev, [scraperId]: true }));
-    setErrors(prev => ({ ...prev, [scraperId]: '' }));
-    
-    try {
-      const scraper = scrapers.find(s => s.id === scraperId);
-      
-      if (!scraper) {
-        throw new Error(`Scraper with ID ${scraperId} not found`);
-      }
-      
-      // Update scraper status
-      setScrapers(prev => prev.map(s => 
-        s.id === scraperId ? { ...s, status: 'running' } : s
-      ));
-      
-      const result = await scraper.scrape();
-      
-      // Store the results
-      setResults(prev => ({ ...prev, [scraperId]: result }));
-      
-      // Update the scraper status to 'completed'
-      setScrapers(prev => prev.map(s => 
-        s.id === scraperId ? { ...s, status: 'completed', lastRun: new Date() } : s
-      ));
-      
-      return result;
-    } catch (error) {
-      console.error(`Error running scraper ${scraperId}:`, error);
-      
-      // Update the scraper status to 'error'
-      setScrapers(prev => prev.map(s => 
-        s.id === scraperId ? { ...s, status: 'error' } : s
-      ));
-      
-      setErrors(prev => ({ ...prev, [scraperId]: `Scraping failed: ${error}` }));
-      return null;
-    } finally {
-      setLoading(prev => ({ ...prev, [scraperId]: false }));
-    }
-  }, [scrapers]);
-  
+  };
+
+  const getActiveScrapers = () => {
+    return scrapers.filter(s => s.status === 'active');
+  };
+
+  const getTotalScraped = () => {
+    return scrapers.reduce((total, s) => total + s.count, 0);
+  };
+
+  const getLastRunTimestamp = () => {
+    return new Date(Math.max(...scrapers.map(s => s.lastRun?.getTime() || 0)));
+  };
+
   return {
     scrapers,
-    results,
-    loading,
-    errors,
-    setScraperFilters,
-    runScraper
+    runScraper,
+    getActiveScrapers,
+    getTotalScraped,
+    getLastRunTimestamp
   };
 };
+
+export default useScrapers;

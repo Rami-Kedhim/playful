@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Video, SplitSquareVertical } from 'lucide-react';
 
-export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both" | "all";
+export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both" | "all" | "incall" | "outcall" | "massage" | "dinner";
 
 export interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
@@ -21,6 +21,14 @@ export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
       return "In-person & Virtual";
     case "all":
       return "All Types";
+    case "incall":
+      return "Incall";
+    case "outcall":
+      return "Outcall";
+    case "massage":
+      return "Massage";
+    case "dinner":
+      return "Dinner Date";
     default:
       return "";
   }
@@ -57,6 +65,26 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
       Icon = SplitSquareVertical;
       label = "All Types";
       variant = "default";
+      break;
+    case "incall":
+      Icon = MapPin;
+      label = "Incall";
+      variant = "secondary";
+      break;
+    case "outcall":
+      Icon = MapPin;
+      label = "Outcall";
+      variant = "secondary";
+      break;
+    case "massage":
+      Icon = MapPin;
+      label = "Massage";
+      variant = "secondary";
+      break;
+    case "dinner":
+      Icon = MapPin;
+      label = "Dinner Date";
+      variant = "secondary";
       break;
     default:
       return null;

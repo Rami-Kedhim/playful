@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   VerificationRequest, 
   VerificationStatus,
-  VerificationDocument
+  VerificationDocument,
+  DocumentType
 } from '@/types/verification';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -70,9 +71,9 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
       // Now includes the required 'type' property
       const pendingDoc: VerificationDocument = {
         id: documentId,
-        type: document_type,
-        document_type: document_type,
-        status: VerificationStatus.PENDING,
+        type: document_type as DocumentType,
+        document_type: document_type as DocumentType,
+        status: "pending",
         uploaded_at: new Date()
       };
       

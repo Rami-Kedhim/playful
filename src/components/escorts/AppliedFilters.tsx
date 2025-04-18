@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useDebounce } from '@/hooks/use-debounce';
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 import ServiceTypeBadgeLabel from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 interface Filter {
@@ -58,9 +58,20 @@ interface FilterBadgeProps {
 const FilterBadge: React.FC<FilterBadgeProps> = ({ filter, onRemove }) => {
   // Special service type rendering
   if (filter.key === 'serviceType' || filter.key === 'service') {
+    // Ensure the value is one of the valid ServiceTypeFilter values
+    const safeValue: ServiceTypeFilter = 
+      (filter.value === 'in-person' || 
+       filter.value === 'virtual' || 
+       filter.value === 'both' || 
+       filter.value === 'all' || 
+       filter.value === 'incall' || 
+       filter.value === 'outcall' || 
+       filter.value === 'massage' || 
+       filter.value === 'dinner') ? filter.value as ServiceTypeFilter : '';
+
     return (
       <div className="inline-flex items-center gap-1 bg-secondary/50 rounded-full pl-2 pr-1 text-sm">
-        <ServiceTypeBadgeLabel type={filter.value as ServiceTypeFilter} variant="default" />
+        <ServiceTypeBadgeLabel type={safeValue} variant="default" />
         <button 
           onClick={onRemove}
           className="rounded-full w-5 h-5 flex items-center justify-center hover:bg-secondary text-muted-foreground transition-colors"

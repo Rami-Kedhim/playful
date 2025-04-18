@@ -16,7 +16,7 @@ export enum VerificationStatus {
   EXPIRED = 'expired'
 }
 
-export type DocumentType = 'id_card' | 'passport' | 'drivers_license';
+export type DocumentType = 'id_card' | 'passport' | 'drivers_license' | string;
 
 export interface VerificationDocument {
   id: string;
@@ -24,7 +24,7 @@ export interface VerificationDocument {
   userId?: string;
   document_type: DocumentType;
   documentType?: DocumentType;
-  file_url: string;
+  file_url?: string;
   fileUrl?: string;
   url?: string;
   document_url?: string;

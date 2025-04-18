@@ -1,149 +1,119 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
-import { AuthResult, LoginCredentials, RegisterCredentials } from '@/types/user';
-import { useAuth } from '@/hooks/useAuth';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SignInForm from '@/components/auth/SignInForm';
+import SignUpForm from '@/components/auth/SignUpForm';
+import { AuthHeader } from '@/components/auth/AuthHeader';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { AppRoutes } from '@/utils/navigation';
+import { User, LoginCredentials, RegisterCredentials } from '@/types/user';
 
-interface SignInFormProps {
-  onLogin: (email: string, password: string) => Promise<AuthResult>;
+export interface AuthProps {
+  initialTab?: 'signin' | 'signup';
+  redirectTo?: string;
+  showHeader?: boolean;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ onLogin }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+const Auth: React.FC<AuthProps> = ({
+  initialTab = 'signin',
+  redirectTo = AppRoutes.HOME,
+  showHeader = true,
+}) => {
   const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const result = await onLogin(email, password);
-      if (result.success) {
-        navigate('/dashboard');
-      } else {
-        setError(result.message || 'Login failed');
-      }
-    } catch (error) {
-      setError('An error occurred during login');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Form content */}
-    </form>
-  );
-};
-
-interface SignUpFormProps {
-  onRegister: (email: string, password: string, name?: string) => Promise<AuthResult>;
-}
-
-const SignUpForm: React.FC<SignUpFormProps> = ({ onRegister }) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const result = await onRegister(email, password, name);
-      if (result.success) {
-        navigate('/dashboard');
-      } else {
-        setError(result.message || 'Registration failed');
-      }
-    } catch (error) {
-      setError('An error occurred during registration');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Form content */}
-    </form>
-  );
-};
-
-export default function Auth() {
   const { login, register } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  // Type conversion functions for auth result compatibility
-  const handleLogin = async (email: string, password: string): Promise<AuthResult> => {
-    const result = await login(email, password);
-    return {
-      success: result.success,
-      message: result.error || '',
-      user: result.user ? {
-        id: result.user.id,
-        username: result.user.username || '',
-        email: result.user.email,
-        role: result.user.role || 'user',
-        createdAt: result.user.created_at || new Date().toISOString(),
-      } : undefined,
-      token: ''
-    };
+  const handleLogin = async (credentials: LoginCredentials) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await login(credentials.email, credentials.password);
+      
+      if (!result.success) {
+        setError(result.error || 'Failed to sign in');
+        return;
+      }
+      
+      // Redirect on successful login
+      navigate(redirectTo);
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
   
-  const handleRegister = async (email: string, password: string, name?: string): Promise<AuthResult> => {
-    const result = await register(email, password, name);
-    return {
-      success: result.success,
-      message: result.error || '',
-      user: result.user ? {
-        id: result.user.id,
-        username: result.user.username || '',
-        email: result.user.email,
-        role: result.user.role || 'user',
-        createdAt: result.user.created_at || new Date().toISOString(),
-      } : undefined,
-      token: ''
-    };
+  const handleRegister = async (credentials: RegisterCredentials) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await register(
+        credentials.email,
+        credentials.password,
+        credentials.username
+      );
+      
+      if (!result.success) {
+        setError(result.error || 'Failed to create account');
+        return;
+      }
+      
+      // Simulate a user object creation
+      const mockUser: User = {
+        id: "user_" + Date.now().toString(),
+        username: credentials.username,
+        email: credentials.email,
+        role: "user",
+        name: credentials.username,
+        isVerified: false,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Redirect on successful registration
+      navigate(redirectTo);
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error('Registration error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
-
+  
   return (
-    <div className="container relative flex flex-col items-center justify-center min-h-screen md:grid lg:max-w-none lg:px-0">
-      <Card className="w-full max-w-md mx-auto">
-        <Tabs defaultValue="login" className="w-full">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
+      {showHeader && <AuthHeader />}
+      
+      <div className="w-full max-w-md space-y-6 bg-background rounded-lg p-6 shadow-lg border">
+        <Tabs defaultValue={initialTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Create Account</TabsTrigger>
           </TabsList>
-          <TabsContent value="login">
-            <CardHeader>
-              <CardTitle>Login</CardTitle>
-              <CardDescription>Enter your credentials to access your account</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SignInForm onLogin={handleLogin} />
-            </CardContent>
+          
+          <TabsContent value="signin" className="space-y-4 pt-4">
+            <SignInForm 
+              onSubmit={handleLogin}
+              loading={loading}
+              error={error}
+            />
           </TabsContent>
-          <TabsContent value="register">
-            <CardHeader>
-              <CardTitle>Create an account</CardTitle>
-              <CardDescription>Enter your details to create a new account</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <SignUpForm onRegister={handleRegister} />
-            </CardContent>
+          
+          <TabsContent value="signup" className="space-y-4 pt-4">
+            <SignUpForm 
+              onSubmit={handleRegister}
+              loading={loading}
+              error={error}
+            />
           </TabsContent>
         </Tabs>
-      </Card>
+      </div>
     </div>
   );
-}
+};
+
+export default Auth;

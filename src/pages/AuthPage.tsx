@@ -1,130 +1,113 @@
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import SignInForm from '@/components/auth/SignInForm';
-import SignUpForm from '@/components/auth/SignUpForm';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth/useAuth';
+import Auth from './Auth';
+import { AppRoutes } from '@/utils/navigation';
 import { UserRole } from '@/types/user';
-import { AuthResult } from '@/types/user';
 
 const AuthPage: React.FC = () => {
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const { user, isLoggedIn, login } = useAuth();
+  const [demoLoginLoading, setDemoLoginLoading] = useState(false);
   
-  // This would typically come from an auth service/context
-  const handleSignIn = async (email: string, password: string): Promise<AuthResult> => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (email === 'admin@example.com' && password === 'password') {
-        const result: AuthResult = {
-          success: true,
-          user: {
-            id: '123',
-            email: email,
-            username: 'admin',
-            role: UserRole.ADMIN,
-            isVerified: true,
-            createdAt: new Date().toISOString()
-          },
-          token: 'fake-jwt-token'
-        };
-        
-        // Save to localStorage or context
-        localStorage.setItem('token', result.token || '');
-        localStorage.setItem('user', JSON.stringify(result.user));
-        
-        // Redirect based on role
-        navigate('/admin/dashboard');
-        return result;
-      }
-      
-      if (email === 'user@example.com' && password === 'password') {
-        const result: AuthResult = {
-          success: true,
-          user: {
-            id: '456',
-            email: email,
-            username: 'user',
-            role: UserRole.USER,
-            isVerified: true,
-            createdAt: new Date().toISOString()
-          },
-          token: 'fake-jwt-token'
-        };
-        
-        localStorage.setItem('token', result.token || '');
-        localStorage.setItem('user', JSON.stringify(result.user));
-        
-        navigate('/dashboard');
-        return result;
-      }
-      
-      setError('Invalid credentials');
-      return { success: false, message: 'Invalid credentials' };
-    } catch (err) {
-      console.error('Sign in error:', err);
-      setError('An error occurred during sign in');
-      return { success: false, message: 'An error occurred during sign in' };
-    }
-  };
-  
-  const handleSignUp = async (email: string, password: string, name?: string): Promise<AuthResult> => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const result: AuthResult = {
-        success: true,
-        user: {
-          id: '789',
-          email: email,
-          username: name || 'newuser',
-          role: UserRole.USER,
-          isVerified: false,
-          createdAt: new Date().toISOString()
-        },
-        token: 'fake-jwt-token'
-      };
-      
-      localStorage.setItem('token', result.token || '');
-      localStorage.setItem('user', JSON.stringify(result.user));
-      
-      navigate('/dashboard');
-      return result;
-    } catch (err) {
-      console.error('Sign up error:', err);
-      setError('An error occurred during sign up');
-      return { success: false, message: 'An error occurred during sign up' };
-    }
+  // If already logged in, redirect to home
+  if (isLoggedIn && user) {
+    return <Navigate to={AppRoutes.HOME} replace />;
+  }
+
+  const handleDemoAdminLogin = async () => {
+    setDemoLoginLoading(true);
+    await login('admin@example.com', 'password123');
+    
+    // This is just for demo purposes - normally login() would handle this
+    const mockAdmin = {
+      id: 'admin-123',
+      email: 'admin@example.com',
+      username: 'admin',
+      role: UserRole.ADMIN,
+      isVerified: true,
+      name: 'Admin User',
+      createdAt: new Date().toISOString()
+    };
+    setDemoLoginLoading(false);
   };
 
+  const handleDemoUserLogin = async () => {
+    setDemoLoginLoading(true);
+    await login('user@example.com', 'password123');
+    
+    // This is just for demo purposes - normally login() would handle this
+    const mockUser = {
+      id: 'user-123',
+      email: 'user@example.com',
+      username: 'demouser',
+      role: UserRole.USER,
+      isVerified: true,
+      name: 'Regular User',
+      createdAt: new Date().toISOString()
+    };
+    setDemoLoginLoading(false);
+  };
+  
+  const handleGuestExplore = () => {
+    // For guest exploration without login
+    const mockGuest = {
+      id: 'guest-' + Date.now(),
+      email: 'guest@example.com',
+      username: 'guest',
+      role: UserRole.USER,
+      isVerified: false,
+      name: 'Guest User',
+      createdAt: new Date().toISOString()
+    };
+  };
+  
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <Card className="w-full max-w-md p-6">
-        <Tabs defaultValue="signin">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="signin" className="mt-6">
-            <SignInForm onSignIn={handleSignIn} />
-          </TabsContent>
-          
-          <TabsContent value="signup" className="mt-6">
-            <SignUpForm onSignUp={handleSignUp} />
-          </TabsContent>
-        </Tabs>
-        
-        {error && (
-          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded text-center text-sm">
-            {error}
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/50 flex flex-col">
+      <div className="flex-1 flex flex-col md:flex-row">
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md space-y-6">
+            <h1 className="text-3xl font-bold">Welcome to Our Platform</h1>
+            <p className="text-muted-foreground">
+              Join our community to access exclusive content and connect with amazing escorts and companions.
+            </p>
+            
+            <div className="space-y-3 pt-4">
+              <h3 className="text-lg font-medium">Quick Demo Accounts</h3>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button 
+                  onClick={handleDemoUserLogin}
+                  className="flex-1 px-4 py-2 border rounded-md hover:bg-muted transition-colors"
+                  disabled={demoLoginLoading}
+                >
+                  Demo User
+                </button>
+                <button 
+                  onClick={handleDemoAdminLogin}
+                  className="flex-1 px-4 py-2 border rounded-md hover:bg-muted transition-colors"
+                  disabled={demoLoginLoading}
+                >
+                  Demo Admin
+                </button>
+              </div>
+              <button
+                onClick={handleGuestExplore}
+                className="w-full px-4 py-2 text-muted-foreground border border-dashed rounded-md hover:bg-muted/50 transition-colors"
+              >
+                Continue as Guest
+              </button>
+            </div>
           </div>
-        )}
-      </Card>
+        </div>
+        
+        <div className="flex-1 flex items-center justify-center">
+          <Auth />
+        </div>
+      </div>
+      
+      <footer className="p-4 text-center text-sm text-muted-foreground">
+        <p>By using our service, you agree to our Terms of Service and Privacy Policy.</p>
+      </footer>
     </div>
   );
 };
