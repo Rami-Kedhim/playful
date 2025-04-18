@@ -190,3 +190,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess }) => {
       </CardFooter>
     </Card>
   );
+};
+
+export default SignUpForm;
