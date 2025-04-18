@@ -1,33 +1,13 @@
+
 import { UberPersona } from '@/types/UberPersona';
+import { UberCoreSettings } from '@/types/uber-ecosystem';
+import { neuralServiceRegistry } from './registry/NeuralServiceRegistry';
 
-// Add safe capability checks helper function
-export const hasCapability = (persona: UberPersona, capability: string): boolean => {
-  if (!persona.capabilities) return false;
-  
-  // If capabilities is an array of strings
-  if (Array.isArray(persona.capabilities)) {
-    return persona.capabilities.includes(capability);
-  }
-  
-  // If capabilities is an object with boolean properties
-  if (typeof persona.capabilities === 'object') {
-    return Boolean(persona.capabilities[capability as keyof typeof persona.capabilities]);
-  }
-  
-  return false;
-};
-
-// Add safe availability check helper function
-export const isAvailableNow = (persona: UberPersona): boolean => {
-  if (!persona.availability) return false;
-  return persona.availability.status === 'available';
-};
-
-class UberCoreService {
-  private isInitialized = false;
-  private settings = {
+export class UberCore {
+  private initialized: boolean = false;
+  private settings: UberCoreSettings = {
     boostingEnabled: true,
-    boostingAlgorithm: 'OxumAlgorithm' as const,
+    boostingAlgorithm: 'OxumAlgorithm',
     orderByBoost: true,
     autonomyLevel: 75,
     resourceAllocation: 60,
@@ -35,220 +15,163 @@ class UberCoreService {
     aiEnhancementLevel: 3
   };
 
-  // Public API
-
-  /**
-   * Initialize the UberCore service
-   */
-  public async initialize(): Promise<boolean> {
-    if (this.isInitialized) {
-      return true;
-    }
-
-    // Mock initialization process with a small delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    console.log('UberCore initialized with settings:', this.settings);
-    this.isInitialized = true;
-    return true;
-  }
-
-  /**
-   * Shutdown the UberCore service
-   */
-  public async shutdown(): Promise<boolean> {
-    if (!this.isInitialized) {
-      return true;
-    }
-
-    // Mock shutdown process
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    console.log('UberCore shutdown completed');
-    this.isInitialized = false;
-    return true;
-  }
-
-  /**
-   * Update settings for the UberCore
-   */
-  public updateSettings(newSettings: Partial<typeof this.settings>): void {
-    this.settings = { ...this.settings, ...newSettings };
-    console.log('UberCore settings updated:', this.settings);
-  }
-
-  /**
-   * Check capabilities of a persona
-   */
-  public checkPersonaCapabilities(persona: UberPersona): {
-    canLiveStream: boolean;
-    hasExclusiveContent: boolean;
-    canVirtualMeet: boolean;
-    canRealMeet: boolean;
-  } {
-    if (!persona) {
-      return {
-        canLiveStream: false,
-        hasExclusiveContent: false,
-        canVirtualMeet: false,
-        canRealMeet: false
-      };
-    }
-
-    let canLiveStream = false;
-    let hasExclusiveContent = false;
-
-    // Check capabilities based on the persona structure
-    if (typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities)) {
-      canLiveStream = persona.capabilities.hasLiveStream || false;
-      hasExclusiveContent = persona.capabilities.hasExclusiveContent || false;
-    } else if (Array.isArray(persona.capabilities)) {
-      canLiveStream = persona.capabilities.includes('liveStream');
-      hasExclusiveContent = persona.capabilities.includes('exclusiveContent');
-    }
-
-    // Determine if persona can do virtual or real meetings
-    const canVirtualMeet = Boolean(
-      persona.type === 'livecam' || 
-      persona.roleFlags?.isLivecam || 
-      canLiveStream
-    );
+  // Check persona availability and status
+  public isAvailable(persona: UberPersona): boolean {
+    if (!persona) return false;
     
-    const canRealMeet = Boolean(
-      persona.type === 'escort' || 
-      persona.roleFlags?.isEscort
-    );
+    // Optional chaining for safely accessing potential undefined properties
+    const availability = persona.availability?.schedule;
+    return persona.isActive === true && !!availability;
+  }
+  
+  // Main initialization method
+  public async initialize(): Promise<boolean> {
+    if (this.initialized) {
+      return true;
+    }
 
+    try {
+      // Initialize all registered neural services
+      await neuralServiceRegistry.initializeAll();
+      
+      // Log initialization
+      console.info('UberCore initialized with settings:', this.settings);
+      
+      this.initialized = true;
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize UberCore:', error);
+      return false;
+    }
+  }
+  
+  // Update settings
+  public updateSettings(newSettings: Partial<UberCoreSettings>): void {
+    this.settings = {
+      ...this.settings,
+      ...newSettings
+    };
+    
+    // Apply relevant settings to neural services
+    if (typeof newSettings.resourceAllocation === 'number') {
+      // Update resource allocation for all services
+      neuralServiceRegistry.optimizeResourceAllocation();
+    }
+    
+    console.info('UberCore settings updated:', this.settings);
+  }
+  
+  // Get current settings
+  public getSettings(): UberCoreSettings {
+    return { ...this.settings };
+  }
+  
+  // Shutdown method
+  public async shutdown(): Promise<boolean> {
+    if (!this.initialized) {
+      return true;
+    }
+    
+    try {
+      // Shutdown all neural services
+      await neuralServiceRegistry.shutdownAll();
+      
+      this.initialized = false;
+      return true;
+    } catch (error) {
+      console.error('Error shutting down UberCore:', error);
+      return false;
+    }
+  }
+  
+  // Process a persona through neural services
+  public async processPersona(persona: UberPersona): Promise<UberPersona> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+    
+    try {
+      // Clone persona to avoid mutations
+      const processedPersona: UberPersona = { ...persona };
+      
+      // Add system metadata if not present
+      const metadata = processedPersona.systemMetadata || {};
+      processedPersona.systemMetadata = {
+        ...metadata,
+        version: metadata.version || '1.0',
+        lastUpdated: new Date().toISOString(),
+        personalityIndex: metadata.personalityIndex || Math.random()
+      };
+      
+      // Process based on persona type
+      switch (processedPersona.type) {
+        case 'escort':
+          // Use escorts neural service
+          break;
+        case 'creator':
+          // Use creators neural service
+          break;
+        case 'livecam':
+          // Use livecams neural service
+          break;
+        case 'ai':
+          // Use AI companion neural service
+          break;
+      }
+      
+      return processedPersona;
+    } catch (error) {
+      console.error('Error processing persona:', error);
+      return persona;
+    }
+  }
+  
+  // Calculate persona status
+  public getPersonaStatus(persona: UberPersona): {
+    isLocked: boolean;
+    isOnline: boolean;
+    availability: string;
+  } {
     return {
-      canLiveStream,
-      hasExclusiveContent,
-      canVirtualMeet,
-      canRealMeet
+      isLocked: persona.isLocked || false,
+      isOnline: persona.isOnline || false,
+      availability: persona.availability?.nextAvailable || 'Unknown'
     };
   }
-
-  /**
-   * Check if persona has system metadata for a specific feature
-   */
-  public hasFeatureEnabled(persona: UberPersona, feature: string): boolean {
-    if (!persona) return false;
-
-    // Check for feature in system metadata
-    if (persona.systemMetadata && 
-        persona.systemMetadata.features && 
-        Array.isArray(persona.systemMetadata.features)) {
-      return persona.systemMetadata.features.includes(feature);
+  
+  // Calculate match score between two personas
+  public calculateMatchScore(personaA: UberPersona, personaB: UberPersona): number {
+    let score = 0;
+    
+    // Basic matching algorithm
+    if (personaA.type === personaB.type) score += 10;
+    if (personaA.location === personaB.location) score += 20;
+    
+    // Match tags
+    if (personaA.tags && personaB.tags) {
+      const sharedTags = personaA.tags.filter(tag => personaB.tags?.includes(tag));
+      score += sharedTags.length * 5;
     }
-
-    // Check for feature in capabilities if no system metadata
-    if (typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities)) {
-      return Boolean(persona.capabilities[feature as keyof typeof persona.capabilities]);
-    } else if (Array.isArray(persona.capabilities)) {
-      return persona.capabilities.includes(feature);
-    }
-
-    return false;
+    
+    return Math.min(100, score);
   }
-
-  /**
-   * Check availability of a persona
-   */
-  public isPersonaAvailable(persona: UberPersona): boolean {
-    // A persona is available if:
-    // 1. It has an online status
-    // 2. It has an availability status of "available"
-    // 3. It is not locked or inactive
-
-    if (!persona) return false;
-    
-    // Check for explicit isActive flag
-    if (persona.isActive === false) return false;
-    
-    // Check locked status
-    if (persona.isLocked === true) return false;
-    
-    // Check online status
-    if (persona.isOnline === true) return true;
-    
-    // Check availability status
-    if (persona.availability && persona.availability.status === 'available') {
-      return true;
-    }
-    
-    return false;
+  
+  // Check if persona is premium
+  public isPremiumPersona(persona: UberPersona): boolean {
+    return persona.isPremium === true;
   }
-
-  /**
-   * Get persona ranking in the ecosystem (higher is better)
-   */
-  public getPersonaRanking(persona: UberPersona): number {
-    if (!persona) return 0;
+  
+  // Check if persona requires neural boost
+  public requiresNeuralBoost(persona: UberPersona): boolean {
+    if (!this.settings.boostingEnabled) return false;
     
-    let baseScore = 50; // Start with a base score
+    // Check if persona has premium status
+    const isPremium = persona.isPremium === true;
     
-    // Add points for each factor
-    if (persona.isVerified || persona.roleFlags?.isVerified) baseScore += 20;
-    if (persona.featured || persona.roleFlags?.isFeatured) baseScore += 30;
-    if (persona.isPremium) baseScore += 15;
+    // Check if persona has system metadata neural service flags
+    const useNeural = persona.systemMetadata?.statusFlags?.needsModeration === true || 
+                      persona.systemMetadata?.personalityIndex !== undefined;
     
-    // Add rating points
-    const rating = persona.rating || persona.stats?.rating || 0;
-    baseScore += rating * 5;
-    
-    // Add points for completeness
-    if (persona.bio && persona.bio.length > 100) baseScore += 10;
-    if (persona.tags && persona.tags.length > 3) baseScore += 5;
-    if (persona.location) baseScore += 5;
-    
-    // Check if capabilities exist
-    if (persona.capabilities) {
-      if (typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities)) {
-        if (persona.capabilities.hasRealMeets) baseScore += 15;
-        if (persona.capabilities.hasVirtualMeets) baseScore += 10;
-        if (persona.capabilities.hasContent) baseScore += 5;
-      }
-    }
-    
-    return Math.min(100, baseScore); // Cap at 100
-  }
-
-  /**
-   * Add boost to persona ranking
-   */
-  public getPersonaBoostFactor(persona: UberPersona): number {
-    if (!this.settings.boostingEnabled) return 1.0;
-    
-    let boostFactor = 1.0;
-    
-    // Add boost based on featured status
-    if (persona.featured || persona.roleFlags?.isFeatured) {
-      boostFactor += 0.5; // 50% boost for featured profiles
-    }
-    
-    // Add boost for verified profiles
-    if (persona.isVerified || persona.roleFlags?.isVerified) {
-      boostFactor += 0.3; // 30% boost for verified profiles
-    }
-    
-    // Add small boost for premium
-    if (persona.isPremium) {
-      boostFactor += 0.2;
-    }
-    
-    // Check for system metadata boost
-    if (persona.systemMetadata && persona.systemMetadata.boostFactor) {
-      boostFactor += persona.systemMetadata.boostFactor;
-    }
-    
-    // Apply algorithm-specific bonuses
-    if (this.settings.boostingAlgorithm === 'OxumAlgorithm') {
-      // OxumAlgorithm gives extra boost to profiles with high activity
-      if (persona.systemMetadata && persona.systemMetadata.activityScore > 80) {
-        boostFactor += 0.4;
-      }
-    }
-    
-    return boostFactor;
+    return isPremium || useNeural;
   }
 }
-
-// Export singleton instance
-export const uberCore = new UberCoreService();

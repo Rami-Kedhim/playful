@@ -1,37 +1,36 @@
 
-// Export all neural services and types from a centralized location
-import { neuralHub } from './HermesOxumNeuralHub';
-import { neuralService } from './NeuralService';
-import { EscortsNeuralService, escortsNeuralService } from './modules/EscortsNeuralService';
-import { CreatorsNeuralService, creatorsNeuralService } from './modules/CreatorsNeuralService';
-import { LivecamsNeuralService, livecamsNeuralService } from './modules/LivecamsNeuralService';
+// Re-export all neural services
+import { BaseNeuralService } from './modules/BaseNeuralService';
 import { AICompanionNeuralService, aiCompanionNeuralService } from './modules/AICompanionNeuralService';
-import { NeuralService, BaseNeuralService } from './types/NeuralService';
-import { NeuralServiceConfig } from './types/neuralConfig';
-
-// Neural service registry
+import { CreatorsNeuralService, creatorsNeuralService } from './modules/CreatorsNeuralService';
+import { EscortsNeuralService, escortsNeuralService } from './modules/EscortsNeuralService';
+import { LivecamsNeuralService, livecamsNeuralService } from './modules/LivecamsNeuralService';
 import { neuralServiceRegistry } from './registry/NeuralServiceRegistry';
+import { UberCore } from './UberCore';
 
-// Re-export all for easy access
+// Create and export singleton instance of UberCore
+export const uberCore = new UberCore();
+
+// Export services
 export {
-  // Core services
-  neuralHub,
-  neuralService,
-  
-  // Module services
-  escortsNeuralService,
-  EscortsNeuralService,
-  creatorsNeuralService,
-  CreatorsNeuralService,
-  livecamsNeuralService,
-  LivecamsNeuralService,
-  aiCompanionNeuralService,
+  BaseNeuralService,
   AICompanionNeuralService,
-  
-  // Registry
-  neuralServiceRegistry,
+  aiCompanionNeuralService,
+  CreatorsNeuralService,
+  creatorsNeuralService,
+  EscortsNeuralService,
+  escortsNeuralService,
+  LivecamsNeuralService,
+  livecamsNeuralService,
+  neuralServiceRegistry
 };
 
-// Types need to use export type for isolatedModules
-export type { NeuralService, BaseNeuralService };
-export type { NeuralServiceConfig };
+// Export types
+export type { 
+  NeuralService, 
+  NeuralServiceConfig 
+} from './interfaces/NeuralService';
+
+export type {
+  ModuleType
+} from './registry/NeuralServiceRegistry';

@@ -1,38 +1,24 @@
 
-import { useContext, useEffect, useState } from 'react';
-import { CreatorContext } from '@/modules/creators/providers/CreatorProvider';
+import { useContext } from 'react';
+import { useParams } from 'react-router-dom';
+import { CreatorContext, Creator } from '@/modules/creators/providers/CreatorProvider';
 
-export function useCreatorDetail(creatorId?: string) {
+export function useCreatorDetail() {
   const context = useContext(CreatorContext);
-  const [creator, setCreator] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { id } = useParams<{ id: string }>();
   
-  useEffect(() => {
-    if (!context) {
-      setError('CreatorContext not available');
-      setLoading(false);
-      return;
-    }
-    
-    if (creatorId && context.creators) {
-      setLoading(true);
-      // Find creator in the context data
-      const foundCreator = context.creators.find(c => c.id === creatorId);
-      
-      if (foundCreator) {
-        setCreator(foundCreator);
-        setError(null);
-      } else {
-        setCreator(null);
-        setError('Creator not found');
-      }
-      setLoading(false);
-    } else {
-      setCreator(null);
-      setLoading(false);
-    }
-  }, [creatorId, context]);
+  if (!context) {
+    throw new Error('useCreatorDetail must be used within a CreatorProvider');
+  }
   
-  return { creator, loading, error };
+  const creator = context.getCreatorById?.(id || '');
+  const isLoading = context.loading;
+  const error = context.error;
+  
+  return {
+    creator,
+    isLoading,
+    error,
+    relatedCreators: context.creators?.filter(c => c.id !== id).slice(0, 3) || []
+  };
 }

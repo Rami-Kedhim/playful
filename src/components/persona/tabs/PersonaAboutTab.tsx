@@ -12,23 +12,22 @@ interface PersonaAboutTabProps {
 
 export const PersonaAboutTab: React.FC<PersonaAboutTabProps> = ({ persona }) => {
   // Safe access to potentially undefined properties
-  const description = persona.description || persona.bio || 'No description available';
+  const description = persona.bio || 'No description available';
   const location = persona.location || 'Location not specified';
   
+  // Handle optional properties with fallbacks
   const languages = persona.languages || [];
   const hasLanguages = Array.isArray(languages) && languages.length > 0;
   
-  const services = Array.isArray(persona.services) ? persona.services : [];
-  const hasServices = services.length > 0;
+  const services = persona.services || [];
+  const hasServices = Array.isArray(services) && services.length > 0;
   
-  const traits = Array.isArray(persona.traits) ? persona.traits : [];
-  const hasTraits = traits.length > 0;
+  const traits = persona.traits || [];
+  const hasTraits = Array.isArray(traits) && traits.length > 0;
   
   // Extract statistics
   const stats = persona.stats || {};
-  const responseTimeMinutes = (stats.responseTime && typeof stats.responseTime === 'number') 
-    ? stats.responseTime 
-    : undefined;
+  const responseTime = stats.responseTime ?? undefined;
   
   return (
     <div className="space-y-6">
@@ -80,16 +79,16 @@ export const PersonaAboutTab: React.FC<PersonaAboutTabProps> = ({ persona }) => 
         </Card>
         
         {/* Response Time if available */}
-        {responseTimeMinutes !== undefined && (
+        {responseTime !== undefined && (
           <Card>
             <CardContent className="p-4 flex items-center">
               <Clock className="h-5 w-5 text-muted-foreground mr-3" />
               <div>
                 <p className="text-sm font-medium">Response Time</p>
                 <p className="text-sm text-muted-foreground">
-                  {responseTimeMinutes < 60 
-                    ? `${responseTimeMinutes} minutes` 
-                    : `${Math.floor(responseTimeMinutes / 60)} hours`}
+                  {typeof responseTime === 'number' && responseTime < 60 
+                    ? `${responseTime} minutes` 
+                    : `${Math.floor((typeof responseTime === 'number' ? responseTime : 0) / 60)} hours`}
                 </p>
               </div>
             </CardContent>
