@@ -1,67 +1,65 @@
 
+export interface UberPersonaFeatures {
+  hasPhotos: boolean;
+  hasVideos: boolean;
+  hasStories: boolean;
+  hasChat: boolean;
+  hasBooking: boolean;
+  hasLiveStream: boolean;
+  hasExclusiveContent: boolean;
+  hasContent: boolean;
+  hasRealMeets: boolean;
+  hasVirtualMeets: boolean;
+}
+
+export interface UberPersonaPricing {
+  acceptsLucoin: boolean;
+  acceptsTips: boolean;
+  subscriptionPrice: number;
+  unlockingPrice: number;
+  boostingActive: boolean;
+  meetingPrice: number;
+}
+
 export interface UberPersona {
   id: string;
   name: string;
-  description: string;
-  avatar: string;
-  displayName?: string;
-  age?: number;
-  system?: {
-    role?: string;
-    context?: string;
+  description?: string;
+  avatarUrl: string;
+  bannerUrl?: string;
+  rating?: number;
+  reviewCount?: number;
+  isVerified?: boolean;
+  isOnline?: boolean;
+  lastActive?: Date | string;
+  features: UberPersonaFeatures | string[];
+  pricing: UberPersonaPricing;
+  tags?: string[];
+  location?: string;
+  category?: string;
+  popularity?: number;
+  relationships?: string[];
+  stats?: {
+    views: number;
+    likes: number;
+    followers: number;
   };
-  bio?: string;
-  roleFlags?: {
-    isEscort?: boolean;
-    isContentCreator?: boolean;
-    isPremium?: boolean;
-  };
-  capabilities?: Capabilities;
-  monetization?: {
-    messageCost?: number;
-    contentCost?: number;
-    subscriptionCost?: number;
-    hasSubscription?: boolean;
-  };
-  contentCount?: number;
 }
 
-export interface Capabilities {
-  hasChat?: boolean;
-  hasLiveStream?: boolean;
-  hasVideoCall?: boolean;
-  hasContent?: boolean;
-  hasVirtualMeets?: boolean;
-  hasRealMeets?: boolean;
-}
-
-export interface PersonaMessage {
-  id: string;
-  content: string;
-  sender: 'user' | 'persona';
-  timestamp: number;
-  personaId?: string;
-}
-
-export interface PersonaStory {
-  id: string;
-  title: string;
-  thumbnail: string;
-  personaId: string;
-  createdAt: string;
-  isPremium?: boolean;
-}
-
-export interface PersonaContent {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  type: 'image' | 'video' | 'audio';
-  url: string;
-  personaId: string;
-  createdAt: string;
-  isPremium?: boolean;
-  price?: number;
-  isUnlocked?: boolean;
-}
+export const normalizeUberPersonaFeatures = (features: UberPersonaFeatures | string[]): UberPersonaFeatures => {
+  if (Array.isArray(features)) {
+    return {
+      hasPhotos: features.includes('photos'),
+      hasVideos: features.includes('videos'),
+      hasStories: features.includes('stories'),
+      hasChat: features.includes('chat'),
+      hasBooking: features.includes('booking'),
+      hasLiveStream: features.includes('livestream'),
+      hasExclusiveContent: features.includes('exclusive'),
+      hasContent: features.includes('content'),
+      hasRealMeets: features.includes('realmeets'),
+      hasVirtualMeets: features.includes('virtualmeets')
+    };
+  }
+  return features as UberPersonaFeatures;
+};

@@ -1,148 +1,132 @@
 
-/**
- * Hook for using scrapers across the application
- * Provides access to all three scraper types
- */
-import { useState, useCallback } from "react";
-import { LivecamScraper } from "@/services/scrapers/LivecamScraper";
-import { CreatorScraper } from "@/services/scrapers/CreatorScraper";
-import { EscortScraper } from "@/services/scrapers/EscortScraper";
-import { LivecamModel, LivecamsResponse } from "@/types/livecams";
-import { Creator } from "@/hooks/useCreators";
-import { Escort } from "@/types/escort";
+import { useState, useCallback } from 'react';
+import { EscortScraper, ScraperFilters, ScrapeResult } from '@/types/scraper';
 
 export const useScrapers = () => {
-  const [isScrapingLivecams, setIsScrapingLivecams] = useState(false);
-  const [isScrapingCreators, setIsScrapingCreators] = useState(false);
-  const [isScrapingEscorts, setIsScrapingEscorts] = useState(false);
-  const [livecamError, setLivecamError] = useState<string | null>(null);
-  const [creatorError, setCreatorError] = useState<string | null>(null);
-  const [escortError, setEscortError] = useState<string | null>(null);
+  const [scrapers, setScrapers] = useState<EscortScraper[]>([
+    {
+      id: 'scraper1',
+      name: 'MainSiteScraper',
+      status: 'idle',
+      lastRun: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+      setFilters: async (filters: ScraperFilters) => {
+        console.log('MainSiteScraper filters set:', filters);
+      },
+      scrape: async (): Promise<ScrapeResult> => {
+        return {
+          id: `scrape-${Date.now()}`,
+          success: true,
+          data: [
+            { id: 'profile1', name: 'Profile 1' },
+            { id: 'profile2', name: 'Profile 2' },
+            { id: 'profile3', name: 'Profile 3' }
+          ],
+          timestamp: new Date()
+        };
+      }
+    },
+    {
+      id: 'scraper2',
+      name: 'SecondarySourceScraper',
+      status: 'idle',
+      lastRun: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+      setFilters: async (filters: ScraperFilters) => {
+        console.log('SecondarySourceScraper filters set:', filters);
+      },
+      scrape: async (): Promise<ScrapeResult> => {
+        return {
+          id: `scrape-${Date.now()}`,
+          success: true,
+          data: [
+            { id: 'alt-profile1', name: 'Alt Profile 1' },
+            { id: 'alt-profile2', name: 'Alt Profile 2' }
+          ],
+          timestamp: new Date()
+        };
+      }
+    }
+  ]);
 
-  /**
-   * Scrape livecams from cam4.com
-   */
-  const scrapeLivecams = useCallback(async (options?: { 
-    country?: string; 
-    category?: string; 
-    limit?: number;
-  }): Promise<LivecamsResponse> => {
-    setIsScrapingLivecams(true);
-    setLivecamError(null);
+  const [results, setResults] = useState<Record<string, ScrapeResult>>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  const setScraperFilters = useCallback(async (scraperId: string, filters: ScraperFilters) => {
+    setLoading(prev => ({ ...prev, [scraperId]: true }));
+    setErrors(prev => ({ ...prev, [scraperId]: '' }));
     
     try {
-      const livecamScraper = LivecamScraper.getInstance();
+      const scraper = scrapers.find(s => s.id === scraperId);
       
-      // Apply filters if provided
-      if (options) {
-        livecamScraper.setFilters({
-          region: options.country,
-          categories: options.category ? [options.category] : [],
-          limit: options.limit || 20
-        });
+      if (!scraper) {
+        throw new Error(`Scraper with ID ${scraperId} not found`);
       }
       
-      // Perform scraping
-      await livecamScraper.scrape();
+      await scraper.setFilters(filters);
       
-      // Get response in expected format
-      return livecamScraper.getResponse();
-    } catch (error: any) {
-      setLivecamError(error.message || "Failed to scrape livecams");
-      return {
-        models: [],
-        totalCount: 0,
-        page: 1,
-        pageSize: options?.limit || 20,
-        hasMore: false
-      };
+      // Update the scraper in state
+      setScrapers(prev => prev.map(s => 
+        s.id === scraperId ? { ...s, lastFiltersSet: new Date() } : s
+      ));
+      
+      return true;
+    } catch (error) {
+      console.error(`Error setting filters for scraper ${scraperId}:`, error);
+      setErrors(prev => ({ ...prev, [scraperId]: `Failed to set filters: ${error}` }));
+      return false;
     } finally {
-      setIsScrapingLivecams(false);
+      setLoading(prev => ({ ...prev, [scraperId]: false }));
     }
-  }, []);
-
-  /**
-   * Scrape creators from uviu.com
-   */
-  const scrapeCreators = useCallback(async (options?: {
-    region?: string;
-    categories?: string[];
-    limit?: number;
-  }): Promise<Creator[]> => {
-    setIsScrapingCreators(true);
-    setCreatorError(null);
+  }, [scrapers]);
+  
+  const runScraper = useCallback(async (scraperId: string) => {
+    setLoading(prev => ({ ...prev, [scraperId]: true }));
+    setErrors(prev => ({ ...prev, [scraperId]: '' }));
     
     try {
-      const creatorScraper = CreatorScraper.getInstance();
+      const scraper = scrapers.find(s => s.id === scraperId);
       
-      // Apply filters if provided
-      if (options) {
-        creatorScraper.setFilters({
-          region: options.region,
-          categories: options.categories || [],
-          limit: options.limit || 20
-        });
+      if (!scraper) {
+        throw new Error(`Scraper with ID ${scraperId} not found`);
       }
       
-      // Perform scraping
-      return await creatorScraper.scrape();
-    } catch (error: any) {
-      setCreatorError(error.message || "Failed to scrape creators");
-      return [];
-    } finally {
-      setIsScrapingCreators(false);
-    }
-  }, []);
-
-  /**
-   * Scrape escorts from tryst.link
-   */
-  const scrapeEscorts = useCallback(async (options?: {
-    location?: string;
-    services?: string[];
-    limit?: number;
-  }): Promise<Escort[]> => {
-    setIsScrapingEscorts(true);
-    setEscortError(null);
-    
-    try {
-      const escortScraper = EscortScraper.getInstance();
+      // Update scraper status
+      setScrapers(prev => prev.map(s => 
+        s.id === scraperId ? { ...s, status: 'running' } : s
+      ));
       
-      // Apply filters if provided
-      if (options) {
-        escortScraper.setFilters({
-          region: options.location,
-          categories: options.services || [],
-          limit: options.limit || 20
-        });
-      }
+      const result = await scraper.scrape();
       
-      // Perform scraping
-      return await escortScraper.scrape();
-    } catch (error: any) {
-      setEscortError(error.message || "Failed to scrape escorts");
-      return [];
+      // Store the results
+      setResults(prev => ({ ...prev, [scraperId]: result }));
+      
+      // Update the scraper status to 'completed'
+      setScrapers(prev => prev.map(s => 
+        s.id === scraperId ? { ...s, status: 'completed', lastRun: new Date() } : s
+      ));
+      
+      return result;
+    } catch (error) {
+      console.error(`Error running scraper ${scraperId}:`, error);
+      
+      // Update the scraper status to 'error'
+      setScrapers(prev => prev.map(s => 
+        s.id === scraperId ? { ...s, status: 'error' } : s
+      ));
+      
+      setErrors(prev => ({ ...prev, [scraperId]: `Scraping failed: ${error}` }));
+      return null;
     } finally {
-      setIsScrapingEscorts(false);
+      setLoading(prev => ({ ...prev, [scraperId]: false }));
     }
-  }, []);
-
+  }, [scrapers]);
+  
   return {
-    // Livecams
-    scrapeLivecams,
-    isScrapingLivecams,
-    livecamError,
-    
-    // Creators
-    scrapeCreators,
-    isScrapingCreators,
-    creatorError,
-    
-    // Escorts
-    scrapeEscorts,
-    isScrapingEscorts,
-    escortError
+    scrapers,
+    results,
+    loading,
+    errors,
+    setScraperFilters,
+    runScraper
   };
 };
-
-export default useScrapers;

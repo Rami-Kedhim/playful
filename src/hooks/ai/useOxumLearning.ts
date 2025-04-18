@@ -1,124 +1,92 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { oxumLearningService, ProcessingResult } from '@/services/neural/modules/OxumLearningService';
-import { useBrainHub } from '@/hooks/useBrainHub';
+import { useState, useCallback } from 'react';
+import { oxumLearningService } from '@/services/ai/OxumLearningService';
 
-interface OxumLearningOptions {
-  componentId: string;
-  autoSync?: boolean;
-  culturalContext?: Record<string, any>;
+interface OxumLearnedPattern {
+  id: string;
+  type: string;
+  confidence: number;
+  occurrences: number;
+  lastObserved?: Date;
+  category?: string;
+  relatedPatterns?: string[];
 }
 
-interface OxumLearningResult {
-  enhancedOutput: string;
-  culturalContext: Record<string, any>;
-  confidenceScore: number;
-}
-
-/**
- * Hook for integrating Oxum learning capabilities into React components
- */
-export const useOxumLearning = (options: OxumLearningOptions) => {
+export const useOxumLearning = () => {
+  const [isInitializing, setIsInitializing] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [output, setOutput] = useState<any>(null);
+  const [patterns, setPatterns] = useState<OxumLearnedPattern[]>([]);
   const [error, setError] = useState<string | null>(null);
-  
-  // Integrate with Brain Hub
-  const brainHub = useBrainHub(`oxum-learning-${options.componentId}`, {
-    moduleType: 'learning',
-    culturalContext: options.culturalContext
-  });
-  
-  // Initialize Oxum Learning service
-  useEffect(() => {
-    const initializeService = async () => {
-      try {
-        const success = await oxumLearningService.initialize();
-        setIsInitialized(success);
-        
-        if (!success) {
-          throw new Error('Failed to initialize Oxum Learning');
-        }
-      } catch (err: any) {
-        console.error('Error initializing Oxum Learning:', err);
-        setError(err.message || 'Failed to initialize Oxum Learning');
-      }
-    };
-    
-    initializeService();
-  }, []);
-  
-  /**
-   * Process text through the Oxum learning system
-   */
-  const processText = useCallback((input: string, context?: any): OxumLearningResult => {
+
+  const initialize = useCallback(async () => {
+    setIsInitializing(true);
+    setError(null);
+
     try {
-      setIsProcessing(true);
-      setError(null);
-      
-      // Merge context with Brain Hub data if available
-      const combinedContext = {
-        ...(context || {}),
-        ...(brainHub.data || {})
-      };
-      
-      // Process through Oxum Learning service
-      const result = oxumLearningService.processInput(input, combinedContext);
-      
-      // Sync with Brain Hub if available and auto-sync enabled
-      if (brainHub.isConnected && options.autoSync) {
-        brainHub.setData({
-          lastProcessed: new Date().toISOString(),
-          culturalContext: result.culturalContext
-        });
-      }
-      
-      // Ensure the result has the required properties
-      const enhancedResult: OxumLearningResult = {
-        enhancedOutput: result.enhancedOutput,
-        confidenceScore: result.confidenceScore,
-        culturalContext: result.culturalContext || {}
-      };
-      
-      return enhancedResult;
-    } catch (err: any) {
-      console.error('Error processing text with Oxum Learning:', err);
-      setError(err.message || 'Failed to process text');
-      
-      // Return unchanged input with low confidence
-      return {
-        enhancedOutput: input,
-        culturalContext: context || {},
-        confidenceScore: 0
-      };
+      const success = await oxumLearningService.initialize();
+      setIsInitialized(success);
+      return success;
+    } catch (err) {
+      setError("Failed to initialize Oxum Learning: " + (err as Error).message);
+      return false;
+    } finally {
+      setIsInitializing(false);
+    }
+  }, []);
+
+  const processInput = useCallback(async (input: string) => {
+    if (!isInitialized) {
+      setError("Oxum Learning not initialized");
+      return null;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const result = await oxumLearningService.processInput(input);
+      setOutput(result);
+      return result;
+    } catch (err) {
+      setError("Error processing input: " + (err as Error).message);
+      return null;
     } finally {
       setIsProcessing(false);
     }
-  }, [brainHub, options.autoSync]);
-  
-  /**
-   * Get learned patterns from the Oxum learning service
-   */
-  const getLearnedPatterns = useCallback(() => {
-    return oxumLearningService.getLearnedPatterns();
-  }, []);
-  
-  /**
-   * Get cultural contexts from the Oxum learning service
-   */
-  const getCulturalContexts = useCallback(() => {
-    return oxumLearningService.getCulturalContexts();
-  }, []);
-  
+  }, [isInitialized]);
+
+  const loadLearnedPatterns = useCallback(async () => {
+    if (!isInitialized) {
+      setError("Oxum Learning not initialized");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const patterns = await oxumLearningService.getLearnedPatterns();
+      setPatterns(patterns);
+    } catch (err) {
+      setError("Error loading learned patterns: " + (err as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isInitialized]);
+
   return {
+    isInitializing,
     isInitialized,
     isProcessing,
+    isLoading,
+    output,
+    patterns,
     error,
-    processText,
-    getLearnedPatterns,
-    getCulturalContexts,
-    brainHubConnected: brainHub.isConnected
+    initialize,
+    processInput,
+    loadLearnedPatterns
   };
 };
-
-export default useOxumLearning;

@@ -1,44 +1,59 @@
 
 export interface OxumLearningService {
-  initialize: () => Promise<void>;
-  processInput: (input: string, context?: any) => Promise<any>;
+  initialize: () => Promise<boolean>;
+  processInput: (input: string) => Promise<any>;
   getLearnedPatterns: () => Promise<any[]>;
-  getInsights: () => Promise<any>;
-  resetContext: () => Promise<void>;
+  configureParams: (params: any) => void;
+  getMetrics: () => any;
+  resetLearningState: () => Promise<void>;
 }
 
 export const oxumLearningService: OxumLearningService = {
-  initialize: async (): Promise<void> => {
+  initialize: async (): Promise<boolean> => {
     console.log("Initializing Oxum Learning Service");
+    return true;
   },
   
-  processInput: async (input: string, context?: any): Promise<any> => {
-    console.log("Processing input with Oxum:", input);
+  processInput: async (input: string): Promise<any> => {
+    console.log("Processing input:", input);
     return {
-      response: "Response from Oxum learning system",
-      confidence: 0.87,
-      context: context || {}
+      output: "This is processed output",
+      confidence: 0.85,
+      processingTime: 120
     };
   },
   
   getLearnedPatterns: async (): Promise<any[]> => {
     return [
-      { id: "pattern1", type: "behavior", frequency: 0.78 },
-      { id: "pattern2", type: "preference", frequency: 0.65 }
+      {
+        id: "pattern1",
+        type: "preference",
+        confidence: 0.92,
+        occurrences: 17
+      },
+      {
+        id: "pattern2",
+        type: "behavior",
+        confidence: 0.78,
+        occurrences: 8
+      }
     ];
   },
   
-  getInsights: async (): Promise<any> => {
+  configureParams: (params: any): void => {
+    console.log("Configuring Oxum Learning parameters:", params);
+  },
+  
+  getMetrics: (): any => {
     return {
-      insights: [
-        { type: "preference", description: "User prefers visual content" },
-        { type: "timing", description: "Higher engagement during evenings" }
-      ],
-      confidence: 0.72
+      accuracy: 0.89,
+      processingSpeed: 450,
+      patternRecognitionRate: 0.76,
+      learningEfficiency: 0.82
     };
   },
   
-  resetContext: async (): Promise<void> => {
-    console.log("Resetting Oxum learning context");
+  resetLearningState: async (): Promise<void> => {
+    console.log("Resetting Oxum Learning state");
   }
 };

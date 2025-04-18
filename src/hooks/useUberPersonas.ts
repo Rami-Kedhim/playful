@@ -1,194 +1,151 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { UberPersona } from '@/types/uberPersona';
-
-// Mock data for initial development
-const mockPersonas: UberPersona[] = [
-  {
-    id: "p1",
-    username: "sophia_rose",
-    displayName: "Sophia Rose",
-    image: "https://example.com/sophia.jpg",
-    imageUrl: "https://example.com/sophia.jpg",
-    avatarUrl: "https://example.com/sophia-avatar.jpg",
-    location: "New York",
-    language: "English",
-    bio: "Elite companion available for dinner dates and travel",
-    age: 27,
-    ethnicity: "Caucasian",
-    tags: ["Elite", "GFE", "Travel Companion"],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    rating: 4.9,
-    price: 300,
-    isOnline: true,
-    roleFlags: {
-      isEscort: true,
-      isCreator: false,
-      isLivecam: false,
-      isAI: false,
-      isVerified: true,
-      isFeatured: true
-    },
-    capabilities: {
-      hasPhotos: true,
-      hasVideos: true,
-      hasStories: true,
-      hasChat: true,
-      hasBooking: true,
-      hasLiveStream: false,
-      hasExclusiveContent: true,
-      hasRealMeets: true,
-      hasVirtualMeets: false
-    },
-    monetization: {
-      acceptsLucoin: true,
-      acceptsTips: true,
-      subscriptionPrice: 29.99,
-      unlockingPrice: 300,
-      boostingActive: true
-    },
-    contentCount: {
-      photos: 45,
-      videos: 7
-    }
-  },
-  {
-    id: "p2",
-    username: "emma_black",
-    displayName: "Emma Black",
-    image: "https://example.com/emma.jpg",
-    imageUrl: "https://example.com/emma.jpg",
-    avatarUrl: "https://example.com/emma-avatar.jpg",
-    location: "Los Angeles",
-    language: "English",
-    bio: "Content creator specializing in lifestyle and fashion",
-    age: 24,
-    ethnicity: "Mixed",
-    tags: ["Fashion", "Lifestyle", "Vlogger"],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    rating: 4.8,
-    roleFlags: {
-      isEscort: false,
-      isCreator: true,
-      isLivecam: false,
-      isAI: false,
-      isVerified: true,
-      isFeatured: false
-    },
-    capabilities: {
-      hasPhotos: true,
-      hasVideos: true,
-      hasStories: true,
-      hasChat: true,
-      hasBooking: false,
-      hasLiveStream: true,
-      hasExclusiveContent: true,
-      hasContent: true
-    },
-    monetization: {
-      acceptsLucoin: true,
-      acceptsTips: true,
-      subscriptionPrice: 9.99
-    },
-    contentCount: {
-      photos: 45,
-      videos: 12,
-      streams: 3
-    }
-  },
-  {
-    id: "p3",
-    username: "luna_star",
-    displayName: "Luna Star",
-    image: "https://example.com/luna.jpg",
-    imageUrl: "https://example.com/luna.jpg",
-    avatarUrl: "https://example.com/luna-avatar.jpg",
-    location: "Miami",
-    language: "Spanish",
-    bio: "Live performer offering interactive shows",
-    age: 26,
-    ethnicity: "Hispanic",
-    tags: ["Live Shows", "Interactive", "Adult"],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    rating: 4.7,
-    price: 150,
-    isOnline: true,
-    roleFlags: {
-      isEscort: false,
-      isCreator: true,
-      isLivecam: true,
-      isAI: false,
-      isVerified: true,
-      isFeatured: false
-    },
-    capabilities: {
-      hasPhotos: true,
-      hasVideos: true,
-      hasStories: true,
-      hasChat: true,
-      hasBooking: false,
-      hasLiveStream: true,
-      hasExclusiveContent: true
-    },
-    monetization: {
-      acceptsLucoin: true,
-      acceptsTips: true,
-      subscriptionPrice: 12.99
-    },
-    contentCount: {
-      photos: 120,
-      videos: 35,
-      streams: 25
-    }
-  }
-];
+import { UberPersona, UberPersonaFeatures, UberPersonaPricing } from '@/types/persona';
 
 export const useUberPersonas = () => {
   const [personas, setPersonas] = useState<UberPersona[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Load personas from API or mock data
-  const loadPersonas = useCallback(async (useCache = true) => {
-    // Skip if we already have data and useCache is true
-    if (useCache && personas.length > 0) return;
-    
-    setIsLoading(true);
+
+  // Mock data for personas
+  const fetchPersonas = useCallback(async () => {
+    setLoading(true);
     setError(null);
-    
+
     try {
-      // In a real app, this would be an API call
-      // For now, we'll just use the mock data with a delay to simulate network
+      // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Mock data
+      const mockPersonas: UberPersona[] = [
+        {
+          id: "persona1",
+          name: "Sophia",
+          description: "Friendly and outgoing persona",
+          avatarUrl: "https://via.placeholder.com/150",
+          bannerUrl: "https://via.placeholder.com/1200x300",
+          rating: 4.8,
+          reviewCount: 120,
+          isVerified: true,
+          isOnline: true,
+          lastActive: new Date(),
+          features: {
+            hasPhotos: true,
+            hasVideos: true,
+            hasStories: true,
+            hasChat: true,
+            hasBooking: true,
+            hasLiveStream: false,
+            hasExclusiveContent: true,
+            hasContent: true,
+            hasRealMeets: true,
+            hasVirtualMeets: false
+          },
+          pricing: {
+            acceptsLucoin: true,
+            acceptsTips: true,
+            subscriptionPrice: 19.99,
+            unlockingPrice: 5.99,
+            boostingActive: true,
+            meetingPrice: 150
+          },
+          tags: ["friendly", "outgoing", "energetic"],
+          location: "New York, NY",
+          category: "companion",
+          popularity: 85,
+          stats: {
+            views: 15000,
+            likes: 2800,
+            followers: 1200
+          }
+        },
+        {
+          id: "persona2",
+          name: "Alex",
+          description: "Creative and artistic virtual companion",
+          avatarUrl: "https://via.placeholder.com/150",
+          rating: 4.6,
+          isVerified: true,
+          isOnline: false,
+          lastActive: new Date(Date.now() - 3600000), // 1 hour ago
+          features: {
+            hasPhotos: true,
+            hasVideos: true,
+            hasStories: true,
+            hasChat: true,
+            hasBooking: false,
+            hasLiveStream: true,
+            hasExclusiveContent: true,
+            hasContent: true,
+            hasRealMeets: false,
+            hasVirtualMeets: true
+          },
+          pricing: {
+            acceptsLucoin: true,
+            acceptsTips: true,
+            subscriptionPrice: 14.99,
+            unlockingPrice: 4.99,
+            boostingActive: false,
+            meetingPrice: 75
+          },
+          tags: ["creative", "artistic", "intellectual"],
+          location: "Virtual",
+          category: "artist",
+          popularity: 72
+        },
+        {
+          id: "persona3",
+          name: "Jasmine",
+          description: "Sophisticated and elegant companion",
+          avatarUrl: "https://via.placeholder.com/150",
+          bannerUrl: "https://via.placeholder.com/1200x300",
+          rating: 4.9,
+          reviewCount: 200,
+          isVerified: true,
+          isOnline: true,
+          features: {
+            hasPhotos: true,
+            hasVideos: true,
+            hasStories: true,
+            hasChat: true,
+            hasBooking: false,
+            hasLiveStream: true,
+            hasExclusiveContent: true,
+            hasContent: true,
+            hasRealMeets: true,
+            hasVirtualMeets: false
+          },
+          pricing: {
+            acceptsLucoin: true,
+            acceptsTips: true,
+            subscriptionPrice: 24.99,
+            unlockingPrice: 7.99,
+            boostingActive: true,
+            meetingPrice: 200
+          },
+          tags: ["elegant", "sophisticated", "cultured"],
+          location: "Miami, FL",
+          popularity: 92
+        }
+      ];
+
       setPersonas(mockPersonas);
-    } catch (err: any) {
-      console.error("Failed to load personas", err);
-      setError(err.message || 'Failed to load personas');
+    } catch (err) {
+      console.error('Error fetching personas:', err);
+      setError('Failed to load personas');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [personas.length]);
-  
-  // Get a specific persona by ID
-  const getPersonaById = useCallback((id: string): UberPersona | undefined => {
-    return personas.find(persona => persona.id === id);
-  }, [personas]);
-  
-  // Initialize data on first load
+  }, []);
+
   useEffect(() => {
-    loadPersonas();
-  }, [loadPersonas]);
-  
+    fetchPersonas();
+  }, [fetchPersonas]);
+
   return {
     personas,
-    isLoading,
+    loading,
     error,
-    loadPersonas,
-    getPersonaById
+    refreshPersonas: fetchPersonas
   };
 };
-
-export default useUberPersonas;

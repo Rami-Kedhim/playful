@@ -2,18 +2,13 @@
 export interface Video {
   id: string;
   title: string;
-  description?: string;
   thumbnailUrl: string;
   videoUrl: string;
   duration: number;
+  viewCount: number;
   views: number;
-  viewCount?: number; // For compatibility
-  isPublished: boolean;
+  createdAt: string;
   isPremium: boolean;
+  isPublished: boolean;
   escortId: string;
-  creatorId?: string;
-  createdAt: string | Date;
-  updatedAt?: string | Date;
-  tags?: string[];
-  categories?: string[];
 }

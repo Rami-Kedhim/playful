@@ -1,5 +1,5 @@
 
-export type ServiceType = "" | "in-person" | "virtual" | "both";
+export type ServiceType = "" | "in-person" | "virtual" | "both" | "all";
 
 export interface ServiceTypeContextType {
   serviceType: ServiceType;
