@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { AppRoutes } from '@/utils/navigation';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { User, UserProfile } from '@/types/user';
+import { safelyParseDate } from '@/utils/dateUtils';
 
 // Auth page
 import AuthPage from './pages/AuthPage';
@@ -47,7 +48,7 @@ const RoutesComponent: React.FC = () => {
     id: authUser.id,
     username: authUser.username || '',
     email: authUser.email,
-    role: authUser.role || 'user',
+    role: (authUser.role as 'user' | 'admin' | 'moderator') || 'user',
     name: authUser.name || authUser.username || authUser.full_name || '',
     isVerified: authUser.isVerified,
     createdAt: authUser.created_at || new Date().toISOString(),
@@ -55,7 +56,8 @@ const RoutesComponent: React.FC = () => {
   
   const profile: UserProfile | null = authProfile ? {
     id: authProfile.id,
-    username: '',
+    userId: authProfile.id,
+    username: authProfile.username || '',
     email: authProfile.email || '',
     displayName: authProfile.name || authProfile.full_name || authUser?.name || '',
     location: authProfile.location || '',
@@ -64,8 +66,8 @@ const RoutesComponent: React.FC = () => {
     website: authProfile.website || '',
     avatarUrl: authProfile.avatar_url || authProfile.profileImageUrl || '',
     joinedDate: new Date(),
-    // Additional fields for compatibility
     avatar_url: authProfile.avatar_url || authProfile.profileImageUrl || '',
+    phone: authProfile.phone || ''
   } : null;
   
   return (

@@ -24,9 +24,18 @@ export interface UserProfile {
   website?: string;
   avatarUrl?: string;
   joinedDate?: Date;
-  // Additional fields for backward compatibility
+  // Additional fields
   avatar_url?: string;
   name?: string;
   full_name?: string;
   is_verified?: boolean;
+  phone?: string; // Added missing phone field
+}
+
+// Add AuthResult interface that's imported in signin/signup forms
+export interface AuthResult {
+  success: boolean;
+  user?: User;
+  token?: string;
+  error?: string;
 }

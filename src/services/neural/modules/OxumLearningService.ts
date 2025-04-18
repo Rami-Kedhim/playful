@@ -11,3 +11,22 @@ export interface OxumLearningService {
   process: (input: any) => Promise<ProcessingResult>;
   getCulturalContexts: () => Promise<string[]>;
 }
+
+// Export the implementation instance
+export const oxumLearningService: OxumLearningService = {
+  process: async (input: any): Promise<ProcessingResult> => {
+    // Implementation placeholder
+    return {
+      id: `proc-${Date.now()}`,
+      status: 'success',
+      result: { processed: true, input },
+      timestamp: new Date()
+    };
+  },
+  getCulturalContexts: async (): Promise<string[]> => {
+    return [
+      'Western', 'Eastern', 'Middle-Eastern', 'African', 
+      'Latin American', 'Southeast Asian', 'Northern European'
+    ];
+  }
+};

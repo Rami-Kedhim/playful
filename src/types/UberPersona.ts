@@ -2,15 +2,25 @@
 export interface UberPersona {
   id: string;
   name: string;
-  avatar?: string;
-  description?: string;
-  personality?: string;
-  backstory?: string;
-  capabilities?: string[];
-  isAI?: boolean;
-  status?: 'active' | 'inactive' | 'training';
-  createdAt?: Date;
-  updatedAt?: Date;
-  languageModel?: string;
-  personality_traits?: string[];
+  avatarUrl: string;
+  type: 'escort' | 'creator' | 'livecam' | 'ai';
+  tagline?: string;
+  profileType?: string;
+  services?: string[];
+  availability?: {
+    status: 'available' | 'busy' | 'offline';
+    nextAvailable?: string;
+  };
+  features?: {
+    verified: boolean;
+    featured: boolean;
+    premium: boolean;
+  };
+  stats?: {
+    rating: number;
+    reviewCount: number;
+    responseTime?: number;
+  };
+  featured?: boolean;
+  isAI?: boolean; // Added missing property
 }

@@ -1,56 +1,59 @@
 
-/**
- * Convert a value to a Date object
- * @param value - The value to convert (can be string, Date, or undefined)
- * @returns A Date object or undefined
- */
-export const toDate = (value: string | Date | undefined): Date | undefined => {
-  if (!value) return undefined;
-  return value instanceof Date ? value : new Date(value);
+// Calculate expiry date (6 months from creation)
+export const calculateExpiryDate = (createdAt: Date): Date => {
+  const expiryDate = new Date(createdAt);
+  expiryDate.setMonth(expiryDate.getMonth() + 6);
+  return expiryDate;
 };
 
-/**
- * Format a date for displaying in the UI
- * @param date - The date to format (can be string, Date, or undefined)
- * @param format - The format to use (default is local date string)
- * @returns A formatted date string or placeholder
- */
-export const formatDate = (
-  date: string | Date | undefined, 
-  format: 'short' | 'full' | 'relative' = 'full'
-): string => {
-  if (!date) return 'N/A';
+// Calculate days remaining until expiry
+export const calculateDaysRemaining = (expiryDate: Date): number => {
+  const now = new Date();
+  const diffTime = expiryDate.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
+
+// Determine content status based on days remaining
+export const determineContentStatus = (createdAt: Date): 'active' | 'expiring' | 'expired' => {
+  const expiryDate = calculateExpiryDate(createdAt);
+  const daysRemaining = calculateDaysRemaining(expiryDate);
   
-  const dateObj = toDate(date);
-  if (!dateObj) return 'Invalid date';
-  
-  switch (format) {
-    case 'short':
-      return dateObj.toLocaleDateString();
-    case 'full':
-      return dateObj.toLocaleString();
-    case 'relative':
-      return getRelativeTimeString(dateObj);
-    default:
-      return dateObj.toLocaleString();
+  if (daysRemaining <= 0) {
+    return 'expired';
+  } else if (daysRemaining < 30) {
+    return 'expiring';
+  } else {
+    return 'active';
   }
 };
 
-/**
- * Get a relative time string (e.g., "2 days ago")
- */
-const getRelativeTimeString = (date: Date): string => {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
+// Calculate renewal cost based on status
+export const calculateRenewalCost = (status: 'active' | 'expiring' | 'expired', contentType: string = 'standard'): number => {
+  const baseRate = contentType === 'premium' ? 2 : 1;
   
-  if (diffSec < 60) return 'just now';
-  if (diffMin < 60) return `${diffMin} minutes ago`;
-  if (diffHour < 24) return `${diffHour} hours ago`;
-  if (diffDay < 30) return `${diffDay} days ago`;
+  switch (status) {
+    case 'expired':
+      return baseRate * 1.5;
+    case 'expiring':
+      return baseRate * 1.2;
+    default:
+      return baseRate;
+  }
+};
+
+// Convert string date to Date object safely
+export const safelyParseDate = (dateString: string | Date | undefined): Date => {
+  if (!dateString) return new Date();
   
-  return date.toLocaleDateString();
+  if (dateString instanceof Date) {
+    return dateString;
+  }
+  
+  try {
+    return new Date(dateString);
+  } catch (e) {
+    console.error("Error parsing date:", e);
+    return new Date();
+  }
 };

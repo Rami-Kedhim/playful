@@ -50,7 +50,7 @@ export interface Video {
   title: string;
   description?: string;
   thumbnailUrl: string;
-  videoUrl: string;
+  videoUrl: string; // Added missing videoUrl property
   duration: number;
   views: number;
   createdAt: Date;
