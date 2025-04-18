@@ -1,127 +1,174 @@
 
-import React from 'react';
 import { UberPersona } from '@/types/UberPersona';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, Star, MessageCircle, HeartHandshake, Languages } from 'lucide-react';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
+import { Clock, MapPin, Languages, Info, Award, Users, Stars } from 'lucide-react';
 
 interface PersonaAboutTabProps {
   persona: UberPersona;
 }
 
-export const PersonaAboutTab: React.FC<PersonaAboutTabProps> = ({ persona }) => {
-  // Safe access to potentially undefined properties
-  const description = persona.bio || 'No description available';
-  const location = persona.location || 'Location not specified';
+const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
+  // Default placeholder values if properties don't exist
+  const hasDescription = !!persona.description || !!persona.bio;
+  const hasLanguages = Array.isArray(persona.languages) && persona.languages.length > 0;
+  const hasServices = Array.isArray(persona.services) && persona.services.length > 0;
+  const hasTraits = Array.isArray(persona.traits) && persona.traits.length > 0;
   
-  // Handle optional properties with fallbacks
-  const languages = persona.languages || [];
-  const hasLanguages = Array.isArray(languages) && languages.length > 0;
-  
-  const services = persona.services || [];
-  const hasServices = Array.isArray(services) && services.length > 0;
-  
-  const traits = persona.traits || [];
-  const hasTraits = Array.isArray(traits) && traits.length > 0;
-  
-  // Extract statistics
-  const stats = persona.stats || {};
-  const responseTime = stats.responseTime ?? undefined;
-  
+  // Calculate response time display (if available)
+  const responseTime = persona.stats?.responseTime;
+  const responseTimeDisplay = responseTime
+    ? responseTime < 60
+      ? `${responseTime} minutes`
+      : `${Math.floor(responseTime / 60)} hours`
+    : 'Unknown';
+
   return (
     <div className="space-y-6">
+      {/* Verification Status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <VerificationBadge level={persona.isVerified ? 'verified' : 'basic'} size="md" />
+        </div>
+      </div>
+      
       {/* Description */}
-      <div>
-        <h3 className="text-lg font-semibold mb-2">About</h3>
-        <p className="text-muted-foreground">{description}</p>
-      </div>
-      
-      {/* Quick Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Location */}
+      {hasDescription && (
         <Card>
-          <CardContent className="p-4 flex items-center">
-            <MapPin className="h-5 w-5 text-muted-foreground mr-3" />
-            <div>
-              <p className="text-sm font-medium">Location</p>
-              <p className="text-sm text-muted-foreground">{location}</p>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-2 flex items-center">
+              <Info className="w-4 h-4 mr-1 text-muted-foreground" />
+              About
+            </h3>
+            <p className="text-muted-foreground">
+              {persona.description || persona.bio}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Languages */}
+      {hasLanguages && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-2 flex items-center">
+              <Languages className="w-4 h-4 mr-1 text-muted-foreground" />
+              Languages
+            </h3>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {persona.languages?.map((language) => (
+                <Badge variant="outline" key={language}>
+                  {language}
+                </Badge>
+              ))}
             </div>
           </CardContent>
         </Card>
-        
-        {/* Languages */}
-        {hasLanguages && (
-          <Card>
-            <CardContent className="p-4 flex items-center">
-              <Languages className="h-5 w-5 text-muted-foreground mr-3" />
-              <div>
-                <p className="text-sm font-medium">Languages</p>
-                <p className="text-sm text-muted-foreground">
-                  {languages.join(', ')}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        {/* Verification */}
-        <Card>
-          <CardContent className="p-4 flex items-center">
-            <VerificationBadge size="sm" level={persona.verificationLevel || 'basic'} />
-            <div className="ml-3">
-              <p className="text-sm font-medium">Verification</p>
-              <p className="text-sm text-muted-foreground">
-                {persona.verificationLevel ? `${persona.verificationLevel.charAt(0).toUpperCase()}${persona.verificationLevel.slice(1)} verified` : 'Not verified'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Response Time if available */}
-        {responseTime !== undefined && (
-          <Card>
-            <CardContent className="p-4 flex items-center">
-              <Clock className="h-5 w-5 text-muted-foreground mr-3" />
-              <div>
-                <p className="text-sm font-medium">Response Time</p>
-                <p className="text-sm text-muted-foreground">
-                  {typeof responseTime === 'number' && responseTime < 60 
-                    ? `${responseTime} minutes` 
-                    : `${Math.floor((typeof responseTime === 'number' ? responseTime : 0) / 60)} hours`}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-      
+      )}
+
       {/* Services */}
       {hasServices && (
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Services</h3>
-          <div className="flex flex-wrap gap-2">
-            {services.map((service, index) => (
-              <Badge key={index} variant="secondary">{service}</Badge>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-2 flex items-center">
+              <Award className="w-4 h-4 mr-1 text-muted-foreground" />
+              Services
+            </h3>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {persona.services?.map((service) => (
+                <Badge variant="outline" key={service}>
+                  {service}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
       
       {/* Traits/Personality */}
       {hasTraits && (
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Personality Traits</h3>
-          <div className="flex flex-wrap gap-2">
-            {traits.map((trait, index) => {
-              if (typeof trait === 'string') {
-                return <Badge key={index} variant="outline">{trait}</Badge>;
-              }
-              return null;
-            })}
-          </div>
-        </div>
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-2 flex items-center">
+              <Users className="w-4 h-4 mr-1 text-muted-foreground" />
+              Personality Traits
+            </h3>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {persona.traits?.map((trait, index) => (
+                <Badge variant="secondary" key={index}>
+                  {trait}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
+
+      {/* Stats Card */}
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="text-lg font-medium mb-2 flex items-center">
+            <Stars className="w-4 h-4 mr-1 text-muted-foreground" />
+            Stats
+          </h3>
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-sm">Rating</span>
+              <span className="font-medium">{persona.stats?.rating || persona.rating || 'N/A'}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-sm">Reviews</span>
+              <span className="font-medium">{persona.stats?.reviewCount || 0}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-sm">Response Time</span>
+              <span className="font-medium">{responseTimeDisplay}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-sm">Completed Bookings</span>
+              <span className="font-medium">{persona.stats?.bookingCount || 0}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Location */}
+      {persona.location && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-2 flex items-center">
+              <MapPin className="w-4 h-4 mr-1 text-muted-foreground" />
+              Location
+            </h3>
+            <p className="text-muted-foreground">{persona.location}</p>
+            
+            <Button variant="outline" className="mt-4 w-full">
+              View on Map
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Availability */}
+      <Card>
+        <CardContent className="p-4">
+          <h3 className="text-lg font-medium mb-2 flex items-center">
+            <Clock className="w-4 h-4 mr-1 text-muted-foreground" />
+            Availability
+          </h3>
+          <p className="text-muted-foreground">
+            {persona.availability?.nextAvailable || 'Available now'}
+          </p>
+          
+          <Button className="mt-4 w-full">
+            Check Schedule
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
+export default PersonaAboutTab;

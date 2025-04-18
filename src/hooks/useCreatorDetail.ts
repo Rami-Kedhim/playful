@@ -1,10 +1,11 @@
 
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { CreatorContext, Creator } from '@/modules/creators/providers/CreatorProvider';
+import { useCreatorContext } from '@/modules/creators/providers/CreatorProvider';
+import type { Creator } from '@/types/creator';
 
 export function useCreatorDetail() {
-  const context = useContext(CreatorContext);
+  const context = useCreatorContext();
   const { id } = useParams<{ id: string }>();
   
   if (!context) {
@@ -19,6 +20,9 @@ export function useCreatorDetail() {
     creator,
     isLoading,
     error,
-    relatedCreators: context.creators?.filter(c => c.id !== id).slice(0, 3) || []
+    relatedCreators: context.creators?.filter((c: Creator) => c.id !== id).slice(0, 3) || []
   };
 }
+
+// Export as named export
+export default useCreatorDetail;

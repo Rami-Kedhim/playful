@@ -1,306 +1,231 @@
-export const mockEscortProfiles = [
+
+import { Escort } from "@/types/Escort";
+import { Creator } from "@/types/creator";
+import { Livecam } from "@/types/livecam";
+import { v4 as uuidv4 } from "uuid";
+
+// Mock escorts data
+export const mockEscorts: Escort[] = [
   {
-    id: '1',
-    name: 'Alice Wonderland',
+    id: "1",
+    name: "Isabella",
     age: 25,
-    gender: 'female',
-    location: 'New York, USA',
-    bio: 'Friendly and adventurous escort ready to make your dreams come true.',
-    rating: 4.8,
-    price: 300,
-    images: [
-      '/images/escorts/profile1.jpg',
-      '/images/escorts/gallery1.jpg',
-      '/images/escorts/gallery2.jpg'
-    ],
-    services: ['GFE', 'Domination', 'Massage'],
-    isVerified: true,
-    featured: true,
-    contactInfo: {
-      email: 'alice@example.com',
-      phone: '+1 (212) 123-4567',
-      website: 'www.alicewonderland.com'
-    }
-  },
-  {
-    id: '2',
-    name: 'Bob The Builder',
-    age: 32,
-    gender: 'male',
-    location: 'Los Angeles, USA',
-    bio: 'Experienced and professional escort ready to fulfill your desires.',
-    rating: 4.5,
-    price: 250,
-    images: [
-      '/images/escorts/profile2.jpg',
-      '/images/escorts/gallery3.jpg',
-      '/images/escorts/gallery4.jpg'
-    ],
-    services: ['BDSM', 'Roleplay', 'Outcall'],
-    isVerified: false,
-    featured: false,
-    contactInfo: {
-      email: 'bob@example.com',
-      phone: '+1 (310) 234-5678',
-      website: 'www.bobthebuilder.com'
-    }
-  },
-  {
-    id: '3',
-    name: 'Charlie Chaplin',
-    age: 28,
-    gender: 'male',
-    location: 'Chicago, USA',
-    bio: 'Passionate and discreet escort ready to provide unforgettable experiences.',
-    rating: 4.9,
-    price: 350,
-    images: [
-      '/images/escorts/profile3.jpg',
-      '/images/escorts/gallery5.jpg',
-      '/images/escorts/gallery6.jpg'
-    ],
-    services: ['Anal', 'COB', 'Incall'],
-    isVerified: true,
-    featured: true,
-    contactInfo: {
-      email: 'charlie@example.com',
-      phone: '+1 (312) 345-6789',
-      website: 'www.charliechaplin.com'
-    }
-  },
-  {
-    id: '4',
-    name: 'Diana Prince',
-    age: 29,
-    gender: 'female',
-    location: 'Houston, USA',
-    bio: 'Elegant and charming escort ready to cater to your every need.',
-    rating: 4.7,
-    price: 400,
-    images: [
-      '/images/escorts/profile4.jpg',
-      '/images/escorts/gallery7.jpg',
-      '/images/escorts/gallery8.jpg'
-    ],
-    services: ['Deepthroat', 'Fellatio', 'Erotic Massage'],
-    isVerified: false,
-    featured: false,
-    contactInfo: {
-      email: 'diana@example.com',
-      phone: '+1 (713) 456-7890',
-      website: 'www.dianaprince.com'
-    }
-  },
-  {
-    id: '5',
-    name: 'Eve Harrington',
-    age: 31,
-    gender: 'female',
-    location: 'Phoenix, USA',
-    bio: 'Sophisticated and sensual escort ready to indulge your fantasies.',
-    rating: 4.6,
-    price: 300,
-    images: [
-      '/images/escorts/profile5.jpg',
-      '/images/escorts/gallery9.jpg',
-      '/images/escorts/gallery10.jpg'
-    ],
-    services: ['Footjob', 'Bondage', 'Striptease'],
-    isVerified: true,
-    featured: false,
-    contactInfo: {
-      email: 'eve@example.com',
-      phone: '+1 (602) 567-8901',
-      website: 'www.eveharrington.com'
-    }
-  },
-  {
-    id: '6',
-    name: 'Frank Underwood',
-    age: 35,
-    gender: 'male',
-    location: 'Philadelphia, USA',
-    bio: 'Intelligent and discreet escort ready to provide stimulating companionship.',
-    rating: 4.4,
-    price: 200,
-    images: [
-      '/images/escorts/profile6.jpg',
-      '/images/escorts/gallery11.jpg',
-      '/images/escorts/gallery12.jpg'
-    ],
-    services: ['Roleplay', 'BBJ', 'Wax Play'],
-    isVerified: false,
-    featured: false,
-    contactInfo: {
-      email: 'frank@example.com',
-      phone: '+1 (215) 678-9012',
-      website: 'www.frankunderwood.com'
-    }
-  },
-  {
-    id: '7',
-    name: 'Grace Kelly',
-    age: 27,
-    gender: 'female',
-    location: 'San Antonio, USA',
-    bio: 'Elegant and refined escort ready to offer unforgettable moments.',
-    rating: 4.7,
-    price: 380,
-    images: [
-      '/images/escorts/profile7.jpg',
-      '/images/escorts/gallery13.jpg',
-      '/images/escorts/gallery14.jpg'
-    ],
-    services: ['Vanilla Sex', 'Light bondage', 'Teasing'],
-    isVerified: true,
-    featured: false,
-    contactInfo: {
-      email: 'grace@example.com',
-      phone: '+1 (210) 789-0123',
-      website: 'www.gracekelly.com'
-    }
-  },
-  {
-    id: '8',
-    name: 'Hans Gruber',
-    age: 39,
-    gender: 'male',
-    location: 'San Diego, USA',
-    bio: 'Sophisticated and worldly escort ready to provide unique experiences.',
-    rating: 4.6,
-    price: 280,
-    images: [
-      '/images/escorts/profile8.jpg',
-      '/images/escorts/gallery15.jpg',
-      '/images/escorts/gallery16.jpg'
-    ],
-    services: ['COB', 'Watersports', 'Fisting'],
-    isVerified: false,
-    featured: false,
-    contactInfo: {
-      email: 'hans@example.com',
-      phone: '+1 (619) 890-1234',
-      website: 'www.hansgruber.com'
-    }
-  },
-  {
-    id: '9',
-    name: 'Ivy Smith',
-    age: 26,
-    gender: 'female',
-    location: 'Dallas, USA',
-    bio: 'Alluring and passionate escort ready to fulfill your deepest desires.',
-    rating: 4.9,
-    price: 320,
-    images: [
-      '/images/escorts/profile9.jpg',
-      '/images/escorts/gallery17.jpg',
-      '/images/escorts/gallery18.jpg'
-    ],
-    services: ['Grope', 'Kissing', 'Roleplay'],
-    isVerified: true,
-    featured: false,
-    contactInfo: {
-      email: 'ivy@example.com',
-      phone: '+1 (214) 901-2345',
-      website: 'www.ivysmith.com'
-    }
-  },
-  {
-    id: '10',
-    name: 'Jack Torrance',
-    age: 42,
-    gender: 'male',
-    location: 'San Francisco, USA',
-    bio: 'Intense and mysterious escort ready to offer unforgettable encounters.',
-    rating: 4.5,
-    price: 220,
-    images: [
-      '/images/escorts/profile10.jpg',
-      '/images/escorts/gallery19.jpg',
-      '/images/escorts/gallery20.jpg'
-    ],
-    services: ['BDSM', 'Domination', 'Submission'],
-    isVerified: false,
-    featured: false,
-    contactInfo: {
-      email: 'jack@example.com',
-      phone: '+1 (415) 123-4567',
-      website: 'www.jacktorrance.com'
-    }
-  }
-];
-
-// Add export for ProfileProps
-export interface ProfileProps {
-  id: string;
-  name: string;
-  imageUrl: string;
-  location?: string;
-  rating?: number;
-  isPremium?: boolean;
-  price?: number;
-}
-
-// Export featured escorts and creators
-export const featuredEscorts = [
-  // Add mock data for featured escorts
-  {
-    id: "e1",
-    name: "Sophia James",
-    imageUrl: "/images/escorts/profile1.jpg",
     location: "New York",
+    description: "Elegant and sophisticated companion for discerning gentlemen.",
+    services: ["Dinner Date", "Overnight", "Travel Companion"],
+    isVerified: true,
     rating: 4.9,
-    isPremium: true,
-    price: 300
+    price: 500,
+    profileImage: "https://picsum.photos/id/1011/300/400",
+    images: [
+      "https://picsum.photos/id/1011/600/800",
+      "https://picsum.photos/id/1005/600/800",
+      "https://picsum.photos/id/1009/600/800"
+    ],
+    featured: true,
+    serviceType: "in-person",
+    languages: ["English", "Spanish"],
+    reviewCount: 42,
+    ethnicity: "Hispanic"
   },
   {
-    id: "e2",
-    name: "Emma Davis",
-    imageUrl: "/images/escorts/profile2.jpg",
+    id: "2",
+    name: "Sophia",
+    age: 28,
     location: "Los Angeles",
-    rating: 4.8,
-    isPremium: false,
-    price: 250
+    description: "Professional model with a passion for intellectual conversation.",
+    services: ["GFE", "Dinner Date", "Events"],
+    isVerified: true,
+    rating: 4.7,
+    price: 600,
+    profileImage: "https://picsum.photos/id/1027/300/400",
+    images: [
+      "https://picsum.photos/id/1027/600/800",
+      "https://picsum.photos/id/1025/600/800",
+      "https://picsum.photos/id/1024/600/800"
+    ],
+    serviceType: "both",
+    languages: ["English", "French"],
+    reviewCount: 36,
+    ethnicity: "Caucasian"
   },
   {
-    id: "e3",
-    name: "Olivia Wilson",
-    imageUrl: "/images/escorts/profile3.jpg",
+    id: "3",
+    name: "Amara",
+    age: 23,
     location: "Miami",
-    rating: 4.7,
-    isPremium: true,
-    price: 350
+    description: "Vibrant and exotic beauty to brighten your day or night.",
+    services: ["Massage", "Dinner Date", "Role Play"],
+    isVerified: false,
+    rating: 4.5,
+    price: 450,
+    profileImage: "https://picsum.photos/id/1013/300/400",
+    images: [
+      "https://picsum.photos/id/1013/600/800",
+      "https://picsum.photos/id/1014/600/800",
+      "https://picsum.photos/id/1015/600/800"
+    ],
+    serviceType: "in-person",
+    languages: ["English", "Portuguese"],
+    reviewCount: 28,
+    ethnicity: "African"
   }
 ];
 
-export const featuredCreators = [
-  // Add mock data for featured creators
+// Mock creators data
+export const mockCreators: Creator[] = [
   {
-    id: "c1",
-    name: "Mia Thompson",
-    imageUrl: "/images/creators/creator1.jpg",
-    location: "Las Vegas",
+    id: "1",
+    name: "Luna Star",
+    username: "lunastar",
+    bio: "Content creator specializing in fantasy and cosplay photography.",
+    profileImage: "https://picsum.photos/id/1011/300/300",
+    coverImage: "https://picsum.photos/id/1019/1200/400",
+    isVerified: true,
     rating: 4.9,
-    isPremium: true,
-    price: 15
+    subscriberCount: 15000,
+    contentCount: 210,
+    featured: true,
+    tier: "premium",
+    price: 19.99,
+    category: "cosplay",
+    tags: ["cosplay", "fantasy", "photography"],
+    social: {
+      instagram: "lunastar_official",
+      twitter: "reallunastar",
+      tiktok: "lunastar"
+    }
   },
   {
-    id: "c2",
-    name: "Ava Johnson",
-    imageUrl: "/images/creators/creator2.jpg",
-    location: "Chicago",
+    id: "2",
+    name: "Max Vision",
+    username: "maxvision",
+    bio: "Photographer and visual artist creating stunning landscapes and portraits.",
+    profileImage: "https://picsum.photos/id/1012/300/300",
+    coverImage: "https://picsum.photos/id/1018/1200/400",
+    isVerified: true,
     rating: 4.8,
-    isPremium: true,
-    price: 12
+    subscriberCount: 9500,
+    contentCount: 145,
+    featured: false,
+    tier: "standard",
+    price: 9.99,
+    category: "photography",
+    tags: ["photography", "landscape", "portrait"],
+    social: {
+      instagram: "maxvision_photo",
+      twitter: "maxvisionphoto"
+    }
   },
   {
-    id: "c3",
-    name: "Charlotte Brown",
-    imageUrl: "/images/creators/creator3.jpg",
-    location: "Austin",
+    id: "3",
+    name: "Alexa Fitness",
+    username: "alexafitness",
+    bio: "Fitness instructor and nutritionist sharing workouts and healthy recipes.",
+    profileImage: "https://picsum.photos/id/1027/300/300",
+    coverImage: "https://picsum.photos/id/1015/1200/400",
+    isVerified: false,
+    rating: 4.6,
+    subscriberCount: 7800,
+    contentCount: 98,
+    featured: true,
+    tier: "premium",
+    price: 14.99,
+    category: "fitness",
+    tags: ["fitness", "nutrition", "workouts"],
+    social: {
+      instagram: "alexafitofficial",
+      twitter: "alexafit",
+      tiktok: "alexafitness"
+    }
+  }
+];
+
+// Mock livecams data
+export const mockLivecams: Livecam[] = [
+  {
+    id: "1",
+    name: "Jenny Love",
+    username: "jennylove",
+    isLive: true,
+    viewerCount: 1245,
+    tags: ["dance", "chat", "music"],
+    profileImage: "https://picsum.photos/id/1027/300/300",
+    previewImage: "https://picsum.photos/id/1040/600/400",
+    isVerified: true,
+    rating: 4.8,
+    price: 3.99,
+    roomType: "public",
+    languages: ["English", "Spanish"],
+    category: "dance",
+    featured: true
+  },
+  {
+    id: "2",
+    name: "Tina Star",
+    username: "tinastar",
+    isLive: true,
+    viewerCount: 876,
+    tags: ["gaming", "chat", "cosplay"],
+    profileImage: "https://picsum.photos/id/1005/300/300",
+    previewImage: "https://picsum.photos/id/1071/600/400",
+    isVerified: true,
     rating: 4.7,
-    isPremium: false,
-    price: 10
+    price: 2.99,
+    roomType: "public",
+    languages: ["English"],
+    category: "gaming",
+    featured: false
+  },
+  {
+    id: "3",
+    name: "Mike Fitness",
+    username: "mikefitness",
+    isLive: false,
+    viewerCount: 0,
+    tags: ["workout", "fitness", "training"],
+    profileImage: "https://picsum.photos/id/1012/300/300",
+    previewImage: "https://picsum.photos/id/1063/600/400",
+    isVerified: false,
+    rating: 4.5,
+    price: 4.99,
+    roomType: "premium",
+    languages: ["English", "German"],
+    category: "fitness",
+    featured: false,
+    nextStreamTime: "2025-04-19T18:00:00Z"
+  }
+];
+
+// Mock verification data
+export const mockVerificationRequests = [
+  {
+    id: uuidv4(),
+    userId: "user1",
+    username: "isabelle_star",
+    currentLevel: "basic",
+    requestedLevel: "verified",
+    documents: [
+      { type: "id", status: "pending", url: "https://picsum.photos/id/0/300/200" },
+      { type: "selfie", status: "approved", url: "https://picsum.photos/id/1005/300/200" }
+    ],
+    status: "pending",
+    submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    notes: "Waiting for ID verification"
+  },
+  {
+    id: uuidv4(),
+    userId: "user2",
+    username: "alex_model",
+    currentLevel: "verified",
+    requestedLevel: "premium",
+    documents: [
+      { type: "id", status: "approved", url: "https://picsum.photos/id/0/300/200" },
+      { type: "selfie", status: "approved", url: "https://picsum.photos/id/1012/300/200" },
+      { type: "certificate", status: "pending", url: "https://picsum.photos/id/104/300/200" }
+    ],
+    status: "in-progress",
+    submittedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    notes: "Professional certification under review"
   }
 ];

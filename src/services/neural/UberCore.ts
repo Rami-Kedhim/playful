@@ -95,13 +95,13 @@ export class UberCore {
       const processedPersona: UberPersona = { ...persona };
       
       // Add system metadata if not present
-      const metadata = processedPersona.systemMetadata || {};
-      processedPersona.systemMetadata = {
-        ...metadata,
-        version: metadata.version || '1.0',
-        lastUpdated: new Date().toISOString(),
-        personalityIndex: metadata.personalityIndex || Math.random()
-      };
+      if (!processedPersona.systemMetadata) {
+        processedPersona.systemMetadata = {
+          version: '1.0',
+          lastUpdated: new Date().toISOString(),
+          personalityIndex: Math.random()
+        };
+      }
       
       // Process based on persona type
       switch (processedPersona.type) {
@@ -175,3 +175,6 @@ export class UberCore {
     return isPremium || useNeural;
   }
 }
+
+// Export a singleton instance
+export const uberCoreInstance = new UberCore();

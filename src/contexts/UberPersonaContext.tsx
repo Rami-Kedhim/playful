@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
-import { uberCore } from '@/services/neural/UberCore';
+import { UberCore, uberCoreInstance } from '@/services/neural/UberCore';
 
 interface UberPersonaContextType {
   allPersonas: UberPersona[];
@@ -38,26 +37,21 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [initialized, setInitialized] = useState<boolean>(false);
   const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
   
-  // Initialize the UberCore system and populate personas
   useEffect(() => {
     const initSystem = async () => {
       try {
         setLoading(true);
         
-        // Initialize UberCore
-        await uberCore.initialize();
+        await uberCoreInstance.initialize();
         
-        // Map escorts to UberPersonas
         if (escorts && escorts.length > 0) {
           const mappedPersonas = mapEscortsToUberPersonas(escorts);
           setAllPersonas(mappedPersonas);
         }
         
-        // Initialize Hilbert space functionality
         setHilbertSpace({
           dimension: 4,
           getCoordinates: (persona: UberPersona): number[] => {
-            // Generate stable coordinates for the persona in Hilbert space
             const seed = persona.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             return [
               Math.sin(seed * 0.1) * 0.5 + 0.5,
@@ -80,13 +74,11 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     
     initSystem();
     
-    // Cleanup on unmount
     return () => {
-      uberCore.shutdown?.()?.catch(console.error);
+      uberCoreInstance.shutdown?.()?.catch(console.error);
     };
   }, [escorts]);
   
-  // Define filter functions for different persona types
   const getEscorts = () => allPersonas.filter(persona => 
     persona.type === 'escort' || persona.roleFlags?.isEscort
   );
@@ -100,17 +92,14 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   );
   
   const getAIPersonas = () => allPersonas.filter(persona => 
-    persona.type === 'ai' || persona.isAI === true || persona.roleFlags?.isAI
+    persona.type === 'ai' || persona.roleFlags?.isAI || persona.isAI === true
   );
   
-  // Get persona by ID
   const getPersonaById = (id: string): UberPersona | undefined => {
     return allPersonas.find(persona => persona.id === id);
   };
   
-  // Get boosted personas 
   const getBoostedPersonas = (): UberPersona[] => {
-    // In a real app, this would check the active boosts in the database
     return allPersonas.filter(persona => 
       persona.monetization?.boostingActive || 
       persona.roleFlags?.isFeatured || 
@@ -118,24 +107,18 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     );
   };
   
-  // Rank personas using machine learning and boost factors
   const rankPersonas = (personas: UberPersona[], boostFactor = 1.0): UberPersona[] => {
-    // Clone to avoid mutations
     const ranked = [...personas];
     
-    // Apply ranking algorithm with boost factor
     ranked.sort((a, b) => {
-      // Make sure stats exists before accessing its properties
       const aRating = a.stats?.rating || a.rating || 0;
       const aReviewCount = a.stats?.reviewCount || 0;
       const bRating = b.stats?.rating || b.rating || 0;
       const bReviewCount = b.stats?.reviewCount || 0;
       
-      // Base ranking on stats
       let aScore = (aRating * 2) + (aReviewCount / 10);
       let bScore = (bRating * 2) + (bReviewCount / 10);
       
-      // Apply boosting
       if (a.roleFlags?.isFeatured || a.featured) aScore *= boostFactor;
       if (b.roleFlags?.isFeatured || b.featured) bScore *= boostFactor;
       
@@ -145,13 +128,10 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     return ranked;
   };
   
-  // Function to refresh the ecosystem
   const refreshEcosystem = async () => {
     try {
       setLoading(true);
       
-      // In a real app, this would fetch fresh data from API
-      // For demo, we'll just map escorts again
       if (escorts && escorts.length > 0) {
         const mappedPersonas = mapEscortsToUberPersonas(escorts);
         setAllPersonas(mappedPersonas);

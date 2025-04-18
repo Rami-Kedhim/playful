@@ -1,5 +1,5 @@
 
-import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../interfaces/NeuralService';
 
 export class EscortsNeuralService implements NeuralService {
   moduleId: string;
@@ -12,19 +12,18 @@ export class EscortsNeuralService implements NeuralService {
   constructor(moduleId: string) {
     this.moduleId = moduleId;
     this.moduleName = 'Escorts Neural Service';
-    this.description = 'Neural service for escort profile optimization and recommendations';
+    this.description = 'Neural service for escort profile optimization and matching';
     this.config = {
       enabled: true,
       priority: 70,
       autonomyLevel: 60,
-      resourceAllocation: 45,
-      boostingEnabled: true,
-      boostingAlgorithm: 'HermesAlgorithm'
+      resourceAllocation: 50
     };
   }
   
   async initialize(): Promise<boolean> {
     // Initialize service
+    console.log(`Initializing ${this.moduleName} (${this.moduleId})`);
     return true;
   }
   
@@ -38,11 +37,11 @@ export class EscortsNeuralService implements NeuralService {
   
   getCapabilities(): string[] {
     return [
-      'ProfileMatching',
-      'LocationAwareness',
-      'VerificationAssessment',
-      'SafetyMonitoring',
-      'BookingOptimization'
+      'ProfileOptimization',
+      'PersonalityMatching',
+      'PreferenceAnalysis',
+      'BookingRecommendations',
+      'SafetyFiltering'
     ];
   }
 
@@ -59,6 +58,19 @@ export class EscortsNeuralService implements NeuralService {
 
   updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
     this.config = { ...this.config, ...newConfig };
+  }
+
+  getConfig(): Record<string, any> {
+    return {
+      ...this.config,
+      moduleId: this.moduleId,
+      moduleType: this.moduleType,
+      moduleName: this.moduleName
+    };
+  }
+
+  getId(): string {
+    return this.moduleId;
   }
 }
 

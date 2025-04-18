@@ -1,5 +1,6 @@
 
 // Re-export all neural services
+import { NeuralService, NeuralServiceConfig, ModuleType } from './interfaces/NeuralService';
 import { BaseNeuralService } from './modules/BaseNeuralService';
 import { AICompanionNeuralService, aiCompanionNeuralService } from './modules/AICompanionNeuralService';
 import { CreatorsNeuralService, creatorsNeuralService } from './modules/CreatorsNeuralService';
@@ -22,15 +23,8 @@ export {
   escortsNeuralService,
   LivecamsNeuralService,
   livecamsNeuralService,
-  neuralServiceRegistry
-};
-
-// Export types
-export type { 
-  NeuralService, 
-  NeuralServiceConfig 
-} from './interfaces/NeuralService';
-
-export type {
+  neuralServiceRegistry,
+  NeuralService,
+  NeuralServiceConfig,
   ModuleType
-} from './registry/NeuralServiceRegistry';
+};

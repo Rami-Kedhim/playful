@@ -1,5 +1,5 @@
 
-import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../interfaces/NeuralService';
 
 export class CreatorsNeuralService implements NeuralService {
   moduleId: string;
@@ -12,17 +12,18 @@ export class CreatorsNeuralService implements NeuralService {
   constructor(moduleId: string) {
     this.moduleId = moduleId;
     this.moduleName = 'Creators Neural Service';
-    this.description = 'Neural service for content creator optimization and recommendations';
+    this.description = 'Neural service for content creator profiling and content suggestions';
     this.config = {
       enabled: true,
       priority: 60,
-      autonomyLevel: 65,
-      resourceAllocation: 50
+      autonomyLevel: 55,
+      resourceAllocation: 45
     };
   }
   
   async initialize(): Promise<boolean> {
     // Initialize service
+    console.log(`Initializing ${this.moduleName} (${this.moduleId})`);
     return true;
   }
   
@@ -37,9 +38,9 @@ export class CreatorsNeuralService implements NeuralService {
   getCapabilities(): string[] {
     return [
       'ContentAnalysis',
-      'CreatorRecommendation',
       'AudienceInsights',
       'TrendPrediction',
+      'CreativeAssistance',
       'EngagementOptimization'
     ];
   }
@@ -57,6 +58,19 @@ export class CreatorsNeuralService implements NeuralService {
 
   updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
     this.config = { ...this.config, ...newConfig };
+  }
+
+  getConfig(): Record<string, any> {
+    return {
+      ...this.config,
+      moduleId: this.moduleId,
+      moduleType: this.moduleType,
+      moduleName: this.moduleName
+    };
+  }
+
+  getId(): string {
+    return this.moduleId;
   }
 }
 

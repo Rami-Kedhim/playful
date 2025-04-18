@@ -3,7 +3,7 @@ import { UberPersona } from './UberPersona';
 
 export interface UberCoreSettings {
   boostingEnabled: boolean;
-  boostingAlgorithm: "OxumAlgorithm" | "HermesAlgorithm" | "StandardAlgorithm";
+  boostingAlgorithm: string;
   orderByBoost: boolean;
   autonomyLevel: number;
   resourceAllocation: number;
@@ -18,17 +18,41 @@ export interface UberSearchFilters {
   maxPrice?: number;
   isVerified?: boolean;
   tags?: string[];
-  [key: string]: any;
+  languages?: string[];
 }
 
-export interface UberCoreService {
-  initialize(): Promise<boolean>;
-  shutdown(): Promise<boolean>;
-  searchPersonas(filters: UberSearchFilters): UberPersona[];
-  findNearestNeighbors(personaId: string, count?: number): UberPersona[];
-  getPersonaById(id: string): UberPersona | undefined;
-  getSettings(): UberCoreSettings;
-  updateSettings(settings: Partial<UberCoreSettings>): void;
-  convertToUberPersona(input: any): UberPersona;
-  getMetrics(): Record<string, any>;
+export interface PersonaMatch {
+  persona: UberPersona;
+  score: number;
+}
+
+export interface PersonaGroup {
+  id: string;
+  name: string;
+  personas: UberPersona[];
+  description?: string;
+}
+
+export interface UberBoostSettings {
+  active: boolean;
+  level: number;
+  duration: number;
+  startTime: string;
+  endTime: string;
+}
+
+export interface UberInteraction {
+  userId: string;
+  personaId: string;
+  interactionType: string;
+  timestamp: string;
+  metadata: Record<string, any>;
+}
+
+export interface UberMetrics {
+  viewCount: number;
+  interactionRate: number;
+  conversionRate: number;
+  engagementScore: number;
+  boostEffectiveness: number;
 }

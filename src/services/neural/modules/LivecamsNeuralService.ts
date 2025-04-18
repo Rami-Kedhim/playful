@@ -1,5 +1,5 @@
 
-import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../interfaces/NeuralService';
 
 export class LivecamsNeuralService implements NeuralService {
   moduleId: string;
@@ -57,6 +57,19 @@ export class LivecamsNeuralService implements NeuralService {
 
   updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
     this.config = { ...this.config, ...newConfig };
+  }
+
+  getConfig(): Record<string, any> {
+    return {
+      ...this.config,
+      moduleId: this.moduleId,
+      moduleType: this.moduleType,
+      moduleName: this.moduleName
+    };
+  }
+
+  getId(): string {
+    return this.moduleId;
   }
 }
 

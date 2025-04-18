@@ -1,5 +1,5 @@
 
-import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../interfaces/NeuralService';
 
 export class AICompanionNeuralService implements NeuralService {
   moduleId: string;
@@ -12,17 +12,18 @@ export class AICompanionNeuralService implements NeuralService {
   constructor(moduleId: string) {
     this.moduleId = moduleId;
     this.moduleName = 'AI Companion Neural Service';
-    this.description = 'Advanced neural service for AI companion personality and interaction';
+    this.description = 'Neural service for AI companion personality modeling and interaction';
     this.config = {
       enabled: true,
       priority: 80,
       autonomyLevel: 90,
-      resourceAllocation: 60
+      resourceAllocation: 70
     };
   }
   
   async initialize(): Promise<boolean> {
     // Initialize service
+    console.log(`Initializing ${this.moduleName} (${this.moduleId})`);
     return true;
   }
   
@@ -36,12 +37,12 @@ export class AICompanionNeuralService implements NeuralService {
   
   getCapabilities(): string[] {
     return [
-      'NaturalLanguageProcessing',
-      'EmotionalIntelligence',
-      'PersonalityModeling',
-      'MemoryManagement',
-      'BehavioralAdaption',
-      'VoiceSynthesis'
+      'PersonalitySimulation',
+      'ConversationalModeling',
+      'EmotionalResponse',
+      'MemoryManager',
+      'UserPreferenceAdaptation',
+      'BehavioralLearning'
     ];
   }
 
@@ -58,6 +59,19 @@ export class AICompanionNeuralService implements NeuralService {
 
   updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
     this.config = { ...this.config, ...newConfig };
+  }
+
+  getConfig(): Record<string, any> {
+    return {
+      ...this.config,
+      moduleId: this.moduleId,
+      moduleType: this.moduleType,
+      moduleName: this.moduleName
+    };
+  }
+
+  getId(): string {
+    return this.moduleId;
   }
 }
 

@@ -1,115 +1,103 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { LivecamsNeuralService, livecamsNeuralService } from '@/services/neural';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { Livecam } from '@/types/livecam';
+import { mockLivecams } from '@/data/mockData';
+import { livecamsNeuralService } from '@/services/neural';
 
-// Define the Livecam type
-export interface Livecam {
-  id: string;
-  performerId: string;
-  performerName: string;
-  streamTitle: string;
-  thumbnailUrl: string;
-  isLive: boolean;
-  viewerCount: number;
-  tags: string[];
-  startTime: string;
-  category: string;
-  price: number;
-  isPremium: boolean;
-}
-
-// Create the context
-interface LivecamContextProps {
+// Context type definition
+interface LivecamContextType {
   livecams: Livecam[];
   loading: boolean;
   error: string | null;
+  featuredLivecams: Livecam[];
+  liveLivecams: Livecam[];
+  getLivecamById: (id: string) => Livecam | undefined;
+  refreshLivecams: () => Promise<void>;
 }
 
-export const LivecamContext = createContext<LivecamContextProps | null>(null);
-
-// Mock data for development
-const MOCK_LIVECAMS: Livecam[] = [
-  {
-    id: 'live-1',
-    performerId: 'performer-1',
-    performerName: 'Jessica',
-    streamTitle: 'Tuesday Vibes',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
-    isLive: true,
-    viewerCount: 245,
-    tags: ['dance', 'music'],
-    startTime: new Date().toISOString(),
-    category: 'entertainment',
-    price: 0,
-    isPremium: false
-  },
-  {
-    id: 'live-2',
-    performerId: 'performer-2',
-    performerName: 'Amanda',
-    streamTitle: 'Private Show',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04',
-    isLive: true,
-    viewerCount: 89,
-    tags: ['private', 'exclusive'],
-    startTime: new Date().toISOString(),
-    category: 'premium',
-    price: 20,
-    isPremium: true
-  }
-];
+// Create the context
+const LivecamContext = createContext<LivecamContextType | undefined>(undefined);
 
 // Provider component
-interface LivecamProviderProps {
-  children: React.ReactNode;
-}
-
-const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) => {
+export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [livecams, setLivecams] = useState<Livecam[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Initialize and fetch livecams
+  // Load initial livecam data
   useEffect(() => {
-    const fetchLivecams = async () => {
+    const loadLivecams = async () => {
       try {
         setLoading(true);
         
+        // Initialize neural service
+        await livecamsNeuralService.initialize();
+        
         // In a real app, this would be an API call
-        // For now, we'll use our mock data
-        setLivecams(MOCK_LIVECAMS);
-        
-        // Initialize neural service if needed
-        livecamsNeuralService.configure({ enabled: true });
-        
+        // For now, use mock data
+        setLivecams(mockLivecams);
         setError(null);
-      } catch (err) {
-        console.error('Failed to fetch livecams:', err);
-        setError('Failed to load livestreams. Please try again later.');
+      } catch (err: any) {
+        setError(err.message || 'Failed to load livecams');
+        console.error('Error loading livecams:', err);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchLivecams();
+    loadLivecams();
   }, []);
   
-  // Context value
-  const value = {
+  // Get featured livecams
+  const getFeaturedLivecams = () => {
+    return livecams.filter(livecam => livecam.featured);
+  };
+  
+  // Get currently live livecams
+  const getLiveLivecams = () => {
+    return livecams.filter(livecam => livecam.isLive);
+  };
+  
+  // Get livecam by ID
+  const getLivecamById = (id: string) => {
+    return livecams.find(livecam => livecam.id === id);
+  };
+  
+  // Refresh livecams data
+  const refreshLivecams = async () => {
+    try {
+      setLoading(true);
+      // In a real app, this would be an API call
+      // For now, just reset with mock data
+      setLivecams(mockLivecams);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to refresh livecams');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Prepare context value
+  const contextValue: LivecamContextType = {
     livecams,
     loading,
-    error
+    error,
+    featuredLivecams: getFeaturedLivecams(),
+    liveLivecams: getLiveLivecams(),
+    getLivecamById,
+    refreshLivecams
   };
   
   return (
-    <LivecamContext.Provider value={value}>
+    <LivecamContext.Provider value={contextValue}>
       {children}
     </LivecamContext.Provider>
   );
 };
 
-// Custom hook
-export const useLivecamContext = () => {
+// Custom hook to use the livecam context
+export const useLivecamContext = (): LivecamContextType => {
   const context = useContext(LivecamContext);
   if (!context) {
     throw new Error('useLivecamContext must be used within a LivecamProvider');
@@ -117,4 +105,4 @@ export const useLivecamContext = () => {
   return context;
 };
 
-export default LivecamProvider;
+export { LivecamContext };

@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import { UberCoreSettings, UberSearchFilters } from '@/types/uber-ecosystem';
-import { uberCore } from '@/services/neural';
+import { uberCoreInstance } from '@/services/neural/UberCore';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { toast } from '@/components/ui/use-toast';
 
@@ -68,7 +67,7 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
         setIsLoading(true);
         
         // Initialize UberCore
-        const initialized = await uberCore.initialize();
+        const initialized = await uberCoreInstance.initialize();
         
         if (initialized) {
           setIsInitialized(true);
@@ -111,7 +110,7 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
     
     // Cleanup on unmount
     return () => {
-      uberCore.shutdown().catch(console.error);
+      uberCoreInstance.shutdown().catch(console.error);
     };
   }, [escorts]);
   
@@ -125,12 +124,19 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
       avatarUrl: escort.profileImage || escort.images?.[0],
       imageUrl: escort.images?.[0],
       bio: escort.description || escort.bio,
+      description: escort.description || escort.bio,
       location: escort.location,
       age: escort.age,
       ethnicity: escort.ethnicity,
       isVerified: escort.isVerified || false,
       isActive: escort.isActive || true,
+      isAI: false,
+      isPremium: escort.isPremium || false,
+      isOnline: escort.isOnline || false,
       rating: escort.rating,
+      languages: escort.languages || [],
+      services: escort.services || [],
+      traits: escort.traits || [],
       tags: escort.tags || [],
       featured: escort.featured || false,
       roleFlags: {
@@ -154,6 +160,14 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
         hasRealMeets: true,
         hasVirtualMeets: false
       },
+      stats: {
+        rating: escort.rating || 0,
+        reviewCount: escort.reviewCount || 0,
+        viewCount: escort.viewCount || 0,
+        favoriteCount: escort.favoriteCount || 0,
+        bookingCount: escort.bookingCount || 0,
+        responseTime: escort.responseTime || 30
+      },
       monetization: {
         acceptsLucoin: true,
         acceptsTips: true,
@@ -162,7 +176,21 @@ export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ child
         boostingActive: escort.featured || false,
         meetingPrice: escort.price || 0
       },
-      price: escort.price || 0
+      price: escort.price || 0,
+      availability: {
+        schedule: escort.availability || {},
+        nextAvailable: escort.nextAvailable || 'Available now'
+      },
+      systemMetadata: {
+        version: '1.0',
+        lastUpdated: new Date().toISOString(),
+        personalityIndex: Math.random(),
+        statusFlags: {
+          needsModeration: false,
+          isPromoted: escort.featured || false,
+          isArchived: false
+        }
+      }
     };
   };
   

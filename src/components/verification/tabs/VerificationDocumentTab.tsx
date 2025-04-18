@@ -1,127 +1,210 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Upload, FilePlus, FileCheck } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { toast } from '@/hooks/use-toast';
+import { Trash, Upload, FileCheck, AlertCircle } from 'lucide-react';
 
 interface VerificationDocumentTabProps {
   userId: string;
-  currentLevel: 'basic' | 'advanced' | 'premium';
-  onUpload?: (files: FileList) => Promise<boolean>;
-  isSubmitting: boolean;
 }
 
-const VerificationDocumentTab: React.FC<VerificationDocumentTabProps> = ({ 
-  userId, 
-  currentLevel,
-  onUpload,
-  isSubmitting
-}) => {
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const VerificationDocumentTab: React.FC<VerificationDocumentTabProps> = ({ userId }) => {
+  const [idDocument, setIdDocument] = useState<File | null>(null);
+  const [selfieDocument, setSelfieDocument] = useState<File | null>(null);
+  const [additionalDocument, setAdditionalDocument] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setFile: (file: File | null) => void) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFiles(e.target.files);
-      setUploadSuccess(false);
+      setFile(e.target.files[0]);
     }
   };
-  
+
+  const handleRemoveFile = (setFile: (file: File | null) => void) => {
+    setFile(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedFiles && onUpload) {
-      const success = await onUpload(selectedFiles);
-      if (success) {
-        setUploadSuccess(true);
-        setSelectedFiles(null);
-      }
+    
+    if (!idDocument || !selfieDocument) {
+      toast({
+        title: "Required documents missing",
+        description: "Please upload your ID and selfie with ID to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setIsUploading(true);
+      
+      // In a real app, you would upload these files to your backend
+      // For demo purpose, we'll just simulate a delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Documents uploaded successfully",
+        description: "Your verification documents have been submitted for review.",
+      });
+      
+      // Reset form
+      setIdDocument(null);
+      setSelfieDocument(null);
+      setAdditionalDocument(null);
+      
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your documents. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
-  
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Upload Verification Documents</h3>
-      
-      <p className="text-sm text-muted-foreground">
-        Please upload clear, high-quality images of your identification documents to process your verification.
-      </p>
-      
-      <form onSubmit={handleSubmit}>
-        <Card className="border-dashed border-2 bg-muted/50 hover:bg-muted/80 transition-colors cursor-pointer">
-          <CardContent className="p-6 text-center">
-            <input
-              type="file"
-              id="document-upload"
-              multiple
-              onChange={handleFileChange}
-              className="hidden"
-              accept="image/*,.pdf"
-              disabled={isSubmitting}
-            />
-            
-            <label htmlFor="document-upload" className="cursor-pointer block">
-              {selectedFiles ? (
-                <div className="flex flex-col items-center">
-                  <FileCheck className="h-12 w-12 text-primary mb-2" />
-                  <p className="font-medium">{selectedFiles.length} file(s) selected</p>
-                  <p className="text-sm text-muted-foreground">Click to change</p>
-                </div>
-              ) : uploadSuccess ? (
-                <div className="flex flex-col items-center">
-                  <div className="rounded-full bg-green-100 p-3 mb-2">
-                    <FileCheck className="h-8 w-8 text-green-600" />
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Identity Verification Documents</CardTitle>
+            <CardDescription>
+              Upload the required documents to verify your identity. All documents must be clear and legible.
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="idDocument" className="font-medium">Government-issued ID (Required)</Label>
+              <div className="flex items-center justify-between p-3 border border-dashed rounded-lg">
+                <input
+                  type="file"
+                  id="idDocument"
+                  className="hidden"
+                  accept="image/jpeg,image/png,application/pdf"
+                  onChange={(e) => handleFileChange(e, setIdDocument)}
+                />
+                
+                {idDocument ? (
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                      <FileCheck className="w-5 h-5 text-primary mr-2" />
+                      <span className="text-sm truncate max-w-[200px]">{idDocument.name}</span>
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleRemoveFile(setIdDocument)}
+                    >
+                      <Trash className="w-4 h-4 text-destructive" />
+                    </Button>
                   </div>
-                  <p className="font-medium text-green-600">Documents uploaded successfully</p>
-                  <p className="text-sm text-muted-foreground">Click to upload more</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <FilePlus className="h-12 w-12 text-muted-foreground mb-2" />
-                  <p className="font-medium">Drop files here or click to upload</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Upload ID card, passport, or driver's license
-                  </p>
-                </div>
-              )}
-            </label>
+                ) : (
+                  <label 
+                    htmlFor="idDocument" 
+                    className="flex items-center justify-center w-full py-2 cursor-pointer"
+                  >
+                    <Upload className="w-5 h-5 text-muted-foreground mr-2" />
+                    <span className="text-sm text-muted-foreground">Upload ID (passport, driver's license)</span>
+                  </label>
+                )}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="selfieDocument" className="font-medium">Selfie with ID (Required)</Label>
+              <div className="flex items-center justify-between p-3 border border-dashed rounded-lg">
+                <input
+                  type="file"
+                  id="selfieDocument"
+                  className="hidden"
+                  accept="image/jpeg,image/png"
+                  onChange={(e) => handleFileChange(e, setSelfieDocument)}
+                />
+                
+                {selfieDocument ? (
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                      <FileCheck className="w-5 h-5 text-primary mr-2" />
+                      <span className="text-sm truncate max-w-[200px]">{selfieDocument.name}</span>
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleRemoveFile(setSelfieDocument)}
+                    >
+                      <Trash className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label 
+                    htmlFor="selfieDocument" 
+                    className="flex items-center justify-center w-full py-2 cursor-pointer"
+                  >
+                    <Upload className="w-5 h-5 text-muted-foreground mr-2" />
+                    <span className="text-sm text-muted-foreground">Upload selfie holding your ID</span>
+                  </label>
+                )}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="additionalDocument" className="font-medium">Additional Document (Optional)</Label>
+              <div className="flex items-center justify-between p-3 border border-dashed rounded-lg">
+                <input
+                  type="file"
+                  id="additionalDocument"
+                  className="hidden"
+                  accept="image/jpeg,image/png,application/pdf"
+                  onChange={(e) => handleFileChange(e, setAdditionalDocument)}
+                />
+                
+                {additionalDocument ? (
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                      <FileCheck className="w-5 h-5 text-primary mr-2" />
+                      <span className="text-sm truncate max-w-[200px]">{additionalDocument.name}</span>
+                    </div>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleRemoveFile(setAdditionalDocument)}
+                    >
+                      <Trash className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label 
+                    htmlFor="additionalDocument" 
+                    className="flex items-center justify-center w-full py-2 cursor-pointer"
+                  >
+                    <Upload className="w-5 h-5 text-muted-foreground mr-2" />
+                    <span className="text-sm text-muted-foreground">Upload additional supporting document</span>
+                  </label>
+                )}
+              </div>
+            </div>
           </CardContent>
+          
+          <CardFooter className="flex-col space-y-2">
+            <div className="flex items-start text-sm text-muted-foreground">
+              <AlertCircle className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+              <p>Your documents are securely stored and only used for verification purposes. They will be deleted after verification is complete.</p>
+            </div>
+            <Button type="submit" className="w-full" disabled={isUploading}>
+              {isUploading ? "Uploading..." : "Submit Documents"}
+            </Button>
+          </CardFooter>
         </Card>
-        
-        {selectedFiles && (
-          <Button 
-            type="submit" 
-            className="mt-4 w-full"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload Documents
-              </>
-            )}
-          </Button>
-        )}
-      </form>
-      
-      <div className="bg-muted p-4 rounded-md text-sm">
-        <h4 className="font-medium">Document Requirements:</h4>
-        <ul className="list-disc list-inside mt-2 space-y-1">
-          <li>Government-issued identification (passport, driver's license, ID card)</li>
-          <li>Image must be clear and not blurry</li>
-          <li>All corners of the document must be visible</li>
-          <li>File size must be under 5MB</li>
-          <li>Acceptable formats: JPG, PNG, PDF</li>
-        </ul>
       </div>
-    </div>
+    </form>
   );
 };
 

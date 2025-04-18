@@ -1,21 +1,5 @@
 
-import { ModuleType } from "../registry/NeuralServiceRegistry";
-
-// Define the configuration for a neural service
-export interface NeuralServiceConfig {
-  moduleId: string;
-  moduleType: ModuleType;
-  moduleName: string;
-  description: string;
-  version: string;
-  enabled: boolean;
-  priority: number;
-  resourceAllocation: number;
-  autonomyLevel: number;
-  boostingEnabled?: boolean;
-}
-
-// Define the interface for a neural service
+// Neural Service interface
 export interface NeuralService {
   moduleId: string;
   moduleType: ModuleType;
@@ -23,33 +7,25 @@ export interface NeuralService {
   description: string;
   version: string;
   config: NeuralServiceConfig;
+  
   initialize(): Promise<boolean>;
-  configure(options: Record<string, any>): void;
-  updateConfig(config: Partial<NeuralServiceConfig>): void;
-  isEnabled(): boolean;
   getCapabilities(): string[];
+  configure(options: Record<string, any>): void;
   getMetrics(): Record<string, any>;
+  isEnabled(): boolean;
+  getConfig(): Record<string, any>;
+  updateConfig(config: Partial<NeuralServiceConfig>): void;
   shutdown?(): Promise<boolean>;
 }
 
-// Singleton registry for neural services
-export class NeuralServiceRegistry {
-  private services: Map<string, NeuralService> = new Map();
-  
-  public registerService(service: NeuralService): boolean {
-    if (this.services.has(service.moduleId)) {
-      return false;
-    }
-    
-    this.services.set(service.moduleId, service);
-    return true;
-  }
-  
-  public getService(moduleId: string): NeuralService | undefined {
-    return this.services.get(moduleId);
-  }
-  
-  public getAllServices(): NeuralService[] {
-    return Array.from(this.services.values());
-  }
+// Neural Service Configuration interface
+export interface NeuralServiceConfig {
+  priority: number;
+  autonomyLevel: number;
+  enabled: boolean;
+  resourceAllocation?: number;
+  boostingEnabled?: boolean;
 }
+
+// Module types
+export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion';
