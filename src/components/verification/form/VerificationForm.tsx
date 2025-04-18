@@ -6,10 +6,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
+import * as z from 'zod';
 import { 
-  VerificationFormValues, 
-  verificationFormSchema, 
   DocumentType,
+  VerificationFormValues
 } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentUploadHandler from './DocumentUploadHandler';
@@ -19,6 +19,26 @@ import SuccessCard from './SuccessCard';
 
 // Defining a constant for ID_CARD to replace the imported one
 const ID_CARD = 'id_card';
+
+// Define schema
+const verificationFormSchema = z.object({
+  documentType: z.string(),
+  documentFile: z.any().refine(val => val instanceof File, { message: "Document file is required" }),
+  selfieFile: z.any().optional().refine(val => val === undefined || val instanceof File, { message: "Invalid selfie file" }),
+  consentChecked: z.boolean().refine(val => val === true, { message: "You must agree to the terms" }),
+  documentFrontImage: z.object({
+    file: z.any(),
+    preview: z.string()
+  }).optional(),
+  documentBackImage: z.object({
+    file: z.any(),
+    preview: z.string()
+  }).optional(),
+  selfieImage: z.object({
+    file: z.any(),
+    preview: z.string()
+  }).optional()
+});
 
 interface VerificationFormProps {
   onSubmit?: (data: VerificationFormValues) => void;
@@ -46,7 +66,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: ID_CARD as DocumentType,
+      documentType: ID_CARD,
       documentFile: undefined as unknown as File,
       selfieFile: undefined as unknown as File,
       consentChecked: false,

@@ -6,12 +6,38 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { VerificationFormValues, DocumentType, ID_CARD, verificationFormSchema, DOCUMENT_TYPES } from '@/types/verification';
+import { DocumentType } from '@/types/verification';
 import DocumentTypeSelect from './form/DocumentTypeSelect';
 import DocumentUploadHandler from './form/DocumentUploadHandler';
 import SubmitButton from './form/SubmitButton';
 import SubmissionAlert from './form/SubmissionAlert';
 import SuccessCard from './form/SuccessCard';
+import * as z from 'zod';
+
+const ID_CARD = 'id_card';
+
+// Define document type schema first
+const verificationFormSchema = z.object({
+  documentType: z.string(),
+  documentFile: z.any().refine(val => val instanceof File, { message: "Document file is required" }),
+  selfieFile: z.any().optional().refine(val => val === undefined || val instanceof File, { message: "Invalid selfie file" }),
+  consentChecked: z.boolean().refine(val => val === true, { message: "You must agree to the terms" }),
+  documentFrontImage: z.object({
+    file: z.any(),
+    preview: z.string()
+  }).optional(),
+  documentBackImage: z.object({
+    file: z.any(),
+    preview: z.string()
+  }).optional(),
+  selfieImage: z.object({
+    file: z.any(),
+    preview: z.string()
+  }).optional()
+});
+
+// Define types based on the schema
+export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
 
 interface VerificationFormProps {
   onSubmit?: (data: VerificationFormValues) => void;
@@ -34,7 +60,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
-  const [documentType, setDocumentType] = useState<DocumentType>(ID_CARD);
+  const [documentType, setDocumentType] = useState<DocumentType>(ID_CARD as DocumentType);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
@@ -145,13 +171,19 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
             
             <DocumentUploadHandler
               label="Front of ID Document"
-              onFileSelect={(file) => form.setValue('documentFile', file)}
+              onFileSelect={(file) => {
+                form.setValue('documentFile', file);
+                form.setValue('documentFrontImage', { file, preview: URL.createObjectURL(file) });
+              }}
               error={form.formState.errors.documentFile?.message?.toString()}
             />
             
             <DocumentUploadHandler
               label="Selfie with ID"
-              onFileSelect={(file) => form.setValue('selfieFile', file)}
+              onFileSelect={(file) => {
+                form.setValue('selfieFile', file);
+                form.setValue('selfieImage', { file, preview: URL.createObjectURL(file) });
+              }}
               error={form.formState.errors.selfieFile?.message?.toString()}
             />
 

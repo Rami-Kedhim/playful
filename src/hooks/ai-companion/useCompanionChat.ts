@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAIVoice } from '@/components/ai/AIVoiceProvider';
 import { useAI } from '@/contexts/AIContext';
-import { useUserAIContext } from '@/hooks/useUserAIContext';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { toast } from 'sonner';
 import { AIAnalyticsService } from '@/services/ai/aiAnalyticsService';
 
@@ -31,7 +31,7 @@ export function useCompanionChat({
 }: UseCompanionChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const { isAuthenticated, user } = useUserAIContext();
+  const { user, isAuthenticated } = useAuth();
   const { speak, stopSpeaking, isPlaying, isMuted, toggleMute } = useAIVoice();
   const { trackInteraction, setCurrentCompanion } = useAI();
 

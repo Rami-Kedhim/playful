@@ -23,11 +23,13 @@ export interface User {
   avatar_url?: string;
   app_metadata?: Record<string, any>;
   created_at?: string;
+  // Added missing properties
   name?: string;
   phone_number?: string;
   location?: string;
   bio?: string;
   gender?: string;
+  full_name?: string;
 }
 
 export interface AuthUser extends User {
@@ -59,7 +61,12 @@ export interface UserProfile {
   ubx_balance?: number;
   verificationLevel?: string;
   profileImageUrl?: string;
-  gender?: string; // Add gender field
+  gender?: string;
+  // Added missing properties
+  sexual_orientation?: string;
+  is_boosted?: boolean;
+  isBoosted?: boolean;
+  lucoinsBalance?: number;
 }
 
 export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';

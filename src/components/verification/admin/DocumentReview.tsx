@@ -7,9 +7,14 @@ import { VerificationDocument } from '@/types/verification';
 
 interface DocumentReviewProps {
   document: VerificationDocument;
+  isOpen?: boolean;
+  onClose?: () => void;
+  verification?: any;
+  onApprove?: () => Promise<void>;
+  onReject?: (reason: any) => Promise<void>;
 }
 
-const DocumentReview = ({ document }: DocumentReviewProps) => {
+const DocumentReview = ({ document, isOpen, onClose, verification, onApprove, onReject }: DocumentReviewProps) => {
   // Format document type for display
   const formatDocumentType = (type: string) => {
     return type
@@ -19,7 +24,9 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
   
   const documentType = document.documentType || document.document_type || document.type || 'Unknown';
   const imageUrl = document.fileUrl || document.file_url || document.url || document.document_url || '';
-  const uploadedAt = document.uploadedAt || document.uploaded_at || document.created_at || new Date().toISOString();
+  
+  // Handle date timestamp with backward compatibility
+  const uploadDate = document.uploadedAt || document.uploaded_at || document.created_at || new Date().toISOString();
 
   return (
     <Card>
@@ -30,7 +37,7 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
             {formatDocumentType(documentType)}
           </span>
           <Badge variant="outline" className="ml-2">
-            {new Date(uploadedAt).toLocaleDateString()}
+            {new Date(uploadDate).toLocaleDateString()}
           </Badge>
         </CardTitle>
       </CardHeader>

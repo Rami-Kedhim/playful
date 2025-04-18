@@ -16,11 +16,21 @@ export const escortData: Escort[] = [
     services: ["Dinner Date", "Event Companion", "Travel Companion"],
     isVerified: true,
     featured: true,
+    isAI: false,
+    profileType: "verified",
+    boostLevel: 0,
     contactInfo: {
       email: "sofia@example.com",
       phone: "+1234567890",
       website: "https://example.com/sofia"
-    }
+    },
+    rates: {
+      hourly: 300,
+      twoHours: 550,
+      overnight: 1500,
+      weekend: 3000
+    },
+    gallery_images: ["/assets/escorts/profile1.jpg", "/assets/escorts/profile1-2.jpg", "/assets/escorts/profile1-3.jpg"]
   },
   {
     id: "2",
@@ -35,11 +45,21 @@ export const escortData: Escort[] = [
     services: ["Dinner Date", "Personal Training", "Event Companion"],
     isVerified: true,
     featured: false,
+    isAI: false,
+    profileType: "verified",
+    boostLevel: 0,
     contactInfo: {
       email: "marcus@example.com",
       phone: "+1234567891",
       website: "https://example.com/marcus"
-    }
+    },
+    rates: {
+      hourly: 280,
+      twoHours: 520,
+      overnight: 1400,
+      weekend: 2800
+    },
+    gallery_images: ["/assets/escorts/profile2.jpg", "/assets/escorts/profile2-2.jpg"]
   },
 ];
 
@@ -56,5 +76,19 @@ export const getEscortById = (id: string): Escort | undefined => {
 
 // Export escorts array for direct import
 export const escorts = escortData;
+
+// Add these exports to fix references to generateRandomEscorts and generateRandomEscort
+export const generateRandomEscorts = (count: number): Escort[] => {
+  // For simplicity, we'll return our existing escorts, duplicating if needed
+  const result: Escort[] = [];
+  while (result.length < count) {
+    result.push(...escortData.slice(0, Math.min(count - result.length, escortData.length)));
+  }
+  return result;
+};
+
+export const generateRandomEscort = (): Escort => {
+  return getRandomEscortProfile();
+};
 
 export default escortData;

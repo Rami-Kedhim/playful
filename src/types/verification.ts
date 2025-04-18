@@ -56,7 +56,7 @@ export interface VerificationRequest {
   rejectionReason?: string;
   reviewer_notes?: string; // For backward compatibility
   reviewedAt?: string;
-  userId?: string;
+  userId?: string; // Add userId property
   user_id?: string;
   profile_id?: string;
   createdAt?: string;
@@ -78,19 +78,19 @@ import * as z from 'zod';
 
 export const verificationFormSchema = z.object({
   documentType: z.string(),
-  documentFile: z.instanceof(File, { message: "Document file is required" }),
-  selfieFile: z.instanceof(File, { message: "Selfie is required" }).optional(),
+  documentFile: z.any().refine(val => val instanceof File, { message: "Document file is required" }),
+  selfieFile: z.any().optional().refine(val => val === undefined || val instanceof File, { message: "Invalid selfie file" }),
   consentChecked: z.boolean().refine(val => val === true, { message: "You must agree to the terms" }),
   documentFrontImage: z.object({
-    file: z.instanceof(File),
+    file: z.any(),
     preview: z.string()
   }).optional(),
   documentBackImage: z.object({
-    file: z.instanceof(File),
+    file: z.any(),
     preview: z.string()
   }).optional(),
   selfieImage: z.object({
-    file: z.instanceof(File),
+    file: z.any(),
     preview: z.string()
   }).optional()
 });
