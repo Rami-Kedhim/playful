@@ -1,73 +1,101 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { VerificationRequest, VerificationLevel } from '@/types/verification';
+import { VerificationRequest, VerificationDocument, DocumentType } from '@/types/verification';
+import { VerificationService } from '@/services/verificationService';
 
-export interface UseVerificationStatusResult {
-  verificationRequest: VerificationRequest | null;
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
-
-// Mock verification request data
-const mockVerificationRequest: VerificationRequest = {
-  id: 'ver-123456',
-  userId: 'user-123',
-  status: 'pending',
-  documentType: 'id_card',
-  created_at: new Date(),
-  updated_at: new Date(),
-  level: VerificationLevel.BASIC,
-  requested_level: VerificationLevel.STANDARD,
-  rejection_reason: null,
-  // Add both formats to support different components
-  rejectionReason: null,
-  reviewer_notes: null,
-  reviewerNotes: null,
-  reviewedAt: null
-};
-
-export const useVerificationStatus = (): UseVerificationStatusResult => {
-  const { user } = useAuth();
-  const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export const useVerificationStatus = (userId: string) => {
+  const [loading, setLoading] = useState(true);
+  const [request, setRequest] = useState<VerificationRequest | null>(null);
+  const [documents, setDocuments] = useState<VerificationDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchVerificationStatus = async () => {
-    if (!user) {
-      setVerificationRequest(null);
-      setIsLoading(false);
+  useEffect(() => {
+    const fetchVerificationStatus = async () => {
+      try {
+        setLoading(true);
+        const userRequest = await VerificationService.getVerificationRequest(userId);
+        
+        if (userRequest) {
+          setRequest(userRequest);
+          
+          // If the request has documents, fetch them
+          if (userRequest.documents && userRequest.documents.length > 0) {
+            setDocuments(userRequest.documents);
+          } else if (userRequest.documentIds && userRequest.documentIds.length > 0) {
+            const docs = await VerificationService.getDocuments(userRequest.documentIds);
+            setDocuments(docs);
+          }
+        }
+        
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch verification status');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchVerificationStatus();
+    }
+  }, [userId]);
+
+  // Submit a new document
+  const submitDocument = async (documentFile: File, documentType: DocumentType) => {
+    setLoading(true);
+    try {
+      if (!request) {
+        // Create a new verification request first
+        const newRequest = await VerificationService.createVerificationRequest(userId);
+        setRequest(newRequest);
+      }
+      
+      // Upload the document
+      const document = await VerificationService.uploadDocument({
+        user_id: userId,
+        document_type: documentType,
+        file: documentFile,
+        verification_request_id: request?.id || '',
+      });
+      
+      // Update the documents list
+      setDocuments(prev => [...prev, document]);
+      return document;
+    } catch (err) {
+      setError('Failed to submit document');
+      console.error(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Submit the verification request for review
+  const submitVerificationRequest = async () => {
+    if (!request) {
+      setError('No verification request to submit');
       return;
     }
-
-    setIsLoading(true);
-    setError(null);
-
+    
+    setLoading(true);
     try {
-      // In a real application, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // For demo purposes, we'll use mock data
-      setVerificationRequest(mockVerificationRequest);
+      const updatedRequest = await VerificationService.submitVerificationRequest(request.id);
+      setRequest(updatedRequest);
     } catch (err) {
-      console.error('Error fetching verification status:', err);
-      setError('Failed to fetch verification status');
+      setError('Failed to submit verification request');
+      console.error(err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchVerificationStatus();
-  }, [user]);
-
   return {
-    verificationRequest,
-    isLoading,
+    loading,
+    request,
+    documents,
     error,
-    refresh: fetchVerificationStatus
+    submitDocument,
+    submitVerificationRequest,
   };
 };
-
-export default useVerificationStatus;

@@ -61,3 +61,33 @@ export const calculateRenewalCost = (status: string, contentType: string = 'defa
   
   return cost;
 };
+
+/**
+ * Safely parse a date string into a Date object
+ * Returns the current date if parsing fails
+ */
+export const safelyParseDate = (dateString: string | Date): Date => {
+  if (dateString instanceof Date) {
+    return dateString;
+  }
+  
+  try {
+    const parsed = new Date(dateString);
+    if (isNaN(parsed.getTime())) {
+      return new Date();
+    }
+    return parsed;
+  } catch (error) {
+    return new Date();
+  }
+};
+
+/**
+ * Convert a string or Date object to a Date
+ */
+export const toDate = (date: string | Date): Date => {
+  if (date instanceof Date) {
+    return date;
+  }
+  return new Date(date);
+};

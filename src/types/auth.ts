@@ -25,12 +25,12 @@ export interface User {
   created_at?: string;
   // Added missing properties
   name?: string;
+  phone?: string;
   phone_number?: string;
   location?: string;
   bio?: string;
   gender?: string;
   full_name?: string;
-  phone?: string;
   website?: string;
 }
 
@@ -45,6 +45,7 @@ export interface AuthUser extends User {
   avatar_url?: string;
   user_metadata?: Record<string, any>;
   roles?: UserRole[];
+  website?: string;
 }
 
 export interface AuthResult {
@@ -77,6 +78,7 @@ export interface UserProfile {
   lucoinsBalance?: number;
   phone?: string;
   website?: string;
+  displayName?: string; // Added displayName property
 }
 
 export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';

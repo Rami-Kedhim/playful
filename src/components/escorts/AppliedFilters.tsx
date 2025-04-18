@@ -65,7 +65,7 @@ const FilterBadge: React.FC<FilterBadgeProps> = ({ filter, onRemove }) => {
 
     return (
       <div className="inline-flex items-center gap-1 bg-secondary/50 rounded-full pl-2 pr-1 text-sm">
-        <ServiceTypeBadgeLabel type={safeValue} size="sm" />
+        <ServiceTypeBadgeLabel type={safeValue} />
         <button 
           onClick={onRemove}
           className="rounded-full w-5 h-5 flex items-center justify-center hover:bg-secondary text-muted-foreground transition-colors"

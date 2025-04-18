@@ -1,74 +1,64 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { EscortService } from '@/services/escortService';
 import { Escort } from '@/types/Escort';
-import escortService from '@/services/escortService';
 
 export const useEscorts = () => {
   const [escorts, setEscorts] = useState<Escort[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [filters, setFilters] = useState({});
-  const [featuredEscorts, setFeaturedEscorts] = useState<Escort[]>([]);
-  
-  const fetchEscorts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await escortService.getAllEscorts();
-      setEscorts(data);
-      
-      // Set featured escorts
-      setFeaturedEscorts(data.filter(escort => escort.is_featured));
-      
-      setError('');
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch escorts');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  
-  const updateFilters = useCallback((newFilters: any) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  }, []);
-  
-  const applyCurrentFilters = useCallback(async () => {
-    // In a real app, this would call the API with the filters
-    // For now we'll simulate filtering
-    try {
-      setLoading(true);
-      const allEscorts = await escortService.getAllEscorts();
-      
-      // Apply filters logic here
-      // This is just placeholder logic
-      const filtered = allEscorts;
-      
-      setEscorts(filtered);
-    } catch (err: any) {
-      setError(err.message || 'Failed to apply filters');
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
-  
-  const clearAllFilters = useCallback(() => {
-    setFilters({});
-    fetchEscorts();
-  }, [fetchEscorts]);
-  
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<Record<string, any>>({});
+
   useEffect(() => {
+    const fetchEscorts = async () => {
+      try {
+        setLoading(true);
+        const data = await EscortService.getAllEscorts();
+        setEscorts(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to fetch escorts');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchEscorts();
-  }, [fetchEscorts]);
-  
-  return { 
-    escorts, 
-    loading, 
-    error, 
+  }, []);
+
+  // Featured escorts
+  const featuredEscorts = useMemo(() => {
+    return escorts.filter(escort => escort.featured);
+  }, [escorts]);
+
+  // Update filters
+  const updateFilters = (newFilters: Record<string, any>) => {
+    setFilters(prev => ({
+      ...prev,
+      ...newFilters
+    }));
+  };
+
+  // Apply current filters
+  const applyCurrentFilters = () => {
+    // Implementation would depend on your filtering logic
+    console.log('Applying filters:', filters);
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setFilters({});
+  };
+
+  return {
+    escorts,
     featuredEscorts,
+    loading,
+    error,
     filters,
     updateFilters,
     applyCurrentFilters,
     clearAllFilters
   };
 };
-
-export default useEscorts;

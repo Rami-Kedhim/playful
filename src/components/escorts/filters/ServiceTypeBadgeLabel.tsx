@@ -1,8 +1,10 @@
 
 import React from 'react';
 
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '' | 'massage' | 'dinner';
+
 interface ServiceTypeBadgeLabelProps {
-  type: string;
+  type: ServiceTypeFilter;
 }
 
 export const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type }) => {

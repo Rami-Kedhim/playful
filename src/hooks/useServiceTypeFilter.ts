@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { getServiceTypeBadgeLabel } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 export const useServiceTypeFilter = (initialTypes: string[] = []) => {
   const [serviceTypes, setServiceTypes] = useState<string[]>(initialTypes);

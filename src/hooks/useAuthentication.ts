@@ -1,143 +1,109 @@
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useAuth } from './auth/useAuthContext';
 import { AuthResult } from '@/types/auth';
 
+/**
+ * Hook that provides authentication methods with loading state and error handling
+ */
 export const useAuthentication = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
   const auth = useAuth();
   
+  // Sign in method with better error handling
   const signIn = useCallback(async (email: string, password: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    setError(null);
-    
     try {
       const result = await auth.signIn(email, password);
       return result;
-    } catch (err: any) {
-      const errorMessage = err.message || 'An unexpected error occurred during sign in';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to sign in'
+      };
     }
   }, [auth]);
   
-  const signUp = useCallback(async (email: string, password: string, username?: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    setError(null);
-    
+  // Sign up method with better error handling
+  const signUp = useCallback(async (email: string, password: string, name?: string): Promise<AuthResult> => {
     try {
-      const result = await auth.signUp(email, password, username);
+      const result = await auth.signUp(email, password, name);
       return result;
-    } catch (err: any) {
-      const errorMessage = err.message || 'An unexpected error occurred during sign up';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to sign up'
+      };
     }
   }, [auth]);
   
+  // Sign out method
   const signOut = useCallback(async (): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
+    if (auth.signOut) {
       await auth.signOut();
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign out');
-    } finally {
-      setIsLoading(false);
     }
   }, [auth]);
   
-  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      if (auth.resetPassword) {
-        const result = await auth.resetPassword(email);
-        return result;
-      }
-      return { success: false, error: 'Reset password function not available' };
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to send password reset email';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
-    }
-  }, [auth]);
-  
+  // Update profile method
   const updateProfile = useCallback(async (data: any): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const success = await auth.updateUserProfile(data);
-      return success;
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update profile';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
+    if (auth.updateUserProfile) {
+      return await auth.updateUserProfile(data);
     }
+    return false;
   }, [auth]);
   
+  // Reset password method
+  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
+    if (auth.resetPassword) {
+      return await auth.resetPassword(email);
+    }
+    return {
+      success: false,
+      error: 'Reset password method not available'
+    };
+  }, [auth]);
+  
+  // Send password reset email
+  const sendPasswordResetEmail = useCallback(async (email: string): Promise<boolean> => {
+    if (auth.sendPasswordResetEmail) {
+      return await auth.sendPasswordResetEmail(email);
+    }
+    return false;
+  }, [auth]);
+  
+  // Update password
+  const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    if (auth.updatePassword) {
+      return await auth.updatePassword(oldPassword, newPassword);
+    }
+    return false;
+  }, [auth]);
+  
+  // Verify email
   const verifyEmail = useCallback(async (token: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      if (auth.verifyEmail) {
-        return await auth.verifyEmail(token);
-      }
-      setError('Verify email function not available');
-      return false;
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to verify email';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
+    if (auth.verifyEmail) {
+      return await auth.verifyEmail(token);
     }
+    return false;
   }, [auth]);
   
+  // Send verification email
   const sendVerificationEmail = useCallback(async (): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      if (auth.sendVerificationEmail) {
-        return await auth.sendVerificationEmail();
-      }
-      setError('Send verification email function not available');
-      return false;
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to send verification email';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
+    if (auth.sendVerificationEmail) {
+      return await auth.sendVerificationEmail();
     }
+    return false;
   }, [auth]);
   
   return {
+    ...auth,
     signIn,
     signUp,
     signOut,
-    resetPassword,
     updateProfile,
+    resetPassword,
+    sendPasswordResetEmail,
+    updatePassword,
     verifyEmail,
     sendVerificationEmail,
-    isLoading,
-    error,
-    clearError: () => setError(null),
   };
 };
 
