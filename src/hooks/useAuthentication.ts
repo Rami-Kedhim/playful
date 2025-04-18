@@ -54,17 +54,20 @@ export const useAuthentication = () => {
     }
   }, [auth]);
   
-  const resetPassword = useCallback(async (email: string): Promise<boolean> => {
+  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const result = await auth.resetPassword(email);
-      return result.success;
+      if (auth.resetPassword) {
+        const result = await auth.resetPassword(email);
+        return result;
+      }
+      return { success: false, error: 'Reset password function not available' };
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to send password reset email';
       setError(errorMessage);
-      return false;
+      return { success: false, error: errorMessage };
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +97,7 @@ export const useAuthentication = () => {
       if (auth.verifyEmail) {
         return await auth.verifyEmail(token);
       }
+      setError('Verify email function not available');
       return false;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to verify email';
@@ -112,6 +116,7 @@ export const useAuthentication = () => {
       if (auth.sendVerificationEmail) {
         return await auth.sendVerificationEmail();
       }
+      setError('Send verification email function not available');
       return false;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to send verification email';

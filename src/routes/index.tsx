@@ -5,7 +5,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { AppRoutes } from '@/utils/navigation';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { User, UserProfile } from '@/types/user';
+import { User, UserProfile, UserRole } from '@/types/user';
 
 // Auth page
 const AuthPage = lazy(() => import('@/pages/AuthPage'));
@@ -47,10 +47,15 @@ const RoutesComponent: React.FC = () => {
     id: authUser.id,
     username: authUser.username || '',
     email: authUser.email,
-    role: authUser.role || 'user',
+    role: (authUser.role as 'user' | 'admin' | 'moderator' | 'escort' | 'creator') || 'user',
     name: authUser.name || authUser.username || authUser.full_name || '',
-    isVerified: authUser.isVerified,
+    isVerified: authUser.isVerified || false,
     createdAt: authUser.created_at || new Date().toISOString(),
+    phone: authUser.phone_number || authUser.phone || '',
+    website: authUser.website || '',
+    profileImageUrl: authUser.profileImageUrl || authUser.avatarUrl || '',
+    avatar_url: authUser.avatar_url || '',
+    avatarUrl: authUser.avatarUrl || authUser.avatar_url || ''
   } : null;
   
   const profile: UserProfile | null = authProfile ? {
@@ -66,6 +71,8 @@ const RoutesComponent: React.FC = () => {
     avatarUrl: authProfile.avatar_url || authProfile.profileImageUrl || '',
     joinedDate: new Date(),
     avatar_url: authProfile.avatar_url || authProfile.profileImageUrl || '',
+    phone: authProfile.phone || '',
+    profileImageUrl: authProfile.profileImageUrl || authProfile.avatar_url || ''
   } : null;
   
   return (

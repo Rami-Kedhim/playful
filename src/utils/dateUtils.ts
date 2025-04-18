@@ -1,124 +1,63 @@
 
+// Date utility functions for content management
+
 /**
- * Safely parses a date string to a Date object
- * If the date string is invalid, returns null or fallbacks to current date
+ * Calculate the expiry date for content (180 days from creation)
  */
-export const safelyParseDate = (
-  dateString?: string | Date | null,
-  useFallback: boolean = false
-): Date | null => {
-  if (!dateString) {
-    return useFallback ? new Date() : null;
-  }
-  
-  if (dateString instanceof Date) {
-    return dateString;
-  }
-  
-  try {
-    const date = new Date(dateString);
-    return isNaN(date.getTime()) ? (useFallback ? new Date() : null) : date;
-  } catch (error) {
-    return useFallback ? new Date() : null;
-  }
+export const calculateExpiryDate = (creationDate: Date): Date => {
+  const expiryDate = new Date(creationDate);
+  expiryDate.setDate(expiryDate.getDate() + 180); // 180 days validity
+  return expiryDate;
 };
 
 /**
- * Formats a date to a string in the user's locale
+ * Calculate days remaining until expiry
  */
-export const formatDate = (
-  date?: Date | string | null,
-  options?: Intl.DateTimeFormatOptions,
-  locale?: string
-): string => {
-  const safeDate = safelyParseDate(date);
-  if (!safeDate) return '';
-  
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  };
-  
-  return new Intl.DateTimeFormat(locale || 'en-US', options || defaultOptions).format(safeDate);
-};
-
-/**
- * Formats a date to a relative time string (e.g. "2 days ago")
- */
-export const formatRelativeTime = (date?: Date | string | null): string => {
-  const safeDate = safelyParseDate(date);
-  if (!safeDate) return '';
-  
+export const calculateDaysRemaining = (expiryDate: Date): number => {
   const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - safeDate.getTime()) / 1000);
-  
-  if (diffInSeconds < 60) {
-    return `${diffInSeconds} seconds ago`;
-  }
-  
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
-  }
-  
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
-  }
-  
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 30) {
-    return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
-  }
-  
-  const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) {
-    return `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} ago`;
-  }
-  
-  const diffInYears = Math.floor(diffInMonths / 12);
-  return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
+  const diffTime = expiryDate.getTime() - now.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-// Add missing utility functions for content components
-export const calculateExpiryDate = (startDate: Date | string, duration: number): Date => {
-  const date = safelyParseDate(startDate, true) as Date;
-  date.setDate(date.getDate() + duration);
-  return date;
-};
-
-export const calculateDaysRemaining = (expiryDate: Date | string): number => {
-  const expiry = safelyParseDate(expiryDate);
-  if (!expiry) return 0;
-  
-  const now = new Date();
-  const diffInDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  return Math.max(0, diffInDays);
-};
-
-export const determineContentStatus = (expiryDate: Date | string): 'active' | 'expiring' | 'expired' => {
+/**
+ * Determine content status based on days remaining
+ */
+export const determineContentStatus = (creationDate: Date): 'active' | 'expiring' | 'expired' => {
+  const expiryDate = calculateExpiryDate(creationDate);
   const daysRemaining = calculateDaysRemaining(expiryDate);
   
-  if (daysRemaining <= 0) return 'expired';
-  if (daysRemaining <= 7) return 'expiring';
-  return 'active';
-};
-
-export const calculateRenewalCost = (basePrice: number, duration: number): number => {
-  // Simple calculation, adjust as needed
-  return basePrice * (duration / 30); // Assuming duration is in days
-};
-
-// Add toDate utility function
-export const toDate = (value: string | Date | null | undefined): Date | null => {
-  if (!value) return null;
-  if (value instanceof Date) return value;
-  
-  try {
-    const date = new Date(value);
-    return isNaN(date.getTime()) ? null : date;
-  } catch (error) {
-    return null;
+  if (daysRemaining <= 0) {
+    return 'expired';
+  } else if (daysRemaining <= 30) {
+    return 'expiring';
+  } else {
+    return 'active';
   }
+};
+
+/**
+ * Calculate renewal cost based on content status and type
+ */
+export const calculateRenewalCost = (status: string, contentType: string = 'default'): number => {
+  // Base cost
+  let cost = 1;
+  
+  // Adjust based on status
+  if (status === 'expired') {
+    cost += 1; // Extra charge for expired content
+  }
+  
+  // Adjust based on content type
+  switch (contentType) {
+    case 'video':
+      cost += 1; // Videos cost more to renew
+      break;
+    case 'image':
+      cost += 0.5; // Images have a small additional cost
+      break;
+    default:
+      break;
+  }
+  
+  return cost;
 };

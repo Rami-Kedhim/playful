@@ -1,59 +1,33 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { ServiceType, ServiceTypeContextType } from '@/types/serviceType';
+import { useState, useCallback } from 'react';
 import { getServiceTypeBadgeLabel } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
-export const useServiceTypeFilter = (): ServiceTypeContextType => {
-  const [serviceType, setServiceType] = useState<ServiceType>("");
-  
-  const clearServiceType = useCallback(() => {
-    setServiceType("");
-  }, []);
-  
-  const isInPersonService = serviceType === "in-person" || serviceType === "both";
-  const isVirtualService = serviceType === "virtual" || serviceType === "both";
-  const isBothServiceTypes = serviceType === "both";
-  const isAnyServiceType = serviceType === "" || serviceType === "all";
-  
-  const toggleServiceType = useCallback((type: ServiceType) => {
-    setServiceType(current => current === type ? "" : type);
-  }, []);
-  
-  const getServiceTypeLabel = useCallback((type: ServiceType): string => {
-    return getServiceTypeBadgeLabel(type);
-  }, []);
-  
-  const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
-  
-  const toggleSpecializedType = useCallback((type: string) => {
-    setSelectedSpecializedTypes(current => 
-      current.includes(type) 
-        ? current.filter(t => t !== type) 
-        : [...current, type]
+export const useServiceTypeFilter = (initialTypes: string[] = []) => {
+  const [serviceTypes, setServiceTypes] = useState<string[]>(initialTypes);
+
+  const toggleServiceType = useCallback((type: string) => {
+    setServiceTypes(prev => 
+      prev.includes(type)
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
     );
   }, []);
-  
-  const validateServiceName = useCallback((name: string): boolean => {
-    return /^[a-zA-Z0-9_\- ]{3,30}$/.test(name);
+
+  const clearServiceTypes = useCallback(() => {
+    setServiceTypes([]);
   }, []);
-  
-  const getSafeServiceName = useCallback((name: string): string => {
-    return name.trim().toLowerCase().replace(/[^a-z0-9_\-]/g, "-");
-  }, []);
-  
+
+  const isServiceTypeSelected = useCallback((type: string) => {
+    return serviceTypes.includes(type);
+  }, [serviceTypes]);
+
   return {
-    serviceType,
-    setServiceType,
-    isInPersonService,
-    isVirtualService,
-    isBothServiceTypes,
-    isAnyServiceType,
-    clearServiceType,
+    serviceTypes,
     toggleServiceType,
-    getServiceTypeLabel,
-    selectedSpecializedTypes,
-    toggleSpecializedType,
-    validateServiceName,
-    getSafeServiceName
+    clearServiceTypes,
+    isServiceTypeSelected,
+    setServiceTypes
   };
 };
+
+export default useServiceTypeFilter;

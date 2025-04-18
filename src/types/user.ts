@@ -3,7 +3,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'user' | 'admin' | 'moderator';
+  role: 'user' | 'admin' | 'moderator' | 'escort' | 'creator';
   name: string;
   isVerified: boolean;
   createdAt: string;

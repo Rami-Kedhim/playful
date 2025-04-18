@@ -31,6 +31,7 @@ export interface VerificationRequest {
   created_at?: Date | string;
   createdAt?: Date | string;
   updated_at?: Date | string;
+  updatedAt?: Date | string;
   reviewed_at?: Date | string;
   reviewedAt?: Date | string;
   submitted_at?: Date | string;
@@ -43,6 +44,7 @@ export interface VerificationRequest {
   level?: string; // For backwards compatibility
   verificationLevel?: string; // Another alias used in some components
   documents?: VerificationDocument[];
+  documentIds?: string[]; // For backward compatibility
 }
 
 export enum VerificationStatus {

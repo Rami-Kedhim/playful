@@ -56,6 +56,7 @@ export interface AuthResult {
 
 export interface UserProfile {
   id: string;
+  userId?: string;
   email?: string;
   username?: string;
   name?: string;

@@ -13,6 +13,7 @@ interface UseRoleReturn {
   isCreator: boolean;
   isEscort: boolean;
   roles: string[];
+  canAccessAdminFeatures: boolean; // Added missing property
 }
 
 export const useRole = (): UseRoleReturn => {
@@ -52,6 +53,11 @@ export const useRole = (): UseRoleReturn => {
     return rolesToCheck.some(role => hasRole(role));
   };
   
+  // Check if user can access admin features - admin or moderator
+  const canAccessAdminFeatures = useMemo(() => {
+    return hasRole(UserRole.ADMIN) || hasRole(UserRole.MODERATOR);
+  }, [hasRole]);
+  
   return {
     hasRole,
     hasAllRoles,
@@ -61,7 +67,8 @@ export const useRole = (): UseRoleReturn => {
     isUser: hasRole(UserRole.USER),
     isCreator: hasRole(UserRole.CREATOR),
     isEscort: hasRole(UserRole.ESCORT),
-    roles
+    roles,
+    canAccessAdminFeatures
   };
 };
 
