@@ -1,56 +1,81 @@
 
-import { z } from 'zod';
-import { DOCUMENT_TYPES, MAX_FILE_SIZE, ACCEPTED_IMAGE_TYPES } from '@/types/verification';
+import { VerificationFormValues } from '@/types/verification';
+import { 
+  MAX_FILE_SIZE, 
+  ACCEPTED_IMAGE_TYPES,
+  ID_CARD,
+  PASSPORT,
+  DRIVER_LICENSE,
+  RESIDENCE_PERMIT
+} from '@/types/verification';
 
-// Document type validation
-export const isDocumentTypeValid = (documentType: string): boolean => {
-  return Object.values(DOCUMENT_TYPES).includes(documentType);
-};
-
-// Get document requirements by type
-export const getDocumentRequirements = (documentType: string) => {
-  return {
-    frontRequired: true,
-    backRequired: documentType !== DOCUMENT_TYPES.PASSPORT,
-    selfieRequired: true
-  };
-};
-
-// Check if back side is required based on document type
-export const isBackSideRequired = (documentType: string): boolean => {
-  const requirements = getDocumentRequirements(documentType);
-  return requirements.backRequired;
-};
-
-// Validate document image files
-export const validateDocumentImage = (file: File | undefined): string | null => {
-  if (!file) {
-    return "Document image is required";
+export const getDocumentTypeLabel = (documentType: string): string => {
+  switch (documentType) {
+    case PASSPORT:
+      return "Passport";
+    case ID_CARD:
+      return "ID Card";
+    case DRIVER_LICENSE:
+      return "Driver's License";
+    case RESIDENCE_PERMIT:
+      return "Residence Permit";
+    default:
+      return "Document";
   }
+};
+
+export const validateFile = (file: File | undefined): string | null => {
+  if (!file) return "File is required";
   
-  // Check file size (max 5MB)
   if (file.size > MAX_FILE_SIZE) {
-    return "File size must be less than 5MB";
+    return `File size should be less than ${MAX_FILE_SIZE / 1000000}MB`;
   }
   
-  // Check file type
   if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-    return "File must be a JPG, JPEG, PNG or WEBP image";
+    return "File must be a valid image (JPG, JPEG, PNG)";
   }
   
   return null;
 };
 
-// Helper function to get document name based on type
-export const getDocumentTypeName = (type: string): string => {
-  switch (type) {
-    case DOCUMENT_TYPES.PASSPORT:
-      return 'Passport';
-    case DOCUMENT_TYPES.ID_CARD:
-      return 'ID Card';
-    case DOCUMENT_TYPES.DRIVER_LICENSE:
-      return 'Driver\'s License';
-    default:
-      return 'Unknown Document Type';
+export const validateVerificationForm = (values: VerificationFormValues): Record<string, string> => {
+  const errors: Record<string, string> = {};
+
+  if (!values.documentType) {
+    errors.documentType = "Document type is required";
   }
+  
+  // Validate front of document
+  if (!values.documentFrontImage?.file) {
+    errors.documentFrontImage = "Front of document is required";
+  } else {
+    const frontFileError = validateFile(values.documentFrontImage.file);
+    if (frontFileError) {
+      errors.documentFrontImage = frontFileError;
+    }
+  }
+  
+  // Validate back of document (required except for passport)
+  if (values.documentType !== PASSPORT) {
+    if (!values.documentBackImage?.file) {
+      errors.documentBackImage = "Back of document is required";
+    } else if (values.documentBackImage.file) {
+      const backFileError = validateFile(values.documentBackImage.file);
+      if (backFileError) {
+        errors.documentBackImage = backFileError;
+      }
+    }
+  }
+  
+  // Validate selfie
+  if (!values.selfieImage?.file) {
+    errors.selfieImage = "Selfie with ID is required";
+  } else {
+    const selfieFileError = validateFile(values.selfieImage.file);
+    if (selfieFileError) {
+      errors.selfieImage = selfieFileError;
+    }
+  }
+  
+  return errors;
 };

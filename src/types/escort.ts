@@ -26,6 +26,47 @@ export interface Availability {
   hours?: string;
   available?: boolean;
   slots?: { start: string; end: string }[];
+  days?: string[];
+  customNotes?: string;
+}
+
+export interface Video {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title?: string;
+  duration?: number;
+  isPublic?: boolean;
+}
+
+export interface ContactInfo {
+  phone?: string;
+  email?: string;
+  website?: string;
+  socialMedia?: {
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
+    onlyfans?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+export interface ExtendedAvailability extends Availability {
+  weekdays?: boolean;
+  weekends?: boolean;
+  timeOfDay?: string[];
+}
+
+export enum ServiceType {
+  MASSAGE = "massage",
+  COMPANIONSHIP = "companionship",
+  OVERNIGHT = "overnight",
+  TRAVEL = "travel",
+  DINNER = "dinner",
+  BDSM = "bdsm",
+  ROLEPLAY = "roleplay",
+  EVENT = "event"
 }
 
 export interface Escort {
@@ -41,7 +82,7 @@ export interface Escort {
   gallery?: string[];
   measurements?: Measurements;
   height?: string | number;
-  weight?: number;
+  weight?: string | number;
   hair?: string;
   eyes?: string;
   hairColor?: string;
@@ -68,16 +109,17 @@ export interface Escort {
   responseRate?: number;
   price?: number;
   physique?: Physique;
-  reviews?: any[];
+  reviews?: any[] | number;
   tags?: string[];
   imageUrl?: string;
   avatar_url?: string;
   sexualOrientation?: string;
+  orientation?: string;
   availableNow?: boolean;
   lastActive?: string | Date;
   description?: string;
   images?: string[];
-  videos?: any[];
+  videos?: Video[] | any[];
   bodyType?: string;
   isAI?: boolean;
   isScraped?: boolean;
@@ -110,4 +152,3 @@ export interface Booking {
   notes?: string;
   totalPrice?: number;
 }
-

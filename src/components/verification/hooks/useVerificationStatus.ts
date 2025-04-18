@@ -17,6 +17,7 @@ const fetchVerificationStatus = async (userId: string): Promise<VerificationRequ
       level: VerificationLevel.BASIC,
       documents: [],
       submittedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       // For backward compatibility
       user_id: userId,
       profile_id: userId,

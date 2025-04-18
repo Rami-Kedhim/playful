@@ -17,6 +17,7 @@ const DEFAULT_CONTEXT: AuthContextType = {
   refreshUser: async () => {},
   updateUserProfile: async () => false,
   refreshProfile: async () => {},
+  resetPassword: async () => ({ success: false, error: 'Not implemented' }),
   userRoles: [],
   checkRole: () => false,
   updatePassword: async () => false
@@ -64,6 +65,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   }, []);
   
+  // Mock implementation for reset password
+  const resetPassword = useCallback(async (email: string): Promise<any> => {
+    console.log('Resetting password for:', email);
+    // In a real app, this would call an API
+    return { success: true };
+  }, []);
+  
   // Mock sign in
   const signIn = useCallback(async (email: string, password: string) => {
     return { success: true, user: { id: '1', email, roles: [UserRole.USER] } };
@@ -98,6 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateUserProfile,
         refreshProfile,
         updatePassword,
+        resetPassword,
         signIn,
         signUp,
         signOut,
@@ -109,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }));
     }, 1000);
-  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, signIn, signUp, signOut]);
+  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, resetPassword, signIn, signUp, signOut]);
   
   return (
     <AuthContext.Provider value={{
@@ -119,6 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateUserProfile,
       refreshProfile,
       updatePassword,
+      resetPassword,
       signIn,
       signUp,
       signOut

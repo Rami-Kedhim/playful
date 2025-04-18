@@ -1,46 +1,33 @@
 
-import { DOCUMENT_TYPES, DOCUMENT_REQUIREMENTS } from '@/types/verification';
+import { 
+  DOCUMENT_TYPES, 
+  DOCUMENT_REQUIREMENTS,
+  ID_CARD,
+  PASSPORT,
+  DRIVER_LICENSE,
+  RESIDENCE_PERMIT
+} from '@/types/verification';
 
-export const isDocumentTypeValid = (documentType: string): boolean => {
-  return Object.values(DOCUMENT_TYPES).includes(documentType);
+export const getDocumentTypeLabel = (documentType: string): string => {
+  const docType = DOCUMENT_TYPES.find(dt => dt.value === documentType);
+  return docType ? docType.label : 'Document';
 };
 
-export const getDocumentRequirements = (documentType: string) => {
-  if (!isDocumentTypeValid(documentType)) {
-    return {
-      frontRequired: true,
-      backRequired: false,
-      selfieRequired: true
-    };
-  }
-  
-  return DOCUMENT_REQUIREMENTS[documentType as keyof typeof DOCUMENT_REQUIREMENTS];
+export const isBackRequired = (documentType: string): boolean => {
+  return documentType !== PASSPORT;
 };
 
-export const isBackSideRequired = (documentType: string): boolean => {
-  const requirements = getDocumentRequirements(documentType);
-  // Check if requirements is an object with backRequired property
-  if (typeof requirements === 'object' && 'backRequired' in requirements) {
-    return requirements.backRequired;
+export const getDocumentInstructions = (documentType: string): string => {
+  switch (documentType) {
+    case PASSPORT:
+      return "Please upload a clear photo of your passport's main page. Make sure all details are visible and not blurry.";
+    case ID_CARD:
+      return "Please upload clear photos of the front and back of your ID card. Ensure all text is legible.";
+    case DRIVER_LICENSE:
+      return "Please upload clear photos of your driver's license. Both sides are required.";
+    case RESIDENCE_PERMIT:
+      return "Please upload clear photos of your residence permit or visa document. Both sides may be required.";
+    default:
+      return "Please upload a clear photo of your identification document.";
   }
-  return false;
-};
-
-export const validateDocumentImage = (file: File | undefined): string | null => {
-  if (!file) {
-    return "Document image is required";
-  }
-  
-  // Check file size (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    return "File size must be less than 5MB";
-  }
-  
-  // Check file type
-  const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-  if (!validTypes.includes(file.type)) {
-    return "File must be a JPG, JPEG, or PNG image";
-  }
-  
-  return null;
 };

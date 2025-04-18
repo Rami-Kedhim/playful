@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { VerificationFormValues, DOCUMENT_TYPES, verificationFormSchema } from '@/types/verification';
+import { VerificationFormValues, verificationFormSchema, ID_CARD } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentUploadHandler from './DocumentUploadHandler';
 import SubmitButton from './SubmitButton';
@@ -34,15 +34,18 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
-  const [documentType, setDocumentType] = useState(DOCUMENT_TYPES.ID_CARD);
+  const [documentType, setDocumentType] = useState(ID_CARD);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: DOCUMENT_TYPES.ID_CARD,
-      documentFrontImage: { preview: '' },
-      documentBackImage: { preview: '' },
-      selfieImage: { preview: '' },
+      documentType: ID_CARD,
+      documentFile: undefined as unknown as File,
+      selfieFile: undefined as unknown as File,
+      consentChecked: false,
+      documentFrontImage: { file: undefined as unknown as File, preview: '' },
+      documentBackImage: { file: undefined as unknown as File, preview: '' },
+      selfieImage: { file: undefined as unknown as File, preview: '' },
     },
   });
 
@@ -77,9 +80,9 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       const result = await submitVerificationRequest(
         user.id,
         data.documentType,
-        data.documentFrontImage.file,
-        data.documentBackImage?.file || null,
-        data.selfieImage.file
+        data.documentFile,
+        data.selfieFile || null,
+        data.documentFile // Use the primary document as selfie for this example
       );
       
       setSubmitMessage({
@@ -142,21 +145,20 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
             
             <DocumentUploadHandler
               label="Front of ID Document"
-              onFileSelect={(file) => form.setValue('documentFrontImage', { file, preview: URL.createObjectURL(file) })}
-              error={form.formState.errors.documentFrontImage?.message?.toString()}
-            />
-            
-            <DocumentUploadHandler
-              label="Back of ID Document (Optional for Passport)"
-              onFileSelect={(file) => form.setValue('documentBackImage', { file, preview: URL.createObjectURL(file) })}
-              error={form.formState.errors.documentBackImage?.message?.toString()}
-              optional={true}
+              onFileSelect={(file) => {
+                form.setValue('documentFile', file);
+                form.setValue('documentFrontImage', { file, preview: URL.createObjectURL(file) });
+              }}
+              error={form.formState.errors.documentFile?.message?.toString()}
             />
             
             <DocumentUploadHandler
               label="Selfie with ID"
-              onFileSelect={(file) => form.setValue('selfieImage', { file, preview: URL.createObjectURL(file) })}
-              error={form.formState.errors.selfieImage?.message?.toString()}
+              onFileSelect={(file) => {
+                form.setValue('selfieFile', file);
+                form.setValue('selfieImage', { file, preview: URL.createObjectURL(file) });
+              }}
+              error={form.formState.errors.selfieFile?.message?.toString()}
             />
 
             <SubmitButton 

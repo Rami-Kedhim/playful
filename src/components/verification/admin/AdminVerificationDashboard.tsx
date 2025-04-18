@@ -84,14 +84,18 @@ const AdminVerificationDashboard = () => {
   return (
     <div className="container mx-auto p-6">
       <VerificationReviewPanel
-        onApprove={(id) => {
+        onApprove={async (id, notes) => {
           setSelectedRequest({ id } as VerificationRequest);
           setIsReviewModalOpen(true);
+          return Promise.resolve();
         }}
-        onReject={(id) => {
+        onReject={async (id, notes) => {
           setSelectedRequest({ id } as VerificationRequest);
           setIsReviewModalOpen(true);
+          return Promise.resolve();
         }}
+        request={{} as VerificationRequest}
+        loading={false}
       />
       
       <ReviewRequestModal

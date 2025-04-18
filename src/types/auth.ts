@@ -41,12 +41,12 @@ export interface UserProfile {
   location?: string;
   bio?: string;
   is_escort?: boolean;
+  is_verified?: boolean; 
   created_at?: string;
   updated_at?: string;
   username?: string;
   full_name?: string;
   gender?: DatabaseGender;
-  is_verified?: boolean;
   lucoin_balance?: number;
   ubx_balance?: number;
 }
@@ -100,4 +100,3 @@ export interface AuthContextType {
   userRoles: UserRole[];
   checkRole: (role: string | UserRole) => boolean;
 }
-

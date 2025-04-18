@@ -90,14 +90,13 @@ export interface VerificationDocument {
 export interface VerificationRequest {
   id: string;
   userId: string;
-  profile_id: string;
+  profile_id?: string;
   status: VerificationStatus;
   requested_level: VerificationLevel;
   documents: VerificationDocument[];
   createdAt: string;
   updatedAt?: string;
   reviewerId?: string;
-  reviewer_id?: string;
   reviewerNotes?: string;
   expiresAt?: string;
   
@@ -106,6 +105,7 @@ export interface VerificationRequest {
   created_at?: string;
   updated_at?: string;
   reviewed_by?: string;
+  reviewer_id?: string;
   reviewer_notes?: string;
   expires_at?: string;
   verificationLevel?: VerificationLevel;
@@ -116,4 +116,3 @@ export interface VerificationRequest {
   user_id?: string;
   reviewedAt?: string;
 }
-
