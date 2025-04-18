@@ -42,10 +42,10 @@ const ProfileTabs: React.FC<ProfileTabsProps> = ({
       
       <TabsContent value="photos">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {profile.avatar_url ? (
+          {(profile.avatarUrl || profile.avatar_url) ? (
             <div className="aspect-square bg-muted rounded-md overflow-hidden">
               <img 
-                src={profile.avatar_url} 
+                src={profile.avatarUrl || profile.avatar_url} 
                 alt="Profile" 
                 className="w-full h-full object-cover"
               />

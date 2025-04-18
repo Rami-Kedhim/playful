@@ -1,5 +1,5 @@
 
-// Create or update the verification types file
+// Update verification types file
 
 export enum VerificationLevel {
   NONE = 'NONE',
@@ -10,11 +10,11 @@ export enum VerificationLevel {
 }
 
 export enum VerificationStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  REVIEW = 'REVIEW',
-  EXPIRED = 'EXPIRED'
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  REVIEW = 'review',
+  EXPIRED = 'expired'
 }
 
 export enum DocumentType {
@@ -28,7 +28,7 @@ export enum DocumentType {
 export interface VerificationDocument {
   id: string;
   document_type: DocumentType;
-  file_url: string;
+  file_url?: string;
   uploaded_at: Date;
   status: VerificationStatus;
   notes?: string;
@@ -38,6 +38,9 @@ export interface VerificationDocument {
   document_url?: string;
   type?: DocumentType;
   uploadedAt?: Date;
+  created_at?: Date;
+  file_path?: string; // Add missing file_path property
+  documentType?: DocumentType; // Add missing documentType property
 }
 
 export interface VerificationRequest {
@@ -53,6 +56,11 @@ export interface VerificationRequest {
   submittedAt?: Date;
   verificationLevel?: VerificationLevel;
   rejectionReason?: string;
+  // For backward compatibility
+  user_id?: string;
+  profile_id?: string;
+  level?: VerificationLevel;
+  requested_level?: VerificationLevel;
 }
 
 export interface VerificationStats {
@@ -61,4 +69,24 @@ export interface VerificationStats {
   rejected: number;
   total: number;
   averageProcessingTime: number;
+}
+
+// Add missing type for VerificationFormValues
+export interface VerificationFormValues {
+  documentType: string;
+  documentFile: File;
+  selfieFile?: File;
+  consentChecked: boolean;
+  documentFrontImage?: {
+    file: File;
+    preview: string;
+  };
+  documentBackImage?: {
+    file: File;
+    preview: string;
+  };
+  selfieImage?: {
+    file: File;
+    preview: string;
+  };
 }

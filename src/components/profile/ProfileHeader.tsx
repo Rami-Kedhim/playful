@@ -21,7 +21,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, profile }) => {
   return (
     <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
       <Avatar className="h-24 w-24">
-        <AvatarImage src={profile.avatar_url || ''} alt={user.name || 'User'} />
+        <AvatarImage src={profile.avatarUrl || profile.avatar_url || ''} alt={user.name || 'User'} />
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
       

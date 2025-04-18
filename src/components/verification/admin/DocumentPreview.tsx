@@ -15,9 +15,9 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
   const [isViewerOpen, setIsViewerOpen] = React.useState(false);
 
   // Get the appropriate document properties, supporting both naming conventions
-  const documentType = document.type || document.documentType || document.document_type || '';
-  const documentUrl = document.url || document.fileUrl || document.file_url || document.document_url || '';
-  const uploadDate = document.uploaded_at || document.uploadedAt || document.created_at || '';
+  const documentType = document.document_type;
+  const documentUrl = document.file_url || document.url || document.fileUrl || document.document_url || '';
+  const uploadDate = document.uploaded_at || document.uploadedAt || '';
 
   return (
     <>
@@ -31,7 +31,7 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
           <div className="aspect-[3/2] relative rounded-md overflow-hidden bg-muted">
             <img 
               src={documentUrl} 
-              alt={documentType}
+              alt={documentType.toString()}
               className="object-cover absolute inset-0 w-full h-full"
             />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
@@ -57,7 +57,7 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
           <div className="w-full h-full flex items-center justify-center">
             <img 
               src={documentUrl}
-              alt={documentType}
+              alt={documentType.toString()}
               className="max-w-full max-h-full object-contain"
             />
           </div>

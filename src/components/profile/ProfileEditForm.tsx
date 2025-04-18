@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -52,9 +53,9 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ initialData, onSubmit
       <CardContent className="space-y-6 pt-6">
         <div className="flex flex-col items-center space-y-4">
           <Avatar className="w-24 h-24">
-            <AvatarImage src={formData.avatar_url || ''} alt="Profile" />
+            <AvatarImage src={formData.avatarUrl || formData.avatar_url || ''} alt="Profile" />
             <AvatarFallback>
-              {capitalizeFirstLetter(initialData.userId)}
+              {capitalizeFirstLetter(initialData.id)}
             </AvatarFallback>
           </Avatar>
           

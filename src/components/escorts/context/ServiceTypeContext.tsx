@@ -17,4 +17,13 @@ export const ServiceTypeContext = createContext<ServiceTypeContextType>({
   availableServiceTypes: ['in-person', 'virtual', 'both']
 });
 
+// Export the hook to use the context
 export const useServiceTypeContext = () => useContext(ServiceTypeContext);
+// Add backward compatibility alias
+export const useServiceType = useServiceTypeContext;
+
+// Add ServiceTypeProvider component for compatibility
+export const ServiceTypeProvider = ({ children }: { children: React.ReactNode }) => {
+  // This is a placeholder - the actual implementation should be in its own file
+  return <>{children}</>;
+};

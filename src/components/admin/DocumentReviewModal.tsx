@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { VerificationDocument, VerificationRequest } from '@/types/verification';
+import { VerificationDocument, VerificationRequest, VerificationStatus } from '@/types/verification';
 
 export interface DocumentReviewModalProps {
   isOpen: boolean;
@@ -55,6 +55,10 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
     }
   };
 
+  const getDocumentUrl = () => {
+    return document.file_url || document.url || document.fileUrl || document.document_url || document.file_path || '';
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px]">
@@ -72,17 +76,17 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
           )}
 
           <div className="overflow-hidden rounded-md">
-            {document.file_path && document.file_path.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+            {getDocumentUrl() && getDocumentUrl().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
               <img
-                src={document.file_path}
-                alt={document.document_type}
+                src={getDocumentUrl()}
+                alt={document.document_type.toString()}
                 className="w-full h-auto max-h-[500px] object-contain"
               />
             ) : (
               <div className="bg-muted p-4 rounded-md text-center">
                 <p>Document preview not available</p>
                 <a 
-                  href={document.file_path} 
+                  href={getDocumentUrl()} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"
@@ -105,8 +109,8 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
               <div className="font-medium">Status</div>
               <div>
                 <span className={`inline-block px-2 py-1 rounded-full text-xs 
-                  ${document.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                    document.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                  ${document.status === VerificationStatus.APPROVED ? 'bg-green-100 text-green-800' : 
+                    document.status === VerificationStatus.REJECTED ? 'bg-red-100 text-red-800' : 
                     'bg-yellow-100 text-yellow-800'}`}>
                   {document.status.charAt(0).toUpperCase() + document.status.slice(1)}
                 </span>
@@ -114,7 +118,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             </div>
           </div>
 
-          {document.status === 'pending' && (
+          {document.status === VerificationStatus.PENDING && (
             <div className="grid gap-2">
               <h3 className="font-medium">Rejection Reason</h3>
               <Textarea
@@ -130,7 +134,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
           <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          {document.status === 'pending' && (
+          {document.status === VerificationStatus.PENDING && (
             <>
               <Button 
                 variant="destructive" 

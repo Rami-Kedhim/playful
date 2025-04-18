@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -56,14 +55,17 @@ const RoutesComponent: React.FC = () => {
   
   const profile: UserProfile | null = authProfile ? {
     id: authProfile.id,
-    userId: authProfile.id,
-    email: authProfile.email,
-    name: authProfile.name || authProfile.full_name || (authUser?.name || ''),
-    avatar_url: authProfile.avatar_url || authProfile.profileImageUrl,
-    location: authProfile.location,
-    bio: authProfile.bio,
-    verified: authProfile.is_verified,
+    username: '',
+    email: authProfile.email || '',
+    displayName: authProfile.name || authProfile.full_name || authUser?.name || '',
+    location: authProfile.location || '',
+    bio: authProfile.bio || '',
+    isVerified: authProfile.is_verified || false,
     website: authProfile.website || '',
+    avatarUrl: authProfile.avatar_url || authProfile.profileImageUrl || '',
+    joinedDate: new Date(),
+    // Additional fields for compatibility
+    avatar_url: authProfile.avatar_url || authProfile.profileImageUrl || '',
   } : null;
   
   return (
