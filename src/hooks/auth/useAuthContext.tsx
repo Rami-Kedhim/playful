@@ -1,6 +1,7 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { AuthService } from '@/services/authService';
-import { User, UserProfile } from '@/types/auth';
+import { User, UserProfile, UserRole, AuthResult } from '@/types/auth';
 
 interface AuthContextType {
   user: User | null;
@@ -8,15 +9,21 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, name: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (email: string, password: string, name: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
   checkRole: (role: string | UserRole) => boolean;
   updateUserProfile: (data: any) => Promise<boolean>;
   refreshProfile: () => Promise<void>;
-  resetPassword: (email: string) => Promise<any>;
+  resetPassword: (email: string) => Promise<AuthResult>;
   userRoles: UserRole[];
   updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  
+  // Aliases for backward compatibility
+  signIn?: (email: string, password: string) => Promise<AuthResult>;
+  signUp?: (email: string, password: string, name: string) => Promise<AuthResult>;
+  signOut?: () => Promise<void>;
+  sendPasswordResetEmail?: (email: string) => Promise<boolean>;
 }
 
 const DEFAULT_CONTEXT: AuthContextType = {
@@ -25,8 +32,8 @@ const DEFAULT_CONTEXT: AuthContextType = {
   isLoading: true,
   isAuthenticated: false,
   error: '',
-  login: async () => false,
-  register: async () => false,
+  login: async () => ({ success: false, error: 'Not implemented' }),
+  register: async () => ({ success: false, error: 'Not implemented' }),
   logout: async () => {},
   checkRole: () => false,
   updateUserProfile: async () => false,
@@ -68,34 +75,72 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
     try {
       const result = await AuthService.updatePassword(oldPassword, newPassword);
-      if (result && result.success) {
-        return true;
-      }
-      return false;
+      return result.success;
     } catch (error) {
       console.error('Error updating password:', error);
       return false;
     }
   };
 
-  const resetPassword = useCallback(async (email: string): Promise<any> => {
-    console.log('Resetting password for:', email);
-    return { success: true };
+  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
+    try {
+      return await AuthService.resetPassword(email);
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      return { success: false, error: error.message || 'Failed to reset password' };
+    }
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    return { success: true, user: { id: '1', email, roles: [UserRole.USER] } };
+  // Method for sending password reset email (alias for resetPassword)
+  const sendPasswordResetEmail = useCallback(async (email: string): Promise<boolean> => {
+    const result = await resetPassword(email);
+    return result.success;
+  }, [resetPassword]);
+
+  const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
+    try {
+      const result = await AuthService.signIn(email, password);
+      
+      if (result.success && result.user) {
+        setState(prev => ({
+          ...prev,
+          user: result.user,
+          isAuthenticated: true,
+          error: null
+        }));
+      }
+      
+      return result;
+    } catch (error: any) {
+      const errorMessage = error.message || 'Login failed';
+      setState(prev => ({ ...prev, error: errorMessage }));
+      return { success: false, error: errorMessage };
+    }
   }, []);
 
-  const signUp = useCallback(async (email: string, password: string, name: string) => {
-    return { success: true, user: { id: '1', email, roles: [UserRole.USER] } };
+  const register = useCallback(async (email: string, password: string, name: string): Promise<AuthResult> => {
+    try {
+      const result = await AuthService.signUp(email, password, name);
+      return result;
+    } catch (error: any) {
+      const errorMessage = error.message || 'Registration failed';
+      setState(prev => ({ ...prev, error: errorMessage }));
+      return { success: false, error: errorMessage };
+    }
   }, []);
 
-  const signOut = useCallback(async () => {
-    setState(prev => ({...prev, user: null, isAuthenticated: false}));
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      await AuthService.signOut();
+      setState(prev => ({...prev, user: null, isAuthenticated: false}));
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      setState(prev => ({ ...prev, error: error.message || 'Logout failed' }));
+    }
   }, []);
 
   useEffect(() => {
+    // Simulate fetching the user on mount
     setTimeout(() => {
       setState(prev => ({
         ...prev,
@@ -108,15 +153,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
         isAuthenticated: true,
         isLoading: false,
-        checkRole,
-        userRoles,
-        updateUserProfile,
-        refreshProfile,
-        updatePassword,
-        resetPassword,
-        signIn,
-        signUp,
-        signOut,
         profile: {
           id: '1',
           email: 'user@example.com',
@@ -125,21 +161,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }));
     }, 1000);
-  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, resetPassword, signIn, signUp, signOut]);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{
-      ...state,
-      checkRole,
-      userRoles,
-      updateUserProfile,
-      refreshProfile,
-      updatePassword,
-      resetPassword,
-      signIn,
-      signUp,
-      signOut
-    }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        login,
+        register,
+        logout,
+        checkRole,
+        userRoles,
+        updateUserProfile,
+        refreshProfile,
+        updatePassword,
+        resetPassword,
+        // Add compatibility aliases
+        signIn: login,
+        signUp: register,
+        signOut: logout,
+        sendPasswordResetEmail
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

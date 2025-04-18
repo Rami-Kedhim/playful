@@ -105,7 +105,7 @@ export const DOCUMENT_REQUIREMENTS = {
 };
 
 // Interface for file with preview
-interface FileWithPreview {
+export interface FileWithPreview {
   file: File;
   preview: string;
 }

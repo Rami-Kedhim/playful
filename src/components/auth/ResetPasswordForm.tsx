@@ -18,9 +18,6 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
   const { toast } = useToast();
   const auth = useAuth();
   
-  // Update to check if resetPassword exists in the auth object
-  const resetPasswordFn = auth.resetPassword || auth.sendPasswordResetEmail;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -36,31 +33,34 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
     setIsSubmitting(true);
     
     try {
-      // Check if the function exists and call it appropriately
-      if (resetPasswordFn) {
-        // Some auth providers need a token and email, others just email
-        // Pass empty string as token when only email is provided
-        if (resetPasswordFn === auth.resetPassword) {
-          await resetPasswordFn("", email, ""); // Added an empty string as the third argument
-        } else if (auth.sendPasswordResetEmail) {
-          // For providers that expect just an email
-          await auth.sendPasswordResetEmail(email);
+      // Use resetPassword if available, fall back to sendPasswordResetEmail
+      let result;
+      
+      if (auth.resetPassword) {
+        result = await auth.resetPassword(email);
+        if (result && result.success) {
+          setIsSent(true);
         } else {
-          // Fallback to using resetPassword with both parameters
-          await auth.resetPassword("", email, "");
+          throw new Error(result?.error || "Failed to send reset email");
         }
-        
-        setIsSent(true);
-        toast({
-          title: "Reset link sent",
-          description: "Check your email for password reset instructions",
-        });
-        
-        if (onComplete) {
-          onComplete();
+      } else if (auth.sendPasswordResetEmail) {
+        const success = await auth.sendPasswordResetEmail(email);
+        if (success) {
+          setIsSent(true);
+        } else {
+          throw new Error("Failed to send reset email");
         }
       } else {
         throw new Error("Reset password function not available");
+      }
+      
+      toast({
+        title: "Reset link sent",
+        description: "Check your email for password reset instructions",
+      });
+      
+      if (onComplete) {
+        onComplete();
       }
     } catch (error: any) {
       toast({

@@ -3,7 +3,7 @@ import React from 'react';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormValues, ID_CARD, PASSPORT, DRIVERS_LICENSE } from '@/types/verification';
+import { VerificationFormValues, ID_CARD, PASSPORT, DRIVERS_LICENSE, RESIDENCE_PERMIT } from '@/types/verification';
 
 interface DocumentTypeSelectProps {
   form: UseFormReturn<VerificationFormValues>;
@@ -34,6 +34,7 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeCha
               <SelectItem value={ID_CARD}>ID Card</SelectItem>
               <SelectItem value={PASSPORT}>Passport</SelectItem>
               <SelectItem value={DRIVERS_LICENSE}>Driver's License</SelectItem>
+              <SelectItem value={RESIDENCE_PERMIT}>Residence Permit</SelectItem>
             </SelectContent>
           </Select>
         </FormItem>
