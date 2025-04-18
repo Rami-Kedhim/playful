@@ -1,43 +1,36 @@
 
 import React from 'react';
-import { MapPin, Laptop, SquareUserRound } from 'lucide-react';
+import { Users, Monitor, Globe, SunMoon, UtensilsCrossed } from 'lucide-react';
 import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 
 interface ServiceTypeIconProps {
-  type: ServiceTypeFilter;
+  type: ServiceTypeFilter | string;
   size?: number;
-  variant?: 'colored' | 'default';
+  variant?: 'default' | 'colored';
   className?: string;
 }
 
-const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
-  type, 
-  size = 16,
+const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
+  type,
+  size = 18,
   variant = 'default',
   className = ''
 }) => {
-  const getColorClass = () => {
-    if (variant !== 'colored') return '';
-    
-    switch (type) {
-      case 'in-person': return 'text-blue-600';
-      case 'virtual': return 'text-purple-600';
-      case 'both': return 'text-green-600';
-      default: return '';
-    }
-  };
+  const iconColor = variant === 'colored' ? 'text-primary' : 'text-muted-foreground';
+  const iconClass = `${iconColor} ${className}`;
 
-  const iconClassName = `h-${size} w-${size} ${getColorClass()} ${className}`;
-  
   switch (type) {
     case 'in-person':
-      return <MapPin className={iconClassName} />;
+      return <Users size={size} className={iconClass} />;
     case 'virtual':
-      return <Laptop className={iconClassName} />;
+      return <Monitor size={size} className={iconClass} />;
     case 'both':
-      return <SquareUserRound className={iconClassName} />;
+      return <Globe size={size} className={iconClass} />;
+    case 'all':
+    case '':
+      return <Globe size={size} className={iconClass} />;
     default:
-      return null;
+      return <Users size={size} className={iconClass} />;
   }
 };
 

@@ -21,6 +21,7 @@ export interface Escort {
     hours?: string[];
   };
   isVerified?: boolean;
+  is_verified?: boolean; // Alias for backward compatibility
   isOnline?: boolean;
   rating?: number;
   reviewCount?: number;

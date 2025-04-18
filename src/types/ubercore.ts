@@ -32,6 +32,16 @@ export interface NeuralSystemMetricsResult {
     history: any[];
   };
   systemHealth: SystemHealthMetrics;
+  performance: {
+    cpuUsage: number;
+    memoryUsage: number;
+    systemLoad: number;
+    memoryAllocation: number;
+    networkThroughput: number;
+    requestRate: number;
+    averageResponseTime: number;
+    errorRate: number;
+  };
 }
 
 export interface SystemHealthMetrics {

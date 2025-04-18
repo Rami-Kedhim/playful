@@ -56,7 +56,8 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
   };
 
   const getDocumentUrl = () => {
-    return document.file_url || document.url || document.fileUrl || document.document_url || document.file_path || '';
+    // Access multiple possible property names for compatibility
+    return document.fileUrl || document.url || document.file_path || '';
   };
 
   return (

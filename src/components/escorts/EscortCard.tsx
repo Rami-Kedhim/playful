@@ -13,12 +13,14 @@ interface EscortCardProps {
   escort: Escort;
   featured?: boolean;
   onClick?: () => void;
+  className?: string;
 }
 
 const EscortCard: React.FC<EscortCardProps> = ({ 
   escort, 
   featured = false,
-  onClick
+  onClick,
+  className = ''
 }) => {
   // Fallback image in case none are provided
   const imageSrc = escort.images && escort.images[0] 
@@ -34,7 +36,7 @@ const EscortCard: React.FC<EscortCardProps> = ({
   
   return (
     <Card 
-      className={`overflow-hidden transition-transform hover:scale-[1.01] cursor-pointer ${featured ? 'border-primary/50 shadow-md' : ''}`}
+      className={`overflow-hidden transition-transform hover:scale-[1.01] cursor-pointer ${featured ? 'border-primary/50 shadow-md' : ''} ${className}`}
       onClick={handleClick}
     >
       <div className="aspect-[3/4] relative">
@@ -47,7 +49,7 @@ const EscortCard: React.FC<EscortCardProps> = ({
           {featured && (
             <Badge className="bg-primary">Featured</Badge>
           )}
-          {escort.is_verified && (
+          {(escort.isVerified || escort.is_verified) && (
             <VerificationBadge level={escort.verificationLevel || 'basic'} />
           )}
         </div>
