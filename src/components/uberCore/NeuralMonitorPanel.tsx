@@ -14,29 +14,59 @@ const NeuralMonitorPanel: React.FC<NeuralMonitorPanelProps> = ({
   systemLogs, 
   refreshData 
 }) => {
+  // Create a default performance object to safely access properties
+  const performance = metrics?.performance || {
+    cpuUsage: 0,
+    memoryUsage: 0,
+    systemLoad: 0,
+    memoryAllocation: 0,
+    networkThroughput: 0,
+    requestRate: 0,
+    averageResponseTime: 0,
+    errorRate: 0
+  };
+
+  // Create a default metrics object to safely access properties
+  const metricsData = metrics?.metrics || {
+    processing: {
+      current: 0,
+      historical: [],
+      processingEfficiency: 0,
+      processingTrend: "stable"
+    },
+    accuracy: {
+      current: 0,
+      historical: [],
+      accuracyRate: 0,
+      accuracyTrend: "stable"
+    },
+    recommendations: [],
+    history: []
+  };
+
   // Just creating a minimal implementation to fix TypeScript errors
   return (
     <div>
       <h2>Neural Monitor Panel</h2>
-      <p>CPU Usage: {metrics?.performance?.cpuUsage}%</p>
-      <p>Memory Usage: {metrics?.performance?.memoryUsage}MB</p>
-      <p>System Load: {metrics?.performance?.systemLoad}%</p>
-      <p>Memory Allocation: {metrics?.performance?.memoryAllocation}MB</p>
-      <p>Network Throughput: {metrics?.performance?.networkThroughput}MB/s</p>
-      <p>Request Rate: {metrics?.performance?.requestRate} req/s</p>
-      <p>Average Response Time: {metrics?.performance?.averageResponseTime}ms</p>
-      <p>Error Rate: {metrics?.performance?.errorRate}%</p>
+      <p>CPU Usage: {performance.cpuUsage}%</p>
+      <p>Memory Usage: {performance.memoryUsage}MB</p>
+      <p>System Load: {performance.systemLoad}%</p>
+      <p>Memory Allocation: {performance.memoryAllocation}MB</p>
+      <p>Network Throughput: {performance.networkThroughput}MB/s</p>
+      <p>Request Rate: {performance.requestRate} req/s</p>
+      <p>Average Response Time: {performance.averageResponseTime}ms</p>
+      <p>Error Rate: {performance.errorRate}%</p>
       
       <div>
         <h3>Processing Efficiency</h3>
-        <p>{metrics?.metrics?.processing?.current}%</p>
-        <p>Trend: {metrics?.metrics?.processing?.processingTrend}</p>
+        <p>{metricsData.processing.current}%</p>
+        <p>Trend: {metricsData.processing.processingTrend}</p>
       </div>
       
       <div>
         <h3>Accuracy Rate</h3>
-        <p>{metrics?.metrics?.accuracy?.current}%</p>
-        <p>Trend: {metrics?.metrics?.accuracy?.accuracyTrend}</p>
+        <p>{metricsData.accuracy.current}%</p>
+        <p>Trend: {metricsData.accuracy.accuracyTrend}</p>
       </div>
       
       <div>

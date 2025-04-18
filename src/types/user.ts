@@ -9,6 +9,12 @@ export interface User {
   createdAt: string;
   phone?: string;
   website?: string;
+  profileImageUrl?: string;
+  avatar_url?: string;
+  avatarUrl?: string;
+  user_metadata?: Record<string, any>;
+  lucoinsBalance?: number;
+  roles?: UserRole[];
 }
 
 export interface UserProfile {
@@ -25,6 +31,7 @@ export interface UserProfile {
   joinedDate: Date;
   avatar_url: string;
   phone?: string;
+  profileImageUrl?: string;
 }
 
 // Add AuthResult type needed for SignInForm and SignUpForm
@@ -53,5 +60,7 @@ export interface RegisterCredentials {
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
-  MODERATOR = 'moderator'
+  MODERATOR = 'moderator',
+  ESCORT = 'escort',
+  CREATOR = 'creator'
 }

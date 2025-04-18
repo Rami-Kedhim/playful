@@ -15,17 +15,7 @@ export const useAuthentication = () => {
     
     try {
       const result = await auth.signIn(email, password);
-      
-      if (result.success) {
-        // Update the context with user data
-        if (auth.setUser && result.user) {
-          auth.setUser(result.user);
-        }
-        return result;
-      } else {
-        setError(result.error || 'Failed to sign in');
-        return result;
-      }
+      return result;
     } catch (err: any) {
       const errorMessage = err.message || 'An unexpected error occurred during sign in';
       setError(errorMessage);
@@ -35,23 +25,13 @@ export const useAuthentication = () => {
     }
   }, [auth]);
   
-  const signUp = useCallback(async (email: string, password: string, options?: any): Promise<AuthResult> => {
+  const signUp = useCallback(async (email: string, password: string, username?: string): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const result = await auth.signUp(email, password, options);
-      
-      if (result.success) {
-        // Update the context with user data if auto sign-in
-        if (auth.setUser && result.user) {
-          auth.setUser(result.user);
-        }
-        return result;
-      } else {
-        setError(result.error || 'Failed to sign up');
-        return result;
-      }
+      const result = await auth.signUp(email, password, username);
+      return result;
     } catch (err: any) {
       const errorMessage = err.message || 'An unexpected error occurred during sign up';
       setError(errorMessage);
@@ -67,11 +47,6 @@ export const useAuthentication = () => {
     
     try {
       await auth.signOut();
-      
-      // Clear user from context
-      if (auth.setUser) {
-        auth.setUser(null);
-      }
     } catch (err: any) {
       setError(err.message || 'Failed to sign out');
     } finally {
@@ -84,12 +59,8 @@ export const useAuthentication = () => {
     setError(null);
     
     try {
-      // Pass only the email parameter
-      const result = await auth.sendPasswordResetEmail(email);
-      if (!result) {
-        setError('Failed to send password reset email');
-      }
-      return !!result;
+      const result = await auth.resetPassword(email);
+      return result.success;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to send password reset email';
       setError(errorMessage);
@@ -105,31 +76,9 @@ export const useAuthentication = () => {
     
     try {
       const success = await auth.updateUserProfile(data);
-      if (!success) {
-        setError('Failed to update profile');
-      }
       return success;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to update profile';
-      setError(errorMessage);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, [auth]);
-  
-  const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<boolean> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const success = await auth.updatePassword(oldPassword, newPassword);
-      if (!success) {
-        setError('Failed to update password');
-      }
-      return success;
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update password';
       setError(errorMessage);
       return false;
     } finally {
@@ -142,15 +91,10 @@ export const useAuthentication = () => {
     setError(null);
     
     try {
-      if (!auth.verifyEmail) {
-        setError('Email verification not supported');
-        return false;
+      if (auth.verifyEmail) {
+        return await auth.verifyEmail(token);
       }
-      const success = await auth.verifyEmail(token);
-      if (!success) {
-        setError('Failed to verify email');
-      }
-      return success;
+      return false;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to verify email';
       setError(errorMessage);
@@ -165,15 +109,10 @@ export const useAuthentication = () => {
     setError(null);
     
     try {
-      if (!auth.sendVerificationEmail) {
-        setError('Send verification email not supported');
-        return false;
+      if (auth.sendVerificationEmail) {
+        return await auth.sendVerificationEmail();
       }
-      const success = await auth.sendVerificationEmail();
-      if (!success) {
-        setError('Failed to send verification email');
-      }
-      return success;
+      return false;
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to send verification email';
       setError(errorMessage);
@@ -183,25 +122,17 @@ export const useAuthentication = () => {
     }
   }, [auth]);
   
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
-  
   return {
     signIn,
     signUp,
     signOut,
     resetPassword,
     updateProfile,
-    updatePassword,
     verifyEmail,
     sendVerificationEmail,
     isLoading,
     error,
-    clearError,
-    user: auth.user,
-    profile: auth.profile,
-    isAuthenticated: auth.isAuthenticated
+    clearError: () => setError(null),
   };
 };
 

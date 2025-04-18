@@ -109,3 +109,16 @@ export const calculateRenewalCost = (basePrice: number, duration: number): numbe
   // Simple calculation, adjust as needed
   return basePrice * (duration / 30); // Assuming duration is in days
 };
+
+// Add toDate utility function
+export const toDate = (value: string | Date | null | undefined): Date | null => {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  
+  try {
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? null : date;
+  } catch (error) {
+    return null;
+  }
+};

@@ -19,6 +19,7 @@ export interface VerificationDocument {
   reviewer_notes?: string;
   type?: string;
   created_at?: Date | string;
+  documentType?: string;
 }
 
 export interface VerificationRequest {
@@ -56,7 +57,8 @@ export enum VerificationLevel {
   NONE = 'none',
   BASIC = 'basic',
   ENHANCED = 'enhanced',
-  PREMIUM = 'premium'
+  PREMIUM = 'premium',
+  STANDARD = 'standard'
 }
 
 // Add DocumentType type for VerificationForm

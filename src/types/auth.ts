@@ -30,6 +30,8 @@ export interface User {
   bio?: string;
   gender?: string;
   full_name?: string;
+  phone?: string;
+  website?: string;
 }
 
 export interface AuthUser extends User {
@@ -38,6 +40,11 @@ export interface AuthUser extends User {
   phone?: string;
   location?: string;
   bio?: string;
+  name?: string;
+  profileImageUrl?: string;
+  avatar_url?: string;
+  user_metadata?: Record<string, any>;
+  roles?: UserRole[];
 }
 
 export interface AuthResult {
@@ -67,6 +74,8 @@ export interface UserProfile {
   is_boosted?: boolean;
   isBoosted?: boolean;
   lucoinsBalance?: number;
+  phone?: string;
+  website?: string;
 }
 
 export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';

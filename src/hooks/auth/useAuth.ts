@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { AuthContextType, User, UserProfile, AuthResult } from '@/types/auth';
+import { AuthContextType, User, UserProfile, AuthResult, UserRole } from '@/types/auth';
 
 export const useAuth = (): AuthContextType => {
   const [user, setUser] = useState<User | null>(null);
@@ -28,7 +28,10 @@ export const useAuth = (): AuthContextType => {
         role: 'user',
         isVerified: true,
         name: email.split('@')[0],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        phone: '',
+        website: '',
+        profileImageUrl: ''
       };
       
       setUser(mockUser);
@@ -49,7 +52,10 @@ export const useAuth = (): AuthContextType => {
         role: 'user',
         isVerified: false,
         name: name || email.split('@')[0],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        phone: '',
+        website: '',
+        profileImageUrl: ''
       };
       
       setUser(mockUser);
@@ -93,11 +99,12 @@ export const useAuth = (): AuthContextType => {
         location: '',
         bio: '',
         isVerified: user.isVerified || false,
-        website: '',
-        avatarUrl: '',
+        website: user.website || '',
+        avatarUrl: user.avatarUrl || '',
         joinedDate: new Date(),
-        avatar_url: '',
-        phone: ''
+        avatar_url: user.avatar_url || '',
+        phone: user.phone || '',
+        profileImageUrl: user.profileImageUrl || ''
       };
       
       setProfile(mockProfile);
@@ -133,6 +140,24 @@ export const useAuth = (): AuthContextType => {
     }
   }, []);
   
+  const verifyEmail = useCallback(async (token: string): Promise<boolean> => {
+    try {
+      // Mock implementation
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }, []);
+  
+  const sendVerificationEmail = useCallback(async (): Promise<boolean> => {
+    try {
+      // Mock implementation
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }, []);
+  
   useEffect(() => {
     // Initialize auth state
     setIsLoading(false);
@@ -159,6 +184,8 @@ export const useAuth = (): AuthContextType => {
     updatePassword,
     setUser,
     updateProfile: updateUserProfile,
+    verifyEmail,
+    sendVerificationEmail
   };
 };
 

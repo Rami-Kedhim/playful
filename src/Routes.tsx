@@ -50,10 +50,13 @@ const RoutesComponent: React.FC = () => {
     email: authUser.email,
     role: (authUser.role as 'user' | 'admin' | 'moderator') || 'user',
     name: authUser.name || authUser.username || authUser.full_name || '',
-    isVerified: authUser.isVerified,
+    isVerified: authUser.isVerified || false,
     createdAt: authUser.created_at || new Date().toISOString(),
     phone: authUser.phone_number || authUser.phone || '',
-    website: authUser.website || ''
+    website: authUser.website || '',
+    profileImageUrl: authUser.profileImageUrl || authUser.avatarUrl || '',
+    avatar_url: authUser.avatar_url || '',
+    avatarUrl: authUser.avatarUrl || authUser.avatar_url || ''
   } : null;
   
   const profile: UserProfile | null = authProfile ? {
@@ -69,7 +72,8 @@ const RoutesComponent: React.FC = () => {
     avatarUrl: authProfile.avatar_url || authProfile.profileImageUrl || '',
     joinedDate: new Date(),
     avatar_url: authProfile.avatar_url || authProfile.profileImageUrl || '',
-    phone: authProfile.phone || ''
+    phone: authProfile.phone || '',
+    profileImageUrl: authProfile.profileImageUrl || authProfile.avatar_url || ''
   } : null;
   
   return (
