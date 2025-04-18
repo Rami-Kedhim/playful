@@ -1,29 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { ServiceType, ServiceTypeContextType } from '@/types/serviceType';
-
-export const getServiceTypeBadgeLabel = (type: ServiceType): string => {
-  switch (type) {
-    case "in-person":
-      return "In-person";
-    case "virtual":
-      return "Virtual";
-    case "both":
-      return "In-person & Virtual";
-    case "all":
-      return "All Types";
-    case "incall":
-      return "Incall";
-    case "outcall":
-      return "Outcall";
-    case "massage":
-      return "Massage";
-    case "dinner":
-      return "Dinner Date";
-    default:
-      return "";
-  }
-};
+import { getServiceTypeBadgeLabel } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 export const useServiceTypeFilter = (): ServiceTypeContextType => {
   const [serviceType, setServiceType] = useState<ServiceType>("");

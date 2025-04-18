@@ -1,6 +1,6 @@
 
 // Import from a consistent path that doesn't have casing issues
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { Grid } from '@/components/ui/grid';
 import EscortCard from './EscortCard';
 
@@ -9,6 +9,9 @@ interface EscortGridProps {
   loading?: boolean;
   emptyMessage?: string;
   onEscortClick?: (escort: Escort) => void;
+  totalPages?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 const EscortGrid: React.FC<EscortGridProps> = ({
@@ -16,6 +19,9 @@ const EscortGrid: React.FC<EscortGridProps> = ({
   loading = false,
   emptyMessage = "No escorts found",
   onEscortClick,
+  totalPages,
+  currentPage,
+  onPageChange
 }) => {
   if (loading) {
     return (

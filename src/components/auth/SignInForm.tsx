@@ -1,65 +1,75 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { AuthResult } from '@/types/user';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { LoginCredentials } from "@/types/user";
+import { AlertCircle } from "lucide-react";
 
 export interface SignInFormProps {
-  onSignIn: (email: string, password: string) => Promise<AuthResult>;
+  onSubmit: (credentials: LoginCredentials) => Promise<void>;
+  loading: boolean;
+  error: string | null;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ onSignIn }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, loading, error }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    
-    try {
-      await onSignIn(email, password);
-    } catch (error) {
-      console.error('Sign in error:', error);
-    } finally {
-      setLoading(false);
-    }
+    onSubmit({ email, password });
   };
   
   return (
     <form onSubmit={handleSubmit}>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input 
+          <Input
             id="email"
             type="email"
-            placeholder="name@example.com"
-            required
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <a href="/forgot-password" className="text-sm text-primary hover:underline">
+            <a 
+              href="#" 
+              className="text-xs text-primary hover:underline"
+            >
               Forgot password?
             </a>
           </div>
-          <Input 
+          <Input
             id="password"
             type="password"
-            required
+            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
         
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing in..." : "Sign In"}
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={loading}
+        >
+          {loading ? "Signing In..." : "Sign In"}
         </Button>
       </div>
     </form>

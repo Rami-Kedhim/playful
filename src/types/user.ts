@@ -7,6 +7,8 @@ export interface User {
   name: string;
   isVerified: boolean;
   createdAt: string;
+  phone?: string;
+  website?: string;
 }
 
 export interface UserProfile {

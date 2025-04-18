@@ -59,19 +59,13 @@ const FilterBadge: React.FC<FilterBadgeProps> = ({ filter, onRemove }) => {
   // Special service type rendering
   if (filter.key === 'serviceType' || filter.key === 'service') {
     // Ensure the value is one of the valid ServiceTypeFilter values
-    const safeValue: ServiceTypeFilter = 
-      (filter.value === 'in-person' || 
-       filter.value === 'virtual' || 
-       filter.value === 'both' || 
-       filter.value === 'all' || 
-       filter.value === 'incall' || 
-       filter.value === 'outcall' || 
-       filter.value === 'massage' || 
-       filter.value === 'dinner') ? filter.value as ServiceTypeFilter : '';
+    const safeValue = filter.value as ServiceTypeFilter;
+    
+    if (!safeValue) return null;
 
     return (
       <div className="inline-flex items-center gap-1 bg-secondary/50 rounded-full pl-2 pr-1 text-sm">
-        <ServiceTypeBadgeLabel type={safeValue} variant="default" />
+        <ServiceTypeBadgeLabel type={safeValue} size="sm" />
         <button 
           onClick={onRemove}
           className="rounded-full w-5 h-5 flex items-center justify-center hover:bg-secondary text-muted-foreground transition-colors"

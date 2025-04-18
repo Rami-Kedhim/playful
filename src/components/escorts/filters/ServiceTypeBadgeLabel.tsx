@@ -9,6 +9,7 @@ export interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   size?: 'sm' | 'default' | 'lg';
   showLabel?: boolean;
+  variant?: "default" | "secondary" | "outline";
 }
 
 export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
@@ -37,54 +38,46 @@ export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   type,
   size = 'default',
-  showLabel = true
+  showLabel = true,
+  variant = "default"
 }) => {
   if (!type) return null;
   
   let Icon;
   let label = "";
-  let variant: "default" | "secondary" | "outline" = "default";
   
   switch (type) {
     case "in-person":
       Icon = MapPin;
       label = "In-person";
-      variant = "secondary";
       break;
     case "virtual":
       Icon = Video;
       label = "Virtual";
-      variant = "outline";
       break;
     case "both":
       Icon = SplitSquareVertical;
       label = "In-person & Virtual";
-      variant = "default";
       break;
     case "all":
       Icon = SplitSquareVertical;
       label = "All Types";
-      variant = "default";
       break;
     case "incall":
       Icon = MapPin;
       label = "Incall";
-      variant = "secondary";
       break;
     case "outcall":
       Icon = MapPin;
       label = "Outcall";
-      variant = "secondary";
       break;
     case "massage":
       Icon = MapPin;
       label = "Massage";
-      variant = "secondary";
       break;
     case "dinner":
       Icon = MapPin;
       label = "Dinner Date";
-      variant = "secondary";
       break;
     default:
       return null;

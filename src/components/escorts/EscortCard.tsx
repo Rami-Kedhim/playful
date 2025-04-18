@@ -5,16 +5,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Star, MapPin, Languages, Calendar } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import ServiceTypeBadgeLabel, { ServiceTypeFilter } from './filters/ServiceTypeBadgeLabel';
 
 interface EscortCardProps {
   escort: Escort;
   className?: string;
   featured?: boolean;
+  onClick?: () => void;
 }
 
-const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) => {
+const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured, onClick }) => {
   const {
     id,
     name,
@@ -51,8 +52,8 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
   };
 
   const getServiceType = (): ServiceTypeFilter => {
-    const hasInPerson = providesInPersonServices || escort.services.includes('in-person') || false;
-    const hasVirtual = providesVirtualContent || escort.services.includes('virtual') || false;
+    const hasInPerson = providesInPersonServices || (escort.services && escort.services.includes('in-person')) || false;
+    const hasVirtual = providesVirtualContent || (escort.services && escort.services.includes('virtual')) || false;
     
     if (hasInPerson && hasVirtual) {
       return "both";
@@ -77,8 +78,16 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
     return text;
   };
 
+  const CardWrapper = onClick ? 
+    ({ children }: { children: React.ReactNode }) => (
+      <div onClick={onClick} className="cursor-pointer">{children}</div>
+    ) : 
+    ({ children }: { children: React.ReactNode }) => (
+      <Link to={`/escorts/${id}`}>{children}</Link>
+    );
+
   return (
-    <Link to={`/escorts/${id}`}>
+    <CardWrapper>
       <Card className={`overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${className} ${featured ? 'border-primary' : ''}`}>
         <div className="relative">
           <div className="aspect-[3/4] overflow-hidden">
@@ -182,7 +191,7 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </CardWrapper>
   );
 };
 

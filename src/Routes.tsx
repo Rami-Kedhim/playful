@@ -6,7 +6,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { AppRoutes } from '@/utils/navigation';
 import { useAuth } from '@/hooks/auth/useAuth';
-import { User, UserProfile } from '@/types/user';
+import { User, UserProfile, UserRole } from '@/types/user';
 import { safelyParseDate } from '@/utils/dateUtils';
 
 // Auth page
@@ -53,6 +53,8 @@ const RoutesComponent: React.FC = () => {
     name: authUser.name || authUser.username || authUser.full_name || '',
     isVerified: authUser.isVerified,
     createdAt: authUser.created_at || new Date().toISOString(),
+    phone: authUser.phone_number || '',
+    website: authUser.website || ''
   } : null;
   
   const profile: UserProfile | null = authProfile ? {

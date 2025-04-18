@@ -7,12 +7,14 @@ interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
   size?: number;
   variant?: 'colored' | 'default';
+  className?: string;
 }
 
 const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
   type, 
   size = 16,
-  variant = 'default'
+  variant = 'default',
+  className = ''
 }) => {
   const getColorClass = () => {
     if (variant !== 'colored') return '';
@@ -25,15 +27,15 @@ const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
     }
   };
 
-  const className = `h-${size} w-${size} ${getColorClass()}`;
+  const iconClassName = `h-${size} w-${size} ${getColorClass()} ${className}`;
   
   switch (type) {
     case 'in-person':
-      return <MapPin className={className} />;
+      return <MapPin className={iconClassName} />;
     case 'virtual':
-      return <Laptop className={className} />;
+      return <Laptop className={iconClassName} />;
     case 'both':
-      return <SquareUserRound className={className} />;
+      return <SquareUserRound className={iconClassName} />;
     default:
       return null;
   }

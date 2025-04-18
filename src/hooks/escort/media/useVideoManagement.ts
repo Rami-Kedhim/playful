@@ -1,136 +1,136 @@
 
-import { useState } from 'react';
-import { Video } from '@/types/video';
+import { useState, useCallback } from 'react';
+import { Video } from '@/types/Escort';
 
-export const useVideoManagement = () => {
+interface VideoManagementResult {
+  videos: Video[];
+  uploading: boolean;
+  uploadProgress: number;
+  error: string | null;
+  uploadVideo: (file: File, metadata: Pick<Video, 'title' | 'description' | 'isPremium'>) => Promise<void>;
+  deleteVideo: (videoId: string) => Promise<void>;
+  updateVideoMetadata: (videoId: string, metadata: Partial<Video>) => Promise<void>;
+}
+
+export const useVideoManagement = (escortId: string): VideoManagementResult => {
   const [videos, setVideos] = useState<Video[]>([
     {
-      id: "v1",
-      title: "Welcome to My Profile",
-      thumbnailUrl: "/placeholders/video-thumbnail-1.jpg",
-      videoUrl: "/videos/sample-video-1.mp4",
-      duration: 120,
-      viewCount: 1450,
-      views: 1450,
-      createdAt: "2023-08-02T14:30:00Z",
-      isPremium: false,
+      id: 'video-1',
+      title: 'Beach Day Fun',
+      thumbnailUrl: 'https://via.placeholder.com/300x200',
+      videoUrl: 'https://example.com/videos/beach.mp4',
+      duration: 120, // in seconds
+      views: 245,
+      createdAt: new Date().toISOString(),
       isPublished: true,
-      escortId: "e1"
+      escortId,
+      viewCount: 245,
+      isPremium: false
     },
     {
-      id: "v2",
-      title: "Exclusive Content Preview",
-      thumbnailUrl: "/placeholders/video-thumbnail-2.jpg",
-      videoUrl: "/videos/sample-video-2.mp4",
-      duration: 180,
-      viewCount: 876,
-      views: 876,
-      createdAt: "2023-07-25T09:15:00Z",
-      isPremium: true,
+      id: 'video-2',
+      title: 'Private Yacht Party',
+      thumbnailUrl: 'https://via.placeholder.com/300x200',
+      videoUrl: 'https://example.com/videos/yacht.mp4',
+      duration: 180, // in seconds
+      views: 120,
+      createdAt: new Date().toISOString(),
       isPublished: true,
-      escortId: "e1"
-    },
-    {
-      id: "v3",
-      title: "Behind the Scenes",
-      thumbnailUrl: "/placeholders/video-thumbnail-3.jpg",
-      videoUrl: "/videos/sample-video-3.mp4",
-      duration: 240,
-      viewCount: 2100,
-      views: 2100,
-      createdAt: "2023-08-10T18:45:00Z",
-      isPremium: true,
-      isPublished: true,
-      escortId: "e1"
+      escortId,
+      viewCount: 120,
+      isPremium: true
     }
   ]);
-
-  const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
   
-  const addVideo = (video: Partial<Video>) => {
-    const newVideo: Video = {
-      id: `v${Date.now()}`,
-      title: video.title || "Untitled Video",
-      thumbnailUrl: video.thumbnailUrl || "/placeholders/default-video-thumbnail.jpg",
-      videoUrl: video.videoUrl || "",
-      duration: video.duration || 0,
-      viewCount: 0,
-      views: 0,
-      createdAt: new Date().toISOString(),
-      isPremium: Boolean(video.isPremium),
-      isPublished: true,
-      escortId: video.escortId || "e1"
-    };
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  
+  const uploadVideo = useCallback(async (file: File, metadata: Pick<Video, 'title' | 'description' | 'isPremium'>) => {
+    setUploading(true);
+    setUploadProgress(0);
+    setError(null);
     
-    setVideos([...videos, newVideo]);
-    return newVideo;
-  };
-  
-  const deleteVideo = (id: string) => {
-    setVideos(videos.filter(video => video.id !== id));
-    if (currentVideo?.id === id) {
-      setCurrentVideo(null);
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(current => {
+          const next = current + 10;
+          return next >= 100 ? 100 : next;
+        });
+      }, 500);
+      
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      // Create new video object
+      const newVideo: Video = {
+        id: 'video-' + Date.now(),
+        title: metadata.title,
+        description: metadata.description,
+        thumbnailUrl: 'https://via.placeholder.com/300x200',
+        videoUrl: URL.createObjectURL(file),
+        duration: 60, // Mock duration
+        views: 0,
+        createdAt: new Date().toISOString(),
+        isPublished: true,
+        escortId,
+        viewCount: 0,
+        isPremium: metadata.isPremium || false
+      };
+      
+      setVideos(current => [...current, newVideo]);
+      
+      // Reset upload state
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress(0);
+      }, 500);
+      
+    } catch (err) {
+      setError('Failed to upload video');
+      setUploading(false);
     }
-  };
+  }, [escortId]);
   
-  const updateVideo = (id: string, updates: Partial<Video>) => {
-    const updatedVideos = videos.map(video => {
-      if (video.id === id) {
-        return { ...video, ...updates };
-      }
-      return video;
-    });
-    
-    setVideos(updatedVideos);
-    
-    if (currentVideo?.id === id) {
-      setCurrentVideo({ ...currentVideo, ...updates });
+  const deleteVideo = useCallback(async (videoId: string) => {
+    try {
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setVideos(current => current.filter(video => video.id !== videoId));
+    } catch (err) {
+      setError('Failed to delete video');
     }
-  };
+  }, []);
   
-  const getVideoById = (id: string): Video | undefined => {
-    return videos.find(video => video.id === id);
-  };
-  
-  const selectVideo = (id: string): boolean => {
-    const video = getVideoById(id);
-    if (video) {
-      setCurrentVideo(video);
-      return true;
+  const updateVideoMetadata = useCallback(async (videoId: string, metadata: Partial<Video>) => {
+    try {
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setVideos(current =>
+        current.map(video =>
+          video.id === videoId
+            ? { ...video, ...metadata }
+            : video
+        )
+      );
+    } catch (err) {
+      setError('Failed to update video metadata');
     }
-    return false;
-  };
-  
-  const clearSelectedVideo = () => {
-    setCurrentVideo(null);
-  };
-  
-  const incrementViews = (id: string) => {
-    updateVideo(id, {
-      viewCount: (getVideoById(id)?.viewCount || 0) + 1,
-      views: (getVideoById(id)?.views || 0) + 1
-    });
-  };
-  
-  const getPremiumVideos = () => {
-    return videos.filter(video => video.isPremium);
-  };
-  
-  const getFreeVideos = () => {
-    return videos.filter(video => !video.isPremium);
-  };
+  }, []);
   
   return {
     videos,
-    currentVideo,
-    addVideo,
+    uploading,
+    uploadProgress,
+    error,
+    uploadVideo,
     deleteVideo,
-    updateVideo,
-    getVideoById,
-    selectVideo,
-    clearSelectedVideo,
-    incrementViews,
-    getPremiumVideos,
-    getFreeVideos
+    updateVideoMetadata
   };
 };

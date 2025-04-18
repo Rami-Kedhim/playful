@@ -7,11 +7,11 @@ import { AppRoutes } from '@/utils/navigation';
 import { UserRole } from '@/types/user';
 
 const AuthPage: React.FC = () => {
-  const { user, isLoggedIn, login } = useAuth();
+  const { user, login } = useAuth();
   const [demoLoginLoading, setDemoLoginLoading] = useState(false);
   
   // If already logged in, redirect to home
-  if (isLoggedIn && user) {
+  if (user) {
     return <Navigate to={AppRoutes.HOME} replace />;
   }
 

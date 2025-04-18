@@ -69,6 +69,12 @@ export interface Escort {
   isAI?: boolean;
   description?: string;
   measurements?: string;
+  subscriptionPrice?: number;
+  contentStats?: {
+    photos: number;
+    videos: number;
+    stories: number;
+  };
 }
 
 // Export Availability interface since it's used in useEscortAvailability.ts
@@ -158,11 +164,14 @@ export interface VerificationRequest {
   created_at?: Date; // For backward compatibility
   updated_at?: Date; // For backward compatibility
   reviewed_at?: Date; // For backward compatibility
+  submittedAt?: Date; // For backward compatibility
   submitted_at?: Date; // For backward compatibility
   rejected_reason?: string; // For backward compatibility
   requested_level?: string; // For backward compatibility
   level?: string; // For backward compatibility
-  submittedAt?: Date; // For backward compatibility
+  rejection_reason?: string;
+  reviewer_notes?: string;
+  requested_level?: string;
 }
 
 // Enum for verification status
@@ -172,7 +181,8 @@ export enum VerificationStatus {
   APPROVED = 'approved',
   REJECTED = 'rejected',
   EXPIRED = 'expired',
-  IN_REVIEW = 'review' // Alias for REVIEW
+  IN_REVIEW = 'review', // Alias for REVIEW
+  ENHANCED = 'enhanced'
 }
 
 // Enum for verification level
@@ -180,5 +190,8 @@ export enum VerificationLevel {
   NONE = 'none',
   BASIC = 'basic',
   VERIFIED = 'verified',
-  PREMIUM = 'premium'
+  PREMIUM = 'premium',
+  ENHANCED = 'enhanced'
 }
+
+export type DocumentType = string;
