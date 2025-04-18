@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -106,7 +105,7 @@ const RoutesComponent: React.FC = () => {
         <Route path="/verification" element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
         <Route path="/personas" element={<AppLayout><PersonasPage /></AppLayout>} />
         
-        {/* Add verification admin route */}
+        {/* Admin verification route */}
         <Route 
           path="/admin/verifications" 
           element={
