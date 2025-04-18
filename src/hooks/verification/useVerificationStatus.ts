@@ -27,11 +27,12 @@ export const useVerificationStatus = (userId?: string) => {
           requested_level: VerificationLevel.BASIC,
           documents: [],
           createdAt: new Date().toISOString(),
-          // Include all required fields plus compatibility fields
+          submittedAt: new Date().toISOString(),
           created_at: new Date().toISOString(),
           level: VerificationLevel.BASIC,
           verificationLevel: VerificationLevel.BASIC,
-          user_id: userId
+          user_id: userId,
+          requestedLevel: VerificationLevel.BASIC
         };
         
         // Artificial delay

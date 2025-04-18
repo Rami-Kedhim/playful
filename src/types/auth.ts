@@ -46,6 +46,9 @@ export interface UserProfile {
   username?: string;
   full_name?: string;
   gender?: DatabaseGender;
+  is_verified?: boolean;
+  lucoin_balance?: number;
+  ubx_balance?: number;
 }
 
 export interface AuthResult {
@@ -53,6 +56,7 @@ export interface AuthResult {
   message?: string;
   error?: string;
   user?: AuthUser;
+  session?: any;
 }
 
 export interface LoginCredentials {
@@ -92,6 +96,7 @@ export interface AuthContextType {
   updateUserProfile: (data: any) => Promise<boolean>;
   refreshProfile: () => Promise<void>;
   updatePassword: (newPassword: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<AuthResult>;
   userRoles: UserRole[];
   checkRole: (role: string | UserRole) => boolean;
 }

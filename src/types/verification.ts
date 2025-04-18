@@ -12,8 +12,21 @@ export const DOCUMENT_TYPES = [
   { value: 'selfie', label: 'Selfie with ID' },
 ];
 
-// Common ID document type
+// Add these constants for document type access
 export const ID_CARD = 'national_id';
+export const PASSPORT = 'passport';
+export const DRIVER_LICENSE = 'drivers_license';
+export const RESIDENCE_PERMIT = 'residence_permit';
+
+// File validation constants
+export const MAX_FILE_SIZE = 5000000; // 5MB
+export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
+export const DOCUMENT_REQUIREMENTS = {
+  passport: { backRequired: false },
+  drivers_license: { backRequired: true },
+  national_id: { backRequired: true },
+  residence_permit: { backRequired: true },
+};
 
 // Verification form schema
 export const verificationFormSchema = z.object({
@@ -25,6 +38,9 @@ export const verificationFormSchema = z.object({
   consentChecked: z.boolean().refine(val => val === true, {
     message: 'You must consent to the verification process',
   }),
+  documentFrontImage: z.any().optional(),
+  documentBackImage: z.any().optional(),
+  selfieImage: z.any().optional(),
 });
 
 // Form values type for verification
@@ -67,6 +83,7 @@ export interface VerificationDocument {
   type?: string;
   url?: string;
   fileUrl?: string;
+  file_url?: string;
   uploadedAt?: string;
 }
 
@@ -91,9 +108,11 @@ export interface VerificationRequest {
   reviewer_notes?: string;
   expires_at?: string;
   verificationLevel?: VerificationLevel;
+  requestedLevel?: VerificationLevel;
   rejection_reason?: string;
   rejectionReason?: string;
   level?: VerificationLevel;
   user_id?: string;
   reviewedAt?: string;
+  reviewer_id?: string;
 }

@@ -4,20 +4,27 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
-import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
 import { Escort, Booking } from '@/types/escort';
 
 interface BookingDialogProps {
   escort: Escort;
-  open: boolean;
+  isOpen?: boolean;
   onClose: () => void;
-  onBook: (booking: Partial<Booking>) => void;
+  onBookNow?: () => void;
+  onSubmit?: (bookingDetails: Partial<Booking>) => void;
+  onCancel?: () => void;
 }
 
-const BookingDialog: React.FC<BookingDialogProps> = ({ escort, open, onClose, onBook }) => {
+const BookingDialog: React.FC<BookingDialogProps> = ({ 
+  escort, 
+  isOpen = false, 
+  onClose, 
+  onBookNow,
+  onSubmit,
+  onCancel
+}) => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [startTime, setStartTime] = useState('');
   const [duration, setDuration] = useState(1);
@@ -52,19 +59,32 @@ const BookingDialog: React.FC<BookingDialogProps> = ({ escort, open, onClose, on
     const booking: Partial<Booking> = {
       escortId: escort.id,
       date: format(date, 'yyyy-MM-dd'),
-      startTime: format(startDate, 'yyyy-MM-dd HH:mm'),
-      endTime: format(endDate, 'yyyy-MM-dd HH:mm'),
+      startTime: startDate.toISOString(),
+      endTime: endDate.toISOString(),
       duration,
       service,
       serviceType: service,
       price: (escort.rates?.hourly || 0) * duration
     };
     
-    onBook(booking);
+    if (onSubmit) {
+      onSubmit(booking);
+    } else if (onBookNow) {
+      onBookNow();
+    }
+    
+    onClose();
+  };
+
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    }
+    onClose();
   };
   
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Book Session with {escort.name}</DialogTitle>
@@ -139,7 +159,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({ escort, open, onClose, on
           </div>
           
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
             <Button type="submit">Request Booking</Button>

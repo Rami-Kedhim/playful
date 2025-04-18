@@ -1,104 +1,83 @@
 
 import React from 'react';
-import { ChevronLeft, Star, Shield, Calendar, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { User, MapPin, Verified } from 'lucide-react';
 import { Escort } from '@/types/escort';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { VerificationLevel } from '@/types/verification';
 
-interface ProfileHeaderProps {
+export interface ProfileHeaderProps {
   escort: Escort;
-  onBookNow?: () => void;
+  onFavoriteToggle?: () => void;
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ escort, onBookNow }) => {
+const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
+  // Function to get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  // Calculate verification badge based on level
+  const getVerificationBadge = () => {
+    const level = escort.verificationLevel || VerificationLevel.NONE;
+    
+    if (level === VerificationLevel.NONE) return null;
+    
+    return (
+      <Badge variant="outline" className="flex items-center gap-1">
+        <Verified className="h-3.5 w-3.5 text-primary" />
+        <span className="capitalize">{level} Verified</span>
+      </Badge>
+    );
+  };
+
   return (
-    <div className="w-full bg-gradient-to-b from-muted/50 to-background pt-6 pb-4">
-      <div className="container">
-        <div className="flex items-center gap-1 mb-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/escorts" className="flex items-center gap-1">
-              <ChevronLeft className="h-4 w-4" />
-              Back to search
-            </Link>
-          </Button>
+    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <Avatar className="h-20 w-20 border-2 border-primary">
+        <AvatarImage 
+          src={escort.profileImage || escort.avatar} 
+          alt={escort.name} 
+          className="object-cover"
+        />
+        <AvatarFallback>{getInitials(escort.name)}</AvatarFallback>
+      </Avatar>
+      
+      <div className="space-y-1 flex-1">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">{escort.name}</h1>
+          {onFavoriteToggle && (
+            <button 
+              onClick={onFavoriteToggle}
+              className="text-muted-foreground hover:text-destructive transition-colors"
+              aria-label={escort.isFavorited ? "Remove from favorites" : "Add to favorites"}
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill={escort.isFavorited ? "currentColor" : "none"}
+                stroke="currentColor" 
+                className="w-6 h-6"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+          )}
         </div>
         
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-1/3 lg:w-1/4">
-            <div className="aspect-[3/4] rounded-md overflow-hidden border">
-              <img 
-                src={escort.avatar || escort.imageUrl || escort.avatar_url || '/placeholders/escort-profile.jpg'} 
-                alt={escort.name} 
-                className="w-full h-full object-cover"
-              />
-            </div>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 items-center text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <User className="h-4 w-4" />
+            <span>{escort.gender || "Not specified"}</span>
           </div>
-          
-          <div className="w-full md:w-2/3 lg:w-3/4 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold">{escort.name}</h1>
-                <div className="flex items-center gap-2 text-muted-foreground mt-1">
-                  <MapPin className="h-4 w-4" />
-                  <span>{escort.location}</span>
-                  
-                  {(escort.verificationLevel || escort.verification_level) && (
-                    <>
-                      <span className="mx-2">•</span>
-                      <Shield className="h-4 w-4 text-primary" />
-                      <span className="capitalize">
-                        {escort.verificationLevel || escort.verification_level} verified
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-2">
-                {escort.availableNow && (
-                  <Badge variant="success" className="font-semibold">
-                    Available Now
-                  </Badge>
-                )}
-                
-                <div className="flex items-center bg-muted rounded-full px-3 py-1">
-                  <Star className="h-4 w-4 text-yellow-500 mr-1" />
-                  <span className="font-medium mr-1">{escort.rating || '4.8'}</span>
-                  <span className="text-muted-foreground text-xs">({escort.reviewCount || 0} reviews)</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2">
-                {escort.services?.slice(0, 5).map((service, index) => (
-                  <Badge key={index} variant="outline" className="capitalize">
-                    {service}
-                  </Badge>
-                ))}
-              </div>
-              
-              <p className="text-muted-foreground line-clamp-3">
-                {escort.bio || escort.description || escort.about || 
-                  "No description available for this profile yet."}
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center">
-                <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
-                <span className="text-sm">
-                  Member since {escort.lastActive ? new Date(escort.lastActive).toLocaleDateString() : 'Recently joined'}
-                </span>
-              </div>
-              
-              <div className="flex gap-3">
-                <Button variant="outline">Message</Button>
-                <Button onClick={onBookNow}>Book Now</Button>
-              </div>
-            </div>
+          <div className="flex items-center gap-1">
+            <MapPin className="h-4 w-4" />
+            <span>{escort.location || "Remote"}</span>
           </div>
+          {getVerificationBadge()}
         </div>
       </div>
     </div>

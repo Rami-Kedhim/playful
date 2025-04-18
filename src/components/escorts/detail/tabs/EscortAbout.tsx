@@ -1,32 +1,66 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { CalendarDays, Languages, MapPin } from 'lucide-react';
+import { User, MapPin, Ruler, Calendar, Clock, Languages, Globe } from 'lucide-react';
 import { Escort } from '@/types/escort';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface EscortAboutProps {
   escort: Escort;
 }
 
 const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
-  // Helper function to safely render arrays
-  const safeRenderArray = (arr: unknown, renderItem: (item: string, index: number) => React.ReactNode) => {
-    if (Array.isArray(arr)) {
-      return arr.map((item, index) => renderItem(String(item), index));
-    }
-    return null;
+  // Function to check if an attribute exists
+  const hasAttribute = (attr: any): boolean => {
+    return attr !== undefined && attr !== null && attr !== '';
+  };
+  
+  // Format the measurements
+  const formatMeasurements = () => {
+    if (!escort.measurements) return null;
+    
+    const { bust, waist, hips } = escort.measurements;
+    if (!bust && !waist && !hips) return null;
+    
+    return (
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {bust && (
+          <div className="text-center p-2 bg-accent rounded-md">
+            <div className="text-sm text-muted-foreground">Bust</div>
+            <div className="font-medium">{bust}</div>
+          </div>
+        )}
+        {waist && (
+          <div className="text-center p-2 bg-accent rounded-md">
+            <div className="text-sm text-muted-foreground">Waist</div>
+            <div className="font-medium">{waist}</div>
+          </div>
+        )}
+        {hips && (
+          <div className="text-center p-2 bg-accent rounded-md">
+            <div className="text-sm text-muted-foreground">Hips</div>
+            <div className="font-medium">{hips}</div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">About Me</h2>
-        <p className="text-muted-foreground whitespace-pre-line">
-          {escort.about || escort.bio || 
-            "This escort hasn't provided a bio yet. Feel free to ask them about themselves when you connect."}
-        </p>
+        <h2 className="text-2xl font-semibold mb-2">About {escort.name}</h2>
+        
+        <ScrollArea className="max-h-[200px] rounded-md">
+          <div className="space-y-2 p-1">
+            {escort.bio ? (
+              <p className="text-muted-foreground">{escort.bio}</p>
+            ) : (
+              <p className="text-muted-foreground italic">No bio provided.</p>
+            )}
+          </div>
+        </ScrollArea>
       </div>
       
       <Separator />
@@ -35,89 +69,104 @@ const EscortAbout: React.FC<EscortAboutProps> = ({ escort }) => {
         <Card>
           <CardContent className="pt-6">
             <h3 className="font-semibold text-lg mb-4">Personal Details</h3>
-            <ul className="space-y-3">
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Age</span>
-                <span className="font-medium">{escort.age || 'Not specified'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Gender</span>
-                <span className="font-medium capitalize">{escort.gender || 'Not specified'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Height</span>
-                <span className="font-medium">{escort.height || 'Not specified'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Body Type</span>
-                <span className="font-medium capitalize">
-                  {escort.bodyType || 'Not specified'}
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Hair Color</span>
-                <span className="font-medium capitalize">{escort.hairColor || 'Not specified'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Eye Color</span>
-                <span className="font-medium capitalize">{escort.eyeColor || 'Not specified'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="text-muted-foreground">Ethnicity</span>
-                <span className="font-medium capitalize">{escort.ethnicity || 'Not specified'}</span>
-              </li>
-            </ul>
+            <div className="space-y-3">
+              {hasAttribute(escort.age) && (
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-muted-foreground text-sm">Age</span>
+                    <p>{escort.age} years</p>
+                  </div>
+                </div>
+              )}
+              
+              {hasAttribute(escort.physique?.bodyType) && (
+                <div className="flex items-center gap-3">
+                  <User className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-muted-foreground text-sm">Body Type</span>
+                    <p>{escort.physique?.bodyType}</p>
+                  </div>
+                </div>
+              )}
+              
+              {hasAttribute(escort.height) && (
+                <div className="flex items-center gap-3">
+                  <Ruler className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-muted-foreground text-sm">Height</span>
+                    <p>{escort.height}</p>
+                  </div>
+                </div>
+              )}
+              
+              {hasAttribute(escort.ethnicity) && (
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-muted-foreground text-sm">Ethnicity</span>
+                    <p>{escort.ethnicity}</p>
+                  </div>
+                </div>
+              )}
+              
+              {Array.isArray(escort.languages) && escort.languages.length > 0 && (
+                <div className="flex items-center gap-3">
+                  <Languages className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-muted-foreground text-sm">Languages</span>
+                    <p>{escort.languages.join(', ')}</p>
+                  </div>
+                </div>
+              )}
+              
+              {escort.availability && (
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <div>
+                    <span className="text-muted-foreground text-sm">Availability</span>
+                    <p>{escort.availability}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="pt-6">
-            <h3 className="font-semibold text-lg mb-4">Location & Languages</h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-2">
-                <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Location</p>
-                  <p className="text-muted-foreground">{escort.location || 'Not specified'}</p>
+            <h3 className="font-semibold text-lg mb-4">Physical Attributes</h3>
+            
+            {formatMeasurements()}
+            
+            <div className="space-y-3">
+              {hasAttribute(escort.hair) && (
+                <div className="flex items-center justify-between py-1 border-b">
+                  <span className="text-muted-foreground">Hair</span>
+                  <span>{escort.hair}</span>
                 </div>
-              </div>
+              )}
               
-              <div className="flex items-start gap-2">
-                <Languages className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Languages</p>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {Array.isArray(escort.languages) && escort.languages.length > 0 ? (
-                      escort.languages.map((language, index) => (
-                        <Badge key={index} variant="outline">
-                          {language}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-muted-foreground">Not specified</span>
-                    )}
-                  </div>
+              {hasAttribute(escort.eyes) && (
+                <div className="flex items-center justify-between py-1 border-b">
+                  <span className="text-muted-foreground">Eyes</span>
+                  <span>{escort.eyes}</span>
                 </div>
-              </div>
+              )}
               
-              <div className="flex items-start gap-2">
-                <CalendarDays className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Availability</p>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {safeRenderArray(
-                      escort.availability, 
-                      (day, index) => (
-                        <Badge key={index} variant="outline">
-                          {day}
-                        </Badge>
-                      )
-                    ) || (
-                      <span className="text-muted-foreground">Not specified</span>
-                    )}
-                  </div>
+              {hasAttribute(escort.physique?.build) && (
+                <div className="flex items-center justify-between py-1 border-b">
+                  <span className="text-muted-foreground">Build</span>
+                  <span>{escort.physique?.build}</span>
                 </div>
-              </div>
+              )}
+              
+              {hasAttribute(escort.physique?.features?.join(', ')) && (
+                <div className="flex items-center justify-between py-1 border-b">
+                  <span className="text-muted-foreground">Features</span>
+                  <span>{escort.physique?.features?.join(', ')}</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
