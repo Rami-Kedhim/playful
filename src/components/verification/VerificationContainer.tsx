@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { VerificationStatusTab } from "./tabs/VerificationStatusTab";
-import { VerificationUpgradeTab } from "./tabs/VerificationUpgradeTab";
-import { VerificationDocumentTab } from "./tabs/VerificationDocumentTab";
+import VerificationStatusTab from "./tabs/VerificationStatusTab";
+import VerificationUpgradeTab from "./tabs/VerificationUpgradeTab";
+import VerificationDocumentTab from "./tabs/VerificationDocumentTab";
 
 interface VerificationContainerProps {
   userId: string;

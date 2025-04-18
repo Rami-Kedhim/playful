@@ -1,51 +1,39 @@
 
-import { BaseNeuralService } from '../types/NeuralService';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
 
-export class LivecamsNeuralService extends BaseNeuralService {
+export class LivecamsNeuralService implements NeuralService {
+  moduleId: string;
+  moduleType: ModuleType = 'livecams';
+  config: NeuralServiceConfig;
+
   constructor(moduleId: string) {
-    super(
-      moduleId,
-      'livecams',
-      'Livecam Neural Service',
-      'Optimizes livecam discovery and scheduling'
-    );
+    this.moduleId = moduleId;
+    this.config = {
+      enabled: true,
+      priority: 50,
+      autonomyLevel: 70,
+      resourceAllocation: 40
+    };
   }
   
   getCapabilities(): string[] {
     return [
-      'schedule-optimization',
-      'audience-matching',
-      'peak-time-prediction',
-      'stream-quality-enhancement',
-      'audience-engagement-boost'
+      'LiveStreamProcessing',
+      'ViewerAnalytics',
+      'StreamRecommendation',
+      'ContentFiltering',
+      'InteractionManagement'
     ];
   }
-  
-  // Implementation for BaseNeuralService abstract methods
-  configure(config: Record<string, any>): boolean {
-    console.log('Configuring LivecamsNeuralService:', config);
-    return true;
+
+  updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
+    this.config = { ...this.config, ...newConfig };
   }
   
-  getMetrics(): Record<string, any> {
-    return {
-      activeStreams: Math.floor(Math.random() * 100),
-      averageViewers: Math.floor(Math.random() * 50) + 10,
-      engagementScore: Math.random() * 100
-    };
-  }
-  
-  isEnabled(): boolean {
-    return true;
-  }
-  
-  getConfig(): Record<string, any> {
-    return {
-      priority: 70,
-      autonomyLevel: 60
-    };
+  getId(): string {
+    return this.moduleId;
   }
 }
 
-// Export a default instance for compatibility
-export const livecamsNeuralService = new LivecamsNeuralService('livecams-default');
+// Export a singleton instance for common use
+export const livecamsNeuralService = new LivecamsNeuralService('livecams-primary');

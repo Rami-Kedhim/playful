@@ -1,51 +1,39 @@
 
-import { BaseNeuralService } from '../types/NeuralService';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
 
-export class CreatorsNeuralService extends BaseNeuralService {
+export class CreatorsNeuralService implements NeuralService {
+  moduleId: string;
+  moduleType: ModuleType = 'creators';
+  config: NeuralServiceConfig;
+
   constructor(moduleId: string) {
-    super(
-      moduleId,
-      'creators',
-      'Creators Neural Service',
-      'Enhances content creator discovery and monetization'
-    );
+    this.moduleId = moduleId;
+    this.config = {
+      enabled: true,
+      priority: 60,
+      autonomyLevel: 65,
+      resourceAllocation: 50
+    };
   }
   
   getCapabilities(): string[] {
     return [
-      'content-recommendation',
-      'audience-targeting',
-      'monetization-optimization',
-      'engagement-analytics',
-      'viral-potential-prediction'
+      'ContentAnalysis',
+      'CreatorRecommendation',
+      'AudienceInsights',
+      'TrendPrediction',
+      'EngagementOptimization'
     ];
   }
-  
-  // Implementation for BaseNeuralService abstract methods
-  configure(config: Record<string, any>): boolean {
-    console.log('Configuring CreatorsNeuralService:', config);
-    return true;
+
+  updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
+    this.config = { ...this.config, ...newConfig };
   }
   
-  getMetrics(): Record<string, any> {
-    return {
-      activeCreators: Math.floor(Math.random() * 150) + 50,
-      audienceEngagement: Math.random() * 100,
-      monetizationScore: Math.random() * 100
-    };
-  }
-  
-  isEnabled(): boolean {
-    return true;
-  }
-  
-  getConfig(): Record<string, any> {
-    return {
-      priority: 75,
-      autonomyLevel: 65
-    };
+  getId(): string {
+    return this.moduleId;
   }
 }
 
-// Export a default instance for compatibility
-export const creatorsNeuralService = new CreatorsNeuralService('creators-default');
+// Export a singleton instance for common use
+export const creatorsNeuralService = new CreatorsNeuralService('creators-primary');

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { LivecamsNeuralService, livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
+import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
 import LivecamProvider from './providers/LivecamProvider';
 
 // These are placeholder components until the actual pages are implemented

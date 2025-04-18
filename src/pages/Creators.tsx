@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { useCreators } from '@/hooks/useCreators';
-import { CreatorCard } from '@/components/creators/CreatorCard';
+import CreatorCard from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,7 +24,7 @@ const Creators = () => {
   const filteredCreators = creators
     ? creators.filter(creator =>
         creator.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        (filterCategory === 'all' || creator.category === filterCategory)
+        (filterCategory === 'all' || (creator.category && creator.category === filterCategory))
       )
     : [];
 

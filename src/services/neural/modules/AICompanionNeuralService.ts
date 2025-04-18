@@ -1,51 +1,40 @@
 
-import { BaseNeuralService } from '../types/NeuralService';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
 
-export class AICompanionNeuralService extends BaseNeuralService {
+export class AICompanionNeuralService implements NeuralService {
+  moduleId: string;
+  moduleType: ModuleType = 'ai-companion';
+  config: NeuralServiceConfig;
+
   constructor(moduleId: string) {
-    super(
-      moduleId,
-      'ai-companion',
-      'AI Companion Neural Service',
-      'Enhances AI companion personalities and interactions'
-    );
+    this.moduleId = moduleId;
+    this.config = {
+      enabled: true,
+      priority: 80,
+      autonomyLevel: 90,
+      resourceAllocation: 60
+    };
   }
   
   getCapabilities(): string[] {
     return [
-      'personality-enhancement',
-      'contextual-memory',
-      'emotional-response',
-      'character-consistency',
-      'personalized-interaction'
+      'NaturalLanguageProcessing',
+      'EmotionalIntelligence',
+      'PersonalityModeling',
+      'MemoryManagement',
+      'BehavioralAdaption',
+      'VoiceSynthesis'
     ];
   }
-  
-  // Implementation for BaseNeuralService abstract methods
-  configure(config: Record<string, any>): boolean {
-    console.log('Configuring AICompanionNeuralService:', config);
-    return true;
+
+  updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
+    this.config = { ...this.config, ...newConfig };
   }
   
-  getMetrics(): Record<string, any> {
-    return {
-      activeCompanions: Math.floor(Math.random() * 50),
-      conversationDepth: Math.random() * 10,
-      sentimentScore: Math.random()
-    };
-  }
-  
-  isEnabled(): boolean {
-    return true;
-  }
-  
-  getConfig(): Record<string, any> {
-    return {
-      priority: 75,
-      autonomyLevel: 90
-    };
+  getId(): string {
+    return this.moduleId;
   }
 }
 
-// Export a default instance for compatibility
-export const aiCompanionNeuralService = new AICompanionNeuralService('ai-companion-default');
+// Export a singleton instance for common use
+export const aiCompanionNeuralService = new AICompanionNeuralService('ai-companion-primary');

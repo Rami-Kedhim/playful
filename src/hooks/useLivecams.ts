@@ -9,12 +9,9 @@ export function useLivecams() {
     throw new Error('useLivecams must be used within a LivecamProvider');
   }
   
-  // Return a safe subset of properties
-  const { livecams, loading, error } = context;
-  
   return {
-    livecams,
-    loading,
-    error
+    livecams: context.livecams || [],
+    loading: context.loading || false,
+    error: context.error || null
   };
 }

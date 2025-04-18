@@ -1,51 +1,41 @@
 
-import { BaseNeuralService } from '../types/NeuralService';
+import { ModuleType, NeuralService, NeuralServiceConfig } from '../types/moduleTypes';
 
-export class EscortsNeuralService extends BaseNeuralService {
+export class EscortsNeuralService implements NeuralService {
+  moduleId: string;
+  moduleType: ModuleType = 'escorts';
+  config: NeuralServiceConfig;
+
   constructor(moduleId: string) {
-    super(
-      moduleId,
-      'escorts',
-      'Escorts Neural Service',
-      'Provides AI enhancement for escort profiles and discovery'
-    );
+    this.moduleId = moduleId;
+    this.config = {
+      enabled: true,
+      priority: 70,
+      autonomyLevel: 60,
+      resourceAllocation: 45,
+      boostingEnabled: true,
+      boostingAlgorithm: 'HermesAlgorithm'
+    };
   }
   
   getCapabilities(): string[] {
     return [
-      'profile-boost',
-      'match-making',
-      'availability-prediction',
-      'preference-analysis',
-      'real-meet-optimization'
+      'ProfileMatching',
+      'LocationAwareness',
+      'VerificationAssessment',
+      'SafetyMonitoring',
+      'BookingOptimization'
     ];
   }
-  
-  // Implementation for BaseNeuralService abstract methods
-  configure(config: Record<string, any>): boolean {
-    console.log('Configuring EscortsNeuralService:', config);
-    return true;
+
+  updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
+    this.config = { ...this.config, ...newConfig };
   }
   
-  getMetrics(): Record<string, any> {
-    return {
-      activeProfiles: Math.floor(Math.random() * 200),
-      matchScore: Math.random(),
-      bookingRate: Math.random() * 0.5
-    };
-  }
-  
-  isEnabled(): boolean {
-    return true;
-  }
-  
-  getConfig(): Record<string, any> {
-    return {
-      priority: 85,
-      autonomyLevel: 70
-    };
+  getId(): string {
+    return this.moduleId;
   }
 }
 
-// Export a default instance for compatibility
-export const escortsNeuralService = new EscortsNeuralService('escorts-default');
+// Export a singleton instance for common use
+export const escortsNeuralService = new EscortsNeuralService('escorts-primary');

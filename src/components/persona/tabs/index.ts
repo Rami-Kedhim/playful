@@ -1,7 +1,7 @@
 
 export { PersonaAboutTab } from './PersonaAboutTab';
-export { PersonaBookingTab } from './PersonaBookingTab';
-export { PersonaChatTab } from './PersonaChatTab';
+export { default as PersonaBookingTab } from './PersonaBookingTab';
+export { default as PersonaChatTab } from './PersonaChatTab';
 export { PersonaContentTab } from './PersonaContentTab';
-export { PersonaLiveTab } from './PersonaLiveTab';
-export { PersonaStoriesTab } from './PersonaStoriesTab';
+export { default as PersonaLiveTab } from './PersonaLiveTab';
+export { default as PersonaStoriesTab } from './PersonaStoriesTab';

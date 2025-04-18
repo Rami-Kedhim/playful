@@ -1,113 +1,104 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { LivecamModel } from '@/types/livecam';
-import { livecamData } from '@/data/livecamData';
-import { livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 
-interface LivecamContextProps {
-  livecams: LivecamModel[];
-  loading: boolean;
-  error: string | null;
-  refreshLivecams: () => Promise<void>;
-  getLivecamById: (id: string) => LivecamModel | undefined;
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
+
+// Mock livecam data for initial development
+const mockLivecams = [
+  {
+    id: '1',
+    title: 'Morning Yoga',
+    performerId: '101',
+    performerName: 'Elena',
+    performerAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
+    viewerCount: 128,
+    isLive: true,
+    tags: ['yoga', 'fitness', 'wellness'],
+    isPremium: false
+  },
+  {
+    id: '2',
+    title: 'DJ Session - Electronic Vibes',
+    performerId: '102',
+    performerName: 'Mike',
+    performerAvatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
+    viewerCount: 356,
+    isLive: true,
+    tags: ['music', 'dj', 'electronic'],
+    isPremium: true
+  },
+  {
+    id: '3',
+    title: 'Cooking Class - Italian Pasta',
+    performerId: '103',
+    performerName: 'Sophia',
+    performerAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
+    viewerCount: 219,
+    isLive: true,
+    tags: ['cooking', 'food', 'italian'],
+    isPremium: false
+  }
+];
+
+export interface Livecam {
+  id: string;
+  title: string;
+  performerId: string;
+  performerName: string;
+  performerAvatar: string;
+  thumbnailUrl: string;
+  viewerCount: number;
+  isLive: boolean;
+  tags: string[];
+  isPremium: boolean;
 }
 
-const LivecamContext = createContext<LivecamContextProps | undefined>(undefined);
+interface LivecamContextProps {
+  livecams: Livecam[];
+  loading: boolean;
+  error: string | null;
+}
 
-export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [livecams, setLivecams] = useState<LivecamModel[]>([]);
+export const LivecamContext = createContext<LivecamContextProps>({
+  livecams: [],
+  loading: false,
+  error: null
+});
+
+export const useLivecamContext = () => useContext(LivecamContext);
+
+interface LivecamProviderProps {
+  children: React.ReactNode;
+}
+
+const LivecamProvider: React.FC<LivecamProviderProps> = ({ children }) => {
+  const [livecams, setLivecams] = useState<Livecam[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Initialize the livecams
   useEffect(() => {
     const loadLivecams = async () => {
       try {
-        setLoading(true);
-        
-        // Simulate loading data
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Set livecam data
-        setLivecams(livecamData);
-        
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load livecams');
-      } finally {
+        // In a real app, this would fetch from an API
+        setLivecams(mockLivecams);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load livecams');
         setLoading(false);
       }
     };
-    
+
     loadLivecams();
-    
-    // Connect to neural service when component mounts
-    const connectToNeuralService = async () => {
-      try {
-        // Configure neural service for livecam optimization
-        livecamsNeuralService.configure({
-          priority: 70,
-          autonomyLevel: 60,
-          enabled: true
-        });
-        
-        // Log successful connection
-        console.log('Connected to Livecams Neural Service:', livecamsNeuralService.moduleId);
-      } catch (err) {
-        console.error('Failed to connect to Livecams Neural Service:', err);
-      }
-    };
-    
-    connectToNeuralService();
-    
-    // Cleanup on unmount
-    return () => {
-      console.log('Disconnecting from Livecams Neural Service');
-    };
   }, []);
-  
-  const refreshLivecams = async () => {
-    try {
-      setLoading(true);
-      
-      // Simulate refreshing data
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      // Re-set livecam data
-      setLivecams(livecamData);
-      
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to refresh livecams');
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const getLivecamById = (id: string): LivecamModel | undefined => {
-    return livecams.find(livecam => livecam.id === id);
-  };
-  
-  const value: LivecamContextProps = {
-    livecams,
-    loading,
-    error,
-    refreshLivecams,
-    getLivecamById
-  };
-  
+
   return (
-    <LivecamContext.Provider value={value}>
+    <LivecamContext.Provider value={{ livecams, loading, error }}>
       {children}
     </LivecamContext.Provider>
   );
-};
-
-export const useLivecamContext = (): LivecamContextProps => {
-  const context = useContext(LivecamContext);
-  if (!context) {
-    throw new Error('useLivecamContext must be used within a LivecamProvider');
-  }
-  return context;
 };
 
 export default LivecamProvider;

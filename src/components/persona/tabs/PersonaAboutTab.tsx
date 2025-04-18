@@ -2,8 +2,8 @@
 import React from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Clock, MapPin, Globe, Languages, User, Star, Heart } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Clock, MapPin, Star, MessageCircle, HeartHandshake, Languages } from 'lucide-react';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
 
 interface PersonaAboutTabProps {
@@ -11,165 +11,117 @@ interface PersonaAboutTabProps {
 }
 
 export const PersonaAboutTab: React.FC<PersonaAboutTabProps> = ({ persona }) => {
+  // Safe access to potentially undefined properties
+  const description = persona.description || persona.bio || 'No description available';
+  const location = persona.location || 'Location not specified';
+  
+  const languages = persona.languages || [];
+  const hasLanguages = Array.isArray(languages) && languages.length > 0;
+  
+  const services = Array.isArray(persona.services) ? persona.services : [];
+  const hasServices = services.length > 0;
+  
+  const traits = Array.isArray(persona.traits) ? persona.traits : [];
+  const hasTraits = traits.length > 0;
+  
+  // Extract statistics
+  const stats = persona.stats || {};
+  const responseTimeMinutes = (stats.responseTime && typeof stats.responseTime === 'number') 
+    ? stats.responseTime 
+    : undefined;
+  
   return (
     <div className="space-y-6">
-      {/* Biography Section */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-xl font-semibold mb-2">Biography</h3>
-          <p className="text-muted-foreground whitespace-pre-line">
-            {persona.bio || persona.description || "No biography provided."}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Details Section */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-xl font-semibold mb-4">Details</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Basic Details */}
-            <div className="space-y-3">
-              {persona.age && (
-                <div className="flex items-center">
-                  <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">Age: {persona.age}</span>
-                </div>
-              )}
-              
-              {persona.location && (
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">{persona.location}</span>
-                </div>
-              )}
-              
-              {persona.ethnicity && (
-                <div className="flex items-center">
-                  <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">Ethnicity: {persona.ethnicity}</span>
-                </div>
-              )}
-              
-              {persona.language && persona.language.length > 0 && (
-                <div className="flex items-center">
-                  <Languages className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">Languages: {persona.language.join(', ')}</span>
-                </div>
-              )}
-            </div>
-            
-            {/* Additional Details */}
-            <div className="space-y-3">
-              {persona.isVerified && (
-                <div className="flex items-center">
-                  <VerificationBadge size="sm" />
-                  <span className="text-sm ml-2">Verified Profile</span>
-                </div>
-              )}
-              
-              {persona.rating !== undefined && (
-                <div className="flex items-center">
-                  <Star className="h-4 w-4 mr-2 text-yellow-500" />
-                  <span className="text-sm">Rating: {persona.rating.toFixed(1)}</span>
-                </div>
-              )}
-              
-              {persona.stats?.favoriteCount !== undefined && (
-                <div className="flex items-center">
-                  <Heart className="h-4 w-4 mr-2 text-red-500" />
-                  <span className="text-sm">Favorites: {persona.stats.favoriteCount}</span>
-                </div>
-              )}
-              
-              {persona.stats?.responseTime !== undefined && (
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">Response time: {persona.stats.responseTime}m</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Services Section - Only show for escorts or those with services */}
-      {(persona.type === 'escort' || persona.roleFlags?.isEscort || persona.services) && (
+      {/* Description */}
+      <div>
+        <h3 className="text-lg font-semibold mb-2">About</h3>
+        <p className="text-muted-foreground">{description}</p>
+      </div>
+      
+      {/* Quick Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Location */}
         <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-xl font-semibold mb-4">Services</h3>
-            {persona.services && persona.services.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {persona.services.map((service, index) => (
-                  <div key={index} className="bg-secondary/20 rounded-md p-3">
-                    {service}
-                  </div>
-                ))}
+          <CardContent className="p-4 flex items-center">
+            <MapPin className="h-5 w-5 text-muted-foreground mr-3" />
+            <div>
+              <p className="text-sm font-medium">Location</p>
+              <p className="text-sm text-muted-foreground">{location}</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Languages */}
+        {hasLanguages && (
+          <Card>
+            <CardContent className="p-4 flex items-center">
+              <Languages className="h-5 w-5 text-muted-foreground mr-3" />
+              <div>
+                <p className="text-sm font-medium">Languages</p>
+                <p className="text-sm text-muted-foreground">
+                  {languages.join(', ')}
+                </p>
               </div>
-            ) : (
-              <p className="text-muted-foreground">No services listed.</p>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Special Traits - Only for AI personas */}
-      {(persona.type === 'ai' || persona.roleFlags?.isAI) && persona.traits && (
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Verification */}
         <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-xl font-semibold mb-4">AI Traits</h3>
-            <div className="space-y-2">
-              {Object.entries(persona.traits).map(([trait, value]) => (
-                <div key={trait} className="flex flex-col">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm capitalize">{trait}</span>
-                    <span className="text-sm">{value}/5</span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-primary" 
-                      style={{ width: `${(value / 5) * 100}%` }} 
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Price Information */}
-      {(persona.price !== undefined || (persona.monetization?.meetingPrice !== undefined)) && (
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-xl font-semibold mb-4">Rates</h3>
-            <div className="space-y-2">
-              {persona.price !== undefined && (
-                <div className="flex justify-between">
-                  <span>Standard Rate</span>
-                  <span className="font-semibold">${persona.price}/hr</span>
-                </div>
-              )}
-              {persona.monetization?.meetingPrice !== undefined && (
-                <div className="flex justify-between">
-                  <span>Meeting Rate</span>
-                  <span className="font-semibold">${persona.monetization.meetingPrice}/hr</span>
-                </div>
-              )}
-              {persona.monetization?.subscriptionPrice !== undefined && (
-                <div className="flex justify-between">
-                  <span>Subscription</span>
-                  <span className="font-semibold">${persona.monetization.subscriptionPrice}/mo</span>
-                </div>
-              )}
-              <Separator className="my-2" />
-              <p className="text-xs text-muted-foreground">
-                Please note that rates may vary based on services requested. Contact for details.
+          <CardContent className="p-4 flex items-center">
+            <VerificationBadge size="sm" level={persona.verificationLevel || 'basic'} />
+            <div className="ml-3">
+              <p className="text-sm font-medium">Verification</p>
+              <p className="text-sm text-muted-foreground">
+                {persona.verificationLevel ? `${persona.verificationLevel.charAt(0).toUpperCase()}${persona.verificationLevel.slice(1)} verified` : 'Not verified'}
               </p>
             </div>
           </CardContent>
         </Card>
+        
+        {/* Response Time if available */}
+        {responseTimeMinutes !== undefined && (
+          <Card>
+            <CardContent className="p-4 flex items-center">
+              <Clock className="h-5 w-5 text-muted-foreground mr-3" />
+              <div>
+                <p className="text-sm font-medium">Response Time</p>
+                <p className="text-sm text-muted-foreground">
+                  {responseTimeMinutes < 60 
+                    ? `${responseTimeMinutes} minutes` 
+                    : `${Math.floor(responseTimeMinutes / 60)} hours`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+      
+      {/* Services */}
+      {hasServices && (
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Services</h3>
+          <div className="flex flex-wrap gap-2">
+            {services.map((service, index) => (
+              <Badge key={index} variant="secondary">{service}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Traits/Personality */}
+      {hasTraits && (
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Personality Traits</h3>
+          <div className="flex flex-wrap gap-2">
+            {traits.map((trait, index) => {
+              if (typeof trait === 'string') {
+                return <Badge key={index} variant="outline">{trait}</Badge>;
+              }
+              return null;
+            })}
+          </div>
+        </div>
       )}
     </div>
   );

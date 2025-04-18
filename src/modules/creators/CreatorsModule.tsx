@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { CreatorsNeuralService, creatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
+import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
 import CreatorProvider from './providers/CreatorProvider';
 
 // These are placeholder components until the actual pages are implemented

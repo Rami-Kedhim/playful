@@ -1,61 +1,100 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ContentCreator } from '@/types/creator';
-import { creatorData } from '@/data/creatorData';
-import { creatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 
-interface CreatorContextProps {
-  creators: ContentCreator[];
-  loading: boolean;
-  error: string | null;
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
+
+// Mock data for initial development
+const mockCreators = [
+  {
+    id: '1',
+    name: 'Jane Smith',
+    username: 'janesmith',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80',
+    bio: 'Content creator and photographer',
+    category: 'photography',
+    rating: 4.8,
+    isVerified: true
+  },
+  {
+    id: '2',
+    name: 'Mark Johnson',
+    username: 'markj',
+    avatarUrl: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80',
+    bio: 'Fitness expert and nutrition coach',
+    category: 'fitness',
+    rating: 4.9,
+    isVerified: true
+  },
+  {
+    id: '3',
+    name: 'Sarah Williams',
+    username: 'sarahw',
+    avatarUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&h=256&q=80',
+    bio: 'Fashion designer and style consultant',
+    category: 'fashion',
+    rating: 4.7,
+    isVerified: false
+  }
+];
+
+export interface Creator {
+  id: string;
+  name: string;
+  username: string;
+  avatarUrl: string;
+  bio: string;
+  rating?: number;
+  isVerified: boolean;
+  category?: string;
 }
 
-const CreatorContext = createContext<CreatorContextProps | undefined>(undefined);
+interface CreatorContextProps {
+  creators: Creator[];
+  loading: boolean;
+  error: string | null;
+  getCreatorById?: (id: string) => Creator | undefined;
+}
 
-export const CreatorProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [creators, setCreators] = useState<ContentCreator[]>([]);
+export const CreatorContext = createContext<CreatorContextProps>({
+  creators: [],
+  loading: false,
+  error: null
+});
+
+export const useCreatorContext = () => useContext(CreatorContext);
+
+interface CreatorProviderProps {
+  children: React.ReactNode;
+}
+
+const CreatorProvider: React.FC<CreatorProviderProps> = ({ children }) => {
+  const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  
+
+  // Initialize with mock data for development
   useEffect(() => {
     const loadCreators = async () => {
       try {
-        setLoading(true);
-        
-        // Simulate loading creators from an API
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        setCreators(creatorData);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load creators');
-      } finally {
+        setCreators(mockCreators);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load creators');
         setLoading(false);
       }
     };
-    
+
     loadCreators();
   }, []);
-  
-  const value: CreatorContextProps = {
-    creators,
-    loading,
-    error
+
+  const getCreatorById = (id: string) => {
+    return creators.find(creator => creator.id === id);
   };
-  
+
   return (
-    <CreatorContext.Provider value={value}>
+    <CreatorContext.Provider value={{ creators, loading, error, getCreatorById }}>
       {children}
     </CreatorContext.Provider>
   );
-};
-
-export const useCreatorContext = (): CreatorContextProps => {
-  const context = useContext(CreatorContext);
-  if (!context) {
-    throw new Error('useCreatorContext must be used within a CreatorProvider');
-  }
-  return context;
 };
 
 export default CreatorProvider;

@@ -1,63 +1,69 @@
+
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Shield, AlertCircle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useVerificationStatus } from '../hooks/useVerificationStatus';
-import VerificationStatusLoading from '../status/VerificationStatusLoading';
-import VerificationProgress from '../VerificationProgress';
-import { VerificationStatus } from '@/types/verification';
+import { CheckCircle, XCircle } from 'lucide-react';
 
 interface VerificationStatusTabProps {
-  onStartVerification?: () => void;
+  status: {
+    email: boolean;
+    phone: boolean;
+    identity: boolean;
+    address: boolean;
+    background: boolean;
+  };
+  currentLevel: 'basic' | 'advanced' | 'premium';
 }
 
-const VerificationStatusTab = ({ onStartVerification }: VerificationStatusTabProps) => {
-  const { loading, error, verificationRequest } = useVerificationStatus();
-
-  if (loading) {
-    return <VerificationStatusLoading />;
-  }
-
-  // If there's a verification request, show the progress
-  if (verificationRequest) {
-    return <VerificationProgress verificationRequest={verificationRequest} />;
-  }
-
-  // Otherwise show the "Get Started" card
+const VerificationStatusTab: React.FC<VerificationStatusTabProps> = ({ status, currentLevel }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          <Shield className="h-5 w-5 mr-2 text-primary" />
-          Get Verified
-        </CardTitle>
-        <CardDescription>
-          Verifying your identity increases trust and unlocks premium features
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="bg-muted/50 p-4 rounded-lg">
-            <h3 className="font-semibold mb-2 flex items-center">
-              <AlertCircle className="h-4 w-4 mr-2 text-amber-500" />
-              Why verify your identity?
-            </h3>
-            <ul className="list-disc pl-5 space-y-1 text-sm">
-              <li>Build trust with other users</li>
-              <li>Access premium features and services</li>
-              <li>Get priority in search results</li>
-              <li>Higher response rates on messages and booking requests</li>
-              <li>Potentially earn more through verified status</li>
-            </ul>
-          </div>
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-lg font-medium mb-2">Current Verification Level</h3>
+        <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-medium capitalize">
+          {currentLevel}
         </div>
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full" onClick={onStartVerification}>
-          Start Verification
-        </Button>
-      </CardFooter>
-    </Card>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-2">Verification Status</h3>
+        <ul className="space-y-2">
+          <li className="flex items-center">
+            {status.email ? 
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" /> : 
+              <XCircle className="h-5 w-5 text-red-500 mr-2" />
+            }
+            <span>Email Verification</span>
+          </li>
+          <li className="flex items-center">
+            {status.phone ? 
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" /> : 
+              <XCircle className="h-5 w-5 text-red-500 mr-2" />
+            }
+            <span>Phone Verification</span>
+          </li>
+          <li className="flex items-center">
+            {status.identity ? 
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" /> : 
+              <XCircle className="h-5 w-5 text-red-500 mr-2" />
+            }
+            <span>ID Verification</span>
+          </li>
+          <li className="flex items-center">
+            {status.address ? 
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" /> : 
+              <XCircle className="h-5 w-5 text-red-500 mr-2" />
+            }
+            <span>Address Verification</span>
+          </li>
+          <li className="flex items-center">
+            {status.background ? 
+              <CheckCircle className="h-5 w-5 text-green-500 mr-2" /> : 
+              <XCircle className="h-5 w-5 text-red-500 mr-2" />
+            }
+            <span>Background Check</span>
+          </li>
+        </ul>
+      </div>
+    </div>
   );
 };
 
