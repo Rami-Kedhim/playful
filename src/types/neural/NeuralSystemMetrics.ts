@@ -1,80 +1,44 @@
 
-export interface NeuralSystemMetricsResult {
-  logs: any[];
-  performance: {
-    cpuUsage: number;
-    memoryUsage: number;
-    responseTime: number;
-    accuracy: number;
-    latency: number;
-    processingEfficiency?: number;
-    processingTrend?: 'up' | 'down';
-    accuracyRate?: number;
-    accuracyTrend?: 'up' | 'down';
-    history?: number[];
-    recommendations?: string[];
-  };
-  refreshMetrics: () => Promise<void>;
-  errorMessage: string | null;
-  isLoading: boolean;
-  isMonitoring?: boolean;
-  startMonitoring?: () => void;
-  stopMonitoring?: () => void;
-}
-
-export interface TrainingProgress {
-  id: string;
-  modelId: string;
-  progress: number;
-  status: 'training' | 'paused' | 'completed' | 'failed';
-  startTime: Date;
-  endTime?: Date;
-  currentEpoch: number;
-  totalEpochs: number;
-  loss: number;
-  accuracy: number;
-  type: string;
-}
-
 export interface NeuralModel {
   id: string;
   name: string;
-  type: string;
   version: string;
-  capabilities: string[] | string;
-  status: 'active' | 'inactive' | 'training' | 'error';
+  specialization: string;
+  size: number;
+  precision: number;
   performance: {
     accuracy: number;
     latency: number;
-    resourceUsage: number;
   };
-  createdAt: Date;
-  updatedAt: Date;
-  specialization?: string | string[];
 }
 
 export interface SystemHealthMetrics {
+  modelCount: number;
+  activeConnections: number;
+  requestsPerMinute: number;
+  averageResponseTime: number;
+  errorRate: number;
+  uptime: number;
+  models: NeuralModel[];
   cpuUtilization: number;
   memoryUtilization: number;
-  networkLatency: number;
   errorFrequency: number;
-  uptime: number;
-  load: number;
-  operationsPerSecond: number;
+  systemUptime: number;
+  networkLatency: number;
   responseTime: number;
-  errorRate: number;
-  stability: number;
-  userEngagement: number;
-  economicBalance: number;
-  lastUpdated: Date;
-  systemLoad?: number;
-  memoryAllocation?: number;
-  networkThroughput?: number;
-  requestRate?: number;
-  averageResponseTime?: number;
-  userSatisfactionScore?: number;
-  systemUptime?: number;
-  lastMaintenanceDate?: Date;
-  dataPrecision?: number;
-  algorithmEfficiency?: number;
+  userSatisfactionScore: number;
+}
+
+export interface NeuralSystemMetricsResult {
+  metrics: SystemHealthMetrics;
+  status: 'operational' | 'degraded' | 'error';
+  timestamp: Date;
+  logs: any[];
+  performance: any;
+  refreshMetrics: () => void;
+  errorMessage: string | null;
+  isLoading: boolean;
+  isMonitoring: boolean;
+  startMonitoring: () => void;
+  stopMonitoring: () => void;
 }
