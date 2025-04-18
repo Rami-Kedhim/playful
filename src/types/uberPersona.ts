@@ -71,8 +71,8 @@ export interface UberPersona {
   isOnline?: boolean;
   rating?: number;
   age?: number;
-  profileType?: string; // Added for UberPersonaContext
-  services?: string[]; // Added for UberPersonaContext
-  isAI?: boolean; // Added for UberPersonaContext
-  featured?: boolean; // For rankPersonas function
+  profileType?: string;
+  services?: string[];
+  isAI?: boolean;
+  featured?: boolean;
 }

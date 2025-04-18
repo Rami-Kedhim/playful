@@ -1,75 +1,61 @@
 
-
 /**
- * Safely parses a date string or returns a fallback if invalid
- * @param dateString The date string to parse
- * @param fallback Optional fallback date (defaults to current date)
+ * Safely parses a date string or Date object into a Date object
+ * Returns the provided default value if parsing fails
  */
-export const safelyParseDate = (dateString?: string | null | undefined, fallback: Date = new Date()): Date => {
-  if (!dateString) return fallback;
+export function safelyParseDate(
+  date: string | Date | undefined | null,
+  defaultValue: Date = new Date()
+): Date {
+  if (!date) return defaultValue;
   
-  const parsedDate = new Date(dateString);
-  return isNaN(parsedDate.getTime()) ? fallback : parsedDate;
-};
-
-/**
- * Calculate the expiry date from a given date and period
- * @param startDate Start date
- * @param periodDays Number of days in the period
- */
-export const calculateExpiryDate = (startDate: Date | string, periodDays: number): Date => {
-  const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
-  return new Date(date.getTime() + periodDays * 24 * 60 * 60 * 1000);
-};
-
-/**
- * Calculate days remaining until a date
- * @param targetDate The target date
- */
-export const calculateDaysRemaining = (targetDate: Date | string): number => {
-  const target = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
-  const now = new Date();
-  const diffTime = target.getTime() - now.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-};
-
-/**
- * Calculate renewal cost based on subscription type and duration
- */
-export const calculateRenewalCost = (
-  basePrice: number,
-  discountRate = 0,
-  isYearly = false
-): number => {
-  let price = basePrice;
-  if (discountRate > 0) {
-    price = basePrice * (1 - discountRate);
+  if (date instanceof Date) return date;
+  
+  try {
+    const parsed = new Date(date);
+    // Check if the date is valid
+    return isNaN(parsed.getTime()) ? defaultValue : parsed;
+  } catch (e) {
+    console.error("Error parsing date:", e);
+    return defaultValue;
   }
-  if (isYearly) {
-    price = price * 12 * 0.8; // 20% yearly discount
-  }
-  return Math.round(price * 100) / 100;
-};
+}
 
 /**
- * Determine content status based on expiry date
+ * Converts a value to a Date object
  */
-export const determineContentStatus = (expiryDate: Date | string): 'active' | 'expiring' | 'expired' => {
-  const expiry = typeof expiryDate === 'string' ? new Date(expiryDate) : expiryDate;
-  const now = new Date();
+export function toDate(value: string | Date | number | undefined | null): Date | null {
+  if (!value) return null;
   
-  if (expiry < now) {
-    return 'expired';
+  if (value instanceof Date) return value;
+  
+  try {
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? null : date;
+  } catch (e) {
+    return null;
   }
-  
-  // If expiring within 7 days
-  const sevenDaysFromNow = new Date();
-  sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-  
-  if (expiry < sevenDaysFromNow) {
-    return 'expiring';
-  }
-  
-  return 'active';
-};
+}
 
+/**
+ * Formats a date to a string using specified options
+ */
+export function formatDate(
+  date: Date | string | number | undefined | null,
+  options: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  },
+  locale: string = 'en-US'
+): string {
+  if (!date) return '';
+  
+  try {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return new Intl.DateTimeFormat(locale, options).format(dateObj);
+  } catch (e) {
+    console.error("Error formatting date:", e);
+    return '';
+  }
+}

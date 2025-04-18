@@ -9,9 +9,8 @@ export interface NeuralModel {
   performance: {
     accuracy: number;
     latency: number;
-    resourceUsage?: number; // Added optional resourceUsage
+    resourceUsage?: number;
   };
-  // Add these fields needed by NeuralSystemsPanel
   type?: string;
   status?: 'active' | 'inactive' | 'training' | 'error';
   capabilities?: string[];
@@ -34,6 +33,12 @@ export interface SystemHealthMetrics {
   networkLatency: number;
   responseTime: number;
   userSatisfactionScore: number;
+  algorithmEfficiency?: number;
+  dataPrecision?: number;
+  lastMaintenanceDate?: Date;
+  load?: number;
+  userEngagement?: number;
+  lastUpdated?: number;
 }
 
 export interface NeuralSystemMetricsResult {
@@ -52,7 +57,7 @@ export interface NeuralSystemMetricsResult {
 
 // Updated TrainingProgress with epoch and timeRemaining
 export interface TrainingProgress {
-  id: string; // Made required
+  id: string;
   modelId: string;
   progress: number;
   epoch: number;

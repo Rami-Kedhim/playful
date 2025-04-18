@@ -5,17 +5,16 @@ export enum VerificationStatus {
   REJECTED = 'rejected',
   REVIEWING = 'reviewing',
   EXPIRED = 'expired',
-  IN_REVIEW = 'in_review' // Added for compatibility
+  IN_REVIEW = 'in_review'
 }
 
-// Adding VerificationLevel enum that's missing
 export enum VerificationLevel {
   NONE = 'none',
   BASIC = 'basic',
   STANDARD = 'standard',
   VERIFIED = 'verified',
   PREMIUM = 'premium',
-  ENHANCED = 'enhanced' // Added for compatibility
+  ENHANCED = 'enhanced'
 }
 
 export interface VerificationRequest {
@@ -27,14 +26,14 @@ export interface VerificationRequest {
   updated_at: Date;
   rejection_reason?: string;
   rejectionReason?: string; // Alias for compatibility
-  reviewer_notes?: string; // Added for compatibility
+  reviewer_notes?: string;
   level?: string;
   verificationLevel?: string;
   requested_level?: string;
   profile_id?: string;
-  submittedAt?: string | Date; // Added for compatibility
-  requestedLevel?: VerificationLevel; // Added for compatibility
-  reviewedAt?: Date; // Added for administrative panels
+  submittedAt?: string | Date;
+  requestedLevel?: VerificationLevel;
+  reviewedAt?: Date;
   user_id?: string; // Alias for compatibility
   createdAt?: Date; // Alias for created_at
 }
