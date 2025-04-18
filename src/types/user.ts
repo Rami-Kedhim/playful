@@ -18,15 +18,9 @@ export interface UserProfile {
   location: string;
   bio: string;
   isVerified: boolean;
-  website: string;
+  website: string; // Added website property
   avatarUrl: string;
   joinedDate: Date;
-  avatar_url: string; // For backward compatibility
-  phone: string;
-}
-
-export interface AuthResult {
-  success: boolean;
-  message: string;
-  user?: User;
+  avatar_url: string;
+  phone: string; // Added phone property
 }

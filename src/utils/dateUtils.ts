@@ -60,3 +60,41 @@ export const compareDates = (
   
   return parsedDate1.getTime() - parsedDate2.getTime();
 };
+
+/**
+ * Calculates the expiry date based on a start date and duration in days
+ */
+export const calculateExpiryDate = (startDate: Date | string, durationDays: number): Date => {
+  const date = safelyParseDate(startDate) || new Date();
+  return new Date(date.getTime() + durationDays * 24 * 60 * 60 * 1000);
+};
+
+/**
+ * Calculates the days remaining until an expiry date
+ */
+export const calculateDaysRemaining = (expiryDate: Date | string): number => {
+  const expiry = safelyParseDate(expiryDate);
+  if (!expiry) return 0;
+  
+  const today = new Date();
+  const diffTime = expiry.getTime() - today.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+/**
+ * Determines content status based on expiry date
+ */
+export const determineContentStatus = (expiryDate: Date | string): 'active' | 'expiring' | 'expired' => {
+  const daysRemaining = calculateDaysRemaining(expiryDate);
+  
+  if (daysRemaining <= 0) return 'expired';
+  if (daysRemaining <= 7) return 'expiring';
+  return 'active';
+};
+
+/**
+ * Calculates renewal cost based on original price and discount percentage
+ */
+export const calculateRenewalCost = (originalPrice: number, discountPercentage: number = 10): number => {
+  return originalPrice * (1 - discountPercentage / 100);
+};

@@ -28,4 +28,41 @@ export interface UberPersona {
   initialMessage?: string;
   mainImage?: string;
   images?: string[];
+  
+  // Additional properties being used in components
+  displayName?: string;
+  avatarUrl?: string;
+  age?: number;
+  updatedAt?: Date;
+  bio?: string;
+  roleFlags?: {
+    isEscort?: boolean;
+    isContentCreator?: boolean;
+    isPremium?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+    isAI?: boolean;
+  };
+  capabilities?: {
+    hasPhotos?: boolean;
+    hasVideos?: boolean;
+    hasStories?: boolean;
+    hasChat?: boolean;
+    hasBooking?: boolean;
+    hasLiveStream?: boolean;
+    hasExclusiveContent?: boolean;
+    hasContent?: boolean;
+    hasRealMeets?: boolean;
+    hasVirtualMeets?: boolean;
+  };
+  monetization?: {
+    messageCost?: number;
+    contentCost?: number;
+    subscriptionPrice?: number;
+    unlockingPrice?: number;
+    subscriptionCost?: number;
+    hasSubscription?: boolean;
+    acceptsLucoin?: boolean;
+  };
+  isOnline?: boolean;
 }

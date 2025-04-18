@@ -1,104 +1,69 @@
 
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
 
-export type ServiceTypeFilter = "in-person" | "virtual" | "both" | null | "";
-
-interface ServiceTypeBadgeLabelProps {
-  type: ServiceTypeFilter;
-  variant?: 'small' | 'default' | 'colored';
-  className?: string;
+interface BadgeStyleProps {
+  label: string;
+  color: string;
+  colorDark: string;
+  icon: string;
 }
 
-// Helper function to get badge details for a service type
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter) => {
-  if (!type) return null;
-  
-  switch(type) {
-    case "in-person":
+export const getServiceTypeBadgeLabel = (serviceType: ServiceTypeFilter): BadgeStyleProps => {
+  switch (serviceType) {
+    case 'incall':
       return {
-        label: "In Person",
-        color: "bg-blue-500/10 text-blue-600 border-blue-200",
-        colorDark: "dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
-        icon: "🏠"
+        label: 'In-Call',
+        color: 'bg-blue-100 text-blue-800',
+        colorDark: 'dark:bg-blue-900 dark:text-blue-100',
+        icon: 'home'
       };
-    case "virtual":
+    case 'outcall':
       return {
-        label: "Virtual",
-        color: "bg-purple-500/10 text-purple-600 border-purple-200",
-        colorDark: "dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
-        icon: "💻"
+        label: 'Out-Call',
+        color: 'bg-purple-100 text-purple-800',
+        colorDark: 'dark:bg-purple-900 dark:text-purple-100',
+        icon: 'map-pin'
       };
-    case "both":
+    case 'virtual':
       return {
-        label: "In Person & Virtual",
-        color: "bg-green-500/10 text-green-600 border-green-200",
-        colorDark: "dark:bg-green-900/30 dark:text-green-400 dark:border-green-800",
-        icon: "✓"
+        label: 'Virtual',
+        color: 'bg-green-100 text-green-800',
+        colorDark: 'dark:bg-green-900 dark:text-green-100',
+        icon: 'video'
       };
+    case 'all':
     default:
       return {
-        label: "Unknown",
-        color: "bg-gray-500/10 text-gray-600 border-gray-200",
-        colorDark: "dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-800",
-        icon: "?"
+        label: 'All Services',
+        color: 'bg-gray-100 text-gray-800',
+        colorDark: 'dark:bg-gray-700 dark:text-gray-100',
+        icon: 'layers'
       };
   }
 };
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
-  type, 
-  variant = 'default',
-  className 
-}) => {
-  if (!type) return null;
+interface ServiceTypeBadgeLabelProps {
+  serviceType: ServiceTypeFilter;
+  variant?: 'outline' | 'default';
+}
+
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ serviceType, variant = 'default' }) => {
+  const badgeStyle = getServiceTypeBadgeLabel(serviceType);
   
-  const details = getServiceTypeBadgeLabel(type);
-  
-  if (variant === 'small') {
+  if (variant === 'outline') {
     return (
-      <Badge
-        variant="outline"
-        className={cn(
-          details.color,
-          details.colorDark,
-          "font-normal text-xs py-0 h-5",
-          className
-        )}
-      >
-        {details.label}
+      <Badge variant="outline" className="font-normal">
+        {badgeStyle.label}
       </Badge>
     );
   }
   
-  if (variant === 'colored') {
-    return (
-      <div className={cn("flex items-center gap-1.5", className)}>
-        <Avatar className="h-5 w-5">
-          <AvatarFallback className={cn(
-            "text-[10px]",
-            details.color,
-            details.colorDark
-          )}>
-            {details.icon}
-          </AvatarFallback>
-        </Avatar>
-        <span className="text-sm">{details.label}</span>
-      </div>
-    );
-  }
-  
   return (
-    <div className={cn("flex items-center gap-1.5", className)}>
-      <Avatar className="h-5 w-5">
-        <AvatarFallback className="bg-muted text-[10px]">
-          {details.icon}
-        </AvatarFallback>
-      </Avatar>
-      <span className="text-sm">{details.label}</span>
-    </div>
+    <Badge className={`${badgeStyle.color} ${badgeStyle.colorDark} font-normal`}>
+      {badgeStyle.label}
+    </Badge>
   );
 };
 
