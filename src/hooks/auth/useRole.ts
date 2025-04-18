@@ -30,6 +30,36 @@ export const useRole = () => {
     
     return user.roles?.includes(roleEnum) || false;
   }, [user]);
+
+  // Add helper methods for common role checks
+  const isAdmin = useCallback(() => {
+    return hasRole(UserRole.ADMIN);
+  }, [hasRole]);
+
+  const isCreator = useCallback(() => {
+    return hasRole(UserRole.CREATOR);
+  }, [hasRole]);
+
+  const isEscort = useCallback(() => {
+    return hasRole(UserRole.ESCORT);
+  }, [hasRole]);
+
+  const hasAllRoles = useCallback((roles: UserRole[]) => {
+    if (!user || !user.roles) return false;
+    return roles.every(role => user.roles!.includes(role));
+  }, [user]);
+
+  const canAccessAdminFeatures = useCallback(() => {
+    return hasRole(UserRole.ADMIN) || hasRole(UserRole.MODERATOR);
+  }, [hasRole]);
   
-  return { hasRole, checkPermission };
+  return { 
+    hasRole, 
+    checkPermission,
+    isAdmin: isAdmin(),
+    isCreator: isCreator(),
+    isEscort: isEscort(),
+    hasAllRoles,
+    canAccessAdminFeatures: canAccessAdminFeatures()
+  };
 };

@@ -10,8 +10,7 @@ const useAuthFlow = () => {
   
   // Generic wrapper for auth operations
   const executeAuthFlow = async <T extends any>(
-    operation: () => Promise<AuthResult>,
-    successMessage?: string
+    operation: () => Promise<AuthResult>
   ): Promise<AuthResult> => {
     setIsLoading(true);
     setError(null);

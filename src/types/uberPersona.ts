@@ -52,10 +52,10 @@ export interface UberPersona {
   capabilities?: Capabilities;
   ethnicity?: string;
   language?: string | string[];
-  displayName?: string;  // Added displayName
-  bio?: string;  // Added bio
-  age?: number;  // Added age
-  system?: {  // Added system object
+  displayName?: string;
+  bio?: string;
+  age?: number;
+  system?: {
     lastActiveAt?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -64,7 +64,7 @@ export interface UberPersona {
     rank?: number;
     isAI?: boolean;
   };
-  monetization?: {  // Added monetization
+  monetization?: {
     enabled?: boolean;
     methods?: string[];
     rates?: {
@@ -81,7 +81,7 @@ export interface UberPersona {
     videoChatPrice?: number;
     meetingPrice?: number;
   };
-  contentCount?: {  // Added contentCount
+  contentCount?: {
     photos?: number;
     videos?: number;
     streams?: number;

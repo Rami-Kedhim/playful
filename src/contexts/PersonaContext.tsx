@@ -23,11 +23,26 @@ export const PersonaProvider: React.FC<{ children: ReactNode }> = ({ children })
     isLoading,
     error,
     loadPersonas,
-    getEscorts,
-    getCreators,
-    getLivecams,
     getPersonaById
   } = useUberPersonas();
+
+  // Define filter functions for different persona types
+  const getEscorts = () => personas.filter(persona => 
+    persona.profileType === 'escort' || 
+    persona.personaFlags?.isEscort || 
+    persona.roleFlags?.isEscort
+  );
+  
+  const getCreators = () => personas.filter(persona => 
+    persona.profileType === 'creator' || 
+    persona.personaFlags?.isCreator || 
+    persona.roleFlags?.isCreator
+  );
+  
+  const getLivecams = () => personas.filter(persona => 
+    persona.profileType === 'livecam' || 
+    (persona.capabilities?.hasLivestream === true)
+  );
 
   useEffect(() => {
     loadPersonas();

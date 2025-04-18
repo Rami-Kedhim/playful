@@ -24,6 +24,13 @@ export interface AuthUser {
   user_metadata?: {
     [key: string]: any;
   };
+  // Additional properties that are used in components
+  username?: string;
+  name?: string;
+  profileImageUrl?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+  lucoinsBalance?: number;
 }
 
 export interface UserProfile {
@@ -42,6 +49,9 @@ export interface UserProfile {
   lucoin_balance?: number;
   stripe_account_id?: string;
   stripe_customer_id?: string;
+  // Additional properties that are used in components
+  username?: string;
+  full_name?: string;
 }
 
 export interface AuthResult {
@@ -71,4 +81,10 @@ export interface AuthContextType {
   updateEmail: (email: string) => Promise<boolean>;
   updatePassword: (password: string) => Promise<boolean>;
   setUser: (user: AuthUser | null) => void;
+  
+  // Additional methods used in components
+  logout?: () => Promise<void>;
+  updateUserProfile?: (data: Partial<AuthUser>) => Promise<boolean>;
+  refreshProfile?: () => Promise<void>;
+  userRoles?: UserRole[];
 }

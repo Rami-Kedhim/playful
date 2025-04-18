@@ -1,163 +1,132 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { UberPersona, Capabilities } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona';
+import { Escort } from '@/types/escort';
+import { ContentCreator } from '@/types/creator';
 
-export const useUberPersonas = (initialList: UberPersona[] = []) => {
-  const [personas, setPersonas] = useState<UberPersona[]>(initialList);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+// Mock data for initial development
+const mockPersonas: UberPersona[] = [
+  {
+    id: "p1",
+    name: "Sophia Rose",
+    image: "https://example.com/sophia.jpg",
+    imageUrl: "https://example.com/sophia.jpg",
+    avatarUrl: "https://example.com/sophia-avatar.jpg",
+    profileType: "escort",
+    description: "Elite companion available for dinner dates and travel",
+    rating: 4.9,
+    price: 300,
+    location: "New York",
+    tags: ["Elite", "GFE", "Travel Companion"],
+    isVerified: true,
+    isActive: true,
+    isOnline: true,
+    personaFlags: {
+      isEscort: true,
+      isVerified: true,
+    },
+    capabilities: {
+      hasChat: true,
+      hasBooking: true,
+      hasPhotos: true,
+      hasVideos: true,
+    }
+  },
+  {
+    id: "p2",
+    name: "Emma Black",
+    image: "https://example.com/emma.jpg",
+    imageUrl: "https://example.com/emma.jpg",
+    avatarUrl: "https://example.com/emma-avatar.jpg",
+    profileType: "creator",
+    description: "Content creator specializing in lifestyle and fashion",
+    rating: 4.8,
+    location: "Los Angeles",
+    tags: ["Fashion", "Lifestyle", "Vlogger"],
+    isVerified: true,
+    isActive: true,
+    personaFlags: {
+      isCreator: true,
+      isVerified: true,
+    },
+    capabilities: {
+      hasChat: true,
+      hasContent: true,
+      hasSubscription: true,
+    },
+    contentCount: {
+      photos: 45,
+      videos: 12,
+      streams: 3
+    }
+  },
+  {
+    id: "p3",
+    name: "Luna Star",
+    image: "https://example.com/luna.jpg",
+    imageUrl: "https://example.com/luna.jpg",
+    avatarUrl: "https://example.com/luna-avatar.jpg",
+    profileType: "livecam",
+    description: "Live performer offering interactive shows",
+    rating: 4.7,
+    price: 150,
+    location: "Miami",
+    isVerified: true,
+    isOnline: true,
+    personaFlags: {
+      isCreator: true,
+      isVerified: true,
+    },
+    capabilities: {
+      hasChat: true,
+      hasLivestream: true,
+      hasContent: true,
+    }
+  }
+];
+
+export const useUberPersonas = () => {
+  const [personas, setPersonas] = useState<UberPersona[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Add a new persona
-  const addPersona = useCallback((persona: UberPersona) => {
-    setPersonas(prev => [...prev, persona]);
-  }, []);
-  
-  // Update an existing persona
-  const updatePersona = useCallback((id: string, updates: Partial<UberPersona>) => {
-    setPersonas(prev => 
-      prev.map(p => p.id === id ? { ...p, ...updates } : p)
-    );
-  }, []);
-  
-  // Update capability properties for a persona
-  const updateCapabilities = useCallback((id: string, capabilities: Partial<Capabilities>) => {
-    setPersonas(prev => 
-      prev.map(p => p.id === id ? { 
-        ...p, 
-        capabilities: {
-          ...p.capabilities,
-          ...capabilities,
-          // Make sure we're consistent with property names
-          hasLivestream: capabilities.hasLivestream ?? p.capabilities.hasLivestream
-        }
-      } : p)
-    );
-  }, []);
-  
-  // Add or update metadata for a persona
-  const updateMetadata = useCallback((id: string, metadata: Record<string, any>) => {
-    setPersonas(prev => 
-      prev.map(p => p.id === id ? { 
-        ...p, 
-        systemMetadata: {
-          ...p.systemMetadata,
-          ...metadata,
-          // Only include properties that exist in the type
-          lastActiveAt: metadata.lastActiveAt || p.systemMetadata?.lastActiveAt,
-          createdAt: metadata.createdAt || p.systemMetadata?.createdAt,
-          updatedAt: metadata.updatedAt || p.systemMetadata?.updatedAt,
-          totalViews: metadata.totalViews || p.systemMetadata?.totalViews,
-          totalLikes: metadata.totalLikes || p.systemMetadata?.totalLikes,
-          rank: metadata.rank || p.systemMetadata?.rank,
-          isAI: metadata.isAI ?? p.systemMetadata?.isAI
-        }
-      } : p)
-    );
-  }, []);
-  
-  // Remove a persona
-  const removePersona = useCallback((id: string) => {
-    setPersonas(prev => prev.filter(p => p.id !== id));
-  }, []);
-  
-  // Fetch personas from API
-  const fetchPersonas = useCallback(async () => {
+  // Load personas from API or mock data
+  const loadPersonas = useCallback(async (useCache = true) => {
+    // Skip if we already have data and useCache is true
+    if (useCache && personas.length > 0) return;
+    
     setIsLoading(true);
     setError(null);
     
     try {
-      // This would be a real API call in production
-      const response = await mockFetchPersonas();
-      setPersonas(response);
+      // In a real app, this would be an API call
+      // For now, we'll just use the mock data with a delay to simulate network
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setPersonas(mockPersonas);
     } catch (err: any) {
+      console.error("Failed to load personas", err);
       setError(err.message || 'Failed to load personas');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [personas.length]);
   
-  // Update personas when initialList changes
+  // Get a specific persona by ID
+  const getPersonaById = useCallback((id: string): UberPersona | undefined => {
+    return personas.find(persona => persona.id === id);
+  }, [personas]);
+  
+  // Initialize data on first load
   useEffect(() => {
-    if (initialList?.length > 0) {
-      setPersonas(initialList);
-    }
-  }, [initialList]);
-  
-  // Mock personas fetch - this would come from a real API
-  const mockFetchPersonas = async (): Promise<UberPersona[]> => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(generateMockPersonas());
-      }, 500);
-    });
-  };
-  
-  // Generate mock personas for testing
-  const generateMockPersonas = (): UberPersona[] => {
-    const mockPersonas: UberPersona[] = [];
-    
-    for (let i = 0; i < 5; i++) {
-      mockPersonas.push({
-        id: `persona-${i}`,
-        displayName: `Persona ${i}`,
-        username: `persona_${i}`,
-        avatarUrl: `https://picsum.photos/200/300?random=${i}`,
-        location: 'New York',
-        bio: 'Lorem ipsum dolor sit amet',
-        language: 'English',
-        age: 25 + i,
-        ethnicity: 'Mixed',
-        tags: ['VIP', 'Elite', 'Featured'],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        roleFlags: {
-          isEscort: true,
-          isCreator: i % 2 === 0,
-          isAI: i % 3 === 0,
-          isVerified: i % 2 === 1,
-          isFeatured: i === 0
-        },
-        capabilities: {
-          hasPhotos: true,
-          hasVideos: i % 2 === 0,
-          hasStories: i % 3 === 0,
-          hasChat: true,
-          hasVoice: i % 2 === 1,
-          hasBooking: true,
-          hasLivestream: i === 0,
-          hasExclusiveContent: i % 2 === 0
-        },
-        monetization: {
-          acceptsLucoin: true,
-          acceptsTips: true,
-          subscriptionPrice: 9.99 * (i + 1),
-          unlockingPrice: 4.99 * (i + 1),
-          boostingActive: i === 0
-        },
-        systemMetadata: {
-          source: i % 2 === 0 ? 'manual' : (i % 3 === 0 ? 'scraped' : 'ai_generated'),
-          lastSynced: new Date().toISOString(),
-          aiPersonality: i % 3 === 0 ? 'friendly' : undefined,
-          aiMood: i % 3 === 0 ? 'happy' : undefined,
-          aiEngine: i % 3 === 0 ? 'GPT' : undefined,
-          tagsGeneratedByAI: i % 3 === 0
-        }
-      });
-    }
-    
-    return mockPersonas;
-  };
+    loadPersonas();
+  }, [loadPersonas]);
   
   return {
     personas,
     isLoading,
     error,
-    addPersona,
-    updatePersona,
-    updateCapabilities,
-    updateMetadata,
-    removePersona,
-    fetchPersonas
+    loadPersonas,
+    getPersonaById
   };
 };
 
