@@ -11,6 +11,7 @@ const DEFAULT_CONTEXT: AuthContextType = {
   signIn: async () => ({ success: false }),
   signUp: async () => ({ success: false }),
   signOut: async () => {},
+  logout: async () => {}, // Alias for signOut for backward compatibility
   checkRole: () => false,
   updateUserProfile: async () => false,
   refreshProfile: async () => {},
@@ -54,7 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePassword = async (oldPassword: string, newPassword: string) => {
     try {
-      // In a real implementation, call an auth service here
       console.log('Updating password', oldPassword, newPassword);
       return true;
     } catch (error) {
@@ -104,6 +104,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: false
     }));
   }, []);
+  
+  // Alias for signOut for backward compatibility
+  const logout = signOut;
+
+  // Mock verification functions for compatibility
+  const verifyEmail = useCallback(async (token: string) => {
+    console.log('Verifying email with token:', token);
+    return true;
+  }, []);
+
+  const sendVerificationEmail = useCallback(async () => {
+    console.log('Sending verification email');
+    return true;
+  }, []);
+
+  const updateProfile = useCallback(async (data: any) => {
+    console.log('Updating profile with data:', data);
+    return await updateUserProfile(data);
+  }, [updateUserProfile]);
 
   // Set up a mock user for development
   useEffect(() => {
@@ -115,6 +134,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: 'user@example.com',
           username: 'user',
           name: 'Test User',
+          profileImageUrl: 'https://i.pravatar.cc/150?u=user',
+          avatarUrl: 'https://i.pravatar.cc/150?u=user',
           roles: [UserRole.USER]
         },
         isAuthenticated: true,
@@ -128,17 +149,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signUp,
         signOut,
+        logout,
         sendPasswordResetEmail,
+        verifyEmail,
+        sendVerificationEmail,
+        updateProfile,
         setUser: (user) => setState(prev => ({ ...prev, user })),
         profile: {
           id: '1',
           email: 'user@example.com',
           name: 'Test User',
-          username: 'user'
+          username: 'user',
+          avatar_url: 'https://i.pravatar.cc/150?u=user',
+          profileImageUrl: 'https://i.pravatar.cc/150?u=user',
+          lucoin_balance: 1000,
+          ubx_balance: 500
         }
       }));
     }, 1000);
-  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, resetPassword, signIn, signUp, signOut, sendPasswordResetEmail]);
+  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, resetPassword, signIn, signUp, signOut, sendPasswordResetEmail, logout, updateProfile, verifyEmail, sendVerificationEmail]);
 
   return (
     <AuthContext.Provider value={{
@@ -153,6 +182,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signIn,
       signUp,
       signOut,
+      logout,
+      verifyEmail,
+      sendVerificationEmail,
+      updateProfile,
       setUser: (user) => setState(prev => ({ ...prev, user }))
     }}>
       {children}

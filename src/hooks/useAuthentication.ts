@@ -104,7 +104,7 @@ export const useAuthentication = () => {
     setError(null);
     
     try {
-      const success = await auth.updateProfile(data);
+      const success = await auth.updateUserProfile(data);
       if (!success) {
         setError('Failed to update profile');
       }
@@ -118,12 +118,12 @@ export const useAuthentication = () => {
     }
   }, [auth]);
   
-  const updatePassword = useCallback(async (newPassword: string): Promise<boolean> => {
+  const updatePassword = useCallback(async (oldPassword: string, newPassword: string): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
     
     try {
-      const success = await auth.updatePassword(newPassword);
+      const success = await auth.updatePassword(oldPassword, newPassword);
       if (!success) {
         setError('Failed to update password');
       }
@@ -142,6 +142,10 @@ export const useAuthentication = () => {
     setError(null);
     
     try {
+      if (!auth.verifyEmail) {
+        setError('Email verification not supported');
+        return false;
+      }
       const success = await auth.verifyEmail(token);
       if (!success) {
         setError('Failed to verify email');
@@ -161,6 +165,10 @@ export const useAuthentication = () => {
     setError(null);
     
     try {
+      if (!auth.sendVerificationEmail) {
+        setError('Send verification email not supported');
+        return false;
+      }
       const success = await auth.sendVerificationEmail();
       if (!success) {
         setError('Failed to send verification email');

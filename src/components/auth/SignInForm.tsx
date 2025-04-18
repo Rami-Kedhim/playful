@@ -13,7 +13,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -46,7 +46,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
 
       if (result.success) {
         toast({
-          title: 'Sign in successful',
+          title: 'Signed in successfully',
           description: 'Welcome back!',
         });
         
@@ -69,7 +69,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
-        <CardDescription>Welcome back! Enter your credentials to continue.</CardDescription>
+        <CardDescription>Enter your credentials to access your account.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -108,18 +108,19 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
               )}
             />
 
+            <div className="text-sm text-right">
+              <Link to="/auth/forgot-password" className="text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex flex-col space-y-2">
-        <div className="text-sm text-center">
-          <Link to="/forgot-password" className="text-primary hover:underline">
-            Forgot your password?
-          </Link>
-        </div>
+      <CardFooter className="flex flex-col">
         <div className="text-sm text-center">
           Don't have an account?{' '}
           <Link to="/auth?tab=signup" className="text-primary hover:underline">

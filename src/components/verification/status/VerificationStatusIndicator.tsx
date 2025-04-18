@@ -1,82 +1,69 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Clock, CheckCircle, X, AlertTriangle, TimerReset } from 'lucide-react';
 import { VerificationStatus } from '@/types/verification';
 
 interface VerificationStatusIndicatorProps {
-  status: VerificationStatus;
-  size?: 'sm' | 'md' | 'lg';
-  showLabel?: boolean;
-  className?: string;
+  status: string;
+  size?: 'sm' | 'default';
 }
 
-const VerificationStatusIndicator = ({ 
+const VerificationStatusIndicator: React.FC<VerificationStatusIndicatorProps> = ({ 
   status, 
-  size = 'md', 
-  showLabel = true,
-  className = ''
-}: VerificationStatusIndicatorProps) => {
-  const sizeClasses = {
-    sm: 'text-xs py-0.5 px-1.5',
-    md: 'text-sm py-1 px-2',
-    lg: 'text-sm py-1.5 px-2.5',
+  size = 'default' 
+}) => {
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case VerificationStatus.PENDING:
+        return {
+          icon: <Clock className="h-3 w-3 mr-1" />,
+          label: 'Pending',
+          variant: 'outline' as const
+        };
+      case VerificationStatus.IN_REVIEW:
+        return {
+          icon: <AlertTriangle className="h-3 w-3 mr-1" />,
+          label: 'In Review',
+          variant: 'secondary' as const
+        };
+      case VerificationStatus.APPROVED:
+        return {
+          icon: <CheckCircle className="h-3 w-3 mr-1" />,
+          label: 'Approved',
+          variant: 'success' as const
+        };
+      case VerificationStatus.REJECTED:
+        return {
+          icon: <X className="h-3 w-3 mr-1" />,
+          label: 'Rejected',
+          variant: 'destructive' as const
+        };
+      case VerificationStatus.EXPIRED:
+        return {
+          icon: <TimerReset className="h-3 w-3 mr-1" />,
+          label: 'Expired',
+          variant: 'outline' as const
+        };
+      default:
+        return {
+          icon: <Clock className="h-3 w-3 mr-1" />,
+          label: 'Unknown',
+          variant: 'outline' as const
+        };
+    }
   };
 
-  const iconSize = size === 'sm' ? 'h-3 w-3 mr-1' : size === 'lg' ? 'h-5 w-5 mr-1.5' : 'h-4 w-4 mr-1';
+  const { icon, label, variant } = getStatusConfig(status);
 
-  switch (status) {
-    case VerificationStatus.APPROVED:
-      return (
-        <Badge 
-          variant="outline" 
-          className={`bg-green-500/10 text-green-500 border-green-500/30 ${sizeClasses[size]} ${className}`}
-        >
-          <CheckCircle className={iconSize} />
-          {showLabel && 'Approved'}
-        </Badge>
-      );
-    case VerificationStatus.REJECTED:
-      return (
-        <Badge 
-          variant="outline" 
-          className={`bg-red-500/10 text-red-500 border-red-500/30 ${sizeClasses[size]} ${className}`}
-        >
-          <XCircle className={iconSize} />
-          {showLabel && 'Rejected'}
-        </Badge>
-      );
-    case VerificationStatus.IN_REVIEW:
-      return (
-        <Badge 
-          variant="outline" 
-          className={`bg-blue-500/10 text-blue-500 border-blue-500/30 ${sizeClasses[size]} ${className}`}
-        >
-          <Clock className={`${iconSize} animate-pulse`} />
-          {showLabel && 'In Review'}
-        </Badge>
-      );
-    case VerificationStatus.PENDING:
-      return (
-        <Badge 
-          variant="outline" 
-          className={`bg-amber-500/10 text-amber-500 border-amber-500/30 ${sizeClasses[size]} ${className}`}
-        >
-          <Clock className={iconSize} />
-          {showLabel && 'Pending'}
-        </Badge>
-      );
-    default:
-      return (
-        <Badge 
-          variant="outline" 
-          className={`bg-gray-500/10 text-gray-500 border-gray-500/30 ${sizeClasses[size]} ${className}`}
-        >
-          <AlertTriangle className={iconSize} />
-          {showLabel && 'Unknown'}
-        </Badge>
-      );
-  }
+  return (
+    <Badge variant={variant} className={size === 'sm' ? 'text-xs py-0 px-2' : ''}>
+      <span className="flex items-center">
+        {icon}
+        {label}
+      </span>
+    </Badge>
+  );
 };
 
 export default VerificationStatusIndicator;

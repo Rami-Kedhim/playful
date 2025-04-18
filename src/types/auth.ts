@@ -1,61 +1,61 @@
 
-export type UserRole = 'USER' | 'ADMIN' | 'ESCORT' | 'CLIENT' | 'MODERATOR';
-
-export const UserRole = {
-  USER: 'USER' as UserRole,
-  ADMIN: 'ADMIN' as UserRole,
-  ESCORT: 'ESCORT' as UserRole,
-  CLIENT: 'CLIENT' as UserRole,
-  MODERATOR: 'MODERATOR' as UserRole,
-};
+// Auth types
+export enum UserRole {
+  USER = 'user',
+  ESCORT = 'escort',
+  CREATOR = 'creator',
+  ADMIN = 'admin',
+  MODERATOR = 'moderator'
+}
 
 export interface User {
   id: string;
-  email: string;
   username?: string;
-  name?: string;
+  email: string;
+  profileImageUrl?: string;
+  avatarUrl?: string;
+  lucoinsBalance?: number;
   roles?: UserRole[];
-  emailVerified?: boolean;
-  profileId?: string;
+  role?: string; 
+  isVerified?: boolean;
   createdAt?: string;
-  updatedAt?: string;
-  lastLoginAt?: string;
+  user_metadata?: Record<string, any>;
+  avatar_url?: string;
+  app_metadata?: Record<string, any>;
+  created_at?: string; // For backward compatibility
 }
 
-export interface UserProfile {
-  id: string;
-  userId?: string;
-  name?: string;
-  email?: string;
-  username?: string;
-  bio?: string;
-  avatar?: string;
+export interface AuthUser extends User {
+  // Extended fields from the AuthUser
+  full_name?: string;
   phone?: string;
   location?: string;
-  website?: string;
-  socialLinks?: {
-    twitter?: string;
-    instagram?: string;
-    facebook?: string;
-    [key: string]: string | undefined;
-  };
-  preferences?: {
-    theme?: string;
-    notifications?: boolean;
-    language?: string;
-    [key: string]: string | boolean | undefined;
-  };
-  verificationStatus?: 'pending' | 'verified' | 'rejected';
-  createdAt?: string;
-  updatedAt?: string;
+  bio?: string;
 }
 
 export interface AuthResult {
   success: boolean;
+  error?: string | null;
   user?: User;
-  error?: string;
-  token?: string;
 }
+
+export interface UserProfile {
+  id: string;
+  email?: string;
+  username?: string;
+  name?: string;
+  bio?: string;
+  location?: string;
+  avatar_url?: string;
+  full_name?: string;
+  is_verified?: boolean;
+  lucoin_balance?: number;
+  ubx_balance?: number;
+  verificationLevel?: string;
+  profileImageUrl?: string;
+}
+
+export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';
 
 export interface AuthContextType {
   user: User | null;
@@ -64,16 +64,18 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   error: string;
   signIn: (email: string, password: string) => Promise<AuthResult>;
-  signUp: (email: string, password: string, options?: any) => Promise<AuthResult>;
+  signUp: (email: string, password: string, name?: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
-  updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
-  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
-  sendPasswordResetEmail: (email: string) => Promise<boolean>;
-  refreshProfile: () => Promise<void>;
+  logout?: () => Promise<void>; // Alias for signOut for backward compatibility
   checkRole: (role: string) => boolean;
-  userRoles: string[];
+  updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
+  refreshProfile: () => Promise<void>;
   resetPassword: (email: string) => Promise<AuthResult>;
+  sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  userRoles: string[];
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
   setUser?: (user: User | null) => void;
   verifyEmail?: (token: string) => Promise<boolean>;
   sendVerificationEmail?: () => Promise<boolean>;
+  updateProfile?: (data: any) => Promise<boolean>;
 }

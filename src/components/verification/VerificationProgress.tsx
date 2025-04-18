@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -73,7 +74,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     return null;
   }
 
-  const calculateVerificationProgress = (status: VerificationStatus): number => {
+  const calculateVerificationProgress = (status: VerificationStatus | string): number => {
     switch (status) {
       case VerificationStatus.PENDING: return 25;
       case VerificationStatus.IN_REVIEW: return 50;
@@ -84,7 +85,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     }
   };
 
-  const getVerificationStatusMessage = (status: VerificationStatus): string => {
+  const getVerificationStatusMessage = (status: VerificationStatus | string): string => {
     switch (status) {
       case VerificationStatus.PENDING: return 'Your verification request has been received and is waiting to be reviewed by our team.';
       case VerificationStatus.IN_REVIEW: return 'Our team is currently reviewing your verification documents.';
@@ -95,9 +96,18 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     }
   };
 
-  const safeStatus = (statusValue: VerificationStatus | string): VerificationStatus => {
-    if (Object.values(VerificationStatus).includes(statusValue as VerificationStatus)) {
-      return statusValue as VerificationStatus;
+  const safeStatus = (statusValue: VerificationStatus | string): string => {
+    // Make sure we always have a valid status string
+    const validStatuses = [
+      VerificationStatus.PENDING,
+      VerificationStatus.IN_REVIEW,
+      VerificationStatus.APPROVED,
+      VerificationStatus.REJECTED,
+      VerificationStatus.EXPIRED
+    ];
+    
+    if (validStatuses.includes(statusValue as VerificationStatus)) {
+      return statusValue;
     }
     return VerificationStatus.PENDING;
   };

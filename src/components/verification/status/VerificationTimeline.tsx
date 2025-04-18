@@ -1,99 +1,96 @@
 
 import React from 'react';
-import { CheckCircle, Clock, AlertCircle, Circle, XCircle } from 'lucide-react';
+import { 
+  Clock, 
+  CheckCircle, 
+  AlertTriangle, 
+  FileCheck, 
+  ShieldCheck 
+} from 'lucide-react';
 import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
 interface VerificationTimelineProps {
   verificationRequest: VerificationRequest;
 }
 
-const VerificationTimeline: React.FC<VerificationTimelineProps> = ({ verificationRequest }) => {
-  const steps = [
-    { 
-      id: 'submitted', 
-      label: 'Submitted', 
-      date: verificationRequest.submittedAt || verificationRequest.createdAt || verificationRequest.created_at, 
-      status: 'complete' as const
-    },
-    { 
-      id: 'review',
-      label: 'In Review',
-      date: verificationRequest.status === 'in_review' ? verificationRequest.updatedAt || verificationRequest.updated_at : null,
-      status: getStepStatus('in_review', verificationRequest.status)
-    },
-    { 
-      id: 'approved',
-      label: 'Approved',
-      date: verificationRequest.status === 'approved' ? verificationRequest.updatedAt || verificationRequest.updated_at || verificationRequest.reviewerId || verificationRequest.reviewer_id : null,
-      status: getStepStatus('approved', verificationRequest.status)
-    },
-    { 
-      id: 'rejected',
-      label: 'Rejected',
-      date: verificationRequest.status === 'rejected' ? verificationRequest.updatedAt || verificationRequest.updated_at || verificationRequest.reviewerId || verificationRequest.reviewer_id : null,
-      status: getStepStatus('rejected', verificationRequest.status)
-    }
-  ];
+const VerificationTimeline: React.FC<VerificationTimelineProps> = ({ 
+  verificationRequest 
+}) => {
+  if (!verificationRequest) return null;
 
-  function getStepStatus(step: string, currentStatus: string): 'pending' | 'current' | 'complete' | 'error' {
-    if (currentStatus === 'rejected' && step === 'rejected') return 'error';
-    if (currentStatus === 'approved' && step === 'approved') return 'complete';
-    
-    switch(step) {
-      case 'in_review':
-        if (currentStatus === 'in_review') return 'current';
-        if (['approved', 'rejected'].includes(currentStatus)) return 'complete';
-        return 'pending';
-      case 'approved':
-        if (currentStatus === 'approved') return 'complete';
-        return 'pending';
-      case 'rejected':
-        if (currentStatus === 'rejected') return 'error';
-        return 'pending';
-      default:
-        return 'pending';
-    }
-  }
+  const getTimelineSteps = () => {
+    const steps = [
+      {
+        id: 'submitted',
+        title: 'Documents Submitted',
+        description: 'Your verification documents have been uploaded successfully.',
+        icon: <FileCheck className="h-5 w-5 text-primary" />,
+        date: new Date(verificationRequest.submittedAt || verificationRequest.created_at || Date.now()).toLocaleDateString(),
+        completed: true
+      },
+      {
+        id: 'pending',
+        title: 'Pending Review',
+        description: 'Your submission is in the queue awaiting review.',
+        icon: <Clock className="h-5 w-5 text-amber-500" />,
+        date: '',
+        completed: [VerificationStatus.PENDING, VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED, VerificationStatus.REJECTED].includes(verificationRequest.status as VerificationStatus)
+      },
+      {
+        id: 'review',
+        title: 'Under Review',
+        description: 'Our team is currently reviewing your submission.',
+        icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
+        date: '',
+        completed: [VerificationStatus.IN_REVIEW, VerificationStatus.APPROVED, VerificationStatus.REJECTED].includes(verificationRequest.status as VerificationStatus)
+      },
+      {
+        id: 'decision',
+        title: verificationRequest.status === VerificationStatus.APPROVED ? 'Verification Approved' : 'Verification Decision',
+        description: verificationRequest.status === VerificationStatus.APPROVED 
+          ? 'Congratulations! Your verification has been approved.' 
+          : verificationRequest.status === VerificationStatus.REJECTED
+          ? `Verification rejected: ${verificationRequest.rejectionReason || verificationRequest.reviewer_notes || 'No reason provided.'}`
+          : 'Awaiting final decision on your verification.',
+        icon: verificationRequest.status === VerificationStatus.APPROVED 
+          ? <CheckCircle className="h-5 w-5 text-green-500" />
+          : verificationRequest.status === VerificationStatus.REJECTED
+          ? <AlertTriangle className="h-5 w-5 text-red-500" />
+          : <ShieldCheck className="h-5 w-5 text-primary" />,
+        date: '',
+        completed: [VerificationStatus.APPROVED, VerificationStatus.REJECTED].includes(verificationRequest.status as VerificationStatus)
+      }
+    ];
 
-  function getStepIcon(status: 'pending' | 'current' | 'complete' | 'error') {
-    switch(status) {
-      case 'complete': return <CheckCircle className="h-6 w-6 text-green-500" />;
-      case 'current': return <Clock className="h-6 w-6 text-blue-500 animate-pulse" />;
-      case 'error': return <XCircle className="h-6 w-6 text-red-500" />;
-      case 'pending': return <Circle className="h-6 w-6 text-gray-300" />;
-    }
-  }
+    return steps;
+  };
+
+  const steps = getTimelineSteps();
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-medium mb-2">Progress Timeline</h3>
-      <div className="space-y-4">
+    <div className="space-y-6">
+      <h3 className="text-sm font-semibold">Verification Progress</h3>
+      <ol className="relative border-l border-muted">
         {steps.map((step, index) => (
-          <div key={step.id} className="flex items-start">
-            <div className="mr-3 mt-0.5">
-              {getStepIcon(step.status)}
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
-                <h4 className={`font-medium ${
-                  step.status === 'current' ? 'text-blue-600' : 
-                  step.status === 'error' ? 'text-red-600' : 
-                  step.status === 'complete' ? 'text-green-600' : 
-                  'text-gray-600'
-                }`}>{step.label}</h4>
+          <li key={step.id} className={`ml-4 ${index === steps.length - 1 ? '' : 'mb-6'}`}>
+            <div className={`absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border ${
+              step.completed ? 'border-primary bg-primary' : 'border-muted bg-muted'
+            }`}></div>
+            <div className="flex items-start">
+              <div className={`mr-3 ${step.completed ? 'text-primary' : 'text-muted-foreground'}`}>
+                {step.icon}
+              </div>
+              <div>
+                <h4 className={`font-medium ${step.completed ? '' : 'text-muted-foreground'}`}>{step.title}</h4>
+                <p className="text-sm text-muted-foreground">{step.description}</p>
                 {step.date && (
-                  <span className="text-xs text-gray-500">
-                    {new Date(step.date).toLocaleDateString()}
-                  </span>
+                  <time className="text-xs text-muted-foreground">{step.date}</time>
                 )}
               </div>
-              {index < steps.length - 1 && step.status !== 'pending' && (
-                <div className="ml-3 mt-1 mb-1 w-0.5 h-6 bg-gray-200 dark:bg-gray-700" />
-              )}
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ol>
     </div>
   );
 };

@@ -1,56 +1,61 @@
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import React, { useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import SignInForm from '@/components/auth/SignInForm';
 import SignUpForm from '@/components/auth/SignUpForm';
 
-const Auth = () => {
+const Auth: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const tab = searchParams.get('tab') || 'signin';
   const navigate = useNavigate();
-  const location = useLocation();
-  const { isAuthenticated } = useAuth();
-  
-  // Get the tab from the URL query parameter or default to 'signin'
-  const searchParams = new URLSearchParams(location.search);
-  const defaultTab = searchParams.get('tab') || 'signin';
-  
-  const [activeTab, setActiveTab] = useState<string>(defaultTab);
-  
-  // Redirect authenticated users to home
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Redirect to home if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/', { replace: true });
+    if (isAuthenticated && !isLoading) {
+      navigate('/');
     }
-  }, [isAuthenticated, navigate]);
-  
-  // Update URL when tab changes
+  }, [isAuthenticated, isLoading, navigate]);
+
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    navigate(`/auth?tab=${value}`, { replace: true });
+    navigate(`/auth?tab=${value}`);
   };
-  
-  // Handle successful authentication
-  const handleAuthSuccess = () => {
-    navigate('/', { replace: true });
-  };
-  
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  // Don't show auth forms if already authenticated and still on this page
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
-    <div className="container mx-auto max-w-lg py-12">
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="signin">Sign In</TabsTrigger>
-          <TabsTrigger value="signup">Sign Up</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="signin">
-          <SignInForm onSuccess={handleAuthSuccess} />
-        </TabsContent>
-        
-        <TabsContent value="signup">
-          <SignUpForm onSuccess={handleAuthSuccess} />
-        </TabsContent>
-      </Tabs>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background/80 to-background p-4">
+      <div className="w-full max-w-md">
+        <Tabs defaultValue={tab} onValueChange={handleTabChange}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          
+          <div className="mt-6">
+            <TabsContent value="signin">
+              <SignInForm />
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <SignUpForm />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 };

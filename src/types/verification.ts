@@ -1,75 +1,68 @@
-
-import { z } from 'zod';
-
-// Document types
-export const ID_CARD = 'id_card';
-export const PASSPORT = 'passport';
-export const DRIVERS_LICENSE = 'drivers_license';
-
-export type DocumentType = typeof ID_CARD | typeof PASSPORT | typeof DRIVERS_LICENSE;
-
-export const DOCUMENT_TYPES = [
-  { value: ID_CARD, label: 'ID Card' },
-  { value: PASSPORT, label: 'Passport' },
-  { value: DRIVERS_LICENSE, label: 'Driver\'s License' },
-];
-
-// Verification status types
-export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired';
-
-export interface DocumentData {
-  file: File;
-  preview: string;
+export enum VerificationStatus {
+  PENDING = 'pending',
+  IN_REVIEW = 'in_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired'
 }
 
-// Schema for verification form
-export const verificationFormSchema = z.object({
-  documentType: z.enum([ID_CARD, PASSPORT, DRIVERS_LICENSE]),
-  documentFile: z.instanceof(File, { message: 'Primary document is required' }),
-  selfieFile: z.instanceof(File, { message: 'Selfie is required' }).optional(),
-  consentChecked: z.boolean().optional(),
-  documentFrontImage: z.object({
-    file: z.instanceof(File).optional(),
-    preview: z.string().optional(),
-  }).optional(),
-  documentBackImage: z.object({
-    file: z.instanceof(File).optional(),
-    preview: z.string().optional(),
-  }).optional(),
-  selfieImage: z.object({
-    file: z.instanceof(File).optional(),
-    preview: z.string().optional(),
-  }).optional(),
-});
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  ENHANCED = 'enhanced',
+  PREMIUM = 'premium'
+}
 
-// Types based on the schema
-export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
+export const ID_CARD = 'id_card';
+export type DocumentType = 'id_card' | 'passport' | 'drivers_license';
 
 export interface VerificationDocument {
   id: string;
-  userId: string;
-  documentType: DocumentType;
-  fileUrl: string;
-  status: VerificationStatus;
-  uploadedAt: string;
-  reviewedAt?: string;
-  notes?: string;
+  documentType?: string;
+  document_type?: string; // For backward compatibility
+  fileUrl?: string;
+  file_url?: string; // For backward compatibility
+  type?: string;
+  url?: string;
+  document_url?: string;
+  status?: string;
+  uploaded_at?: string;
 }
 
 export interface VerificationRequest {
   id: string;
-  userId: string;
-  status: VerificationStatus;
-  submittedAt: string;
-  updatedAt?: string;
-  documents: VerificationDocument[];
-  rejectionReason?: string;
+  status: VerificationStatus | string;
+  submittedAt?: string;
+  created_at?: string; // For backward compatibility
+  documents?: VerificationDocument[];
   verificationLevel?: string;
+  requested_level?: string; // For backward compatibility
+  rejectionReason?: string;
+  reviewer_notes?: string; // For backward compatibility
 }
 
-// Form data type
-export interface VerificationFormData {
+export interface VerificationFormValues {
   documentType: DocumentType;
   documentFile: File;
   selfieFile?: File;
+  consentChecked: boolean;
+  documentFrontImage: { file: File; preview: string };
+  documentBackImage: { file: File; preview: string };
+  selfieImage: { file: File; preview: string };
+}
+
+export const verificationFormSchema = {
+  // Schema placeholder - add validation schema if needed
+};
+
+export interface VerificationEligibilityResponse {
+  canSubmit: boolean;
+  reason?: string;
+  cooldownRemaining?: number;
+}
+
+export interface VerificationSubmissionResponse {
+  success: boolean;
+  message: string;
+  requestId?: string;
 }
