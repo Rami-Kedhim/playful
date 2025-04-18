@@ -1,19 +1,26 @@
 
 import { useState, useEffect } from 'react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
-import { SystemHealthMetrics } from '@/types/neural';
+import { SystemHealthMetrics } from '@/types/neural-system';
 
 // Default system health metrics
 const defaultMetrics: SystemHealthMetrics = {
+  modelCount: 5,
+  activeConnections: 23,
+  requestsPerMinute: 120,
+  averageResponseTime: 250,
+  errorRate: 0.02,
+  uptime: 99.98,
+  models: [],
   cpuUtilization: 0.45,
   memoryUtilization: 0.38,
-  networkLatency: 120, // ms
   errorFrequency: 0.02,
-  userSatisfactionScore: 0.87,
+  systemUptime: 99.98,
+  networkLatency: 120, // ms
   responseTime: 250, // ms
+  userSatisfactionScore: 0.87,
   algorithmEfficiency: 0.78,
   dataPrecision: 0.92,
-  systemUptime: 99.98, // percentage
   lastMaintenanceDate: new Date(),
   // Fields that neuralHub.getHealthMetrics() might return
   load: 0.42,
@@ -33,6 +40,14 @@ export interface NeuralSystemMetricsResult {
     expected: number;
     severity: 'low' | 'medium' | 'high';
   }[];
+  logs: any[];
+  performance: any;
+  refreshMetrics: () => void;
+  errorMessage: string | null;
+  isLoading: boolean;
+  isMonitoring: boolean;
+  startMonitoring: () => void;
+  stopMonitoring: () => void;
 }
 
 export const useNeuralSystemMetrics = (

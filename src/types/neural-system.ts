@@ -26,6 +26,7 @@ export interface TrainingProgress {
   id: string;
   modelId: string;
   progress: number;
+  epoch: number;
   status: 'training' | 'paused' | 'completed' | 'failed';
   startTime: Date;
   endTime?: Date;
@@ -34,6 +35,9 @@ export interface TrainingProgress {
   loss: number;
   accuracy: number;
   type: string;
+  timeRemaining: number;
+  targetAccuracy?: number;
+  estimatedCompletionTime?: Date;
 }
 
 export interface NeuralModel {
@@ -41,6 +45,9 @@ export interface NeuralModel {
   name: string;
   type: string;
   version: string;
+  specialization: string;
+  size: number;
+  precision: number;
   capabilities: string[];
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
@@ -53,22 +60,24 @@ export interface NeuralModel {
 }
 
 export interface SystemHealthMetrics {
+  modelCount: number;
+  activeConnections: number;
+  requestsPerMinute: number;
+  averageResponseTime: number;
+  errorRate: number;
+  uptime: number;
+  models: NeuralModel[];
   cpuUtilization: number;
   memoryUtilization: number;
-  networkLatency: number;
   errorFrequency: number;
-  uptime: number;
-  load: number;
-  operationsPerSecond: number;
+  systemUptime: number;
+  networkLatency: number;
   responseTime: number;
-  errorRate: number;
-  stability: number;
-  userEngagement: number;
-  economicBalance: number;
-  lastUpdated: Date;
-  systemLoad?: number;
-  memoryAllocation?: number;
-  networkThroughput?: number;
-  requestRate?: number;
-  averageResponseTime?: number;
+  userSatisfactionScore: number;
+  algorithmEfficiency?: number;
+  dataPrecision?: number;
+  lastMaintenanceDate?: Date;
+  load?: number;
+  userEngagement?: number;
+  lastUpdated?: number;
 }

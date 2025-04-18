@@ -59,3 +59,54 @@ export function formatDate(
     return '';
   }
 }
+
+/**
+ * Calculates expiry date from a creation date (180 days later)
+ */
+export function calculateExpiryDate(createdAt: Date): Date {
+  const expiryDate = new Date(createdAt);
+  expiryDate.setDate(expiryDate.getDate() + 180); // 180 days validity
+  return expiryDate;
+}
+
+/**
+ * Calculates days remaining until a given date
+ */
+export function calculateDaysRemaining(expiryDate: Date): number {
+  const now = new Date();
+  const diffTime = expiryDate.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+/**
+ * Determines content status based on created date
+ */
+export function determineContentStatus(createdAt: Date): 'active' | 'expiring' | 'expired' {
+  const expiryDate = calculateExpiryDate(createdAt);
+  const daysRemaining = calculateDaysRemaining(expiryDate);
+  
+  if (daysRemaining <= 0) return 'expired';
+  if (daysRemaining <= 30) return 'expiring'; // 30 days or less = expiring
+  return 'active';
+}
+
+/**
+ * Calculate renewal cost for content
+ */
+export function calculateRenewalCost(contentStatus: string, contentType?: string): number {
+  // Default costs
+  const baseCosts = {
+    image: 1,
+    video: 2,
+    text: 1
+  };
+  
+  // Apply status multiplier
+  const statusMultiplier = contentStatus === 'expired' ? 1.5 : 1;
+  
+  // Calculate base cost based on content type
+  const baseCost = contentType ? (baseCosts[contentType as keyof typeof baseCosts] || 1) : 1;
+  
+  return Math.ceil(baseCost * statusMultiplier);
+}

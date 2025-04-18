@@ -12,7 +12,7 @@ export interface UberPersona {
   };
   description: string;
   background: string;
-  capabilities: string[] | {
+  capabilities: {
     hasPhotos: boolean;
     hasVideos: boolean;
     hasStories: boolean;
