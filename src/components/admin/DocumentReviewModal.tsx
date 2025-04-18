@@ -1,25 +1,27 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { VerificationRequest } from '@/types/escort';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { CheckCircle, XCircle } from 'lucide-react';
+import { VerificationDocument, VerificationRequest } from '@/types/verification';
 
-export interface DocumentReviewProps {
-  document: any; // Document being reviewed
+interface DocumentReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  verification: VerificationRequest;
-  onApprove: () => Promise<void>;
-  onReject: (reason: string) => Promise<void>;
+  document: VerificationDocument;
+  request: VerificationRequest;
+  onApprove: (documentId: string, notes: string) => void;
+  onReject: (documentId: string, notes: string) => void;
 }
 
-const DocumentReviewModal: React.FC<DocumentReviewProps> = ({
-  document,
+const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
   isOpen,
   onClose,
-  verification,
+  document,
+  request,
   onApprove,
   onReject
 }) => {

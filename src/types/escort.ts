@@ -10,6 +10,7 @@ export interface Escort {
   price: number;
   rating?: number;
   reviewCount?: number;
+  reviews?: number;
   services: string[];
   images: string[];
   imageUrl?: string;
@@ -44,6 +45,23 @@ export interface Escort {
   subscriptionPrice?: number;
   contentStats?: ContentStats;
   avatar?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+  sexualOrientation?: string;
+  responseRate?: number;
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  serviceTypes?: string[];
+  gallery_images?: string[];
+  verification_level?: string;
+  description?: string;
+  videos?: any[];
+  isFavorited?: boolean;
+  measurements?: {
+    bust?: number;
+    waist?: number;
+    hips?: number;
+  };
 }
 
 export interface ContactInfo {
@@ -101,6 +119,8 @@ export interface Booking {
   notes?: string;
   createdAt: string;
   updatedAt?: string;
+  duration?: number;
+  service?: string;
 }
 
 export enum BookingStatus {
@@ -108,7 +128,9 @@ export enum BookingStatus {
   CONFIRMED = 'confirmed',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
-  NO_SHOW = 'no_show'
+  NO_SHOW = 'no_show',
+  REJECTED = 'rejected',
+  DECLINED = 'declined'
 }
 
 export enum VerificationLevel {
@@ -117,4 +139,41 @@ export enum VerificationLevel {
   STANDARD = 'standard',
   PREMIUM = 'premium',
   PLATINUM = 'platinum'
+}
+
+export interface VerificationRequest {
+  id: string;
+  status: string;
+  submittedAt?: string;
+  created_at?: string;
+  documents?: VerificationDocument[];
+  verificationLevel?: string;
+  requested_level?: string;
+  requestedLevel?: string;
+  rejectionReason?: string;
+  reviewer_notes?: string;
+  reviewedAt?: string;
+  userId?: string;
+  user_id?: string;
+  profile_id?: string;
+  createdAt?: string;
+  level?: string;
+  updated_at?: string;
+  verification_id?: string;
+}
+
+export interface VerificationDocument {
+  id: string;
+  documentType?: string;
+  document_type?: string;
+  fileUrl?: string;
+  file_url?: string;
+  type?: string;
+  url?: string;
+  document_url?: string;
+  status?: string;
+  uploaded_at?: string;
+  uploadedAt?: string;
+  created_at?: string;
+  verification_id?: string;
 }

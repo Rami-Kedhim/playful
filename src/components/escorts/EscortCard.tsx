@@ -51,8 +51,8 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
   };
 
   const getServiceType = (): ServiceTypeFilter => {
-    const hasInPerson = providesInPersonServices || escort.serviceTypes?.includes('in-person') || false;
-    const hasVirtual = providesVirtualContent || escort.serviceTypes?.includes('virtual') || false;
+    const hasInPerson = providesInPersonServices || escort.services.includes('in-person') || false;
+    const hasVirtual = providesVirtualContent || escort.services.includes('virtual') || false;
     
     if (hasInPerson && hasVirtual) {
       return "both";

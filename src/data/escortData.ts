@@ -30,7 +30,7 @@ export const escortData: Escort[] = [
       overnight: 1500,
       weekend: 3000
     },
-    gallery_images: ["/assets/escorts/profile1.jpg", "/assets/escorts/profile1-2.jpg", "/assets/escorts/profile1-3.jpg"]
+    gallery: ["/assets/escorts/profile1.jpg", "/assets/escorts/profile1-2.jpg", "/assets/escorts/profile1-3.jpg"]
   },
   {
     id: "2",
@@ -59,7 +59,7 @@ export const escortData: Escort[] = [
       overnight: 1400,
       weekend: 2800
     },
-    gallery_images: ["/assets/escorts/profile2.jpg", "/assets/escorts/profile2-2.jpg"]
+    gallery: ["/assets/escorts/profile2.jpg", "/assets/escorts/profile2-2.jpg"]
   },
 ];
 

@@ -11,14 +11,14 @@ export enum UserRole {
 
 export interface User {
   id: string;
-  username?: string; // Made optional to match auth.User
+  username?: string; 
   email: string;
   role: UserRole | string;
   avatar?: string;
   isVerified?: boolean;
   createdAt: string;
   updatedAt?: string;
-  name?: string; // Added to support ProfileHeader component
+  name?: string;
 }
 
 export interface UserProfile {
@@ -27,15 +27,15 @@ export interface UserProfile {
   email: string;
   name: string;
   avatar_url?: string;
-  phone_number?: string; // Changed from phone
+  phone_number?: string;
+  phone?: string; // Added to support both naming conventions
   location?: string;
   bio?: string;
   is_escort?: boolean;
   created_at?: string;
   updated_at?: string;
   verified?: boolean;
-  website?: string; // Added to support ProfileEditForm
-  phone?: string; // Alternative field for phone_number
+  website?: string;
 }
 
 export interface AuthState {

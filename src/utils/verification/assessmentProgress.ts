@@ -1,88 +1,83 @@
 
 import { VerificationStatus } from '@/types/verification';
 
-/**
- * Calculate the verification progress percentage based on status
- */
-export function calculateVerificationProgress(status: VerificationStatus | string): number {
-  switch(status) {
-    case VerificationStatus.PENDING:
-      return 0;
-    case VerificationStatus.IN_REVIEW:
-      return 50;
-    case VerificationStatus.APPROVED:
-      return 100;
-    case VerificationStatus.REJECTED:
-      return 100;
-    case VerificationStatus.EXPIRED:
-      return 100;
-    default:
-      return 0;
-  }
-}
+export default function getVerificationProgress(status: VerificationStatus | string) {
+  // Map string status to enum if needed
+  let normalizedStatus = status;
+  if (status === 'pending') normalizedStatus = VerificationStatus.PENDING;
+  if (status === 'in_review') normalizedStatus = VerificationStatus.IN_REVIEW;
+  if (status === 'approved') normalizedStatus = VerificationStatus.APPROVED;
+  if (status === 'rejected') normalizedStatus = VerificationStatus.REJECTED;
+  if (status === 'expired') normalizedStatus = VerificationStatus.EXPIRED;
 
-/**
- * Get appropriate status message for verification status
- */
-export function getVerificationStatusMessage(status: VerificationStatus | string): string {
-  switch(status) {
-    case VerificationStatus.PENDING:
-      return 'Your verification request has been submitted and is waiting to be reviewed.';
-    case VerificationStatus.IN_REVIEW:
-      return 'Your verification documents are currently being reviewed by our team.';
-    case VerificationStatus.APPROVED:
-      return 'Congratulations! Your verification has been approved.';
-    case VerificationStatus.REJECTED:
-      return 'Your verification request has been rejected. Please check the reason and try again.';
-    case VerificationStatus.EXPIRED:
-      return 'Your verification request has expired. Please submit a new request.';
-    default:
-      return 'Status information unavailable.';
+  // Handle pending status
+  if (normalizedStatus === VerificationStatus.PENDING) {
+    return {
+      step: 1,
+      totalSteps: 3,
+      status: 'pending',
+      label: 'Documents Submitted',
+      description: 'Your verification request has been submitted and is pending review.',
+      color: 'blue'
+    };
   }
-}
 
-/**
- * Get appropriate title for verification status
- */
-export function getVerificationStatusTitle(status: VerificationStatus | string): string {
-  switch(status) {
-    case VerificationStatus.PENDING:
-      return 'Pending';
-    case VerificationStatus.IN_REVIEW:
-      return 'In Review';
-    case VerificationStatus.APPROVED:
-      return 'Approved';
-    case VerificationStatus.REJECTED:
-      return 'Rejected';
-    case VerificationStatus.EXPIRED:
-      return 'Expired';
-    default:
-      return 'Unknown Status';
+  // Handle in review status
+  if (normalizedStatus === VerificationStatus.IN_REVIEW) {
+    return {
+      step: 2,
+      totalSteps: 3,
+      status: 'in_review',
+      label: 'Under Review',
+      description: 'Our team is currently reviewing your verification documents.',
+      color: 'yellow'
+    };
   }
-}
 
-/**
- * Calculate estimated completion time based on status
- */
-export function getEstimatedCompletionTime(status: VerificationStatus | string): string {
-  switch(status) {
-    case VerificationStatus.PENDING:
-      return '24-48 hours';
-    case VerificationStatus.IN_REVIEW:
-      return '12-24 hours';
-    case VerificationStatus.APPROVED:
-    case VerificationStatus.REJECTED:
-    case VerificationStatus.EXPIRED:
-      return 'Completed';
-    default:
-      return 'Unknown';
+  // Handle approved status
+  if (normalizedStatus === VerificationStatus.APPROVED) {
+    return {
+      step: 3,
+      totalSteps: 3,
+      status: 'approved',
+      label: 'Verification Approved',
+      description: 'Your identity has been successfully verified!',
+      color: 'green'
+    };
   }
-}
 
-/**
- * Check if verification is in progress
- */
-export function isVerificationInProgress(status: VerificationStatus | string): boolean {
-  return status === VerificationStatus.PENDING || 
-         status === VerificationStatus.IN_REVIEW;
+  // Handle rejected status
+  if (normalizedStatus === VerificationStatus.REJECTED) {
+    return {
+      step: 2,
+      totalSteps: 3,
+      status: 'rejected',
+      label: 'Verification Rejected',
+      description: 'Your verification request was rejected. Please check the feedback and try again.',
+      color: 'red'
+    };
+  }
+
+  // Handle expired status
+  if (normalizedStatus === VerificationStatus.EXPIRED || 
+      [VerificationStatus.APPROVED, VerificationStatus.REJECTED, VerificationStatus.EXPIRED].includes(normalizedStatus as any) === false) {
+    return {
+      step: 0,
+      totalSteps: 3,
+      status: 'expired',
+      label: 'Verification Expired',
+      description: 'Your verification request has expired. Please submit a new request.',
+      color: 'gray'
+    };
+  }
+
+  // Default fallback
+  return {
+    step: 0,
+    totalSteps: 3,
+    status: 'unknown',
+    label: 'Not Started',
+    description: 'Please start the verification process.',
+    color: 'gray'
+  };
 }
