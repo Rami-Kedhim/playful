@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DOCUMENT_TYPES, DocumentType } from '@/types/verification';
+import { DocumentType, DOCUMENT_TYPES } from '@/types/verification';
 import { UseFormReturn } from 'react-hook-form';
 
 interface DocumentTypeSelectProps {

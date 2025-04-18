@@ -45,7 +45,7 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">
           <User className="h-4 w-4" />
-          <span>User ID: {request.userId || request.user_id}</span>
+          <span>User ID: {request.userId || request.user_id || request.profile_id}</span>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -54,7 +54,9 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
             Submitted:{' '}
             {request.submittedAt
               ? format(new Date(request.submittedAt), 'MMM dd, yyyy h:mm a')
-              : format(new Date(request.created_at || request.createdAt || new Date()), 'MMM dd, yyyy h:mm a')}
+              : request.created_at || request.createdAt 
+                ? format(new Date(request.created_at || request.createdAt), 'MMM dd, yyyy h:mm a')
+                : format(new Date(), 'MMM dd, yyyy h:mm a')}
           </span>
         </div>
         
@@ -65,7 +67,7 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
           </TabsList>
           
           <TabsContent value="documents" className="space-y-4">
-            {request.documents.length === 0 ? (
+            {(!request.documents || request.documents.length === 0) ? (
               <div className="text-center text-muted-foreground">
                 <File className="h-6 w-6 mx-auto mb-2" />
                 No documents submitted.

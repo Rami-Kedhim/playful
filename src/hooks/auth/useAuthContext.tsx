@@ -12,6 +12,8 @@ const DEFAULT_CONTEXT: AuthContextType = {
   signUp: async () => ({ success: false }),
   signOut: async () => {},
   logout: async () => {}, // Alias for signOut for backward compatibility
+  login: async () => ({ success: false }), // Alias for signIn
+  register: async () => ({ success: false }), // Alias for signUp
   checkRole: () => false,
   updateUserProfile: async () => false,
   refreshProfile: async () => {},
@@ -42,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return state.user.roles.includes(role as UserRole);
   }, [state.user]);
 
-  const userRoles = state.user?.roles || [];
+  const userRoles = state.user?.roles?.map(r => r.toString()) || [];
 
   const updateUserProfile = useCallback(async (data: Partial<UserProfile>) => {
     console.log('Updating user profile with data:', data);
@@ -81,10 +83,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user: {
         id: '1',
         email,
-        roles: [UserRole.USER]
+        roles: [UserRole.USER],
+        name: 'Test User'
       }
     };
   }, []);
+
+  // Alias for signIn
+  const login = signIn;
 
   const signUp = useCallback(async (email: string, password: string, name?: string): Promise<AuthResult> => {
     return {
@@ -92,10 +98,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user: {
         id: '1',
         email,
-        roles: [UserRole.USER]
+        roles: [UserRole.USER],
+        name: name || 'New User'
       }
     };
   }, []);
+
+  // Alias for signUp
+  const register = signUp;
 
   const signOut = useCallback(async () => {
     setState(prev => ({
@@ -140,14 +150,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
         isAuthenticated: true,
         isLoading: false,
+        login,
+        register,
+        signIn,
+        signUp,
         checkRole,
         userRoles,
         updateUserProfile,
         refreshProfile,
         updatePassword,
         resetPassword,
-        signIn,
-        signUp,
         signOut,
         logout,
         sendPasswordResetEmail,
@@ -167,11 +179,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }));
     }, 1000);
-  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, resetPassword, signIn, signUp, signOut, sendPasswordResetEmail, logout, updateProfile, verifyEmail, sendVerificationEmail]);
+  }, [checkRole, userRoles, updateUserProfile, refreshProfile, updatePassword, resetPassword, signIn, signUp, signOut, sendPasswordResetEmail, logout, login, register, updateProfile, verifyEmail, sendVerificationEmail]);
 
   return (
     <AuthContext.Provider value={{
       ...state,
+      login,
+      register,
       checkRole,
       userRoles,
       updateUserProfile,

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import { VerificationFormValues, DOCUMENT_TYPES, verificationFormSchema, ID_CARD } from '@/types/verification';
+import { VerificationFormValues, DocumentType, ID_CARD, verificationFormSchema, DOCUMENT_TYPES } from '@/types/verification';
 import DocumentTypeSelect from './form/DocumentTypeSelect';
 import DocumentUploadHandler from './form/DocumentUploadHandler';
 import SubmitButton from './form/SubmitButton';
@@ -34,7 +34,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
-  const [documentType, setDocumentType] = useState(ID_CARD);
+  const [documentType, setDocumentType] = useState<DocumentType>(ID_CARD);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
@@ -42,7 +42,10 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       documentType: ID_CARD,
       documentFile: undefined as unknown as File,
       selfieFile: undefined as unknown as File,
-      consentChecked: false
+      consentChecked: false,
+      documentFrontImage: { file: undefined as unknown as File, preview: '' },
+      documentBackImage: { file: undefined as unknown as File, preview: '' },
+      selfieImage: { file: undefined as unknown as File, preview: '' },
     },
   });
 
@@ -64,7 +67,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     }
   }, [user]);
 
-  const handleDocumentTypeChange = (type: string) => {
+  const handleDocumentTypeChange = (type: DocumentType) => {
     setDocumentType(type);
   };
 

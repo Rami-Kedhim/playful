@@ -27,13 +27,15 @@ const DashboardLayout: React.FC = () => {
     return <div>Loading...</div>;
   }
 
+  const displayName = user.username || user.name || user.email?.split('@')[0] || 'User';
+
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <div className="hidden md:flex w-64 flex-col bg-card dark:bg-card border-r">
         <div className="p-4 border-b">
           <h2 className="text-xl font-bold">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">Welcome, {user.name || user.username || 'User'}</p>
+          <p className="text-sm text-muted-foreground">Welcome, {displayName}</p>
         </div>
         
         <div className="flex flex-col flex-1 overflow-y-auto py-4">

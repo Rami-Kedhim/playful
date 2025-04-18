@@ -21,17 +21,15 @@ export const useVerificationStatus = (userId?: string) => {
         // Mock data - with properly typed fields
         const mockRequest: VerificationRequest = {
           id: 'ver_123',
-          userId: userId, 
+          user_id: userId, 
           profile_id: userId,
           status: VerificationStatus.PENDING,
           requested_level: VerificationLevel.BASIC,
           documents: [],
-          createdAt: new Date().toISOString(),
-          submittedAt: new Date().toISOString(),
           created_at: new Date().toISOString(),
+          submittedAt: new Date().toISOString(),
           level: VerificationLevel.BASIC,
           verificationLevel: VerificationLevel.BASIC,
-          user_id: userId,
           requestedLevel: VerificationLevel.BASIC
         };
         
@@ -53,6 +51,7 @@ export const useVerificationStatus = (userId?: string) => {
   
   return {
     request,
+    verificationRequest: request,
     loading,
     error,
     isVerified: request?.status === VerificationStatus.APPROVED,

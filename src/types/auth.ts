@@ -22,7 +22,12 @@ export interface User {
   user_metadata?: Record<string, any>;
   avatar_url?: string;
   app_metadata?: Record<string, any>;
-  created_at?: string; // For backward compatibility
+  created_at?: string;
+  name?: string;
+  phone_number?: string;
+  location?: string;
+  bio?: string;
+  gender?: string;
 }
 
 export interface AuthUser extends User {
@@ -37,6 +42,7 @@ export interface AuthResult {
   success: boolean;
   error?: string | null;
   user?: User;
+  session?: any; // Add session property
 }
 
 export interface UserProfile {
@@ -53,6 +59,7 @@ export interface UserProfile {
   ubx_balance?: number;
   verificationLevel?: string;
   profileImageUrl?: string;
+  gender?: string; // Add gender field
 }
 
 export type DatabaseGender = 'male' | 'female' | 'other' | 'trans' | 'non-binary';
@@ -67,6 +74,8 @@ export interface AuthContextType {
   signUp: (email: string, password: string, name?: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   logout?: () => Promise<void>; // Alias for signOut for backward compatibility
+  login?: (email: string, password: string) => Promise<AuthResult>; // Alias for signIn
+  register?: (email: string, password: string, name?: string) => Promise<AuthResult>; // Alias for signUp
   checkRole: (role: string) => boolean;
   updateUserProfile: (data: Partial<UserProfile>) => Promise<boolean>;
   refreshProfile: () => Promise<void>;

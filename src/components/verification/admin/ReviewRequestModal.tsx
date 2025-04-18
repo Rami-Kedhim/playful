@@ -51,13 +51,13 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="font-medium">User ID:</div>
-              <div>{request.userId || request.user_id}</div>
+              <div>{request.userId || request.user_id || request.profile_id || ''}</div>
               
               <div className="font-medium">Status:</div>
               <div className="capitalize">{request.status}</div>
               
               <div className="font-medium">Requested Level:</div>
-              <div className="capitalize">{request.requestedLevel || request.requested_level}</div>
+              <div className="capitalize">{request.requested_level || request.requestedLevel || ''}</div>
             </div>
             
             <div className="space-y-2">

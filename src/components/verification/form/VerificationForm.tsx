@@ -10,7 +10,8 @@ import {
   VerificationFormValues, 
   verificationFormSchema, 
   ID_CARD, 
-  DocumentType 
+  DocumentType,
+  DOCUMENT_TYPES
 } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentUploadHandler from './DocumentUploadHandler';
@@ -39,7 +40,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
-  const [documentType, setDocumentType] = useState(ID_CARD);
+  const [documentType, setDocumentType] = useState<DocumentType>(ID_CARD);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),

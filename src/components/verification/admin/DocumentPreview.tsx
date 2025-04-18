@@ -15,9 +15,9 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
   const [isViewerOpen, setIsViewerOpen] = React.useState(false);
 
   // Get the appropriate document properties, supporting both naming conventions
-  const documentType = document.type || document.document_type || '';
+  const documentType = document.type || document.documentType || document.document_type || '';
   const documentUrl = document.url || document.fileUrl || document.file_url || document.document_url || '';
-  const uploadDate = document.uploadedAt || document.created_at || '';
+  const uploadDate = document.uploaded_at || document.uploadedAt || document.created_at || '';
 
   return (
     <>

@@ -17,9 +17,9 @@ const DocumentReview = ({ document }: DocumentReviewProps) => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
   
-  const documentType = document.type || document.document_type || 'Unknown';
+  const documentType = document.type || document.documentType || document.document_type || 'Unknown';
   const imageUrl = document.url || document.fileUrl || document.file_url || document.document_url || '';
-  const uploadedAt = document.uploadedAt || document.created_at || new Date().toISOString();
+  const uploadedAt = document.uploaded_at || document.uploadedAt || document.created_at || new Date().toISOString();
 
   return (
     <Card>
