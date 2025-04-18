@@ -56,13 +56,16 @@ const RoutesComponent: React.FC = () => {
   const profile: UserProfile | null = authProfile ? {
     id: authProfile.id,
     userId: authProfile.id,
-    email: authProfile.email,
-    name: authProfile.name || authProfile.full_name || (authUser?.name || ''),
-    avatar_url: authProfile.avatar_url || authProfile.profileImageUrl,
-    location: authProfile.location,
-    bio: authProfile.bio,
-    verified: authProfile.is_verified,
+    username: authProfile.username || '',
+    email: authProfile.email || '',
+    displayName: authProfile.name || authProfile.full_name || (authUser?.name || ''),
+    location: authProfile.location || '',
+    bio: authProfile.bio || '',
+    isVerified: authProfile.is_verified || false,
     website: authProfile.website || '',
+    avatarUrl: authProfile.avatar_url || authProfile.profileImageUrl || '',
+    joinedDate: new Date(),
+    avatar_url: authProfile.avatar_url || authProfile.profileImageUrl || '',
   } : null;
   
   return (

@@ -63,6 +63,7 @@ export interface NeuralModel {
     latency: number;
     resourceUsage: number;
   };
+  specialization?: string[]; // Added for NeuralService.getSuitableModels
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,5 +71,5 @@ export interface NeuralModel {
 export interface UberCoreService {
   getStatus: () => Promise<any>;
   configure: (config: any) => Promise<any>;
-  processUserInput: (input: string) => Promise<any>;
+  processUserInput: (userId: string, input: string, options?: any) => Promise<any>;
 }

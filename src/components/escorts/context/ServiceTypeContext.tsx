@@ -1,20 +1,28 @@
 
 import { createContext, useContext } from 'react';
-import { ServiceTypeFilter } from '@/types/filters';
 
-// Use "export type" for re-export when isolatedModules is enabled
-export type { ServiceTypeFilter };
+// Define the type for service type filter
+export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both';
 
+// Define types for specialized service types
 export interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
   setServiceType: (type: ServiceTypeFilter) => void;
   availableServiceTypes: ServiceTypeFilter[];
+  // Additional properties for specialized service types
+  specializedServiceTypes: string[];
+  selectedSpecializedTypes: string[];
+  toggleSpecializedType: (type: string) => void;
 }
 
+// Create context with default values
 export const ServiceTypeContext = createContext<ServiceTypeContextType>({
   serviceType: '',
   setServiceType: () => {},
-  availableServiceTypes: ['in-person', 'virtual', 'both']
+  availableServiceTypes: ['in-person', 'virtual', 'both'],
+  specializedServiceTypes: [],
+  selectedSpecializedTypes: [],
+  toggleSpecializedType: () => {}
 });
 
 // Export the hook to use the context
@@ -23,7 +31,17 @@ export const useServiceTypeContext = () => useContext(ServiceTypeContext);
 export const useServiceType = useServiceTypeContext;
 
 // Add ServiceTypeProvider component for compatibility
-export const ServiceTypeProvider = ({ children }: { children: React.ReactNode }) => {
+export const ServiceTypeProvider = ({ 
+  children, 
+  supportedServiceTypes,
+  filterForbiddenTerms,
+  onUnsafeTermRemap
+}: { 
+  children: React.ReactNode;
+  supportedServiceTypes?: string[];
+  filterForbiddenTerms?: boolean;
+  onUnsafeTermRemap?: (original: string, remapped: string) => void;
+}) => {
   // This is a placeholder - the actual implementation should be in its own file
   return <>{children}</>;
 };

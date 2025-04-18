@@ -90,3 +90,16 @@ export interface VerificationFormValues {
     preview: string;
   };
 }
+
+// Add missing interface for submission responses
+export interface VerificationSubmissionResponse {
+  success: boolean;
+  message: string;
+  requestId?: string;
+}
+
+// Add missing interface for eligibility check
+export interface VerificationEligibilityResponse {
+  canSubmit: boolean;
+  reason?: string;
+}

@@ -17,6 +17,11 @@ export interface UserProfile {
   phone?: string;
   userId?: string;
   avatar_url?: string; // For backward compatibility
+  name?: string; // Added for backward compatibility
+  is_verified?: boolean; // Added for backward compatibility
+  created_at?: string; // Added for backward compatibility
+  full_name?: string; // Added for backward compatibility
+  verified?: boolean; // Added for backward compatibility
 }
 
 // Add User type that was missing
