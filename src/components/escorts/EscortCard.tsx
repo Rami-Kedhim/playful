@@ -1,10 +1,9 @@
 
-// Import from a consistent path that doesn't have casing issues
-import { Escort } from '@/types/Escort';
 import React from 'react';
+import { Escort } from '@/types/escort';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import { ServiceTypeBadge } from './ServiceTypeBadge';
+import ServiceTypeBadge from './ServiceTypeBadge';
 
 interface EscortCardProps {
   escort: Escort;
@@ -42,7 +41,9 @@ const EscortCard: React.FC<EscortCardProps> = ({
         )}
         
         <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-          <ServiceTypeBadge serviceType={escort.serviceType || 'in-person'} />
+          {escort.serviceType && (
+            <ServiceTypeBadge serviceType={escort.serviceType} />
+          )}
         </div>
       </CardHeader>
       

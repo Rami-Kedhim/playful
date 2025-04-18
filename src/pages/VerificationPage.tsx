@@ -12,7 +12,7 @@ const VerificationPage: React.FC = () => {
   const demoProps = {
     userId: user?.id || '123456',
     currentLevel: VerificationLevel.NONE,
-    verificationStatus: 'none'
+    verificationStatus: 'none' as 'none' | 'pending' | 'approved' | 'rejected'
   };
   
   return (

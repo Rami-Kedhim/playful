@@ -1,64 +1,106 @@
 
-// Neural Hub implementation
+import { NeuralServiceMetrics } from '../interfaces/NeuralService';
+
+export interface HealthMetrics {
+  systemLoad: number;
+  uptime: number;
+  memoryUsage: number;
+  activeConnections: number;
+  lastUpdated: Date;
+}
+
 export interface NeuralModel {
   id: string;
   name: string;
   version: string;
+  type: string;
+  status: 'active' | 'inactive' | 'training' | 'error';
+  accuracy?: number;
+  lastUpdated?: Date;
   specialization: string | string[];
-  status: 'active' | 'inactive' | 'training';
-  accuracy: number;
-  lastUpdated: Date;
-  metadata?: Record<string, any>;
 }
 
-export interface HealthMetrics {
-  load: number;
-  userEngagement: number;
-  stability: number;
-  cpuUtilization: number;
-  memoryUtilization: number; 
-  responseTime: number;
-  lastUpdated: number;
+export interface TrainingProgress {
+  modelId: string;
+  progress: number;
+  startTime: Date;
+  estimatedCompletionTime?: Date;
+  currentEpoch?: number;
+  totalEpochs?: number;
+  currentLoss?: number;
 }
 
 export const neuralHub = {
   getHealthMetrics: (): HealthMetrics => ({
-    load: Math.random() * 0.7,
-    userEngagement: Math.random() * 0.8,
-    stability: 0.95,
-    cpuUtilization: Math.random() * 0.6,
-    memoryUtilization: Math.random() * 0.5,
-    responseTime: 150 + Math.random() * 100,
-    lastUpdated: Date.now()
+    systemLoad: Math.random() * 100,
+    uptime: Math.floor(Math.random() * 1000000),
+    memoryUsage: Math.random() * 100,
+    activeConnections: Math.floor(Math.random() * 100),
+    lastUpdated: new Date()
   }),
   
   getModels: (): NeuralModel[] => [
     {
-      id: 'escort-predictor-v1',
-      name: 'Escort Predictor',
-      version: '1.0.0',
-      specialization: ['profile matching', 'compatibility'],
-      status: 'active',
-      accuracy: 0.89,
-      lastUpdated: new Date('2024-01-15')
-    },
-    {
-      id: 'content-recommender-v2',
-      name: 'Content Recommender',
-      version: '2.0.0',
-      specialization: 'content recommendations',
+      id: '1',
+      name: 'Escort Recommendation Engine',
+      version: '1.2.0',
+      type: 'recommendation',
       status: 'active',
       accuracy: 0.92,
-      lastUpdated: new Date('2024-03-01')
+      lastUpdated: new Date(),
+      specialization: ['escorts', 'recommendations']
     },
     {
-      id: 'sentiment-analyzer-v1',
-      name: 'Sentiment Analyzer',
-      version: '1.2.5',
-      specialization: ['sentiment analysis', 'mood detection'],
+      id: '2',
+      name: 'Content Creator Analysis',
+      version: '0.9.5',
+      type: 'analysis',
       status: 'active',
-      accuracy: 0.87,
-      lastUpdated: new Date('2024-02-10')
+      accuracy: 0.85,
+      lastUpdated: new Date(),
+      specialization: ['creators', 'content', 'analytics']
+    },
+    {
+      id: '3',
+      name: 'AI Companion Personality Core',
+      version: '1.5.0',
+      type: 'personality',
+      status: 'active',
+      accuracy: 0.95,
+      lastUpdated: new Date(),
+      specialization: ['ai', 'companions', 'personality']
     }
-  ]
+  ],
+  
+  getActiveTrainingJobs: (): TrainingProgress[] => [
+    {
+      modelId: '4',
+      progress: 0.65,
+      startTime: new Date(Date.now() - 3600000),
+      estimatedCompletionTime: new Date(Date.now() + 1800000),
+      currentEpoch: 65,
+      totalEpochs: 100,
+      currentLoss: 0.035
+    }
+  ],
+  
+  startTraining: (modelId: string) => {
+    console.log(`Started training for model ${modelId}`);
+    return true;
+  },
+  
+  stopTraining: (modelId: string) => {
+    console.log(`Stopped training for model ${modelId}`);
+    return true;
+  },
+  
+  resetSystem: () => {
+    console.log('Neural system reset');
+    return true;
+  },
+  
+  updateModelParameters: (modelId: string, parameters: Record<string, any>) => {
+    console.log(`Updated parameters for model ${modelId}:`, parameters);
+    return true;
+  }
 };

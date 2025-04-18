@@ -1,26 +1,26 @@
 
 import React, { useEffect } from 'react';
-import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
+import { AICompanionNeuralService } from '@/services/neural/modules/AICompanionNeuralService';
 
-interface LivecamConsumerProps {
-  neuralService: LivecamsNeuralService;
+interface AICompanionConsumerProps {
+  neuralService: AICompanionNeuralService;
   onUpdate?: (data: any) => void;
 }
 
-const LivecamConsumer: React.FC<LivecamConsumerProps> = ({ 
+const AICompanionConsumer: React.FC<AICompanionConsumerProps> = ({ 
   neuralService,
   onUpdate
 }) => {
   useEffect(() => {
     // Configure the neural service with consumer-specific settings
     const success = neuralService.configure({
-      consumerName: 'LivecamConsumer',
+      consumerName: 'AICompanionConsumer',
       priorityLevel: 'high',
       useCache: true
     });
     
     if (!success) {
-      console.error('Failed to configure LivecamConsumer neural service');
+      console.error('Failed to configure AICompanionConsumer neural service');
     }
     
     // Additional initialization code here
@@ -33,4 +33,4 @@ const LivecamConsumer: React.FC<LivecamConsumerProps> = ({
   return null; // This component doesn't render anything
 };
 
-export default LivecamConsumer;
+export default AICompanionConsumer;

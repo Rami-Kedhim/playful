@@ -1,79 +1,59 @@
 
-import { ModuleType } from '../registry/NeuralServiceRegistry';
+import { NeuralService, NeuralServiceConfig, NeuralServiceMetrics } from '../interfaces/NeuralService';
 
-export interface NeuralServiceConfig {
-  moduleId: string;
-  moduleType: ModuleType;
+export class BaseNeuralService implements NeuralService {
   moduleName: string;
-  description: string;
   version: string;
-  enabled: boolean;
-  priority?: number;
-  autonomyLevel?: number;
-  resourceAllocation?: number;
-  resourcePriority?: 'low' | 'medium' | 'high';
-  [key: string]: any;
-}
-
-export class BaseNeuralService {
-  public readonly moduleId: string;
-  public readonly moduleType: ModuleType;
-  public readonly moduleName: string;
-  public readonly description: string;
-  public readonly version: string;
-  public config: NeuralServiceConfig;
-
-  constructor(config: NeuralServiceConfig) {
-    this.moduleId = config.moduleId;
-    this.moduleType = config.moduleType;
-    this.moduleName = config.moduleName;
-    this.description = config.description;
-    this.version = config.version;
-    this.config = {
-      ...config,
-      priority: config.priority || 50,
-      autonomyLevel: config.autonomyLevel || 50,
-      resourceAllocation: config.resourceAllocation || 50,
-    };
-  }
-
-  public updateConfig(config: Partial<NeuralServiceConfig>): void {
-    this.config = {
-      ...this.config,
-      ...config,
-    };
+  description: string;
+  protected active: boolean = false;
+  protected config: NeuralServiceConfig = {};
+  
+  constructor(moduleName: string, version: string, description: string) {
+    this.moduleName = moduleName;
+    this.version = version;
+    this.description = description;
   }
   
-  public configure(options: Record<string, any>): void {
-    this.updateConfig(options);
+  configure(config: NeuralServiceConfig): boolean {
+    try {
+      this.config = { ...this.config, ...config };
+      this.active = true;
+      return true;
+    } catch (error) {
+      console.error(`Failed to configure ${this.moduleName}:`, error);
+      return false;
+    }
   }
   
-  public getMetrics(): Record<string, any> {
+  getMetrics(): NeuralServiceMetrics {
     return {
-      moduleId: this.moduleId,
-      moduleType: this.moduleType,
-      enabled: this.config.enabled,
-      priority: this.config.priority,
-      autonomyLevel: this.config.autonomyLevel,
-      resourceAllocation: this.config.resourceAllocation,
+      load: Math.random() * 100,
+      userEngagement: Math.random() * 100,
+      lastUpdated: Date.now(),
+      stability: Math.random() * 100,
+      cpuUtilization: Math.random() * 100,
+      memoryUtilization: Math.random() * 100,
+      responseTime: Math.random() * 1000
     };
   }
-
-  public getCapabilities(): string[] {
-    return [];
+  
+  isActive(): boolean {
+    return this.active;
   }
   
-  // Added missing methods
-  public initialize(): Promise<boolean> {
-    // Default implementation returns a successful initialization
-    return Promise.resolve(true);
+  start(): void {
+    this.active = true;
+    console.log(`${this.moduleName} started`);
   }
   
-  public isEnabled(): boolean {
-    return this.config.enabled;
+  stop(): void {
+    this.active = false;
+    console.log(`${this.moduleName} stopped`);
   }
   
-  public getConfig(): NeuralServiceConfig {
-    return this.config;
+  reset(): void {
+    this.config = {};
+    this.active = false;
+    console.log(`${this.moduleName} reset`);
   }
 }

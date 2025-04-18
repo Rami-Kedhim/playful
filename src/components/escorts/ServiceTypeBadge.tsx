@@ -1,43 +1,62 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { User, Video, Users } from 'lucide-react';
+import { MapPin, Video, Globe } from 'lucide-react';
 
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
-
-interface ServiceTypeBadgeProps {
-  type: ServiceTypeFilter;
+export interface ServiceTypeBadgeProps {
+  serviceType: 'in-person' | 'virtual' | 'both';
+  className?: string;
+  showIcon?: boolean;
   showLabel?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ type, showLabel = true }) => {
-  if (!type) return null;
+const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ 
+  serviceType, 
+  className = '', 
+  showIcon = true, 
+  showLabel = true,
+  size = 'md'
+}) => {
+  let icon = null;
+  let label = '';
+  let variant: 'default' | 'secondary' | 'outline' = 'default';
   
-  switch (type) {
+  switch (serviceType) {
     case 'in-person':
-      return (
-        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-          <User className="h-3 w-3 mr-1" />
-          {showLabel && 'In-Person'}
-        </Badge>
-      );
+      icon = <MapPin className={size === 'sm' ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'} />;
+      label = 'In-person';
+      variant = 'default';
+      break;
     case 'virtual':
-      return (
-        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-          <Video className="h-3 w-3 mr-1" />
-          {showLabel && 'Virtual'}
-        </Badge>
-      );
+      icon = <Video className={size === 'sm' ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'} />;
+      label = 'Virtual';
+      variant = 'secondary';
+      break;
     case 'both':
-      return (
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          <Users className="h-3 w-3 mr-1" />
-          {showLabel && 'In-Person & Virtual'}
-        </Badge>
-      );
+      icon = <Globe className={size === 'sm' ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'} />;
+      label = 'In-person & Virtual';
+      variant = 'outline';
+      break;
     default:
       return null;
   }
+  
+  const sizeClasses = size === 'sm' 
+    ? 'text-xs px-1.5 py-0' 
+    : size === 'lg' 
+      ? 'text-base px-3 py-1' 
+      : '';
+  
+  return (
+    <Badge 
+      variant={variant} 
+      className={`flex items-center ${sizeClasses} ${className}`}
+    >
+      {showIcon && icon}
+      {showLabel && label}
+    </Badge>
+  );
 };
 
 export default ServiceTypeBadge;

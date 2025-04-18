@@ -18,3 +18,5 @@ export interface AIPersonality {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type EmotionalState = 'neutral' | 'happy' | 'sad' | 'excited' | 'angry' | 'flirty' | 'thoughtful';

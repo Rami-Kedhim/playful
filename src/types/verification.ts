@@ -9,13 +9,22 @@ export enum VerificationLevel {
 
 export type DocumentType = 'id_card' | 'passport' | 'drivers_license';
 
+export type VerificationStatus = 'pending' | 'approved' | 'rejected';
+
 export interface VerificationDocument {
   type: DocumentType;
   frontImageUrl?: string;
   backImageUrl?: string;
   selfieWithIdUrl?: string;
   uploadedAt: Date;
-  status: 'pending' | 'approved' | 'rejected';
+  status: VerificationStatus;
+  
+  // Alternative field names that some components might use
+  fileUrl?: string;
+  url?: string;
+  file_path?: string;
+  document_type?: DocumentType;
+  uploaded_at?: Date;
 }
 
 export interface VerificationRequest {
@@ -23,7 +32,7 @@ export interface VerificationRequest {
   userId: string;
   requestedLevel: VerificationLevel;
   documents: VerificationDocument[];
-  status: 'pending' | 'approved' | 'rejected';
+  status: VerificationStatus;
   submitDate: Date;
   reviewDate?: Date;
   reviewerId?: string;

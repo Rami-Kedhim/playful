@@ -1,14 +1,15 @@
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import VerificationStatusTab from './tabs/VerificationStatusTab';
-import VerificationUpgradeTab from './tabs/VerificationUpgradeTab';
-import VerificationDocumentTab from './tabs/VerificationDocumentTab';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { VerificationLevel } from '@/types/verification';
+import VerificationLevels from './VerificationLevels';
+import VerificationStatus from './VerificationStatus';
+import DocumentUploader from './DocumentUploader';
 
 export interface VerificationContainerProps {
   userId: string;
-  currentLevel: 'basic' | 'verified' | 'premium';
-  verificationStatus: 'unverified' | 'pending' | 'verified' | 'rejected';
+  currentLevel: VerificationLevel;
+  verificationStatus: 'none' | 'pending' | 'approved' | 'rejected';
 }
 
 const VerificationContainer: React.FC<VerificationContainerProps> = ({
@@ -16,38 +17,22 @@ const VerificationContainer: React.FC<VerificationContainerProps> = ({
   currentLevel,
   verificationStatus
 }) => {
-  const [activeTab, setActiveTab] = useState('status');
-
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-      <TabsList className="grid grid-cols-3">
-        <TabsTrigger value="status">Status</TabsTrigger>
-        <TabsTrigger value="upgrade">Upgrade</TabsTrigger>
-        <TabsTrigger value="documents">Documents</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="status" className="space-y-4">
-        <VerificationStatusTab 
-          userId={userId}
-          currentLevel={currentLevel}
-          verificationStatus={verificationStatus}
-        />
-      </TabsContent>
-      
-      <TabsContent value="upgrade" className="space-y-4">
-        <VerificationUpgradeTab 
-          userId={userId}
-          currentLevel={currentLevel}
-        />
-      </TabsContent>
-      
-      <TabsContent value="documents" className="space-y-4">
-        <VerificationDocumentTab 
-          userId={userId}
-        />
-      </TabsContent>
-    </Tabs>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Account Verification</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <VerificationStatus status={verificationStatus} level={currentLevel} />
+        <VerificationLevels currentLevel={currentLevel} />
+        
+        {(verificationStatus === 'none' || verificationStatus === 'rejected') && (
+          <DocumentUploader userId={userId} />
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
+export { VerificationContainer };
 export default VerificationContainer;

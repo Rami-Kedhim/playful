@@ -1,36 +1,38 @@
 
 import { NeuralService } from '../interfaces/NeuralService';
-
-export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion';
+import { EscortsNeuralService } from '../modules/EscortsNeuralService';
+import { CreatorsNeuralService } from '../modules/CreatorsNeuralService';
+import { LivecamsNeuralService } from '../modules/LivecamsNeuralService';
+import { AICompanionNeuralService } from '../modules/AICompanionNeuralService';
 
 class NeuralServiceRegistry {
   private services: Map<string, NeuralService> = new Map();
 
-  registerService(service: NeuralService): boolean {
-    if (this.services.has(service.moduleId)) {
-      return false;
-    }
-    this.services.set(service.moduleId, service);
-    return true;
+  constructor() {
+    this.registerDefaultServices();
   }
 
-  unregisterService(moduleId: string): boolean {
-    return this.services.delete(moduleId);
+  private registerDefaultServices(): void {
+    this.register('escorts', new EscortsNeuralService());
+    this.register('creators', new CreatorsNeuralService());
+    this.register('livecams', new LivecamsNeuralService());
+    this.register('ai-companion', new AICompanionNeuralService());
   }
 
-  getService(moduleId: string): NeuralService | undefined {
-    return this.services.get(moduleId);
+  register(name: string, service: NeuralService): void {
+    this.services.set(name, service);
+    console.log(`Registered neural service: ${name}`);
+  }
+
+  getService(name: string): NeuralService | undefined {
+    return this.services.get(name);
   }
 
   getAllServices(): NeuralService[] {
     return Array.from(this.services.values());
   }
-
-  getServicesByType(type: ModuleType): NeuralService[] {
-    return this.getAllServices().filter(service => service.moduleType === type);
-  }
 }
 
-export { NeuralService };
-export const neuralServiceRegistry = new NeuralServiceRegistry();
+// Export a singleton instance
+const neuralServiceRegistry = new NeuralServiceRegistry();
 export default neuralServiceRegistry;

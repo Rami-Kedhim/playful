@@ -1,31 +1,33 @@
 
-// Neural Service interface
-export interface NeuralService {
-  moduleId: string;
-  moduleType: ModuleType;
-  moduleName: string;
-  description: string;
-  version: string;
-  config: NeuralServiceConfig;
-  
-  initialize(): Promise<boolean>;
-  getCapabilities(): string[];
-  configure(options: Record<string, any>): void;
-  getMetrics(): Record<string, any>;
-  isEnabled(): boolean;
-  getConfig(): Record<string, any>;
-  updateConfig(config: Partial<NeuralServiceConfig>): void;
-  shutdown?(): Promise<boolean>;
-}
-
-// Neural Service Configuration interface
 export interface NeuralServiceConfig {
-  priority: number;
-  autonomyLevel: number;
-  enabled: boolean;
-  resourceAllocation?: number;
-  boostingEnabled?: boolean;
+  consumerName?: string;
+  priorityLevel?: 'low' | 'medium' | 'high';
+  useCache?: boolean;
+  [key: string]: any;
 }
 
-// Module types
-export type ModuleType = 'escorts' | 'creators' | 'livecams' | 'ai-companion';
+export interface NeuralServiceMetrics {
+  load: number;
+  userEngagement: number;
+  lastUpdated: number;
+  stability?: number;
+  cpuUtilization?: number;
+  memoryUtilization?: number;
+  responseTime?: number;
+}
+
+export interface NeuralService {
+  moduleName: string;
+  version: string;
+  description: string;
+  
+  // Core methods
+  configure(config: NeuralServiceConfig): boolean;
+  getMetrics(): NeuralServiceMetrics;
+  isActive(): boolean;
+  
+  // Optional methods with default implementations
+  start?(): void;
+  stop?(): void;
+  reset?(): void;
+}
