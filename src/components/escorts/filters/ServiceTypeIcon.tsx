@@ -1,36 +1,34 @@
 
 import React from 'react';
-import { Users, Monitor, Globe, SunMoon, UtensilsCrossed } from 'lucide-react';
-import { ServiceTypeFilter } from './ServiceTypeBadgeLabel';
+import { Bed, Video, BedDouble, Utensils, type IconProps } from 'lucide-react';
+import { type ServiceTypeFilter } from './ServiceTypeBadgeLabel';
 
-interface ServiceTypeIconProps {
-  type: ServiceTypeFilter | string;
+export interface ServiceTypeIconProps {
+  type: string;
   size?: number;
-  variant?: 'default' | 'colored';
-  className?: string;
+  className?: string; // Added className prop
 }
 
-const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({
-  type,
+export const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
+  type, 
   size = 18,
-  variant = 'default',
-  className = ''
+  className = '' 
 }) => {
-  const iconColor = variant === 'colored' ? 'text-primary' : 'text-muted-foreground';
-  const iconClass = `${iconColor} ${className}`;
-
-  switch (type) {
+  const iconProps = { size, className };
+  
+  switch (type.toLowerCase()) {
     case 'in-person':
-      return <Users size={size} className={iconClass} />;
+      return <Bed {...iconProps} />;
     case 'virtual':
-      return <Monitor size={size} className={iconClass} />;
+      return <Video {...iconProps} />;
     case 'both':
-      return <Globe size={size} className={iconClass} />;
-    case 'all':
-    case '':
-      return <Globe size={size} className={iconClass} />;
+      return <BedDouble {...iconProps} />;
+    case 'massage':
+      return <BedDouble {...iconProps} />; // Could use a more appropriate icon if available
+    case 'dinner':
+      return <Utensils {...iconProps} />;
     default:
-      return <Users size={size} className={iconClass} />;
+      return <Bed {...iconProps} />;
   }
 };
 

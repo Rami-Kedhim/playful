@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { EscortService } from '@/services/escortService';
 import { Escort } from '@/types/Escort';
+import escortService from '@/services/escortService';
 
 export const useEscorts = () => {
   const [escorts, setEscorts] = useState<Escort[]>([]);
@@ -13,7 +13,7 @@ export const useEscorts = () => {
     const fetchEscorts = async () => {
       try {
         setLoading(true);
-        const data = await EscortService.getAllEscorts();
+        const data = await escortService.getAllEscorts();
         setEscorts(data);
         setError(null);
       } catch (err) {

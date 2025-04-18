@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { VerificationRequest, VerificationDocument, DocumentType } from '@/types/verification';
-import { VerificationService } from '@/services/verificationService';
+import verificationService from '@/services/verificationService';
 
 export const useVerificationStatus = (userId: string) => {
   const [loading, setLoading] = useState(true);
@@ -13,16 +13,25 @@ export const useVerificationStatus = (userId: string) => {
     const fetchVerificationStatus = async () => {
       try {
         setLoading(true);
-        const userRequest = await VerificationService.getVerificationRequest(userId);
+        const userRequest = await verificationService.getVerificationRequest(userId);
         
         if (userRequest) {
-          setRequest(userRequest);
+          // Create a request object without the documentType property
+          const requestData = {
+            id: userRequest.id,
+            user_id: userId,
+            status: userRequest.status,
+            documents: userRequest.documents || [],
+            // Include other properties as needed, making sure they match the VerificationRequest type
+          };
           
-          // If the request has documents, fetch them
+          setRequest(requestData as VerificationRequest);
+          
+          // If the request has documents, set them
           if (userRequest.documents && userRequest.documents.length > 0) {
             setDocuments(userRequest.documents);
           } else if (userRequest.documentIds && userRequest.documentIds.length > 0) {
-            const docs = await VerificationService.getDocuments(userRequest.documentIds);
+            const docs = await verificationService.getDocuments(userRequest.documentIds);
             setDocuments(docs);
           }
         }
@@ -47,12 +56,12 @@ export const useVerificationStatus = (userId: string) => {
     try {
       if (!request) {
         // Create a new verification request first
-        const newRequest = await VerificationService.createVerificationRequest(userId);
+        const newRequest = await verificationService.createVerificationRequest(userId);
         setRequest(newRequest);
       }
       
       // Upload the document
-      const document = await VerificationService.uploadDocument({
+      const document = await verificationService.uploadDocument({
         user_id: userId,
         document_type: documentType,
         file: documentFile,
@@ -80,7 +89,7 @@ export const useVerificationStatus = (userId: string) => {
     
     setLoading(true);
     try {
-      const updatedRequest = await VerificationService.submitVerificationRequest(request.id);
+      const updatedRequest = await verificationService.submitVerificationRequest(request.id);
       setRequest(updatedRequest);
     } catch (err) {
       setError('Failed to submit verification request');

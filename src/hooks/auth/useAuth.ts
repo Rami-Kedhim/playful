@@ -98,7 +98,7 @@ export const useAuth = (): AuthContextType => {
         displayName: user.name || user.username || '',
         location: '',
         bio: '',
-        isVerified: user.isVerified || false,
+        is_verified: user.isVerified || false,
         website: user.website || '',
         avatarUrl: user.avatarUrl || '',
         joinedDate: new Date(),

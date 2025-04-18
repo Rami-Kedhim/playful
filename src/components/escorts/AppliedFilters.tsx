@@ -2,8 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useDebounce } from '@/hooks/use-debounce';
-import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
-import ServiceTypeBadgeLabel from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import ServiceTypeBadgeLabel, { type ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 interface Filter {
   label: string;
