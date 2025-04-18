@@ -1,47 +1,37 @@
+
 import React, { useEffect } from 'react';
-import { useLivecamContext } from '../providers/LivecamProvider';
-import { livecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
+import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
 
 interface LivecamConsumerProps {
-  children: React.ReactNode;
+  neuralService: LivecamsNeuralService;
+  onUpdate?: (data: any) => void;
 }
 
-const LivecamConsumer: React.FC<LivecamConsumerProps> = ({ children }) => {
-  const { livecams, loading, error } = useLivecamContext();
-  
-  // Connect to neural service when component mounts
+const LivecamConsumer: React.FC<LivecamConsumerProps> = ({ 
+  neuralService,
+  onUpdate
+}) => {
   useEffect(() => {
-    const connectToNeuralService = async () => {
-      try {
-        // Configure neural service for livecam optimization
-        livecamsNeuralService.configure({
-          priority: 70,
-          autonomyLevel: 60,
-          enabled: true
-        });
-        
-        // Log successful connection
-        console.log('Connected to Livecams Neural Service:', livecamsNeuralService.getId());
-        
-        // Check if livecams are loaded and log
-        if (livecams && livecams.length > 0) {
-          console.log(`Loaded ${livecams.length} livecams for neural processing`);
-        }
-      } catch (err) {
-        console.error('Failed to connect to Livecams Neural Service:', err);
-      }
-    };
+    // Configure the neural service with consumer-specific settings
+    const success = neuralService.configure({
+      consumerName: 'LivecamConsumer',
+      priorityLevel: 'high',
+      useCache: true,
+      streamQuality: 'hd'
+    });
+
+    if (!success) {
+      console.error('Failed to configure LivecamConsumer neural service');
+    }
     
-    connectToNeuralService();
-    
-    // Cleanup on unmount
+    // Additional initialization code here
+
     return () => {
-      console.log('Disconnecting from Livecams Neural Service');
+      // Cleanup code here
     };
-  }, [livecams]);
-  
-  // Render children
-  return <>{children}</>;
+  }, [neuralService]);
+
+  return null; // This component doesn't render anything
 };
 
 export default LivecamConsumer;

@@ -1,128 +1,146 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Star, Clock, MapPin, Calendar } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { StarIcon, MapPin, Clock, DollarSign, Check } from 'lucide-react';
 import { Escort } from '@/types/escort';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import ServiceTypeBadge from './ServiceTypeBadge';
 
 interface EscortProfileCardProps {
   escort: Escort;
-  className?: string;
-  showActions?: boolean;
+  onClick?: () => void;
+  onBookNow?: () => void;
 }
 
-const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
-  escort,
-  className,
-  showActions = true
+const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ 
+  escort, 
+  onClick,
+  onBookNow 
 }) => {
-  // Default availability object with empty arrays
-  const defaultAvailability = {
-    days: [],
-    hours: [],
-    customNotes: ''
+  // Get the primary hourly rate
+  const getHourlyRate = () => {
+    if (escort.price) return escort.price;
+    if (escort.rates?.hourly) return escort.rates.hourly;
+    return null;
   };
   
-  // Get the availability from the escort, or use defaults
-  const availability = typeof escort.availability === 'string' 
-    ? defaultAvailability 
-    : (Array.isArray(escort.availability) && escort.availability.length > 0 
-        ? { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], hours: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], customNotes: '' } 
-        : defaultAvailability);
+  // Get service type badge
+  const getServiceType = () => {
+    if (escort.providesInPersonServices && escort.providesVirtualContent) {
+      return "both";
+    } else if (escort.providesInPersonServices) {
+      return "in-person";
+    } else if (escort.providesVirtualContent) {
+      return "virtual";
+    }
+    return escort.serviceType || "";
+  };
   
-  // Generate display name
-  const displayName = escort.name || 'Anonymous';
+  // Get avatar image with fallbacks
+  const getAvatarImage = () => {
+    return escort.profileImage || escort.imageUrl || escort.avatarUrl || 
+           escort.avatar || escort.avatar_url || '/placeholder-avatar.png';
+  };
   
-  // Format price
-  const formattedPrice = escort.price 
-    ? `$${escort.price}` 
-    : escort.rates?.hourly 
-      ? `$${escort.rates.hourly}/hr` 
-      : 'Price on request';
+  // Format the display name
+  const getDisplayName = () => {
+    return escort.name || 'Anonymous';
+  };
   
-  // Get image from various possible properties
-  const displayImage = escort.imageUrl || escort.avatarUrl || escort.avatar || escort.avatar_url || '/placeholders/escort-profile.jpg';
+  // Get verification status
+  const isVerified = () => {
+    return escort.isVerified || escort.verified || false;
+  };
+  
+  // Get availability status
+  const isAvailable = () => {
+    return escort.availableNow || false;
+  };
   
   return (
-    <Card className={cn("h-full flex flex-col overflow-hidden", className)}>
-      <div className="relative aspect-[3/4] overflow-hidden group">
-        <img
-          src={displayImage}
-          alt={displayName}
-          className="w-full h-full object-cover transition-transform group-hover:scale-105"
-        />
-        {escort.verified && (
-          <Badge className="absolute top-3 right-3 bg-primary text-white">
-            Verified
-          </Badge>
-        )}
-        {escort.availableNow && (
-          <Badge variant="success" className="absolute top-3 left-3">
-            Available Now
-          </Badge>
+    <Card 
+      className="overflow-hidden h-full transition-all hover:shadow-md cursor-pointer"
+      onClick={onClick}
+    >
+      <div className="relative">
+        <Avatar className="w-full h-48 rounded-none">
+          <AvatarImage src={getAvatarImage()} className="object-cover" />
+          <AvatarFallback className="rounded-none">
+            {getDisplayName().substring(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          <ServiceTypeBadge type={getServiceType()} />
+          
+          {isAvailable() && (
+            <Badge variant="default" className="bg-green-500 text-white">
+              Available Now
+            </Badge>
+          )}
+        </div>
+        
+        {escort.tags && escort.tags.length > 0 && (
+          <div className="absolute bottom-2 left-2">
+            <Badge variant="secondary" className="bg-black/70 text-white text-xs">
+              {escort.tags[0]}
+              {escort.tags.length > 1 ? ` +${escort.tags.length - 1}` : ''}
+            </Badge>
+          </div>
         )}
       </div>
       
-      <CardHeader className="p-4 pb-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-lg font-semibold line-clamp-1">{displayName}</h3>
-            <div className="text-sm text-muted-foreground flex items-center">
-              <MapPin className="w-3 h-3 mr-1" />
-              {escort.location || 'Location not specified'}
-            </div>
-          </div>
-          <div className="flex items-center">
-            <Star className="w-4 h-4 text-yellow-500 mr-1" />
-            <span className="text-sm font-medium">{escort.rating || '4.8'}</span>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-4 pt-0 pb-2 flex-grow">
-        <div className="flex flex-wrap gap-1 mb-2">
-          {escort.tags && escort.tags.slice(0, 3).map((tag, idx) => (
-            <Badge key={idx} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-        
-        <div className="mt-2 text-sm">
-          <div className="flex items-center text-muted-foreground">
-            <Calendar className="w-3 h-3 mr-1" />
-            <span>{availability.days?.length || 0} days available</span>
-          </div>
-          <div className="flex items-center text-muted-foreground mt-1">
-            <Clock className="w-3 h-3 mr-1" />
-            <span>{availability.hours?.length || 0} hours available</span>
-          </div>
-          {availability.customNotes && (
-            <div className="mt-1 text-xs text-muted-foreground">
-              Note: {availability.customNotes}
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-medium">{getDisplayName()}</h3>
+          
+          {escort.rating && (
+            <div className="flex items-center">
+              <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
+              <span className="text-sm">{escort.rating}</span>
             </div>
           )}
         </div>
-      </CardContent>
-      
-      <CardFooter className="p-4 pt-2 flex justify-between items-center">
-        <div className="font-semibold">{formattedPrice}</div>
         
-        {showActions && (
-          <div className="flex gap-2">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Heart className="w-4 h-4" />
-              <span className="sr-only">Add to favorites</span>
-            </Button>
-            <Button asChild>
-              <Link to={`/escorts/${escort.id}`}>View Profile</Link>
-            </Button>
-          </div>
+        <div className="space-y-1 mb-3">
+          {escort.location && (
+            <div className="flex items-center text-sm text-gray-600">
+              <MapPin className="w-3.5 h-3.5 mr-1" />
+              <span>{escort.location}</span>
+            </div>
+          )}
+          
+          {isVerified() && (
+            <div className="flex items-center text-sm text-green-600">
+              <Check className="w-3.5 h-3.5 mr-1" />
+              <span>Verified</span>
+            </div>
+          )}
+          
+          {getHourlyRate() && (
+            <div className="flex items-center text-sm">
+              <DollarSign className="w-3.5 h-3.5 mr-1" />
+              <span>${getHourlyRate()}/hr</span>
+            </div>
+          )}
+        </div>
+        
+        {onBookNow && (
+          <Button 
+            size="sm" 
+            className="w-full mt-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              onBookNow();
+            }}
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            Book Now
+          </Button>
         )}
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };

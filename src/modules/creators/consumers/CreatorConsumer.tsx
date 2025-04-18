@@ -1,47 +1,36 @@
+
 import React, { useEffect } from 'react';
-import { useCreatorContext } from '../providers/CreatorProvider';
-import { creatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
+import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
 
 interface CreatorConsumerProps {
-  children: React.ReactNode;
+  neuralService: CreatorsNeuralService;
+  onUpdate?: (data: any) => void;
 }
 
-const CreatorConsumer: React.FC<CreatorConsumerProps> = ({ children }) => {
-  const { creators, loading, error } = useCreatorContext();
-  
-  // Connect to neural service when component mounts
+const CreatorConsumer: React.FC<CreatorConsumerProps> = ({ 
+  neuralService,
+  onUpdate
+}) => {
   useEffect(() => {
-    const connectToNeuralService = async () => {
-      try {
-        // Configure neural service for creator optimization
-        creatorsNeuralService.configure({
-          priority: 80,
-          autonomyLevel: 65,
-          enabled: true
-        });
-        
-        // Log successful connection
-        console.log('Connected to Creators Neural Service:', creatorsNeuralService.getId());
-        
-        // Check if creators are loaded and log
-        if (creators && creators.length > 0) {
-          console.log(`Loaded ${creators.length} creators for neural processing`);
-        }
-      } catch (err) {
-        console.error('Failed to connect to Creators Neural Service:', err);
-      }
-    };
+    // Configure the neural service with consumer-specific settings
+    const success = neuralService.configure({
+      consumerName: 'CreatorConsumer',
+      priorityLevel: 'high',
+      useCache: true
+    });
+
+    if (!success) {
+      console.error('Failed to configure CreatorConsumer neural service');
+    }
     
-    connectToNeuralService();
-    
-    // Cleanup on unmount
+    // Additional initialization code here
+
     return () => {
-      console.log('Disconnecting from Creators Neural Service');
+      // Cleanup code here
     };
-  }, [creators]);
-  
-  // Render children
-  return <>{children}</>;
+  }, [neuralService]);
+
+  return null; // This component doesn't render anything
 };
 
 export default CreatorConsumer;

@@ -1,77 +1,74 @@
 
-import { ModuleType, NeuralService, NeuralServiceConfig } from '../interfaces/NeuralService';
+import { NeuralService, NeuralServiceConfig } from '../interfaces/NeuralService';
 
 export class LivecamsNeuralService implements NeuralService {
   moduleId: string;
-  moduleType: ModuleType = 'livecams';
+  moduleType: 'livecams';
   moduleName: string;
   description: string;
-  version: string = '1.0.0';
+  version: string;
   config: NeuralServiceConfig;
 
   constructor(moduleId: string) {
     this.moduleId = moduleId;
+    this.moduleType = 'livecams';
     this.moduleName = 'Livecams Neural Service';
-    this.description = 'Neural service for livecam stream processing and recommendations';
+    this.description = 'AI-powered livecam matching and streaming optimization';
+    this.version = '1.0.0';
     this.config = {
-      enabled: true,
       priority: 50,
-      autonomyLevel: 70,
-      resourceAllocation: 40
+      autonomyLevel: 50,
+      enabled: true
     };
   }
-  
+
   async initialize(): Promise<boolean> {
-    // Initialize service
+    console.log(`Initializing ${this.moduleName} with ID: ${this.moduleId}`);
     return true;
   }
-  
-  configure(options: Record<string, any>): void {
-    this.config = { ...this.config, ...options };
-  }
-  
-  isEnabled(): boolean {
-    return this.config.enabled;
-  }
-  
+
   getCapabilities(): string[] {
     return [
-      'LiveStreamProcessing',
-      'ViewerAnalytics',
-      'StreamRecommendation',
-      'ContentFiltering',
-      'InteractionManagement'
+      'viewer-matching',
+      'stream-quality-optimization',
+      'audience-engagement',
+      'viewer-retention'
     ];
+  }
+
+  configure(options: Record<string, any>): boolean {
+    try {
+      console.log(`Configuring ${this.moduleName} with options:`, options);
+      return true;
+    } catch (error) {
+      console.error(`Error configuring ${this.moduleName}:`, error);
+      return false;
+    }
   }
 
   getMetrics(): Record<string, any> {
     return {
-      moduleId: this.moduleId,
-      moduleType: this.moduleType,
-      resourceAllocation: this.config.resourceAllocation,
-      priority: this.config.priority,
-      autonomyLevel: this.config.autonomyLevel,
-      enabled: this.config.enabled
+      activeStreams: Math.floor(Math.random() * 200) + 50,
+      averageViewers: Math.floor(Math.random() * 500) + 100,
+      streamQuality: 0.9 + Math.random() * 0.1,
+      viewerRetention: 0.7 + Math.random() * 0.3
     };
   }
 
-  updateConfig(newConfig: Partial<NeuralServiceConfig>): void {
-    this.config = { ...this.config, ...newConfig };
+  isEnabled(): boolean {
+    return this.config.enabled;
   }
 
   getConfig(): Record<string, any> {
-    return {
-      ...this.config,
-      moduleId: this.moduleId,
-      moduleType: this.moduleType,
-      moduleName: this.moduleName
-    };
+    return { ...this.config };
   }
 
-  getId(): string {
-    return this.moduleId;
+  updateConfig(config: Partial<NeuralServiceConfig>): void {
+    this.config = { ...this.config, ...config };
+  }
+
+  async shutdown(): Promise<boolean> {
+    console.log(`Shutting down ${this.moduleName} with ID: ${this.moduleId}`);
+    return true;
   }
 }
-
-// Export a singleton instance for common use
-export const livecamsNeuralService = new LivecamsNeuralService('livecams-primary');

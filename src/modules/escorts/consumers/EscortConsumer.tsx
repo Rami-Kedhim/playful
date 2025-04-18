@@ -1,49 +1,36 @@
 
 import React, { useEffect } from 'react';
-import { useEscortContext } from '../providers/EscortProvider';
-import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
-import { toast } from '@/components/ui/use-toast';
+import { EscortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
 
 interface EscortConsumerProps {
-  children: React.ReactNode;
+  neuralService: EscortsNeuralService;
+  onUpdate?: (data: any) => void;
 }
 
-const EscortConsumer: React.FC<EscortConsumerProps> = ({ children }) => {
-  const { escorts, loading, error } = useEscortContext();
-  
-  // Connect to neural service when component mounts
+const EscortConsumer: React.FC<EscortConsumerProps> = ({ 
+  neuralService,
+  onUpdate
+}) => {
   useEffect(() => {
-    const connectToNeuralService = async () => {
-      try {
-        // Configure neural service for escort optimization
-        escortsNeuralService.configure({
-          priority: 80,
-          autonomyLevel: 65,
-          enabled: true
-        });
-        
-        // Log successful connection
-        console.log('Connected to Escorts Neural Service:', escortsNeuralService.getId());
-        
-        // Check if escorts are loaded and log
-        if (escorts && escorts.length > 0) {
-          console.log(`Loaded ${escorts.length} escorts for neural processing`);
-        }
-      } catch (err) {
-        console.error('Failed to connect to Escorts Neural Service:', err);
-      }
-    };
+    // Configure the neural service with consumer-specific settings
+    const success = neuralService.configure({
+      consumerName: 'EscortConsumer',
+      priorityLevel: 'high',
+      useCache: true
+    });
     
-    connectToNeuralService();
+    if (!success) {
+      console.error('Failed to configure EscortConsumer neural service');
+    }
     
-    // Cleanup on unmount
+    // Additional initialization code here
+
     return () => {
-      console.log('Disconnecting from Escorts Neural Service');
+      // Cleanup code here
     };
-  }, [escorts]);
-  
-  // Render children
-  return <>{children}</>;
+  }, [neuralService]);
+
+  return null; // This component doesn't render anything
 };
 
 export default EscortConsumer;

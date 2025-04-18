@@ -1,164 +1,121 @@
 
-import { useState, useRef } from "react";
+import React, { useState } from "react";
+import { Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import {
-  Facebook,
-  Twitter,
-  Linkedin,
-  Copy,
-  Mail,
-  Instagram,
-  Link,
-  Check
+import { 
+  FacebookIcon, 
+  TwitterIcon, 
+  LinkedinIcon, 
+  InstagramIcon, 
+  Share2 
 } from "lucide-react";
 
 interface SocialShareContentProps {
   shareUrl: string;
   escortName: string;
-  onCopySuccess?: () => void;
 }
 
-const SocialShareContent = ({ shareUrl, escortName, onCopySuccess }: SocialShareContentProps) => {
+const SocialShareContent = ({ shareUrl, escortName }: SocialShareContentProps) => {
   const [copied, setCopied] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const copyToClipboard = () => {
-    if (inputRef.current) {
-      inputRef.current.select();
-      navigator.clipboard.writeText(shareUrl);
+  
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      
       toast({
-        title: "Link copied",
+        title: "Link Copied",
         description: "Profile link has been copied to clipboard",
       });
       
-      // Reset copied state after 2 seconds
       setTimeout(() => setCopied(false), 2000);
-      
-      if (onCopySuccess) {
-        onCopySuccess();
-      }
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy link to clipboard",
+        variant: "destructive",
+      });
     }
   };
-
-  const shareToSocial = (platform: string) => {
+  
+  const handleShareSocial = (platform: string) => {
     let shareLink = "";
-    const text = `Check out ${escortName}'s profile!`;
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const encodedText = encodeURIComponent(`Check out ${escortName}'s profile!`);
     
     switch (platform) {
       case "facebook":
-        shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
         break;
       case "twitter":
-        shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+        shareLink = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`;
         break;
       case "linkedin":
-        shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+        shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
         break;
-      case "email":
-        shareLink = `mailto:?subject=${encodeURIComponent(`${escortName}'s Profile`)}&body=${encodeURIComponent(`Check out ${escortName}'s profile: ${shareUrl}`)}`;
-        break;
-      case "instagram":
-        // Instagram doesn't support direct sharing via URL, show instructions instead
-        toast({
-          title: "Instagram Sharing",
-          description: "Copy the link and paste it into your Instagram story or post",
-        });
-        copyToClipboard();
-        return;
       default:
-        return;
+        break;
     }
     
-    window.open(shareLink, "_blank", "width=600,height=400");
-    
-    toast({
-      title: "Sharing profile",
-      description: `Opening ${platform} to share ${escortName}'s profile`,
-    });
+    if (shareLink) {
+      window.open(shareLink, "_blank", "width=600,height=400");
+    }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <Input 
-          ref={inputRef}
-          value={shareUrl} 
-          readOnly 
-          className="flex-1"
-        />
+      <div className="flex items-center gap-2 justify-center">
         <Button 
+          variant="outline" 
           size="icon" 
-          onClick={copyToClipboard}
-          variant="outline"
-          aria-label="Copy link"
+          onClick={() => handleShareSocial("facebook")}
         >
-          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          <FacebookIcon className="h-5 w-5 text-blue-600" />
+          <span className="sr-only">Share on Facebook</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={() => handleShareSocial("twitter")}
+        >
+          <TwitterIcon className="h-5 w-5 text-sky-500" />
+          <span className="sr-only">Share on Twitter</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={() => handleShareSocial("linkedin")}
+        >
+          <LinkedinIcon className="h-5 w-5 text-blue-700" />
+          <span className="sr-only">Share on LinkedIn</span>
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="icon" 
+          disabled
+          title="Instagram sharing coming soon"
+        >
+          <InstagramIcon className="h-5 w-5 text-pink-600" />
+          <span className="sr-only">Share on Instagram</span>
         </Button>
       </div>
       
-      <div className="grid grid-cols-3 gap-3">
-        <Button
-          onClick={() => shareToSocial("facebook")}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3 px-2"
-          aria-label="Share to Facebook"
+      <div className="flex space-x-2">
+        <Input 
+          readOnly 
+          value={shareUrl} 
+          className="bg-muted"
+        />
+        <Button 
+          variant="secondary" 
+          onClick={handleCopyLink}
         >
-          <Facebook className="h-8 w-8 text-blue-600" />
-          <span className="text-xs">Facebook</span>
-        </Button>
-        
-        <Button
-          onClick={() => shareToSocial("twitter")}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3 px-2"
-          aria-label="Share to Twitter"
-        >
-          <Twitter className="h-8 w-8 text-blue-400" />
-          <span className="text-xs">Twitter</span>
-        </Button>
-        
-        <Button
-          onClick={() => shareToSocial("linkedin")}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3 px-2"
-          aria-label="Share to LinkedIn"
-        >
-          <Linkedin className="h-8 w-8 text-blue-700" />
-          <span className="text-xs">LinkedIn</span>
-        </Button>
-        
-        <Button
-          onClick={() => shareToSocial("email")}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3 px-2"
-          aria-label="Share via Email"
-        >
-          <Mail className="h-8 w-8 text-gray-500" />
-          <span className="text-xs">Email</span>
-        </Button>
-        
-        <Button
-          onClick={() => shareToSocial("instagram")}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3 px-2"
-          aria-label="Share to Instagram"
-        >
-          <Instagram className="h-8 w-8 text-pink-500" />
-          <span className="text-xs">Instagram</span>
-        </Button>
-        
-        <Button
-          onClick={copyToClipboard}
-          variant="outline"
-          className="flex flex-col items-center gap-2 h-auto py-3 px-2"
-          aria-label="Copy Link"
-        >
-          <Link className="h-8 w-8 text-gray-400" />
-          <span className="text-xs">Copy Link</span>
+          {copied ? "Copied!" : "Copy"}
         </Button>
       </div>
     </div>

@@ -1,27 +1,27 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import VerificationContainer from '@/components/verification/VerificationContainer';
+import { Container } from '@/components/ui/container';
+import { VerificationContainer } from '@/components/verification';
+import { useAuth } from '@/contexts/AuthContext';
+import { VerificationLevel } from '@/types/verification';
 
 const VerificationPage: React.FC = () => {
   const { user } = useAuth();
-
+  
+  // Since this is just a demo page, we'll use hardcoded values
+  const demoProps = {
+    userId: user?.id || '123456',
+    currentLevel: VerificationLevel.NONE,
+    verificationStatus: 'none'
+  };
+  
   return (
-    <div className="container py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Account Verification</h1>
-      
-      {user ? (
-        <VerificationContainer 
-          userId={user.id} 
-          currentLevel={user.verificationLevel || 'basic'} 
-          verificationStatus={user.isVerified ? 'verified' : 'unverified'}
-        />
-      ) : (
-        <div className="p-6 bg-muted rounded-lg text-center">
-          <p>Please log in to access verification features.</p>
-        </div>
-      )}
-    </div>
+    <Container>
+      <div className="py-8 max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">Account Verification</h1>
+        <VerificationContainer {...demoProps} />
+      </div>
+    </Container>
   );
 };
 

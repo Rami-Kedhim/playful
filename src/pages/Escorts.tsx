@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -7,9 +6,8 @@ import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Filter, SlidersHorizontal, MapPin, Star } from 'lucide-react';
-import { EscortsModule } from '@/modules/escorts/EscortsModule';
+import EscortsModule from '@/modules/escorts/EscortsModule';
 
-// Content component that uses the escort hooks
 const EscortsContent = () => {
   const { 
     escorts, 
@@ -23,7 +21,6 @@ const EscortsContent = () => {
   
   const [showFilters, setShowFilters] = useState(false);
   
-  // Apply filters when component mounts
   useEffect(() => {
     applyCurrentFilters();
   }, [applyCurrentFilters]);
@@ -32,19 +29,16 @@ const EscortsContent = () => {
     setShowFilters(!showFilters);
   };
 
-  // Extract values from filters for compatibility with EscortFilters component
   const serviceType = filters.serviceTypes && filters.serviceTypes.length === 1 
     ? filters.serviceTypes[0] as "" | "in-person" | "virtual" | "both"
     : "";
   
   const selectedServices = filters.serviceTypes || [];
-  
+
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Featured Section */}
       <FeaturedEscorts escorts={featuredEscorts} loading={loading} />
 
-      {/* Filter Controls */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Find Escorts</h2>
         
@@ -72,7 +66,6 @@ const EscortsContent = () => {
         </div>
       </div>
 
-      {/* Quick Filter Tabs */}
       <Tabs defaultValue="all" className="mb-6">
         <TabsList className="mb-4">
           <TabsTrigger value="all">All Escorts</TabsTrigger>
@@ -107,7 +100,6 @@ const EscortsContent = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Filter Panel */}
       {showFilters && (
         <EscortFilters 
           location={filters.location || ""}
@@ -172,7 +164,6 @@ const EscortsContent = () => {
   );
 };
 
-// Main component that wraps the content with the provider
 const Escorts = () => {
   return (
     <EscortsModule>

@@ -1,57 +1,44 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Monitor, Users, Globe } from 'lucide-react';
-import { Escort } from '@/types/escort';
+import { User, Video, Users } from 'lucide-react';
+
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
 
 interface ServiceTypeBadgeProps {
-  escort: Escort;
-  size?: 'sm' | 'md' | 'lg';
+  type: ServiceTypeFilter;
+  showLabel?: boolean;
 }
 
-const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ escort, size = 'md' }) => {
-  // Use nullish coalescing to provide default values
-  const providesInPersonServices = escort.providesInPersonServices ?? 
-    escort.services?.includes('in-person') ?? 
-    false;
+const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ type, showLabel = true }) => {
+  if (!type) return null;
   
-  const providesVirtualContent = escort.providesVirtualContent ?? 
-    escort.services?.includes('virtual') ?? 
-    false;
-  
-  // Icon sizes based on the badge size
-  const iconSizes = {
-    sm: 10,
-    md: 12,
-    lg: 16
-  };
-  
-  const iconSize = iconSizes[size];
-  
-  if (providesInPersonServices && providesVirtualContent) {
-    return (
-      <Badge className="flex items-center gap-1 bg-blue-500 text-white border-0">
-        <Globe size={iconSize} />
-        <span>In-Person & Virtual</span>
-      </Badge>
-    );
-  } else if (providesInPersonServices) {
-    return (
-      <Badge className="flex items-center gap-1 bg-indigo-500 text-white border-0">
-        <Users size={iconSize} />
-        <span>In-Person</span>
-      </Badge>
-    );
-  } else if (providesVirtualContent) {
-    return (
-      <Badge className="flex items-center gap-1 bg-purple-500 text-white border-0">
-        <Monitor size={iconSize} />
-        <span>Virtual</span>
-      </Badge>
-    );
+  switch (type) {
+    case 'in-person':
+      return (
+        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+          <User className="h-3 w-3 mr-1" />
+          {showLabel && 'In-Person'}
+        </Badge>
+      );
+    case 'virtual':
+      return (
+        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+          <Video className="h-3 w-3 mr-1" />
+          {showLabel && 'Virtual'}
+        </Badge>
+      );
+    case 'both':
+      return (
+        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Users className="h-3 w-3 mr-1" />
+          {showLabel && 'In-Person & Virtual'}
+        </Badge>
+      );
+    default:
+      return null;
   }
-  
-  return null;
 };
 
 export default ServiceTypeBadge;
+export { ServiceTypeBadge };

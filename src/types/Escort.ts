@@ -23,4 +23,32 @@ export interface Escort {
   bodyType?: string;
   availability?: Record<string, any>;
   nextAvailable?: string;
+  
+  // Additional properties required by components
+  rates?: {
+    hourly?: number;
+    twoHour?: number;
+    overnight?: number;
+  };
+  imageUrl?: string;
+  avatarUrl?: string;
+  avatar?: string;
+  avatar_url?: string;
+  verified?: boolean;
+  availableNow?: boolean;
+  tags?: string[];
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  stats?: {
+    viewCount: number;
+    favoriteCount: number;
+    reviewCount: number;
+  };
+  verificationLevel?: string;
+  isFavorited?: boolean;
+  gender?: string;
+  bio?: string;
+  boostLevel?: number;
+  responseRate?: number;
+  isAI?: boolean;
 }

@@ -17,4 +17,26 @@ export interface Livecam {
   featured: boolean;
   nextStreamTime?: string;
   description?: string;
+  
+  // Additional properties
+  displayName?: string;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  location?: string;
+  region?: string;
+  country?: string;
+  language?: string;
+  ethnicity?: string;
+  age?: number;
+  categories?: string[];
+  isStreaming?: boolean;
+  boosted?: boolean;
+  boostScore?: number;
+  isVerified?: boolean;
+  isFeatured?: boolean;
+  isPopular?: boolean;
+  previewVideoUrl?: string;
+  createdAt?: Date;
 }
+
+export type LivecamModel = Livecam;

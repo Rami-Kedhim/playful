@@ -1,73 +1,64 @@
 
+// Neural Hub implementation
 export interface NeuralModel {
   id: string;
   name: string;
   version: string;
-  type: string;
-  capabilities: string[];
-  status: 'active' | 'inactive' | 'training' | 'error';
-  performance: {
-    accuracy: number;
-    latency: number;
-    resourceUsage: number;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-  specialization?: string | string[];
-  size?: number;
-  precision?: number;
-}
-
-export interface ModelParameters {
-  learningRate: number;
-  batchSize: number;
-  epochs: number;
-  optimizerType: string;
-  dropout: number;
-  activationFunction: string;
-  embeddingSize: number;
-  hiddenLayers: number[];
-  decayConstant: number;
-  growthFactor: number;
-  cyclePeriod: number;
-  harmonicCount: number;
-  bifurcationPoint: number;
-  attractorStrength: number;
-}
-
-export interface SystemHealthMetrics {
-  cpuUtilization: number;
-  memoryUtilization: number;
-  networkLatency: number;
-  errorFrequency: number;
-  uptime: number;
-  load: number;
-  operationsPerSecond: number;
-  responseTime: number;
-  errorRate: number;
-  stability: number;
-  userEngagement: number;
-  economicBalance: number;
-  lastUpdated: Date;
-  // Added properties that match what's being used
-  systemLoad: number;
-  memoryAllocation: number;
-  networkThroughput: number;
-  requestRate: number;
-  averageResponseTime: number;
-}
-
-// Update TrainingProgress to include all required properties
-export interface TrainingProgress {
-  modelId: string;
-  status: 'training' | 'starting' | 'validating' | 'completed' | 'failed' | 'running' | 'stopped';
-  startTime: Date;
-  currentEpoch: number;
-  totalEpochs: number;
-  progress: number;
+  specialization: string | string[];
+  status: 'active' | 'inactive' | 'training';
   accuracy: number;
-  targetAccuracy: number;
-  estimatedCompletionTime: Date;
-  message?: string;
-  error?: string;
+  lastUpdated: Date;
+  metadata?: Record<string, any>;
 }
+
+export interface HealthMetrics {
+  load: number;
+  userEngagement: number;
+  stability: number;
+  cpuUtilization: number;
+  memoryUtilization: number; 
+  responseTime: number;
+  lastUpdated: number;
+}
+
+export const neuralHub = {
+  getHealthMetrics: (): HealthMetrics => ({
+    load: Math.random() * 0.7,
+    userEngagement: Math.random() * 0.8,
+    stability: 0.95,
+    cpuUtilization: Math.random() * 0.6,
+    memoryUtilization: Math.random() * 0.5,
+    responseTime: 150 + Math.random() * 100,
+    lastUpdated: Date.now()
+  }),
+  
+  getModels: (): NeuralModel[] => [
+    {
+      id: 'escort-predictor-v1',
+      name: 'Escort Predictor',
+      version: '1.0.0',
+      specialization: ['profile matching', 'compatibility'],
+      status: 'active',
+      accuracy: 0.89,
+      lastUpdated: new Date('2024-01-15')
+    },
+    {
+      id: 'content-recommender-v2',
+      name: 'Content Recommender',
+      version: '2.0.0',
+      specialization: 'content recommendations',
+      status: 'active',
+      accuracy: 0.92,
+      lastUpdated: new Date('2024-03-01')
+    },
+    {
+      id: 'sentiment-analyzer-v1',
+      name: 'Sentiment Analyzer',
+      version: '1.2.5',
+      specialization: ['sentiment analysis', 'mood detection'],
+      status: 'active',
+      accuracy: 0.87,
+      lastUpdated: new Date('2024-02-10')
+    }
+  ]
+};
