@@ -1,50 +1,15 @@
-
-export interface User {
+export interface UserProfile {
   id: string;
   username: string;
   email: string;
-  role: string;
-  name: string;
-  isVerified?: boolean;
-  createdAt: string;
-}
-
-export interface UserProfile {
-  id: string | number;
-  userId?: string | number;
-  email?: string;
-  name: string;
-  avatar_url?: string;
-  location?: string;
+  displayName: string;
   bio?: string;
-  verified?: boolean;
-  website?: string;
-  phone?: string;
-  phone_number?: string;
-}
-
-export enum UserRole {
-  USER = 'user',
-  ESCORT = 'escort',
-  CREATOR = 'creator',
-  ADMIN = 'admin',
-  MODERATOR = 'moderator'
-}
-
-export interface AuthResult {
-  success: boolean;
-  message?: string;
-  user?: User;
-  token?: string;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterCredentials {
-  email: string;
-  password: string;
-  name?: string;
+  avatarUrl?: string;
+  location?: string;
+  joinedDate: Date;
+  lastActive?: Date;
+  isVerified: boolean;
+  preferences?: Record<string, any>;
+  notifications?: Record<string, boolean>;
+  website?: string; // Add the missing property
 }

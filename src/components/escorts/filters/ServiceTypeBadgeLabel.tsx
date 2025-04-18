@@ -7,6 +7,20 @@ import { ServiceTypeFilter as ServiceTypeFilterType } from '@/types/filters';
 // Export the type for other components to use
 export type ServiceTypeFilter = ServiceTypeFilterType;
 
+// Helper function to get label text for a service type
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
+  switch(type) {
+    case 'in-person':
+      return 'In Person';
+    case 'virtual':
+      return 'Virtual';
+    case 'both':
+      return 'Both';
+    default:
+      return type.charAt(0).toUpperCase() + type.slice(1);
+  }
+};
+
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
   showIcon?: boolean;
@@ -23,16 +37,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
   if (!type) return null;
   
   const getLabel = () => {
-    switch(type) {
-      case 'in-person':
-        return 'In Person';
-      case 'virtual':
-        return 'Virtual';
-      case 'both':
-        return 'Both';
-      default:
-        return type.charAt(0).toUpperCase() + type.slice(1);
-    }
+    return getServiceTypeBadgeLabel(type);
   };
   
   const getIcon = () => {

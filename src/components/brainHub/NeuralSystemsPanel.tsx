@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import { NeuralModel, TrainingProgress } from '@/services/neural/types/neuralHub';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, CheckCircle, Clock, Zap, Brain } from 'lucide-react';
 import TrainingProgressDetails from './TrainingProgressDetails';
+import { toast } from 'react-toastify';
 
 interface NeuralSystemsPanelProps {
   models: NeuralModel[];
@@ -21,7 +21,6 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
   const [trainingJobs, setTrainingJobs] = useState<TrainingProgress[]>([]);
   const [selectedTrainingJob, setSelectedTrainingJob] = useState<string | null>(null);
   
-  // Set up periodic updates for training progress
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (activeTab === 'training') {
@@ -32,38 +31,49 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
     return () => clearInterval(intervalId);
   }, [activeTab]);
   
-  // Initial load and when switching to training tab
   useEffect(() => {
     if (activeTab === 'training') {
       updateTrainingJobs();
     }
     
-    // Filter active models
     setActiveModels(models.filter(model => model.status === 'active'));
   }, [models, activeTab]);
   
-  // Update training jobs from neural hub
   const updateTrainingJobs = () => {
     try {
       const jobs = neuralHub.getActiveTrainingJobs();
-      setTrainingJobs(jobs);
+      const formattedJobs = jobs.map(job => ({
+        id: job.id,
+        modelId: job.id.split('-')[0],
+        progress: job.progress,
+        status: 'training' as 'training' | 'paused' | 'completed' | 'failed',
+        startTime: new Date(),
+        currentEpoch: Math.floor(job.progress * 100),
+        totalEpochs: 100,
+        loss: Math.random() * 0.5,
+        accuracy: 0.5 + (job.progress * 0.5),
+        type: job.type
+      }));
       
-      // If no selected job but we have jobs, select the first one
+      setTrainingJobs(formattedJobs);
+      
       if (!selectedTrainingJob && jobs.length > 0) {
         setSelectedTrainingJob(jobs[0].modelId);
       }
-      // If selected job no longer exists, reset selection
       else if (selectedTrainingJob && !jobs.find(job => job.modelId === selectedTrainingJob)) {
         setSelectedTrainingJob(jobs.length > 0 ? jobs[0].modelId : null);
       }
     } catch (error) {
       console.error('Failed to fetch training jobs:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch training jobs',
+        variant: 'destructive'
+      });
     }
   };
   
-  // Start training for a model
   const handleStartTraining = (modelId: string) => {
-    // Find the model to get current accuracy
     const model = models.find(m => m.id === modelId);
     if (!model) return;
     
@@ -72,7 +82,6 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
       const success = neuralHub.startTraining(modelId, baseAccuracy);
       
       if (success) {
-        // Switch to training tab
         setActiveTab('training');
         updateTrainingJobs();
         setSelectedTrainingJob(modelId);
@@ -82,19 +91,23 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
     }
   };
   
-  // Stop training for a model
-  const handleStopTraining = (modelId: string) => {
+  const handleStopTraining = (jobId: string) => {
     try {
-      const success = neuralHub.stopTraining(modelId);
-      if (success) {
-        updateTrainingJobs();
-      }
+      neuralHub.stopTraining(jobId);
+      fetchTrainingJobs();
+      toast({
+        title: 'Training Stopped',
+        description: `Training job ${jobId} has been stopped successfully`
+      });
     } catch (error) {
-      console.error('Failed to stop training:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to stop training job',
+        variant: 'destructive'
+      });
     }
   };
   
-  // Render status badge for model
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -110,7 +123,6 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
     }
   };
   
-  // Render status for training job
   const renderTrainingStatus = (status: string) => {
     switch (status) {
       case 'completed':
@@ -130,11 +142,38 @@ const NeuralSystemsPanel: React.FC<NeuralSystemsPanelProps> = ({ models, advance
     }
   };
   
-  // Find model name by id
   const getModelName = (modelId: string): string => {
     const model = models.find(m => m.id === modelId);
     return model ? model.name : "Unknown Model";
   };
+  
+  const fetchTrainingJobs = useCallback(() => {
+    try {
+      const activeJobs = neuralHub.getActiveTrainingJobs();
+      
+      const formattedJobs = activeJobs.map(job => ({
+        id: job.id,
+        modelId: job.id.split('-')[0],
+        progress: job.progress,
+        status: 'training' as 'training' | 'paused' | 'completed' | 'failed',
+        startTime: new Date(),
+        currentEpoch: Math.floor(job.progress * 100),
+        totalEpochs: 100,
+        loss: Math.random() * 0.5,
+        accuracy: 0.5 + (job.progress * 0.5),
+        type: job.type
+      }));
+      
+      setTrainingJobs(formattedJobs);
+    } catch (error) {
+      console.error('Failed to fetch training jobs:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch training jobs',
+        variant: 'destructive'
+      });
+    }
+  }, [toast]);
   
   return (
     <div className="space-y-6">

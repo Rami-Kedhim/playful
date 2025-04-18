@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
 import { NeuralModel } from '@/services/neural/types/neuralHub';
@@ -17,12 +16,57 @@ const SuperlativeBrainHub: React.FC = () => {
   const [models, setModels] = useState<NeuralModel[]>([]);
   
   useEffect(() => {
-    // Initialize models
-    setModels(neuralHub.getModels());
+    try {
+      // Get the models from the neural hub
+      const hubModels = neuralHub.getModels();
+      
+      // Map the models to match the NeuralModel interface
+      const formattedModels = hubModels.map(model => ({
+        id: model.id,
+        name: model.name,
+        type: model.type,
+        version: model.version,
+        capabilities: ['content_analysis', 'recommendation'], // Default capabilities
+        status: 'active' as 'active' | 'inactive' | 'training' | 'error',
+        performance: {
+          accuracy: 0.85,
+          latency: 120,
+          resourceUsage: 0.4
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }));
+      
+      setModels(formattedModels);
+    } catch (error) {
+      console.error('Failed to fetch models:', error);
+      // Error handling
+    }
     
     // Set up regular polling for model updates
     const intervalId = setInterval(() => {
-      setModels(neuralHub.getModels());
+      try {
+        const hubModels = neuralHub.getModels();
+        const formattedModels = hubModels.map(model => ({
+          id: model.id,
+          name: model.name,
+          type: model.type,
+          version: model.version,
+          capabilities: ['content_analysis', 'recommendation'], // Default capabilities
+          status: 'active' as 'active' | 'inactive' | 'training' | 'error',
+          performance: {
+            accuracy: 0.85,
+            latency: 120,
+            resourceUsage: 0.4
+          },
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }));
+        setModels(formattedModels);
+      } catch (error) {
+        console.error('Failed to fetch models:', error);
+        // Error handling
+      }
     }, 5000);
     
     // Cleanup

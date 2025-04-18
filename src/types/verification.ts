@@ -1,36 +1,64 @@
 
+// Create or update the verification types file
+
+export enum VerificationLevel {
+  NONE = 'NONE',
+  BASIC = 'BASIC',
+  VERIFIED = 'VERIFIED',
+  ENHANCED = 'ENHANCED',
+  PREMIUM = 'PREMIUM'
+}
+
+export enum VerificationStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  REVIEW = 'REVIEW',
+  EXPIRED = 'EXPIRED'
+}
+
+export enum DocumentType {
+  ID_CARD = 'ID_CARD',
+  PASSPORT = 'PASSPORT',
+  DRIVERS_LICENSE = 'DRIVERS_LICENSE',
+  SELFIE = 'SELFIE',
+  OTHER = 'OTHER'
+}
+
 export interface VerificationDocument {
   id: string;
-  document_type: string;
-  file_path: string;
-  uploaded_at: string;
-  status: 'pending' | 'approved' | 'rejected';
-  verification_request_id: string;
-  reviewer_notes?: string;
+  document_type: DocumentType;
+  file_url: string;
+  uploaded_at: Date;
+  status: VerificationStatus;
+  notes?: string;
+  // Aliases for backward compatibility
+  url?: string;
+  fileUrl?: string;
+  document_url?: string;
+  type?: DocumentType;
+  uploadedAt?: Date;
 }
 
 export interface VerificationRequest {
   id: string;
-  profile_id: string;
-  status: 'pending' | 'approved' | 'rejected';
-  requested_level: 'basic' | 'advanced' | 'premium';
-  created_at: string;
-  documents?: VerificationDocument[];
-  reviewer_notes?: string;
-  reviewed_at?: string;
+  userId: string;
+  status: VerificationStatus;
+  documents: VerificationDocument[];
+  created_at: Date;
+  updated_at: Date;
   reviewed_by?: string;
-}
-
-export enum VerificationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  ADVANCED = 'advanced',
-  PREMIUM = 'premium'
+  reviewed_at?: Date;
+  // Additional fields required by components
+  submittedAt?: Date;
+  verificationLevel?: VerificationLevel;
+  rejectionReason?: string;
 }
 
 export interface VerificationStats {
-  pendingCount: number;
-  approvedCount: number;
-  rejectedCount: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  total: number;
   averageProcessingTime: number;
 }
