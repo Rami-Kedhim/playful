@@ -67,10 +67,10 @@ export class HermesOxumNeuralHub {
   }
 
   // Type definitions for neural operations
-  private neuralOps: { [key: string]: (a: Escort[], b: Escort[]) => Escort[] } = {
-    merge: (a: Escort[], b: Escort[]) => [...a, ...b],
-    filter: (a: Escort[], _: Escort[]) => a.filter(e => e.rating && e.rating > 4),
-    sort: (a: Escort[], _: Escort[]) => [...a].sort((x, y) => (y.rating || 0) - (x.rating || 0))
+  private neuralOps: { [key: string]: (a: any[], b: any[]) => any[] } = {
+    merge: (a: any[], b: any[]) => [...a, ...b],
+    filter: (a: any[], _: any[]) => a.filter(e => e.rating && e.rating > 4),
+    sort: (a: any[], _: any[]) => [...a].sort((x, y) => (y.rating || 0) - (x.rating || 0))
   };
   
   public async init(): Promise<boolean> {
@@ -81,6 +81,26 @@ export class HermesOxumNeuralHub {
     this.isInitialized = true;
     return true;
   }
+
+  public getHealthMetrics() {
+    return {
+      load: 0.42,
+      userEngagement: 0.65,
+      lastUpdated: new Date().getTime()
+    };
+  }
+
+  public applyBoostToContent(
+    id: string,
+    contentType: string,
+    score: number,
+    region?: string,
+    language?: string
+  ): number {
+    // Mock implementation - would integrate with neural algorithms in real app
+    return score * 1.25; // 25% boost as example
+  }
 }
 
 export const brainHub = HermesOxumNeuralHub.getInstance();
+export const neuralHub = brainHub; // Add this export for compatibility

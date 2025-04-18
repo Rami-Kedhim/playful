@@ -1,92 +1,60 @@
-
-import { useState } from 'react';
-import { Escort, ContactInfo } from '@/types/escort';
-import { useToast } from '@/components/ui/use-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { Escort } from '@/types/escort';
 import escortService from '@/services/escortService';
+import { useAuth } from '@/hooks/auth/useAuthContext';
 
-/**
- * Hook to manage escort profile data
- */
-export const useEscortProfile = (initialEscort?: Escort) => {
-  const [escort, setEscort] = useState<Escort | null>(initialEscort || null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
-  
-  /**
-   * Fetch escort profile by ID
-   */
-  const fetchEscortProfile = async (id: string) => {
+export const useEscortProfile = (escortId?: string) => {
+  const [escort, setEscort] = useState<Escort | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+
+  const fetchProfile = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      setIsLoading(true);
-      const data = await escortService.getEscortById(id);
-      
-      if (data) {
-        setEscort(data);
-        return data;
+      const fetchedEscort = await escortService.getEscortById(id);
+      if (fetchedEscort) {
+        setEscort(fetchedEscort);
+      } else {
+        setError('Escort profile not found');
       }
-      return null;
-    } catch (error) {
-      console.error('Error fetching escort profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load escort profile",
-        variant: "destructive",
-      });
-      return null;
+    } catch (e: any) {
+      setError(e.message || 'Failed to fetch escort profile');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
-  
-  /**
-   * Update escort profile data
-   */
-  const updateProfile = async (id: string, updates: Partial<Escort>) => {
+  }, []);
+
+  useEffect(() => {
+    if (escortId) {
+      fetchProfile(escortId);
+    }
+  }, [escortId, fetchProfile]);
+
+  const updateProfile = async (profileData: Partial<Escort>): Promise<boolean> => {
+    if (!escort?.id) return false;
     try {
-      setIsSaving(true);
-      const updatedEscort = await escortService.updateEscortProfile(id, updates);
-      
+      const updatedEscort = await escortService.updateEscort(escort.id, profileData);
       if (updatedEscort) {
         setEscort(updatedEscort);
-        toast({
-          title: "Profile Updated",
-          description: "Your profile has been successfully updated",
-        });
-        return updatedEscort;
+        return true;
       }
-      return null;
+      return false;
     } catch (error) {
-      console.error('Error updating escort profile:', error);
-      toast({
-        title: "Update Failed",
-        description: "Could not update your profile information",
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsSaving(false);
+      console.error('Failed to update escort profile:', error);
+      return false;
     }
   };
-  
-  /**
-   * Update contact information
-   */
-  const updateContactInfo = async (id: string, contactInfo: ContactInfo) => {
-    return updateProfile(id, { 
-      contactInfo 
-    } as Partial<Escort>);
-  };
-  
+
   return {
     escort,
-    isLoading,
-    isSaving,
-    fetchEscortProfile,
+    loading,
+    error,
+    fetchProfile,
     updateProfile,
-    updateContactInfo
+    isOwnProfile: user?.id === escort?.id
   };
 };
 
-// Export as both named and default export for compatibility
 export default useEscortProfile;

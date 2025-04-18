@@ -1,104 +1,92 @@
 
 import { Escort } from '@/types/escort';
 
-export interface MappedProfile {
+// Interface for UberPersona model
+export interface UberPersona {
   id: string;
   name: string;
-  displayName: string;
-  username?: string;
-  bio: string;
-  images: string[];
-  age: number;
-  location: string;
-  tags: string[];
-  verificationLevel: string;
   profileType: 'verified' | 'ai' | 'provisional' | 'scraped';
-  rating: number;
-  price: number;
-  availability: {
-    isAvailable: boolean;
-    nextAvailable?: string;
-  };
+  profileImage: string;
+  images: string[];
+  description: string;
   services: string[];
+  location: string;
   stats: {
-    views: number;
-    likes: number;
-    followers: number;
+    rating: number;
+    reviewCount: number;
+    responseRate: number;
   };
-  socialLinks?: {
-    instagram?: string;
-    twitter?: string;
-    website?: string;
+  pricing: {
+    hourly: number;
+    base: number;
+    specialServices?: Record<string, number>;
   };
-  contactInfo: {
-    email?: string;
-    phone?: string;
+  availability: {
+    schedule: string[]; // e.g. ['Monday', 'Tuesday', 'Friday']
+    timeWindows: string[]; // e.g. ['10:00-18:00', '19:00-22:00']
   };
-  isFavorited: boolean;
-  lastActive?: string;
+  tags: string[];
+  featured: boolean;
+  isAI?: boolean;
 }
 
-export const mapEscortToProfile = (escort: Escort): MappedProfile => {
-  // Define profile type
-  let profileType: 'verified' | 'ai' | 'provisional' | 'scraped' = 'provisional';
-  
-  if (escort.profileType) {
-    profileType = escort.profileType;
-  } else {
-    if (escort.isVerified) {
-      profileType = 'verified';
-    } else if (escort.isAI) {
-      profileType = 'ai';
-    } else if (escort.isScraped) {
-      profileType = 'scraped';
-    }
-  }
-  
+/**
+ * Maps an escort model to the UberPersona format
+ * @param escort The escort data to convert
+ * @returns UberPersona formatted data
+ */
+export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
   return {
     id: escort.id,
     name: escort.name,
-    displayName: escort.name,
-    bio: escort.bio || escort.description || '',
-    images: escort.images || escort.gallery || [],
-    age: escort.age,
-    location: escort.location,
-    tags: escort.tags || escort.services || [],
-    verificationLevel: escort.verificationLevel || (escort.isVerified ? 'verified' : 'unverified'),
-    profileType,
-    rating: escort.rating || 0,
-    price: escort.price,
-    availability: {
-      isAvailable: escort.availableNow || false,
-      nextAvailable: escort.availability?.nextAvailable
-    },
+    profileType: escort.isVerified ? 'verified' : 'provisional',
+    profileImage: escort.images[0] || '',
+    images: escort.images || [],
+    description: escort.bio || '',
     services: escort.services || [],
+    location: escort.location || '',
     stats: {
-      views: Math.floor(Math.random() * 1000),
-      likes: Math.floor(Math.random() * 100),
-      followers: Math.floor(Math.random() * 50)
+      rating: escort.rating || 4.5,
+      reviewCount: escort.reviewCount || 0,
+      responseRate: 0.85, // Default
     },
-    contactInfo: {
-      email: escort.contactInfo?.email,
-      phone: escort.contactInfo?.phone
+    pricing: {
+      hourly: escort.price || 0,
+      base: escort.price ? escort.price * 0.8 : 0,
     },
-    isFavorited: escort.isFavorited || false,
-    lastActive: escort.lastActive
+    availability: {
+      schedule: ['Monday', 'Wednesday', 'Friday'], // Mock data
+      timeWindows: ['10:00-18:00', '19:00-22:00'], // Mock data
+    },
+    tags: ['New', 'Trending'].concat(escort.services.slice(0, 2)),
+    featured: escort.featured || false,
+    isAI: escort.isAI || false
   };
 };
 
-export const mapProfileToSearchResult = (profile: MappedProfile) => {
-  return {
-    id: profile.id,
-    name: profile.name,
-    age: profile.age,
-    location: profile.location,
-    image: profile.images[0] || '',
-    rating: profile.rating,
-    price: profile.price,
-    isVerified: profile.profileType === 'verified',
-    isAvailable: profile.availability.isAvailable,
-    tags: profile.tags.slice(0, 3)
-  };
+/**
+ * Maps multiple escorts to UberPersonas
+ */
+export const mapEscortsToUberPersonas = (escorts: Escort[]): UberPersona[] => {
+  return escorts.map(escort => mapEscortToUberPersona(escort));
 };
 
-export default { mapEscortToProfile, mapProfileToSearchResult };
+/**
+ * Helper function to determine if a profile is AI generated
+ */
+export const isAIProfile = (profile: UberPersona): boolean => {
+  return profile.profileType === "ai" || profile.isAI === true;
+};
+
+/**
+ * Helper function to get appropriate styling class based on profile type
+ */
+export const getProfileTypeClass = (type: string): string => {
+  switch(type) {
+    case 'verified': return 'border-green-500';
+    case 'ai': return 'border-purple-500';
+    case 'provisional': return 'border-yellow-500';
+    case 'scraped': return 'border-gray-500';
+    default: return '';
+  }
+};

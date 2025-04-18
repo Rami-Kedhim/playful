@@ -22,3 +22,30 @@ export interface UserProfile {
   phone?: string;
   phone_number?: string;
 }
+
+// Add missing auth types
+export enum UserRole {
+  USER = 'user',
+  ESCORT = 'escort',
+  CREATOR = 'creator',
+  ADMIN = 'admin',
+  MODERATOR = 'moderator'
+}
+
+export interface AuthResult {
+  success: boolean;
+  message?: string;
+  user?: User;
+  token?: string;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterCredentials {
+  email: string;
+  password: string;
+  name?: string;
+}

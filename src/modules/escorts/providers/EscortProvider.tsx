@@ -1,149 +1,124 @@
-
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from 'react';
+import escortService from '@/services/escortService';
 import { Escort } from '@/types/escort';
-import escortService from '../../../services/escortService';
-import { EscortFilterOptions } from '@/types/escortTypes';
 
-// Define the EscortContextState interface
-export interface EscortContextState {
+interface EscortContextType {
   escorts: Escort[];
   loading: boolean;
   error: string | null;
-  filters: EscortFilterOptions;
-  totalPages: number;
-  currentPage: number;
-  featuredEscorts: Escort[];
-  isLoading: boolean;
+  fetchEscorts: () => Promise<void>;
+  createEscort: (escort: Partial<Escort>) => Promise<Escort | undefined>;
+  updateEscort: (id: string, updates: Partial<Escort>) => Promise<Escort | undefined>;
+  deleteEscort: (id: string) => Promise<boolean>;
 }
 
-export interface EscortContextProps {
-  state: EscortContextState;
-  loadEscorts: (filters?: EscortFilterOptions | boolean) => Promise<void>;
-  getEscortById: (id: string) => Promise<Escort | null>;
-  updateFilters: (filters: Partial<EscortFilterOptions>) => void;
-}
+const EscortContext = createContext<EscortContextType | undefined>(undefined);
 
-// Default empty filter object
-const defaultFilters: EscortFilterOptions = {
-  gender: [],
-  serviceType: [],
-  serviceTypes: [],
-  priceRange: [0, 1000],
-  ageRange: [18, 99],
-  language: [],
-  location: "",
-  verified: false,
-  rating: 0,
-  availableNow: false,
-  escortType: "all"
-};
+export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [escorts, setEscorts] = useState<Escort[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export const EscortContext = createContext<EscortContextProps>({
-  state: {
-    escorts: [],
-    loading: false,
-    error: null,
-    filters: defaultFilters,
-    totalPages: 1,
-    currentPage: 1,
-    featuredEscorts: [],
-    isLoading: false
-  },
-  loadEscorts: async () => {},
-  getEscortById: async () => null,
-  updateFilters: () => {}
-});
-
-// Add this hook for consuming the context
-export const useEscortContext = () => useContext(EscortContext);
-
-export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<EscortContextState>({
-    escorts: [],
-    loading: false,
-    error: null,
-    filters: defaultFilters,
-    totalPages: 1,
-    currentPage: 1,
-    featuredEscorts: [],
-    isLoading: false
-  });
-
-  // Whenever state.loading changes, update isLoading
-  useEffect(() => {
-    setState(prev => ({
-      ...prev,
-      isLoading: prev.loading
-    }));
-  }, [state.loading]);
-
-  // Fetch escorts on initial load
-  useEffect(() => {
-    loadEscorts(defaultFilters);
+  const fetchEscortsData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await escortService.getAllEscorts();
+      setEscorts(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch escorts');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // Fetch escorts when filters change
+  const createEscort = async (escort: Partial<Escort>): Promise<Escort | undefined> => {
+    try {
+      setLoading(true);
+      const newEscort = await escortService.createEscort(escort);
+      setEscorts(prevEscorts => [...prevEscorts, newEscort]);
+      setError(null);
+      return newEscort;
+    } catch (err: any) {
+      setError(err.message || 'Failed to create escort');
+      return undefined;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateEscort = async (id: string, updates: Partial<Escort>): Promise<Escort | undefined> => {
+    try {
+      setLoading(true);
+      const updatedEscort = await escortService.updateEscort(id, updates);
+      if (updatedEscort) {
+        setEscorts(prevEscorts =>
+          prevEscorts.map(escort => (escort.id === id ? updatedEscort : escort))
+        );
+        setError(null);
+        return updatedEscort;
+      }
+      setError('Escort not found');
+      return undefined;
+    } catch (err: any) {
+      setError(err.message || 'Failed to update escort');
+      return undefined;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteEscort = async (id: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const success = await escortService.deleteEscort(id);
+      if (success) {
+        setEscorts(prevEscorts => prevEscorts.filter(escort => escort.id !== id));
+        setError(null);
+        return true;
+      }
+      setError('Escort not found');
+      return false;
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete escort');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    loadEscorts(state.filters);
-  }, [state.filters]);
+    fetchEscortsData();
+  }, [fetchEscortsData]);
 
-  const loadEscorts = async (filters: EscortFilterOptions | boolean = defaultFilters) => {
-    try {
-      setState(prev => ({ ...prev, loading: true, isLoading: true, error: null }));
-      
-      // If filters is a boolean, it's the useNeuralProcessing flag
-      const actualFilters = typeof filters === 'boolean' ? state.filters : filters;
-      
-      const data = await escortService.getEscorts(actualFilters);
-      
-      // Extract featured escorts
-      const featured = data.escorts ? data.escorts.filter(escort => escort.featured) : [];
-      
-      setState(prev => ({ 
-        ...prev,
-        escorts: data.escorts || [],
-        featuredEscorts: featured,
-        totalPages: data.totalPages || 1,
-        currentPage: data.currentPage || 1,
-        loading: false,
-        isLoading: false
-      }));
-    } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        loading: false,
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Failed to load escorts'
-      }));
-    }
-  };
-
-  const getEscortById = async (id: string): Promise<Escort | null> => {
-    try {
-      return await escortService.getEscortById(id);
-    } catch (error) {
-      console.error('Error fetching escort by ID:', error);
-      return null;
-    }
-  };
-
-  const updateFilters = (filters: Partial<EscortFilterOptions>) => {
-    setState(prev => ({
-      ...prev,
-      filters: { ...prev.filters, ...filters }
-    }));
-  };
-
-  const contextValue: EscortContextProps = {
-    state,
-    loadEscorts,
-    getEscortById,
-    updateFilters
+  const value: EscortContextType = {
+    escorts,
+    loading,
+    error,
+    fetchEscorts: fetchEscortsData,
+    createEscort,
+    updateEscort,
+    deleteEscort,
   };
 
   return (
-    <EscortContext.Provider value={contextValue}>
+    <EscortContext.Provider value={value}>
       {children}
     </EscortContext.Provider>
   );
+};
+
+export const useEscortContext = (): EscortContextType => {
+  const context = useContext(EscortContext);
+  if (!context) {
+    throw new Error('useEscortContext must be used within a EscortProvider');
+  }
+  return context;
 };

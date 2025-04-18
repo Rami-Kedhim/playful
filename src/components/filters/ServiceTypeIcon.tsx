@@ -1,20 +1,20 @@
 
 import React from 'react';
 import { MapPin, Video, UserCheck, SunMoon, UtensilsCrossed } from 'lucide-react';
-import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import { ServiceTypeFilter } from '@/components/escorts/context/ServiceTypeContext';
 
 export interface ServiceTypeIconProps {
   type: ServiceTypeFilter;
   size?: number;
   className?: string;
-  variant?: string;
+  variant?: string; // Add support for variant prop
 }
 
 const ServiceTypeIcon: React.FC<ServiceTypeIconProps> = ({ 
   type, 
   size = 16,
   className = "",
-  variant = "default"
+  variant = "default" // Default value for variant
 }) => {
   switch(type) {
     case 'in-person':

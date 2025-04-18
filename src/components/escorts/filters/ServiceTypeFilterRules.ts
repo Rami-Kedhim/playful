@@ -48,10 +48,16 @@ export const filterRules = {
   ]
 };
 
+// Export forbidden terms for reuse
+export const ForbiddenTerms = filterRules.blockedTerms;
+
 // Utility function to check if a service type is allowed
 export const isServiceTypeAllowed = (type: string): boolean => {
   return Object.values(ServiceType).includes(type as ServiceType);
 };
+
+// Alias for backward compatibility
+export const isAllowedServiceType = isServiceTypeAllowed;
 
 // Utility function to safely format a service type
 export const formatServiceType = (
@@ -82,5 +88,8 @@ export const formatServiceType = (
   // Return empty if no match
   return '';
 };
+
+// Alias for backward compatibility
+export const remapUnsafeService = formatServiceType;
 
 export default { ServiceType, filterRules, isServiceTypeAllowed, formatServiceType };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +40,13 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ initialData, onSubmit
     }
   };
   
+  const capitalizeFirstLetter = (value: string | number | undefined): string => {
+    const stringValue = String(value || '');
+    return stringValue.length > 0 
+      ? stringValue.charAt(0).toUpperCase() + stringValue.slice(1) 
+      : '';
+  };
+  
   return (
     <form onSubmit={handleSubmit}>
       <CardContent className="space-y-6 pt-6">
@@ -48,7 +54,7 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({ initialData, onSubmit
           <Avatar className="w-24 h-24">
             <AvatarImage src={formData.avatar_url || ''} alt="Profile" />
             <AvatarFallback>
-              {initialData.userId?.charAt(0).toUpperCase() || 'U'}
+              {capitalizeFirstLetter(initialData.userId)}
             </AvatarFallback>
           </Avatar>
           
