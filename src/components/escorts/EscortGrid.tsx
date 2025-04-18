@@ -47,7 +47,7 @@ const EscortGrid: React.FC<EscortGridProps> = ({
         <EscortCard
           key={escort.id}
           escort={escort}
-          onClick={onEscortClick ? () => onEscortClick(escort) : undefined}
+          onClick={() => onEscortClick?.(escort)}
         />
       ))}
     </div>

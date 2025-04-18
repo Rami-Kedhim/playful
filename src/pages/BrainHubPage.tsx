@@ -1,136 +1,109 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Brain, Info, Settings, ChartBar } from 'lucide-react';
 import SuperlativeBrainHub from '@/components/brainHub/SuperlativeBrainHub';
-import BrainCore from '@/components/brainHub/BrainCore';
-import NeuralServicesPanel from '@/components/brainHub/NeuralServicesPanel';
-import NeuralAnalyticsPanel from '@/components/brainHub/NeuralAnalyticsPanel';
-import NeuralModuleRegistration from '@/components/brainHub/NeuralModuleRegistration';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
-import { NeuralModel } from '@/services/neural/types/neuralHub';
-import { useToast } from '@/components/ui/use-toast';
+import { NeuralModel } from '@/types/uberpersona';
 
-const BrainHubPage: React.FC = () => {
+const BrainHubPage = () => {
+  const [activeTab, setActiveTab] = useState<string>('models');
   const [models, setModels] = useState<NeuralModel[]>([]);
-  const [advancedMode, setAdvancedMode] = useState(false);
-  const { toast } = useToast();
-  
-  // Load models on component mount
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    fetchModels();
+    // Simulate fetching models
+    setTimeout(() => {
+      const mockModels: NeuralModel[] = [
+        {
+          id: 'model-1',
+          name: 'LoveSense GPT',
+          type: 'language',
+          version: '2.1',
+          capabilities: ['text-generation', 'image-description', 'sentiment-analysis'],
+          status: 'active',
+          performance: {
+            accuracy: 0.89,
+            latency: 120,
+            throughput: 250
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'model-2',
+          name: 'Persona Builder',
+          type: 'language',
+          version: '1.5',
+          capabilities: ['character-creation', 'dialogue-generation'],
+          status: 'active',
+          performance: {
+            accuracy: 0.85,
+            latency: 100,
+            throughput: 300
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'model-3',
+          name: 'EscortMind',
+          type: 'multimodal',
+          version: '3.0',
+          capabilities: ['profile-optimization', 'scheduling-assistant', 'recommendation-engine'],
+          status: 'active',
+          performance: {
+            accuracy: 0.92,
+            latency: 150,
+            throughput: 200
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+      setModels(mockModels);
+      setLoading(false);
+    }, 1000);
   }, []);
-  
-  const fetchModels = () => {
-    try {
-      const hubModels = neuralHub.getModels();
-      setModels(hubModels);
-    } catch (error) {
-      console.error('Failed to fetch models:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch neural models',
-        variant: 'destructive'
-      });
-    }
-  };
-  
-  // Handle module registration
-  const handleModuleRegistered = () => {
-    toast({
-      title: 'Success',
-      description: 'Neural module successfully registered',
-    });
-    fetchModels(); // Refresh models list
-  };
-  
+
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex flex-col md:flex-row justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center">
-            <Brain className="mr-2 h-8 w-8 text-primary" />
-            Brain Hub Control Center
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Brain Hub</h1>
           <p className="text-muted-foreground">
-            Advanced management interface for the neural systems integration
+            Advanced neural systems for profile optimization and interaction.
           </p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setAdvancedMode(!advancedMode)}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            {advancedMode ? 'Basic Mode' : 'Advanced Mode'}
-          </Button>
-        </div>
+        <Button>Connect New Service</Button>
       </div>
-      
-      <Tabs defaultValue="overview">
-        <TabsList className="mb-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="neural-services">Neural Services</TabsTrigger>
-          <TabsTrigger value="brain-core">Brain Core</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3 w-full max-w-md">
+          <TabsTrigger value="models">Models</TabsTrigger>
+          <TabsTrigger value="training">Training</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="overview">
-          <SuperlativeBrainHub />
+        <TabsContent value="models" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Neural Models Available</CardTitle>
+              <CardDescription>Select a neural model to enhance your profile and interactions.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SuperlativeBrainHub models={models} />
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline">Configure Neural Integration</Button>
+            </CardFooter>
+          </Card>
         </TabsContent>
-        
-        <TabsContent value="neural-services">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <NeuralServicesPanel 
-                models={models} 
-                advancedMode={advancedMode} 
-              />
-            </div>
-            
-            <div className="space-y-6">
-              <NeuralModuleRegistration onRegistered={handleModuleRegistered} />
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center">
-                    <Info className="w-5 h-5 mr-2 text-primary" />
-                    Neural Systems Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <span className="text-sm text-muted-foreground">Active Models</span>
-                      <p className="text-2xl font-medium">{models.filter(m => m.status === 'active').length} / {models.length}</p>
-                    </div>
-                    
-                    <div>
-                      <span className="text-sm text-muted-foreground">System Efficiency</span>
-                      <p className="text-2xl font-medium">{neuralHub.calculateSystemEfficiency()}%</p>
-                    </div>
-                    
-                    <div>
-                      <span className="text-sm text-muted-foreground">Active Training Jobs</span>
-                      <p className="text-2xl font-medium">{neuralHub.getActiveTrainingJobs().length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+        <TabsContent value="training" className="space-y-4">
+          {/* Training tab content here */}
+          <p>Training tab content would go here</p>
         </TabsContent>
-        
-        <TabsContent value="brain-core">
-          <BrainCore initialRequestType="analysis" />
-        </TabsContent>
-        
-        <TabsContent value="analytics">
-          <NeuralAnalyticsPanel advancedMode={advancedMode} />
+        <TabsContent value="performance" className="space-y-4">
+          {/* Performance tab content here */}
+          <p>Performance tab content would go here</p>
         </TabsContent>
       </Tabs>
     </div>

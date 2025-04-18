@@ -1,77 +1,77 @@
 
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { LoginCredentials } from "@/types/user";
-import { AlertCircle } from "lucide-react";
+import React from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
+import { LoginCredentials } from '@/types/user';
 
 export interface SignInFormProps {
-  onSubmit: (credentials: LoginCredentials) => Promise<void>;
-  loading: boolean;
-  error: string | null;
+  onSubmit?: (credentials: LoginCredentials) => Promise<void>;
+  loading?: boolean;
+  error?: string | null;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ onSubmit, loading, error }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const SignInForm: React.FC<SignInFormProps> = ({ 
+  onSubmit,
+  loading = false,
+  error = null
+}) => {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ email, password });
+    if (onSubmit) {
+      await onSubmit({ email, password });
+    }
   };
   
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
       
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <a 
-              href="#" 
-              className="text-xs text-primary hover:underline"
-            >
-              Forgot password?
-            </a>
-          </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        
-        <Button 
-          type="submit" 
-          className="w-full"
+      <div className="space-y-2">
+        <Input
+          type="email"
+          placeholder="Email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
-        >
-          {loading ? "Signing In..." : "Sign In"}
-        </Button>
+          className="bg-background"
+        />
       </div>
+      
+      <div className="space-y-2">
+        <Input
+          type="password"
+          placeholder="Password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={loading}
+          className="bg-background"
+        />
+        <div className="text-sm text-right">
+          <Button variant="link" className="p-0 h-auto" type="button">
+            Forgot password?
+          </Button>
+        </div>
+      </div>
+      
+      <Button 
+        type="submit" 
+        className="w-full" 
+        disabled={loading}
+      >
+        {loading ? 'Signing In...' : 'Sign In'}
+      </Button>
     </form>
   );
 };

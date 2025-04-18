@@ -53,7 +53,7 @@ const RoutesComponent: React.FC = () => {
     name: authUser.name || authUser.username || authUser.full_name || '',
     isVerified: authUser.isVerified,
     createdAt: authUser.created_at || new Date().toISOString(),
-    phone: authUser.phone_number || '',
+    phone: authUser.phone_number || authUser.phone || '',
     website: authUser.website || ''
   } : null;
   

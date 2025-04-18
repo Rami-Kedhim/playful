@@ -1,95 +1,47 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Video, SplitSquareVertical } from 'lucide-react';
+import ServiceTypeIcon from './ServiceTypeIcon';
 
-export type ServiceTypeFilter = "" | "in-person" | "virtual" | "both" | "all" | "incall" | "outcall" | "massage" | "dinner";
+export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'all';
 
-export interface ServiceTypeBadgeLabelProps {
+interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
-  size?: 'sm' | 'default' | 'lg';
-  showLabel?: boolean;
-  variant?: "default" | "secondary" | "outline";
+  variant?: 'default' | 'outline' | 'pill';
 }
 
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  switch (type) {
-    case "in-person":
-      return "In-person";
-    case "virtual":
-      return "Virtual";
-    case "both":
-      return "In-person & Virtual";
-    case "all":
-      return "All Types";
-    case "incall":
-      return "Incall";
-    case "outcall":
-      return "Outcall";
-    case "massage":
-      return "Massage";
-    case "dinner":
-      return "Dinner Date";
-    default:
-      return "";
-  }
-};
-
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
+export const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type,
-  size = 'default',
-  showLabel = true,
-  variant = "default"
+  variant = 'default'
 }) => {
-  if (!type) return null;
-  
-  let Icon;
-  let label = "";
-  
-  switch (type) {
-    case "in-person":
-      Icon = MapPin;
-      label = "In-person";
-      break;
-    case "virtual":
-      Icon = Video;
-      label = "Virtual";
-      break;
-    case "both":
-      Icon = SplitSquareVertical;
-      label = "In-person & Virtual";
-      break;
-    case "all":
-      Icon = SplitSquareVertical;
-      label = "All Types";
-      break;
-    case "incall":
-      Icon = MapPin;
-      label = "Incall";
-      break;
-    case "outcall":
-      Icon = MapPin;
-      label = "Outcall";
-      break;
-    case "massage":
-      Icon = MapPin;
-      label = "Massage";
-      break;
-    case "dinner":
-      Icon = MapPin;
-      label = "Dinner Date";
-      break;
-    default:
-      return null;
-  }
-  
-  const iconSize = size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4';
-  const badgeClass = size === 'sm' ? 'text-xs py-0 px-1' : size === 'lg' ? 'text-sm py-1 px-2' : '';
-  
+  const getLabel = () => {
+    switch (type) {
+      case 'in-person': return 'In-Person';
+      case 'virtual': return 'Virtual';
+      case 'both': return 'In-Person & Virtual';
+      case 'all': return 'All Services';
+      default: return '';
+    }
+  };
+
+  const getBadgeStyle = () => {
+    if (variant === 'outline') {
+      return 'bg-transparent border border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300';
+    }
+    if (variant === 'pill') {
+      return 'rounded-full px-3';
+    }
+    // Default style
+    return '';
+  };
+
+  const label = getLabel();
+  if (!label) return null;
+
   return (
-    <Badge variant={variant} className={badgeClass}>
-      {Icon && <Icon className={`${iconSize} ${showLabel ? 'mr-1' : ''}`} />}
-      {showLabel && label}
+    <Badge className={`flex items-center gap-1.5 ${getBadgeStyle()}`}>
+      {type !== 'all' && <ServiceTypeIcon type={type} size={14} />}
+      <span>{label}</span>
     </Badge>
   );
 };

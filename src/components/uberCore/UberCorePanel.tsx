@@ -1,3 +1,4 @@
+
 // This is a stub implementation - we're only fixing the TypeScript errors
 import React from 'react';
 import { UberCoreService, UberCoreStatus } from '@/types/ubercore';

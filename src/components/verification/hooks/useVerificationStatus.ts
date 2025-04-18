@@ -5,7 +5,8 @@ import {
   VerificationRequest, 
   VerificationStatus,
   VerificationDocument,
-  DocumentType
+  DocumentType,
+  toDocumentType
 } from '@/types/verification';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -71,8 +72,8 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
       // Now includes the required 'type' property
       const pendingDoc: VerificationDocument = {
         id: documentId,
-        type: document_type as DocumentType,
-        document_type: document_type as DocumentType,
+        type: toDocumentType(document_type),
+        document_type: toDocumentType(document_type),
         status: "pending",
         uploaded_at: new Date()
       };

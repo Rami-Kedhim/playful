@@ -63,7 +63,7 @@ const Auth: React.FC<AuthProps> = ({
         return;
       }
       
-      // Simulate a user object creation
+      // Create a proper User object with all required fields
       const mockUser: User = {
         id: "user_" + Date.now().toString(),
         username: credentials.username,

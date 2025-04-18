@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
 import Auth from './Auth';
 import { AppRoutes } from '@/utils/navigation';
-import { UserRole } from '@/types/user';
+import { User, UserRole } from '@/types/user';
 
 const AuthPage: React.FC = () => {
   const { user, login } = useAuth();
@@ -20,7 +20,7 @@ const AuthPage: React.FC = () => {
     await login('admin@example.com', 'password123');
     
     // This is just for demo purposes - normally login() would handle this
-    const mockAdmin = {
+    const mockAdmin: User = {
       id: 'admin-123',
       email: 'admin@example.com',
       username: 'admin',
@@ -37,7 +37,7 @@ const AuthPage: React.FC = () => {
     await login('user@example.com', 'password123');
     
     // This is just for demo purposes - normally login() would handle this
-    const mockUser = {
+    const mockUser: User = {
       id: 'user-123',
       email: 'user@example.com',
       username: 'demouser',
@@ -51,7 +51,7 @@ const AuthPage: React.FC = () => {
   
   const handleGuestExplore = () => {
     // For guest exploration without login
-    const mockGuest = {
+    const mockGuest: User = {
       id: 'guest-' + Date.now(),
       email: 'guest@example.com',
       username: 'guest',

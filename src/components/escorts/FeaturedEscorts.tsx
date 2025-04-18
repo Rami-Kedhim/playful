@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import EscortCard from './EscortCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Link } from 'react-router-dom';
 
 interface FeaturedEscortsProps {
   escorts: Escort[];

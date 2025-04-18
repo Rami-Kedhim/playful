@@ -23,3 +23,5 @@ export const AuthHeader: React.FC<AuthHeaderProps> = ({
     </div>
   );
 };
+
+export default AuthHeader;
