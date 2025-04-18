@@ -1,4 +1,5 @@
 
+// Define service type enum
 export enum ServiceType {
   IN_PERSON = 'in-person',
   VIRTUAL = 'virtual',
@@ -7,78 +8,79 @@ export enum ServiceType {
   DINNER = 'dinner'
 }
 
-export const ForbiddenTerms = [
-  'illegal',
-  'underage',
-  'trafficking',
-  'drugs',
-  'child',
-  'minor',
-  'weapons',
-  'force',
-  'unwilling',
-  'exploitation'
-];
+// Define filter rules
+export const filterRules = {
+  // Allowed service types based on platform policy
+  allowedServiceTypes: [
+    ServiceType.IN_PERSON,
+    ServiceType.VIRTUAL,
+    ServiceType.BOTH,
+    ServiceType.MASSAGE,
+    ServiceType.DINNER
+  ],
 
-export const remapUnsafeService = (term: string): ServiceType => {
-  // Check if the term contains any forbidden keywords and remap to a safe service type
-  const lowerTerm = term.toLowerCase();
+  // Terms that should be remapped to appropriate service types
+  remappings: {
+    // In-person remappings
+    physical: ServiceType.IN_PERSON,
+    real: ServiceType.IN_PERSON,
+    "in person": ServiceType.IN_PERSON,
+    
+    // Virtual remappings
+    online: ServiceType.VIRTUAL,
+    digital: ServiceType.VIRTUAL,
+    remote: ServiceType.VIRTUAL,
+    
+    // Both remappings
+    all: ServiceType.BOTH,
+    "in-person & virtual": ServiceType.BOTH,
+    "in person & virtual": ServiceType.BOTH,
+    
+    // Special services
+    "dinner date": ServiceType.DINNER
+  },
 
-  if (
-    lowerTerm.includes('massage') || 
-    lowerTerm.includes('spa') || 
-    lowerTerm.includes('therapy')
-  ) {
-    return ServiceType.MASSAGE;
-  }
-  
-  if (
-    lowerTerm.includes('dinner') ||
-    lowerTerm.includes('date') ||
-    lowerTerm.includes('companion')
-  ) {
-    return ServiceType.DINNER;
-  }
-  
-  if (
-    lowerTerm.includes('cam') ||
-    lowerTerm.includes('virtual') ||
-    lowerTerm.includes('online') ||
-    lowerTerm.includes('digital') ||
-    lowerTerm.includes('remote')
-  ) {
-    return ServiceType.VIRTUAL;
-  }
-  
-  return ServiceType.IN_PERSON;
+  // Terms that should be blocked
+  blockedTerms: [
+    "illegal",
+    "explicit",
+    "underage"
+  ]
 };
 
-export const isAllowedServiceType = (term: string): boolean => {
-  const lowerTerm = term.toLowerCase();
+// Utility function to check if a service type is allowed
+export const isServiceTypeAllowed = (type: string): boolean => {
+  return Object.values(ServiceType).includes(type as ServiceType);
+};
+
+// Utility function to safely format a service type
+export const formatServiceType = (
+  input: string, 
+  callback?: (original: string, remapped: ServiceType) => void
+): ServiceType | '' => {
+  // Check if it's already a valid service type
+  if (isServiceTypeAllowed(input)) {
+    return input as ServiceType;
+  }
   
-  // Check against forbidden terms
-  for (const forbidden of ForbiddenTerms) {
-    if (lowerTerm.includes(forbidden)) {
-      return false;
+  // Check if it's in the remappings
+  const remapped = filterRules.remappings[input.toLowerCase() as keyof typeof filterRules.remappings];
+  if (remapped) {
+    if (callback) {
+      callback(input, remapped);
     }
+    return remapped;
   }
   
-  return true;
+  // Check if it contains blocked terms
+  if (filterRules.blockedTerms.some(term => 
+    input.toLowerCase().includes(term.toLowerCase())
+  )) {
+    return '';
+  }
+  
+  // Return empty if no match
+  return '';
 };
 
-export const getServiceTypeDescription = (type: ServiceType): string => {
-  switch (type) {
-    case ServiceType.IN_PERSON:
-      return 'In-person services and appointments';
-    case ServiceType.VIRTUAL:
-      return 'Online and digital services only';
-    case ServiceType.BOTH:
-      return 'Offers both in-person and virtual services';
-    case ServiceType.MASSAGE:
-      return 'Massage and wellness services';
-    case ServiceType.DINNER:
-      return 'Companionship for dining and events';
-    default:
-      return 'Service type not specified';
-  }
-};
+export default { ServiceType, filterRules, isServiceTypeAllowed, formatServiceType };

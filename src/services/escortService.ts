@@ -1,91 +1,89 @@
 
 import { Escort, ContactInfo } from '@/types/escort';
-import { mockEscortProfiles } from '@/data/mockData'; 
+import { generateRandomEscort } from '@/data/mock/profileGenerator';
 
-// Mock implementation of escort service
-const escortService = {
-  getEscorts: async (filters: any = {}) => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    let filteredEscorts = [...mockEscortProfiles];
-    
-    // Apply filters
-    if (filters.gender) {
-      filteredEscorts = filteredEscorts.filter(escort => 
-        escort.gender === filters.gender
-      );
-    }
-    
-    if (filters.minPrice) {
-      filteredEscorts = filteredEscorts.filter(escort => 
-        (escort.price || 0) >= filters.minPrice
-      );
-    }
-    
-    if (filters.maxPrice) {
-      filteredEscorts = filteredEscorts.filter(escort => 
-        (escort.price || 0) <= filters.maxPrice
-      );
-    }
-    
-    if (filters.location) {
-      filteredEscorts = filteredEscorts.filter(escort => 
-        escort.location?.toLowerCase().includes(filters.location.toLowerCase())
-      );
-    }
-    
-    if (filters.verifiedOnly) {
-      filteredEscorts = filteredEscorts.filter(escort => 
-        escort.isVerified
-      );
-    }
-    
-    // Pagination
-    const page = filters.page || 1;
-    const limit = filters.limit || 10;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedEscorts = filteredEscorts.slice(startIndex, endIndex);
-    
-    return {
-      escorts: paginatedEscorts,
-      totalPages: Math.ceil(filteredEscorts.length / limit),
-      currentPage: page,
-      total: filteredEscorts.length
-    };
-  },
-  
-  getEscortById: async (id: string): Promise<Escort | null> => {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const escort = mockEscortProfiles.find(escort => escort.id === id);
-    return escort || null;
-  },
-  
-  updateEscortProfile: async (id: string, updates: Partial<Escort>): Promise<Escort | null> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Find the escort by ID
-    const escortIndex = mockEscortProfiles.findIndex(escort => escort.id === id);
-    
-    if (escortIndex === -1) {
-      throw new Error('Escort not found');
-    }
-    
-    // Update the escort
-    const updatedEscort = {
-      ...mockEscortProfiles[escortIndex],
-      ...updates
-    };
-    
-    // Update in the mock array
-    mockEscortProfiles[escortIndex] = updatedEscort;
-    
-    return updatedEscort;
-  }
+// Mock escort data
+const mockEscorts: Escort[] = [
+  // Mocked data will be provided by generateRandomEscort function
+];
+
+// Populate some initial data
+for (let i = 0; i < 10; i++) {
+  mockEscorts.push(generateRandomEscort(`mock-escort-${i}`));
+}
+
+// Get all escorts
+export const getAllEscorts = async (): Promise<Escort[]> => {
+  return mockEscorts;
 };
 
-export default escortService;
+// Get escort by ID
+export const getEscortById = async (id: string): Promise<Escort | undefined> => {
+  return mockEscorts.find(escort => escort.id === id);
+};
+
+// Create a new escort
+export const createEscort = async (escort: Partial<Escort>): Promise<Escort> => {
+  const newEscort: Escort = {
+    id: `escort-${Date.now()}`,
+    name: escort.name || 'Anonymous',
+    age: escort.age || 25,
+    gender: escort.gender || 'female',
+    location: escort.location || 'New York',
+    bio: escort.bio || 'No bio provided',
+    price: escort.price || 200,
+    rating: escort.rating || 4.5,
+    services: escort.services || [],
+    images: escort.images || [],
+    isVerified: escort.isVerified || false,
+    contactInfo: escort.contactInfo || { email: 'escort@example.com' },
+    featured: false
+  };
+
+  mockEscorts.push(newEscort);
+  return newEscort;
+};
+
+// Update escort by ID
+export const updateEscort = async (id: string, updates: Partial<Escort>): Promise<Escort | undefined> => {
+  const index = mockEscorts.findIndex(escort => escort.id === id);
+  if (index === -1) return undefined;
+
+  const updatedEscort = { ...mockEscorts[index], ...updates };
+  mockEscorts[index] = updatedEscort;
+  return updatedEscort;
+};
+
+// Delete escort by ID
+export const deleteEscort = async (id: string): Promise<boolean> => {
+  const index = mockEscorts.findIndex(escort => escort.id === id);
+  if (index === -1) return false;
+
+  mockEscorts.splice(index, 1);
+  return true;
+};
+
+// Get featured escorts
+export const getFeaturedEscorts = async (): Promise<Escort[]> => {
+  return mockEscorts.filter(escort => escort.featured);
+};
+
+// Search escorts
+export const searchEscorts = async (query: string): Promise<Escort[]> => {
+  const lowerQuery = query.toLowerCase();
+  return mockEscorts.filter(escort => 
+    escort.name.toLowerCase().includes(lowerQuery) || 
+    escort.bio.toLowerCase().includes(lowerQuery) ||
+    escort.services.some(service => service.toLowerCase().includes(lowerQuery))
+  );
+};
+
+export default {
+  getAllEscorts,
+  getEscortById,
+  createEscort,
+  updateEscort,
+  deleteEscort,
+  getFeaturedEscorts,
+  searchEscorts
+};

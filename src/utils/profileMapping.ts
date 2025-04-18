@@ -1,96 +1,104 @@
 
-import { Escort } from "@/types/escort";
-import { UberPersona } from "@/types/uberPersona";
+import { Escort } from '@/types/escort';
 
-/**
- * Maps a legacy Escort object to the new UberPersona structure
- */
-export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
-  // Extract base profile data
-  const baseProfile = {
+export interface MappedProfile {
+  id: string;
+  name: string;
+  displayName: string;
+  username?: string;
+  bio: string;
+  images: string[];
+  age: number;
+  location: string;
+  tags: string[];
+  verificationLevel: string;
+  profileType: 'verified' | 'ai' | 'provisional' | 'scraped';
+  rating: number;
+  price: number;
+  availability: {
+    isAvailable: boolean;
+    nextAvailable?: string;
+  };
+  services: string[];
+  stats: {
+    views: number;
+    likes: number;
+    followers: number;
+  };
+  socialLinks?: {
+    instagram?: string;
+    twitter?: string;
+    website?: string;
+  };
+  contactInfo: {
+    email?: string;
+    phone?: string;
+  };
+  isFavorited: boolean;
+  lastActive?: string;
+}
+
+export const mapEscortToProfile = (escort: Escort): MappedProfile => {
+  // Define profile type
+  let profileType: 'verified' | 'ai' | 'provisional' | 'scraped' = 'provisional';
+  
+  if (escort.profileType) {
+    profileType = escort.profileType;
+  } else {
+    if (escort.isVerified) {
+      profileType = 'verified';
+    } else if (escort.isAI) {
+      profileType = 'ai';
+    } else if (escort.isScraped) {
+      profileType = 'scraped';
+    }
+  }
+  
+  return {
     id: escort.id,
-    username: escort.name?.toLowerCase().replace(/\s/g, '_') || `escort_${escort.id.substring(0, 8)}`,
-    displayName: escort.name || 'Unnamed',
-    avatarUrl: escort.imageUrl || escort.avatar_url || '',
-    location: escort.location || '',
-    language: escort.languages?.[0] || 'English',
+    name: escort.name,
+    displayName: escort.name,
     bio: escort.bio || escort.description || '',
-    age: escort.age || 0,
-    ethnicity: escort.ethnicity || '',
-    tags: [...(escort.tags || []), ...(escort.services || [])],
-    createdAt: new Date(),  // Default to current date if not provided
-    updatedAt: new Date(),  // Default to current date if not provided
+    images: escort.images || escort.gallery || [],
+    age: escort.age,
+    location: escort.location,
+    tags: escort.tags || escort.services || [],
+    verificationLevel: escort.verificationLevel || (escort.isVerified ? 'verified' : 'unverified'),
+    profileType,
+    rating: escort.rating || 0,
+    price: escort.price,
+    availability: {
+      isAvailable: escort.availableNow || false,
+      nextAvailable: escort.availability?.nextAvailable
+    },
+    services: escort.services || [],
+    stats: {
+      views: Math.floor(Math.random() * 1000),
+      likes: Math.floor(Math.random() * 100),
+      followers: Math.floor(Math.random() * 50)
+    },
+    contactInfo: {
+      email: escort.contactInfo?.email,
+      phone: escort.contactInfo?.phone
+    },
+    isFavorited: escort.isFavorited || false,
+    lastActive: escort.lastActive
   };
-  
-  // Extract role flags
-  const roleFlags = {
-    isEscort: true,
-    isCreator: false,
-    isLivecam: false,
-    isAI: escort.isAI || false,
-    isVerified: escort.verified || false,
-    isFeatured: escort.featured || false
-  };
-  
-  // Extract capabilities
-  const capabilities = {
-    hasPhotos: false,
-    hasVideos: false,
-    hasStories: false,
-    hasChat: true,
-    hasBooking: true,
-    hasLiveStream: false,
-    hasExclusiveContent: false
-  };
-  
-  // Extract monetization
-  const monetization = {
-    acceptsLucoin: true,
-    acceptsTips: true,
-    subscriptionPrice: escort.subscriptionPrice || undefined,
-    unlockingPrice: escort.price,
-    boostingActive: escort.boostLevel ? escort.boostLevel > 0 : false
-  };
-  
-  // Return the complete UberPersona
+};
+
+export const mapProfileToSearchResult = (profile: MappedProfile) => {
   return {
-    ...baseProfile,
-    roleFlags,
-    capabilities,
-    monetization
+    id: profile.id,
+    name: profile.name,
+    age: profile.age,
+    location: profile.location,
+    image: profile.images[0] || '',
+    rating: profile.rating,
+    price: profile.price,
+    isVerified: profile.profileType === 'verified',
+    isAvailable: profile.availability.isAvailable,
+    tags: profile.tags.slice(0, 3)
   };
 };
 
-/**
- * Maps an array of Escorts to UberPersona objects
- */
-export const mapEscortsToUberPersonas = (escorts: Escort[]): UberPersona[] => {
-  return escorts.map(mapEscortToUberPersona);
-};
-
-export const getProfileType = (profile: Escort): 'scraped' | 'manual' | 'ai_enhanced' => {
-  if (profile.isScraped || profile.profileType === 'scraped') return 'scraped';
-  if (profile.isAI || profile.profileType === 'ai') return 'ai_enhanced';
-  return 'manual';
-};
-
-export const mapProfileToType = (profileData: any): any => {
-  return {
-    id: profileData.id,
-    username: profileData.username,
-    displayName: profileData.displayName,
-    avatarUrl: profileData.avatarUrl,
-    location: profileData.location,
-    language: profileData.language,
-    bio: profileData.bio,
-    age: profileData.age,
-    ethnicity: profileData.ethnicity,
-    tags: profileData.tags,
-    createdAt: profileData.createdAt,
-    updatedAt: profileData.updatedAt,
-    sourceType: profileData.sourceType || 'manual',
-    roleFlags: profileData.roleFlags,
-    capabilities: profileData.capabilities,
-    monetization: profileData.monetization,
-  };
-};
+export default { mapEscortToProfile, mapProfileToSearchResult };

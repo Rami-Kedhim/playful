@@ -35,7 +35,7 @@ export interface Escort {
   verification_level?: string;
   hasContent?: boolean;
   hasLiveStream?: boolean;
-  profileType?: 'verified' | 'ai' | 'provisional';
+  profileType?: 'verified' | 'ai' | 'provisional' | 'scraped';
   orientation?: string;
   bodyType?: string;
   height?: number;
