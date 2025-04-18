@@ -1,4 +1,3 @@
-
 import React from 'react';
 import SuperlativeBrainHub from './SuperlativeBrainHub';
 import { Separator } from '@/components/ui/separator';
@@ -22,7 +21,7 @@ const BrainHubDashboard: React.FC = () => {
       },
       createdAt: new Date(),
       updatedAt: new Date(),
-      specialization: ['cognitive analysis']
+      specialization: 'cognitive analysis'
     }
   ];
 

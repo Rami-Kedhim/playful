@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
 
-interface BadgeStyleProps {
+// Export ServiceTypeFilter type
+export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | 'in-person' | 'both' | '';
+
+export interface BadgeStyleProps {
   label: string;
   color: string;
   colorDark: string;
@@ -32,6 +34,20 @@ export const getServiceTypeBadgeLabel = (serviceType: ServiceTypeFilter): BadgeS
         color: 'bg-green-100 text-green-800',
         colorDark: 'dark:bg-green-900 dark:text-green-100',
         icon: 'video'
+      };
+    case 'in-person':
+      return {
+        label: 'In Person',
+        color: 'bg-blue-100 text-blue-800',
+        colorDark: 'dark:bg-blue-900 dark:text-blue-100',
+        icon: 'user'
+      };
+    case 'both':
+      return {
+        label: 'Both',
+        color: 'bg-purple-100 text-purple-800',
+        colorDark: 'dark:bg-purple-900 dark:text-purple-100',
+        icon: 'layers'
       };
     case 'all':
     default:

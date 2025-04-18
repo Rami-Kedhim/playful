@@ -65,4 +65,5 @@ export interface UberPersona {
     acceptsLucoin?: boolean;
   };
   isOnline?: boolean;
+  profileType?: string;
 }

@@ -1,12 +1,13 @@
 
 import React, { createContext, useContext, useState } from 'react';
-
-// Define and export the ServiceTypeFilter type 
-export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | '';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 export interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
   setServiceType: (type: ServiceTypeFilter) => void;
+  specializedServiceTypes?: string[];
+  selectedSpecializedTypes?: string[];
+  toggleSpecializedType?: (type: string) => void;
 }
 
 const ServiceTypeContext = createContext<ServiceTypeContextType>({
@@ -16,9 +17,36 @@ const ServiceTypeContext = createContext<ServiceTypeContextType>({
 
 export const ServiceTypeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>('all');
+  const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
+  
+  // Sample specialized service types
+  const specializedServiceTypes = [
+    "Massage",
+    "Dinner Date",
+    "Travel Companion",
+    "BDSM",
+    "Roleplay",
+    "Couples",
+    "Groups",
+    "Fetish"
+  ];
+  
+  const toggleSpecializedType = (type: string) => {
+    setSelectedSpecializedTypes(prev => 
+      prev.includes(type) 
+        ? prev.filter(t => t !== type) 
+        : [...prev, type]
+    );
+  };
 
   return (
-    <ServiceTypeContext.Provider value={{ serviceType, setServiceType }}>
+    <ServiceTypeContext.Provider value={{ 
+      serviceType, 
+      setServiceType,
+      specializedServiceTypes,
+      selectedSpecializedTypes,
+      toggleSpecializedType
+    }}>
       {children}
     </ServiceTypeContext.Provider>
   );

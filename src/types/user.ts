@@ -18,9 +18,18 @@ export interface UserProfile {
   location: string;
   bio: string;
   isVerified: boolean;
-  website: string; // Added website property
+  website: string;
   avatarUrl: string;
   joinedDate: Date;
   avatar_url: string;
-  phone: string; // Added phone property
+  phone: string;
+}
+
+// Add AuthResult type needed for SignInForm and SignUpForm
+export interface AuthResult {
+  success: boolean;
+  message?: string;
+  user?: User;
+  token?: string;
+  error?: string;
 }
