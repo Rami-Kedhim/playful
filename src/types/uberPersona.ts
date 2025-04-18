@@ -1,4 +1,9 @@
 
+/**
+ * UberPersona Type Definition
+ * Unified representation of all entities in the Uber ecosystem
+ */
+
 export interface RoleFlags {
   isEscort: boolean;
   isCreator: boolean;
@@ -20,6 +25,8 @@ export interface Capabilities {
   hasContent?: boolean;
   hasRealMeets?: boolean;
   hasVirtualMeets?: boolean;
+  hasMetaversePresence?: boolean;
+  hasAICompanion?: boolean;
 }
 
 export interface Monetization {
@@ -29,6 +36,12 @@ export interface Monetization {
   unlockingPrice?: number;
   boostingActive?: boolean;
   meetingPrice?: number;
+  contentPrices?: {
+    photos?: number;
+    videos?: number;
+    stories?: number;
+    metaverseAccess?: number;
+  };
 }
 
 export interface SystemMetadata {
@@ -39,6 +52,11 @@ export interface SystemMetadata {
   aiEngine?: string;
   tagsGeneratedByAI: boolean;
   hilbertSpaceVector?: number[]; // For advanced mathematical positioning in the ecosystem
+  hilbertCluster?: string;
+  similarityScore?: number;
+  boostScore?: number;
+  qualityScore?: number;
+  relevanceScore?: number;
 }
 
 export interface UberPersona {
@@ -58,6 +76,28 @@ export interface UberPersona {
   capabilities: Capabilities;
   monetization: Monetization;
   systemMetadata?: SystemMetadata;
+  stats?: {
+    rating: number;
+    reviewCount: number;
+    responseRate: number;
+    viewCount: number;
+    favoriteCount: number;
+    bookingCount?: number;
+  };
+  website?: string;
+  socialLinks?: {
+    instagram?: string;
+    twitter?: string;
+    onlyfans?: string;
+    tiktok?: string;
+    snapchat?: string;
+  };
+  availability?: {
+    schedule: Record<string, boolean>;
+    customHours?: Record<string, string>;
+    timezone: string;
+    availableNow: boolean;
+  };
   // Legacy compatibility fields
   name?: string;
   image?: string;

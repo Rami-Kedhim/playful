@@ -1,400 +1,375 @@
 
-import { ubxEmoService, UbxEmoService } from './modules/UbxEmoService';
-import { ubxEthicsService, UbxEthicsService } from './modules/UbxEthicsService';
-import { ubxBridgeService, UbxBridgeService } from './modules/UbxBridgeService';
-import { oxumLearningService, OxumLearningService } from './modules/OxumLearningService';
+import { UberCoreSettings, UberSearchFilters, HilbertSpacePosition } from '@/types/uber-ecosystem';
+import { UberPersona } from '@/types/uberPersona';
+import { mapEscortToUberPersona, mapCreatorToUberPersona, mapLivecamToUberPersona } from '@/utils/profileMapping';
+import { Escort } from '@/types/escort';
+import { ContentCreator } from '@/types/creator';
+import { LivecamModel } from '@/types/livecam';
 
 /**
- * UberCore Configuration
+ * UberCore - The central neural service for the Uber ecosystem
+ * Manages integration between escorts, content creators, livecams, and AI companions
+ * in a unified Hilbert space representation
  */
-interface UberCoreConfig {
-  enabledModules: {
-    logic: boolean;
-    emotional: boolean;
-    ethics: boolean;
-    bridge: boolean;
+class UberCoreService {
+  private initialized = false;
+  private settings: UberCoreSettings = {
+    boostingEnabled: true,
+    boostingAlgorithm: 'OxumAlgorithm',
+    orderByBoost: true,
+    autonomyLevel: 65,
+    resourceAllocation: 80,
+    hilbertDimension: 8,
+    aiEnhancementLevel: 40
   };
-  performanceMode: 'balanced' | 'efficiency' | 'quality';
-  loggingLevel: 'debug' | 'info' | 'warning' | 'error';
-  memoryRetention: 'minimal' | 'standard' | 'extended';
-}
-
-/**
- * Processing context interface to avoid TypeScript errors
- */
-interface ProcessingContext {
-  userId: string;
-  timestamp: Date;
-  sessionId: string;
-  source?: string;
-  emotionalState?: {
-    dominantEmotion: string;
-    emotionIntensity: number;
-    emotionVector: Record<string, number>;
-  };
-  recommendedAdaptation?: {
-    tone: string;
-    visualMode: string;
-    contentPriority: string;
-  };
-  hilbertCoordinates?: number[]; // Position in Hilbert space
-  [key: string]: any; // Allow additional properties
-}
-
-/**
- * UberCore - Unified AI Architecture for UberEscorts
- * Integrates UBX_Logic, UBX_Emo, UBX_Ethics modules through UBX_Bridge
- */
-class UberCore {
-  // Core modules
-  public readonly logic: OxumLearningService;
-  public readonly emotional: UbxEmoService;
-  public readonly ethics: UbxEthicsService;
-  public readonly bridge: UbxBridgeService;
   
-  private config: UberCoreConfig;
-  private initialized: boolean = false;
-  private startTime: Date | null = null;
-  
-  constructor() {
-    // Initialize core modules
-    this.logic = oxumLearningService;
-    this.emotional = ubxEmoService;
-    this.ethics = ubxEthicsService;
-    this.bridge = ubxBridgeService;
-    
-    // Set default configuration
-    this.config = {
-      enabledModules: {
-        logic: true,
-        emotional: true,
-        ethics: true,
-        bridge: true
-      },
-      performanceMode: 'balanced',
-      loggingLevel: 'info',
-      memoryRetention: 'standard'
-    };
-  }
+  private personaCache: Map<string, UberPersona> = new Map();
+  private hilbertSpace: Map<string, HilbertSpacePosition> = new Map();
   
   /**
-   * Initialize the UberCore system
+   * Initialize the UberCore service
    */
   public async initialize(): Promise<boolean> {
-    if (this.initialized) {
-      console.log('UberCore is already initialized');
-      return true;
-    }
+    if (this.initialized) return true;
     
-    console.log('Initializing UberCore Architecture...');
-    this.startTime = new Date();
+    console.log("Initializing UberCore Neural Service...");
     
-    try {
-      // Initialize the event bridge first
-      if (this.config.enabledModules.bridge) {
-        await this.bridge.initialize();
-      }
-      
-      // Initialize core modules
-      if (this.config.enabledModules.logic) {
-        await this.logic.initialize();
-      }
-      
-      if (this.config.enabledModules.emotional) {
-        await this.emotional.initialize();
-      }
-      
-      if (this.config.enabledModules.ethics) {
-        await this.ethics.initialize();
-      }
-      
-      // Register cross-module event handlers
-      this.registerEventHandlers();
-      
-      // Publish initialization complete event
-      this.bridge.publish(
-        'system:initialized',
-        'ubercore',
-        {
-          timestamp: new Date(),
-          modules: Object.entries(this.config.enabledModules)
-            .filter(([, enabled]) => enabled)
-            .map(([module]) => module)
-        },
-        {
-          systemVersion: '1.0.0',
-          performanceMode: this.config.performanceMode
-        },
-        'high'
-      );
-      
-      this.initialized = true;
-      console.log('UberCore Architecture initialized successfully');
-      return true;
-    } catch (error) {
-      console.error('Error initializing UberCore:', error);
-      return false;
-    }
+    // Initialize Hilbert space
+    this.initializeHilbertSpace();
+    
+    this.initialized = true;
+    return true;
   }
   
   /**
-   * Register event handlers between modules
+   * Initialize the Hilbert space for entity positioning
    */
-  private registerEventHandlers(): void {
-    // Logic module events
-    this.bridge.subscribe('logic:pattern_detected', (event) => {
-      // Process pattern with emotional context
-      const emotionalContext = this.emotional.getUserEmotionalProfile(event.payload.userId);
-      if (emotionalContext) {
-        this.logic.processInput(event.payload.pattern, { 
-          ...event.payload.context, 
-          emotionalContext,
-          hilbertCoordinates: this.calculateHilbertCoordinates(event.payload)
-        });
-      }
-    });
-    
-    // Emotional module events
-    this.bridge.subscribe('emotional:state_changed', (event) => {
-      // Verify ethical compliance of adaptation
-      const assessment = this.ethics.evaluateInteraction({
-        userId: event.payload.userId,
-        interactionType: 'emotional_adaptation',
-        patterns: [event.payload.emotionalState.dominantEmotion],
-        context: event.payload
-      });
-      
-      if (assessment.isCompliant) {
-        // Publish approved emotional adaptation
-        this.bridge.publish(
-          'system:adaptation_required',
-          'emotional',
-          {
-            userId: event.payload.userId,
-            adaptationType: 'interface',
-            parameters: event.payload.recommendedAdaptation,
-            hilbertCoordinates: this.calculateHilbertCoordinates(event.payload)
-          }
-        );
-      } else {
-        console.warn('Emotional adaptation blocked by ethics module:', assessment.violatedGuidelines);
-      }
-    });
-    
-    // Ethics module events
-    this.bridge.subscribe('ethics:violation_detected', (event) => {
-      // High priority event for violations
-      this.bridge.publish(
-        'system:ethics_violation',
-        'ethics',
-        {
-          violation: event.payload.violatedGuidelines,
-          severity: event.payload.severityLevel,
-          actions: event.payload.recommendedActions,
-          hilbertCoordinates: event.payload.hilbertCoordinates || this.calculateDefaultHilbertCoordinates()
-        },
-        {},
-        'high'
-      );
-    });
+  private initializeHilbertSpace(): void {
+    console.log(`Creating Hilbert space with dimension ${this.settings.hilbertDimension}`);
+    // Additional setup for Hilbert space would go here
   }
   
   /**
-   * Calculate Hilbert space coordinates for positioning in ecosystem
-   * Uses mathematical algorithms to optimize and position entities in the Uber ecosystem
-   */
-  private calculateHilbertCoordinates(context: any): number[] {
-    // Implementation of Hilbert space mapping algorithm
-    // This creates a mathematical model for organizing the Uber ecosystem
-    const userId = context.userId || '';
-    const timestamp = context.timestamp || new Date();
-    const emotionalVector = context.emotionalState?.emotionVector || {};
-    
-    // Create a seed from user and time
-    const seed = userId.charCodeAt(0) || 0 + timestamp.getTime();
-    
-    // Generate a 4D vector representation in Hilbert space
-    const x = Math.sin(seed * 0.1) * 0.5 + 0.5;
-    const y = Math.cos(seed * 0.1) * 0.5 + 0.5;
-    const z = Math.sin(seed * 0.2) * 0.5 + 0.5;
-    const t = Math.cos(seed * 0.2) * 0.5 + 0.5;
-    
-    // Add emotional influence if available
-    const emotionalInfluence = Object.values(emotionalVector).reduce((sum, val) => sum + val, 0) / 
-                              (Object.values(emotionalVector).length || 1);
-    
-    // Return Hilbert coordinates with emotional weighting
-    return [
-      x + (emotionalInfluence * 0.1),
-      y + (emotionalInfluence * 0.1),
-      z,
-      t
-    ];
-  }
-  
-  /**
-   * Calculate default Hilbert coordinates
-   */
-  private calculateDefaultHilbertCoordinates(): number[] {
-    return [0.5, 0.5, 0.5, 0.5];
-  }
-  
-  /**
-   * Process user input through the UberCore architecture
-   * @param userId User identifier
-   * @param input User input
-   * @param context Additional context
-   * @returns Processing result
-   */
-  public async processUserInput(
-    userId: string,
-    input: string,
-    context?: Record<string, any>
-  ): Promise<Record<string, any>> {
-    if (!this.initialized) {
-      await this.initialize();
-    }
-    
-    // Create cross-module context with the proper type
-    const processingContext: ProcessingContext = {
-      userId,
-      timestamp: new Date(),
-      sessionId: context?.sessionId || `session-${Date.now()}`,
-      hilbertCoordinates: context?.hilbertCoordinates || this.calculateDefaultHilbertCoordinates(),
-      ...context
-    };
-    
-    // 1. Ethical pre-check
-    const ethicsCheck = this.ethics.evaluateContent({
-      userId,
-      content: input,
-      contentType: 'text',
-      context: processingContext
-    });
-    
-    // Block processing if ethics check fails
-    if (!ethicsCheck.isCompliant) {
-      return {
-        success: false,
-        blocked: true,
-        reason: 'Ethics violation detected',
-        details: ethicsCheck,
-        output: null
-      };
-    }
-    
-    // 2. Detect emotional signals
-    const emotionalResult = this.emotional.processInteraction(
-      userId,
-      { text: input },
-      processingContext
-    );
-    
-    // Update context with emotional state
-    processingContext.emotionalState = emotionalResult.emotionalState;
-    processingContext.recommendedAdaptation = emotionalResult.recommendedAdaptation;
-    
-    // 3. Process input through logic module
-    const logicResult = this.logic.processInput(input, processingContext);
-    
-    // 4. Publish event with results
-    this.bridge.publish(
-      'system:input_processed',
-      'ubercore',
-      {
-        userId,
-        input: input.substring(0, 50) + (input.length > 50 ? '...' : ''),
-        emotionalState: emotionalResult.emotionalState.dominantEmotion,
-        adaptations: emotionalResult.recommendedAdaptation,
-        outputConfidence: logicResult.confidenceScore,
-        hilbertCoordinates: processingContext.hilbertCoordinates
-      }
-    );
-    
-    return {
-      success: true,
-      output: logicResult.enhancedOutput,
-      emotionalState: emotionalResult.emotionalState,
-      uiAdaptation: emotionalResult.recommendedAdaptation,
-      confidence: logicResult.confidenceScore,
-      ethicsScore: ethicsCheck.score,
-      context: logicResult.culturalContext,
-      hilbertCoordinates: processingContext.hilbertCoordinates
-    };
-  }
-  
-  /**
-   * Set UberCore configuration
-   */
-  public configure(config: Partial<UberCoreConfig>): void {
-    this.config = {
-      ...this.config,
-      ...config
-    };
-    
-    console.log('UberCore configuration updated:', this.config);
-  }
-  
-  /**
-   * Get system status
-   */
-  public getStatus(): Record<string, any> {
-    const moduleStatuses = {
-      logic: this.logic.getConfig().enabled,
-      emotional: this.emotional.getStatus().enabled,
-      ethics: this.ethics.getMetrics().enabled,
-      bridge: this.bridge.getConfig().enabled
-    };
-    
-    return {
-      initialized: this.initialized,
-      uptime: this.startTime ? Math.floor((new Date().getTime() - this.startTime.getTime()) / 1000) : 0,
-      moduleStatuses,
-      activeModules: this.bridge.getActiveModules(),
-      eventCount: Object.values(this.bridge.getEventStats())
-        .reduce((total, stat) => total + stat.count, 0),
-      performanceMode: this.config.performanceMode,
-      patternsLearned: this.logic.getLearnedPatterns().length,
-      emotionalProfilesCount: Object.keys(this.emotional.getAllEmotionalProfiles()).length,
-      ethicalGuidelinesCount: Object.keys(this.ethics.getEthicalGuidelines()).length,
-      hilbertSpaceDimension: 4 // Default Hilbert space dimension
-    };
-  }
-  
-  /**
-   * Shutdown the UberCore system
+   * Shutdown the UberCore service
    */
   public async shutdown(): Promise<void> {
-    if (!this.initialized) {
-      console.log('UberCore is not initialized');
-      return;
+    console.log("Shutting down UberCore Neural Service...");
+    this.personaCache.clear();
+    this.hilbertSpace.clear();
+    this.initialized = false;
+  }
+  
+  /**
+   * Boost a profile based on system parameters
+   */
+  public boostProfile(persona: UberPersona): UberPersona {
+    if (!this.settings.boostingEnabled) return persona;
+    
+    // Calculate boost score based on metadata
+    const boostScore = this.calculateBoostScore(persona);
+    
+    // Apply boost to persona
+    const boostedPersona = {
+      ...persona,
+      systemMetadata: {
+        ...(persona.systemMetadata || { tagsGeneratedByAI: false }),
+        boostScore
+      }
+    };
+    
+    return boostedPersona;
+  }
+  
+  /**
+   * Calculate a boost score for a profile
+   */
+  private calculateBoostScore(persona: UberPersona): number {
+    // Base score
+    let score = 1.0;
+    
+    // Add boost factors based on profile attributes
+    if (persona.roleFlags.isVerified) score *= 1.2;
+    if (persona.roleFlags.isFeatured) score *= 1.5;
+    if (persona.stats?.rating && persona.stats.rating > 4.5) score *= 1.3;
+    if (persona.stats?.reviewCount && persona.stats.reviewCount > 10) score *= 1.1;
+    if (persona.capabilities.hasLiveStream && persona.roleFlags.isLivecam) score *= 1.4;
+    if (persona.capabilities.hasExclusiveContent) score *= 1.2;
+    
+    // Normalize score between 1.0 and 5.0
+    return Math.min(5.0, Math.max(1.0, score));
+  }
+  
+  /**
+   * Convert an entity to an UberPersona
+   */
+  public convertToUberPersona(entity: any): UberPersona | null {
+    if (!entity) return null;
+    
+    // Check if already cached
+    if (entity.id && this.personaCache.has(entity.id)) {
+      return this.personaCache.get(entity.id)!;
     }
     
-    console.log('Shutting down UberCore...');
+    let persona: UberPersona | null = null;
     
-    // Publish shutdown event
-    this.bridge.publish(
-      'system:shutdown',
-      'ubercore',
-      {
-        timestamp: new Date(),
-        uptime: this.startTime ? Math.floor((new Date().getTime() - this.startTime.getTime()) / 1000) : 0
-      },
-      {},
-      'critical'
-    );
+    // Detect entity type and map accordingly
+    if (entity.services && entity.images) {
+      persona = mapEscortToUberPersona(entity as Escort);
+    } else if (entity.contentCount || entity.isPremium) {
+      persona = mapCreatorToUberPersona(entity as ContentCreator);
+    } else if (entity.isStreaming || entity.viewerCount) {
+      persona = mapLivecamToUberPersona(entity as LivecamModel);
+    }
     
-    // Allow time for critical event processing
-    await new Promise(resolve => setTimeout(resolve, 100));
+    if (persona) {
+      // Position in Hilbert space
+      const hilbertPosition = this.getHilbertPosition(persona);
+      
+      // Update with Hilbert coordinates
+      persona.systemMetadata = {
+        ...(persona.systemMetadata || { tagsGeneratedByAI: false }),
+        hilbertSpaceVector: hilbertPosition.coordinates
+      };
+      
+      // Cache the persona
+      this.personaCache.set(persona.id, persona);
+      
+      // Cache the Hilbert position
+      this.hilbertSpace.set(persona.id, hilbertPosition);
+    }
     
-    this.initialized = false;
-    this.startTime = null;
-    console.log('UberCore shutdown complete');
+    return persona;
+  }
+  
+  /**
+   * Calculate the Hilbert space position for an entity
+   */
+  private getHilbertPosition(persona: UberPersona): HilbertSpacePosition {
+    // Generate coordinates using persona attributes
+    const coordinates: number[] = [];
+    const dim = this.settings.hilbertDimension;
+    
+    // Seed from ID for stability
+    const seed = persona.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    // Generate base coordinates
+    for (let i = 0; i < dim; i++) {
+      coordinates.push(Math.sin(seed * (i + 1) * 0.1) * 0.5 + 0.5);
+    }
+    
+    // Modify coordinates based on persona attributes
+    if (persona.roleFlags.isEscort) coordinates[0] = Math.min(1, coordinates[0] * 1.5);
+    if (persona.roleFlags.isCreator) coordinates[1] = Math.min(1, coordinates[1] * 1.5);
+    if (persona.roleFlags.isLivecam) coordinates[2] = Math.min(1, coordinates[2] * 1.5);
+    if (persona.roleFlags.isAI) coordinates[3] = Math.min(1, coordinates[3] * 1.5);
+    
+    // Return position
+    return {
+      coordinates,
+      dimension: dim
+    };
+  }
+  
+  /**
+   * Find nearest neighbors in Hilbert space
+   */
+  public findNearestNeighbors(personaId: string, count: number = 5): UberPersona[] {
+    const targetPosition = this.hilbertSpace.get(personaId);
+    if (!targetPosition) return [];
+    
+    const distances: {id: string, distance: number}[] = [];
+    
+    // Calculate distances to all other points
+    for (const [id, position] of this.hilbertSpace.entries()) {
+      if (id === personaId) continue;
+      
+      const distance = this.calculateHilbertDistance(targetPosition.coordinates, position.coordinates);
+      distances.push({ id, distance });
+    }
+    
+    // Sort by distance and take top count
+    distances.sort((a, b) => a.distance - b.distance);
+    const nearestIds = distances.slice(0, count).map(item => item.id);
+    
+    // Return personas
+    return nearestIds
+      .map(id => this.personaCache.get(id))
+      .filter((p): p is UberPersona => p !== undefined);
+  }
+  
+  /**
+   * Calculate distance between points in Hilbert space
+   */
+  private calculateHilbertDistance(a: number[], b: number[]): number {
+    if (a.length !== b.length) {
+      throw new Error("Vectors must have same dimension");
+    }
+    
+    // Euclidean distance
+    let sum = 0;
+    for (let i = 0; i < a.length; i++) {
+      sum += Math.pow(a[i] - b[i], 2);
+    }
+    
+    return Math.sqrt(sum);
+  }
+  
+  /**
+   * Search across all personas with unified filters
+   */
+  public searchPersonas(filters: UberSearchFilters): UberPersona[] {
+    const results: UberPersona[] = [];
+    
+    // Apply filters to all personas in cache
+    for (const persona of this.personaCache.values()) {
+      if (this.matchesFilters(persona, filters)) {
+        results.push(persona);
+      }
+    }
+    
+    // Sort results if needed
+    if (filters.sortBy) {
+      this.sortResults(results, filters.sortBy, filters.sortDirection);
+    }
+    
+    return results;
+  }
+  
+  /**
+   * Check if a persona matches the given filters
+   */
+  private matchesFilters(persona: UberPersona, filters: UberSearchFilters): boolean {
+    // Check service types
+    if (filters.serviceTypes && filters.serviceTypes.length > 0) {
+      const matchesServiceType = filters.serviceTypes.some(serviceType => {
+        if (serviceType === 'in-person' && persona.capabilities.hasRealMeets) return true;
+        if (serviceType === 'virtual' && persona.capabilities.hasVirtualMeets) return true;
+        if (serviceType === 'content' && persona.capabilities.hasContent) return true;
+        return false;
+      });
+      
+      if (!matchesServiceType) return false;
+    }
+    
+    // Check price range
+    if (filters.minPrice !== undefined) {
+      const price = persona.monetization.meetingPrice || 
+                   persona.monetization.subscriptionPrice || 
+                   persona.price || 0;
+      if (price < filters.minPrice) return false;
+    }
+    
+    if (filters.maxPrice !== undefined) {
+      const price = persona.monetization.meetingPrice || 
+                   persona.monetization.subscriptionPrice || 
+                   persona.price || 0;
+      if (price > filters.maxPrice) return false;
+    }
+    
+    // Check location
+    if (filters.location && persona.location) {
+      if (!persona.location.toLowerCase().includes(filters.location.toLowerCase())) {
+        return false;
+      }
+    }
+    
+    // Check verification
+    if (filters.verifiedOnly && !persona.roleFlags.isVerified) {
+      return false;
+    }
+    
+    // Check availability
+    if (filters.availableNow && !persona.availability?.availableNow) {
+      return false;
+    }
+    
+    // Check age range
+    if (filters.ageRange) {
+      const age = persona.age || 0;
+      if (age < filters.ageRange.min || age > filters.ageRange.max) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Sort results based on criteria
+   */
+  private sortResults(
+    results: UberPersona[], 
+    sortBy: 'price' | 'rating' | 'popularity' | 'relevance' | 'boost',
+    sortDirection: 'asc' | 'desc' = 'desc'
+  ): void {
+    const direction = sortDirection === 'asc' ? 1 : -1;
+    
+    results.sort((a, b) => {
+      let aValue = 0;
+      let bValue = 0;
+      
+      switch (sortBy) {
+        case 'price':
+          aValue = a.monetization.meetingPrice || a.monetization.subscriptionPrice || a.price || 0;
+          bValue = b.monetization.meetingPrice || b.monetization.subscriptionPrice || b.price || 0;
+          break;
+        case 'rating':
+          aValue = a.stats?.rating || 0;
+          bValue = b.stats?.rating || 0;
+          break;
+        case 'popularity':
+          aValue = (a.stats?.favoriteCount || 0) + (a.stats?.viewCount || 0);
+          bValue = (b.stats?.favoriteCount || 0) + (b.stats?.viewCount || 0);
+          break;
+        case 'boost':
+          aValue = a.systemMetadata?.boostScore || 1;
+          bValue = b.systemMetadata?.boostScore || 1;
+          break;
+        case 'relevance':
+        default:
+          // Default relevance score (combination of factors)
+          aValue = (a.stats?.rating || 0) * 0.5 + (a.systemMetadata?.boostScore || 1) * 0.5;
+          bValue = (b.stats?.rating || 0) * 0.5 + (b.systemMetadata?.boostScore || 1) * 0.5;
+          break;
+      }
+      
+      return (aValue - bValue) * direction;
+    });
+  }
+  
+  /**
+   * Update UberCore settings
+   */
+  public updateSettings(newSettings: Partial<UberCoreSettings>): void {
+    this.settings = {
+      ...this.settings,
+      ...newSettings
+    };
+    
+    console.log("UberCore settings updated:", this.settings);
+  }
+  
+  /**
+   * Get current UberCore settings
+   */
+  public getSettings(): UberCoreSettings {
+    return { ...this.settings };
+  }
+  
+  /**
+   * Get system diagnostics
+   */
+  public getDiagnostics(): any {
+    return {
+      initialized: this.initialized,
+      personaCacheSize: this.personaCache.size,
+      hilbertSpaceSize: this.hilbertSpace.size,
+      settings: this.settings,
+      memoryUsage: process.memoryUsage?.() || { heapUsed: 0 },
+      uptime: process.uptime?.() || 0
+    };
   }
 }
 
-// Export singleton instance
-export const uberCore = new UberCore();
-
-// Export the class for typing and extending
-export { UberCore };
+// Create and export singleton instance
+export const uberCore = new UberCoreService();

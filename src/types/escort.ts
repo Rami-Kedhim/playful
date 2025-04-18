@@ -26,6 +26,18 @@ export interface Escort {
   isVerified: boolean;
   featured: boolean;
   contactInfo: ContactInfo;
+  // Properties required by components
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  sexualOrientation?: string;
+  lastActive?: Date | string;
+  responseRate?: number;
+  avatar?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
+  gallery_images?: string[];
+  videos?: string[];
+  verificationLevel?: 'none' | 'basic' | 'enhanced' | 'premium';
   // Optional properties
   availableNow?: boolean;
   imageUrl?: string;
@@ -75,4 +87,29 @@ export interface EscortFilterOptions {
   verified?: boolean;
   sortBy?: 'rating' | 'price' | 'age' | 'popularity';
   sortOrder?: 'asc' | 'desc';
+}
+
+// Additional types needed for booking functionality
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
+  REJECTED = 'rejected'
+}
+
+export interface Booking {
+  id: string;
+  escortId: string;
+  userId: string;
+  date: string;
+  time: string;
+  duration: number;
+  location: string;
+  status: BookingStatus;
+  totalPrice: number;
+  notes?: string;
+  serviceType: 'in-person' | 'virtual';
+  createdAt: string;
+  updatedAt: string;
 }
