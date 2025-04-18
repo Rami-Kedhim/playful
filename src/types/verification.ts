@@ -43,9 +43,11 @@ export interface VerificationRequest {
   verificationLevel?: VerificationLevel | string;
   requested_level?: VerificationLevel | string;
   requestedLevel?: VerificationLevel | string;
+  level?: VerificationLevel | string;
   documents?: VerificationDocument[];
   submittedAt?: string | Date;
   submitted_at?: string | Date;
+  createdAt?: string | Date;
   created_at?: string | Date;
   updatedAt?: string | Date;
   updated_at?: string | Date;
@@ -77,3 +79,10 @@ export interface VerificationFormValues {
     preview: string;
   };
 }
+
+// Add document type options constant
+export const DOCUMENT_TYPE_OPTIONS = [
+  { value: 'id_card', label: 'ID Card' },
+  { value: 'passport', label: 'Passport' },
+  { value: 'drivers_license', label: 'Driver\'s License' }
+];

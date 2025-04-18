@@ -1,83 +1,59 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useUberPersonas } from '@/hooks/useUberPersonas';
-import { UberPersona } from '@/types/uberPersona';
-import { Loader2 } from 'lucide-react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface PersonaContextType {
-  personas: UberPersona[];
-  escortPersonas: UberPersona[];
-  creatorPersonas: UberPersona[];
-  livecamPersonas: UberPersona[];
-  isLoading: boolean;
-  error: string | null;
-  refreshPersonas: (useCache?: boolean) => Promise<void>;
-  getPersonaById: (id: string) => UberPersona | undefined;
+  persona: {
+    isEscort?: boolean;
+    isContentCreator?: boolean;
+    isCreator?: boolean; // Add the missing property
+    isPremium?: boolean;
+    isVerified?: boolean;
+    isFeatured?: boolean;
+    isAI?: boolean;
+  };
+  togglePersonaType: (type: string) => void;
 }
 
-const PersonaContext = createContext<PersonaContextType | undefined>(undefined);
+// Create the context with a default state
+const PersonaContext = createContext<PersonaContextType>({
+  persona: {
+    isEscort: false,
+    isContentCreator: false,
+    isCreator: false, // Add default value
+    isPremium: false,
+    isVerified: false,
+    isFeatured: false,
+    isAI: false
+  },
+  togglePersonaType: () => {}
+});
 
-export const PersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const {
-    personas,
-    isLoading,
-    error,
-    loadPersonas,
-    getPersonaById
-  } = useUberPersonas();
-
-  // Define filter functions for different persona types
-  const getEscorts = () => personas.filter(persona => 
-    (persona.roleFlags?.isEscort) || 
-    (persona.roleFlags?.isEscort === true)
-  );
+// Create a provider component
+export const PersonaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [persona, setPersona] = useState({
+    isEscort: false,
+    isContentCreator: false,
+    isCreator: false,
+    isPremium: false,
+    isVerified: false,
+    isFeatured: false,
+    isAI: false
+  });
   
-  const getCreators = () => personas.filter(persona => 
-    (persona.roleFlags?.isCreator) || 
-    (persona.roleFlags?.isCreator === true)
-  );
+  const togglePersonaType = (type: string) => {
+    setPersona(prev => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+  };
   
-  const getLivecams = () => personas.filter(persona => 
-    (persona.capabilities?.hasLiveStream === true)
+  return (
+    <PersonaContext.Provider value={{ persona, togglePersonaType }}>
+      {children}
+    </PersonaContext.Provider>
   );
-
-  useEffect(() => {
-    loadPersonas();
-  }, [loadPersonas]);
-
-  const refreshPersonas = async (useCache = false) => {
-    await loadPersonas(useCache);
-  };
-
-  const value = {
-    personas,
-    escortPersonas: getEscorts(),
-    creatorPersonas: getCreators(),
-    livecamPersonas: getLivecams(),
-    isLoading,
-    error,
-    refreshPersonas,
-    getPersonaById
-  };
-
-  if (isLoading && personas.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading profiles...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return <PersonaContext.Provider value={value}>{children}</PersonaContext.Provider>;
 };
 
-export const usePersonaContext = () => {
-  const context = useContext(PersonaContext);
-  if (context === undefined) {
-    throw new Error('usePersonaContext must be used within a PersonaProvider');
-  }
-  return context;
-};
+// Create a custom hook to use the context
+export const usePersona = () => useContext(PersonaContext);
+
+export default PersonaContext;

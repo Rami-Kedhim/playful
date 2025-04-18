@@ -41,7 +41,7 @@ export interface NeuralModel {
   name: string;
   type: string;
   version: string;
-  capabilities: string[] | string; // Allow both string[] and string
+  capabilities: string[] | string;
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
     accuracy: number;
@@ -50,7 +50,7 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
-  specialization?: string | string[]; // Allow both string and string array
+  specialization?: string | string[];
 }
 
 export interface SystemHealthMetrics {
@@ -72,4 +72,9 @@ export interface SystemHealthMetrics {
   networkThroughput?: number;
   requestRate?: number;
   averageResponseTime?: number;
+  userSatisfactionScore?: number;
+  systemUptime?: number;
+  lastMaintenanceDate?: Date;
+  dataPrecision?: number;
+  algorithmEfficiency?: number;
 }
