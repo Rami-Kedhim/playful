@@ -1,57 +1,59 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import ServiceTypeIcon, { ServiceTypeIconType } from './ServiceTypeIconProps';
+import { MapPin, Video, Users } from 'lucide-react';
+import { ServiceTypeFilter as ServiceTypeFilterType } from '@/types/filters';
 
-export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both' | 'massage' | 'dinner';
+// Export the type for other components to use
+export type ServiceTypeFilter = ServiceTypeFilterType;
 
-export interface ServiceTypeBadgeLabelProps {
+interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
-  showLabel?: boolean;
+  showIcon?: boolean;
+  variant?: 'default' | 'outline' | 'secondary';
+  size?: 'default' | 'sm';
 }
 
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  switch (type) {
-    case 'in-person':
-      return 'In-Person';
-    case 'virtual':
-      return 'Virtual';
-    case 'both':
-      return 'In-Person & Virtual';
-    case 'massage':
-      return 'Massage';
-    case 'dinner':
-      return 'Dinner Date';
-    default:
-      return '';
-  }
-};
-
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type, showLabel = true }) => {
-  // Get badge styling based on type
-  const getBadgeStyle = () => {
-    switch (type) {
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
+  type, 
+  showIcon = true, 
+  variant = 'default',
+  size = 'default'
+}) => {
+  if (!type) return null;
+  
+  const getLabel = () => {
+    switch(type) {
       case 'in-person':
-        return 'bg-indigo-500 text-white border-0';
+        return 'In Person';
       case 'virtual':
-        return 'bg-purple-500 text-white border-0';
+        return 'Virtual';
       case 'both':
-        return 'bg-blue-500 text-white border-0';
-      case 'massage':
-        return 'bg-green-500 text-white border-0';
-      case 'dinner':
-        return 'bg-amber-500 text-white border-0';
+        return 'Both';
       default:
-        return 'bg-gray-500 text-white border-0';
+        return type.charAt(0).toUpperCase() + type.slice(1);
     }
   };
   
-  if (!type) return null;
+  const getIcon = () => {
+    switch(type) {
+      case 'in-person':
+        return <MapPin className="h-3 w-3 mr-1" />;
+      case 'virtual':
+        return <Video className="h-3 w-3 mr-1" />;
+      case 'both':
+        return <Users className="h-3 w-3 mr-1" />;
+      default:
+        return null;
+    }
+  };
+  
+  const sizeClasses = size === 'sm' ? 'text-xs py-0 px-2' : '';
   
   return (
-    <Badge className={`flex items-center gap-1 ${getBadgeStyle()}`}>
-      <ServiceTypeIcon type={type as ServiceTypeIconType} size={12} className="" />
-      {showLabel && <span>{getServiceTypeBadgeLabel(type)}</span>}
+    <Badge variant={variant} className={sizeClasses}>
+      {showIcon && getIcon()}
+      {getLabel()}
     </Badge>
   );
 };

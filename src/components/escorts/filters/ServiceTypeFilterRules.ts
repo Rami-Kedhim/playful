@@ -2,6 +2,11 @@
 import { ServiceTypeFilter } from '@/types/filters';
 
 /**
+ * Define the ServiceType type
+ */
+export type ServiceType = string;
+
+/**
  * List of forbidden terms that should not be displayed as service types
  */
 export const ForbiddenTerms = [

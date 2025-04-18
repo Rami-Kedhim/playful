@@ -109,6 +109,8 @@ export interface UberPersona {
   isVerified?: boolean;
   isActive?: boolean;
   isOnline?: boolean;
+  featured?: boolean; // Added this property
+  services?: string[]; // Added this property
   personaFlags?: {
     isEscort?: boolean;
     isCreator?: boolean;

@@ -1,92 +1,76 @@
 
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { ServiceTypeFilter } from '@/types/filters';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { ServiceTypeFilter as ServiceTypeFilterType } from '@/types/filters';
 
+export { ServiceTypeFilterType as ServiceTypeFilter };
+
+// Define the context type
 export interface ServiceTypeContextType {
-  selectedServiceType: ServiceTypeFilter;
-  setSelectedServiceType: (type: ServiceTypeFilter) => void;
+  serviceType: ServiceTypeFilterType;
+  setServiceType: (type: ServiceTypeFilterType) => void;
+  specializedServiceTypes: string[];
   selectedSpecializedTypes: string[];
   toggleSpecializedType: (type: string) => void;
-  specializedServiceTypes: string[];
-  isInPersonService: boolean;
-  isVirtualService: boolean;
-  isBothServiceTypes: boolean;
-  isAnyServiceType: boolean;
-  clearServiceType: () => void;
-}
-
-const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(undefined);
-
-export interface ServiceTypeProviderProps {
-  children: ReactNode;
-  supportedServiceTypes?: ServiceTypeFilter[];
+  supportedServiceTypes?: string[];
   filterForbiddenTerms?: boolean;
-  onUnsafeTermRemap?: (original: string, remapped: ServiceTypeFilter) => void;
+  onUnsafeTermRemap?: (original: string, remapped: ServiceTypeFilterType) => void;
 }
 
-export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
+// Create the context with default values
+const ServiceTypeContext = createContext<ServiceTypeContextType>({
+  serviceType: '',
+  setServiceType: () => {},
+  specializedServiceTypes: [],
+  selectedSpecializedTypes: [],
+  toggleSpecializedType: () => {}
+});
+
+// Create the provider component
+export const ServiceTypeProvider: React.FC<{
+  children: ReactNode;
+  supportedServiceTypes?: string[];
+  filterForbiddenTerms?: boolean;
+  onUnsafeTermRemap?: (original: string, remapped: ServiceTypeFilterType) => void;
+}> = ({ 
   children,
-  supportedServiceTypes = ['in-person', 'virtual', 'both', 'massage', 'dinner'],
+  supportedServiceTypes = ['massage', 'escort', 'dinner', 'companionship', 'travel', 'events'],
   filterForbiddenTerms = true,
-  onUnsafeTermRemap = () => {}
+  onUnsafeTermRemap
 }) => {
-  const [selectedServiceType, setSelectedServiceType] = useState<ServiceTypeFilter>('');
+  const [serviceType, setServiceType] = useState<ServiceTypeFilterType>('');
   const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
-  
-  // Define specialized service types
-  const specializedServiceTypes = [
-    'Dinner Date',
-    'Massage',
-    'Event Companion',
-    'Travel Companion',
-    'GFE',
-    'Overnight'
-  ];
-  
-  const isInPersonService = selectedServiceType === 'in-person';
-  const isVirtualService = selectedServiceType === 'virtual';
-  const isBothServiceTypes = selectedServiceType === 'both';
-  const isAnyServiceType = selectedServiceType === '';
-  
+
   const toggleSpecializedType = (type: string) => {
-    setSelectedSpecializedTypes(prev =>
+    setSelectedSpecializedTypes(prev => 
       prev.includes(type)
         ? prev.filter(t => t !== type)
         : [...prev, type]
     );
   };
-  
-  const clearServiceType = () => {
-    setSelectedServiceType('');
-    setSelectedSpecializedTypes([]);
-  };
 
   return (
-    <ServiceTypeContext.Provider
-      value={{
-        selectedServiceType,
-        setSelectedServiceType,
-        selectedSpecializedTypes,
-        toggleSpecializedType,
-        specializedServiceTypes,
-        isInPersonService,
-        isVirtualService,
-        isBothServiceTypes,
-        isAnyServiceType,
-        clearServiceType
-      }}
-    >
+    <ServiceTypeContext.Provider value={{
+      serviceType,
+      setServiceType,
+      specializedServiceTypes: supportedServiceTypes,
+      selectedSpecializedTypes,
+      toggleSpecializedType,
+      supportedServiceTypes,
+      filterForbiddenTerms,
+      onUnsafeTermRemap
+    }}>
       {children}
     </ServiceTypeContext.Provider>
   );
 };
 
-export const useServiceType = (): ServiceTypeContextType => {
+// Create a custom hook for using this context
+export const useServiceType = () => {
   const context = useContext(ServiceTypeContext);
+  
   if (context === undefined) {
     throw new Error('useServiceType must be used within a ServiceTypeProvider');
   }
+  
   return context;
 };
-
-export default ServiceTypeContext;

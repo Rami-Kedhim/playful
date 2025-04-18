@@ -10,6 +10,7 @@ export interface Rates {
   halfHour?: number;
   overnight?: number;
   weekend?: number;
+  twoHours?: number; // Added this property
 }
 
 export interface Escort {
@@ -38,6 +39,7 @@ export interface Escort {
   gallery_images?: string[];
   videos?: string[];
   verificationLevel?: 'none' | 'basic' | 'enhanced' | 'premium';
+  verification_level?: string;
   // Optional properties
   availableNow?: boolean;
   imageUrl?: string;
@@ -59,6 +61,7 @@ export interface Escort {
   boostLevel?: number;
   isActive?: boolean;
   isAI?: boolean;
+  isFavorited?: boolean; // Added this property
   availability?: {
     monday?: boolean;
     tuesday?: boolean;
@@ -95,7 +98,8 @@ export enum BookingStatus {
   CONFIRMED = 'confirmed',
   CANCELED = 'canceled',
   COMPLETED = 'completed',
-  REJECTED = 'rejected'
+  REJECTED = 'rejected',
+  DECLINED = 'declined' // Added this status
 }
 
 export interface Booking {
@@ -112,4 +116,56 @@ export interface Booking {
   serviceType: 'in-person' | 'virtual';
   createdAt: string;
   updatedAt: string;
+  price?: number; // Added this property
+  service?: string; // Added this property
+}
+
+export interface Video {
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  url?: string;
+  duration?: number;
+  viewCount?: number;
+  isPremium?: boolean;
+}
+
+export interface VerificationDocument {
+  id: string;
+  verification_id: string;
+  document_type: string;
+  document_url: string;
+  status: string;
+  notes?: string;
+  created_at: string;
+  updated_at?: string;
+  type?: string;
+  fileUrl?: string;
+  uploadedAt?: string;
+}
+
+export interface VerificationRequest {
+  id: string;
+  profile_id: string;
+  status: string;
+  requested_level: string;
+  documents: VerificationDocument[];
+  created_at: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  reviewer_notes?: string;
+  expires_at?: string;
+  submittedAt?: string;
+  updatedAt?: string;
+  verificationLevel?: string;
+  rejectionReason?: string;
+  userId?: string;
+}
+
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  ENHANCED = 'enhanced',
+  PREMIUM = 'premium'
 }

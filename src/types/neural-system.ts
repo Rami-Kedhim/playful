@@ -7,10 +7,19 @@ export interface NeuralSystemMetricsResult {
     responseTime: number;
     accuracy: number;
     latency: number;
+    processingEfficiency?: number;
+    processingTrend?: 'up' | 'down';
+    accuracyRate?: number;
+    accuracyTrend?: 'up' | 'down';
+    history?: number[];
+    recommendations?: string[];
   };
   refreshMetrics: () => Promise<void>;
   errorMessage: string | null;
   isLoading: boolean;
+  isMonitoring?: boolean;
+  startMonitoring?: () => void;
+  stopMonitoring?: () => void;
 }
 
 export interface TrainingProgress {
@@ -41,4 +50,25 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface SystemHealthMetrics {
+  cpuUtilization: number;
+  memoryUtilization: number;
+  networkLatency: number;
+  errorFrequency: number;
+  uptime: number;
+  load: number;
+  operationsPerSecond: number;
+  responseTime: number;
+  errorRate: number;
+  stability: number;
+  userEngagement: number;
+  economicBalance: number;
+  lastUpdated: Date;
+  systemLoad?: number;
+  memoryAllocation?: number;
+  networkThroughput?: number;
+  requestRate?: number;
+  averageResponseTime?: number;
 }
