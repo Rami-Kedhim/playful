@@ -16,6 +16,11 @@ export interface AuthUser {
   phone?: string;
   website?: string;
   full_name?: string;
+  profileImageUrl?: string;
+  user_metadata?: Record<string, any>;
+  avatar_url?: string;
+  lucoinsBalance?: number;
+  roles?: UserRole[];
 }
 
 export interface AuthContextType {
@@ -27,7 +32,13 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, username: string) => Promise<boolean>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>; // Alias for signOut
   refreshUser: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  checkRole: (role: string) => boolean;
+  updateUserProfile: (data: Partial<any>) => Promise<boolean>;
+  userRoles: string[];
+  updatePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
 }
 
 // Create context with default values
@@ -40,7 +51,13 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => false,
   signUp: async () => false,
   signOut: async () => {},
+  logout: async () => {},
   refreshUser: async () => {},
+  refreshProfile: async () => {},
+  checkRole: () => false,
+  updateUserProfile: async () => false,
+  userRoles: [],
+  updatePassword: async () => false,
 });
 
 // Auth provider component
@@ -49,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -61,6 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
           setProfile(parsedUser); // Simplified for this example
+          setUserRoles(parsedUser.roles || [parsedUser.role]);
         }
       } catch (err) {
         console.error("Error checking session:", err);
@@ -72,6 +91,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     checkSession();
   }, []);
+
+  // Check if user has a specific role
+  const checkRole = (role: string): boolean => {
+    if (!user) return false;
+    
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.includes(role as UserRole);
+    }
+    
+    return user.role === role;
+  };
 
   // Sign in function
   const signIn = async (email: string, password: string): Promise<boolean> => {
@@ -88,11 +118,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: UserRole.USER,
         isVerified: true,
         avatarUrl: '',
+        profileImageUrl: '',
       };
       
       setUser(mockUser);
       setProfile(mockUser); // Simplified
       localStorage.setItem('user', JSON.stringify(mockUser));
+      setUserRoles([mockUser.role]);
       
       return true;
     } catch (err: any) {
@@ -119,11 +151,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: UserRole.USER,
         isVerified: false,
         avatarUrl: '',
+        profileImageUrl: '',
       };
       
       setUser(mockUser);
       setProfile(mockUser); // Simplified
       localStorage.setItem('user', JSON.stringify(mockUser));
+      setUserRoles([mockUser.role]);
       
       return true;
     } catch (err: any) {
@@ -144,6 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('user');
       setUser(null);
       setProfile(null);
+      setUserRoles([]);
     } catch (err: any) {
       console.error("Sign out error:", err);
       setError(err.message || "Failed to sign out");
@@ -151,6 +186,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   };
+
+  // Alias for signOut
+  const logout = signOut;
 
   // Refresh user data
   const refreshUser = async (): Promise<void> => {
@@ -163,12 +201,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setProfile(parsedUser); // Simplified
+        setUserRoles(parsedUser.roles || [parsedUser.role]);
       }
     } catch (err: any) {
       console.error("Refresh user error:", err);
       setError(err.message || "Failed to refresh user data");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Alias for refreshUser
+  const refreshProfile = refreshUser;
+
+  // Update user profile
+  const updateUserProfile = async (data: Partial<any>): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      
+      // In a real app, update profile via API
+      if (user) {
+        const updatedUser = { ...user, ...data };
+        setUser(updatedUser);
+        setProfile(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      console.error("Update profile error:", err);
+      setError(err.message || "Failed to update profile");
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Update password
+  const updatePassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      // Mock implementation
+      console.log("Password updated", { oldPassword, newPassword });
+      return true;
+    } catch (err) {
+      setError("Failed to update password");
+      return false;
     }
   };
 
@@ -182,7 +259,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
-    refreshUser
+    logout,
+    refreshUser,
+    refreshProfile,
+    checkRole,
+    updateUserProfile,
+    userRoles,
+    updatePassword
   };
 
   return (
