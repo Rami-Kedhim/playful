@@ -16,6 +16,7 @@ export interface Escort {
   imageUrl?: string;
   profileImage?: string;
   gallery?: string[];
+  gallery_images?: string[];
   isVerified: boolean;
   verified?: boolean;
   featured?: boolean;
@@ -29,7 +30,9 @@ export interface Escort {
   hasRealMeets?: boolean;
   lastActive?: string;
   isScraped?: boolean;
+  isAI?: boolean;
   verificationLevel?: VerificationLevel;
+  verification_level?: string;
   hasContent?: boolean;
   hasLiveStream?: boolean;
   profileType?: 'verified' | 'ai' | 'provisional';
@@ -40,7 +43,6 @@ export interface Escort {
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
-  isAI?: boolean;
   boostLevel?: number;
   subscriptionPrice?: number;
   contentStats?: ContentStats;
@@ -52,8 +54,6 @@ export interface Escort {
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
   serviceTypes?: string[];
-  gallery_images?: string[];
-  verification_level?: string;
   description?: string;
   videos?: any[];
   isFavorited?: boolean;
@@ -66,7 +66,7 @@ export interface Escort {
 
 export interface ContactInfo {
   phone?: string;
-  email?: string;
+  email: string;
   website?: string;
 }
 
@@ -74,6 +74,9 @@ export interface Availability {
   days: string[];
   hours: string[];
   nextAvailable?: string;
+  day?: string;
+  slots?: { start: string; end: string; }[];
+  customNotes?: string;
 }
 
 export interface Rates {
@@ -89,6 +92,8 @@ export interface ContentStats {
   videos: number;
   totalViews: number;
   averageRating: number;
+  streams?: string | number;
+  live?: boolean | string | number;
 }
 
 export interface Video {
@@ -97,6 +102,7 @@ export interface Video {
   description?: string;
   thumbnailUrl: string;
   videoUrl?: string;
+  url?: string;
   duration: number;
   viewCount: number;
   rating?: number;
@@ -113,14 +119,14 @@ export interface Booking {
   startTime: string;
   endTime: string;
   status: BookingStatus;
-  serviceType: string;
+  serviceType?: string;
+  service?: string;
   location?: string;
   price: number;
   notes?: string;
   createdAt: string;
   updatedAt?: string;
   duration?: number;
-  service?: string;
 }
 
 export enum BookingStatus {
@@ -139,6 +145,14 @@ export enum VerificationLevel {
   STANDARD = 'standard',
   PREMIUM = 'premium',
   PLATINUM = 'platinum'
+}
+
+export enum VerificationStatus {
+  PENDING = 'pending',
+  IN_REVIEW = 'in_review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired'
 }
 
 export interface VerificationRequest {
@@ -160,6 +174,7 @@ export interface VerificationRequest {
   level?: string;
   updated_at?: string;
   verification_id?: string;
+  request_id?: string;
 }
 
 export interface VerificationDocument {
@@ -176,4 +191,6 @@ export interface VerificationDocument {
   uploadedAt?: string;
   created_at?: string;
   verification_id?: string;
+  requestId?: string;
+  request_id?: string;
 }

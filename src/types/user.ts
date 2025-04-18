@@ -28,7 +28,7 @@ export interface UserProfile {
   name: string;
   avatar_url?: string;
   phone_number?: string;
-  phone?: string; // Added to support both naming conventions
+  phone?: string;
   location?: string;
   bio?: string;
   is_escort?: boolean;

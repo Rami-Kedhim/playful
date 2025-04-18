@@ -1,41 +1,50 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import ServiceTypeIcon from '@/components/filters/ServiceTypeIcon';
+import ServiceTypeIcon, { ServiceTypeIconType } from './ServiceTypeIconProps';
 
-export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both' | 'massage' | 'dinner';
+export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both';
 
-// Helper function to get badge label for service type
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  switch (type) {
-    case 'in-person': return 'In Person';
-    case 'virtual': return 'Virtual';
-    case 'both': return 'In Person & Virtual';
-    case 'massage': return 'Massage';
-    case 'dinner': return 'Dinner Date';
-    default: return 'Any Service Type';
-  }
-};
-
-interface ServiceTypeBadgeLabelProps {
+export interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
-  className?: string;
-  showIcon?: boolean;
-  showLabel?: boolean; // Added showLabel prop
+  showLabel?: boolean;
 }
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
-  type, 
-  className = "",
-  showIcon = true,
-  showLabel = true // Default to showing the label
-}) => {
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type, showLabel = true }) => {
+  // Get badge styling based on type
+  const getBadgeStyle = () => {
+    switch (type) {
+      case 'in-person':
+        return 'bg-indigo-500 text-white border-0';
+      case 'virtual':
+        return 'bg-purple-500 text-white border-0';
+      case 'both':
+        return 'bg-blue-500 text-white border-0';
+      default:
+        return 'bg-gray-500 text-white border-0';
+    }
+  };
+  
+  // Get label text based on type
+  const getLabel = () => {
+    switch (type) {
+      case 'in-person':
+        return 'In-Person';
+      case 'virtual':
+        return 'Virtual';
+      case 'both':
+        return 'In-Person & Virtual';
+      default:
+        return '';
+    }
+  };
+  
   if (!type) return null;
   
   return (
-    <Badge variant="outline" className={className}>
-      {showIcon && <ServiceTypeIcon type={type} size={14} className="mr-1" />}
-      {showLabel && <span>{getServiceTypeBadgeLabel(type)}</span>}
+    <Badge className={`flex items-center gap-1 ${getBadgeStyle()}`}>
+      <ServiceTypeIcon type={type as ServiceTypeIconType} size={12} className="" />
+      {showLabel && <span>{getLabel()}</span>}
     </Badge>
   );
 };

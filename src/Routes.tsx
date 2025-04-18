@@ -56,11 +56,9 @@ const RoutesComponent: React.FC = () => {
   const profile: UserProfile | null = authProfile ? {
     id: authProfile.id,
     userId: authProfile.id,
-    email: authProfile.email || (authUser?.email || ''),
+    email: authProfile.email,
     name: authProfile.name || authProfile.full_name || (authUser?.name || ''),
     avatar_url: authProfile.avatar_url || authProfile.profileImageUrl,
-    phone: authProfile.phone || authProfile.phone_number,
-    phone_number: authProfile.phone_number || authProfile.phone,
     location: authProfile.location,
     bio: authProfile.bio,
     verified: authProfile.is_verified,

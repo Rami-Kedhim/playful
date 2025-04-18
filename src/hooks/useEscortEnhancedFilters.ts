@@ -1,69 +1,68 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { EnhancedEscortFilters, EscortFilterOptions } from '@/types/escortTypes';
-
-const defaultFilters: EnhancedEscortFilters = {
-  location: '',
-  serviceType: [],
-  serviceTypes: [],
-  price: [0, 1000],
-  gender: [],
-  orientation: [],
-  age: [21, 50],
-  rating: 0,
-  verified: false,
-  availableNow: false,
-  escortType: "all",
-  language: [],
-  selectedFilters: [],
-  localOnly: false,
-  sortBy: "newest",
-  useNeuralSuggestions: false,
-  useBoostSorting: true,
-  availability: {
-    days: [] as string[],
-    hours: [] as string[]
-  }
-};
+import { useState } from 'react';
+import { EnhancedEscortFilters } from '@/types/escortFilters';
 
 export const useEscortEnhancedFilters = () => {
-  const [filters, setFilters] = useState<EnhancedEscortFilters>(defaultFilters);
-  const [isFiltering, setIsFiltering] = useState(false);
-  
-  // Update specific filter fields
-  const updateFilter = useCallback(<K extends keyof EnhancedEscortFilters>(
-    key: K, 
-    value: EnhancedEscortFilters[K]
-  ) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  }, []);
-  
-  // Reset filters to default
-  const resetFilters = useCallback(() => {
-    setFilters(defaultFilters);
-  }, []);
-  
-  // Convert enhanced filters to basic filter options for API calls
-  const toFilterOptions = useCallback(() => {
-    return {
-      gender: filters.gender,
-      serviceType: filters.serviceType,
-      priceRange: filters.price,
-      ageRange: filters.age,
-      language: filters.language,
-      location: filters.location,
-      verified: filters.verified,
-      availableNow: filters.availableNow,
-      escortType: filters.escortType,
-      orientation: filters.orientation
-    };
-  }, [filters]);
+  const [filters, setFilters] = useState<EnhancedEscortFilters>({
+    location: '',
+    serviceType: [],
+    serviceTypes: [],
+    price: [0, 500],
+    priceRange: [0, 500],
+    age: [18, 99],
+    ageRange: [18, 99],
+    gender: [],
+    orientation: [],
+    rating: 0,
+    verified: false,
+    languages: [],
+    availableNow: false,
+    escortType: 'all',
+    hasContent: false,
+    bodyType: [],
+    hairColor: [],
+    ethnicity: [],
+    maxDistance: 50,
+    localOnly: false,
+    useNeuralSuggestions: false,
+    selectedFilters: []
+  });
+
+  const updateFilters = (newFilters: Partial<EnhancedEscortFilters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      location: '',
+      serviceType: [],
+      serviceTypes: [],
+      price: [0, 500],
+      priceRange: [0, 500],
+      age: [18, 99],
+      ageRange: [18, 99],
+      gender: [],
+      orientation: [],
+      rating: 0,
+      verified: false,
+      languages: [],
+      availableNow: false,
+      escortType: 'all',
+      hasContent: false,
+      bodyType: [],
+      hairColor: [],
+      ethnicity: [],
+      maxDistance: 50,
+      localOnly: false,
+      useNeuralSuggestions: false,
+      selectedFilters: []
+    });
+  };
 
   return {
     filters,
-    updateFilter,
-    resetFilters,
-    toFilterOptions
+    updateFilters,
+    resetFilters
   };
 };
 

@@ -1,30 +1,45 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/formatters';
-import { Booking } from '@/types/escort';
+import { Booking, Escort } from '@/types/escort';
 import { Loader2, CheckCircle } from 'lucide-react';
 
 interface BookingPaymentStepProps {
   booking: Partial<Booking>;
-  isProcessing: boolean;
-  isComplete: boolean;
-  onProceed: () => void;
-  estimatedTotal: number;
+  isProcessing?: boolean;
+  isComplete?: boolean;
+  onProceed?: () => void;
+  estimatedTotal?: number;
+  escort: Escort;
+  onBack: () => void;
+  onComplete: () => Promise<void>;
+  isSubmitting: boolean;
+  onConfirm: () => Promise<void>;
+  onCancel: () => void;
 }
 
 const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
   booking,
-  isProcessing,
-  isComplete,
+  isProcessing = false,
+  isComplete = false,
   onProceed,
-  estimatedTotal
+  estimatedTotal = 0,
+  escort,
+  onBack,
+  onComplete,
+  isSubmitting,
+  onConfirm,
+  onCancel
 }) => {
-  const baseRate = booking.price || 0;
+  const baseRate = booking.price || escort.price || 0;
+  const duration = booking.duration || 1;
+  const total = estimatedTotal || baseRate * duration;
 
   const calculateBreakdown = () => {
     // Calculate duration in hours if available
-    const durationHours = booking.duration || 1;
+    const durationHours = duration || 1;
     
     // Use service type if available for display
     const serviceType = booking.service || booking.serviceType || 'Standard';
@@ -43,12 +58,12 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
         
         <div className="flex justify-between">
           <span>Taxes</span>
-          <span>{formatCurrency(estimatedTotal * 0.05)}</span>
+          <span>{formatCurrency(total * 0.05)}</span>
         </div>
         
         <div className="flex justify-between font-semibold">
           <span>Total</span>
-          <span>{formatCurrency(estimatedTotal)}</span>
+          <span>{formatCurrency(total)}</span>
         </div>
       </div>
     );
@@ -72,13 +87,21 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
             
             {calculateBreakdown()}
             
-            <div className="mt-6">
+            <div className="mt-6 flex gap-2">
               <Button 
-                disabled={isProcessing}
-                onClick={onProceed}
-                className="w-full"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSubmitting}
+                className="flex-1"
               >
-                {isProcessing ? (
+                Cancel
+              </Button>
+              <Button 
+                disabled={isSubmitting}
+                onClick={onConfirm}
+                className="flex-1"
+              >
+                {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Processing Payment...

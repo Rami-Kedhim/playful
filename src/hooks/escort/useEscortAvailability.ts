@@ -5,79 +5,84 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface UseEscortAvailabilityProps {
   escortId?: string;
-  initialAvailability?: Availability[];
+  initialAvailability?: Availability;
 }
 
 export const useEscortAvailability = ({ 
   escortId, 
-  initialAvailability = [] 
+  initialAvailability = { days: [], hours: [] }
 }: UseEscortAvailabilityProps) => {
-  const [availability, setAvailability] = useState<Availability[]>(initialAvailability);
+  const [availability, setAvailability] = useState<Availability>(initialAvailability);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Days of the week
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   
   // Default time slots for adding new availability
   const defaultTimeSlots = [
-    { start: "09:00", end: "17:00" }
+    "09:00-17:00"
   ];
 
-  // Add a new day of availability
+  // Add a day to availability
   const addAvailabilityDay = useCallback((day: string) => {
-    setAvailability(prev => [
-      ...prev,
-      {
-        day,
-        slots: [...defaultTimeSlots]
-      }
-    ]);
-  }, []);
-
-  // Remove a day of availability
-  const removeAvailabilityDay = useCallback((index: number) => {
-    setAvailability(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  // Add a time slot to a specific day
-  const addTimeSlot = useCallback((dayIndex: number) => {
     setAvailability(prev => {
-      const updatedAvailability = [...prev];
-      updatedAvailability[dayIndex] = {
-        ...updatedAvailability[dayIndex],
-        slots: [
-          ...updatedAvailability[dayIndex].slots,
-          { start: "12:00", end: "17:00" }
-        ]
+      const updatedDays = [...prev.days, day];
+      return {
+        ...prev,
+        days: updatedDays
       };
-      return updatedAvailability;
     });
   }, []);
 
-  // Remove a time slot from a specific day
-  const removeTimeSlot = useCallback((dayIndex: number, slotIndex: number) => {
+  // Remove a day from availability
+  const removeAvailabilityDay = useCallback((dayToRemove: string) => {
     setAvailability(prev => {
-      const updatedAvailability = [...prev];
-      updatedAvailability[dayIndex] = {
-        ...updatedAvailability[dayIndex],
-        slots: updatedAvailability[dayIndex].slots.filter((_, i) => i !== slotIndex)
+      const updatedDays = prev.days.filter(day => day !== dayToRemove);
+      return {
+        ...prev,
+        days: updatedDays
       };
-      return updatedAvailability;
+    });
+  }, []);
+
+  // Add a time slot
+  const addTimeSlot = useCallback((timeSlot: string) => {
+    setAvailability(prev => {
+      const updatedHours = [...prev.hours, timeSlot];
+      return {
+        ...prev,
+        hours: updatedHours
+      };
+    });
+  }, []);
+
+  // Remove a time slot
+  const removeTimeSlot = useCallback((timeSlotToRemove: string) => {
+    setAvailability(prev => {
+      const updatedHours = prev.hours.filter(hour => hour !== timeSlotToRemove);
+      return {
+        ...prev,
+        hours: updatedHours
+      };
     });
   }, []);
 
   // Update a time slot
-  const updateTimeSlot = useCallback((dayIndex: number, slotIndex: number, field: 'start' | 'end', value: string) => {
+  const updateTimeSlot = useCallback((oldTimeSlot: string, newTimeSlot: string) => {
     setAvailability(prev => {
-      const updatedAvailability = [...prev];
-      updatedAvailability[dayIndex].slots[slotIndex] = {
-        ...updatedAvailability[dayIndex].slots[slotIndex],
-        [field]: value
+      const hourIndex = prev.hours.findIndex(hour => hour === oldTimeSlot);
+      if (hourIndex === -1) return prev;
+      
+      const updatedHours = [...prev.hours];
+      updatedHours[hourIndex] = newTimeSlot;
+      
+      return {
+        ...prev,
+        hours: updatedHours
       };
-      return updatedAvailability;
     });
   }, []);
 
@@ -122,17 +127,17 @@ export const useEscortAvailability = ({
 
   // Get available days (for display or logic)
   const getAvailableDays = useCallback(() => {
-    return availability.map(a => a.day);
+    return availability.days;
   }, [availability]);
 
   // Check if a specific day is available
   const isDayAvailable = useCallback((day: string) => {
-    return availability.some(a => a.day === day);
+    return availability.days.includes(day);
   }, [availability]);
 
   return {
     availability,
-    days,
+    daysOfWeek,
     loading,
     saving,
     error,

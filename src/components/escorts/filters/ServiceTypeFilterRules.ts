@@ -1,57 +1,84 @@
 
-// Define possible service types
-export type ServiceType = 
-  | 'Massage'
-  | 'Dinner Date'
-  | 'Companionship'
-  | 'Travel'
-  | 'Overnight'
-  | 'Events'
-  | 'Roleplay'
-  | 'Escort'
-  | 'Dating'
-  | 'Dancing'
-  | string;
+export enum ServiceType {
+  IN_PERSON = 'in-person',
+  VIRTUAL = 'virtual',
+  BOTH = 'both',
+  MASSAGE = 'massage',
+  DINNER = 'dinner'
+}
 
-// Function to check if a service type is allowed
-export const isAllowedServiceType = (type: string): boolean => {
-  // This would be more complex in a real application with forbidden terms checking
-  const forbiddenTerms = [
-    'illegal',
-    'underage',
-    'trafficking'
-  ];
-  
-  return !forbiddenTerms.some(term => 
-    type.toLowerCase().includes(term.toLowerCase())
-  );
-};
-
-// Function to return a safe version of a service name
-export const getSafeServiceName = (name: string): ServiceType => {
-  // In a real app, this would sanitize or remap problematic terms
-  return name as ServiceType;
-};
-
-// Maps services to their categories
-export const serviceCategories = {
-  'Massage': 'Wellness',
-  'Dinner Date': 'Social',
-  'Companionship': 'Social',
-  'Travel': 'Companion',
-  'Overnight': 'Extended',
-  'Events': 'Social',
-  'Roleplay': 'Entertainment',
-  'Escort': 'Companion',
-  'Dating': 'Social',
-  'Dancing': 'Entertainment'
-};
-
-// Export default service categories
-export const DEFAULT_SERVICE_CATEGORIES = [
-  'Social',
-  'Companion',
-  'Entertainment',
-  'Wellness',
-  'Extended'
+export const ForbiddenTerms = [
+  'illegal',
+  'underage',
+  'trafficking',
+  'drugs',
+  'child',
+  'minor',
+  'weapons',
+  'force',
+  'unwilling',
+  'exploitation'
 ];
+
+export const remapUnsafeService = (term: string): ServiceType => {
+  // Check if the term contains any forbidden keywords and remap to a safe service type
+  const lowerTerm = term.toLowerCase();
+
+  if (
+    lowerTerm.includes('massage') || 
+    lowerTerm.includes('spa') || 
+    lowerTerm.includes('therapy')
+  ) {
+    return ServiceType.MASSAGE;
+  }
+  
+  if (
+    lowerTerm.includes('dinner') ||
+    lowerTerm.includes('date') ||
+    lowerTerm.includes('companion')
+  ) {
+    return ServiceType.DINNER;
+  }
+  
+  if (
+    lowerTerm.includes('cam') ||
+    lowerTerm.includes('virtual') ||
+    lowerTerm.includes('online') ||
+    lowerTerm.includes('digital') ||
+    lowerTerm.includes('remote')
+  ) {
+    return ServiceType.VIRTUAL;
+  }
+  
+  return ServiceType.IN_PERSON;
+};
+
+export const isAllowedServiceType = (term: string): boolean => {
+  const lowerTerm = term.toLowerCase();
+  
+  // Check against forbidden terms
+  for (const forbidden of ForbiddenTerms) {
+    if (lowerTerm.includes(forbidden)) {
+      return false;
+    }
+  }
+  
+  return true;
+};
+
+export const getServiceTypeDescription = (type: ServiceType): string => {
+  switch (type) {
+    case ServiceType.IN_PERSON:
+      return 'In-person services and appointments';
+    case ServiceType.VIRTUAL:
+      return 'Online and digital services only';
+    case ServiceType.BOTH:
+      return 'Offers both in-person and virtual services';
+    case ServiceType.MASSAGE:
+      return 'Massage and wellness services';
+    case ServiceType.DINNER:
+      return 'Companionship for dining and events';
+    default:
+      return 'Service type not specified';
+  }
+};

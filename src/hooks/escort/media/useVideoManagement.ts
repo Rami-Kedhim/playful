@@ -26,21 +26,23 @@ export const useVideoManagement = ({ escortId }: UseVideoManagementProps) => {
       const mockVideos: Video[] = [
         {
           id: '1',
-          url: 'https://example.com/video1.mp4',
           title: 'Introduction Video',
-          thumbnail: 'https://example.com/thumbnail1.jpg',
+          thumbnailUrl: 'https://example.com/thumbnail1.jpg',
+          videoUrl: 'https://example.com/video1.mp4',
           duration: 120,
-          isPublic: true,
+          viewCount: 42,
           createdAt: new Date().toISOString(),
+          isPremium: false
         },
         {
           id: '2',
-          url: 'https://example.com/video2.mp4',
           title: 'Private Message',
-          thumbnail: 'https://example.com/thumbnail2.jpg',
+          thumbnailUrl: 'https://example.com/thumbnail2.jpg',
+          videoUrl: 'https://example.com/video2.mp4',
           duration: 45,
-          isPublic: false,
+          viewCount: 18,
           createdAt: new Date().toISOString(),
+          isPremium: true
         }
       ];
       
@@ -71,12 +73,13 @@ export const useVideoManagement = ({ escortId }: UseVideoManagementProps) => {
       // Create a mock video entry
       const newVideo: Video = {
         id: `video-${Date.now()}`,
-        url: URL.createObjectURL(file),
         title: metadata.title,
-        thumbnail: 'https://example.com/default-thumbnail.jpg',
+        thumbnailUrl: 'https://example.com/default-thumbnail.jpg',
+        videoUrl: URL.createObjectURL(file),
         duration: 60, // Mock duration
-        isPublic: metadata.isPublic,
+        viewCount: 0,
         createdAt: new Date().toISOString(),
+        isPremium: !metadata.isPublic
       };
       
       setVideos(prev => [newVideo, ...prev]);

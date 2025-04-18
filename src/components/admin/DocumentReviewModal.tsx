@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { VerificationDocument, VerificationRequest } from '@/types/verification';
+import { VerificationDocument, VerificationRequest } from '@/types/escort';
 
 interface DocumentReviewModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
   const handleApprove = async () => {
     setIsSubmitting(true);
     try {
-      await onApprove();
+      await onApprove(document.id, reason);
       onClose();
     } catch (error) {
       console.error('Error approving document:', error);
@@ -45,7 +45,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
     
     setIsSubmitting(true);
     try {
-      await onReject(reason);
+      await onReject(document.id, reason);
       onClose();
     } catch (error) {
       console.error('Error rejecting document:', error);

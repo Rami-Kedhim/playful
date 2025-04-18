@@ -1,139 +1,89 @@
 
-import { useCallback } from 'react';
-import { ServiceType, isAllowedServiceType, getSafeServiceName } from '@/components/escorts/filters/ServiceTypeFilterRules';
+import { useState, useCallback } from 'react';
+import { ServiceType, ForbiddenTerms, isAllowedServiceType, remapUnsafeService } from '@/components/escorts/filters/ServiceTypeFilterRules';
+import { toast } from '@/components/ui/use-toast';
 
-// Define forbidden terms locally
-const FORBIDDEN_TERMS = [
-  'illegal',
-  'underage',
-  'trafficking'
-];
+export const useServiceTypeRules = (filterEnabled = true) => {
+  const [unsafeTermAttempts, setUnsafeTermAttempts] = useState<string[]>([]);
 
-/**
- * Hook for validating and processing service types according to platform rules
- */
-export const useServiceTypeRules = () => {
-  /**
-   * Checks if a service name is allowed by platform rules
-   */
-  const isValidServiceType = useCallback((name: string): boolean => {
-    return isAllowedServiceType(name);
-  }, []);
-
-  /**
-   * Remaps potentially problematic service names to safe alternatives
-   */
-  const remapUnsafeService = useCallback((name: string): string => {
-    if (name.toLowerCase().includes('escort')) {
-      return 'Companionship';
+  const handleServiceTypeValidation = useCallback((term: string): {
+    isValid: boolean;
+    remappedTerm?: ServiceType;
+    message?: string;
+  } => {
+    // Skip validation if filtering is disabled
+    if (!filterEnabled) {
+      return { isValid: true };
     }
 
-    // Check against forbidden terms
-    for (const term of FORBIDDEN_TERMS) {
-      if (name.toLowerCase().includes(term)) {
-        return 'Service';
+    // Check if the term is allowed
+    const isValid = isAllowedServiceType(term);
+
+    if (!isValid) {
+      // Add the term to the attempts list
+      setUnsafeTermAttempts(prev => [...prev, term]);
+      
+      // Get a remapped safe term
+      const remappedTerm = remapUnsafeService(term);
+      
+      return {
+        isValid: false,
+        remappedTerm,
+        message: `The term "${term}" is not allowed. It has been remapped to "${remappedTerm}".`
+      };
+    }
+
+    return { isValid: true };
+  }, [filterEnabled]);
+
+  const validateServiceType = useCallback((term: string): ServiceType | null => {
+    const result = handleServiceTypeValidation(term);
+    
+    if (!result.isValid) {
+      if (result.message) {
+        toast({
+          title: 'Term Remapped',
+          description: result.message,
+          variant: 'warning',
+        });
       }
-    }
-
-    return name;
-  }, []);
-
-  /**
-   * Maps service types to their display names for UI
-   */
-  const getServiceDisplayName = useCallback((type: string): string => {
-    const displayMap: Record<string, string> = {
-      'GFE': 'Girlfriend Experience',
-      'BDSM': 'BDSM Services',
-      'RolePlay': 'Role Play',
-      'Massage': 'Professional Massage',
-      'Travel': 'Travel Companion',
-      'Overnight': 'Overnight Companion',
-      'Dinner': 'Dinner Date',
-      'Events': 'Event Companion'
-    };
-
-    return displayMap[type] || type;
-  }, []);
-
-  /**
-   * Gets the supported service types based on user role
-   */
-  const getSupportedServiceTypes = useCallback((userRole: string): string[] => {
-    // Base services available to all roles
-    const baseServices = [
-      'Massage', 
-      'Companionship', 
-      'Dinner Date', 
-      'Events'
-    ];
-
-    // Premium services for certain roles
-    const premiumServices = [
-      'Travel', 
-      'Overnight', 
-      'Dancing'
-    ];
-
-    // Role-specific services
-    const roleSpecificServices: Record<string, string[]> = {
-      'escort': [...baseServices, ...premiumServices, 'Dating'],
-      'premium': [...baseServices, ...premiumServices],
-      'creator': [...baseServices, 'Entertainment', 'Roleplay'],
-      'admin': [...baseServices, ...premiumServices, 'Dating', 'Entertainment', 'Roleplay']
-    };
-
-    return roleSpecificServices[userRole.toLowerCase()] || baseServices;
-  }, []);
-
-  /**
-   * Maps a user-defined service to a platform-supported service type
-   */
-  const mapToSupportedServiceType = useCallback((customService: string): string => {
-    // Convert to lowercase for comparison
-    const service = customService.toLowerCase();
-    
-    // Define mapping of terms to standard service types
-    const serviceMap: Record<string, string> = {
-      'massage': 'Massage',
-      'spa': 'Massage',
-      'dinner': 'Dinner Date',
-      'meals': 'Dinner Date',
-      'dining': 'Dinner Date',
-      'travel': 'Travel',
-      'trip': 'Travel',
-      'vacation': 'Travel',
-      'overnight': 'Overnight',
-      'sleepover': 'Overnight',
-      'event': 'Events',
-      'party': 'Events',
-      'dance': 'Dancing',
-      'dancing': 'Dancing',
-      'role': 'Roleplay',
-      'roleplay': 'Roleplay',
-      'escort': 'Companionship',
-      'companion': 'Companionship',
-      'date': 'Dating'
-    };
-    
-    // Find matching terms
-    for (const [key, value] of Object.entries(serviceMap)) {
-      if (service.includes(key)) {
-        return value;
-      }
+      return result.remappedTerm || null;
     }
     
-    // Default fallback
-    return String(customService);
-  }, []);
+    // Try to match to an existing ServiceType
+    const knownTypes = Object.values(ServiceType) as string[];
+    const matchingType = knownTypes.find(type => 
+      type.toLowerCase() === term.toLowerCase()
+    );
+    
+    if (matchingType) {
+      return matchingType as ServiceType;
+    }
+    
+    // If no match, use a default method to categorize
+    const lowerTerm = term.toLowerCase();
+    
+    if (lowerTerm.includes('virtual') || lowerTerm.includes('online')) {
+      return ServiceType.VIRTUAL;
+    }
+    
+    if (lowerTerm.includes('massage')) {
+      return ServiceType.MASSAGE;
+    }
+    
+    if (lowerTerm.includes('dinner') || lowerTerm.includes('date')) {
+      return ServiceType.DINNER;
+    }
+    
+    // Default to in-person
+    return ServiceType.IN_PERSON;
+  }, [handleServiceTypeValidation]);
 
   return {
-    isValidServiceType,
-    remapUnsafeService,
-    getServiceDisplayName,
-    getSupportedServiceTypes,
-    mapToSupportedServiceType,
-    forbiddenTerms: FORBIDDEN_TERMS
+    validateServiceType,
+    unsafeTermAttempts,
+    resetUnsafeTerms: () => setUnsafeTermAttempts([]),
+    forbiddenTerms: ForbiddenTerms
   };
 };
 

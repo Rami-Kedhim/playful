@@ -39,45 +39,31 @@ const LoadingFallback = () => (
 // Main routes component
 const routes = [
   // Public routes
-  <Route path="/auth" element={<AuthPage />} />,
+  <Route path="/auth" element={<AuthPage />} key="auth" />,
   
   // Routes using AppLayout
-  <Route path="/" element={<AppLayout><HomePage /></AppLayout>} />,
+  <Route path="/" element={<AppLayout><HomePage /></AppLayout>} key="home" />,
   <Route path="/profile" element={
     <ProtectedRoute>
       <AppLayout>
-        {/* Use AuthProvider or create empty values to match required Props */}
         <Suspense fallback={<LoadingFallback />}>
-          {(useAuth) => {
-            const { user: authUser, profile: authProfile } = useAuth();
-            
-            // Define fallback user and profile if needed
-            const defaultUser: User = {
-              id: '1',
-              username: 'user',
-              email: 'user@example.com',
-              role: 'user',
-              createdAt: new Date().toISOString(),
-            };
-            
-            const defaultProfile: UserProfile = {
-              id: '1',
-              email: 'user@example.com',
-              name: 'User',
-            };
-            
-            return (
-              <ProfilePage 
-                user={authUser || defaultUser} 
-                profile={authProfile || defaultProfile}
-                initialTab="about"
-              />
-            );
-          }}
+          <ProfilePage user={{
+            id: '1',
+            username: 'user',
+            email: 'user@example.com',
+            role: 'user',
+            createdAt: new Date().toISOString(),
+          }} 
+          profile={{
+            id: '1',
+            email: 'user@example.com',
+            name: 'User',
+          }} 
+          initialTab="about" />
         </Suspense>
       </AppLayout>
     </ProtectedRoute>
-  } />,
+  } key="profile" />,
   <Route path="/favorites" element={<ProtectedRoute><AppLayout><FavoritesPage /></AppLayout></ProtectedRoute>} />,
   <Route path="/messages" element={<ProtectedRoute><AppLayout><MessagesPage /></AppLayout></ProtectedRoute>} />,
   <Route path="/metaverse" element={<AppLayout><MetaversePage /></AppLayout>} />,
