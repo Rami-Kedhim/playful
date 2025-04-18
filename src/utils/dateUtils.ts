@@ -1,59 +1,60 @@
 
-// Calculate expiry date (6 months from creation)
-export const calculateExpiryDate = (createdAt: Date): Date => {
-  const expiryDate = new Date(createdAt);
-  expiryDate.setMonth(expiryDate.getMonth() + 6);
+// Date formatting and manipulation utilities
+
+/**
+ * Safely parses a date string to Date object
+ */
+export const safelyParseDate = (dateString?: string): Date => {
+  if (!dateString) return new Date();
+  
+  try {
+    return new Date(dateString);
+  } catch (error) {
+    console.error("Error parsing date:", error);
+    return new Date();
+  }
+};
+
+/**
+ * Calculates the expiry date for a content item
+ */
+export const calculateExpiryDate = (startDate: Date, durationDays: number): Date => {
+  const expiryDate = new Date(startDate);
+  expiryDate.setDate(expiryDate.getDate() + durationDays);
   return expiryDate;
 };
 
-// Calculate days remaining until expiry
+/**
+ * Calculates remaining days for a content subscription
+ */
 export const calculateDaysRemaining = (expiryDate: Date): number => {
-  const now = new Date();
-  const diffTime = expiryDate.getTime() - now.getTime();
+  const today = new Date();
+  const diffTime = expiryDate.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return Math.max(0, diffDays);
 };
 
-// Determine content status based on days remaining
-export const determineContentStatus = (createdAt: Date): 'active' | 'expiring' | 'expired' => {
-  const expiryDate = calculateExpiryDate(createdAt);
+/**
+ * Determines the status of content based on expiry
+ */
+export const determineContentStatus = (expiryDate: Date): 'active' | 'expiring' | 'expired' => {
   const daysRemaining = calculateDaysRemaining(expiryDate);
   
   if (daysRemaining <= 0) {
     return 'expired';
-  } else if (daysRemaining < 30) {
+  } else if (daysRemaining <= 7) {
     return 'expiring';
   } else {
     return 'active';
   }
 };
 
-// Calculate renewal cost based on status
-export const calculateRenewalCost = (status: 'active' | 'expiring' | 'expired', contentType: string = 'standard'): number => {
-  const baseRate = contentType === 'premium' ? 2 : 1;
-  
-  switch (status) {
-    case 'expired':
-      return baseRate * 1.5;
-    case 'expiring':
-      return baseRate * 1.2;
-    default:
-      return baseRate;
+/**
+ * Calculate renewal cost with potential discount
+ */
+export const calculateRenewalCost = (baseCost: number, isEarlyRenewal: boolean): number => {
+  if (isEarlyRenewal) {
+    return baseCost * 0.9; // 10% discount for early renewal
   }
-};
-
-// Convert string date to Date object safely
-export const safelyParseDate = (dateString: string | Date | undefined): Date => {
-  if (!dateString) return new Date();
-  
-  if (dateString instanceof Date) {
-    return dateString;
-  }
-  
-  try {
-    return new Date(dateString);
-  } catch (e) {
-    console.error("Error parsing date:", e);
-    return new Date();
-  }
+  return baseCost;
 };

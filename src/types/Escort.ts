@@ -28,13 +28,13 @@ export interface Escort {
   ethnicity?: string;
   hairColor?: string;
   eyeColor?: string;
-  profileType?: string; // Added missing profileType property
-  orientation?: string; // Added missing orientation property
+  profileType?: string; // Added for compatibility
+  orientation?: string; // Added for compatibility
   price?: number;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
-  serviceTypes?: string[]; // Added missing serviceTypes property
-  // Add any other properties used in components
+  serviceTypes?: string[]; // Added for compatibility
+  featured?: boolean; // Added missing property
 }
 
 // Export Availability interface since it's used in useEscortAvailability.ts

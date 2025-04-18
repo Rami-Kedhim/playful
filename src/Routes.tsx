@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -64,11 +63,11 @@ const RoutesComponent: React.FC = () => {
     location: authProfile.location || '',
     bio: authProfile.bio || '',
     isVerified: authProfile.is_verified || false,
-    website: authProfile.website || '',
+    website: authProfile.website || '', // Using updated type
     avatarUrl: authProfile.avatar_url || authProfile.profileImageUrl || '',
     joinedDate: new Date(),
     avatar_url: authProfile.avatar_url || authProfile.profileImageUrl || '',
-    phone: authProfile.phone || ''
+    phone: authProfile.phone || '' // Using updated type
   } : null;
   
   return (

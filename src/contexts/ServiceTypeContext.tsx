@@ -7,6 +7,9 @@ interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
   setServiceType: (type: ServiceTypeFilter) => void;
   supportedServiceTypes: string[];
+  specializedServiceTypes?: string[];
+  selectedSpecializedTypes?: string[];
+  toggleSpecializedType?: (type: string) => void;
   filterForbiddenTerms: boolean;
   onUnsafeTermRemap: (original: string, remapped: string) => void;
 }
@@ -33,6 +36,15 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
   onUnsafeTermRemap,
 }) => {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>(null);
+  const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
+  
+  const toggleSpecializedType = (type: string) => {
+    setSelectedSpecializedTypes(prev => 
+      prev.includes(type) 
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    );
+  };
 
   return (
     <ServiceTypeContext.Provider 
@@ -40,6 +52,9 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
         serviceType, 
         setServiceType,
         supportedServiceTypes,
+        specializedServiceTypes: supportedServiceTypes,
+        selectedSpecializedTypes,
+        toggleSpecializedType,
         filterForbiddenTerms,
         onUnsafeTermRemap
       }}
@@ -50,3 +65,4 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
 };
 
 export const useServiceTypeContext = () => useContext(ServiceTypeContext);
+export const useServiceType = useServiceTypeContext;

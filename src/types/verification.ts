@@ -3,8 +3,8 @@ export interface VerificationDocument {
   id: string;
   userId: string;
   type: string;
-  url: string; // Added missing url property
-  uploadedAt: Date; // Use camelCase
+  url: string;
+  uploadedAt: Date;
   status: string;
   metadata?: Record<string, any>;
   
@@ -15,6 +15,8 @@ export interface VerificationDocument {
   fileUrl?: string;
   document_url?: string;
   file_path?: string;
+  documentType?: string;
+  created_at?: Date;
 }
 
 export interface VerificationRequest {
@@ -34,14 +36,21 @@ export interface VerificationRequest {
   verificationLevel?: string;
   documents?: VerificationDocument[];
   rejectionReason?: string;
+  user_id?: string;
+  profile_id?: string;
+  requestedLevel?: string;
+  createdAt?: Date;
+  reviewedAt?: Date;
+  level?: string;
 }
 
 export enum VerificationStatus {
   PENDING = 'pending',
-  REVIEW = 'review', // NOT IN_REVIEW (corrected)
+  REVIEW = 'review',
+  IN_REVIEW = 'review', // Alias for backward compatibility
   APPROVED = 'approved',
   REJECTED = 'rejected',
-  EXPIRED = 'expired' // Added missing EXPIRED status
+  EXPIRED = 'expired'
 }
 
 export interface DocumentType {
@@ -71,7 +80,6 @@ export interface VerificationFormValues {
   };
 }
 
-// Add missing VerificationLevel enum
 export enum VerificationLevel {
   NONE = 'none',
   BASIC = 'basic',

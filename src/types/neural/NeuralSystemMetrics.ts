@@ -50,6 +50,7 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
+  specialization?: string; // Added for BrainHubDashboard
 }
 
 export interface SystemHealthMetrics {

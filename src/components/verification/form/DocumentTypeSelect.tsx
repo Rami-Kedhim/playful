@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { DocumentType } from '@/types/verification';
 import { UseFormReturn } from 'react-hook-form';
+import { toDocumentType } from '../utils/documentTypeHelper';
 
 // Define document types for the component
 const DOCUMENT_TYPES = [
@@ -41,7 +42,8 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeCha
             onValueChange={(value) => {
               field.onChange(value);
               if (onTypeChange) {
-                onTypeChange(value as DocumentType);
+                // Use the helper to safely convert string to DocumentType
+                onTypeChange(toDocumentType(value));
               }
             }}
             defaultValue={field.value}

@@ -7,11 +7,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Check, Info } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-import { ServiceTypeFilter as ServiceTypeFilterType } from '../context/ServiceTypeContext';
-import { useServiceType } from '../context/ServiceTypeContext';
+import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
+import { useServiceType } from '@/contexts/ServiceTypeContext';
 
-// Import ServiceTypeIcon separately since it might be in a different location
-// This is just a placeholder - you'd need to update with the correct import path
+// Simple ServiceTypeIcon component
 const ServiceTypeIcon = ({ type, variant }: { type: any, variant: 'colored' | 'default' }) => {
   return <div className={variant === 'colored' ? 'text-primary' : 'text-muted-foreground'}>Icon</div>;
 };
@@ -19,8 +18,8 @@ const ServiceTypeIcon = ({ type, variant }: { type: any, variant: 'colored' | 'd
 interface ServiceTypeSelectionProps {
   className?: string;
   showSpecializedTypes?: boolean;
-  onChange?: (type: ServiceTypeFilterType) => void;
-  value?: ServiceTypeFilterType;
+  onChange?: (type: ServiceTypeFilter) => void;
+  value?: ServiceTypeFilter;
   showTitle?: boolean;
 }
 
@@ -31,7 +30,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
   value,
   showTitle = true
 }) => {
-  // Get specialized service types from context if available
+  // Get context values
   const {
     serviceType: contextServiceType,
     setServiceType: contextSetServiceType,
@@ -47,7 +46,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
   const serviceType = isControlled ? value : contextServiceType;
   
   // Handle service type changes
-  const handleServiceTypeChange = (type: ServiceTypeFilterType) => {
+  const handleServiceTypeChange = (type: ServiceTypeFilter) => {
     if (isControlled) {
       onChange(type);
     } else {
@@ -56,7 +55,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
   };
   
   // Basic service types for location-based filtering
-  const basicServiceTypes: ServiceTypeFilterType[] = ["in-person", "virtual", "both", ""];
+  const basicServiceTypes: ServiceTypeFilter[] = ["in-person", "virtual", "both", null];
   
   const labels: Record<string, string> = {
     "in-person": "In Person",
@@ -88,7 +87,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
                 type={type} 
                 variant={serviceType === type ? "colored" : "default"} 
               />
-              <span>{labels[type]}</span>
+              <span>{type ? labels[type] : "Any Type"}</span>
             </div>
             
             {serviceType === type && (
@@ -121,17 +120,17 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
             {specializedServiceTypes.map((serviceType) => (
               <Badge
                 key={serviceType}
-                variant={selectedSpecializedTypes.includes(serviceType) ? "default" : "outline"}
+                variant={selectedSpecializedTypes?.includes(serviceType) ? "default" : "outline"}
                 className={cn(
                   "cursor-pointer py-2 px-3 flex items-center justify-between",
                   "hover:bg-accent hover:text-accent-foreground transition-colors",
                   "text-xs font-normal",
-                  selectedSpecializedTypes.includes(serviceType) && "bg-primary/20 hover:bg-primary/30 text-foreground"
+                  selectedSpecializedTypes?.includes(serviceType) && "bg-primary/20 hover:bg-primary/30 text-foreground"
                 )}
-                onClick={() => toggleSpecializedType(serviceType)}
+                onClick={() => toggleSpecializedType?.(serviceType)}
               >
                 <span>{serviceType}</span>
-                {selectedSpecializedTypes.includes(serviceType) && (
+                {selectedSpecializedTypes?.includes(serviceType) && (
                   <Check size={14} className="ml-2" />
                 )}
               </Badge>
