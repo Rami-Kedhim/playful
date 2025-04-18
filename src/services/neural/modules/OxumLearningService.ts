@@ -9,7 +9,7 @@ export interface ProcessingResult {
 
 export interface OxumLearningService {
   process: (input: any) => Promise<ProcessingResult>;
-  getCulturalContexts: () => Promise<string[]>;
+  getCulturalContexts: (params?: any) => Promise<string[]>;
 }
 
 // Export the implementation instance
@@ -23,7 +23,7 @@ export const oxumLearningService: OxumLearningService = {
       timestamp: new Date()
     };
   },
-  getCulturalContexts: async (): Promise<string[]> => {
+  getCulturalContexts: async (params?: any): Promise<string[]> => {
     return [
       'Western', 'Eastern', 'Middle-Eastern', 'African', 
       'Latin American', 'Southeast Asian', 'Northern European'

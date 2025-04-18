@@ -28,12 +28,12 @@ export interface Escort {
   ethnicity?: string;
   hairColor?: string;
   eyeColor?: string;
-  profileType?: string;
-  orientation?: string;
+  profileType?: string; // Added missing profileType property
+  orientation?: string; // Added missing orientation property
   price?: number;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
-  serviceTypes?: string[];
+  serviceTypes?: string[]; // Added missing serviceTypes property
   // Add any other properties used in components
 }
 

@@ -7,6 +7,14 @@ export interface VerificationDocument {
   uploadedAt: Date; // Use camelCase
   status: string;
   metadata?: Record<string, any>;
+  
+  // For backward compatibility with existing code
+  document_type?: string;
+  uploaded_at?: Date;
+  file_url?: string;
+  fileUrl?: string;
+  document_url?: string;
+  file_path?: string;
 }
 
 export interface VerificationRequest {
@@ -20,13 +28,20 @@ export interface VerificationRequest {
   reviewer_id?: string;
   reviewer_notes?: string;
   requested_level?: string;
+  
+  // For backward compatibility with existing code
+  submittedAt?: Date;
+  verificationLevel?: string;
+  documents?: VerificationDocument[];
+  rejectionReason?: string;
 }
 
 export enum VerificationStatus {
   PENDING = 'pending',
   REVIEW = 'review', // NOT IN_REVIEW (corrected)
   APPROVED = 'approved',
-  REJECTED = 'rejected'
+  REJECTED = 'rejected',
+  EXPIRED = 'expired' // Added missing EXPIRED status
 }
 
 export interface DocumentType {
@@ -54,4 +69,12 @@ export interface VerificationFormValues {
     file: File;
     preview: string;
   };
+}
+
+// Add missing VerificationLevel enum
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  ENHANCED = 'enhanced',
+  PREMIUM = 'premium'
 }
