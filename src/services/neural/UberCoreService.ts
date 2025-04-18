@@ -3,6 +3,7 @@ export interface UberCoreService {
   configure: (config: any) => Promise<boolean>;
   getStatus: () => Promise<any>;
   processUserInput: (input: string) => Promise<any>;
+  initialize?: () => Promise<void>;
 }
 
 export const uberCoreService: UberCoreService = {
@@ -25,5 +26,9 @@ export const uberCoreService: UberCoreService = {
       response: "This is a response from UberCore",
       processed: true
     };
+  },
+  
+  initialize: async (): Promise<void> => {
+    console.log("Initializing UberCore");
   }
 };

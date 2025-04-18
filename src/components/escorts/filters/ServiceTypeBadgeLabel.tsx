@@ -12,6 +12,42 @@ interface ServiceTypeBadgeLabelProps {
   className?: string;
 }
 
+// Helper function to get badge details for a service type
+export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter) => {
+  if (!type) return null;
+  
+  switch(type) {
+    case "in-person":
+      return {
+        label: "In Person",
+        color: "bg-blue-500/10 text-blue-600 border-blue-200",
+        colorDark: "dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
+        icon: "🏠"
+      };
+    case "virtual":
+      return {
+        label: "Virtual",
+        color: "bg-purple-500/10 text-purple-600 border-purple-200",
+        colorDark: "dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
+        icon: "💻"
+      };
+    case "both":
+      return {
+        label: "In Person & Virtual",
+        color: "bg-green-500/10 text-green-600 border-green-200",
+        colorDark: "dark:bg-green-900/30 dark:text-green-400 dark:border-green-800",
+        icon: "✓"
+      };
+    default:
+      return {
+        label: "Unknown",
+        color: "bg-gray-500/10 text-gray-600 border-gray-200",
+        colorDark: "dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-800",
+        icon: "?"
+      };
+  }
+};
+
 const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
   type, 
   variant = 'default',
@@ -19,40 +55,7 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
 }) => {
   if (!type) return null;
   
-  const getTypeDetails = (type: ServiceTypeFilter) => {
-    switch(type) {
-      case "in-person":
-        return {
-          label: "In Person",
-          color: "bg-blue-500/10 text-blue-600 border-blue-200",
-          colorDark: "dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
-          icon: "🏠"
-        };
-      case "virtual":
-        return {
-          label: "Virtual",
-          color: "bg-purple-500/10 text-purple-600 border-purple-200",
-          colorDark: "dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800",
-          icon: "💻"
-        };
-      case "both":
-        return {
-          label: "In Person & Virtual",
-          color: "bg-green-500/10 text-green-600 border-green-200",
-          colorDark: "dark:bg-green-900/30 dark:text-green-400 dark:border-green-800",
-          icon: "✓"
-        };
-      default:
-        return {
-          label: "Unknown",
-          color: "bg-gray-500/10 text-gray-600 border-gray-200",
-          colorDark: "dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-800",
-          icon: "?"
-        };
-    }
-  };
-  
-  const details = getTypeDetails(type);
+  const details = getServiceTypeBadgeLabel(type);
   
   if (variant === 'small') {
     return (

@@ -41,7 +41,7 @@ export interface NeuralModel {
   name: string;
   type: string;
   version: string;
-  capabilities: string[] | string; // Fix: Allow both string[] and string
+  capabilities: string[] | string; // Allow both string[] and string
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
     accuracy: number;

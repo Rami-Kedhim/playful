@@ -1,42 +1,34 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
-export type ServiceTypeFilter = string | null;
-
-interface ServiceTypeContextType {
+export interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
   setServiceType: (type: ServiceTypeFilter) => void;
-  supportedServiceTypes: string[];
-  specializedServiceTypes?: string[];
-  selectedSpecializedTypes?: string[];
-  toggleSpecializedType?: (type: string) => void;
-  filterForbiddenTerms: boolean;
-  onUnsafeTermRemap: (original: string, remapped: string) => void;
+  specializedServiceTypes: string[];
+  selectedSpecializedTypes: string[];
+  toggleSpecializedType: (type: string) => void;
+  clearSpecializedTypes: () => void;
+  hasActiveFilters: boolean;
 }
 
-const ServiceTypeContext = createContext<ServiceTypeContextType>({
-  serviceType: null,
-  setServiceType: () => {},
-  supportedServiceTypes: [],
-  filterForbiddenTerms: false,
-  onUnsafeTermRemap: () => {},
-});
+const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(undefined);
 
-interface ServiceTypeProviderProps {
-  children: ReactNode;
-  supportedServiceTypes: string[];
-  filterForbiddenTerms: boolean;
-  onUnsafeTermRemap: (original: string, remapped: string) => void;
-}
-
-export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
-  children,
-  supportedServiceTypes,
-  filterForbiddenTerms,
-  onUnsafeTermRemap,
-}) => {
+export const ServiceTypeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [serviceType, setServiceType] = useState<ServiceTypeFilter>(null);
   const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
+  
+  // Predefined specialized service types
+  const specializedServiceTypes = [
+    'Massage',
+    'Dinner Date',
+    'Travel Companion',
+    'Role Play',
+    'Coaching',
+    'Event Companion',
+    'Video Chat',
+    'Photo Content'
+  ];
   
   const toggleSpecializedType = (type: string) => {
     setSelectedSpecializedTypes(prev => 
@@ -45,24 +37,34 @@ export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
         : [...prev, type]
     );
   };
-
+  
+  const clearSpecializedTypes = () => {
+    setSelectedSpecializedTypes([]);
+  };
+  
+  const hasActiveFilters = serviceType !== null || selectedSpecializedTypes.length > 0;
+  
   return (
-    <ServiceTypeContext.Provider 
-      value={{ 
-        serviceType, 
-        setServiceType,
-        supportedServiceTypes,
-        specializedServiceTypes: supportedServiceTypes,
-        selectedSpecializedTypes,
-        toggleSpecializedType,
-        filterForbiddenTerms,
-        onUnsafeTermRemap
-      }}
-    >
+    <ServiceTypeContext.Provider value={{
+      serviceType,
+      setServiceType,
+      specializedServiceTypes,
+      selectedSpecializedTypes,
+      toggleSpecializedType,
+      clearSpecializedTypes,
+      hasActiveFilters
+    }}>
       {children}
     </ServiceTypeContext.Provider>
   );
 };
 
-export const useServiceTypeContext = () => useContext(ServiceTypeContext);
-export const useServiceType = useServiceTypeContext;
+export const useServiceType = (): ServiceTypeContextType => {
+  const context = useContext(ServiceTypeContext);
+  
+  if (context === undefined) {
+    throw new Error('useServiceType must be used within a ServiceTypeProvider');
+  }
+  
+  return context;
+};

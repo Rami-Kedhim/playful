@@ -16,6 +16,9 @@ export interface Escort {
   availability?: {
     weekday?: string[];
     weekend?: string[];
+    customDays?: Record<string, string[]>;
+    days?: string[];
+    hours?: string[];
   };
   isVerified?: boolean;
   isOnline?: boolean;
@@ -49,6 +52,7 @@ export interface Escort {
   images?: string[];
   videos?: any[];
   verificationLevel?: string;
+  verification_level?: string;
   featured?: boolean;
   price?: number;
   providesInPersonServices?: boolean;
@@ -62,6 +66,9 @@ export interface Escort {
   };
   isFavorited?: boolean;
   isPremium?: boolean;
+  isAI?: boolean;
+  description?: string;
+  measurements?: string;
 }
 
 // Export Availability interface since it's used in useEscortAvailability.ts
@@ -69,6 +76,10 @@ export interface Availability {
   weekday?: string[];
   weekend?: string[];
   customDays?: Record<string, string[]>;
+  // Additional properties for backward compatibility
+  days?: string[];
+  hours?: string[];
+  customNotes?: string;
 }
 
 // Export Video interface for useVideoManagement.ts
@@ -80,7 +91,7 @@ export interface Video {
   videoUrl: string;
   duration: number;
   views: number;
-  createdAt: Date;
+  createdAt: Date | string;
   isPublished: boolean;
   escortId: string;
   viewCount?: number;
@@ -111,4 +122,63 @@ export enum BookingStatus {
   DECLINED = 'declined',
   CANCELED = 'canceled',
   COMPLETED = 'completed'
+}
+
+// Add VerificationDocument and VerificationRequest for verification components
+export interface VerificationDocument {
+  id: string;
+  userId: string;
+  type: string;
+  url: string;
+  uploadedAt: Date;
+  status: string;
+  document_type?: string; // For backward compatibility
+  file_url?: string; // For backward compatibility
+  fileUrl?: string; // For backward compatibility
+  document_url?: string; // For backward compatibility
+  file_path?: string; // For backward compatibility
+  uploaded_at?: Date; // For backward compatibility
+  created_at?: Date; // For backward compatibility
+}
+
+export interface VerificationRequest {
+  id: string;
+  userId: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  documentIds: string[];
+  reviewedBy?: string;
+  reviewedAt?: Date;
+  rejectionReason?: string;
+  verificationLevel?: string;
+  documents?: VerificationDocument[]; // For backward compatibility
+  user_id?: string; // For backward compatibility
+  profile_id?: string; // For backward compatibility
+  created_at?: Date; // For backward compatibility
+  updated_at?: Date; // For backward compatibility
+  reviewed_at?: Date; // For backward compatibility
+  submitted_at?: Date; // For backward compatibility
+  rejected_reason?: string; // For backward compatibility
+  requested_level?: string; // For backward compatibility
+  level?: string; // For backward compatibility
+  submittedAt?: Date; // For backward compatibility
+}
+
+// Enum for verification status
+export enum VerificationStatus {
+  PENDING = 'pending',
+  REVIEW = 'review',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  EXPIRED = 'expired',
+  IN_REVIEW = 'review' // Alias for REVIEW
+}
+
+// Enum for verification level
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  VERIFIED = 'verified',
+  PREMIUM = 'premium'
 }
