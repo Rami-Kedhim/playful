@@ -1,11 +1,43 @@
 
 import { Escort, ContactInfo } from '@/types/escort';
-import { generateRandomEscort } from '@/data/mock/profileGenerator';
+
+// Mock escort data generator function since generateRandomEscort is missing
+const generateRandomEscort = (id: string = `escort-${Date.now()}`): Escort => {
+  const gender = Math.random() > 0.7 ? 'male' : 'female';
+  const age = Math.floor(Math.random() * 15) + 21; // 21-35
+  
+  return {
+    id,
+    name: `Escort ${id.slice(-4)}`,
+    age,
+    gender,
+    location: ['New York', 'Los Angeles', 'Miami', 'Las Vegas', 'Chicago'][Math.floor(Math.random() * 5)],
+    bio: `Professional companion with ${Math.floor(Math.random() * 5) + 1} years of experience.`,
+    price: Math.floor(Math.random() * 300) + 200, // $200-$500
+    rating: Math.random() * 2 + 3, // 3.0-5.0
+    services: [
+      'Dinner Date', 
+      'Event Companion',
+      'Travel Companion',
+      'Massage',
+      'Overnight'
+    ].slice(0, Math.floor(Math.random() * 4) + 1),
+    images: [
+      `https://picsum.photos/seed/${id}-1/800/1200`,
+      `https://picsum.photos/seed/${id}-2/800/1200`
+    ],
+    isVerified: Math.random() > 0.5,
+    featured: Math.random() > 0.8,
+    contactInfo: {
+      email: `escort${id.slice(-4)}@example.com`,
+      phone: `+1555${Math.floor(1000000 + Math.random() * 9000000)}`,
+      website: `https://example.com/escort${id.slice(-4)}`
+    }
+  };
+};
 
 // Mock escort data
-const mockEscorts: Escort[] = [
-  // Mocked data will be provided by generateRandomEscort function
-];
+const mockEscorts: Escort[] = [];
 
 // Populate some initial data
 for (let i = 0; i < 10; i++) {
@@ -36,7 +68,11 @@ export const createEscort = async (escort: Partial<Escort>): Promise<Escort> => 
     services: escort.services || [],
     images: escort.images || [],
     isVerified: escort.isVerified || false,
-    contactInfo: escort.contactInfo || { email: 'escort@example.com' },
+    contactInfo: escort.contactInfo || { 
+      email: 'escort@example.com',
+      phone: '+1555123456',
+      website: 'https://example.com'
+    },
     featured: false
   };
 

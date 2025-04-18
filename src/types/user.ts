@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   username: string;
@@ -23,7 +22,6 @@ export interface UserProfile {
   phone_number?: string;
 }
 
-// Add missing auth types
 export enum UserRole {
   USER = 'user',
   ESCORT = 'escort',

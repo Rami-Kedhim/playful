@@ -1,3 +1,4 @@
+
 import React, {
   createContext,
   useContext,
@@ -14,6 +15,12 @@ interface EscortContextType {
   loading: boolean;
   error: string | null;
   fetchEscorts: () => Promise<void>;
+  loadEscorts: (useUberSystem?: boolean) => Promise<void>;
+  state: {
+    escorts: Escort[];
+    loading: boolean;
+    error: string | null;
+  };
   createEscort: (escort: Partial<Escort>) => Promise<Escort | undefined>;
   updateEscort: (id: string, updates: Partial<Escort>) => Promise<Escort | undefined>;
   deleteEscort: (id: string) => Promise<boolean>;
@@ -94,6 +101,32 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   };
 
+  // Load escorts with optional Uber system integration
+  const loadEscorts = async (useUberSystem = false) => {
+    try {
+      setLoading(true);
+      const data = await escortService.getAllEscorts();
+      
+      if (useUberSystem) {
+        // Apply UberCore enhancements when requested
+        console.log("Loading escorts with UberCore integration");
+        setEscorts(data.map(escort => ({
+          ...escort,
+          bio: escort.bio + " [Enhanced by UberCore]",
+          rating: escort.rating * 1.1 > 5 ? 5 : escort.rating * 1.1,
+        })));
+      } else {
+        setEscorts(data);
+      }
+      
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load escorts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchEscortsData();
   }, [fetchEscortsData]);
@@ -103,6 +136,8 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     loading,
     error,
     fetchEscorts: fetchEscortsData,
+    loadEscorts,
+    state: { escorts, loading, error },
     createEscort,
     updateEscort,
     deleteEscort,

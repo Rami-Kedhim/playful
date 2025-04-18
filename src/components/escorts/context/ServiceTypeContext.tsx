@@ -1,67 +1,71 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { ServiceType } from '../filters/ServiceTypeFilterRules';
-
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | 'massage' | 'dinner';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { ServiceTypeFilter } from '@/types/filters';
 
 export interface ServiceTypeContextType {
-  selectedType: ServiceTypeFilter | null;
-  setSelectedType: (type: ServiceTypeFilter | null) => void;
-  toggleType: (type: ServiceTypeFilter) => void;
-  isTypeSelected: (type: ServiceTypeFilter) => boolean;
-  
-  // Add these missing properties
-  selectedSpecializedTypes: ServiceTypeFilter[];
-  toggleSpecializedType: (type: ServiceTypeFilter) => void;
-  specializedServiceTypes: ServiceTypeFilter[];
-  
-  // Add utility methods
-  isInPersonService: () => boolean;
-  isVirtualService: () => boolean;
-  isBothServiceTypes: () => boolean;
-  isAnyServiceType: (type: ServiceTypeFilter) => boolean;
+  selectedServiceType: ServiceTypeFilter;
+  setSelectedServiceType: (type: ServiceTypeFilter) => void;
+  selectedSpecializedTypes: string[];
+  toggleSpecializedType: (type: string) => void;
+  specializedServiceTypes: string[];
+  isInPersonService: boolean;
+  isVirtualService: boolean;
+  isBothServiceTypes: boolean;
+  isAnyServiceType: boolean;
   clearServiceType: () => void;
 }
 
 const ServiceTypeContext = createContext<ServiceTypeContextType | undefined>(undefined);
 
-export const ServiceTypeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [selectedType, setSelectedType] = useState<ServiceTypeFilter | null>(null);
-  const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<ServiceTypeFilter[]>([]);
+export interface ServiceTypeProviderProps {
+  children: ReactNode;
+  supportedServiceTypes?: ServiceTypeFilter[];
+  filterForbiddenTerms?: boolean;
+  onUnsafeTermRemap?: (original: string, remapped: ServiceTypeFilter) => void;
+}
+
+export const ServiceTypeProvider: React.FC<ServiceTypeProviderProps> = ({
+  children,
+  supportedServiceTypes = ['in-person', 'virtual', 'both', 'massage', 'dinner'],
+  filterForbiddenTerms = true,
+  onUnsafeTermRemap = () => {}
+}) => {
+  const [selectedServiceType, setSelectedServiceType] = useState<ServiceTypeFilter>('');
+  const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
   
-  // Available specialized service types
-  const specializedServiceTypes: ServiceTypeFilter[] = ['massage', 'dinner'];
+  // Define specialized service types
+  const specializedServiceTypes = [
+    'Dinner Date',
+    'Massage',
+    'Event Companion',
+    'Travel Companion',
+    'GFE',
+    'Overnight'
+  ];
   
-  // Toggle specialized service type selection
-  const toggleSpecializedType = (type: ServiceTypeFilter) => {
-    setSelectedSpecializedTypes(prev => 
-      prev.includes(type) 
-        ? prev.filter(t => t !== type) 
+  const isInPersonService = selectedServiceType === 'in-person';
+  const isVirtualService = selectedServiceType === 'virtual';
+  const isBothServiceTypes = selectedServiceType === 'both';
+  const isAnyServiceType = selectedServiceType === '';
+  
+  const toggleSpecializedType = (type: string) => {
+    setSelectedSpecializedTypes(prev =>
+      prev.includes(type)
+        ? prev.filter(t => t !== type)
         : [...prev, type]
     );
   };
-
-  const toggleType = (type: ServiceTypeFilter) => {
-    setSelectedType(prev => (prev === type ? null : type));
-  };
-
-  const isTypeSelected = (type: ServiceTypeFilter): boolean => {
-    return selectedType === type;
-  };
   
-  const isInPersonService = (): boolean => selectedType === 'in-person';
-  const isVirtualService = (): boolean => selectedType === 'virtual';
-  const isBothServiceTypes = (): boolean => selectedType === 'both';
-  const isAnyServiceType = (type: ServiceTypeFilter): boolean => selectedType === type;
-  const clearServiceType = () => setSelectedType(null);
+  const clearServiceType = () => {
+    setSelectedServiceType('');
+    setSelectedSpecializedTypes([]);
+  };
 
   return (
     <ServiceTypeContext.Provider
       value={{
-        selectedType,
-        setSelectedType,
-        toggleType,
-        isTypeSelected,
+        selectedServiceType,
+        setSelectedServiceType,
         selectedSpecializedTypes,
         toggleSpecializedType,
         specializedServiceTypes,
@@ -77,10 +81,10 @@ export const ServiceTypeProvider: React.FC<{ children: ReactNode }> = ({ childre
   );
 };
 
-export const useServiceTypeContext = (): ServiceTypeContextType => {
+export const useServiceType = (): ServiceTypeContextType => {
   const context = useContext(ServiceTypeContext);
-  if (!context) {
-    throw new Error('useServiceTypeContext must be used within a ServiceTypeProvider');
+  if (context === undefined) {
+    throw new Error('useServiceType must be used within a ServiceTypeProvider');
   }
   return context;
 };

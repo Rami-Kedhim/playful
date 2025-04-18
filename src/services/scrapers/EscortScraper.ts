@@ -1,169 +1,141 @@
-import axios from 'axios';
-import * as cheerio from 'cheerio';
-import { Escort, ContactInfo, Rates } from '@/types/escort';
 
-interface ScrapedEscort {
-  id: string;
-  name: string;
-  age: number;
-  gender: string;
-  location: string;
-  bio: string;
-  services: string[];
-  price: number;
-  imageUrl: string;
-  profileImage: string;
-  gallery: string[];
-  rates: Rates;
-  contactInfo: ContactInfo;
-  phone: string;
-  email: string;
-  website: string;
-  rating: number;
-  reviewCount: number;
-  isAvailable: boolean;
-  boostLevel: number;
-}
+import { Escort, Rates } from '@/types/escort';
 
 export class EscortScraper {
   private baseUrl: string;
+  private apiKey: string | null;
+  private isInitialized: boolean = false;
 
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string = '', apiKey: string | null = null) {
     this.baseUrl = baseUrl;
+    this.apiKey = apiKey;
   }
 
-  async scrapeEscortList(page: number = 1): Promise<ScrapedEscort[]> {
-    const url = `${this.baseUrl}/escorts?page=${page}`;
-    try {
-      const response = await axios.get(url);
-      const html = response.data;
-      const $ = cheerio.load(html);
-      const escorts: ScrapedEscort[] = [];
+  /**
+   * Initialize the scraper
+   */
+  public async initialize(): Promise<boolean> {
+    // Simulating an initialization process
+    await new Promise(resolve => setTimeout(resolve, 500));
+    this.isInitialized = true;
+    return true;
+  }
 
-      $('.escort-card').each((index, element) => {
-        const escort = this.extractEscortData($, element);
-        escorts.push(escort);
-      });
-
-      return escorts;
-    } catch (error) {
-      console.error('Error scraping escort list:', error);
-      return [];
+  /**
+   * Get all escorts from the source
+   */
+  public async getEscorts(): Promise<Escort[]> {
+    if (!this.isInitialized) {
+      await this.initialize();
     }
+    
+    // Simulate API call with mock data
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    return this.generateMockEscorts(10);
   }
 
-  async scrapeEscortDetail(escortId: string): Promise<ScrapedEscort | null> {
-    const url = `${this.baseUrl}/escorts/${escortId}`;
-    try {
-      const response = await axios.get(url);
-      const html = response.data;
-      const $ = cheerio.load(html);
-
-      // Extract detailed information from the detail page
-      const escort = this.extractEscortDetails($, html);
-      return escort;
-    } catch (error) {
-      console.error(`Error scraping escort detail for ID ${escortId}:`, error);
-      return null;
+  /**
+   * Get escort by ID
+   */
+  public async getEscortById(id: string): Promise<Escort | null> {
+    if (!this.isInitialized) {
+      await this.initialize();
     }
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const mockEscort = this.generateMockEscorts(1, id)[0];
+    return mockEscort || null;
   }
 
-  private extractEscortData($, element): ScrapedEscort {
-    const id = $(element).data('escort-id') || `escort-${Date.now()}`;
-    const name = $(element).find('.name').text().trim() || 'Anonymous';
-    const age = parseInt($(element).find('.age').text(), 10) || 25;
-    const gender = $(element).find('.gender').text().trim() || 'Unknown';
-    const location = $(element).find('.location').text().trim() || 'Unknown';
-    const bio = $(element).find('.bio').text().trim() || 'No bio provided';
-    const services = $(element).find('.services').text().split(',').map(s => s.trim()) || [];
-    const price = parseInt($(element).find('.price').text().replace(/\D/g, ''), 10) || 200;
-    const imageUrl = $(element).find('img').attr('src') || '';
-    const profileImage = $(element).find('.profile-image').attr('src') || '';
-    const gallery = $(element).find('.gallery-image').map((i, el) => $(el).attr('src')).get() || [];
-
-    return {
-      id,
-      name,
-      age,
-      gender,
-      location,
-      bio,
-      services,
-      price,
-      imageUrl,
-      profileImage,
-      gallery,
-      rates: { hourly: price },
-      contactInfo: { email: 'contact@example.com' },
-      phone: 'N/A',
-      email: 'N/A',
-      website: 'N/A',
-      rating: 4.5,
-      reviewCount: 10,
-      isAvailable: true,
-      boostLevel: 1
-    };
+  /**
+   * Search escorts by query
+   */
+  public async searchEscorts(query: string): Promise<Escort[]> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const mockEscorts = this.generateMockEscorts(5);
+    return mockEscorts.filter(escort => 
+      escort.name.toLowerCase().includes(query.toLowerCase()) ||
+      escort.location.toLowerCase().includes(query.toLowerCase()) ||
+      escort.services.some(s => s.toLowerCase().includes(query.toLowerCase()))
+    );
   }
 
-  private extractEscortDetails($, html: string): ScrapedEscort {
-    // Example of extracting data, adjust selectors as needed
-    const name = $('h1.name').text().trim() || 'Anonymous';
-    const age = parseInt($('.age').text(), 10) || 25;
-    const gender = $('.gender').text().trim() || 'Unknown';
-    const location = $('.location').text().trim() || 'Unknown';
-    const bio = $('.bio').text().trim() || 'No bio provided';
-    const services = $('.services').text().split(',').map(s => s.trim()) || [];
-    const price = parseInt($('.price').text().replace(/\D/g, ''), 10) || 200;
-    const imageUrl = $('img.main').attr('src') || '';
-    const profileImage = $('img.profile').attr('src') || '';
-    const gallery = $('.gallery-img').map((i, el) => $(el).attr('src')).get() || [];
-    const phone = $('.contact-phone').text().trim() || 'N/A';
-    const email = $('.contact-email').text().trim() || 'N/A';
-    const website = $('.website').attr('href') || 'N/A';
-    const rating = parseFloat($('.rating').text()) || 4.5;
-    const reviewCount = parseInt($('.review-count').text(), 10) || 10;
-    const isAvailable = $('.availability').text().includes('Available');
-    const boostLevel = parseInt($('.boost-level').text(), 10) || 1;
-
-    // Example of extracting rates
-    const hourlyRate = parseInt($('.hourly-rate').text().replace(/\D/g, ''), 10) || price;
-    const halfHourRate = parseInt($('.half-hour-rate').text().replace(/\D/g, ''), 10) || price / 2;
-
-    // Example of extracting contact info
-    const contactPhone = $('.contact-phone').text().trim() || 'N/A';
-    const contactEmail = $('.contact-email').text().trim() || 'N/A';
-
-    const escort: ScrapedEscort = {
-      id: `escort-${Date.now()}`,
-      name,
-      age,
-      gender,
-      location,
-      bio,
-      services,
-      price,
-      imageUrl,
-      profileImage,
-      gallery,
-      rates: {
-        hourly: hourlyRate,
-        halfHour: halfHourRate
-      },
-      contactInfo: {
-        email: contactEmail,
-        phone: contactPhone,
-        website: website
-      },
-      phone,
-      email,
-      website,
-      rating,
-      reviewCount,
-      isAvailable,
-      boostLevel
-    };
-
-    return escort;
+  /**
+   * Generate mock escort data for testing
+   */
+  private generateMockEscorts(count: number, specificId?: string): Escort[] {
+    const escorts: Escort[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      const id = specificId || `scraped-escort-${i}`;
+      
+      const gender = Math.random() > 0.7 ? 'male' : 'female';
+      const age = Math.floor(Math.random() * 15) + 21; // 21-35
+      
+      const rates: Rates = {
+        hourly: Math.floor(Math.random() * 300) + 200,  // $200-$500
+        halfHour: Math.floor(Math.random() * 150) + 150, // $150-$300
+        overnight: Math.floor(Math.random() * 1000) + 1000 // $1000-$2000
+      };
+      
+      // Create escort with appropriate type structure
+      const mockEscort: Escort = {
+        id,
+        name: `Scraped ${gender === 'male' ? 'John' : 'Jane'} ${id.slice(-3)}`,
+        age,
+        gender,
+        location: ['New York', 'Los Angeles', 'Miami', 'Chicago', 'Las Vegas'][i % 5],
+        bio: `Scraped profile with high-quality service. Available for bookings and special occasions.`,
+        services: [
+          'Dinner Date',
+          'Event Companion',
+          'Travel Companion',
+          'Massage'
+        ].slice(0, Math.floor(Math.random() * 3) + 1),
+        price: rates.hourly || 300,
+        imageUrl: `https://picsum.photos/seed/${id}/800/1200`,
+        profileImage: `https://picsum.photos/seed/${id}-profile/400/400`,
+        gallery: [
+          `https://picsum.photos/seed/${id}-1/800/1200`,
+          `https://picsum.photos/seed/${id}-2/800/1200`,
+          `https://picsum.photos/seed/${id}-3/800/1200`
+        ],
+        rates,
+        rating: Math.random() * 2 + 3, // 3.0-5.0
+        reviewCount: Math.floor(Math.random() * 50) + 5,
+        verified: Math.random() > 0.5,
+        isVerified: Math.random() > 0.5,
+        featured: Math.random() > 0.8,
+        images: [
+          `https://picsum.photos/seed/${id}-1/800/1200`,
+          `https://picsum.photos/seed/${id}-2/800/1200`,
+        ],
+        contactInfo: {
+          email: `escort${id.slice(-3)}@example.com`,
+          phone: `+1555${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,
+          website: `https://example.com/escorts/${id}`
+        },
+        boostLevel: Math.floor(Math.random() * 5)
+      };
+      
+      escorts.push(mockEscort);
+    }
+    
+    return escorts;
+  }
+  
+  // Static method to get instance
+  public static getInstance(): EscortScraper {
+    return new EscortScraper();
   }
 }
 

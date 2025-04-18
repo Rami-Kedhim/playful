@@ -1,32 +1,157 @@
 
-// Add the missing prop to the component props interface
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { VerificationDocument, VerificationRequest } from '@/types/verification';
+
 export interface DocumentReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   document: VerificationDocument;
-  request: VerificationRequest; // Add this missing property
+  request: VerificationRequest;
   onApprove: () => Promise<void>;
   onReject: (reason: string) => Promise<void>;
-  verification?: VerificationRequest; // Optional for backward compatibility
+  verification?: VerificationRequest;
 }
 
-// Also fix any approve/reject functions that are missing arguments
-const handleApprove = async () => {
-  try {
-    // Call the onApprove prop with no arguments if it's defined that way
-    await onApprove();
-    onClose();
-  } catch (error) {
-    setError('Failed to approve document');
-  }
+const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
+  isOpen,
+  onClose,
+  document,
+  request,
+  onApprove,
+  onReject
+}) => {
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleApprove = async () => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      await onApprove();
+      onClose();
+    } catch (error) {
+      setError('Failed to approve document');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+      await onReject(rejectionReason);
+      onClose();
+    } catch (error) {
+      setError('Failed to reject document');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader>
+          <DialogTitle>Document Review - {document.document_type}</DialogTitle>
+        </DialogHeader>
+
+        <div className="grid gap-6">
+          {error && (
+            <Alert variant="destructive">
+              <ExclamationTriangleIcon className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="overflow-hidden rounded-md">
+            {document.file_path && document.file_path.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+              <img
+                src={document.file_path}
+                alt={document.document_type}
+                className="w-full h-auto max-h-[500px] object-contain"
+              />
+            ) : (
+              <div className="bg-muted p-4 rounded-md text-center">
+                <p>Document preview not available</p>
+                <a 
+                  href={document.file_path} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Download Document
+                </a>
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-2">
+            <h3 className="font-medium">Document Information</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="font-medium">Type</div>
+              <div>{document.document_type}</div>
+              
+              <div className="font-medium">Uploaded</div>
+              <div>{new Date(document.uploaded_at).toLocaleString()}</div>
+              
+              <div className="font-medium">Status</div>
+              <div>
+                <span className={`inline-block px-2 py-1 rounded-full text-xs 
+                  ${document.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                    document.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                    'bg-yellow-100 text-yellow-800'}`}>
+                  {document.status.charAt(0).toUpperCase() + document.status.slice(1)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {document.status === 'pending' && (
+            <div className="grid gap-2">
+              <h3 className="font-medium">Rejection Reason</h3>
+              <Textarea
+                placeholder="Provide a reason for rejection (required for rejecting documents)"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+              />
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          {document.status === 'pending' && (
+            <>
+              <Button 
+                variant="destructive" 
+                onClick={handleReject} 
+                disabled={isSubmitting || !rejectionReason.trim()}
+              >
+                Reject
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={handleApprove} 
+                disabled={isSubmitting}
+              >
+                Approve
+              </Button>
+            </>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
-const handleReject = async () => {
-  try {
-    // Make sure to pass the rejection reason to onReject
-    await onReject(rejectionReason);
-    onClose();
-  } catch (error) {
-    setError('Failed to reject document');
-  }
-};
+export default DocumentReviewModal;

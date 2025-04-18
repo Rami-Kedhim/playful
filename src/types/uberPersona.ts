@@ -38,6 +38,7 @@ export interface SystemMetadata {
   aiMood?: string;
   aiEngine?: string;
   tagsGeneratedByAI: boolean;
+  hilbertSpaceVector?: number[]; // For advanced mathematical positioning in the ecosystem
 }
 
 export interface UberPersona {
@@ -57,6 +58,7 @@ export interface UberPersona {
   capabilities: Capabilities;
   monetization: Monetization;
   systemMetadata?: SystemMetadata;
+  // Legacy compatibility fields
   name?: string;
   image?: string;
   imageUrl?: string;
@@ -89,6 +91,7 @@ export interface AIContext {
   currentMood?: string;
   interactions: number;
   topicsInteractedWith: string[];
+  hilbertCoordinates?: number[]; // For positioning in Hilbert space
 }
 
 export interface AIPreferences {

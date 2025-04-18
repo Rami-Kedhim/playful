@@ -1,95 +1,49 @@
 
-// Define service type enum
-export enum ServiceType {
-  IN_PERSON = 'in-person',
-  VIRTUAL = 'virtual',
-  BOTH = 'both',
-  MASSAGE = 'massage',
-  DINNER = 'dinner'
-}
+import { ServiceTypeFilter } from '@/types/filters';
 
-// Define filter rules
-export const filterRules = {
-  // Allowed service types based on platform policy
-  allowedServiceTypes: [
-    ServiceType.IN_PERSON,
-    ServiceType.VIRTUAL,
-    ServiceType.BOTH,
-    ServiceType.MASSAGE,
-    ServiceType.DINNER
-  ],
+/**
+ * List of forbidden terms that should not be displayed as service types
+ */
+export const ForbiddenTerms = [
+  'explicit', 'sex', 'intercourse', 'prostitution', 'illegal',
+  'trafficking', 'drugs', 'underage', 'exploitation'
+];
 
-  // Terms that should be remapped to appropriate service types
-  remappings: {
-    // In-person remappings
-    physical: ServiceType.IN_PERSON,
-    real: ServiceType.IN_PERSON,
-    "in person": ServiceType.IN_PERSON,
-    
-    // Virtual remappings
-    online: ServiceType.VIRTUAL,
-    digital: ServiceType.VIRTUAL,
-    remote: ServiceType.VIRTUAL,
-    
-    // Both remappings
-    all: ServiceType.BOTH,
-    "in-person & virtual": ServiceType.BOTH,
-    "in person & virtual": ServiceType.BOTH,
-    
-    // Special services
-    "dinner date": ServiceType.DINNER
-  },
-
-  // Terms that should be blocked
-  blockedTerms: [
-    "illegal",
-    "explicit",
-    "underage"
-  ]
+/**
+ * Checks if a service type is allowed based on content rules
+ */
+export const isAllowedServiceType = (serviceType: string): boolean => {
+  if (!serviceType) return true;
+  
+  const lowerType = serviceType.toLowerCase();
+  return !ForbiddenTerms.some(term => lowerType.includes(term.toLowerCase()));
 };
 
-// Export forbidden terms for reuse
-export const ForbiddenTerms = filterRules.blockedTerms;
-
-// Utility function to check if a service type is allowed
-export const isServiceTypeAllowed = (type: string): boolean => {
-  return Object.values(ServiceType).includes(type as ServiceType);
+/**
+ * Maps unsafe service descriptions to acceptable terms
+ */
+export const remapUnsafeService = (serviceType: string): ServiceTypeFilter => {
+  const lowerType = serviceType.toLowerCase();
+  
+  // Map potentially problematic terms to acceptable alternatives
+  if (lowerType.includes('sex') || 
+      lowerType.includes('explicit') || 
+      lowerType.includes('full service')) {
+    return 'in-person';
+  }
+  
+  if (lowerType.includes('cam') || 
+      lowerType.includes('online') || 
+      lowerType.includes('virtual')) {
+    return 'virtual';
+  }
+  
+  // Default safe fallback
+  return 'both';
 };
 
-// Alias for backward compatibility
-export const isAllowedServiceType = isServiceTypeAllowed;
-
-// Utility function to safely format a service type
-export const formatServiceType = (
-  input: string, 
-  callback?: (original: string, remapped: ServiceType) => void
-): ServiceType | '' => {
-  // Check if it's already a valid service type
-  if (isServiceTypeAllowed(input)) {
-    return input as ServiceType;
-  }
-  
-  // Check if it's in the remappings
-  const remapped = filterRules.remappings[input.toLowerCase() as keyof typeof filterRules.remappings];
-  if (remapped) {
-    if (callback) {
-      callback(input, remapped);
-    }
-    return remapped;
-  }
-  
-  // Check if it contains blocked terms
-  if (filterRules.blockedTerms.some(term => 
-    input.toLowerCase().includes(term.toLowerCase())
-  )) {
-    return '';
-  }
-  
-  // Return empty if no match
-  return '';
+export default {
+  ForbiddenTerms,
+  isAllowedServiceType,
+  remapUnsafeService
 };
-
-// Alias for backward compatibility
-export const remapUnsafeService = formatServiceType;
-
-export default { ServiceType, filterRules, isServiceTypeAllowed, formatServiceType };

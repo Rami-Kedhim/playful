@@ -1,25 +1,33 @@
 
-import React from 'react';
-import { AuthProvider } from '@/hooks/auth/useAuthContext';
-import { AIProvider } from '@/contexts/AIContext';
-import { AIVoiceProvider } from '@/components/ai/AIVoiceProvider';
-import { PersonaProvider } from '@/contexts/PersonaContext';
-import { Toaster } from 'sonner';
-import RoutesComponent from './Routes';
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './routes';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { PersonaProvider } from './contexts/PersonaContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
+import { UberPersonaProvider } from './contexts/UberPersonaContext';
+import { EscortProvider } from './modules/escorts/providers/EscortProvider';
+import { Toaster } from './components/ui/toaster';
 
-const App: React.FC = () => {
+function App() {
   return (
-    <AuthProvider>
-      <AIProvider>
-        <AIVoiceProvider>
-          <PersonaProvider>
-            <Toaster position="top-right" />
-            <RoutesComponent />
-          </PersonaProvider>
-        </AIVoiceProvider>
-      </AIProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <EscortProvider>
+            <UberPersonaProvider>
+              <PersonaProvider>
+                <FavoritesProvider>
+                  <Routes />
+                  <Toaster />
+                </FavoritesProvider>
+              </PersonaProvider>
+            </UberPersonaProvider>
+          </EscortProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
-};
+}
 
 export default App;

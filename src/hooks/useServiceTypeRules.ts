@@ -1,89 +1,76 @@
 
 import { useState, useCallback } from 'react';
-import { ServiceType, ForbiddenTerms, isAllowedServiceType, remapUnsafeService } from '@/components/escorts/filters/ServiceTypeFilterRules';
-import { toast } from '@/components/ui/use-toast';
+import { ServiceTypeFilter } from '@/types/filters';
+import { 
+  ForbiddenTerms,
+  isAllowedServiceType,
+  remapUnsafeService 
+} from '@/components/escorts/filters/ServiceTypeFilterRules';
 
-export const useServiceTypeRules = (filterEnabled = true) => {
-  const [unsafeTermAttempts, setUnsafeTermAttempts] = useState<string[]>([]);
+interface ServiceTypeRulesResult {
+  checkServiceType: (type: string) => boolean;
+  transformUnsafeType: (type: string) => ServiceTypeFilter;
+  forbiddenTerms: string[];
+  detectedUnsafeTerms: string[];
+  hasDetectedUnsafeTerms: boolean;
+  clearDetectedTerms: () => void;
+}
 
-  const handleServiceTypeValidation = useCallback((term: string): {
-    isValid: boolean;
-    remappedTerm?: ServiceType;
-    message?: string;
-  } => {
-    // Skip validation if filtering is disabled
-    if (!filterEnabled) {
-      return { isValid: true };
-    }
-
-    // Check if the term is allowed
-    const isValid = isAllowedServiceType(term);
-
-    if (!isValid) {
-      // Add the term to the attempts list
-      setUnsafeTermAttempts(prev => [...prev, term]);
+/**
+ * Hook for handling service type content safety rules
+ */
+export const useServiceTypeRules = (
+  enableFiltering: boolean = true,
+  onUnsafeTermDetected?: (term: string, replacement: ServiceTypeFilter) => void
+): ServiceTypeRulesResult => {
+  const [detectedUnsafeTerms, setDetectedUnsafeTerms] = useState<string[]>([]);
+  
+  /**
+   * Check if a service type is allowed based on configured rules
+   */
+  const checkServiceType = useCallback((type: string): boolean => {
+    if (!enableFiltering) return true;
+    return isAllowedServiceType(type);
+  }, [enableFiltering]);
+  
+  /**
+   * Transform an unsafe service type to a safe alternative
+   */
+  const transformUnsafeType = useCallback((type: string): ServiceTypeFilter => {
+    if (!enableFiltering) return type as ServiceTypeFilter;
+    
+    if (!isAllowedServiceType(type)) {
+      const safeType = remapUnsafeService(type);
       
-      // Get a remapped safe term
-      const remappedTerm = remapUnsafeService(term);
+      // Add to detected terms if not already present
+      setDetectedUnsafeTerms(prev => {
+        if (!prev.includes(type)) {
+          // Call the callback if provided
+          if (onUnsafeTermDetected) {
+            onUnsafeTermDetected(type, safeType);
+          }
+          return [...prev, type];
+        }
+        return prev;
+      });
       
-      return {
-        isValid: false,
-        remappedTerm,
-        message: `The term "${term}" is not allowed. It has been remapped to "${remappedTerm}".`
-      };
-    }
-
-    return { isValid: true };
-  }, [filterEnabled]);
-
-  const validateServiceType = useCallback((term: string): ServiceType | null => {
-    const result = handleServiceTypeValidation(term);
-    
-    if (!result.isValid) {
-      if (result.message) {
-        toast({
-          title: 'Term Remapped',
-          description: result.message,
-          variant: 'warning',
-        });
-      }
-      return result.remappedTerm || null;
+      return safeType;
     }
     
-    // Try to match to an existing ServiceType
-    const knownTypes = Object.values(ServiceType) as string[];
-    const matchingType = knownTypes.find(type => 
-      type.toLowerCase() === term.toLowerCase()
-    );
-    
-    if (matchingType) {
-      return matchingType as ServiceType;
-    }
-    
-    // If no match, use a default method to categorize
-    const lowerTerm = term.toLowerCase();
-    
-    if (lowerTerm.includes('virtual') || lowerTerm.includes('online')) {
-      return ServiceType.VIRTUAL;
-    }
-    
-    if (lowerTerm.includes('massage')) {
-      return ServiceType.MASSAGE;
-    }
-    
-    if (lowerTerm.includes('dinner') || lowerTerm.includes('date')) {
-      return ServiceType.DINNER;
-    }
-    
-    // Default to in-person
-    return ServiceType.IN_PERSON;
-  }, [handleServiceTypeValidation]);
-
+    return type as ServiceTypeFilter;
+  }, [enableFiltering, onUnsafeTermDetected]);
+  
+  const clearDetectedTerms = useCallback(() => {
+    setDetectedUnsafeTerms([]);
+  }, []);
+  
   return {
-    validateServiceType,
-    unsafeTermAttempts,
-    resetUnsafeTerms: () => setUnsafeTermAttempts([]),
-    forbiddenTerms: ForbiddenTerms
+    checkServiceType,
+    transformUnsafeType,
+    forbiddenTerms: ForbiddenTerms,
+    detectedUnsafeTerms,
+    hasDetectedUnsafeTerms: detectedUnsafeTerms.length > 0,
+    clearDetectedTerms
   };
 };
 

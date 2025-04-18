@@ -1,5 +1,6 @@
 
 import { Escort } from '@/types/escort';
+import { SystemHealthMetrics } from '@/types/neural';
 
 export class HermesOxumNeuralHub {
   private static instance: HermesOxumNeuralHub;
@@ -82,7 +83,7 @@ export class HermesOxumNeuralHub {
     return true;
   }
 
-  public getHealthMetrics() {
+  public getHealthMetrics(): { load: number; userEngagement: number; lastUpdated: number } {
     return {
       load: 0.42,
       userEngagement: 0.65,
@@ -100,7 +101,62 @@ export class HermesOxumNeuralHub {
     // Mock implementation - would integrate with neural algorithms in real app
     return score * 1.25; // 25% boost as example
   }
+
+  // Add missing methods for BrainHub components
+  public getModelParameters(): any {
+    return {
+      learningRate: 0.01,
+      batchSize: 64,
+      epochs: 100,
+      optimizerType: "adam",
+      activationFunction: "relu",
+      networkDepth: 3,
+      networkWidth: 128,
+      dropoutRate: 0.2
+    };
+  }
+
+  public calculateSystemEfficiency(): number {
+    return 0.78; // Mock value between 0 and 1
+  }
+
+  public validateModelParameters(params: any): { valid: boolean, errors?: string[] } {
+    return { valid: true };
+  }
+
+  public updateModelParameters(params: any): boolean {
+    console.log("Updating model parameters:", params);
+    return true;
+  }
+
+  public resetSystem(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  public getActiveTrainingJobs(): { id: string, progress: number, type: string }[] {
+    return [
+      { id: "job-1", progress: 0.45, type: "content-matching" },
+      { id: "job-2", progress: 0.78, type: "user-preferences" }
+    ];
+  }
+
+  public startTraining(type: string): Promise<{ jobId: string }> {
+    return Promise.resolve({ jobId: `job-${Date.now()}` });
+  }
+
+  public stopTraining(jobId: string): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  public getModels(): { id: string, name: string, type: string, version: string }[] {
+    return [
+      { id: "model-1", name: "Content Match", type: "recommendation", version: "1.2.0" },
+      { id: "model-2", name: "User Preferences", type: "analysis", version: "0.9.5" },
+      { id: "model-3", name: "Escort Ranking", type: "ranking", version: "2.0.1" }
+    ];
+  }
 }
 
+// Export singleton instances
 export const brainHub = HermesOxumNeuralHub.getInstance();
 export const neuralHub = brainHub; // Add this export for compatibility

@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -8,30 +9,30 @@ import { useAuth } from '@/hooks/auth/useAuth';
 import { User, UserProfile } from '@/types/user';
 
 // Auth page
-import AuthPage from './pages/AuthPage';
+const AuthPage = lazy(() => import('@/pages/AuthPage'));
 
 // Lazy loaded components
-const HomePage = lazy(() => import('./pages/Index'));
-const ProfilePage = lazy(() => import('./pages/ProfilePage'));
-const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
-const MessagesPage = lazy(() => import('./pages/MessagesPage'));
-const MetaversePage = lazy(() => import('./pages/MetaversePage'));
-const SearchPage = lazy(() => import('./pages/SearchPage'));
-const NotFound = lazy(() => import('./pages/NotFound'));
-const Escorts = lazy(() => import('./pages/Escorts'));
-const EscortDetail = lazy(() => import('./pages/EscortDetail'));
-const EscortLiveStreams = lazy(() => import('./pages/EscortLiveStreams'));
-const EscortLiveStreamDetail = lazy(() => import('./pages/EscortLiveStreamDetail'));
-const Creators = lazy(() => import('./pages/Creators'));
-const CreatorDetail = lazy(() => import('./pages/CreatorDetail'));
-const Livecams = lazy(() => import('./pages/Livecams'));
-const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
-const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
-const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
-const WalletPage = lazy(() => import('./pages/WalletPage/index'));
-const VerificationPage = lazy(() => import('./pages/VerificationPage'));
-const PersonasPage = lazy(() => import('./pages/Personas'));
-const VerificationDashboard = lazy(() => import('./pages/admin/VerificationDashboard'));
+const HomePage = lazy(() => import('@/pages/Index'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const FavoritesPage = lazy(() => import('@/pages/FavoritesPage'));
+const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
+const MetaversePage = lazy(() => import('@/pages/MetaversePage'));
+const SearchPage = lazy(() => import('@/pages/SearchPage'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
+const Escorts = lazy(() => import('@/pages/Escorts'));
+const EscortDetail = lazy(() => import('@/pages/EscortDetail'));
+const EscortLiveStreams = lazy(() => import('@/pages/EscortLiveStreams'));
+const EscortLiveStreamDetail = lazy(() => import('@/pages/EscortLiveStreamDetail'));
+const Creators = lazy(() => import('@/pages/Creators'));
+const CreatorDetail = lazy(() => import('@/pages/CreatorDetail'));
+const Livecams = lazy(() => import('@/pages/Livecams'));
+const LivecamDetail = lazy(() => import('@/pages/LivecamDetail'));
+const BrainHubPage = lazy(() => import('@/pages/BrainHubPage'));
+const NSFWImageGeneratorPage = lazy(() => import('@/pages/NSFWImageGeneratorPage'));
+const WalletPage = lazy(() => import('@/pages/WalletPage/index'));
+const VerificationPage = lazy(() => import('@/pages/VerificationPage'));
+const PersonasPage = lazy(() => import('@/pages/Personas'));
+const VerificationDashboard = lazy(() => import('@/pages/admin/VerificationDashboard'));
 
 const RoutesComponent: React.FC = () => {
   const { user: authUser, profile: authProfile } = useAuth();
@@ -103,7 +104,9 @@ const RoutesComponent: React.FC = () => {
           path="/admin/verifications" 
           element={
             <ProtectedRoute>
-              <VerificationDashboard />
+              <AppLayout>
+                <VerificationDashboard />
+              </AppLayout>
             </ProtectedRoute>
           } 
         />
