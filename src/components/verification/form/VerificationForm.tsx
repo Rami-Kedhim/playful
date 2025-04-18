@@ -9,15 +9,16 @@ import { canSubmitVerification, submitVerificationRequest } from '@/utils/verifi
 import { 
   VerificationFormValues, 
   verificationFormSchema, 
-  ID_CARD, 
   DocumentType,
-  DOCUMENT_TYPES
 } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentUploadHandler from './DocumentUploadHandler';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
+
+// Defining a constant for ID_CARD to replace the imported one
+const ID_CARD = 'id_card';
 
 interface VerificationFormProps {
   onSubmit?: (data: VerificationFormValues) => void;
@@ -40,12 +41,12 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     success: boolean;
     message: string;
   } | null>(null);
-  const [documentType, setDocumentType] = useState<DocumentType>(ID_CARD);
+  const [documentType, setDocumentType] = useState<DocumentType>(ID_CARD as DocumentType);
 
   const form = useForm<VerificationFormValues>({
     resolver: zodResolver(verificationFormSchema),
     defaultValues: {
-      documentType: ID_CARD,
+      documentType: ID_CARD as DocumentType,
       documentFile: undefined as unknown as File,
       selfieFile: undefined as unknown as File,
       consentChecked: false,
@@ -73,7 +74,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     }
   }, [user]);
 
-  const handleDocumentTypeChange = (type: string) => {
+  const handleDocumentTypeChange = (type: DocumentType) => {
     setDocumentType(type);
   };
 

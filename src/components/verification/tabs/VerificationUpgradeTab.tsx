@@ -1,6 +1,4 @@
 
-// Make sure to update the VerificationUpgradeTab component to match the VerificationBadgeProps
-// Add the necessary imports and update the component props
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import VerificationBadge from '../VerificationBadge';

@@ -14,8 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DocumentType, DOCUMENT_TYPES } from '@/types/verification';
+import { DocumentType } from '@/types/verification';
 import { UseFormReturn } from 'react-hook-form';
+
+// Define document types for the component
+const DOCUMENT_TYPES = [
+  { value: 'id_card', label: 'ID Card' },
+  { value: 'passport', label: 'Passport' },
+  { value: 'drivers_license', label: "Driver's License" }
+];
 
 interface DocumentTypeSelectProps {
   form: UseFormReturn<any>;

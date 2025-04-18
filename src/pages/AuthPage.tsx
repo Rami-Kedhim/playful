@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -11,10 +12,6 @@ const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading, signIn, signUp } = useAuth();
 
-  // Map auth functions to legacy names if needed
-  const login = signIn;
-  const register = signUp;
-  
   // Redirect to home if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && !isLoading) {
@@ -48,10 +45,10 @@ const AuthPage: React.FC = () => {
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
           <TabsContent value="signin">
-            <SignInForm onLogin={login} />
+            <SignInForm onSignIn={signIn} />
           </TabsContent>
           <TabsContent value="signup">
-            <SignUpForm onRegister={register} />
+            <SignUpForm onSignUp={signUp} />
           </TabsContent>
         </Tabs>
       </div>
