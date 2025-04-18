@@ -1,68 +1,57 @@
+
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { 
-  VerificationRequest,
-  VerificationDocument,
-  VerificationStatus,
-  VerificationLevel
-} from '@/types/verification';
+import { toDate } from '@/utils/dateUtils';
 
-// Mock function to fetch verification status
-const fetchVerificationStatus = async (userId: string): Promise<VerificationRequest | null> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Return mock data - 50% chance of having a verification
-  if (Math.random() > 0.5) {
-    return {
-      id: '1234567890',
-      userId: userId,
-      status: VerificationStatus.PENDING,
-      requested_level: VerificationLevel.BASIC,
-      documents: [],
-      createdAt: new Date().toISOString(),
-      // For backward compatibility
-      created_at: new Date().toISOString(),
-      requestedLevel: VerificationLevel.BASIC,
-      verificationLevel: VerificationLevel.BASIC
-    };
-  }
-  
-  return null;
-};
+interface VerificationData {
+  isVerified: boolean;
+  verificationDate: Date | null;
+  expiryDate: Date | null;
+  verificationLevel: string;
+  documents: Array<{
+    id: string;
+    type: string;
+    status: string;
+    uploadedAt: Date;
+  }>;
+}
 
-export const useEscortVerification = () => {
-  const { user } = useAuth();
+export function useEscortVerification(escortId: string | undefined) {
+  const [data, setData] = useState<VerificationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
-  
+
   useEffect(() => {
-    const checkStatus = async () => {
-      if (!user) {
+    const fetchVerificationData = async () => {
+      if (!escortId) {
         setLoading(false);
         return;
       }
+
+      setLoading(true);
       
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchVerificationStatus(user.id);
-        setVerificationRequest(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load verification status');
-        console.error('Error fetching verification status:', err);
-      } finally {
+      // This would be an API call in a real app
+      setTimeout(() => {
+        // Mock data
+        setData({
+          isVerified: true,
+          verificationDate: toDate('2023-01-15T10:30:00Z'),
+          expiryDate: toDate('2024-01-15T10:30:00Z'),
+          verificationLevel: 'PREMIUM',
+          documents: [
+            {
+              id: 'doc1',
+              type: 'ID_CARD',
+              status: 'APPROVED',
+              uploadedAt: new Date(2023, 0, 10)
+            }
+          ]
+        });
         setLoading(false);
-      }
+      }, 1000);
     };
-    
-    checkStatus();
-  }, [user]);
-  
-  return {
-    loading,
-    error,
-    verificationRequest,
-  };
-};
+
+    fetchVerificationData();
+  }, [escortId]);
+
+  return { data, loading, error };
+}

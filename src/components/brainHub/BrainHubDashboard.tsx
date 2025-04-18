@@ -4,8 +4,28 @@ import SuperlativeBrainHub from './SuperlativeBrainHub';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon, Brain } from 'lucide-react';
+import { NeuralModel } from '@/types/neural/NeuralSystemMetrics';
 
 const BrainHubDashboard: React.FC = () => {
+  // Mock models data
+  const mockModels: NeuralModel[] = [
+    {
+      id: 'model-1',
+      name: 'Cognitive Analyzer',
+      version: '1.0.0',
+      capabilities: ['pattern recognition', 'information processing'],
+      status: 'active',
+      performance: {
+        accuracy: 0.95,
+        latency: 120,
+        resourceUsage: 0.75
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      specialization: ['cognitive analysis']
+    }
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -23,7 +43,7 @@ const BrainHubDashboard: React.FC = () => {
       
       <Separator />
       
-      <SuperlativeBrainHub />
+      <SuperlativeBrainHub models={mockModels} />
     </div>
   );
 };

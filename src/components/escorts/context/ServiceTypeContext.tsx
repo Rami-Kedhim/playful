@@ -32,15 +32,9 @@ export const useServiceType = useServiceTypeContext;
 
 // Add ServiceTypeProvider component for compatibility
 export const ServiceTypeProvider = ({ 
-  children, 
-  supportedServiceTypes,
-  filterForbiddenTerms,
-  onUnsafeTermRemap
+  children
 }: { 
   children: React.ReactNode;
-  supportedServiceTypes?: string[];
-  filterForbiddenTerms?: boolean;
-  onUnsafeTermRemap?: (original: string, remapped: string) => void;
 }) => {
   // This is a placeholder - the actual implementation should be in its own file
   return <>{children}</>;

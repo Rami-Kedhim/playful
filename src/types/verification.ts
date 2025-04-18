@@ -29,13 +29,14 @@ export enum DocumentType {
 export interface VerificationDocument {
   id: string;
   document_type: DocumentType;
+  url?: string;
   file_url?: string;
   uploaded_at: Date;
   status: VerificationStatus;
   notes?: string;
   // Aliases for backward compatibility
-  url?: string;
   fileUrl?: string;
+  documentUrl?: string;
   document_url?: string;
   type?: DocumentType;
   uploadedAt?: Date;

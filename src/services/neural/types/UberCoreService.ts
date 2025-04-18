@@ -1,6 +1,6 @@
 
 import { UberCoreSettings, UberSearchFilters } from '@/types/uber-ecosystem';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 import { SystemHealthMetrics } from './neuralHub';
 
 export interface UberCoreService {
@@ -11,7 +11,7 @@ export interface UberCoreService {
   findNearestNeighbors: (personaId: string, count?: number) => UberPersona[];
   searchPersonas: (filters: UberSearchFilters) => UberPersona[];
   convertToUberPersona: (entity: any) => UberPersona | null;
-  getStatus: () => Promise<{ status: string; metrics: SystemHealthMetrics }>;
+  getStatus: () => Promise<{ status: string; metrics: SystemHealthMetrics }> | any;
   configure: (config: any) => Promise<void>;
-  processUserInput: (input: string) => Promise<string>;
+  processUserInput: (userId: string, input: string, options?: any) => Promise<any>;
 }

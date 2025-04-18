@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
-export const useVerificationStatus = (userId: string | undefined) => {
+export const useVerificationStatus = (userId?: string) => {
   const [request, setRequest] = useState<VerificationRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +55,7 @@ export const useVerificationStatus = (userId: string | undefined) => {
 
   return {
     request,
+    verificationRequest: request, // Add verificationRequest alias
     loading,
     error,
     isVerified: request?.status === VerificationStatus.APPROVED,

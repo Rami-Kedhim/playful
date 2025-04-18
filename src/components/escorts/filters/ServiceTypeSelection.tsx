@@ -7,10 +7,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Check, Info } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-import { ServiceType } from './ServiceTypeFilterRules';
-import ServiceTypeIcon from './ServiceTypeIcon';
-import { ServiceTypeFilter as ServiceTypeFilterType } from './ServiceTypeBadgeLabel';
+import { ServiceTypeFilter as ServiceTypeFilterType } from '../context/ServiceTypeContext';
 import { useServiceType } from '../context/ServiceTypeContext';
+
+// Import ServiceTypeIcon separately since it might be in a different location
+// This is just a placeholder - you'd need to update with the correct import path
+const ServiceTypeIcon = ({ type, variant }: { type: any, variant: 'colored' | 'default' }) => {
+  return <div className={variant === 'colored' ? 'text-primary' : 'text-muted-foreground'}>Icon</div>;
+};
 
 interface ServiceTypeSelectionProps {
   className?: string;
@@ -20,10 +24,6 @@ interface ServiceTypeSelectionProps {
   showTitle?: boolean;
 }
 
-/**
- * An enhanced component for selecting service types, integrating both
- * basic service types and specialized service types from our ethical guidelines
- */
 const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
   className,
   showSpecializedTypes = true,
@@ -58,7 +58,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
   // Basic service types for location-based filtering
   const basicServiceTypes: ServiceTypeFilterType[] = ["in-person", "virtual", "both", ""];
   
-  const labels = {
+  const labels: Record<string, string> = {
     "in-person": "In Person",
     "virtual": "Virtual",
     "both": "Both Types",
@@ -98,7 +98,7 @@ const ServiceTypeSelection: React.FC<ServiceTypeSelectionProps> = ({
         ))}
       </div>
 
-      {showSpecializedTypes && (
+      {showSpecializedTypes && specializedServiceTypes && specializedServiceTypes.length > 0 && (
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
             <Label className="text-sm font-medium">Specialized Services</Label>

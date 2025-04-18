@@ -1,69 +1,56 @@
 
-import contentBrainHub from '@/services/content/ContentBrainHubService';
+/**
+ * Convert a value to a Date object
+ * @param value - The value to convert (can be string, Date, or undefined)
+ * @returns A Date object or undefined
+ */
+export const toDate = (value: string | Date | undefined): Date | undefined => {
+  if (!value) return undefined;
+  return value instanceof Date ? value : new Date(value);
+};
 
 /**
- * Calculate the expiry date for content
- * @param createdAt Date the content was created
- * @returns Date when the content will expire
+ * Format a date for displaying in the UI
+ * @param date - The date to format (can be string, Date, or undefined)
+ * @param format - The format to use (default is local date string)
+ * @returns A formatted date string or placeholder
  */
-export function calculateExpiryDate(createdAt: Date): Date {
-  // Content expires 180 days after creation
-  const expiryDate = new Date(createdAt);
-  expiryDate.setDate(expiryDate.getDate() + 180);
-  return expiryDate;
-}
-
-/**
- * Calculate how many days remain until expiry
- * @param expiryDate The date when content expires
- * @returns Number of days remaining until expiry
- */
-export function calculateDaysRemaining(expiryDate: Date): number {
-  const now = new Date();
-  const diffTime = expiryDate.getTime() - now.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(0, diffDays);
-}
-
-/**
- * Determine content status based on creation date
- * @param createdAt Date content was created
- * @returns Status string: 'active', 'expiring', or 'expired'
- */
-export function determineContentStatus(createdAt: Date): 'active' | 'expiring' | 'expired' {
-  const expiryDate = calculateExpiryDate(createdAt);
-  const daysRemaining = calculateDaysRemaining(expiryDate);
+export const formatDate = (
+  date: string | Date | undefined, 
+  format: 'short' | 'full' | 'relative' = 'full'
+): string => {
+  if (!date) return 'N/A';
   
-  if (daysRemaining <= 0) {
-    return 'expired';
-  } else if (daysRemaining <= 30) {
-    return 'expiring';
-  } else {
-    return 'active';
+  const dateObj = toDate(date);
+  if (!dateObj) return 'Invalid date';
+  
+  switch (format) {
+    case 'short':
+      return dateObj.toLocaleDateString();
+    case 'full':
+      return dateObj.toLocaleString();
+    case 'relative':
+      return getRelativeTimeString(dateObj);
+    default:
+      return dateObj.toLocaleString();
   }
-}
+};
 
 /**
- * Calculate the cost to renew content
- * First attempts to use Brain Hub for intelligent pricing,
- * falls back to standard calculation if Brain Hub is unavailable
- * 
- * @param status Content status ('active', 'expiring', 'expired')
- * @param type Content type ('image', 'video', 'text')
- * @returns Renewal cost in Lucoins
+ * Get a relative time string (e.g., "2 days ago")
  */
-export function calculateRenewalCost(status: string, type: string): number {
-  try {
-    // Try to use Brain Hub for intelligent pricing
-    return contentBrainHub.calculateOptimalRenewalCost(status, type);
-  } catch (error) {
-    // Fallback to standard calculation
-    if (status === 'expired') {
-      // Expired content costs more to renew
-      return type === 'video' ? 3 : 2;
-    } else {
-      // Active or expiring content
-      return type === 'video' ? 2 : 1;
-    }
-  }
-}
+const getRelativeTimeString = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+  
+  if (diffSec < 60) return 'just now';
+  if (diffMin < 60) return `${diffMin} minutes ago`;
+  if (diffHour < 24) return `${diffHour} hours ago`;
+  if (diffDay < 30) return `${diffDay} days ago`;
+  
+  return date.toLocaleDateString();
+};
