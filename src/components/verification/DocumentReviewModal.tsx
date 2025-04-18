@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { VerificationDocument, VerificationRequest } from '@/types/escort';
+import { format } from 'date-fns';
 
 interface DocumentReviewModalProps {
   isOpen: boolean;
@@ -74,7 +74,9 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
           
           <div>
             <p><strong>Type:</strong> {document?.type || document?.document_type || 'Unknown'}</p>
-            <p><strong>Uploaded:</strong> {document?.uploadedAt || document?.uploaded_at || 'Unknown'}</p>
+            <p><strong>Uploaded:</strong> {document.uploaded_at || document.created_at ? 
+              format(new Date(document.uploaded_at || document.created_at), 'PPP') : 
+              'Unknown date'}</p>
           </div>
           
           <div className="space-y-2">

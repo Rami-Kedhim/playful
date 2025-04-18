@@ -1,5 +1,3 @@
 
-// This file serves as a bridge to handle the casing issue with escort.ts vs Escort.ts
-// It re-exports everything from the proper file
-
+// Export everything from the proper Escort.ts file (with capital E)
 export * from '../Escort';

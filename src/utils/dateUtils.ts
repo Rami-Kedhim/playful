@@ -1,90 +1,21 @@
 
-/**
- * Safely parses a string or Date into a Date object
- * 
- * @param date Date string or Date object to parse
- * @returns Date object or null if invalid
- */
-export const safelyParseDate = (date: string | Date | null | undefined): Date | null => {
-  if (!date) return null;
-  
-  if (date instanceof Date) return date;
-  
-  try {
-    const parsedDate = new Date(date);
-    return isNaN(parsedDate.getTime()) ? null : parsedDate;
-  } catch (e) {
-    return null;
-  }
-};
+import { ContentStatus } from '@/types/neural';
 
-/**
- * Formats a date to a localized string representation
- * 
- * @param date Date to format
- * @param options Intl.DateTimeFormatOptions
- * @returns Formatted date string
- */
-export const formatDate = (
-  date: Date | string | null | undefined,
-  options: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }
-): string => {
-  const parsedDate = safelyParseDate(date);
-  
-  if (!parsedDate) return 'Invalid date';
-  
-  return parsedDate.toLocaleDateString(undefined, options);
-};
-
-/**
- * Compares two dates
- * 
- * @param date1 First date
- * @param date2 Second date
- * @returns -1 if date1 is before date2, 1 if date1 is after date2, 0 if equal
- */
-export const compareDates = (
-  date1: Date | string | null | undefined,
-  date2: Date | string | null | undefined
-): number => {
-  const parsedDate1 = safelyParseDate(date1);
-  const parsedDate2 = safelyParseDate(date2);
-  
-  if (!parsedDate1 && !parsedDate2) return 0;
-  if (!parsedDate1) return -1;
-  if (!parsedDate2) return 1;
-  
-  return parsedDate1.getTime() - parsedDate2.getTime();
-};
-
-/**
- * Calculates the expiry date based on a start date and duration in days
- */
-export const calculateExpiryDate = (startDate: Date | string, durationDays: number): Date => {
-  const date = safelyParseDate(startDate) || new Date();
+export const calculateExpiryDate = (startDate: Date | string, durationDays: number = 180): Date => {
+  const date = startDate instanceof Date ? startDate : new Date(startDate);
   return new Date(date.getTime() + durationDays * 24 * 60 * 60 * 1000);
 };
 
-/**
- * Calculates the days remaining until an expiry date
- */
 export const calculateDaysRemaining = (expiryDate: Date | string): number => {
-  const expiry = safelyParseDate(expiryDate);
-  if (!expiry) return 0;
-  
+  const expiry = expiryDate instanceof Date ? expiryDate : new Date(expiryDate);
   const today = new Date();
   const diffTime = expiry.getTime() - today.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-/**
- * Determines content status based on expiry date
- */
-export const determineContentStatus = (expiryDate: Date | string): 'active' | 'expiring' | 'expired' => {
+export const determineContentStatus = (startDate: Date | string): ContentStatus => {
+  // Calculate expiry date based on start date
+  const expiryDate = calculateExpiryDate(startDate);
   const daysRemaining = calculateDaysRemaining(expiryDate);
   
   if (daysRemaining <= 0) return 'expired';
@@ -92,9 +23,16 @@ export const determineContentStatus = (expiryDate: Date | string): 'active' | 'e
   return 'active';
 };
 
-/**
- * Calculates renewal cost based on original price and discount percentage
- */
 export const calculateRenewalCost = (originalPrice: number, discountPercentage: number = 10): number => {
   return originalPrice * (1 - discountPercentage / 100);
+};
+
+export const safelyParseDate = (dateInput: string | Date | undefined | null): Date | null => {
+  if (!dateInput) return null;
+  try {
+    return dateInput instanceof Date ? dateInput : new Date(dateInput);
+  } catch (e) {
+    console.error("Failed to parse date:", dateInput);
+    return null;
+  }
 };

@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+
+export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | 'in-person' | 'both';
 
 export interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;

@@ -1,9 +1,10 @@
+
 import React from 'react';
 import SuperlativeBrainHub from './SuperlativeBrainHub';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { InfoIcon, Brain } from 'lucide-react';
-import { NeuralModel } from '@/types/neural/NeuralSystemMetrics';
+import { NeuralModel } from '@/services/neural/types/neuralHub';
 
 const BrainHubDashboard: React.FC = () => {
   // Mock models data
@@ -12,6 +13,7 @@ const BrainHubDashboard: React.FC = () => {
       id: 'model-1',
       name: 'Cognitive Analyzer',
       version: '1.0.0',
+      type: 'analyzer', // Added required type property
       capabilities: ['pattern recognition', 'information processing'],
       status: 'active',
       performance: {

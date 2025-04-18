@@ -18,11 +18,11 @@ export interface UserProfile {
   location: string;
   bio: string;
   isVerified: boolean;
-  website: string;
+  website: string; // Added missing property
   avatarUrl: string;
   joinedDate: Date;
   avatar_url: string;
-  phone: string;
+  phone: string; // Added missing property
 }
 
 // Add AuthResult type needed for SignInForm and SignUpForm

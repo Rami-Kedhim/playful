@@ -1,84 +1,94 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { ServiceTypeFilter } from '@/contexts/ServiceTypeContext';
 
-// Export ServiceTypeFilter type
-export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | 'in-person' | 'both' | '';
-
-export interface BadgeStyleProps {
+export type BadgeStyleProps = {
   label: string;
   color: string;
   colorDark: string;
   icon: string;
+};
+
+export interface ServiceTypeBadgeLabelProps {
+  type?: ServiceTypeFilter | string;
+  style?: BadgeStyleProps;
+  className?: string;
+  variant?: 'default' | 'outline' | 'colored';
 }
 
-export const getServiceTypeBadgeLabel = (serviceType: ServiceTypeFilter): BadgeStyleProps => {
-  switch (serviceType) {
-    case 'incall':
-      return {
-        label: 'In-Call',
-        color: 'bg-blue-100 text-blue-800',
-        colorDark: 'dark:bg-blue-900 dark:text-blue-100',
-        icon: 'home'
-      };
-    case 'outcall':
-      return {
-        label: 'Out-Call',
-        color: 'bg-purple-100 text-purple-800',
-        colorDark: 'dark:bg-purple-900 dark:text-purple-100',
-        icon: 'map-pin'
-      };
-    case 'virtual':
-      return {
-        label: 'Virtual',
-        color: 'bg-green-100 text-green-800',
-        colorDark: 'dark:bg-green-900 dark:text-green-100',
-        icon: 'video'
-      };
-    case 'in-person':
-      return {
-        label: 'In Person',
-        color: 'bg-blue-100 text-blue-800',
-        colorDark: 'dark:bg-blue-900 dark:text-blue-100',
-        icon: 'user'
-      };
-    case 'both':
-      return {
-        label: 'Both',
-        color: 'bg-purple-100 text-purple-800',
-        colorDark: 'dark:bg-purple-900 dark:text-purple-100',
-        icon: 'layers'
-      };
-    case 'all':
-    default:
-      return {
-        label: 'All Services',
-        color: 'bg-gray-100 text-gray-800',
-        colorDark: 'dark:bg-gray-700 dark:text-gray-100',
-        icon: 'layers'
-      };
+// Map service types to display labels and colors
+const serviceTypeStyles: Record<string, BadgeStyleProps> = {
+  'all': {
+    label: 'All Services',
+    color: 'bg-gray-100 text-gray-900',
+    colorDark: 'dark:bg-gray-800 dark:text-gray-100',
+    icon: 'globe'
+  },
+  'in-person': {
+    label: 'In-Person',
+    color: 'bg-rose-100 text-rose-900',
+    colorDark: 'dark:bg-rose-900/30 dark:text-rose-300',
+    icon: 'user'
+  },
+  'incall': {
+    label: 'Incall',
+    color: 'bg-pink-100 text-pink-900',
+    colorDark: 'dark:bg-pink-900/30 dark:text-pink-300',
+    icon: 'home'
+  },
+  'outcall': {
+    label: 'Outcall',
+    color: 'bg-violet-100 text-violet-900',
+    colorDark: 'dark:bg-violet-900/30 dark:text-violet-300',
+    icon: 'car'
+  },
+  'virtual': {
+    label: 'Virtual',
+    color: 'bg-blue-100 text-blue-900',
+    colorDark: 'dark:bg-blue-900/30 dark:text-blue-300',
+    icon: 'video'
+  },
+  'both': {
+    label: 'All Types',
+    color: 'bg-emerald-100 text-emerald-900',
+    colorDark: 'dark:bg-emerald-900/30 dark:text-emerald-300',
+    icon: 'check-circle'
   }
 };
 
-interface ServiceTypeBadgeLabelProps {
-  serviceType: ServiceTypeFilter;
-  variant?: 'outline' | 'default';
-}
-
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ serviceType, variant = 'default' }) => {
-  const badgeStyle = getServiceTypeBadgeLabel(serviceType);
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ 
+  type,
+  style,
+  className,
+  variant = 'default'
+}) => {
+  // Use provided style or look up by type
+  const badgeStyle = style || (type ? serviceTypeStyles[type] || serviceTypeStyles['all'] : serviceTypeStyles['all']);
+  const { label, color, colorDark } = badgeStyle;
   
-  if (variant === 'outline') {
+  if (variant === 'colored') {
     return (
-      <Badge variant="outline" className="font-normal">
-        {badgeStyle.label}
+      <Badge 
+        className={cn(
+          color, 
+          colorDark, 
+          "font-medium border-0 px-2 py-0.5",
+          className
+        )}
+      >
+        {label}
       </Badge>
     );
   }
   
   return (
-    <Badge className={`${badgeStyle.color} ${badgeStyle.colorDark} font-normal`}>
-      {badgeStyle.label}
+    <Badge 
+      variant={variant === 'outline' ? 'outline' : 'secondary'}
+      className={cn("font-medium whitespace-nowrap", className)}
+    >
+      {label}
     </Badge>
   );
 };

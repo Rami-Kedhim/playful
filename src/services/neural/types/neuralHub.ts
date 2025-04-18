@@ -3,6 +3,7 @@ export interface NeuralModel {
   id: string;
   name: string;
   version: string;
+  type: string; // Added type property
   capabilities: string[];
   status: 'active' | 'inactive' | 'training' | 'error';
   performance: {
@@ -12,7 +13,7 @@ export interface NeuralModel {
   };
   createdAt: Date;
   updatedAt: Date;
-  specialization?: string[]; // Changed to string array
+  specialization?: string | string[]; // Allow either string or string array
 }
 
 export interface ModelParameters {
@@ -46,6 +47,12 @@ export interface SystemHealthMetrics {
   userEngagement: number;
   economicBalance: number;
   lastUpdated: Date;
+  // Added properties that match what's being used
+  systemLoad: number;
+  memoryAllocation: number;
+  networkThroughput: number;
+  requestRate: number;
+  averageResponseTime: number;
 }
 
 // Update TrainingProgress to include all required properties
