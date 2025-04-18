@@ -1,66 +1,57 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/auth/useAuthContext';
-import { useNavigate } from 'react-router-dom';
 import SignInForm from '@/components/auth/SignInForm';
 import SignUpForm from '@/components/auth/SignUpForm';
-import AppLayout from '@/components/layout/AppLayout';
 
 const Auth = () => {
-  const [activeTab, setActiveTab] = useState<string>('signin');
-  const { signIn, signUp, error, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
-  // If already authenticated, redirect to home
-  if (isAuthenticated && user) {
-    navigate('/');
-    return null;
-  }
-
-  const handleSignIn = async (email: string, password: string) => {
-    const result = await signIn(email, password);
-    if (result.success) {
-      navigate('/');
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  
+  // Get the tab from the URL query parameter or default to 'signin'
+  const searchParams = new URLSearchParams(location.search);
+  const defaultTab = searchParams.get('tab') || 'signin';
+  
+  const [activeTab, setActiveTab] = useState<string>(defaultTab);
+  
+  // Redirect authenticated users to home
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
     }
+  }, [isAuthenticated, navigate]);
+  
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/auth?tab=${value}`, { replace: true });
   };
-
-  const handleSignUp = async (email: string, password: string, username?: string) => {
-    const result = await signUp(email, password, { username });
-    if (result.success) {
-      setActiveTab('signin');
-    }
+  
+  // Handle successful authentication
+  const handleAuthSuccess = () => {
+    navigate('/', { replace: true });
   };
-
+  
   return (
-    <AppLayout>
-      <div className="container flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-md">
-          <Card>
-            <CardContent className="pt-6">
-              <Tabs
-                defaultValue="signin"
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-                <TabsContent value="signin">
-                  <SignInForm onSubmit={handleSignIn} />
-                </TabsContent>
-                <TabsContent value="signup">
-                  <SignUpForm onSubmit={handleSignUp} />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </AppLayout>
+    <div className="container mx-auto max-w-lg py-12">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsTrigger value="signin">Sign In</TabsTrigger>
+          <TabsTrigger value="signup">Sign Up</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="signin">
+          <SignInForm onSuccess={handleAuthSuccess} />
+        </TabsContent>
+        
+        <TabsContent value="signup">
+          <SignUpForm onSuccess={handleAuthSuccess} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

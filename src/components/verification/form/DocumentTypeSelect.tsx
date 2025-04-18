@@ -1,13 +1,25 @@
 
 import React from 'react';
-import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { DOCUMENT_TYPES, DocumentType } from '@/types/verification';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormValues, ID_CARD, PASSPORT, DRIVERS_LICENSE, RESIDENCE_PERMIT } from '@/types/verification';
 
 interface DocumentTypeSelectProps {
-  form: UseFormReturn<VerificationFormValues>;
-  onTypeChange?: (type: string) => void;
+  form: UseFormReturn<any>;
+  onTypeChange?: (type: DocumentType) => void;
 }
 
 const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeChange }) => {
@@ -18,25 +30,29 @@ const DocumentTypeSelect: React.FC<DocumentTypeSelectProps> = ({ form, onTypeCha
       render={({ field }) => (
         <FormItem>
           <FormLabel>Document Type</FormLabel>
-          <Select 
+          <Select
             onValueChange={(value) => {
               field.onChange(value);
-              if (onTypeChange) onTypeChange(value);
+              if (onTypeChange) {
+                onTypeChange(value as DocumentType);
+              }
             }}
             defaultValue={field.value}
           >
             <FormControl>
               <SelectTrigger>
-                <SelectValue placeholder="Select document type" />
+                <SelectValue placeholder="Select ID type" />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value={ID_CARD}>ID Card</SelectItem>
-              <SelectItem value={PASSPORT}>Passport</SelectItem>
-              <SelectItem value={DRIVERS_LICENSE}>Driver's License</SelectItem>
-              <SelectItem value={RESIDENCE_PERMIT}>Residence Permit</SelectItem>
+              {DOCUMENT_TYPES.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
+          <FormMessage />
         </FormItem>
       )}
     />

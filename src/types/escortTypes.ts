@@ -59,6 +59,37 @@ export const ESCORT_LANGUAGE_OPTIONS = [
   { value: 'other', label: 'Other' },
 ];
 
+// Service types
+export const ESCORT_SERVICE_TYPES = [
+  { value: 'massage', label: 'Massage' },
+  { value: 'companionship', label: 'Companionship' },
+  { value: 'dinner_date', label: 'Dinner Date' },
+  { value: 'travel', label: 'Travel Companion' },
+  { value: 'events', label: 'Social Events' },
+  { value: 'roleplay', label: 'Role Play' },
+  { value: 'fetish', label: 'Fetish' },
+  { value: 'bdsm', label: 'BDSM' },
+];
+
+// Gender options
+export const ESCORT_GENDER_OPTIONS = [
+  { value: 'female', label: 'Female' },
+  { value: 'male', label: 'Male' },
+  { value: 'non-binary', label: 'Non-Binary' },
+  { value: 'transgender', label: 'Transgender' },
+  { value: 'other', label: 'Other' },
+];
+
+// Orientation options
+export const ESCORT_ORIENTATION_OPTIONS = [
+  { value: 'straight', label: 'Straight' },
+  { value: 'gay', label: 'Gay' },
+  { value: 'lesbian', label: 'Lesbian' },
+  { value: 'bisexual', label: 'Bisexual' },
+  { value: 'pansexual', label: 'Pansexual' },
+  { value: 'other', label: 'Other' },
+];
+
 // Enhanced escort filters interface
 export interface EnhancedEscortFilters {
   location: string;
@@ -69,7 +100,6 @@ export interface EnhancedEscortFilters {
   age: [number, number];
   rating: number;
   verified: boolean;
-  availableNow: boolean;
   escortType: string;
   languages: string[];
   height: [number, number];
@@ -84,4 +114,34 @@ export interface EnhancedEscortFilters {
   };
   sortBy: string;
   useBoostSorting: boolean;
+}
+
+export interface EscortFilterOptions {
+  gender?: string[];
+  serviceType?: string[];
+  serviceTypes?: string[];
+  priceRange?: [number, number];
+  ageRange?: [number, number];
+  language?: string[];
+  languages?: string[];
+  location?: string;
+  maxDistance?: number;
+  availability?: string[];
+  rating?: number;
+  verified?: boolean;
+  verifiedOnly?: boolean;
+  availableNow?: boolean;
+  selectedServices?: string[];
+  selectedGenders?: string[];
+  orientation?: string[];
+  sortBy?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
+  bodyType?: string[];
+  hairColor?: string[];
+  eyeColor?: string[];
+  ethnicity?: string[];
+  height?: [number, number];
+  weight?: [number, number];
 }

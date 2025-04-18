@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
@@ -5,22 +6,26 @@ import { EnhancedEscortFilters } from '@/types/escortTypes';
 
 const defaultFilters: EnhancedEscortFilters = {
   location: '',
-  serviceTypes: [],
-  priceRange: [0, 1000],
+  serviceType: [],
+  price: [0, 1000],
   gender: [],
   orientation: [],
-  ageRange: [21, 50],
+  age: [21, 50],
   rating: 0,
   verified: false,
-  availableNow: false,
   escortType: "all",
-  language: [],
+  languages: [],
   height: [140, 200],
-  weight: [40, 120],
+  bodyType: [],
   hairColor: [],
   eyeColor: [],
   ethnicity: [],
-  bodyType: [],
+  availability: {
+    days: [],
+    hours: [],
+  },
+  sortBy: '',
+  useBoostSorting: false
 };
 
 export const useEscortEnhancedFilters = () => {
@@ -33,15 +38,14 @@ export const useEscortEnhancedFilters = () => {
     setFilters(prev => ({
       ...prev,
       location: state.filters.location || '',
-      serviceTypes: state.filters.serviceTypes || [],
-      priceRange: state.filters.priceRange || [0, 1000],
+      serviceType: state.filters.serviceType || state.filters.serviceTypes || [],
+      price: state.filters.priceRange || [0, 1000],
       gender: state.filters.gender || [],
       orientation: state.filters.orientation || [],
-      ageRange: state.filters.ageRange || [21, 50],
+      age: state.filters.ageRange || [21, 50],
       rating: state.filters.rating || 0,
-      verified: state.filters.verified || false,
-      availableNow: state.filters.availableNow || false,
-      language: state.filters.language || [],
+      verified: state.filters.verified || state.filters.verifiedOnly || false,
+      languages: state.filters.language || state.filters.languages || [],
     }));
   }, [state.filters]);
   
@@ -78,18 +82,17 @@ export const useEscortEnhancedFilters = () => {
       // Update context filters with the subset it supports
       updateContextFilters({
         location: filters.location,
-        serviceType: filters.serviceTypes,
-        serviceTypes: filters.serviceTypes,
-        priceRange: filters.priceRange,
+        serviceType: filters.serviceType,
+        priceRange: filters.price,
         gender: filters.gender,
         orientation: filters.orientation,
-        ageRange: filters.ageRange,
+        ageRange: filters.age,
         rating: filters.rating,
         verified: filters.verified,
         verifiedOnly: filters.verified,
-        availableNow: filters.availableNow,
-        escortType: filters.escortType,
-        language: filters.language
+        language: filters.languages,
+        languages: filters.languages,
+        escortType: filters.escortType
       });
       
       // Load escorts with neural processing
@@ -126,6 +129,8 @@ export const useEscortEnhancedFilters = () => {
   const toggleAvailability = useCallback((type: 'days' | 'hours', value: string) => {
     setFilters(prev => {
       const currentValues = prev.availability[type];
+      if (!currentValues) return prev;
+      
       const exists = currentValues.includes(value);
       const updatedValues = exists
         ? currentValues.filter(v => v !== value)

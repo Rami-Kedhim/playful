@@ -9,7 +9,7 @@ import BookingDialog from '../../booking/BookingDialog';
 interface BookingButtonProps {
   escort: Escort;
   availability?: any;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'lg' | 'default';
   variant?: 'default' | 'outline' | 'ghost';
   fullWidth?: boolean;
 }
@@ -17,7 +17,7 @@ interface BookingButtonProps {
 const BookingButton: React.FC<BookingButtonProps> = ({
   escort,
   availability,
-  size = 'md',
+  size = 'default',
   variant = 'default',
   fullWidth = false
 }) => {

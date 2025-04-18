@@ -1,5 +1,4 @@
 
-// Update the EscortContextState interface to include featuredEscorts
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Escort } from '@/types/escort';
 import escortService from '../../../services/escortService';
@@ -13,8 +12,8 @@ export interface EscortContextState {
   filters: EscortFilterOptions;
   totalPages: number;
   currentPage: number;
-  featuredEscorts: Escort[]; // Add featuredEscorts property
-  isLoading: boolean; // Add isLoading as an alias for loading
+  featuredEscorts: Escort[];
+  isLoading: boolean;
 }
 
 export interface EscortContextProps {
@@ -83,7 +82,7 @@ export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const data = await escortService.getEscorts(actualFilters);
       
       // Extract featured escorts
-      const featured = data.escorts ? data.escorts.filter(escort => escort.featured || escort.isFeatured) : [];
+      const featured = data.escorts ? data.escorts.filter(escort => escort.featured) : [];
       
       setState(prev => ({ 
         ...prev,

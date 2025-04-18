@@ -1,132 +1,75 @@
 
 import { z } from 'zod';
 
-// Verification types
-export enum VerificationStatus {
-  PENDING = 'pending',
-  IN_REVIEW = 'in_review',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  EXPIRED = 'expired'
+// Document types
+export const ID_CARD = 'id_card';
+export const PASSPORT = 'passport';
+export const DRIVERS_LICENSE = 'drivers_license';
+
+export type DocumentType = typeof ID_CARD | typeof PASSPORT | typeof DRIVERS_LICENSE;
+
+export const DOCUMENT_TYPES = [
+  { value: ID_CARD, label: 'ID Card' },
+  { value: PASSPORT, label: 'Passport' },
+  { value: DRIVERS_LICENSE, label: 'Driver\'s License' },
+];
+
+// Verification status types
+export type VerificationStatus = 'pending' | 'approved' | 'rejected' | 'expired';
+
+export interface DocumentData {
+  file: File;
+  preview: string;
 }
 
-export enum VerificationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  ENHANCED = 'enhanced', 
-  PREMIUM = 'premium'
-}
+// Schema for verification form
+export const verificationFormSchema = z.object({
+  documentType: z.enum([ID_CARD, PASSPORT, DRIVERS_LICENSE]),
+  documentFile: z.instanceof(File, { message: 'Primary document is required' }),
+  selfieFile: z.instanceof(File, { message: 'Selfie is required' }).optional(),
+  consentChecked: z.boolean().optional(),
+  documentFrontImage: z.object({
+    file: z.instanceof(File).optional(),
+    preview: z.string().optional(),
+  }).optional(),
+  documentBackImage: z.object({
+    file: z.instanceof(File).optional(),
+    preview: z.string().optional(),
+  }).optional(),
+  selfieImage: z.object({
+    file: z.instanceof(File).optional(),
+    preview: z.string().optional(),
+  }).optional(),
+});
+
+// Types based on the schema
+export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
 
 export interface VerificationDocument {
   id: string;
-  type: string;
+  userId: string;
+  documentType: DocumentType;
   fileUrl: string;
+  status: VerificationStatus;
   uploadedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
-  verification_id?: string;
-  document_type?: string;
-  document_url?: string;
-  url?: string;
-  file_url?: string;
+  reviewedAt?: string;
   notes?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface VerificationRequest {
   id: string;
   userId: string;
-  user_id?: string;
   status: VerificationStatus;
-  verificationLevel?: VerificationLevel;
-  documents: VerificationDocument[];
-  submittedAt?: string;
+  submittedAt: string;
   updatedAt?: string;
+  documents: VerificationDocument[];
   rejectionReason?: string;
-  
-  // Additional fields used in various components
-  profile_id?: string;
-  requested_level?: VerificationLevel;
-  requestedLevel?: VerificationLevel;
-  created_at?: string;
-  createdAt?: string;
-  updated_at?: string;
-  reviewed_at?: string;
-  reviewedAt?: string;
-  reviewed_by?: string;
-  reviewer_id?: string;
-  reviewerId?: string;
-  reviewer_notes?: string;
-  expires_at?: string;
-  
-  // Compatibility fields
-  level?: VerificationLevel;
-  rejection_reason?: string;
+  verificationLevel?: string;
 }
 
-// Add types for verification form
-export type DocumentType = 'id_card' | 'passport' | 'drivers_license';
-export const ID_CARD: DocumentType = 'id_card';
-export const PASSPORT: DocumentType = 'passport';
-export const DRIVERS_LICENSE: DocumentType = 'drivers_license';
-export const RESIDENCE_PERMIT: string = 'residence_permit';
-
-export const DOCUMENT_TYPES: Record<DocumentType, string> = {
-  id_card: 'ID Card',
-  passport: 'Passport',
-  drivers_license: 'Driver\'s License'
-};
-
-// Additional constants required by components
-export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-export const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
-export const DOCUMENT_REQUIREMENTS = {
-  id_card: {
-    front: true,
-    back: true,
-    selfie: true
-  },
-  passport: {
-    front: true,
-    back: false,
-    selfie: true
-  },
-  drivers_license: {
-    front: true,
-    back: true,
-    selfie: true
-  },
-  residence_permit: {
-    front: true,
-    back: true,
-    selfie: true
-  }
-};
-
-// Interface for file with preview
-export interface FileWithPreview {
-  file: File;
-  preview: string;
-}
-
-export interface VerificationFormValues {
+// Form data type
+export interface VerificationFormData {
   documentType: DocumentType;
   documentFile: File;
   selfieFile?: File;
-  consentChecked: boolean;
-  documentFrontImage?: FileWithPreview;
-  documentBackImage?: FileWithPreview;
-  selfieImage?: FileWithPreview;
 }
-
-// Create a proper zod schema for form validation
-export const verificationFormSchema = z.object({
-  documentType: z.enum(['id_card', 'passport', 'drivers_license'] as const),
-  documentFile: z.any(),
-  selfieFile: z.any().optional(),
-  consentChecked: z.boolean(),
-  documentFrontImage: z.any().optional(),
-  documentBackImage: z.any().optional(),
-  selfieImage: z.any().optional()
-});

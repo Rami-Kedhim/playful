@@ -1,69 +1,80 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { MapPin, Video, RadioTower } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Define the ServiceTypeFilter as a type, not just values
-export type ServiceTypeFilter = 'in-person' | 'virtual' | 'both' | '';
+export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both';
 
 interface ServiceTypeBadgeLabelProps {
   type: ServiceTypeFilter;
+  showEmpty?: boolean;
+  variant?: 'default' | 'outline' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
-// Service type filter constants that can be exported and used by other components
-export const SERVICE_TYPES = {
-  IN_PERSON: 'in-person' as ServiceTypeFilter,
-  VIRTUAL: 'virtual' as ServiceTypeFilter,
-  BOTH: 'both' as ServiceTypeFilter,
-};
-
-// Helper function to get badge label from service type
-export const getServiceTypeBadgeLabel = (type: ServiceTypeFilter): string => {
-  switch (type.toLowerCase()) {
-    case SERVICE_TYPES.IN_PERSON:
-      return 'In-Person';
-    case SERVICE_TYPES.VIRTUAL:
+// Use this function to get the service type badge label
+export function getServiceTypeBadgeLabel(type: ServiceTypeFilter): string {
+  switch (type) {
+    case 'in-person':
+      return 'In Person';
+    case 'virtual':
       return 'Virtual';
-    case SERVICE_TYPES.BOTH:
-      return 'In-Person & Virtual';
+    case 'both':
+      return 'In Person & Virtual';
     default:
-      return type || 'Any';
+      return 'All Service Types';
   }
-};
+}
 
-// Export the ServiceTypeFilter for other components to use
-export const ServiceTypeFilterOptions = {
-  types: SERVICE_TYPES,
-  getLabel: getServiceTypeBadgeLabel,
-  options: [
-    { value: SERVICE_TYPES.IN_PERSON, label: 'In-Person' },
-    { value: SERVICE_TYPES.VIRTUAL, label: 'Virtual' },
-    { value: SERVICE_TYPES.BOTH, label: 'Both' },
-    { value: '', label: 'Any' }
-  ],
-};
+// Use this to get the icon component for a service type
+export function ServiceTypeIcon({ 
+  type, 
+  size = 16,
+  variant = 'default'
+}: { 
+  type: ServiceTypeFilter; 
+  size?: number;
+  variant?: 'default' | 'colored';
+}) {
+  switch (type) {
+    case 'in-person':
+      return <MapPin size={size} className={variant === 'colored' ? 'text-blue-500' : ''} />;
+    case 'virtual':
+      return <Video size={size} className={variant === 'colored' ? 'text-green-500' : ''} />;
+    case 'both':
+      return <RadioTower size={size} className={variant === 'colored' ? 'text-purple-500' : ''} />;
+    default:
+      return null;
+  }
+}
 
-const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type, className }) => {
-  let label: string = getServiceTypeBadgeLabel(type);
-  let variant: "default" | "secondary" | "outline" | "destructive" = "outline";
+const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({
+  type,
+  showEmpty = false,
+  variant = 'default',
+  size = 'md',
+  className
+}) => {
+  if (!type && !showEmpty) return null;
   
-  switch (type.toLowerCase()) {
-    case SERVICE_TYPES.IN_PERSON:
-      variant = 'default';
-      break;
-    case SERVICE_TYPES.VIRTUAL:
-      variant = 'secondary';
-      break;
-    case SERVICE_TYPES.BOTH:
-      variant = 'outline';
-      break;
-    default:
-      variant = 'outline';
-  }
+  const label = getServiceTypeBadgeLabel(type);
+  const sizeClass = size === 'sm' ? 'text-xs py-0.5 px-2' : 
+                   size === 'lg' ? 'text-sm py-1.5 px-3' : 
+                   'text-xs py-1 px-2.5';
   
   return (
-    <Badge variant={variant} className={className}>
-      {label}
+    <Badge 
+      variant={variant}
+      className={cn(
+        "flex items-center gap-1.5 font-medium",
+        sizeClass,
+        className
+      )}
+    >
+      <ServiceTypeIcon type={type} size={size === 'sm' ? 12 : size === 'lg' ? 18 : 14} />
+      <span>{label}</span>
     </Badge>
   );
 };

@@ -2,13 +2,21 @@
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ESCORT_BODY_TYPE_OPTIONS } from '@/types/escortTypes';
 
 interface BodyTypeFilterProps {
   selectedBodyTypes: string[];
   toggleBodyType: (bodyType: string) => void;
   className?: string;
 }
+
+const ESCORT_BODY_TYPE_OPTIONS = [
+  { value: 'slim', label: 'Slim' },
+  { value: 'athletic', label: 'Athletic' },
+  { value: 'average', label: 'Average' },
+  { value: 'curvy', label: 'Curvy' },
+  { value: 'full', label: 'Full-Figured' },
+  { value: 'muscular', label: 'Muscular' },
+];
 
 const BodyTypeFilter: React.FC<BodyTypeFilterProps> = ({
   selectedBodyTypes,

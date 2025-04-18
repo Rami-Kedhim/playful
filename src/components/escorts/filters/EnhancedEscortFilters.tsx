@@ -6,8 +6,8 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { useEnhancedEscortFilters } from '@/hooks/useEnhancedEscortFilters';
-import { EnhancedEscortFilters as EnhancedEscortFiltersType } from '@/types/escortTypes';
+import { useEscortEnhancedFilters } from '@/hooks/useEscortEnhancedFilters';
+import { ESCORT_SERVICE_TYPES } from '@/types/escortTypes';
 
 const EnhancedEscortFilters: React.FC = () => {
   const {
@@ -15,7 +15,7 @@ const EnhancedEscortFilters: React.FC = () => {
     updateFilters,
     resetFilters,
     toggleFilterValue
-  } = useEnhancedEscortFilters();
+  } = useEscortEnhancedFilters();
   
   const handlePriceChange = (values: number[]) => {
     updateFilters({ price: [values[0], values[1]] });
@@ -35,14 +35,14 @@ const EnhancedEscortFilters: React.FC = () => {
         <div>
           <Label>Service Type</Label>
           <div className="flex flex-wrap gap-2 mt-2">
-            {['massage', 'companionship', 'roleplay', 'travel'].map((type) => (
+            {ESCORT_SERVICE_TYPES.map((type) => (
               <Badge
-                key={type}
-                variant={filters.serviceType.includes(type) ? "default" : "outline"}
+                key={type.value}
+                variant={filters.serviceType.includes(type.value) ? "default" : "outline"}
                 className="cursor-pointer"
-                onClick={() => toggleFilterValue('serviceType', type)}
+                onClick={() => toggleFilterValue('serviceType', type.value)}
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {type.label}
               </Badge>
             ))}
           </div>
@@ -80,15 +80,6 @@ const EnhancedEscortFilters: React.FC = () => {
           <Switch
             checked={filters.verified}
             onCheckedChange={(checked) => updateFilters({ verified: checked })}
-          />
-        </div>
-        
-        {/* Available Now */}
-        <div className="flex items-center justify-between">
-          <Label>Available Now</Label>
-          <Switch
-            checked={filters.availableNow}
-            onCheckedChange={(checked) => updateFilters({ availableNow: checked })}
           />
         </div>
         
