@@ -66,12 +66,12 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
       const randomId = randomUUID();
 
       // Update the object to include the required 'type' property
-      const pendingDoc = {
+      const pendingDoc: VerificationDocument = {
         id: randomId,
         type: document_type, // Add the missing property
         document_type: document_type,
-        uploaded_at: new Date(),
-        status: VerificationStatus.PENDING
+        status: VerificationStatus.PENDING,
+        uploaded_at: new Date()
       };
       
       const { data, error } = await supabase

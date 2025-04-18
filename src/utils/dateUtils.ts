@@ -1,91 +1,73 @@
 
 /**
- * Safely converts various date formats to a Date object
+ * Safely parses a date string or returns a fallback if invalid
+ * @param dateString The date string to parse
+ * @param fallback Optional fallback date (defaults to current date)
  */
-export const safelyParseDate = (date: Date | string | number | null | undefined): Date => {
-  if (date instanceof Date) return date;
-  if (!date) return new Date();
+export const safelyParseDate = (dateString?: string | null | undefined, fallback: Date = new Date()): Date => {
+  if (!dateString) return fallback;
   
-  try {
-    return new Date(date);
-  } catch (err) {
-    console.error('Error parsing date:', err);
-    return new Date();
-  }
+  const parsedDate = new Date(dateString);
+  return isNaN(parsedDate.getTime()) ? fallback : parsedDate;
 };
 
 /**
- * Converts string or Date to a Date object
+ * Calculate the expiry date from a given date and period
+ * @param startDate Start date
+ * @param periodDays Number of days in the period
  */
-export const toDate = (date: string | Date | undefined): Date => {
-  if (!date) return new Date();
-  return typeof date === 'string' ? new Date(date) : date;
+export const calculateExpiryDate = (startDate: Date | string, periodDays: number): Date => {
+  const date = typeof startDate === 'string' ? new Date(startDate) : startDate;
+  return new Date(date.getTime() + periodDays * 24 * 60 * 60 * 1000);
 };
 
 /**
- * Format date to a short readable string
+ * Calculate days remaining until a date
+ * @param targetDate The target date
  */
-export const formatDate = (date: Date | string | null | undefined): string => {
-  if (!date) return '';
-  const dateObj = typeof date === 'string' ? new Date(date) : (date as Date);
-  return dateObj.toLocaleDateString();
-};
-
-/**
- * Format date with time
- */
-export const formatDateTime = (date: Date | string | null | undefined): string => {
-  if (!date) return '';
-  const dateObj = typeof date === 'string' ? new Date(date) : (date as Date);
-  return dateObj.toLocaleString();
-};
-
-/**
- * Calculate expiry date (180 days from creation)
- */
-export const calculateExpiryDate = (creationDate: Date): Date => {
-  const expiryDate = new Date(creationDate);
-  expiryDate.setDate(expiryDate.getDate() + 180); // 180 days (6 months) expiry
-  return expiryDate;
-};
-
-/**
- * Calculate days remaining until expiry
- */
-export const calculateDaysRemaining = (expiryDate: Date): number => {
+export const calculateDaysRemaining = (targetDate: Date | string): number => {
+  const target = typeof targetDate === 'string' ? new Date(targetDate) : targetDate;
   const now = new Date();
-  const diffTime = expiryDate.getTime() - now.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // Convert ms to days
+  const diffTime = target.getTime() - now.getTime();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
 /**
- * Determine content status based on creation date and days remaining
+ * Calculate renewal cost based on subscription type and duration
  */
-export const determineContentStatus = (creationDate: Date): 'active' | 'expiring' | 'expired' => {
-  const expiryDate = calculateExpiryDate(creationDate);
-  const daysRemaining = calculateDaysRemaining(expiryDate);
+export const calculateRenewalCost = (
+  basePrice: number,
+  discountRate = 0,
+  isYearly = false
+): number => {
+  let price = basePrice;
+  if (discountRate > 0) {
+    price = basePrice * (1 - discountRate);
+  }
+  if (isYearly) {
+    price = price * 12 * 0.8; // 20% yearly discount
+  }
+  return Math.round(price * 100) / 100;
+};
+
+/**
+ * Determine content status based on expiry date
+ */
+export const determineContentStatus = (expiryDate: Date | string): 'active' | 'expiring' | 'expired' => {
+  const expiry = typeof expiryDate === 'string' ? new Date(expiryDate) : expiryDate;
+  const now = new Date();
   
-  if (daysRemaining <= 0) {
+  if (expiry < now) {
     return 'expired';
-  } else if (daysRemaining <= 30) { // Less than 30 days left
+  }
+  
+  // If expiring within 7 days
+  const sevenDaysFromNow = new Date();
+  sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+  
+  if (expiry < sevenDaysFromNow) {
     return 'expiring';
-  } else {
-    return 'active';
-  }
-};
-
-/**
- * Calculate renewal cost based on content status and type
- */
-export const calculateRenewalCost = (status: string, contentType: string): number => {
-  const basePrice = contentType === 'video' ? 5 : contentType === 'image' ? 2 : 1;
-  
-  // Apply discount for nearly expired content
-  if (status === 'expiring') {
-    return basePrice * 0.8; // 20% discount
-  } else if (status === 'expired') {
-    return basePrice * 1.2; // 20% penalty
   }
   
-  return basePrice;
+  return 'active';
 };

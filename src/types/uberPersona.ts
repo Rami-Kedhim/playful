@@ -1,4 +1,5 @@
 
+
 export interface UberPersona {
   id: string;
   name: string;
@@ -12,7 +13,18 @@ export interface UberPersona {
   };
   description: string;
   background: string;
-  capabilities: string[];
+  capabilities: string[] | {
+    hasPhotos: boolean;
+    hasVideos: boolean;
+    hasStories: boolean;
+    hasChat: boolean;
+    hasBooking: boolean;
+    hasLiveStream: boolean;
+    hasExclusiveContent: boolean;
+    hasContent: boolean;
+    hasRealMeets: boolean;
+    hasVirtualMeets: boolean;
+  };
   limitations: string[];
   conversationStyle: string;
   stats: {
@@ -20,6 +32,10 @@ export interface UberPersona {
     favoriteCount: number;
     averageRating: number;
     totalSessionDuration: number;
+    rating?: number;
+    reviewCount?: number;
+    responseTime?: number;
+    viewCount?: number;
   };
   isActive: boolean;
   isLocked?: boolean;
@@ -27,4 +43,33 @@ export interface UberPersona {
   requiredAccessLevel?: string;
   specialization?: string;
   knowledgeDomains?: string[];
+  
+  // Additional properties used in various components
+  username?: string;
+  displayName?: string;
+  avatarUrl?: string;
+  location?: string;
+  bio?: string;
+  tags?: string[];
+  updatedAt?: Date;
+  roleFlags?: {
+    isEscort: boolean;
+    isCreator: boolean;
+    isLivecam: boolean;
+    isAI: boolean;
+    isVerified: boolean;
+    isFeatured: boolean;
+  };
+  monetization?: {
+    acceptsLucoin: boolean;
+    acceptsTips: boolean;
+    subscriptionPrice: number;
+    unlockingPrice: number;
+    boostingActive: boolean;
+    meetingPrice: number;
+  };
+  price?: number;
+  isOnline?: boolean;
+  rating?: number;
+  age?: number;
 }

@@ -1,10 +1,20 @@
 
+
 export enum VerificationStatus {
   PENDING = 'pending',
   APPROVED = 'approved',
   REJECTED = 'rejected',
   REVIEWING = 'reviewing',
   EXPIRED = 'expired'
+}
+
+// Adding VerificationLevel enum that's missing
+export enum VerificationLevel {
+  NONE = 'none',
+  BASIC = 'basic',
+  STANDARD = 'standard',
+  VERIFIED = 'verified',
+  PREMIUM = 'premium'
 }
 
 export interface VerificationRequest {
@@ -16,6 +26,8 @@ export interface VerificationRequest {
   updated_at: Date;
   rejection_reason?: string;
   level?: string;
+  verificationLevel?: string;
+  requested_level?: string;
 }
 
 export interface VerificationDocument {
@@ -26,6 +38,10 @@ export interface VerificationDocument {
   uploaded_at: Date;
   reviewer_notes?: string;
   file_path?: string;
+  file_url?: string;
+  url?: string;
+  fileUrl?: string;
+  document_url?: string;
 }
 
 export interface VerificationFormValues {

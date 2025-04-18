@@ -1,4 +1,5 @@
 
+
 export interface NeuralModel {
   id: string;
   name: string;
@@ -10,6 +11,13 @@ export interface NeuralModel {
     accuracy: number;
     latency: number;
   };
+  // Add these fields needed by NeuralSystemsPanel
+  type?: string;
+  status?: 'active' | 'inactive' | 'training' | 'error';
+  capabilities?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  resourceUsage?: number;
 }
 
 export interface SystemHealthMetrics {
@@ -41,4 +49,14 @@ export interface NeuralSystemMetricsResult {
   isMonitoring: boolean;
   startMonitoring: () => void;
   stopMonitoring: () => void;
+}
+
+// Add TrainingProgress type needed by NeuralSystemsPanel
+export interface TrainingProgress {
+  modelId: string;
+  progress: number;
+  epoch: number;
+  accuracy: number;
+  loss: number;
+  timeRemaining: number;
 }
