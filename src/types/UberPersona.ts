@@ -1,26 +1,88 @@
 
-// Standardized UberPersona definition that includes all properties from both versions
+/**
+ * Unified UberPersona type definition for the entire ecosystem
+ */
 
 export interface UberPersona {
+  // Core identity fields
   id: string;
   name: string;
   username?: string;
   displayName?: string;
   avatarUrl?: string;
   imageUrl?: string;
+  
+  // Categorization
   type: 'escort' | 'creator' | 'livecam' | 'ai';
-  tagline?: string;
   profileType?: string;
+  tagline?: string;
+  featured?: boolean;
+  
+  // Content and services
   services?: string[];
+  tags?: string[];
+  
+  // Profile information
+  bio?: string;
+  location?: string;
+  age?: number;
+  ethnicity?: string;
+  language?: string[];
+  description?: string;
+  background?: string;
+  
+  // Role flags - clear way to identify persona types
+  roleFlags?: {
+    isEscort: boolean;
+    isCreator: boolean;
+    isLivecam: boolean;
+    isAI: boolean;
+    isVerified: boolean;
+    isFeatured: boolean;
+  };
+  
+  // Availability information
   availability?: {
     status: 'available' | 'busy' | 'offline';
     nextAvailable?: string;
   };
-  features?: {
-    verified: boolean;
-    featured: boolean;
-    premium: boolean;
+  isOnline?: boolean;
+  
+  // Status and verification
+  isVerified?: boolean;
+  isActive: boolean;
+  isLocked?: boolean;
+  isPremium?: boolean;
+  isAI?: boolean;
+  requiredAccessLevel?: string;
+  
+  // Media content capabilities
+  capabilities?: string[] | {
+    hasPhotos: boolean;
+    hasVideos: boolean;
+    hasStories: boolean;
+    hasChat: boolean;
+    hasVoice: boolean;
+    hasBooking: boolean;
+    hasLiveStream: boolean;
+    hasExclusiveContent: boolean;
+    hasContent: boolean;
+    hasRealMeets: boolean;
+    hasVirtualMeets: boolean;
   };
+  
+  // Monetization settings
+  monetization?: {
+    acceptsLucoin: boolean;
+    acceptsTips: boolean;
+    subscriptionPrice: number;
+    unlockingPrice: number;
+    boostingActive: boolean;
+    meetingPrice: number;
+  };
+  price?: number;
+  
+  // Stats information
   stats?: {
     rating: number;
     reviewCount: number;
@@ -31,46 +93,9 @@ export interface UberPersona {
     totalSessionDuration?: number;
     viewCount?: number;
   };
-  featured?: boolean;
-  isAI?: boolean;
-  updatedAt?: Date;
-  bio?: string;
-  tags?: string[];
-  location?: string;
-  age?: number;
-  price?: number;
-  ethnicity?: string;
-  language?: string[];
-  roleFlags?: {
-    isEscort: boolean;
-    isCreator: boolean;
-    isLivecam: boolean;
-    isAI: boolean;
-    isVerified: boolean;
-    isFeatured: boolean;
-  };
-  capabilities?: string[] | {
-    hasPhotos: boolean;
-    hasVideos: boolean;
-    hasStories: boolean;
-    hasChat: boolean;
-    hasBooking: boolean;
-    hasLiveStream: boolean;
-    hasExclusiveContent: boolean;
-    hasContent: boolean;
-    hasRealMeets: boolean;
-    hasVirtualMeets: boolean;
-  };
-  monetization?: {
-    acceptsLucoin: boolean;
-    acceptsTips: boolean;
-    subscriptionPrice: number;
-    unlockingPrice: number;
-    boostingActive: boolean;
-    meetingPrice: number;
-  };
-  isOnline?: boolean;
   rating?: number;
+  
+  // For AI personas
   traits?: {
     intelligence: number;
     creativity: number;
@@ -78,20 +103,17 @@ export interface UberPersona {
     empathy: number;
     assertiveness: number;
   };
-  description?: string;
-  background?: string;
   limitations?: string[];
   conversationStyle?: string;
   knowledgeDomains?: string[];
   specialization?: string;
-  isActive: boolean;
-  isLocked?: boolean;
-  isPremium?: boolean;
-  requiredAccessLevel?: string;
+  
+  // System fields
   systemMetadata?: any;
+  updatedAt?: Date;
 }
 
-// Neural model definition moved here from uberpersona.ts
+// Neural model definition
 export interface NeuralModel {
   id: string;
   name: string;

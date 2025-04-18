@@ -64,9 +64,10 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
       if (debouncedSearch) {
         const searchLower = debouncedSearch.toLowerCase();
         const matchesSearch = 
-          persona.displayName?.toLowerCase().includes(searchLower) || 
-          persona.bio?.toLowerCase().includes(searchLower) ||
-          persona.tags?.some(tag => tag.toLowerCase().includes(searchLower));
+          (persona.displayName?.toLowerCase().includes(searchLower)) || 
+          (persona.name?.toLowerCase().includes(searchLower)) ||
+          (persona.bio?.toLowerCase().includes(searchLower)) ||
+          (persona.tags?.some(tag => tag.toLowerCase().includes(searchLower)));
         
         if (!matchesSearch) return false;
       }
@@ -80,7 +81,7 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
       }
       
       // Role filters
-      const hasActiveRoleFilters = Object.values(roleFilters).some(value => value);
+      const hasActiveRoleFilters = Object.entries(roleFilters).some(([_, value]) => value);
       if (hasActiveRoleFilters && persona.roleFlags) {
         const matchesRoleFilter = Object.entries(roleFilters).some(([role, isActive]) => {
           return isActive && persona.roleFlags && persona.roleFlags[role as keyof typeof persona.roleFlags];
@@ -90,14 +91,14 @@ export function usePersonaFilter({ initialPersonas }: UsePersonaFilterProps) {
       }
       
       // Capability filters
-      const hasActiveCapabilityFilters = Object.values(capabilityFilters).some(value => value);
+      const hasActiveCapabilityFilters = Object.entries(capabilityFilters).some(([_, value]) => value);
       if (hasActiveCapabilityFilters && persona.capabilities) {
         const matchesCapabilityFilter = Object.entries(capabilityFilters).some(([capability, isActive]) => {
           if (!isActive) return false;
           
           // Handle different capability structures
           if (typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities)) {
-            return persona.capabilities[capability as keyof typeof persona.capabilities];
+            return persona.capabilities[capability as keyof typeof persona.capabilities] === true;
           } else if (Array.isArray(persona.capabilities)) {
             return persona.capabilities.includes(capability);
           }

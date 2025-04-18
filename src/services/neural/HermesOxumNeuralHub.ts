@@ -1,5 +1,7 @@
+
 import { Escort } from '@/types/escort';
 import { SystemHealthMetrics } from '@/types/neural';
+import { ContactInfo } from '@/types/escort';
 
 export class HermesOxumNeuralHub {
   private static instance: HermesOxumNeuralHub;
@@ -40,7 +42,8 @@ export class HermesOxumNeuralHub {
         images: [`https://picsum.photos/seed/neural${i}/800/1200`],
         contactInfo: {
           email: `neural${i}@example.com`,
-          phone: 'N/A'
+          phone: 'N/A',
+          website: undefined
         },
         isAI: true
       });
@@ -53,8 +56,8 @@ export class HermesOxumNeuralHub {
     // Add neural enhancements to escort data
     return escorts.map(escort => ({
       ...escort,
-      bio: this.enhanceBio(escort.bio),
-      tags: this.enhanceTags(escort.services),
+      bio: this.enhanceBio(escort.bio || ''),
+      tags: this.enhanceTags(escort.services || []),
       isAI: escort.isAI || false,
       isFavorited: Math.random() > 0.7
     }));

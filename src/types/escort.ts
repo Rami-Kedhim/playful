@@ -2,7 +2,7 @@
 // This file resolves the casing issue by re-exporting from Escort.ts
 export * from './Escort';
 
-// Add the missing ContactInfo type
+// Adding ContactInfo type
 export interface ContactInfo {
   email: string;
   phone: string;
@@ -11,6 +11,7 @@ export interface ContactInfo {
 
 // Adding VerificationStatus enum
 export enum VerificationStatus {
+  NONE = 'none',
   PENDING = 'pending',
   IN_REVIEW = 'in_review',
   APPROVED = 'approved',

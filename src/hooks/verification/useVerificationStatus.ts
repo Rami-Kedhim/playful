@@ -1,12 +1,13 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
-import { VerificationStatus } from '@/types/escort';
+import { VerificationStatus, VerificationLevel } from '@/types/escort';
 
 interface VerificationHookResult {
   status: VerificationStatus;
   isVerifying: boolean;
   error: string | null;
-  submitVerification: (level?: "basic" | "advanced" | "premium") => Promise<void>;
+  submitVerification: (level?: VerificationLevel) => Promise<void>;
   refreshStatus: () => Promise<void>;
 }
 
@@ -37,7 +38,7 @@ export const useVerificationStatus = (): VerificationHookResult => {
     }
   };
 
-  const submitVerification = async (level: "basic" | "advanced" | "premium" = "basic") => {
+  const submitVerification = async (level: VerificationLevel = VerificationLevel.BASIC) => {
     setIsVerifying(true);
     setError(null);
 

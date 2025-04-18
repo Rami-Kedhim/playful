@@ -4,11 +4,15 @@ import { useNeuralServices } from '@/hooks/useNeuralServices';
 import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
 import { EscortConsumer } from './consumers/EscortConsumer';
 import { EscortProvider } from './providers/EscortProvider';
+import { UberPersonaProvider } from '@/contexts/UberPersonaContext';
 import { toast } from '@/components/ui/use-toast';
 
 /**
  * Escorts Module - Main container component that integrates with the Brain Hub
  * and initializes the neural services for escorts functionality
+ * 
+ * This module integrates with the UberPersona ecosystem, allowing escorts
+ * to also function as content creators and livecam models
  */
 export const EscortsModule: React.FC<{children: React.ReactNode}> = ({ children }) => {
   // Initialize neural services with error handling
@@ -27,9 +31,11 @@ export const EscortsModule: React.FC<{children: React.ReactNode}> = ({ children 
 
   return (
     <EscortProvider>
-      <EscortConsumer isNeuralInitialized={isInitialized}>
-        {children}
-      </EscortConsumer>
+      <UberPersonaProvider>
+        <EscortConsumer isNeuralInitialized={isInitialized}>
+          {children}
+        </EscortConsumer>
+      </UberPersonaProvider>
     </EscortProvider>
   );
 };

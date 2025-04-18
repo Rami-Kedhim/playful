@@ -82,31 +82,25 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     
     // Cleanup on unmount
     return () => {
-      uberCore.shutdown().catch(console.error);
+      uberCore.shutdown?.()?.catch(console.error);
     };
   }, [escorts]);
   
   // Define filter functions for different persona types
   const getEscorts = () => allPersonas.filter(persona => 
-    persona.profileType === 'verified' || persona.profileType === 'provisional'
+    persona.type === 'escort' || persona.roleFlags?.isEscort
   );
   
-  const getCreators = () => allPersonas.filter(persona => {
-    // Fix: Check if services exists before calling some() on it
-    return persona.services && persona.services.some(s => 
-      s.toLowerCase().includes('content') || s.toLowerCase().includes('subscription')
-    );
-  });
+  const getCreators = () => allPersonas.filter(persona => 
+    persona.type === 'creator' || persona.roleFlags?.isCreator
+  );
   
-  const getLivecams = () => allPersonas.filter(persona => {
-    // Fix: Check if services exists before calling some() on it
-    return persona.services && persona.services.some(s => 
-      s.toLowerCase().includes('cam') || s.toLowerCase().includes('stream') || s.toLowerCase().includes('virtual')
-    );
-  });
+  const getLivecams = () => allPersonas.filter(persona => 
+    persona.type === 'livecam' || persona.roleFlags?.isLivecam
+  );
   
   const getAIPersonas = () => allPersonas.filter(persona => 
-    persona.isAI === true || persona.profileType === 'ai'
+    persona.type === 'ai' || persona.isAI === true || persona.roleFlags?.isAI
   );
   
   // Get persona by ID
@@ -117,7 +111,11 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   // Get boosted personas 
   const getBoostedPersonas = (): UberPersona[] => {
     // In a real app, this would check the active boosts in the database
-    return allPersonas.filter((_, index) => index % 3 === 0); // Every 3rd one for demo
+    return allPersonas.filter(persona => 
+      persona.monetization?.boostingActive || 
+      persona.roleFlags?.isFeatured || 
+      persona.featured
+    );
   };
   
   // Rank personas using machine learning and boost factors
@@ -128,10 +126,9 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     // Apply ranking algorithm with boost factor
     ranked.sort((a, b) => {
       // Make sure stats exists before accessing its properties
-      // Fix: Check if stats exists before accessing its properties
-      const aRating = a.stats?.rating || 0;
+      const aRating = a.stats?.rating || a.rating || 0;
       const aReviewCount = a.stats?.reviewCount || 0;
-      const bRating = b.stats?.rating || 0;
+      const bRating = b.stats?.rating || b.rating || 0;
       const bReviewCount = b.stats?.reviewCount || 0;
       
       // Base ranking on stats
@@ -139,8 +136,8 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
       let bScore = (bRating * 2) + (bReviewCount / 10);
       
       // Apply boosting
-      if (a.featured) aScore *= boostFactor;
-      if (b.featured) bScore *= boostFactor;
+      if (a.roleFlags?.isFeatured || a.featured) aScore *= boostFactor;
+      if (b.roleFlags?.isFeatured || b.featured) bScore *= boostFactor;
       
       return bScore - aScore;
     });

@@ -19,19 +19,11 @@ const MessagesPage = lazy(() => import('./pages/MessagesPage'));
 const MetaversePage = lazy(() => import('./pages/MetaversePage'));
 const SearchPage = lazy(() => import('./pages/SearchPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
-const Escorts = lazy(() => import('./pages/Escorts'));
-const EscortDetail = lazy(() => import('./pages/EscortDetail'));
-const EscortLiveStreams = lazy(() => import('./pages/EscortLiveStreams'));
-const EscortLiveStreamDetail = lazy(() => import('./pages/EscortLiveStreamDetail'));
-const Creators = lazy(() => import('./pages/Creators'));
-const CreatorDetail = lazy(() => import('./pages/CreatorDetail'));
-const Livecams = lazy(() => import('./pages/Livecams'));
-const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
-const NSFWImageGeneratorPage = lazy(() => import('./pages/NSFWImageGeneratorPage'));
 const WalletPage = lazy(() => import('./pages/WalletPage/index'));
 const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const PersonasPage = lazy(() => import('./pages/Personas'));
+const PersonaPage = lazy(() => import('./pages/PersonaPage')); // New unified persona page
 const VerificationDashboard = lazy(() => import('./pages/admin/VerificationDashboard'));
 
 // Loading component
@@ -102,19 +94,17 @@ const RoutesComponent: React.FC = () => {
         <Route path={AppRoutes.MESSAGES} element={<ProtectedRoute><AppLayout><MessagesPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.METAVERSE} element={<AppLayout><MetaversePage /></AppLayout>} />
         <Route path={AppRoutes.SEARCH} element={<AppLayout><SearchPage /></AppLayout>} />
-        <Route path={AppRoutes.ESCORTS} element={<AppLayout><Escorts /></AppLayout>} />
-        <Route path={AppRoutes.ESCORT_DETAIL} element={<AppLayout><EscortDetail /></AppLayout>} />
-        <Route path="/escorts/live" element={<AppLayout><EscortLiveStreams /></AppLayout>} />
-        <Route path="/escorts/live/:id" element={<AppLayout><EscortLiveStreamDetail /></AppLayout>} />
-        <Route path={AppRoutes.CREATORS} element={<AppLayout><Creators /></AppLayout>} />
-        <Route path={AppRoutes.CREATOR_DETAIL} element={<AppLayout><CreatorDetail /></AppLayout>} />
-        <Route path={AppRoutes.LIVECAMS} element={<AppLayout><Livecams /></AppLayout>} />
-        <Route path={AppRoutes.LIVECAM_DETAIL} element={<AppLayout><LivecamDetail /></AppLayout>} />
         <Route path={AppRoutes.BRAIN_HUB} element={<ProtectedRoute><AppLayout><BrainHubPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/nsfw-image-generator" element={<ProtectedRoute><AppLayout><NSFWImageGeneratorPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.WALLET} element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
         <Route path="/verification" element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
         <Route path="/personas" element={<AppLayout><PersonasPage /></AppLayout>} />
+        
+        {/* Unified persona routes */}
+        <Route path="/personas/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
+        <Route path="/escorts/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
+        <Route path="/creators/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
+        <Route path="/livecams/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
+        <Route path="/ai-companions/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
         
         {/* Admin verification route */}
         <Route 
