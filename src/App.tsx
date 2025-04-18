@@ -1,6 +1,6 @@
 
 import { BrowserRouter } from 'react-router-dom';
-import Routes from './routes';
+import Routes from './Routes';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PersonaProvider } from './contexts/PersonaContext';

@@ -1,5 +1,5 @@
 
-// Updated UberPersona.ts - standardizing with more properties
+// Standardized UberPersona definition that includes all properties from both versions
 
 export interface UberPersona {
   id: string;
@@ -25,6 +25,11 @@ export interface UberPersona {
     rating: number;
     reviewCount: number;
     responseTime?: number;
+    usageCount?: number;
+    favoriteCount?: number;
+    averageRating?: number;
+    totalSessionDuration?: number;
+    viewCount?: number;
   };
   featured?: boolean;
   isAI?: boolean;
@@ -34,8 +39,8 @@ export interface UberPersona {
   location?: string;
   age?: number;
   price?: number;
-  ethnicity?: string; // Added for PersonaProfile.tsx
-  language?: string[]; // Added for PersonaProfile.tsx
+  ethnicity?: string;
+  language?: string[];
   roleFlags?: {
     isEscort: boolean;
     isCreator: boolean;
@@ -79,5 +84,32 @@ export interface UberPersona {
   conversationStyle?: string;
   knowledgeDomains?: string[];
   specialization?: string;
-  systemMetadata?: any; // Added for UberCore.ts
+  isActive: boolean;
+  isLocked?: boolean;
+  isPremium?: boolean;
+  requiredAccessLevel?: string;
+  systemMetadata?: any;
+}
+
+// Neural model definition moved here from uberpersona.ts
+export interface NeuralModel {
+  id: string;
+  name: string;
+  type: string;
+  version: string;
+  capabilities: string[];
+  status: 'active' | 'inactive' | 'deprecated';
+  performance: {
+    accuracy: number;
+    latency: number;
+    throughput: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+  size?: number;
+  precision?: number;
+}
+
+export interface SuperlativeBrainHubProps {
+  models: NeuralModel[];
 }

@@ -42,5 +42,3 @@ const ServiceTypeBadgeLabel: React.FC<ServiceTypeBadgeLabelProps> = ({ type }) =
 };
 
 export default ServiceTypeBadgeLabel;
-// Use "export type" to resolve isolatedModules error
-export type { ServiceTypeFilter };

@@ -1,12 +1,12 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Loader2 } from 'lucide-react';
 import { AppRoutes } from '@/utils/navigation';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { User, UserProfile, UserRole } from '@/types/user';
-import { safelyParseDate } from '@/utils/dateUtils';
+import { useAuth } from '@/hooks/auth/useAuthContext';
+import { User, UserProfile } from '@/types/user';
 
 // Auth page
 import AuthPage from './pages/AuthPage';
@@ -48,7 +48,7 @@ const RoutesComponent: React.FC = () => {
     id: authUser.id,
     username: authUser.username || '',
     email: authUser.email,
-    role: (authUser.role as 'user' | 'admin' | 'moderator') || 'user',
+    role: (authUser.role as 'user' | 'admin' | 'moderator' | 'escort' | 'creator') || 'user',
     name: authUser.name || authUser.username || authUser.full_name || '',
     isVerified: authUser.isVerified || false,
     createdAt: authUser.created_at || new Date().toISOString(),

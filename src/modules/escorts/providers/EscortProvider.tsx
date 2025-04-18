@@ -8,7 +8,7 @@ import React, {
   ReactNode,
 } from 'react';
 import escortService from '@/services/escortService';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 interface EscortContextType {
   escorts: Escort[];

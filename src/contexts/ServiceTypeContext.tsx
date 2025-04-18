@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState } from 'react';
-
-export type ServiceTypeFilter = 'all' | 'incall' | 'outcall' | 'virtual' | 'in-person' | 'both' | '';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 export interface ServiceTypeContextType {
   serviceType: ServiceTypeFilter;
@@ -12,12 +11,12 @@ export interface ServiceTypeContextType {
 }
 
 const ServiceTypeContext = createContext<ServiceTypeContextType>({
-  serviceType: 'all',
+  serviceType: 'all' as any,
   setServiceType: () => {}
 });
 
 export const ServiceTypeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [serviceType, setServiceType] = useState<ServiceTypeFilter>('all');
+  const [serviceType, setServiceType] = useState<ServiceTypeFilter>('');
   const [selectedSpecializedTypes, setSelectedSpecializedTypes] = useState<string[]>([]);
   
   // Sample specialized service types

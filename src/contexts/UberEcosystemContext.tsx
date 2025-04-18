@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 import { UberCoreSettings, UberSearchFilters } from '@/types/uber-ecosystem';
 import { uberCore } from '@/services/neural/UberCore';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';

@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import Header from './Header';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useThemeToggle } from '@/hooks/useThemeToggle';
@@ -11,9 +12,17 @@ import '@/styles/reveal-animations.css';
 
 interface EnhancedAppLayoutProps {
   children?: React.ReactNode;
+  hideNavbar?: boolean;
+  hideFooter?: boolean;
+  useHeader?: boolean;
 }
 
-const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
+const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ 
+  children, 
+  hideNavbar = false, 
+  hideFooter = false,
+  useHeader = false
+}) => {
   const { isDark, mounted } = useThemeToggle();
   const location = useLocation();
   
@@ -21,6 +30,7 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
   useEffect(() => {
     if (mounted) {
       document.body.classList.add('transition-colors', 'duration-300');
+      document.documentElement.classList.add('theme-transition');
       
       // Add a fade-in animation on initial load with a slight scale effect
       const mainContent = document.querySelector('main');
@@ -28,7 +38,7 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
         mainContent.classList.add('opacity-0', 'transform', 'scale-98');
         setTimeout(() => {
           mainContent.classList.remove('opacity-0', 'scale-98');
-          mainContent.classList.add('transition-all', 'duration-700', 'opacity-100', 'scale-100');
+          mainContent.classList.add('transition-all', 'duration-500', 'opacity-100', 'scale-100');
         }, 50);
       }
     }
@@ -36,6 +46,7 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
     return () => {
       // Clean up classes on unmount
       document.body.classList.remove('transition-colors', 'duration-300');
+      document.documentElement.classList.remove('theme-transition');
     };
   }, [mounted]);
   
@@ -49,15 +60,20 @@ const EnhancedAppLayout: React.FC<EnhancedAppLayoutProps> = ({ children }) => {
       "flex flex-col min-h-screen bg-background text-foreground",
       "transition-colors duration-300"
     )}>
-      <Navbar />
+      {useHeader ? 
+        (!hideNavbar && <Header />) :
+        (!hideNavbar && <Navbar />)
+      }
+      
       <AnimatePresence mode="wait">
         <PageTransition key={location.pathname} className="flex-1 w-full max-w-full">
-          <main className="flex-1 w-full max-w-full transition-all duration-500">
+          <main className="flex-1 w-full max-w-full transition-all duration-300">
             {children || <Outlet />}
           </main>
         </PageTransition>
       </AnimatePresence>
-      <Footer />
+      
+      {!hideFooter && <Footer />}
     </div>
   );
 };
