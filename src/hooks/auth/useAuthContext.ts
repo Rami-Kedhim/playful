@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { User, UserRole, AuthResult } from '@/types/user';
 
@@ -43,7 +42,6 @@ export interface AuthContextType {
   setUser?: (user: User | null) => void;
 }
 
-// Create the default state
 const defaultAuthContext: AuthContextType = {
   user: null,
   profile: null,
@@ -65,15 +63,12 @@ const defaultAuthContext: AuthContextType = {
   logout: async () => {},
 };
 
-// Create the context
 export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
-// Create a hook for using the auth context
 export const useAuth = (): AuthContextType => {
   return useContext(AuthContext);
 };
 
-// Export the AuthProvider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthContextType>(defaultAuthContext);
 
@@ -157,7 +152,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // Mock verification functions for compatibility
   const verifyEmail = useCallback(async (token: string) => {
     console.log('Verifying email with token:', token);
     return true;
@@ -173,7 +167,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return await updateUserProfile(data);
   }, [updateUserProfile]);
 
-  // Set up a mock user for development
   useEffect(() => {
     setTimeout(() => {
       const mockUser: User = {
@@ -231,26 +224,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [checkRole, updateUserProfile, refreshProfile, updatePassword, resetPassword, signIn, signUp, signOut, sendPasswordResetEmail, login, register, logout, updateProfile, verifyEmail, sendVerificationEmail]);
 
   return (
-    <AuthContext.Provider value={{
-      ...state,
-      login,
-      register,
-      signIn,
-      signUp,
-      signOut,
-      logout,
-      checkRole,
-      updateUserProfile,
-      refreshProfile,
-      updatePassword,
-      resetPassword,
-      sendPasswordResetEmail,
-      userRoles: state.user ? [state.user.role] : [],
-      verifyEmail,
-      sendVerificationEmail,
-      updateProfile,
-      setUser: (user) => setState(prev => ({ ...prev, user }))
-    }}>
+    <AuthContext.Provider 
+      value={{
+        ...state,
+        login,
+        register,
+        signIn,
+        signUp,
+        signOut,
+        logout,
+        checkRole,
+        updateUserProfile,
+        refreshProfile,
+        updatePassword,
+        resetPassword,
+        sendPasswordResetEmail,
+        userRoles: state.user ? [state.user.role] : [],
+        verifyEmail,
+        sendVerificationEmail,
+        updateProfile,
+        setUser: (user) => setState(prev => ({ ...prev, user }))
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
