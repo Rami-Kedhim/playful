@@ -1,5 +1,27 @@
-
 import { UberPersona } from '@/types/UberPersona';
+
+// Add safe capability checks helper function
+export const hasCapability = (persona: UberPersona, capability: string): boolean => {
+  if (!persona.capabilities) return false;
+  
+  // If capabilities is an array of strings
+  if (Array.isArray(persona.capabilities)) {
+    return persona.capabilities.includes(capability);
+  }
+  
+  // If capabilities is an object with boolean properties
+  if (typeof persona.capabilities === 'object') {
+    return Boolean(persona.capabilities[capability as keyof typeof persona.capabilities]);
+  }
+  
+  return false;
+};
+
+// Add safe availability check helper function
+export const isAvailableNow = (persona: UberPersona): boolean => {
+  if (!persona.availability) return false;
+  return persona.availability.status === 'available';
+};
 
 class UberCoreService {
   private isInitialized = false;

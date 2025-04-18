@@ -73,19 +73,23 @@ const PersonaPage = () => {
   // Determine which tabs to show based on persona type and capabilities
   const showBookingTab = persona.type === 'escort' || 
                          (persona.roleFlags?.isEscort) || 
-                         (persona.capabilities && typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities) && persona.capabilities.hasBooking);
+                         (persona.capabilities && typeof persona.capabilities === 'object' && 
+                          !Array.isArray(persona.capabilities) && persona.capabilities.hasBooking);
   
   const showContentTab = persona.type === 'creator' || 
                          (persona.roleFlags?.isCreator) || 
-                         (persona.capabilities && typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities) && persona.capabilities.hasContent);
+                         (persona.capabilities && typeof persona.capabilities === 'object' && 
+                          !Array.isArray(persona.capabilities) && persona.capabilities.hasContent);
   
   const showLiveTab = persona.type === 'livecam' || 
                       (persona.roleFlags?.isLivecam) || 
-                      (persona.capabilities && typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities) && persona.capabilities.hasLiveStream);
+                      (persona.capabilities && typeof persona.capabilities === 'object' && 
+                       !Array.isArray(persona.capabilities) && persona.capabilities.hasLiveStream);
   
   const showChatTab = persona.type === 'ai' || 
                       (persona.roleFlags?.isAI) || 
-                      (persona.capabilities && typeof persona.capabilities === 'object' && !Array.isArray(persona.capabilities) && persona.capabilities.hasChat);
+                      (persona.capabilities && typeof persona.capabilities === 'object' && 
+                       !Array.isArray(persona.capabilities) && persona.capabilities.hasChat);
   
   const showStoriesTab = persona.capabilities && 
                         typeof persona.capabilities === 'object' && 
@@ -156,7 +160,7 @@ const PersonaPage = () => {
                 <Badge key={index} variant="outline">
                   {tag}
                 </Badge>
-              )}
+              ))}
             </div>
           )}
 

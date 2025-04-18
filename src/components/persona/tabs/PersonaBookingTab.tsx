@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, DollarSign } from 'lucide-react';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 
 interface PersonaBookingTabProps {
   persona: UberPersona;

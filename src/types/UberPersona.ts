@@ -111,6 +111,7 @@ export interface UberPersona {
   // System fields
   systemMetadata?: any;
   updatedAt?: Date;
+  createdAt?: Date;
 }
 
 // Neural model definition
