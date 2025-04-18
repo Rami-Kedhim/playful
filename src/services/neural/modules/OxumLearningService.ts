@@ -1,6 +1,13 @@
 /**
  * OxumLearningService - Machine learning and logic module for UberCore
  */
+export interface ProcessingResult {
+  success: boolean;
+  data: any;
+  message?: string;
+  error?: string;
+}
+
 export class OxumLearningService {
   private config = {
     enabled: true,
@@ -74,6 +81,17 @@ export class OxumLearningService {
   
   getLearnedPatterns(): any[] {
     return this.learnedPatterns;
+  }
+  
+  public getCulturalContexts(input: string): ProcessingResult {
+    // Implementation would go here
+    return {
+      success: true,
+      data: {
+        contexts: ['western', 'global'],
+        confidence: 0.89
+      }
+    };
   }
 }
 

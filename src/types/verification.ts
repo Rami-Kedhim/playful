@@ -14,7 +14,8 @@ export enum VerificationStatus {
   APPROVED = 'approved',
   REJECTED = 'rejected',
   REVIEW = 'review',
-  EXPIRED = 'expired'
+  EXPIRED = 'expired',
+  IN_REVIEW = 'review' // Alias for backward compatibility
 }
 
 export enum DocumentType {
@@ -56,11 +57,15 @@ export interface VerificationRequest {
   submittedAt?: Date;
   verificationLevel?: VerificationLevel;
   rejectionReason?: string;
+  reviewer_notes?: string; // Add missing property
   // For backward compatibility
   user_id?: string;
   profile_id?: string;
   level?: VerificationLevel;
   requested_level?: VerificationLevel;
+  requestedLevel?: VerificationLevel;
+  createdAt?: Date;
+  reviewedAt?: Date;
 }
 
 export interface VerificationStats {

@@ -2,7 +2,7 @@
 import { createContext, useContext } from 'react';
 
 // Define the type for service type filter
-export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both';
+export type ServiceTypeFilter = '' | 'in-person' | 'virtual' | 'both' | 'massage' | 'dinner';
 
 // Define types for specialized service types
 export interface ServiceTypeContextType {
@@ -19,7 +19,7 @@ export interface ServiceTypeContextType {
 export const ServiceTypeContext = createContext<ServiceTypeContextType>({
   serviceType: '',
   setServiceType: () => {},
-  availableServiceTypes: ['in-person', 'virtual', 'both'],
+  availableServiceTypes: ['in-person', 'virtual', 'both', 'massage', 'dinner'],
   specializedServiceTypes: [],
   selectedSpecializedTypes: [],
   toggleSpecializedType: () => {}

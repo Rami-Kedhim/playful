@@ -1,124 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { neuralHub } from '@/services/neural/HermesOxumNeuralHub';
-import { NeuralModel } from '@/services/neural/types/neuralHub';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import NeuralSystemsPanel from './NeuralSystemsPanel';
-import SystemHealthPanel from './SystemHealthPanel';
-import ConfigurationPanel from './ConfigurationPanel';
+import React from 'react';
+import { NeuralModel } from '@/types/neural/NeuralSystemMetrics';
 
-const SuperlativeBrainHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('neural-systems');
-  const [advancedMode, setAdvancedMode] = useState(false);
-  const [models, setModels] = useState<NeuralModel[]>([]);
-  
-  useEffect(() => {
-    try {
-      // Get the models from the neural hub
-      const hubModels = neuralHub.getModels();
-      
-      // Map the models to match the NeuralModel interface
-      const formattedModels = hubModels.map(model => ({
-        id: model.id,
-        name: model.name,
-        type: model.type,
-        version: model.version,
-        capabilities: ['content_analysis', 'recommendation'], // Default capabilities
-        status: 'active' as 'active' | 'inactive' | 'training' | 'error',
-        performance: {
-          accuracy: 0.85,
-          latency: 120,
-          resourceUsage: 0.4
-        },
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }));
-      
-      setModels(formattedModels);
-    } catch (error) {
-      console.error('Failed to fetch models:', error);
-      // Error handling
-    }
-    
-    // Set up regular polling for model updates
-    const intervalId = setInterval(() => {
-      try {
-        const hubModels = neuralHub.getModels();
-        const formattedModels = hubModels.map(model => ({
-          id: model.id,
-          name: model.name,
-          type: model.type,
-          version: model.version,
-          capabilities: ['content_analysis', 'recommendation'], // Default capabilities
-          status: 'active' as 'active' | 'inactive' | 'training' | 'error',
-          performance: {
-            accuracy: 0.85,
-            latency: 120,
-            resourceUsage: 0.4
-          },
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }));
-        setModels(formattedModels);
-      } catch (error) {
-        console.error('Failed to fetch models:', error);
-        // Error handling
-      }
-    }, 5000);
-    
-    // Cleanup
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
-  
-  const handleAdvancedModeChange = (checked: boolean) => {
-    setAdvancedMode(checked);
-  };
-  
+interface SuperlativeBrainHubProps {
+  models: NeuralModel[];
+  advancedMode?: boolean;
+}
+
+const SuperlativeBrainHub: React.FC<SuperlativeBrainHubProps> = ({ models, advancedMode = false }) => {
+  // Component implementation
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Neural Hub Control Center</h2>
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="advanced-mode" className={advancedMode ? 'text-primary' : ''}>
-            Advanced Mode
-          </Label>
-          <Switch
-            id="advanced-mode"
-            checked={advancedMode}
-            onCheckedChange={handleAdvancedModeChange}
-          />
-        </div>
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-8">
-          <TabsTrigger value="neural-systems">Neural Systems</TabsTrigger>
-          <TabsTrigger value="system-health">System Health</TabsTrigger>
-          <TabsTrigger value="configuration">Configuration</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="neural-systems" className="space-y-4">
-          <NeuralSystemsPanel 
-            models={models}
-            advancedMode={advancedMode}
-          />
-        </TabsContent>
-        
-        <TabsContent value="system-health" className="space-y-4">
-          <SystemHealthPanel />
-        </TabsContent>
-        
-        <TabsContent value="configuration" className="space-y-4">
-          <ConfigurationPanel 
-            advancedMode={advancedMode}
-          />
-        </TabsContent>
-      </Tabs>
+    <div className="p-4 border rounded-md">
+      <h2 className="text-xl font-bold mb-4">Superlative Brain Hub</h2>
+      <p>Number of models: {models.length}</p>
+      <p>Advanced mode: {advancedMode ? 'Enabled' : 'Disabled'}</p>
     </div>
   );
 };

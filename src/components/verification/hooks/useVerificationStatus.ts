@@ -1,67 +1,67 @@
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
-// Mock function to fetch verification status
-const fetchVerificationStatus = async (userId: string): Promise<VerificationRequest | null> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Return mock data - 50% chance of having a verification
-  if (Math.random() > 0.5) {
-    return {
-      id: '1234567890',
-      userId: userId,
-      status: VerificationStatus.PENDING,
-      level: VerificationLevel.BASIC,
-      documents: [],
-      submittedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      // For backward compatibility
-      user_id: userId,
-      profile_id: userId,
-      created_at: new Date().toISOString(),
-      verificationLevel: VerificationLevel.BASIC,
-      requested_level: VerificationLevel.BASIC
-    };
-  }
-  
-  return null;
-};
-
-export const useVerificationStatus = () => {
-  const { user } = useAuth();
+export const useVerificationStatus = (userId: string | undefined) => {
+  const [request, setRequest] = useState<VerificationRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [verificationRequest, setVerificationRequest] = useState<VerificationRequest | null>(null);
-  
+
   useEffect(() => {
-    const checkStatus = async () => {
-      if (!user) {
+    // Simulate fetching the verification status
+    const fetchStatus = async () => {
+      if (!userId) {
         setLoading(false);
         return;
       }
-      
+
       try {
         setLoading(true);
-        setError(null);
-        const data = await fetchVerificationStatus(user.id);
-        setVerificationRequest(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load verification status');
-        console.error('Error fetching verification status:', err);
-      } finally {
+        // Here we would normally fetch from an API
+        // For now, mock a verification request
+        setTimeout(() => {
+          const mockRequest: VerificationRequest = {
+            id: 'mock-request-id',
+            userId: userId,
+            status: VerificationStatus.PENDING,
+            documents: [
+              {
+                id: 'doc-1',
+                document_type: 'ID_CARD' as any,
+                uploaded_at: new Date(),
+                status: VerificationStatus.PENDING
+              }
+            ],
+            created_at: new Date(),
+            updated_at: new Date(),
+            // For compatibility with both created_at and createdAt
+            createdAt: new Date(),
+            // For compatibility with both reviewed_at and reviewedAt
+            reviewedAt: new Date()
+          };
+          
+          setRequest(mockRequest);
+          setLoading(false);
+        }, 1000);
+      } catch (err) {
+        console.error("Error fetching verification status:", err);
+        setError("Failed to retrieve verification status");
         setLoading(false);
       }
     };
-    
-    checkStatus();
-  }, [user]);
-  
+
+    fetchStatus();
+  }, [userId]);
+
   return {
+    request,
     loading,
     error,
-    verificationRequest,
+    isVerified: request?.status === VerificationStatus.APPROVED,
+    isPending: request?.status === VerificationStatus.PENDING,
+    isRejected: request?.status === VerificationStatus.REJECTED,
+    inReview: request?.status === VerificationStatus.REVIEW
   };
 };
+
+export default useVerificationStatus;

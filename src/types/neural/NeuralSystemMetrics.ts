@@ -23,6 +23,20 @@ export interface SystemHealthMetrics {
   requestRate: number;
   averageResponseTime: number;
   errorRate: number;
+  // Add missing properties
+  cpuUtilization?: number;
+  memoryUtilization?: number;
+  networkLatency?: number;
+  errorFrequency?: number;
+  userSatisfactionScore?: number;
+  responseTime?: number;
+  algorithmEfficiency?: number;
+  dataPrecision?: number;
+  systemUptime?: number;
+  lastMaintenanceDate?: Date;
+  load?: number;
+  userEngagement?: number;
+  lastUpdated?: number;
 }
 
 export interface TrainingProgress {
@@ -49,6 +63,18 @@ export interface NeuralSystemMetricsResult {
   isMonitoring?: boolean;
   startMonitoring?: () => void;
   stopMonitoring?: () => void;
+  // Add compatibility with useNeuralSystemMetrics hook
+  metrics?: SystemHealthMetrics;
+  status?: 'optimal' | 'good' | 'warning' | 'critical';
+  recommendations?: string[];
+  lastUpdated?: Date;
+  hasAnomalies?: boolean;
+  anomalies?: {
+    metric: string;
+    value: number;
+    expected: number;
+    severity: 'low' | 'medium' | 'high';
+  }[];
 }
 
 export interface NeuralModel {
