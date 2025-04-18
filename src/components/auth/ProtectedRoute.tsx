@@ -6,7 +6,7 @@ import { UserRole } from "@/types/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: UserRole[];
+  allowedRoles?: string[];
 }
 
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
 
   // If allowedRoles is specified, check if user has one of the allowed roles
   if (allowedRoles && allowedRoles.length > 0 && user) {
-    const userRoles = user.roles || ['user'];
+    const userRoles = user.roles || [user.role || 'user'];
     const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
     
     if (!hasAllowedRole) {

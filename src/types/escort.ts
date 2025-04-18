@@ -25,6 +25,7 @@ export interface Availability {
   day?: string;
   hours?: string;
   available?: boolean;
+  slots?: { start: string; end: string }[];
 }
 
 export interface Escort {
@@ -39,9 +40,12 @@ export interface Escort {
   coverImage?: string;
   gallery?: string[];
   measurements?: Measurements;
-  height?: string;
+  height?: string | number;
+  weight?: number;
   hair?: string;
   eyes?: string;
+  hairColor?: string;
+  eyeColor?: string;
   ethnicity?: string;
   languages?: string[];
   verified?: boolean;
@@ -49,19 +53,36 @@ export interface Escort {
   verification_level?: VerificationLevel;
   rating?: number;
   reviewsCount?: number;
+  reviewCount?: number;
   rates?: Rates;
   services?: string[];
+  serviceTypes?: string[];
   availability?: string[] | Availability[];
   specialties?: string[];
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
   isFeatured?: boolean;
+  featured?: boolean;
   isNewcomer?: boolean;
   isFavorited?: boolean;
   responseRate?: number;
   price?: number;
   physique?: Physique;
   reviews?: any[];
+  tags?: string[];
+  imageUrl?: string;
+  avatar_url?: string;
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  lastActive?: string | Date;
+  description?: string;
+  images?: string[];
+  videos?: any[];
+  bodyType?: string;
+  isAI?: boolean;
+  isScraped?: boolean;
+  profileType?: string;
+  boostLevel?: number;
 }
 
 export enum BookingStatus {
@@ -77,9 +98,9 @@ export interface Booking {
   id: string;
   escortId: string;
   clientId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
+  date: string | Date;
+  startTime: string | Date;
+  endTime: string | Date;
   service?: string;
   serviceType?: string;
   duration: number;
@@ -89,3 +110,4 @@ export interface Booking {
   notes?: string;
   totalPrice?: number;
 }
+

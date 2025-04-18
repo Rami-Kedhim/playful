@@ -1,5 +1,5 @@
 
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Escort } from '@/types/escort';
 import escortService from '../../../services/escortService';
 
@@ -29,7 +29,7 @@ interface EscortContextState {
 
 export interface EscortContextProps {
   state: EscortContextState;
-  loadEscorts: (filters?: EscortFilterOptions) => Promise<void>;
+  loadEscorts: (filters?: EscortFilterOptions | boolean) => Promise<void>;
   getEscortById: (id: string) => Promise<Escort | null>;
   updateFilters: (filters: Partial<EscortFilterOptions>) => void;
 }
@@ -47,6 +47,9 @@ export const EscortContext = createContext<EscortContextProps>({
   getEscortById: async () => null,
   updateFilters: () => {}
 });
+
+// Add this hook for consuming the context
+export const useEscortContext = () => useContext(EscortContext);
 
 export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<EscortContextState>({
@@ -68,10 +71,14 @@ export const EscortProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     loadEscorts(state.filters);
   }, [state.filters]);
 
-  const loadEscorts = async (filters: EscortFilterOptions = {}) => {
+  const loadEscorts = async (filters: EscortFilterOptions | boolean = {}) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      const data = await escortService.getEscorts(filters);
+      
+      // If filters is a boolean, it's the useNeuralProcessing flag
+      const actualFilters = typeof filters === 'boolean' ? state.filters : filters;
+      
+      const data = await escortService.getEscorts(actualFilters);
       
       setState(prev => ({ 
         ...prev,

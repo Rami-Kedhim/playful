@@ -7,7 +7,7 @@ import { Escort, Booking, BookingStatus } from '@/types/escort';
 import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent, EnhancedCardFooter } from '@/components/ui/enhanced-card';
 import { EnhancedButton } from '@/components/ui/enhanced-button';
 import { toast } from '@/components/ui/use-toast';
-import BookingDialog from './BookingDialog';
+import BookingDialog from '../detail/booking/BookingDialog';
 import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
 import { Loader2 } from 'lucide-react';
@@ -93,7 +93,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       // Create booking with the right types
       const bookingData = {
         ...booking,
-        id: `booking-${Date.now()}`,
+        id: `booking-${Date.now().toString().substring(8, 13)}-${Math.random().toString(36).substring(2, 7)}`,
         createdAt: new Date(),
         status: BookingStatus.PENDING,
         totalPrice: booking.price || 0
@@ -129,8 +129,9 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
         return (
           <BookingDialog
             escort={escort}
+            isOpen={isOpen}
+            onClose={onClose}
             onSubmit={handleDetailsSubmit}
-            onCancel={onClose}
           />
         );
         

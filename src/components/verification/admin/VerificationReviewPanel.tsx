@@ -1,112 +1,123 @@
-
 import React, { useState } from 'react';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle } from 'lucide-react';
-import { VerificationStatusIndicator } from '@/components/verification';
-import { VerificationRequest } from '@/types/escort';
-import ReviewRequestModal from './ReviewRequestModal';
-import VerificationFilters from './VerificationFilters';
-import { useVerificationSearch } from '@/hooks/verification/useVerificationSearch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { AlertCircle, CheckCircle, Clock, File, User, X } from 'lucide-react';
+import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
+import DocumentReview from './DocumentReview';
+import { Badge } from '@/components/ui/badge';
+import { toast } from '@/components/ui/use-toast';
+import { format } from 'date-fns';
 
 interface VerificationReviewPanelProps {
-  onApprove: (requestId: string) => void;
-  onReject: (requestId: string, reason?: string) => void;
-  initialStatus?: string | null;
+  request: VerificationRequest;
+  onApprove: (requestId: string, notes?: string) => Promise<void>;
+  onReject: (requestId: string, notes?: string) => Promise<void>;
+  loading: boolean;
 }
 
-const VerificationReviewPanel = ({
+const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
+  request,
   onApprove,
   onReject,
-  initialStatus
-}: VerificationReviewPanelProps) => {
-  const [selectedRequest, setSelectedRequest] = useState<VerificationRequest | null>(null);
-  const {
-    requests,
-    isLoading,
-    setSearchQuery,
-    setStatusFilter,
-    setLevelFilter,
-    setDateRange
-  } = useVerificationSearch(initialStatus);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
+  loading,
+}) => {
+  const [notes, setNotes] = useState('');
+  const isPending = request.status === VerificationStatus.PENDING || request.status === VerificationStatus.IN_REVIEW;
+  
+  const handleApprove = async () => {
+    if (!isPending) return;
+    await onApprove(request.id, notes);
+  };
+  
+  const handleReject = async () => {
+    if (!isPending) return;
+    await onReject(request.id, notes);
+  };
+  
   return (
-    <div className="w-full space-y-6">
-      <VerificationFilters
-        onSearchChange={setSearchQuery}
-        onStatusChange={setStatusFilter}
-        onLevelChange={setLevelFilter}
-        onDateRangeChange={setDateRange}
-      />
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Submitted</TableHead>
-            <TableHead>User</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Documents</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {requests && requests.map((request) => (
-            <TableRow key={request.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedRequest(request)}>
-              <TableCell>
-                {new Date(request.submittedAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell>{request.userId}</TableCell>
-              <TableCell>
-                <VerificationStatusIndicator status={request.status} />
-              </TableCell>
-              <TableCell>{request.documents.length} submitted</TableCell>
-              <TableCell className="flex space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onApprove(request.id)}
-                  disabled={request.status !== 'pending'}
-                >
-                  <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
-                  Approve
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onReject(request.id)}
-                  disabled={request.status !== 'pending'}
-                >
-                  <XCircle className="h-4 w-4 mr-1 text-red-500" />
-                  Reject
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <ReviewRequestModal
-        request={selectedRequest}
-        isOpen={!!selectedRequest}
-        onClose={() => setSelectedRequest(null)}
-        onApprove={() => {
-          if (selectedRequest) {
-            onApprove(selectedRequest.id);
-            setSelectedRequest(null);
-          }
-        }}
-        onReject={(reason) => {
-          if (selectedRequest) {
-            onReject(selectedRequest.id, reason);
-            setSelectedRequest(null);
-          }
-        }}
-      />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Verification Request</CardTitle>
+        <CardDescription>Review the submitted documents and take action.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <User className="h-4 w-4" />
+          <span>User ID: {request.userId}</span>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Clock className="h-4 w-4" />
+          <span>
+            Submitted:{' '}
+            {request.submittedAt
+              ? format(new Date(request.submittedAt), 'MMM dd, yyyy h:mm a')
+              : format(new Date(request.created_at || request.createdAt), 'MMM dd, yyyy h:mm a')}
+          </span>
+        </div>
+        
+        <Tabs defaultValue="documents" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="documents" className="space-y-4">
+            {request.documents.length === 0 ? (
+              <div className="text-center text-muted-foreground">
+                <File className="h-6 w-6 mx-auto mb-2" />
+                No documents submitted.
+              </div>
+            ) : (
+              request.documents.map((doc) => (
+                <DocumentReview key={doc.id} document={doc} />
+              ))
+            )}
+          </TabsContent>
+          
+          <TabsContent value="notes">
+            <Textarea 
+              placeholder="Add notes about this verification request" 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        {request.status === VerificationStatus.APPROVED ? (
+          <Badge variant="outline" className="bg-green-100 text-green-500 border-green-200">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Approved on {request.reviewedAt ? format(new Date(request.reviewedAt), 'MMM dd, yyyy') : 'Unknown'}
+          </Badge>
+        ) : request.status === VerificationStatus.REJECTED ? (
+          <Badge variant="outline" className="bg-red-100 text-red-500 border-red-200">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            Rejected on {request.reviewedAt ? format(new Date(request.reviewedAt), 'MMM dd, yyyy') : 'Unknown'}
+          </Badge>
+        ) : (
+          <div className="flex space-x-2">
+            <Button 
+              variant="ghost" 
+              onClick={handleReject} 
+              disabled={loading}
+            >
+              Reject
+              <X className="h-4 w-4 ml-2" />
+            </Button>
+            <Button 
+              onClick={handleApprove} 
+              disabled={loading}
+            >
+              Approve
+              <CheckCircle className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 

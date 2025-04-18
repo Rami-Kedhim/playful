@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,22 +11,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import ServiceTypeBadgeLabel from '../../filters/ServiceTypeBadgeLabel';
 
-interface BookingDialogProps {
+export interface BookingDialogProps {
   escort: Escort;
   isOpen: boolean;
   onClose: () => void;
-  onBookNow: () => void;
+  onBookNow?: () => void;
+  onSubmit?: (bookingDetails: any) => Promise<void>;
+  onCancel?: () => void;
 }
 
-const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProps) => {
+const BookingDialog = ({ escort, isOpen, onClose, onBookNow, onSubmit, onCancel }: BookingDialogProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState<string | null>(null);
   const [duration, setDuration] = useState<string>("1hour");
   const [message, setMessage] = useState<string>("");
-  const { toast } = useToast();
   
   const getServiceType = () => {
     if (escort.providesInPersonServices && escort.providesVirtualContent) {
@@ -71,21 +72,42 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
   
   const handleSubmit = () => {
     if (!date || !timeSlot) {
-      toast({
-        title: "Incomplete booking",
-        description: "Please select both date and time for your booking",
-        variant: "destructive"
-      });
       return;
     }
     
-    toast({
-      title: "Booking Submitted",
-      description: `Your booking with ${escort.name} has been scheduled for ${format(date, "PP")} at ${timeSlot}`,
-    });
+    // Call either onBookNow or onSubmit based on what was provided
+    if (onBookNow) {
+      onBookNow();
+    } else if (onSubmit) {
+      const bookingDetails = {
+        date: date,
+        startTime: timeSlot,
+        endTime: calculateEndTime(timeSlot, duration),
+        duration: getDurationInHours(duration),
+        service: duration,
+        price: getPriceForDuration(duration),
+        notes: message,
+      };
+      
+      onSubmit(bookingDetails);
+    }
     
-    onBookNow();
     onClose();
+  };
+  
+  const calculateEndTime = (startTime: string, durationType: string): string => {
+    // Simple calculation for demo purposes
+    return startTime; // In a real app, calculate this properly
+  };
+  
+  const getDurationInHours = (durationType: string): number => {
+    switch (durationType) {
+      case "1hour": return 1;
+      case "2hours": return 2;
+      case "3hours": return 3;
+      case "overnight": return 8;
+      default: return 1;
+    }
   };
   
   const handleDialogClose = () => {
@@ -93,6 +115,11 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow }: BookingDialogProp
     setTimeSlot(null);
     setDuration("1hour");
     setMessage("");
+    
+    if (onCancel) {
+      onCancel();
+    }
+    
     onClose();
   };
   

@@ -100,3 +100,4 @@ export interface AuthContextType {
   userRoles: UserRole[];
   checkRole: (role: string | UserRole) => boolean;
 }
+
