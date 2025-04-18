@@ -23,13 +23,22 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photo
     let images: string[] = [];
     
     if (escort.gallery) {
-      if (typeof escort.gallery === 'object' && !Array.isArray(escort.gallery) && 'imageUrls' in escort.gallery) {
-        images = Array.isArray(escort.gallery.imageUrls) ? escort.gallery.imageUrls : [];
+      if (typeof escort.gallery === 'object' && !Array.isArray(escort.gallery)) {
+        // Handle gallery object with imageUrls property
+        const galleryObj = escort.gallery as { imageUrls: string[] };
+        if (galleryObj.imageUrls && Array.isArray(galleryObj.imageUrls)) {
+          images = galleryObj.imageUrls;
+        }
       } else if (Array.isArray(escort.gallery)) {
+        // Handle gallery array
         images = escort.gallery;
       }
     } else if (escort.images && Array.isArray(escort.images)) {
+      // Fallback to images array
       images = escort.images;
+    } else if (escort.gallery_images && Array.isArray(escort.gallery_images)) {
+      // Fallback to gallery_images array
+      images = escort.gallery_images;
     }
     
     return images;
@@ -37,32 +46,42 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photo
   
   // Process videos to ensure they're in a consistent format
   const videos = React.useMemo(() => {
-    if (!escort.videos || !Array.isArray(escort.videos)) return [] as VideoItem[];
+    const videosArray: VideoItem[] = [];
     
-    return escort.videos.map((video, index) => {
-      // Handle string URLs
-      if (typeof video === 'string') {
-        return { 
-          url: video,
+    // Handle case when escort.videos doesn't exist
+    if (!escort.videos) {
+      return videosArray;
+    }
+    
+    // Handle case when escort.videos exists
+    if (Array.isArray(escort.videos)) {
+      return escort.videos.map((video, index) => {
+        // Handle string URLs
+        if (typeof video === 'string') {
+          return { 
+            url: video,
+            title: `Video ${index + 1}`
+          };
+        }
+        
+        // Handle object videos
+        if (typeof video === 'object' && video !== null) {
+          return {
+            url: (video as any).url || '',
+            title: (video as any).title || `Video ${index + 1}`,
+            thumbnail: (video as any).thumbnail
+          };
+        }
+        
+        // Default fallback
+        return {
+          url: '',
           title: `Video ${index + 1}`
         };
-      }
-      
-      // Handle object videos
-      if (typeof video === 'object' && video !== null) {
-        return {
-          url: (video as any).url || '',
-          title: (video as any).title || `Video ${index + 1}`,
-          thumbnail: (video as any).thumbnail
-        };
-      }
-      
-      // Default fallback
-      return {
-        url: '',
-        title: `Video ${index + 1}`
-      };
-    }).filter(video => video.url); // Filter out videos with empty URLs
+      }).filter(video => video.url); // Filter out videos with empty URLs
+    }
+    
+    return videosArray;
   }, [escort.videos]);
 
   return (

@@ -40,7 +40,8 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
 
   // Use reviewCount as a fallback if reviews is an array
   const reviewsCount = typeof reviews === 'number' ? reviews : (reviewCount || 0);
-  const displayImage = profileImage || imageUrl || "https://via.placeholder.com/300x400";
+  // Use multiple fallbacks for image sources
+  const displayImage = imageUrl || profileImage || escort.avatar || escort.profileImage || escort.avatarUrl || "https://via.placeholder.com/300x400";
   
   const formatLastActive = () => {
     if (!lastActive) return "";
@@ -50,11 +51,14 @@ const EscortCard: React.FC<EscortCardProps> = ({ escort, className, featured }) 
   };
 
   const getServiceType = (): ServiceTypeFilter => {
-    if (providesInPersonServices && providesVirtualContent) {
+    const hasInPerson = providesInPersonServices || escort.serviceTypes?.includes('in-person') || false;
+    const hasVirtual = providesVirtualContent || escort.serviceTypes?.includes('virtual') || false;
+    
+    if (hasInPerson && hasVirtual) {
       return "both";
-    } else if (providesInPersonServices) {
+    } else if (hasInPerson) {
       return "in-person";
-    } else if (providesVirtualContent) {
+    } else if (hasVirtual) {
       return "virtual";
     }
     return "";

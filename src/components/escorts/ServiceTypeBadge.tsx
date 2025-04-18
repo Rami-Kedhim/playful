@@ -10,7 +10,14 @@ interface ServiceTypeBadgeProps {
 }
 
 const ServiceTypeBadge: React.FC<ServiceTypeBadgeProps> = ({ escort, size = 'md' }) => {
-  const { providesInPersonServices, providesVirtualContent } = escort;
+  // Use nullish coalescing to provide default values
+  const providesInPersonServices = escort.providesInPersonServices ?? 
+    escort.serviceTypes?.includes('in-person') ?? 
+    false;
+  
+  const providesVirtualContent = escort.providesVirtualContent ?? 
+    escort.serviceTypes?.includes('virtual') ?? 
+    false;
   
   // Icon sizes based on the badge size
   const iconSizes = {

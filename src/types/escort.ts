@@ -30,11 +30,11 @@ export interface Escort {
     phone: string;
     website: string;
   };
-  // Additional fields that are referenced in errors
+  // Additional fields referenced in components
   isAI?: boolean;
   profileType?: 'verified' | 'ai' | 'provisional';
   rates?: Rates;
-  availability?: string[];
+  availability?: string[] | any;
   reviewCount?: number;
   reviews?: number;
   tags?: string[];
@@ -45,20 +45,68 @@ export interface Escort {
   gallery_images?: string[];
   avatarUrl?: string;
   profileImage?: string;
-  gallery?: string[];
+  gallery?: string[] | { imageUrls: string[] };
   availableNow?: boolean;
   measurements?: {
-    height?: number;
-    weight?: number;
-    bust?: number;
-    waist?: number;
-    hips?: number;
+    height?: number | string;
+    weight?: number | string;
+    bust?: number | string;
+    waist?: number | string;
+    hips?: number | string;
   };
   hourly_rate?: number;
   is_verified?: boolean; // Alias for backward compatibility
   profileUrl?: string;
   verified?: boolean; // Alias for isVerified
   isFavorited?: boolean;
+  
+  // Adding missing properties referenced in components
+  imageUrl?: string;
+  sexualOrientation?: string;
+  lastActive?: Date | string;
+  responseRate?: number;
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  serviceTypes?: string[];
+  description?: string;
+  height?: number;
+  weight?: number;
+  hairColor?: string;
+  eyeColor?: string;
+  ethnicity?: string;
+  avatar_url?: string;
+  verification_level?: string;
+  verificationLevel?: string;
+  videos?: Array<{ url: string; title?: string; thumbnail?: string } | string>;
+}
+
+// Add BookingStatus enum
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
+  REJECTED = 'rejected',
+  DECLINED = 'declined'
+}
+
+// Add Booking interface
+export interface Booking {
+  id: string;
+  escortId: string;
+  clientId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  duration: number;
+  service: string;
+  status: BookingStatus;
+  location?: string;
+  price: number;
+  deposit?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface EscortSearchParams {
@@ -94,6 +142,12 @@ export interface VerificationRequest {
   rejectionReason?: string;
   reviewerId?: string;
   reviewedAt?: string;
+  // Backward compatibility fields
+  user_id?: string;
+  requested_level?: string;
+  created_at?: string;
+  reviewed_at?: string;
+  level?: string;
 }
 
 export interface VerificationDocument {
@@ -103,6 +157,12 @@ export interface VerificationDocument {
   url: string;
   status: string;
   uploadedAt: string;
+  // Backward compatibility fields
+  uploaded_at?: string;
+  created_at?: string;
+  document_type?: string;
+  document_url?: string;
+  fileUrl?: string;
 }
 
 export enum VerificationStatus {
@@ -115,4 +175,5 @@ export enum VerificationStatus {
 export interface ContentStats {
   photos: string;
   videos: string;
+  streams?: string;
 }

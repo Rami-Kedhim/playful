@@ -43,11 +43,14 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
       ? `$${escort.rates.hourly}/hr` 
       : 'Price on request';
   
+  // Get image from various possible properties
+  const displayImage = escort.imageUrl || escort.avatarUrl || escort.avatar || escort.avatar_url || '/placeholders/escort-profile.jpg';
+  
   return (
     <Card className={cn("h-full flex flex-col overflow-hidden", className)}>
       <div className="relative aspect-[3/4] overflow-hidden group">
         <img
-          src={escort.imageUrl || escort.avatar_url || escort.avatar || '/placeholders/escort-profile.jpg'}
+          src={displayImage}
           alt={displayName}
           className="w-full h-full object-cover transition-transform group-hover:scale-105"
         />

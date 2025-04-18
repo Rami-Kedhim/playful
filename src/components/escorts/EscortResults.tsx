@@ -79,12 +79,18 @@ const EscortResults = ({
   }
   
   // Count escorts by service type
-  const inPersonCount = escorts.filter(e => e.providesInPersonServices || e.serviceTypes?.includes('in-person')).length;
-  const virtualCount = escorts.filter(e => e.providesVirtualContent || e.serviceTypes?.includes('virtual')).length;
-  const bothCount = escorts.filter(e => 
-    (e.providesInPersonServices || e.serviceTypes?.includes('in-person')) && 
-    (e.providesVirtualContent || e.serviceTypes?.includes('virtual'))
-  ).length;
+  const getServiceType = (escort: Escort): { inPerson: boolean, virtual: boolean } => {
+    const inPerson = escort.providesInPersonServices || escort.services?.includes('in-person') || false;
+    const virtual = escort.providesVirtualContent || escort.services?.includes('virtual') || false;
+    return { inPerson, virtual };
+  };
+  
+  const inPersonCount = escorts.filter(e => getServiceType(e).inPerson).length;
+  const virtualCount = escorts.filter(e => getServiceType(e).virtual).length;
+  const bothCount = escorts.filter(e => {
+    const { inPerson, virtual } = getServiceType(e);
+    return inPerson && virtual;
+  }).length;
   
   return (
     <>
