@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -38,11 +38,16 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onComplete }) => 
     try {
       // Check if the function exists and call it appropriately
       if (resetPasswordFn) {
-        // Check if the function requires a token parameter (which would be null for email request)
+        // Some auth providers need a token and email, others just email
+        // Pass empty string as token when only email is provided
         if (resetPasswordFn === auth.resetPassword) {
           await resetPasswordFn("", email); // Provide empty token for email request
+        } else if (auth.sendPasswordResetEmail) {
+          // For providers that expect just an email
+          await auth.sendPasswordResetEmail(email);
         } else {
-          await resetPasswordFn(email);
+          // Fallback to using resetPassword with both parameters
+          await auth.resetPassword("", email);
         }
         
         setIsSent(true);

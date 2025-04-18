@@ -64,7 +64,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     };
   }, [bookingId]);
   
-  const handleDetailsSubmit = async (bookingDetails: Partial<Booking>) => {
+  const handleDetailsSubmit = async (bookingDetails: any) => {
     if (!user) {
       toast({
         title: 'Authentication Required',

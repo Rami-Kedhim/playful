@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -22,7 +21,7 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
     if (verificationRequest?.status === VerificationStatus.PENDING || verificationRequest?.status === VerificationStatus.IN_REVIEW) {
       const updateRemainingTime = () => {
         // Use either submittedAt or createdAt with fallback to created_at
-        const submissionDate = verificationRequest.submittedAt || verificationRequest.createdAt || verificationRequest.created_at;
+        const submissionDate = verificationRequest.submittedAt || verificationRequest.created_at;
         if (!submissionDate) return;
         
         const estimatedCompletionMs = new Date(submissionDate).getTime() + 48 * 60 * 60 * 1000;
@@ -97,11 +96,10 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
   };
 
   const safeStatus = (statusValue: VerificationStatus | string): VerificationStatus => {
-    const validStatuses = Object.values(VerificationStatus);
-    
-    return validStatuses.includes(statusValue as VerificationStatus) 
-      ? (statusValue as VerificationStatus) 
-      : VerificationStatus.PENDING;
+    if (Object.values(VerificationStatus).includes(statusValue as VerificationStatus)) {
+      return statusValue as VerificationStatus;
+    }
+    return VerificationStatus.PENDING;
   };
 
   // Handle status value
@@ -135,13 +133,13 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Submitted on</span>
               <span className="text-sm">
-                {new Date(verificationRequest.submittedAt || verificationRequest.createdAt || verificationRequest.created_at || Date.now()).toLocaleDateString()}
+                {new Date(verificationRequest.submittedAt || verificationRequest.created_at || Date.now()).toLocaleDateString()}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Level requested</span>
               <span className="text-sm capitalize">
-                {verificationRequest.level || verificationRequest.verificationLevel || verificationRequest.requested_level || verificationRequest.requestedLevel || 'basic'}
+                {verificationRequest.verificationLevel || verificationRequest.requested_level || 'basic'}
               </span>
             </div>
             <div className="flex justify-between">
@@ -156,11 +154,11 @@ const VerificationProgress = ({ verificationRequest, error, onRetry }: Verificat
                 <span className="text-sm">{timeRemaining}</span>
               </div>
             )}
-            {status === VerificationStatus.REJECTED && (verificationRequest.rejectionReason || verificationRequest.rejection_reason || verificationRequest.reviewer_notes || verificationRequest.reviewerNotes) && (
+            {status === VerificationStatus.REJECTED && (verificationRequest.rejectionReason || verificationRequest.reviewer_notes) && (
               <div className="mt-2">
                 <span className="text-sm text-muted-foreground block">Rejection reason:</span>
                 <p className="text-sm mt-1 p-2 bg-red-50 dark:bg-red-900/20 rounded-md">
-                  {verificationRequest.rejectionReason || verificationRequest.rejection_reason || verificationRequest.reviewer_notes || verificationRequest.reviewerNotes}
+                  {verificationRequest.rejectionReason || verificationRequest.reviewer_notes}
                 </p>
               </div>
             )}

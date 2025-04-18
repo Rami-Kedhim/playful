@@ -19,19 +19,25 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photo
   const [activeTab, setActiveTab] = useState(initialTab);
   
   // Get gallery images from either gallery or images field
-  let galleryImages: string[] = [];
-  
-  if (escort.gallery && 'imageUrls' in escort.gallery && Array.isArray(escort.gallery.imageUrls)) {
-    galleryImages = escort.gallery.imageUrls;
-  } else if (Array.isArray(escort.gallery)) {
-    galleryImages = escort.gallery;
-  } else if (escort.images && Array.isArray(escort.images)) {
-    galleryImages = escort.images as string[];
-  }
+  const galleryImages = React.useMemo(() => {
+    let images: string[] = [];
+    
+    if (escort.gallery) {
+      if (typeof escort.gallery === 'object' && 'imageUrls' in escort.gallery) {
+        images = Array.isArray(escort.gallery.imageUrls) ? escort.gallery.imageUrls : [];
+      } else if (Array.isArray(escort.gallery)) {
+        images = escort.gallery;
+      }
+    } else if (escort.images && Array.isArray(escort.images)) {
+      images = escort.images;
+    }
+    
+    return images;
+  }, [escort]);
   
   // Process videos to ensure they're in a consistent format
-  const processVideos = (): VideoItem[] => {
-    if (!escort.videos || !Array.isArray(escort.videos)) return [];
+  const videos = React.useMemo(() => {
+    if (!escort.videos || !Array.isArray(escort.videos)) return [] as VideoItem[];
     
     return escort.videos.map((video, index) => {
       // Handle string URLs
@@ -57,9 +63,7 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort, initialTab = "photo
         title: `Video ${index + 1}`
       };
     }).filter(video => video.url); // Filter out videos with empty URLs
-  };
-  
-  const videos = processVideos();
+  }, [escort.videos]);
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

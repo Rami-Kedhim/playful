@@ -86,10 +86,10 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
             <span>{booking.duration}</span>
           </div>
           
-          {booking.serviceType && (
+          {booking.service && (
             <div className="flex items-center justify-between border-b pb-2">
               <span className="text-muted-foreground">Service Type</span>
-              <span className="capitalize">{booking.serviceType}</span>
+              <span className="capitalize">{booking.service}</span>
             </div>
           )}
           

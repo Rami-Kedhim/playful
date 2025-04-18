@@ -1,6 +1,15 @@
 
 import { VerificationDocument, VerificationLevel, VerificationRequest, VerificationStatus } from './verification';
 
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELED = 'canceled',
+  COMPLETED = 'completed',
+  REJECTED = 'rejected',
+  DECLINED = 'declined'
+}
+
 export interface Escort {
   id: string;
   name: string;
@@ -26,7 +35,7 @@ export interface Escort {
   contentStats?: ContentStats;
   orientation?: string;
   
-  // Additional properties used in components
+  // Additional properties
   reviewCount?: number;
   reviews?: number;
   tags?: string[];
@@ -52,6 +61,14 @@ export interface Escort {
   eyeColor?: string;
   height?: number;
   weight?: number;
+  ethnicity?: string;
+  bodyType?: string;
+  description?: string;
+  gallery?: string[] | { imageUrls: string[] };
+  videos?: Array<string | { url: string, title?: string, thumbnail?: string }>;
+  verificationLevel?: VerificationLevel;
+  verification_level?: string;
+  isFavorited?: boolean;
 }
 
 export interface Measurements {
@@ -113,6 +130,8 @@ export interface Availability {
   endTime?: string;
   location?: string;
   isAvailable?: boolean;
+  // Compatibility fields for components that expect 'days'
+  days?: string[];
 }
 
 export type ExtendedAvailability = Availability & {
@@ -135,9 +154,6 @@ export interface Video {
   updatedAt?: string;
 }
 
-// Add missing types from booking components
-export type BookingStatus = 'pending' | 'confirmed' | 'canceled' | 'completed' | 'rejected';
-
 export interface Booking {
   id: string;
   escortId: string;
@@ -154,4 +170,26 @@ export interface Booking {
   notes?: string;
   createdAt: string;
   updatedAt?: string;
+  serviceType?: string; // Add this for compatibility
 }
+
+// Add escort filter constants
+export const ESCORT_BODY_TYPE_OPTIONS = [
+  'Slim', 'Athletic', 'Average', 'Curvy', 'Full-figured', 'Muscular'
+];
+
+export const ESCORT_ETHNICITY_OPTIONS = [
+  'Asian', 'Black', 'Caucasian', 'Hispanic/Latino', 'Middle Eastern', 'Mixed', 'Other'
+];
+
+export const ESCORT_EYE_COLOR_OPTIONS = [
+  'Blue', 'Brown', 'Green', 'Hazel', 'Gray', 'Other'
+];
+
+export const ESCORT_HAIR_COLOR_OPTIONS = [
+  'Black', 'Blonde', 'Brown', 'Red', 'Gray', 'Other'
+];
+
+export const ESCORT_LANGUAGE_OPTIONS = [
+  'English', 'Spanish', 'French', 'German', 'Italian', 'Chinese', 'Japanese', 'Korean', 'Russian', 'Portuguese', 'Arabic'
+];
