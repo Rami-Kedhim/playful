@@ -1,6 +1,12 @@
 
 import { useState, useEffect } from 'react';
-import { VerificationRequest, VerificationDocument, DocumentType } from '@/types/verification';
+import { 
+  VerificationRequest, 
+  VerificationStatus,
+  VerificationDocument,
+  DocumentType,
+  toDocumentType
+} from '@/types/verification';
 import verificationService from '@/services/verificationService';
 
 export const useVerificationStatus = (userId: string) => {
@@ -48,8 +54,8 @@ export const useVerificationStatus = (userId: string) => {
     }
   }, [userId]);
 
-  // Submit a new document - simplified to match available methods
-  const submitDocument = async (documentFile: File, documentType: DocumentType) => {
+  // Submit a new document - with correct parameters
+  const submitDocument = async (documentFile: File, documentType: DocumentType, additionalData?: any) => {
     setLoading(true);
     try {
       if (!request) {

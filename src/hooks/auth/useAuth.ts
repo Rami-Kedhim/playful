@@ -100,7 +100,6 @@ export const useAuth = (): AuthContextType => {
         is_verified: user.isVerified || false,
         website: user.website || '',
         avatar_url: user.avatar_url || '',
-        joinedDate: new Date(),
         phone: user.phone || '',
         profileImageUrl: user.profileImageUrl || ''
       };

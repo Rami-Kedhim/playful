@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +14,8 @@ const ServiceTypeDemo = () => {
   };
   
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Service Type Demo</h1>
+    <div className="container mx-auto py-6 space-y-6">
+      <h1 className="text-3xl font-bold">Service Type Components Demo</h1>
       
       <Card>
         <CardContent className="space-y-4">
@@ -51,6 +50,31 @@ const ServiceTypeDemo = () => {
             ) : (
               <p>No service type selected</p>
             )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>ServiceTypeIcon Component</CardTitle>
+          <CardDescription>Display service types as icons</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 p-2 border rounded">
+              <ServiceTypeIcon type="in-person" size={24} />
+              <span>In Person (default)</span>
+            </div>
+            
+            <div className="flex items-center gap-1 p-2 border rounded">
+              <ServiceTypeIcon type="virtual" size={24} variant="colored" />
+              <span>Virtual (colored)</span>
+            </div>
+            
+            <div className="flex items-center gap-1 p-2 border rounded">
+              <ServiceTypeIcon type="both" size={24} variant="colored" />
+              <span>Both</span>
+            </div>
           </div>
         </CardContent>
       </Card>

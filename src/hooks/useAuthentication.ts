@@ -50,9 +50,7 @@ export const useAuthentication = () => {
     return false;
   }, [auth]);
   
-  // Mock implementations for methods that don't exist in the auth context
-  
-  // Reset password method
+  // Reset password method (mock implementation)
   const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
     console.log('Reset password requested for', email);
     return {
@@ -61,10 +59,13 @@ export const useAuthentication = () => {
     };
   }, []);
   
-  // Send password reset email
-  const sendPasswordResetEmail = useCallback(async (email: string): Promise<boolean> => {
+  // Send password reset email (mock implementation)
+  const sendPasswordResetEmail = useCallback(async (email: string): Promise<AuthResult> => {
     console.log('Send password reset email to', email);
-    return true;
+    return { 
+      success: true,
+      error: null
+    };
   }, []);
   
   // Update password
@@ -75,16 +76,22 @@ export const useAuthentication = () => {
     return false;
   }, [auth]);
   
-  // Verify email
-  const verifyEmail = useCallback(async (token: string): Promise<boolean> => {
+  // Verify email (mock implementation)
+  const verifyEmail = useCallback(async (token: string): Promise<AuthResult> => {
     console.log('Verify email with token', token);
-    return true;
+    return {
+      success: true,
+      error: null
+    };
   }, []);
   
-  // Send verification email
-  const sendVerificationEmail = useCallback(async (): Promise<boolean> => {
+  // Send verification email (mock implementation)
+  const sendVerificationEmail = useCallback(async (): Promise<AuthResult> => {
     console.log('Send verification email requested');
-    return true;
+    return {
+      success: true,
+      error: null
+    };
   }, []);
   
   return {

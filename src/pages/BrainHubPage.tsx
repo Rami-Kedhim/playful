@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import SuperlativeBrainHub from '@/components/brainHub/SuperlativeBrainHub';
-import { NeuralModel } from '@/types/uberpersona';
+import { NeuralModel } from '@/types/neural/NeuralSystemMetrics';
 
 const BrainHubPage = () => {
   const [activeTab, setActiveTab] = useState<string>('models');
@@ -26,6 +27,9 @@ const BrainHubPage = () => {
             latency: 120,
             throughput: 250
           },
+          specialization: 'natural-language-processing',
+          size: 'medium',
+          precision: 'mixed',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         },
@@ -41,6 +45,9 @@ const BrainHubPage = () => {
             latency: 100,
             throughput: 300
           },
+          specialization: 'character-generation',
+          size: 'small',
+          precision: 'standard',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         },
@@ -56,6 +63,9 @@ const BrainHubPage = () => {
             latency: 150,
             throughput: 200
           },
+          specialization: 'profile-optimization',
+          size: 'large',
+          precision: 'high',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }
