@@ -1,11 +1,12 @@
-import { Escort } from "@/types/Escort";
-import { mockEscorts } from "@/data/escortData";
+
+import { Escort } from "@/types/escort";
+import { escorts } from "@/data/escortData";
 
 const getEscorts = async (): Promise<Escort[]> => {
   // Simulate an API call
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(mockEscorts);
+      resolve(escorts);
     }, 500);
   });
 };
@@ -14,7 +15,7 @@ const getEscortById = async (id: string): Promise<Escort | undefined> => {
   // Simulate an API call
   return new Promise((resolve) => {
     setTimeout(() => {
-      const escort = mockEscorts.find((escort) => escort.id === id);
+      const escort = escorts.find((escort) => escort.id === id);
       resolve(escort);
     }, 500);
   });
