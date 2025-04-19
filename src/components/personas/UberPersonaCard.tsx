@@ -1,9 +1,7 @@
 
-// Fix UberPersonaCard ts errors by adding optional chaining and verifying property names according to UberPersona type
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Link } from 'react-router-dom';
 import { VerificationBadge } from '../verification/VerificationBadge';
 import { UberPersona } from '@/types/UberPersona';
 import { hasRealMeets, hasVirtualMeets, hasContent, getVerificationLevel } from '@/utils/personaHelpers';
@@ -26,7 +24,23 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
   };
 
   // Use displayName or name fallback for display
-  const displayName = persona.displayName || persona.name || "Unnamed";
+  const displayName = persona.displayName || "Unnamed";
+
+  // Use avatarUrl or imageUrl or empty string fallback
+  const imageSrc = persona.avatarUrl || '';
+
+  // Use featured flag from persona or false fallback
+  const isFeatured = persona.featured ?? false;
+
+  // Use isVerified from persona or false fallback
+  const verified = persona.isVerified ?? false;
+
+  // Fix verification level to acceptable levels only (e.g., 'none', 'basic', premium')
+  // Assuming `getVerificationLevel` returns correct enum
+  const verificationLevelSafe = getVerificationLevel(persona.verificationLevel || 'none');
+
+  // Use persona.price if defined or default 0
+  const price = persona.price ?? 0;
 
   return (
     <Card 
@@ -35,18 +49,16 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
     >
       <div className="aspect-[3/4] relative">
         <img 
-          src={persona.avatarUrl || persona.imageUrl || ''} 
+          src={imageSrc} 
           alt={displayName}
           className="object-cover w-full h-full"
         />
         <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
-          {persona.featured && (
+          {isFeatured && (
             <Badge className="bg-primary">Featured</Badge>
           )}
-          {(persona.isVerified || persona.roleFlags?.isVerified) && (
-            <VerificationBadge level={
-              getVerificationLevel(persona.verificationLevel || 'none')
-            } />
+          {verified && (
+            <VerificationBadge level={verificationLevelSafe} />
           )}
         </div>
       </div>
@@ -57,7 +69,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
             {persona.location || 'Location not specified'}
           </div>
           <div className="text-sm font-medium">
-            ${persona.price ?? 0}/hr
+            ${price}/hr
           </div>
         </div>
         <div className="flex justify-between items-center mt-2">

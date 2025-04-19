@@ -61,4 +61,3 @@ export interface VerificationRequest {
   reviewer_notes?: string;
   expires_at?: string;
 }
-

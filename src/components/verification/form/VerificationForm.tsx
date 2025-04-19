@@ -1,4 +1,5 @@
 
+// Updated import and type usage for VerificationFormValues from local
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -6,21 +7,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form } from '@/components/ui/form';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { canSubmitVerification, submitVerificationRequest } from '@/utils/verification';
-import * as z from 'zod';
-import { 
-  DocumentType,
-  VerificationFormValues
-} from '@/types/verification';
+import { DocumentType } from '@/types/verification';
 import DocumentTypeSelect from './DocumentTypeSelect';
 import DocumentUploadHandler from './DocumentUploadHandler';
 import SubmitButton from './SubmitButton';
 import SubmissionAlert from './SubmissionAlert';
 import SuccessCard from './SuccessCard';
+import * as z from 'zod';
 
-// Defining a constant for ID_CARD to replace the imported one
-const ID_CARD = 'id_card';
-
-// Define schema
+// Define the same schema here for consistency
 const verificationFormSchema = z.object({
   documentType: z.string(),
   documentFile: z.any().refine(val => val instanceof File, { message: "Document file is required" }),
@@ -40,12 +35,17 @@ const verificationFormSchema = z.object({
   }).optional()
 });
 
+// Define type here inline to fix import issue
+export type VerificationFormValues = z.infer<typeof verificationFormSchema>;
+
 interface VerificationFormProps {
   onSubmit?: (data: VerificationFormValues) => void;
   loading?: boolean;
   serviceType?: string;
   onSubmissionComplete?: () => void;
 }
+
+const ID_CARD = 'id_card';
 
 const VerificationForm: React.FC<VerificationFormProps> = ({ 
   onSubmit: externalSubmit, 

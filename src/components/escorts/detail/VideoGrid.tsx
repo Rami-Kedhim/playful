@@ -39,8 +39,8 @@ const VideoGrid: React.FC<VideoGridProps> = ({
         >
           <div className="aspect-video bg-black/10">
             <img 
-              src={video.thumbnailUrl} 
-              alt={video.title} 
+              src={video.thumbnail} 
+              alt={video.title || 'Video'} 
               className="w-full h-full object-cover"
               loading="lazy"
             />
@@ -58,7 +58,8 @@ const VideoGrid: React.FC<VideoGridProps> = ({
             </div>
           )}
           
-          {video.isPremium && (
+          {/* Use isPublic or default to false */}
+          {video.isPublic && (
             <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-1 rounded">
               Premium
             </div>
@@ -75,4 +76,3 @@ const VideoGrid: React.FC<VideoGridProps> = ({
 };
 
 export default VideoGrid;
-

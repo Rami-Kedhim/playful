@@ -7,8 +7,8 @@ export function toDocumentType(value: string): DocumentType {
       return 'id_card';
     case 'passport':
       return 'passport';
-    case 'drivers_license':
-      return 'drivers_license';
+    case 'driver_license':
+      return 'driver_license';
     default:
       return 'id_card';
   }
@@ -20,7 +20,7 @@ export function getDocumentTypeLabel(type: DocumentType): string {
       return 'ID Card';
     case 'passport':
       return 'Passport';
-    case 'drivers_license':
+    case 'driver_license':
       return 'Driver\'s License';
     default:
       return 'ID Document';
