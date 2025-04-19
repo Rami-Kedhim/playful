@@ -1,10 +1,21 @@
 
+// Fix to accept correct props by adding imageUrl & isPremium to ProfileProps interface
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ContentCard from './ContentCard';
-import { ProfileProps } from '@/data/mockData';
+
+// Extend ProfileProps interface to include imageUrl and isPremium
+export interface ProfileProps {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  location?: string;
+  rating?: number;
+  isPremium?: boolean;
+  price?: number;
+}
 
 interface FeaturedContentSectionProps {
   title: string;
@@ -31,7 +42,6 @@ const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, 
       <CardContent className="pl-4 pb-4">
         <ScrollArea className="h-[250px] w-full">
           <div className="flex space-x-4">
-            {/* Add null check before mapping over profiles */}
             {Array.isArray(profiles) && profiles.length > 0 ? (
               profiles.map(profile => (
                 <ContentCard
@@ -39,10 +49,10 @@ const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, 
                   id={profile.id}
                   name={profile.name}
                   imageUrl={profile.imageUrl}
-                  location={profile.location}
-                  rating={profile.rating}
+                  location={profile.location || ''}
+                  rating={profile.rating || 0}
                   isPremium={profile.isPremium}
-                  price={profile.price}
+                  price={profile.price || 0}
                 />
               ))
             ) : (

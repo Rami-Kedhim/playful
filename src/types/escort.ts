@@ -1,28 +1,28 @@
 
+// Extended Escort interface with missing properties (reviewCount, providesVirtualContent, isFavorited, description, responseRate, bodyType, etc.)
+
 export interface Escort {
   id: string;
   name: string;
-  username: string;
+  username?: string;
   age?: number;
   gender?: string;
   sexualOrientation?: string;
   location?: string;
   bio?: string;
-  profileImage: string;
+  profileImage?: string;
   isVerified?: boolean;
   verificationLevel?: string;
   verification_level?: string; // Legacy field
   price?: number;
   rating?: number;
   serviceType?: 'in-person' | 'virtual' | 'both';
-  
-  // Gallery related fields
+
   gallery?: string[];
   gallery_images?: string[];
   images?: string[];
   videos?: string[];
-  
-  // Legacy fields for backward compatibility
+
   imageUrl?: string;
   avatarUrl?: string;
   avatar?: string;
@@ -31,37 +31,24 @@ export interface Escort {
   availableNow?: boolean;
   tags?: string[];
   reviews?: any[];
-  measurements?: string;
-  
-  // Optional but used in some components
-  height?: string;
-  weight?: string;
+  reviewCount?: number;
+  description?: string;
+  responseRate?: number;
+  bodyType?: string;
+  providesInPersonServices?: boolean;
+  providesVirtualContent?: boolean;
+  isFavorited?: boolean;
+  profileType?: string;
+  boostLevel?: number;
+  measures?: string;
+  favoriteCount?: number;
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
   languages?: string[];
-  availability?: string;
-  rates?: { [key: string]: number };
-  services?: string[];
-  
-  // Service type flags
-  providesInPersonServices?: boolean;
-  providesVirtualServices?: boolean;
-}
 
-export interface Video {
-  id: string;
-  title?: string;
-  description?: string;
-  thumbnailUrl: string;
-  videoUrl: string;
-  duration: number;
-  uploadedAt: Date;
-  views: number;
-  isPremium?: boolean;
+  // Possibly other optional fields
 }
-
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'rejected';
 
 export interface Booking {
   id: string;
@@ -70,10 +57,11 @@ export interface Booking {
   date: Date;
   duration: number; // in minutes
   service: string;
-  status: BookingStatus;
+  status: string;
   price: number;
   location?: string;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
+  serviceType?: string;
 }

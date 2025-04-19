@@ -1,5 +1,5 @@
 
-// Fix missing required onSubmit prop for BookingDialog and fixes for providesVirtualServices vs providesVirtualContent
+// Fix onSubmit handler to return Promise<void> and add missing props to BookingDialog, fix use of providesVirtualContent
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,10 +34,11 @@ const ProfileInfo = ({
     setBookingDialogOpen(true);
   };
 
-  // Provide a no-op onSubmit for BookingDialog to satisfy required prop
-  const bookingOnSubmit = (data: any) => {
+  // Provide a correct Promise returning onSubmit for BookingDialog
+  const bookingOnSubmit = async (data: any) => {
     // This can be implemented or logged if needed
     console.log("BookingDialog onSubmit called", data);
+    return Promise.resolve();
   };
   
   return (
@@ -125,4 +126,3 @@ const ProfileInfo = ({
 };
 
 export default ProfileInfo;
-

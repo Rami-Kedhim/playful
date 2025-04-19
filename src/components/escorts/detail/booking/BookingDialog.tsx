@@ -1,3 +1,6 @@
+
+// Fix usage of providesVirtualContent and import type accordingly
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ServiceTypeBadgeLabel from '../../filters/ServiceTypeBadgeLabel';
 
 export interface BookingDialogProps {
-  escort: Escort;
+  escort: Escort & { providesVirtualContent?: boolean; providesInPersonServices?: boolean };
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (bookingDetails: any) => Promise<void>;
@@ -21,7 +24,14 @@ export interface BookingDialogProps {
   onBookNow?: () => void;
 }
 
-const BookingDialog = ({ escort, isOpen, onClose, onSubmit, onCancel, onBookNow }: BookingDialogProps) => {
+const BookingDialog = ({
+  escort,
+  isOpen,
+  onClose,
+  onSubmit,
+  onCancel,
+  onBookNow,
+}: BookingDialogProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState<string | null>(null);
   const [duration, setDuration] = useState<string>("1hour");
@@ -69,7 +79,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onSubmit, onCancel, onBookNow 
     }
   };
   
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!date || !timeSlot) {
       return;
     }
@@ -86,7 +96,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onSubmit, onCancel, onBookNow 
         price: getPriceForDuration(duration),
         notes: message,
       };
-      onSubmit(bookingDetails);
+      await onSubmit(bookingDetails);
     }
     
     onClose();

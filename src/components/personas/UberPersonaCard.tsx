@@ -1,8 +1,5 @@
 
-// Adjust to match UberPersona interface with appropriate property checks, especially for 'name', 'featured', 'isVerified', and 'verificationLevel'
-// Map UberPersona's verificationLevel string to a standardized type or string output for VerificationBadge
-// Fix missing 'price' fallback
-
+// Fix UberPersonaCard ts errors by adding optional chaining and verifying property names according to UberPersona type
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

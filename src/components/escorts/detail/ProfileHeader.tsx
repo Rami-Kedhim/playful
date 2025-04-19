@@ -1,3 +1,6 @@
+
+// Fix usage of `isFavorited` property existence in Escort interface
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Verified } from 'lucide-react';

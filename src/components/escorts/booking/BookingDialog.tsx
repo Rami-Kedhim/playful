@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { bookingFormSchema, BookingFormValues } from './types';
+// Fix import path of bookingFormSchema and BookingFormValues
+import { bookingFormSchema, BookingFormValues } from '../../detail/booking/types';
 import ServiceTypeBadgeLabel from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 interface BookingDialogProps {
@@ -61,6 +63,18 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
     { value: 'overnight', label: 'Overnight' },
   ];
 
+  // Fix properties for serviceType check
+  const getServiceType = () => {
+    if (escort.providesInPersonServices && escort.providesVirtualContent) {
+      return "both";
+    } else if (escort.providesInPersonServices) {
+      return "in-person";
+    } else if (escort.providesVirtualContent) {
+      return "virtual";
+    }
+    return "in-person";
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -68,15 +82,7 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
           <DialogTitle>Book {escort.name}</DialogTitle>
           <div className="flex space-x-2 mt-2">
             <ServiceTypeBadgeLabel 
-              type={
-                escort.providesInPersonServices && escort.providesVirtualServices
-                  ? "both"
-                  : escort.providesInPersonServices
-                  ? "in-person"
-                  : escort.providesVirtualServices
-                  ? "virtual"
-                  : "in-person"
-              }
+              type={getServiceType()}
             />
           </div>
         </DialogHeader>

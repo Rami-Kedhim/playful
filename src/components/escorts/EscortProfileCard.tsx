@@ -1,5 +1,5 @@
 
-// Fix serviceType type issue by providing a safe fallback that excludes empty string
+// Fix the getServiceType function to never return empty string to avoid TS error
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -38,8 +38,8 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
     } else if (escort.providesVirtualContent) {
       return 'virtual';
     }
-    // Provide a fallback to avoid empty string causing TS error
-    return (escort.serviceType && escort.serviceType !== '') ? escort.serviceType : 'in-person';
+    // Fallback to default 'in-person' instead of empty string
+    return 'in-person';
   };
 
   const getAvatarImage = () => {

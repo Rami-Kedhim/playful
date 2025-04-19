@@ -1,4 +1,6 @@
 
+// Fix usage of booking.serviceType, safely fallback to string
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,8 +43,8 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
     // Calculate duration in hours if available
     const durationHours = duration || 1;
     
-    // Use service type if available for display
-    const serviceType = booking.service || booking.serviceType || 'Standard';
+    // Use service type if available for display, else fallback to 'Standard'
+    const serviceType = (booking.serviceType as string) || 'Standard';
     
     return (
       <div className="space-y-2 mt-4">

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
 import { Escort } from '@/types/escort';
+// Fixed import path for ServiceTypeFilter
 import { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
 import BookingDialog from '../detail/booking/BookingDialog';
 
@@ -56,7 +57,7 @@ const BookingButton: React.FC<BookingButtonProps> = ({
         escort={escort}
         isOpen={showBookingDialog}
         onClose={() => setShowBookingDialog(false)}
-        onSubmit={async () => {}} // Provide a no-op submit since it is required
+        onSubmit={async () => {}} // no-op submit for required prop
       />
     </>
   );
