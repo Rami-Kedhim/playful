@@ -1,21 +1,8 @@
-
-// Fix ProfileProps interface to properly include imageUrl and isPremium properties
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import ContentCard from './ContentCard';
-
-export interface ProfileProps {
-  id: string;
-  name: string;
-  imageUrl?: string;      // made optional to fix TS errors
-  location?: string;
-  rating?: number;
-  isPremium?: boolean;    // made optional
-  price?: number;
-}
+import ContentCard, { ProfileProps } from './ContentCard';
 
 interface FeaturedContentSectionProps {
   title: string;

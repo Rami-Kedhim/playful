@@ -1,4 +1,6 @@
 
+// Extending Escort interface with Booking and Video interfaces to solve missing exports
+
 export interface Escort {
   id: string;
   name: string;
@@ -49,7 +51,6 @@ export interface Escort {
   rates?: {             // Fixed to optional to allow rates accesses
     hourly?: number;
     twoHours?: number;
-    twoHours?: number;
     overnight?: number;
     weekend?: number;
   };
@@ -64,3 +65,31 @@ export interface Escort {
 
   [key: string]: any;   // Allow flexible additional properties for gradual migration
 }
+
+export interface Booking {
+  id: string;
+  escortId: string;
+  clientId: string;
+  date: string | Date;
+  startTime?: string;
+  endTime?: string;
+  duration: number; // in minutes
+  service: string;
+  status: string;
+  price: number;
+  location?: string;
+  notes?: string;
+  createdAt: string | Date;
+  updatedAt?: string;
+  serviceType?: string;
+}
+
+export interface Video {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title?: string;
+  duration?: number;
+  isPublic?: boolean;
+}
+

@@ -3,7 +3,16 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
-import { ProfileProps } from '@/data/mockData';
+
+export interface ProfileProps {
+  id: string;
+  name: string;
+  imageUrl?: string;      // added optional to fix TS errors related to missing imageUrl
+  location?: string;
+  rating?: number;
+  isPremium?: boolean;    // added optional to fix TS errors related to missing isPremium
+  price?: number;
+}
 
 const ContentCard: React.FC<ProfileProps> = ({
   id,
@@ -52,3 +61,4 @@ const ContentCard: React.FC<ProfileProps> = ({
 };
 
 export default ContentCard;
+
