@@ -32,6 +32,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
+  // FIXED: Import VerificationLevel directly from types/verification for consistent type
   const verificationLevelSafe: VerificationLevel = (persona.verificationLevel as VerificationLevel) || VerificationLevel.NONE;
 
   const price = persona.monetization?.meetingPrice ?? 0;

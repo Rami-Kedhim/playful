@@ -1,26 +1,28 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import SuperlativeBrainHub from '@/components/brainHub/SuperlativeBrainHub';
-import { NeuralModel } from '@/services/neural/types/neuralHub';
+import { NeuralModel as NeuralHubNeuralModel } from '@/services/neural/types/neuralHub';
+import { NeuralModel as NeuralMetricsNeuralModel } from '@/types/neural/NeuralSystemMetrics';
 
 const BrainHubPage = () => {
   const [activeTab, setActiveTab] = useState<string>('models');
-  const [models, setModels] = useState<NeuralModel[]>([]);
+  const [models, setModels] = useState<NeuralMetricsNeuralModel[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simulate fetching models
     setTimeout(() => {
-      const mockModels: NeuralModel[] = [
+      const mockModelsHub: NeuralHubNeuralModel[] = [
         {
           id: 'model-1',
           name: 'LoveSense GPT',
           type: 'language',
           version: '2.1',
           capabilities: ['text-generation', 'image-description', 'sentiment-analysis'],
-          status: 'active',
+          status: 'active' as const,
           performance: {
             accuracy: 0.89,
             latency: 120,
@@ -38,7 +40,7 @@ const BrainHubPage = () => {
           type: 'language',
           version: '1.5',
           capabilities: ['character-creation', 'dialogue-generation'],
-          status: 'active',
+          status: 'active' as const,
           performance: {
             accuracy: 0.85,
             latency: 100,
@@ -56,7 +58,7 @@ const BrainHubPage = () => {
           type: 'multimodal',
           version: '3.0',
           capabilities: ['profile-optimization', 'scheduling-assistant', 'recommendation-engine'],
-          status: 'active',
+          status: 'active' as const,
           performance: {
             accuracy: 0.92,
             latency: 150,
@@ -69,7 +71,14 @@ const BrainHubPage = () => {
           precision: 64
         }
       ];
-      setModels(mockModels);
+
+      // Cast from neuralHub's model type to metrics's expected type
+      const modelsMapped: NeuralMetricsNeuralModel[] = mockModelsHub.map(m => ({
+        ...m,
+        status: m.status  // Already compatible with required unions by asserting as const above
+      }));
+
+      setModels(modelsMapped);
       setLoading(false);
     }, 1000);
   }, []);
@@ -120,3 +129,4 @@ const BrainHubPage = () => {
 };
 
 export default BrainHubPage;
+

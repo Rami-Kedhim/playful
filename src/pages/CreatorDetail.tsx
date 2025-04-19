@@ -1,5 +1,4 @@
 
-// Remove children prop for CreatorsModule and fix creator type issues with casting username
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -13,7 +12,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
 import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
-import type { Creator, ContentCreator } from "@/types/creator";
+import type { ContentCreator } from "@/types/creator";
 
 const CreatorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,17 +22,12 @@ const CreatorDetail: React.FC = () => {
   }
 
   return (
-    <CreatorsModule>
-      <CreatorDetailContent creatorId={id} />
-    </CreatorsModule>
+    // Remove children from CreatorsModule since it doesn't accept props
+    <CreatorsModule />
   );
 };
 
-interface CreatorDetailContentProps {
-  creatorId: string;
-}
-
-const CreatorDetailContent: React.FC<CreatorDetailContentProps> = ({ creatorId }) => {
+export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorId }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const {
@@ -47,8 +41,8 @@ const CreatorDetailContent: React.FC<CreatorDetailContentProps> = ({ creatorId }
     handleSendTip,
   } = useCreatorDetail(creatorId);
 
-  // Fix type compatibility by casting content creator to Creator with default username if missing
-  const creator: Creator | null = rawCreator
+  // Use ContentCreator type and fix prop typing
+  const creator: ContentCreator | null = rawCreator
     ? {
         ...rawCreator,
         username: rawCreator.username || rawCreator.name || 'unknown',

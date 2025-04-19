@@ -18,24 +18,50 @@ const PersonaProfile: React.FC = () => {
   const { personaId } = useParams<{ personaId: string }>();
   const navigate = useNavigate();
 
-  // Initialize persona with required fields and default values
+  // Provide default values for all required UberPersona properties to fix TS errors
   const [persona, setPersona] = useState<UberPersona>({
     id: personaId || '1',
-    username: '',
+    username: 'unknown',
     displayName: 'Unknown Persona',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    rating: 4.8,
-    reviewCount: 120,
-    isVerified: true,
     location: 'New York, NY',
-    description: 'A passionate creator with a love for sharing her life.',
-    tags: ['travel', 'fashion', 'lifestyle', 'beauty'],
     language: '',
     bio: '',
-    isAI: false,
-    roleFlags: {},
+    age: 0,
+    ethnicity: '',
+    tags: ['travel', 'fashion', 'lifestyle', 'beauty'],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    roleFlags: {
+      isEscort: false,
+      isCreator: false,
+      isLivecam: false,
+      isAI: false,
+      isVerified: true,
+      isFeatured: false,
+    },
+    capabilities: {
+      hasPhotos: false,
+      hasVideos: false,
+      hasStories: false,
+      hasChat: false,
+      hasBooking: false,
+      hasLiveStream: false,
+      hasExclusiveContent: false,
+      hasContent: false,
+      hasRealMeets: false,
+      hasVirtualMeets: false,
+    },
     monetization: {},
-  } as UberPersona);
+    stats: {
+      rating: 4.8,
+      reviewCount: 120,
+      viewCount: 0,
+      favoriteCount: 0,
+    },
+    description: 'A passionate creator with a love for sharing her life.',
+    isAI: false,
+  });
 
   return (
     <div className="container mx-auto py-8">
@@ -61,7 +87,7 @@ const PersonaProfile: React.FC = () => {
                   <MapPin className="h-4 w-4" />
                   <span>{persona.location}</span>
                   <Star className="h-4 w-4" />
-                  <span>{persona.rating} ({persona.reviewCount} reviews)</span>
+                  <span>{persona.stats?.rating} ({persona.stats?.reviewCount} reviews)</span>
                 </div>
               </div>
               <Button onClick={() => navigate('/messages')}>

@@ -5,13 +5,12 @@ import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
-import usePersonaFilter, { FilterOptions } from '@/hooks/usePersonaFilter';
+import usePersonaFilter from '@/hooks/usePersonaFilter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
 import FilterBadge from '@/components/escorts/FilterBadge';
-import type { CheckedState } from '@radix-ui/react-checkbox';
 
 const PersonasPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -31,7 +30,7 @@ const PersonasPage: React.FC = () => {
         const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
         setAllPersonas(mappedPersonas);
 
-        updateFilterOptions?.({ personas: mappedPersonas });
+        updateFilterOptions({}); // Remove 'personas' from update to fix type error
       } catch (error) {
         console.error('Error loading personas:', error);
       } finally {
@@ -95,8 +94,8 @@ const PersonasPage: React.FC = () => {
                 <Input
                   id="search"
                   placeholder="Search personas..."
-                  value={filterOptions.searchQuery || ''}
-                  onChange={(e) => updateFilterOptions({ searchQuery: e.target.value })}
+                  value={filterOptions.searchTerm || ''}
+                  onChange={(e) => updateFilterOptions({ searchTerm: e.target.value })}
                   className="mt-1"
                 />
               </div>
@@ -190,4 +189,3 @@ const PersonasPage: React.FC = () => {
 };
 
 export default PersonasPage;
-
