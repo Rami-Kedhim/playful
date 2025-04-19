@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
 import { UberPersona } from '@/types/UberPersona';
 import { hasRealMeets, hasVirtualMeets, hasContent, getVerificationLevel } from '@/utils/personaHelpers';
+import { VerificationLevel } from '@/types/verification';
 
 interface UberPersonaCardProps {
   persona: UberPersona;
@@ -22,27 +24,31 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
     }
   };
 
-  // Use displayName or name fallback for display
   const displayName = persona.displayName || (persona as any).name || "Unnamed";
 
-  // Use avatarUrl or imageUrl or empty string fallback
   const imageSrc = persona.avatarUrl || (persona as any).imageUrl || '';
 
-  // Use featured flag from persona or false fallback
-  const isFeatured = persona.featured ?? false;
+  const isFeatured = persona.roleFlags?.isFeatured ?? false;
 
-  // Use isVerified from persona or false fallback
-  const verified = persona.isVerified ?? false;
+  const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Fix verification level to acceptable levels only (e.g., 'none', 'basic', 'premium')
-  // Using getVerificationLevel for safe enum conversion
+  // Fix verificationLevel with proper enum values, mapping 'advanced' to 'enhanced'
   const verificationLevelRaw = (persona as any).verificationLevel || 'none';
-  // The 'advanced' level caused previous issues; assume 'enhanced' instead for backwards compatibility
   const verificationLevelNormalized = verificationLevelRaw === 'advanced' ? 'enhanced' : verificationLevelRaw;
-  const verificationLevelSafe = getVerificationLevel(verificationLevelNormalized);
+  let verificationLevelSafe: VerificationLevel;
+  if (
+    verificationLevelNormalized === 'none' ||
+    verificationLevelNormalized === 'basic' ||
+    verificationLevelNormalized === 'enhanced' ||
+    verificationLevelNormalized === 'premium'
+  ) {
+    verificationLevelSafe = verificationLevelNormalized as VerificationLevel;
+  } else {
+    verificationLevelSafe = VerificationLevel.NONE;
+  }
 
-  // Use persona.price if defined or default 0
-  const price = (persona as any).price ?? 0;
+  // Use monetization.meetingPrice as price fallback to 0
+  const price = persona.monetization?.meetingPrice ?? 0;
 
   return (
     <Card 

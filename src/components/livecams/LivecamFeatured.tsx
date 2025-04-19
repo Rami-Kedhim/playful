@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -52,7 +53,7 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
           <Card key={livecam.id} className="overflow-hidden">
             <div className="aspect-video relative group">
               <img 
-                src={livecam.previewVideoUrl || livecam.previewUrl || livecam.thumbnailUrl || ''} 
+                src={livecam.previewVideoUrl || (livecam as any).previewUrl || livecam.thumbnailUrl || ''} 
                 alt={livecam.name}
                 className="w-full h-full object-cover"
               />
@@ -87,11 +88,11 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
             <CardContent className="p-4">
               <div className="flex justify-between">
                 <div className="text-sm">
-                  {livecam.tags && livecam.tags.slice(0, 2).map((tag, i) => (
+                  <>{livecam.tags && livecam.tags.slice(0, 2).map((tag, i) => (
                     <Badge key={i} variant="outline" className="mr-1 text-xs">
                       {tag}
                     </Badge>
-                  ))}
+                  ))}</>
                 </div>
                 <Link to={`/livecams/${livecam.id}`}>
                   <Button size="sm" className="bg-red-500 hover:bg-red-600 text-white">
@@ -108,3 +109,4 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
 };
 
 export default LivecamFeatured;
+

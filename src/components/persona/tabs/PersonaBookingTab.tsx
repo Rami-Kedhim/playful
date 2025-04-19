@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,12 +13,12 @@ const PersonaBookingTab: React.FC<PersonaBookingTabProps> = ({ persona }) => {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   
-  // Get meeting price safely
+  // Get meeting price safely considering new UberPersona type structure
   const getMeetingPrice = () => {
-    if (typeof persona.monetization === 'object') {
-      return persona.monetization.unlockingPrice ?? persona.price ?? 0;
+    if (persona.monetization && typeof persona.monetization === 'object') {
+      return persona.monetization.meetingPrice ?? 0;
     }
-    return persona.price ?? 0;
+    return 0;
   };
   
   const meetingPrice = getMeetingPrice();

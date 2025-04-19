@@ -5,8 +5,7 @@ import {
   VerificationRequest, 
   VerificationStatus,
   VerificationDocument,
-  DocumentType,
-  toDocumentType
+  DocumentType
 } from '@/types/verification';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { useToast } from '@/components/ui/use-toast';
@@ -16,7 +15,7 @@ interface UseVerificationStatusResult {
   verificationRequest: VerificationRequest | null; // Added alias
   loading: boolean;
   error: string | null;
-  createVerificationRequest: (document_type: string) => Promise<void>;
+  createVerificationRequest: (document_type: DocumentType) => Promise<void>;
   refreshVerificationStatus: () => Promise<void>;
 }
 
@@ -29,6 +28,7 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
   
   useEffect(() => {
     refreshVerificationStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
   
   const refreshVerificationStatus = async () => {
@@ -59,7 +59,7 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
     }
   };
   
-  const createVerificationRequest = async (document_type: string) => {
+  const createVerificationRequest = async (document_type: DocumentType) => {
     if (!user) return;
     
     setLoading(true);
@@ -69,13 +69,14 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
       // Generate a random ID for the document
       const documentId = Math.random().toString(36).substring(2, 15);
 
-      // Now includes the required 'type' property
+      // Compose VerificationDocument with required fields, add compatibility with types
       const pendingDoc: VerificationDocument = {
         id: documentId,
-        type: toDocumentType(document_type),
-        document_type: toDocumentType(document_type),
-        status: "pending",
-        uploaded_at: new Date()
+        documentType: document_type,
+        status: VerificationStatus.PENDING,
+        uploadedAt: new Date().toISOString(),
+        userId: user.id,
+        fileUrl: '', // URL might be set later after upload
       };
       
       const { data, error } = await supabase
@@ -123,3 +124,4 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
     refreshVerificationStatus
   };
 };
+
