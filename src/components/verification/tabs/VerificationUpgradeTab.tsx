@@ -1,4 +1,5 @@
 
+// Fix string literals in VerificationUpgradeTab to use enum values properly
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-// Correct import from verification types not escort
+// Use VerificationLevel enum import from verification types for strict typing
 import type { VerificationLevel } from '@/types/verification';
 
 interface VerificationUpgradeTabProps {
@@ -20,12 +21,13 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 }) => {
   const [selectedLevel, setSelectedLevel] = useState<VerificationLevel | ''>('');
 
+  // Use enum values explicitly here to avoid type conflicts
   const getAvailableUpgrades = (): VerificationLevel[] => {
     switch (currentLevel) {
-      case 'basic':
-        return ['enhanced', 'premium'];
-      case 'enhanced':
-        return ['premium'];
+      case VerificationLevel.BASIC:
+        return [VerificationLevel.ENHANCED, VerificationLevel.PREMIUM];
+      case VerificationLevel.ENHANCED:
+        return [VerificationLevel.PREMIUM];
       default:
         return [];
     }
@@ -90,12 +92,12 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 
         <CardContent>
           <RadioGroup value={selectedLevel} onValueChange={(val) => setSelectedLevel(val as VerificationLevel)} className="space-y-4">
-            {availableUpgrades.includes('enhanced') && (
+            {availableUpgrades.includes(VerificationLevel.ENHANCED) && (
               <div className="flex items-start space-x-3 border rounded-md p-4">
-                <RadioGroupItem value="enhanced" id="enhanced" className="mt-1" />
+                <RadioGroupItem value={VerificationLevel.ENHANCED} id="enhanced" className="mt-1" />
                 <div className="flex-1">
                   <Label htmlFor="enhanced" className="flex items-center">
-                    <VerificationBadge level="enhanced" size="sm" />
+                    <VerificationBadge level={VerificationLevel.ENHANCED} size="sm" />
                     <span className="ml-2">Enhanced Level</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -110,12 +112,12 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
               </div>
             )}
 
-            {availableUpgrades.includes('premium') && (
+            {availableUpgrades.includes(VerificationLevel.PREMIUM) && (
               <div className="flex items-start space-x-3 border rounded-md p-4">
-                <RadioGroupItem value="premium" id="premium" className="mt-1" />
+                <RadioGroupItem value={VerificationLevel.PREMIUM} id="premium" className="mt-1" />
                 <div className="flex-1">
                   <Label htmlFor="premium" className="flex items-center">
-                    <VerificationBadge level="premium" size="sm" />
+                    <VerificationBadge level={VerificationLevel.PREMIUM} size="sm" />
                     <span className="ml-2">Premium Level</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -151,3 +153,4 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 };
 
 export default VerificationUpgradeTab;
+

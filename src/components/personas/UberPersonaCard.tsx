@@ -1,9 +1,10 @@
 
+// Fix VerificationLevel usage by using enum values correctly
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
-// Fix import: use VerificationLevel from verification types not escort
+// Import enum VerificationLevel from verification types
 import type { VerificationLevel } from '@/types/verification';
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
@@ -33,16 +34,16 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Normalize verification level to enum type
-  let verificationLevelSafe: VerificationLevel = 'none';
-  const verificationLevelRaw = persona.verificationLevel || 'none';
+  // Normalize verification level to enum type, default to NONE value
+  let verificationLevelSafe: VerificationLevel = VerificationLevel.NONE;
+  const verificationLevelRaw = persona.verificationLevel || VerificationLevel.NONE;
 
-  // Simple string check since VerificationLevel is string enum aliases in src/types/verification
+  // Validate enum membership by checking values (enum has string values)
   if (
-    verificationLevelRaw === 'none' ||
-    verificationLevelRaw === 'basic' ||
-    verificationLevelRaw === 'enhanced' ||
-    verificationLevelRaw === 'premium'
+    verificationLevelRaw === VerificationLevel.NONE ||
+    verificationLevelRaw === VerificationLevel.BASIC ||
+    verificationLevelRaw === VerificationLevel.ENHANCED ||
+    verificationLevelRaw === VerificationLevel.PREMIUM
   ) {
     verificationLevelSafe = verificationLevelRaw as VerificationLevel;
   }
@@ -96,3 +97,4 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
+
