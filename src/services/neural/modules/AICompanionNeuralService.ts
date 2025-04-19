@@ -6,7 +6,7 @@ export class AICompanionNeuralService extends BaseNeuralService {
   constructor() {
     super(
       'AICompanionNeuralService', 
-      'ai_companions' as ModuleType, 
+      'ai_companions', 
       'AI Companion Neural Service',
       '1.0.0',
       'Neural service for AI companions and virtual entities'

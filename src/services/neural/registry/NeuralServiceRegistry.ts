@@ -1,72 +1,75 @@
 
-import { BaseNeuralService, ModuleType } from '../types/NeuralService';
+import { ModuleType, BaseNeuralService } from '../types/NeuralService';
+import { AICompanionNeuralService } from '../modules/AICompanionNeuralService';
 
 class NeuralServiceRegistry {
   private services: Map<string, BaseNeuralService> = new Map();
-  
-  registerService(service: BaseNeuralService): boolean {
+  private initialized: boolean = false;
+
+  constructor() {
+    // Register core services on instantiation
+    this.registerCoreServices();
+  }
+
+  private registerCoreServices() {
+    // Register the AICompanion service
+    const aiCompanionService = new AICompanionNeuralService();
+    this.registerService(aiCompanionService);
+
+    // Additional core services would be registered here
+  }
+
+  public async initialize(): Promise<boolean> {
+    if (this.initialized) {
+      console.log("Neural service registry already initialized");
+      return true;
+    }
+
+    console.log("Initializing neural service registry");
+    
+    // Initialize all registered services
+    const initPromises = Array.from(this.services.values()).map(service => service.initialize());
+    
+    try {
+      await Promise.all(initPromises);
+      this.initialized = true;
+      console.log("Neural service registry initialized successfully");
+      return true;
+    } catch (error) {
+      console.error("Failed to initialize neural service registry:", error);
+      return false;
+    }
+  }
+
+  public registerService(service: BaseNeuralService): boolean {
     if (this.services.has(service.id)) {
-      console.warn(`Service with ID ${service.id} is already registered.`);
+      console.warn(`Service with ID ${service.id} already registered`);
       return false;
     }
     
     this.services.set(service.id, service);
-    console.log(`Service ${service.name} registered successfully.`);
+    console.log(`Registered neural service: ${service.name} (${service.id})`);
     return true;
   }
-  
-  getService(id: string): BaseNeuralService | undefined {
+
+  public getService(id: string): BaseNeuralService | undefined {
     return this.services.get(id);
   }
-  
-  getServiceById(id: string): BaseNeuralService | undefined {
-    return this.services.get(id);
-  }
-  
-  getServicesByType(type: ModuleType): BaseNeuralService[] {
+
+  public getServicesByModule(moduleType: ModuleType): BaseNeuralService[] {
     return Array.from(this.services.values())
-      .filter(service => service.moduleType === type);
+      .filter(service => service.moduleType === moduleType);
   }
-  
-  getAllServices(): BaseNeuralService[] {
+
+  public getAllServices(): BaseNeuralService[] {
     return Array.from(this.services.values());
   }
-  
-  removeService(id: string): boolean {
-    return this.services.delete(id);
-  }
-  
-  unregisterService(id: string): boolean {
-    return this.services.delete(id);
-  }
-  
-  clear(): void {
-    this.services.clear();
-  }
-  
-  getServicesCount(): number {
-    return this.services.size;
-  }
 
-  async initializeAll(): Promise<boolean> {
-    try {
-      for (const service of this.services.values()) {
-        await service.initialize();
-      }
-      return true;
-    } catch (error) {
-      console.error("Error initializing services:", error);
-      return false;
-    }
-  }
-
-  optimizeResourceAllocation(): void {
-    console.log("Optimizing resource allocation for neural services...");
-    // Implementation would go here in a real system
+  public removeService(id: string): boolean {
+    return this.services.delete(id);
   }
 }
 
-export const neuralServiceRegistry = new NeuralServiceRegistry();
-export type { BaseNeuralService as NeuralService };
-export { ModuleType };
+// Export a singleton instance
+const neuralServiceRegistry = new NeuralServiceRegistry();
 export default neuralServiceRegistry;

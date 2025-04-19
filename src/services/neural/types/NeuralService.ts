@@ -1,4 +1,5 @@
 
+// Define the module types for neural services
 export type ModuleType = 
   | 'escorts'
   | 'creators'
@@ -8,6 +9,7 @@ export type ModuleType =
   | 'security'
   | 'analytics';
 
+// Neural service configuration interface
 export interface NeuralServiceConfig {
   enabled: boolean;
   apiEndpoint?: string;
@@ -22,6 +24,7 @@ export interface NeuralServiceConfig {
   resourceAllocation?: number;
 }
 
+// Base neural service interface that all services must implement
 export interface BaseNeuralService {
   id: string;
   moduleId: string;
@@ -40,4 +43,5 @@ export interface BaseNeuralService {
   getMetrics(): Record<string, any>;
 }
 
+// Export BaseNeuralService as BaseService for backward compatibility
 export { BaseNeuralService as BaseService };

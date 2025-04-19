@@ -59,6 +59,7 @@ class RouteShareService {
       const { data, error } = await supabase
         .from('route_shares')
         .insert(routeShareData)
+        .select('*')
         .single();
         
       if (error) {
@@ -140,18 +141,21 @@ class RouteShareService {
     updates: Partial<RouteShare>
   ): Promise<RouteShare | null> {
     try {
+      const updateData: any = {};
+      
+      if (updates.startLocation) updateData.start_location = updates.startLocation;
+      if (updates.endLocation) updateData.end_location = updates.endLocation;
+      if (updates.waypoints) updateData.waypoints = updates.waypoints;
+      if (updates.status) updateData.status = updates.status;
+      if (updates.sharedWith) updateData.shared_with = updates.sharedWith;
+      if (updates.expiresAt) updateData.expires_at = updates.expiresAt;
+      if (updates.metadata) updateData.metadata = updates.metadata;
+      
       const { data, error } = await supabase
         .from('route_shares')
-        .update({
-          start_location: updates.startLocation,
-          end_location: updates.endLocation,
-          waypoints: updates.waypoints,
-          status: updates.status,
-          shared_with: updates.sharedWith,
-          expires_at: updates.expiresAt,
-          metadata: updates.metadata
-        })
+        .update(updateData)
         .eq('id', id)
+        .select('*')
         .single();
         
       if (error) {

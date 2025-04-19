@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { MapPin, Navigation, Clock, Users, Share2 } from "lucide-react";
+import { MapPin, Navigation, Share2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { RouteLocation, routeShareService } from "@/services/route/RouteShareService";
 import mapService from "@/services/maps/MapService";
@@ -87,10 +87,10 @@ const RouteShareForm: React.FC<RouteShareFormProps> = ({ onShareCreated }) => {
     
     try {
       // Geocode the addresses to get coordinates
-      const startLocation = await mapService.geocode(startAddress);
-      const endLocation = await mapService.geocode(endAddress);
+      const startGeo = await mapService.geocode(startAddress);
+      const endGeo = await mapService.geocode(endAddress);
       
-      if (!startLocation || !endLocation) {
+      if (!startGeo || !endGeo) {
         toast({
           title: "Geocoding Error",
           description: "Unable to find coordinates for the provided addresses",
@@ -100,11 +100,24 @@ const RouteShareForm: React.FC<RouteShareFormProps> = ({ onShareCreated }) => {
         return;
       }
       
+      // Convert MapLocation to RouteLocation
+      const startLocation: RouteLocation = {
+        latitude: startGeo.lat,
+        longitude: startGeo.lng,
+        address: startAddress
+      };
+      
+      const endLocation: RouteLocation = {
+        latitude: endGeo.lat,
+        longitude: endGeo.lng,
+        address: endAddress
+      };
+      
       // Create route share
       const routeShare = await routeShareService.createRouteShare(
         user.id,
-        startLocation as RouteLocation,
-        endLocation as RouteLocation,
+        startLocation,
+        endLocation,
         {
           expiresIn: parseInt(duration),
           sharedWith: contactsToShare,

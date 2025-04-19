@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RouteShare, routeShareService } from "@/services/route/RouteShareService";
 import { format, formatDistanceToNow } from "date-fns";
-import { MapPin, Navigation, Clock, Calendar, AlertTriangle, ThumbsUp, PhoneCall, MessageSquare } from "lucide-react";
+import { MapPin, Navigation, Clock, Calendar, AlertTriangle, ThumbsUp, MapIcon } from "lucide-react";
 
 interface RouteShareViewerProps {
   shareId: string;
@@ -57,8 +57,12 @@ const RouteShareViewer: React.FC<RouteShareViewerProps> = ({ shareId, onAction }
 
   const handleViewMap = () => {
     if (onAction) onAction("viewMap", shareId);
-    // In a real app, this would open a map view
-    window.open(`https://maps.google.com/?q=${routeShare?.startLocation.latitude},${routeShare?.startLocation.longitude}`, "_blank");
+    
+    // Open a Google Maps link with the route
+    if (routeShare?.startLocation && routeShare?.endLocation) {
+      const mapUrl = `https://www.google.com/maps/dir/?api=1&origin=${routeShare.startLocation.latitude},${routeShare.startLocation.longitude}&destination=${routeShare.endLocation.latitude},${routeShare.endLocation.longitude}&travelmode=driving`;
+      window.open(mapUrl, "_blank");
+    }
   };
 
   const handleCheckIn = () => {
@@ -103,7 +107,7 @@ const RouteShareViewer: React.FC<RouteShareViewerProps> = ({ shareId, onAction }
             <Navigation className="h-5 w-5" />
             Shared Route
           </CardTitle>
-          <Badge variant={isActive && !isExpired ? "success" : "secondary"}>
+          <Badge variant={isActive && !isExpired ? "outline" : "secondary"}>
             {isExpired ? "Expired" : routeShare.status}
           </Badge>
         </div>
@@ -152,7 +156,7 @@ const RouteShareViewer: React.FC<RouteShareViewerProps> = ({ shareId, onAction }
         {isActive && !isExpired ? (
           <>
             <Button variant="outline" className="flex-1" onClick={handleViewMap}>
-              <MapPin className="mr-1 h-4 w-4" />
+              <MapIcon className="mr-1 h-4 w-4" />
               View Map
             </Button>
             <Button className="flex-1" onClick={handleCheckIn}>
