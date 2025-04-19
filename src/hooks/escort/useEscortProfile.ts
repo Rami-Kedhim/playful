@@ -32,7 +32,7 @@ export function useEscortProfile() {
       try {
         const foundEscort = context.escorts.find(e => e.id === id);
         if (foundEscort) {
-          // Fix height to string to satisfy types
+          // Fix height string type - explicitly convert to string
           const fixedEscort = { ...foundEscort, height: String(foundEscort.height) };
           setEscort(fixedEscort);
         } else {
@@ -62,4 +62,3 @@ export function useEscortProfile() {
 }
 
 export default useEscortProfile;
-

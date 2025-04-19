@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -19,19 +18,11 @@ const EscortsContent = () => {
     applyCurrentFilters,
     clearAllFilters
   } = useEscorts();
-  
-  const [showFilters, setShowFilters] = useState(false);
-  
-  useEffect(() => {
-    applyCurrentFilters();
-  }, [applyCurrentFilters]);
 
-  // Use type guard and default values to safely access filters
-  const serviceType = (Array.isArray(filters.serviceTypes) && filters.serviceTypes.length === 1) 
-    ? (filters.serviceTypes[0] as "" | "in-person" | "virtual" | "both")
-    : "";
-
-  const selectedServices = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
+  // Provide default empty filter properties to prevent errors
+  const serviceTypes = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
+  const serviceType = serviceTypes.length === 1 ? (serviceTypes[0] as "" | "in-person" | "virtual" | "both") : "";
+  const selectedServices = serviceTypes;
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -169,4 +160,3 @@ const Escorts = () => {
 };
 
 export default Escorts;
-

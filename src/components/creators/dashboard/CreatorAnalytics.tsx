@@ -1,130 +1,116 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import AnalyticsChart from "./analytics/AnalyticsChart";
+import AnalyticsStats from "./analytics/AnalyticsStats";
+import { Eye, ThumbsUp, DollarSign, Users } from "lucide-react";
 
-import { useState, useEffect } from "react";
-import { format } from 'date-fns';
-import { useCreatorAnalytics } from "@/hooks/useCreatorAnalytics";
-import { AnalyticsHeader, AnalyticsStats, AnalyticsCharts, AnalyticsSummary } from "./analytics";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Eye, ThumbsUp, Share2, DollarSign } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+const CreatorAnalytics = () => {
+  const { analytics, loading, totalValue, error } = useAnalytics();
+  const [timeRange, setTimeRange] = useState("7days");
 
-interface CreatorAnalyticsProps {
-  creatorId: string;
-}
-
-const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
-  const [timeRange, setTimeRange] = useState<string>("7days");
-  
-  const periodMap: Record<string, 'week' | 'month' | 'year'> = {
-    "7days": "week",
-    "30days": "month",
-    "90days": "year"
-  };
-  
-  const { analytics, loading, totalValue } = useCreatorAnalytics(
-    periodMap[timeRange] || "week"
-  );
-  
-  const [statsData, setStatsData] = useState<any[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!loading && analytics.length > 0) {
-      // Process analytics data for charts
-      const formattedData = analytics.map((item: any) => ({
-        date: format(new Date(item.date), 'MMM dd'),
-        views: item.views,
-        likes: item.likes,
-        shares: item.shares,
-        earnings: parseFloat(item.earnings)
-      }));
-      
-      setChartData(formattedData);
-      
-      // Calculate percent changes for stats
-      const previousPeriodData = getPreviousPeriodSummary();
-      
-      // Create stats data for display
-      setStatsData([
-        {
-          title: "Total Views",
-          value: totalValue,
-          change: getPercentChange(totalValue, previousPeriodData.views),
-          icon: <Eye className="h-4 w-4" />,
-          trend: totalValue >= previousPeriodData.views ? "up" : "down"
-        },
-        {
-          title: "Total Likes",
-          value: totalValue,
-          change: getPercentChange(totalValue, previousPeriodData.likes),
-          icon: <ThumbsUp className="h-4 w-4" />,
-          trend: totalValue >= previousPeriodData.likes ? "up" : "down"
-        },
-        {
-          title: "Total Shares",
-          value: totalValue,
-          change: getPercentChange(totalValue, previousPeriodData.shares),
-          icon: <Share2 className="h-4 w-4" />,
-          trend: totalValue >= previousPeriodData.shares ? "up" : "down"
-        },
-        {
-          title: "Total Earnings",
-          value: `${totalValue.toFixed(2)} LC`,
-          change: getPercentChange(totalValue, previousPeriodData.earnings),
-          icon: <DollarSign className="h-4 w-4" />,
-          trend: totalValue >= previousPeriodData.earnings ? "up" : "down"
-        }
-      ]);
-    }
-  }, [analytics, totalValue, loading]);
-
-  // Helpers
-  const getPreviousPeriodSummary = () => {
-    return {
-      views: Math.floor(totalValue * 0.9),
-      likes: Math.floor(totalValue * 0.9),
-      shares: Math.floor(totalValue * 0.9),
-      earnings: totalValue * 0.9
-    };
-  };
-
-  const getPercentChange = (current: number, previous: number) => {
-    if (previous === 0) return "+100%";
-    const change = ((current - previous) / previous) * 100;
-    const prefix = change >= 0 ? "+" : "";
-    return `${prefix}${change.toFixed(1)}%`;
-  };
-
-  if (error) {
+  if (loading) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Failed to load analytics data: {error}
-        </AlertDescription>
-      </Alert>
+      <div className="p-6">
+        <div className="h-8 w-32 bg-muted rounded animate-pulse mb-6"></div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <div className="h-4 w-20 bg-muted rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-8 w-16 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardHeader>
+            <div className="h-5 w-32 bg-muted rounded animate-pulse"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 w-full bg-muted rounded animate-pulse"></div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-destructive mb-2">Error loading analytics data</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const statsData = [
+    {
+      title: "Total Views",
+      value: analytics?.views?.total || 0,
+      change: analytics?.views?.change || "0%",
+      icon: <Eye className="h-4 w-4 mr-2" />,
+      trend: analytics?.views?.trend || "neutral"
+    },
+    {
+      title: "Likes",
+      value: analytics?.likes?.total || 0,
+      change: analytics?.likes?.change || "0%",
+      icon: <ThumbsUp className="h-4 w-4 mr-2" />,
+      trend: analytics?.likes?.trend || "neutral"
+    },
+    {
+      title: "Revenue",
+      value: `$${analytics?.revenue?.total || 0}`,
+      change: analytics?.revenue?.change || "0%",
+      icon: <DollarSign className="h-4 w-4 mr-2" />,
+      trend: analytics?.revenue?.trend || "neutral"
+    },
+    {
+      title: "Subscribers",
+      value: analytics?.subscribers?.total || 0,
+      change: analytics?.subscribers?.change || "0%",
+      icon: <Users className="h-4 w-4 mr-2" />,
+      trend: analytics?.subscribers?.trend || "neutral"
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      <AnalyticsHeader timeRange={timeRange} setTimeRange={setTimeRange} />
-      
-      <AnalyticsSummary 
-        views={totalValue}
-        likes={totalValue}
-        shares={totalValue}
-        earnings={totalValue}
-        loading={loading}
-      />
-      
-      <AnalyticsStats statsData={statsData} isLoading={loading} />
-      
-      <AnalyticsCharts chartData={chartData} isLoading={loading} />
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Analytics</h2>
+        <Tabs value={timeRange} onValueChange={setTimeRange}>
+          <TabsList>
+            <TabsTrigger value="7days">7 Days</TabsTrigger>
+            <TabsTrigger value="30days">30 Days</TabsTrigger>
+            <TabsTrigger value="90days">90 Days</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <AnalyticsStats statsData={statsData} isLoading={false} />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AnalyticsChart 
+            data={analytics?.chartData || []} 
+            timeRange={timeRange}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
 export default CreatorAnalytics;
-
