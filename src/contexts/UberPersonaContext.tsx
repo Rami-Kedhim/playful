@@ -1,3 +1,6 @@
+
+// Fix UberPersonaContext: Use correct UberPersona typings and safely access properties
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
@@ -80,19 +83,19 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, [escorts]);
   
   const getEscorts = () => allPersonas.filter(persona => 
-    persona.type === 'escort' || persona.roleFlags?.isEscort
+    (persona as any).type === 'escort' || persona.roleFlags?.isEscort
   );
   
   const getCreators = () => allPersonas.filter(persona => 
-    persona.type === 'creator' || persona.roleFlags?.isCreator
+    (persona as any).type === 'creator' || persona.roleFlags?.isCreator
   );
   
   const getLivecams = () => allPersonas.filter(persona => 
-    persona.type === 'livecam' || persona.roleFlags?.isLivecam
+    (persona as any).type === 'livecam' || persona.roleFlags?.isLivecam
   );
   
   const getAIPersonas = () => allPersonas.filter(persona => 
-    persona.type === 'ai' || persona.roleFlags?.isAI || persona.isAI === true
+    (persona as any).type === 'ai' || persona.roleFlags?.isAI || persona.isAI === true
   );
   
   const getPersonaById = (id: string): UberPersona | undefined => {
@@ -111,9 +114,9 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     const ranked = [...personas];
     
     ranked.sort((a, b) => {
-      const aRating = a.stats?.rating || a.rating || 0;
+      const aRating = a.stats?.rating ?? 0;
       const aReviewCount = a.stats?.reviewCount || 0;
-      const bRating = b.stats?.rating || b.rating || 0;
+      const bRating = b.stats?.rating ?? 0;
       const bReviewCount = b.stats?.reviewCount || 0;
       
       let aScore = (aRating * 2) + (aReviewCount / 10);
@@ -164,7 +167,7 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <div className="h-12 w-12 rounded-full border-4 border-t-primary animate-spin mx-auto mb-4"></div>
+          <div className="h-12 w-12 rounded-full border-4 border-t-ubx animate-spin mx-auto mb-4"></div>
           <p className="text-muted-foreground">Initializing UberPersona ecosystem...</p>
         </div>
       </div>

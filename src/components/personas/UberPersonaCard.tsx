@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,24 +23,26 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
   };
 
   // Use displayName or name fallback for display
-  const displayName = persona.displayName || persona.name || "Unnamed";
+  const displayName = persona.displayName || (persona as any).name || "Unnamed";
 
   // Use avatarUrl or imageUrl or empty string fallback
-  const imageSrc = persona.avatarUrl || persona.imageUrl || '';
+  const imageSrc = persona.avatarUrl || (persona as any).imageUrl || '';
 
   // Use featured flag from persona or false fallback
   const isFeatured = persona.featured ?? false;
 
   // Use isVerified from persona or false fallback
-  // In UberPersona types isVerified is optional boolean
   const verified = persona.isVerified ?? false;
 
   // Fix verification level to acceptable levels only (e.g., 'none', 'basic', 'premium')
-  // Assuming getVerificationLevel is safe and returns correct enum
-  const verificationLevelSafe = getVerificationLevel(persona.verificationLevel || 'none');
+  // Using getVerificationLevel for safe enum conversion
+  const verificationLevelRaw = (persona as any).verificationLevel || 'none';
+  // The 'advanced' level caused previous issues; assume 'enhanced' instead for backwards compatibility
+  const verificationLevelNormalized = verificationLevelRaw === 'advanced' ? 'enhanced' : verificationLevelRaw;
+  const verificationLevelSafe = getVerificationLevel(verificationLevelNormalized);
 
   // Use persona.price if defined or default 0
-  const price = persona.price ?? 0;
+  const price = (persona as any).price ?? 0;
 
   return (
     <Card 
@@ -90,4 +91,3 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
-

@@ -1,13 +1,10 @@
-
-// Removed usage of missing 'hasExclusiveContent' import from '@/types/UberPersona' and replaced with local logic
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { UberPersona } from '@/types/UberPersona';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PlayIcon, LockIcon, ImageIcon } from "lucide-react";
+import { PlayIcon, LockIcon } from "lucide-react";
 
 interface PersonaContentTabProps {
   persona: UberPersona;
@@ -17,7 +14,7 @@ export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona })
   const [selectedTab, setSelectedTab] = useState('photos');
 
   // Determine if persona has exclusive content by checking monetization flag
-  const showExclusiveContent = persona.monetization?.subscriptionPrice !== undefined || false;
+  const showExclusiveContent = persona.monetization?.subscriptionPrice !== undefined && persona.monetization?.subscriptionPrice > 0;
 
   // Generate placeholder content based on persona type
   const generatePlaceholderContent = (type: 'photos' | 'videos') => {
@@ -94,7 +91,7 @@ export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona })
               <div className="bg-muted/30 border rounded-lg p-6 mb-6">
                 <h3 className="text-lg font-medium mb-2">Premium Content</h3>
                 <p className="text-muted-foreground mb-4">
-                  Access exclusive content from {persona.displayName || persona.name} with a premium subscription.
+                  Access exclusive content from {persona.displayName || (persona as any).name} with a premium subscription.
                 </p>
                 <Button>
                   <LockIcon className="w-4 h-4 mr-2" />
@@ -123,4 +120,3 @@ export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona })
 };
 
 export default PersonaContentTab;
-

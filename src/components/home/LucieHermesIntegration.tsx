@@ -1,25 +1,19 @@
-/**
- * LucieHermesIntegration - Connects Lucie AI assistant with HERMES
- * This enhances the Lucie assistant with intelligence from HERMES
- */
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
 import LucieAssistant from './LucieAssistant';
 
 export type LucieHermesIntegrationProps = {
-  // Optional override to manually control Lucie visibility
   forceVisible?: boolean;
-  // Optional callback when Lucie is triggered by HERMES
   onLucieTriggered?: (reason: string) => void;
 };
 
 interface Insight {
   type: string;
+  // The HermesInsight type doesn't officially have these properties, so we'll define optional here
   value?: string;
   expires?: string;
   category?: string;
-  // other possible fields
   [key: string]: any;
 }
 
@@ -31,10 +25,9 @@ export const LucieHermesIntegration = ({
   const [isVisible, setIsVisible] = useState(Boolean(forceVisible));
   const [customMessage, setCustomMessage] = useState<string | undefined>(undefined);
 
-  // insights is an object with "insights" property being array according to useHermesInsights signature without arguments now
   const { insights = [] } = useHermesInsights();
 
-  // Find specific insights by type
+  // Use safer property access because HermesInsight does not declare 'value' or 'expires'
   const boostOffer = insights.find((ins: Insight) => ins.type === 'boostOffer');
   const vrEvent = insights.find((ins: Insight) => ins.type === 'vrEvent');
   const recommendedProfile = insights.find((ins: Insight) => ins.type === 'recommendedProfileId');
@@ -83,7 +76,7 @@ export const LucieHermesIntegration = ({
     if (isVisible && isLucieEnabled && !forceVisible) {
       timeout = setTimeout(() => {
         setIsVisible(false);
-      }, 120000); // Auto-hide after 2 minutes
+      }, 120000);
     }
 
     return () => {

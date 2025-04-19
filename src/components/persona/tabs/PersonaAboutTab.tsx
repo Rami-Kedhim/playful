@@ -2,7 +2,6 @@ import { UberPersona } from '@/types/UberPersona';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-// Changed import: remove VerificationBadge import (it may not fit types)
 import { Clock, MapPin, Languages, Info, Award, Users, Stars } from 'lucide-react';
 
 interface PersonaAboutTabProps {
@@ -10,13 +9,11 @@ interface PersonaAboutTabProps {
 }
 
 const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
-  // Default placeholder values if properties don't exist
   const hasDescription = !!persona.description || !!persona.bio;
   const hasLanguages = Array.isArray(persona.languages) && persona.languages.length > 0;
   const hasServices = Array.isArray(persona.services) && persona.services.length > 0;
   const hasTraits = Array.isArray(persona.traits) && persona.traits.length > 0;
   
-  // Calculate response time display (if available)
   const responseTime = persona.stats?.responseTime;
   const responseTimeDisplay = responseTime
     ? responseTime < 60
@@ -24,9 +21,11 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
       : `${Math.floor(responseTime / 60)} hours`
     : 'Unknown';
 
+  // Fix: persona.rating doesn't exist, try persona.stats.rating or fallback 'N/A'
+  const rating = persona.stats?.rating ?? 'N/A';
+
   return (
     <div className="space-y-6">
-      {/* Description */}
       {hasDescription && (
         <Card>
           <CardContent className="p-4">
@@ -41,7 +40,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
         </Card>
       )}
       
-      {/* Languages */}
       {hasLanguages && (
         <Card>
           <CardContent className="p-4">
@@ -60,7 +58,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
         </Card>
       )}
 
-      {/* Services */}
       {hasServices && (
         <Card>
           <CardContent className="p-4">
@@ -79,7 +76,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
         </Card>
       )}
       
-      {/* Traits/Personality */}
       {hasTraits && (
         <Card>
           <CardContent className="p-4">
@@ -98,7 +94,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
         </Card>
       )}
 
-      {/* Stats Card */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-lg font-medium mb-2 flex items-center">
@@ -108,7 +103,7 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
           <div className="grid grid-cols-2 gap-4 mt-2">
             <div className="flex flex-col">
               <span className="text-muted-foreground text-sm">Rating</span>
-              <span className="font-medium">{persona.stats?.rating || persona.rating || 'N/A'}</span>
+              <span className="font-medium">{rating}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-muted-foreground text-sm">Reviews</span>
@@ -126,7 +121,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
         </CardContent>
       </Card>
       
-      {/* Location */}
       {persona.location && (
         <Card>
           <CardContent className="p-4">
@@ -143,7 +137,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
         </Card>
       )}
       
-      {/* Availability */}
       <Card>
         <CardContent className="p-4">
           <h3 className="text-lg font-medium mb-2 flex items-center">

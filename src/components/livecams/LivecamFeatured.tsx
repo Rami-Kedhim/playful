@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +18,6 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
   loading = false 
 }) => {
   if (loading) {
-    // Return skeleton loading state
     return (
       <div className="space-y-4">
         <div className="h-8 w-48 bg-gray-200 animate-pulse rounded-md"></div>
@@ -54,7 +52,7 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
           <Card key={livecam.id} className="overflow-hidden">
             <div className="aspect-video relative group">
               <img 
-                src={livecam.previewUrl || livecam.previewVideoUrl || livecam.thumbnailUrl} 
+                src={livecam.previewVideoUrl || livecam.previewUrl || livecam.thumbnailUrl || ''} 
                 alt={livecam.name}
                 className="w-full h-full object-cover"
               />
@@ -76,7 +74,7 @@ const LivecamFeatured: React.FC<LivecamFeaturedProps> = ({
                     <Users className="h-3 w-3 mr-1" />
                     <span>{livecam.viewerCount || 0} viewers</span>
                   </div>
-                  {livecam.rating && (
+                  {livecam.rating !== undefined && livecam.rating !== null && (
                     <div className="flex items-center">
                       <Star className="h-3 w-3 mr-1 text-yellow-400" />
                       <span>{livecam.rating.toFixed(1)}</span>
