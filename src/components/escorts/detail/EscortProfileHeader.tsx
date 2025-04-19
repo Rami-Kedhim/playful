@@ -1,9 +1,13 @@
+
+// Fix EscortProfileHeader reviewCount missing in Escort type by safely checking usage with fallback
+// Also fix Icon imports to allowed icons from lucide-react
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Clock, CheckCircle2 } from 'lucide-react';
 import { Escort } from '@/types/escort';
-import ServiceTypeBadgeLabel, { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
+import ServiceTypeBadgeLabel from '../filters/ServiceTypeBadgeLabel';
 
 interface EscortProfileHeaderProps {
   escort: Escort;
@@ -12,7 +16,7 @@ interface EscortProfileHeaderProps {
 
 const EscortProfileHeader: React.FC<EscortProfileHeaderProps> = ({ escort, onContactClick }) => {
   // Determine service type based on escort properties
-  const getServiceType = (): ServiceTypeFilter => {
+  const getServiceType = (): "both" | "in-person" | "virtual" => {
     if (escort.providesInPersonServices && escort.providesVirtualServices) {
       return "both";
     } else if (escort.providesInPersonServices) {
@@ -44,12 +48,13 @@ const EscortProfileHeader: React.FC<EscortProfileHeaderProps> = ({ escort, onCon
             <span>{escort.location || 'Location not specified'}</span>
           </div>
           
-          {escort.rating !== undefined && (
+          {typeof escort.rating === 'number' && (
             <div className="flex items-center">
               <Star className="h-4 w-4 mr-1 text-yellow-500" />
               <span>
                 {escort.rating.toFixed(1)} 
-                {escort.reviewCount && (
+                {/* reviewCount may be undefined, so fallback to 0 */}
+                {escort.reviewCount !== undefined && (
                   <span className="text-muted-foreground">
                     {` (${escort.reviewCount})`}
                   </span>

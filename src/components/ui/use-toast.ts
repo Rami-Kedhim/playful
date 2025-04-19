@@ -1,5 +1,6 @@
 
-// Re-export toast functionality from the hooks directory
-import { useToast, toast, Toast } from "@/hooks/use-toast";
+// Fix import of Toast from "@/hooks/use-toast" because Toast is not exported (only toast and useToast)
 
-export { useToast, toast, type Toast };
+import { useToast, toast } from "@/hooks/use-toast";
+
+export { useToast, toast };

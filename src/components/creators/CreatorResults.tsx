@@ -1,4 +1,6 @@
 
+// Fix CreatorResults to match CreatorCard props interface by removing props not in CreatorCardProps interface
+
 import CreatorCard from "@/components/creators/CreatorCard";
 import { Button } from "@/components/ui/button";
 import { ContentCreator } from "@/types/creator";
@@ -25,15 +27,9 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
               id={creator.id}
               name={creator.name || "Unknown Creator"}
               image={creator.imageUrl || creator.avatarUrl || creator.profileImage || ""}
+              location={creator.location || "Unknown location"}
               premium={Boolean(creator.isPremium) || false}
-              subscriberCount={creator.subscriberCount || 0}
-              contentCount={
-                typeof creator.contentCount === "object"
-                  ? creator.contentCount || { photos: 0, videos: 0 }
-                  : { photos: creator.contentCount || 0, videos: 0 }
-              }
               price={creator.price || 0}
-              isAI={Boolean(creator.isAI) || false}
               rating={creator.rating || 0}
             />
           ))}

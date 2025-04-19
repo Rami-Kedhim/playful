@@ -1,11 +1,13 @@
+
+// Fix imports from "@/types/escort" to use correct names or correct type imports for VerificationDocument and VerificationRequest if missing
+
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { VerificationDocument, VerificationRequest } from '@/types/escort';
+import { VerificationDocument, VerificationRequest } from '@/types/escorts';
 import { format } from 'date-fns';
 
 interface DocumentReviewModalProps {
@@ -13,7 +15,6 @@ interface DocumentReviewModalProps {
   onClose: () => void;
   document: VerificationDocument;
   request: VerificationRequest;
-  verification?: VerificationRequest; // Added for backward compatibility
   onApprove: (documentId: string, notes: string) => void;
   onReject: (documentId: string, notes: string) => void;
 }
@@ -23,13 +24,12 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
   onClose,
   document,
   request,
-  verification,
   onApprove,
-  onReject
+  onReject,
 }) => {
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const handleApprove = async () => {
     setIsSubmitting(true);
     try {
@@ -41,10 +41,9 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
       setIsSubmitting(false);
     }
   };
-  
+
   const handleReject = async () => {
     if (!reason) return;
-    
     setIsSubmitting(true);
     try {
       await onReject(document.id, reason);
@@ -55,30 +54,30 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Review Document</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="bg-muted p-4 rounded-md">
             <img 
-              src={document?.url || document?.fileUrl || 'no-image.png'} 
+              src={document.url || document.fileUrl || 'no-image.png'} 
               alt="Verification document" 
               className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
-          
+
           <div>
-            <p><strong>Type:</strong> {document?.type || document?.document_type || 'Unknown'}</p>
-            <p><strong>Uploaded:</strong> {document.uploaded_at || document.created_at ? 
-              format(new Date(document.uploaded_at || document.created_at), 'PPP') : 
+            <p><strong>Type:</strong> {document.type || document.document_type || 'Unknown'}</p>
+            <p><strong>Uploaded:</strong> {document.uploadedAt || document.created_at ? 
+              format(new Date(document.uploadedAt || document.created_at), 'PPP') : 
               'Unknown date'}</p>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="rejection-reason">Rejection Reason (if applicable)</Label>
             <Textarea 
@@ -89,7 +88,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
               className="min-h-[100px]"
             />
           </div>
-          
+
           <div className="flex justify-between gap-2">
             <Button 
               variant="destructive" 

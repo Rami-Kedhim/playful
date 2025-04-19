@@ -1,10 +1,16 @@
 
+// Fix import of DocumentType from '@/types/verification' if not exported, fallback to string literal type
+// If necessary, can define the DocumentType locally as string union
+// Use safe checks on typing
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DocumentType } from '@/types/verification';
+// If DocumentType missing, fallback to inline definition
+type DocumentType = 'id_card' | 'passport' | 'drivers_license';
+
 import { Upload, X } from 'lucide-react';
 
 interface DocumentUploaderProps {
@@ -21,8 +27,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({ userId }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // In a real app, you would upload the files to your server/storage here
+
     console.log('Submitting documents:', {
       userId,
       documentType,
@@ -30,7 +35,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({ userId }) => {
       backImage,
       selfieImage
     });
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);

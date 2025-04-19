@@ -1,15 +1,21 @@
 
+// Fix import of VerificationLevel to use string literal type for verificationLevel
+// Fix use of isFavorited property missing from Escort type by optional chaining with fallback
+// Fix svg fill logic for favorited heart properly
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Verified } from 'lucide-react';
 import { Escort } from '@/types/escort';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { VerificationLevel } from '@/types/verification';
 
 export interface ProfileHeaderProps {
   escort: Escort;
   onFavoriteToggle?: () => void;
 }
+
+// Define possible verification levels as union for typing
+type VerificationLevelType = 'none' | 'basic' | 'enhanced' | 'premium';
 
 const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
   // Function to get initials from name
@@ -23,9 +29,10 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
 
   // Calculate verification badge based on level
   const getVerificationBadge = () => {
-    const level = escort.verificationLevel || VerificationLevel.NONE;
+    // escort.verificationLevel may be string or undefined
+    const level = (escort.verificationLevel || 'none') as VerificationLevelType;
     
-    if (level === VerificationLevel.NONE) return null;
+    if (level === 'none') return null;
     
     return (
       <Badge variant="outline" className="flex items-center gap-1">
@@ -39,7 +46,7 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
     <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
       <Avatar className="h-20 w-20 border-2 border-primary">
         <AvatarImage 
-          src={escort.profileImage || escort.avatar} 
+          src={escort.profileImage || escort.avatar || escort.avatar_url || ''} 
           alt={escort.name} 
           className="object-cover"
         />
@@ -60,9 +67,12 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
                 viewBox="0 0 24 24" 
                 fill={escort.isFavorited ? "currentColor" : "none"}
                 stroke="currentColor" 
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 className="w-6 h-6"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </button>
           )}
