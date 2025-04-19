@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
-import LivecamCard, { LivecamCardProps } from '@/components/livecams/LivecamCard';
+import LivecamCard from '@/components/livecams/LivecamCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -112,12 +112,11 @@ const Livecams = () => {
             sortedLivecams.map(livecam => (
               <LivecamCard 
                 key={livecam.id} 
-                imageUrl={livecam.imageUrl}
-                location={livecam.location}
-                rating={livecam.rating || 0}
-                isLive={livecam.isLive || false}
-                isPremium={Boolean(livecam.isPremium)}
-                price={livecam.price || 0}
+                model={livecam}
+                showBoostControls={false}
+                isBoosted={false}
+                onBoost={() => false}
+                onCancelBoost={() => false}
               />
             ))
           ) : (
@@ -130,4 +129,3 @@ const Livecams = () => {
 };
 
 export default Livecams;
-

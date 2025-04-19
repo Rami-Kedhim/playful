@@ -1,9 +1,11 @@
 
+// Fix import and verificationLevel type mismatch
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import VerificationBadge from '@/components/verification/VerificationBadge';
-import type { VerificationLevel } from '@/types/verification'; // Import VerificationLevel from types
+import type { VerificationLevel } from '@/types/verification'; // Use type only, no direct export from UI component
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 

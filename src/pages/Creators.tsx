@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useCreators } from '@/hooks/useCreators';
-import CreatorCard, { CreatorProfileProps } from '@/components/creators/CreatorCard';
+import CreatorCard from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -68,11 +68,11 @@ const Creators = () => {
               key={creator.id} 
               id={creator.id}
               name={creator.name}
-              // Use optional chaining with fallbacks for image url
-              image={('avatarUrl' in creator ? creator.avatarUrl : undefined) 
-                     || ('profileImage' in creator ? creator.profileImage : undefined) 
-                     || creator.imageUrl || ''}
-              location={'location' in creator ? creator.location : ''}
+              // Safe access with type guard
+              image={('avatarUrl' in creator && typeof creator.avatarUrl === 'string' ? creator.avatarUrl : 
+                      ('profileImage' in creator && typeof creator.profileImage === 'string' ? creator.profileImage : 
+                       creator.imageUrl || ''))}
+              location={('location' in creator && typeof creator.location === 'string') ? creator.location : ''}
               rating={creator.rating || 0}
               premium={creator.isPremium || false}
               price={creator.price}

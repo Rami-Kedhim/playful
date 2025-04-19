@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -6,7 +5,7 @@ import EscortGrid from '@/components/escorts/EscortGrid';
 import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Filter, SlidersHorizontal, MapPin, Star } from 'lucide-react';
+import { Filter, SlidersHorizontal } from 'lucide-react';
 import EscortsModule from '@/modules/escorts/EscortsModule';
 
 const EscortsContent = () => {
@@ -59,7 +58,6 @@ const EscortsContent = () => {
           <Button 
             variant="outline" 
             size="sm"
-            className="flex items-center"
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Sort
