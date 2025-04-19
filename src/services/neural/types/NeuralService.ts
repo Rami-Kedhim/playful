@@ -17,6 +17,9 @@ export interface NeuralServiceConfig {
   debugMode?: boolean;
   modelParameters?: Record<string, any>;
   customSettings?: Record<string, any>;
+  priority?: number;
+  autonomyLevel?: number;
+  resourceAllocation?: number;
 }
 
 export interface BaseNeuralService {
@@ -30,6 +33,7 @@ export interface BaseNeuralService {
   status: 'online' | 'offline' | 'degraded' | 'maintenance';
   
   initialize(): Promise<boolean>;
+  updateConfig(config: Partial<NeuralServiceConfig>): void;
   configure(): boolean;
   getStatus(): string;
   getCapabilities(): string[];

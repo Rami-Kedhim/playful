@@ -1,8 +1,7 @@
 
-import { v4 as uuidv4 } from 'uuid';
-import { BaseNeuralService as BaseServiceType, ModuleType, NeuralServiceConfig } from '../types/NeuralService';
+import { ModuleType, NeuralServiceConfig, BaseNeuralService as INeuralService } from '../types/NeuralService';
 
-export class BaseNeuralService implements BaseServiceType {
+export abstract class BaseNeuralService implements INeuralService {
   id: string;
   moduleId: string;
   name: string;
@@ -10,35 +9,46 @@ export class BaseNeuralService implements BaseServiceType {
   moduleType: ModuleType;
   version: string;
   config: NeuralServiceConfig;
-  status: 'online' | 'offline' | 'degraded' | 'maintenance';
+  status: 'online' | 'offline' | 'degraded' | 'maintenance' = 'offline';
   
   constructor(
-    name: string,
+    id: string,
     moduleType: ModuleType,
-    description: string,
-    version: string = '1.0.0'
+    name: string,
+    version: string,
+    description: string = ''
   ) {
-    this.id = uuidv4();
-    this.moduleId = `neural-${moduleType}-${this.id.substring(0, 8)}`;
+    this.id = id;
+    this.moduleId = id.toLowerCase().replace(/\s+/g, '-');
     this.name = name;
+    this.description = description || `${name} neural service module`;
     this.moduleType = moduleType;
-    this.description = description;
     this.version = version;
-    this.status = 'offline';
     this.config = {
       enabled: false,
       version: version,
-      debugMode: false
+      priority: 50,
+      autonomyLevel: 50,
+      resourceAllocation: 30
     };
   }
   
   async initialize(): Promise<boolean> {
+    console.log(`Initializing neural service: ${this.name}`);
     this.status = 'online';
     return true;
   }
   
+  updateConfig(config: Partial<NeuralServiceConfig>): void {
+    this.config = {
+      ...this.config,
+      ...config
+    };
+    console.log(`Updated configuration for ${this.name}`);
+  }
+  
   configure(): boolean {
-    this.config.enabled = true;
+    console.log(`Configuring neural service: ${this.name}`);
     return true;
   }
   
@@ -52,12 +62,9 @@ export class BaseNeuralService implements BaseServiceType {
   
   getMetrics(): Record<string, any> {
     return {
-      uptime: 0,
-      requests: 0,
-      errors: 0,
-      latency: 0
+      uptime: Math.floor(Math.random() * 1000000),
+      requests: Math.floor(Math.random() * 1000),
+      latency: Math.random() * 100
     };
   }
 }
-
-export { BaseServiceType as BaseNeuralService };

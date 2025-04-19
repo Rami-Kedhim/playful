@@ -15,6 +15,10 @@ class NeuralServiceRegistry {
     return true;
   }
   
+  getService(id: string): BaseNeuralService | undefined {
+    return this.services.get(id);
+  }
+  
   getServiceById(id: string): BaseNeuralService | undefined {
     return this.services.get(id);
   }
@@ -32,12 +36,33 @@ class NeuralServiceRegistry {
     return this.services.delete(id);
   }
   
+  unregisterService(id: string): boolean {
+    return this.services.delete(id);
+  }
+  
   clear(): void {
     this.services.clear();
   }
   
   getServicesCount(): number {
     return this.services.size;
+  }
+
+  async initializeAll(): Promise<boolean> {
+    try {
+      for (const service of this.services.values()) {
+        await service.initialize();
+      }
+      return true;
+    } catch (error) {
+      console.error("Error initializing services:", error);
+      return false;
+    }
+  }
+
+  optimizeResourceAllocation(): void {
+    console.log("Optimizing resource allocation for neural services...");
+    // Implementation would go here in a real system
   }
 }
 

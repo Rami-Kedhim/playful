@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Brain, Power } from "lucide-react";
-import { NeuralService } from '@/services/neural';
+import { BaseNeuralService } from '@/services/neural/types/NeuralService';
 import { useNeuralService } from '@/hooks/useNeuralService';
 
 interface NeuralServiceCardProps {
-  service: NeuralService;
+  service: BaseNeuralService;
   onRefresh?: () => void;
 }
 
@@ -45,25 +45,25 @@ const NeuralServiceCard: React.FC<NeuralServiceCardProps> = ({ service, onRefres
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
             <span>Autonomy Level</span>
-            <span>{service.config.autonomyLevel}%</span>
+            <span>{service.config.autonomyLevel ?? 50}%</span>
           </div>
-          <Progress value={service.config.autonomyLevel} className="h-2" />
+          <Progress value={service.config.autonomyLevel ?? 50} className="h-2" />
         </div>
         
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
             <span>Priority</span>
-            <span>{service.config.priority}/100</span>
+            <span>{service.config.priority ?? 50}/100</span>
           </div>
-          <Progress value={service.config.priority} className="h-2" />
+          <Progress value={service.config.priority ?? 50} className="h-2" />
         </div>
         
         <div>
           <div className="flex items-center justify-between text-sm mb-1">
             <span>Resource Allocation</span>
-            <span>{service.config.resourceAllocation}%</span>
+            <span>{service.config.resourceAllocation ?? 30}%</span>
           </div>
-          <Progress value={service.config.resourceAllocation} className="h-2" />
+          <Progress value={service.config.resourceAllocation ?? 30} className="h-2" />
         </div>
         
         <div className="pt-2">

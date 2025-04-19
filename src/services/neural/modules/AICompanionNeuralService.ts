@@ -8,18 +8,19 @@ export class AICompanionNeuralService extends BaseNeuralService {
       'AICompanionNeuralService', 
       'ai_companions' as ModuleType, 
       'AI Companion Neural Service',
-      '1.0.0'
+      '1.0.0',
+      'Neural service for AI companions and virtual entities'
     );
   }
   
   override getCapabilities(): string[] {
     return [
-      'personality-generation',
-      'emotional-modeling',
-      'conversation-memory',
-      'adaptive-learning',
-      'preference-matching',
-      'interaction-optimization'
+      'personality-modeling',
+      'dialogue-generation',
+      'emotional-intelligence',
+      'memory-retention',
+      'contextual-responses',
+      'learning-adaptation'
     ];
   }
 }
