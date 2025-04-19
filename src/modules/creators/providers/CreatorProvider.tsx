@@ -1,4 +1,6 @@
 
+// Fix CreatorsNeuralService usage and property references
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { ContentCreator } from '@/types/creator';
 import { mockCreators } from '@/data/mockData';
@@ -25,7 +27,7 @@ export const CreatorProvider: React.FC<{ children: ReactNode }> = ({ children })
     const loadCreators = async () => {
       try {
         setLoading(true);
-        await CreatorsNeuralService.initialize();
+        // Removed nonexistent initialize method call
         setCreators(mockCreators);
         setError(null);
       } catch (err: any) {
@@ -40,7 +42,7 @@ export const CreatorProvider: React.FC<{ children: ReactNode }> = ({ children })
   }, []);
 
   const getFeaturedCreators = () => {
-    return creators.filter(creator => creator.featured);
+    return creators.filter(creator => creator.isFeatured);
   };
 
   const getTopCreators = () => {
@@ -89,3 +91,4 @@ export const useCreatorContext = (): CreatorContextType => {
   }
   return context;
 };
+

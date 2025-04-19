@@ -1,3 +1,6 @@
+
+// Fix to import useCreatorDetail as named import and fix type error on CreatorDetail function
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -5,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import useCreatorDetail from "@/hooks/useCreatorDetail";
+import { useCreatorDetail } from "@/hooks/useCreatorDetail"; // fixed named import
 import CreatorsModule from "@/modules/creators/CreatorsModule";
 import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
@@ -33,8 +36,8 @@ const CreatorDetailContent: React.FC = () => {
     canSubscribe,
     handleSubscribe,
     handleSendTip
-  } = useCreatorDetail(id);
-  
+  } = useCreatorDetail(id || '');
+
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast({
@@ -42,7 +45,7 @@ const CreatorDetailContent: React.FC = () => {
       description: "Creator profile link copied to clipboard"
     });
   };
-  
+
   if (loading) {
     return (
       <MainLayout>
@@ -53,15 +56,15 @@ const CreatorDetailContent: React.FC = () => {
               Back
             </Button>
           </div>
-          
+
           <div className="space-y-6">
             <Skeleton className="h-64 w-full rounded-xl" />
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="md:col-span-2">
                 <Skeleton className="h-96 w-full rounded-xl" />
               </div>
-              
+
               <div className="md:col-span-1">
                 <Skeleton className="h-80 w-full rounded-xl" />
               </div>
@@ -71,7 +74,7 @@ const CreatorDetailContent: React.FC = () => {
       </MainLayout>
     );
   }
-  
+
   if (error || !creator) {
     return (
       <MainLayout>
@@ -82,7 +85,7 @@ const CreatorDetailContent: React.FC = () => {
               Back
             </Button>
           </div>
-          
+
           <div className="bg-red-500/10 border border-red-500 rounded-lg p-8 text-center">
             <h2 className="text-2xl font-bold text-red-500 mb-2">Creator Not Found</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
@@ -96,14 +99,14 @@ const CreatorDetailContent: React.FC = () => {
       </MainLayout>
     );
   }
-  
+
   return (
     <>
       <Helmet>
         <title>{`${creator.name} - Content Creator | Subscribe for Exclusive Content`}</title>
         <meta name="description" content={`${creator.name} - Subscribe to access exclusive photos, videos, and live streams. Starting at $${creator.price}/month.`} />
       </Helmet>
-      
+
       <MainLayout>
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-6">
@@ -111,19 +114,19 @@ const CreatorDetailContent: React.FC = () => {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            
+
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" />
               Share
             </Button>
           </div>
-          
+
           <CreatorHeader 
             creator={creator} 
             isSubscribed={isSubscribed}
             isFavorite={isFavorite}
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
             <div className="md:col-span-2">
               <CreatorTabs 
@@ -131,7 +134,7 @@ const CreatorDetailContent: React.FC = () => {
                 isSubscribed={isSubscribed}
               />
             </div>
-            
+
             <div className="md:col-span-1">
               <CreatorSubscriptionCard 
                 creator={creator}
@@ -149,3 +152,4 @@ const CreatorDetailContent: React.FC = () => {
 };
 
 export default CreatorDetail;
+

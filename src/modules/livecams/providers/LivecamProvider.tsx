@@ -1,7 +1,9 @@
 
+// Fix LivecamsNeuralService usage and substitute mockLivecams with full mock livecam data matching Livecam type
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Livecam } from '@/types/livecam';
-import { mockLivecams } from '@/data/mockData';
+// import { mockLivecams } from '@/data/mockData'; // Removed due to type issues
 import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
 
 interface LivecamContextType {
@@ -16,6 +18,42 @@ interface LivecamContextType {
 
 const LivecamContext = createContext<LivecamContextType | undefined>(undefined);
 
+const MOCK_LIVECAMS: Livecam[] = [
+  {
+    id: '1',
+    name: 'Luna',
+    username: 'luna_cam',
+    profileImage: '/images/livecams/luna.jpg',
+    viewerCount: 1250,
+    tags: ['chatty', 'gaming'],
+    featured: true,
+    isLive: true,
+    category: 'Casual'
+  },
+  {
+    id: '2',
+    name: 'Max',
+    username: 'max_live',
+    profileImage: '/images/livecams/max.jpg',
+    viewerCount: 850,
+    tags: ['music', 'singing'],
+    featured: false,
+    isLive: false,
+    category: 'Music'
+  },
+  {
+    id: '3',
+    name: 'Nova',
+    username: 'nova_star',
+    profileImage: '/images/livecams/nova.jpg',
+    viewerCount: 200,
+    tags: ['art', 'painting'],
+    featured: false,
+    isLive: true,
+    category: 'Art'
+  }
+];
+
 export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [livecams, setLivecams] = useState<Livecam[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -25,8 +63,8 @@ export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children })
     const loadLivecams = async () => {
       try {
         setLoading(true);
-        await LivecamsNeuralService.initialize();
-        setLivecams(mockLivecams);
+        // Removed await LivecamsNeuralService.initialize(); since it does not exist
+        setLivecams(MOCK_LIVECAMS);
         setError(null);
       } catch (err: any) {
         setError(err.message || 'Failed to load livecams');
@@ -54,7 +92,8 @@ export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children })
   const refreshLivecams = async () => {
     try {
       setLoading(true);
-      setLivecams(mockLivecams);
+      // refresh with same mock data for now
+      setLivecams(MOCK_LIVECAMS);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to refresh livecams');
