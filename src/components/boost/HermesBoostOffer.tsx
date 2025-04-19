@@ -14,10 +14,11 @@ interface HermesBoostOfferProps {
 
 const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOffer }) => {
   const { insights } = useHermesInsights();
+
   const { toast } = useToast();
 
-  // insights is an array, so find the boostOffer insight
-  const boostOffer = insights.find((insight) => insight.type === 'boostOffer');
+  // insights is an array, find boostOffer insight
+  const boostOfferInsight = insights.find(insight => insight.type === 'boostOffer');
 
   const handleAcceptOffer = () => {
     toast({
@@ -31,11 +32,9 @@ const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOff
     }
   };
 
-  if (!boostOffer) {
-    return null;
-  }
+  if (!boostOfferInsight) return null;
 
-  const offerCategory = boostOffer.category || "visibility";
+  const offerCategory = boostOfferInsight.category || "visibility";
 
   return (
     <Card className="border-2 border-purple-400 dark:border-purple-600">
@@ -58,16 +57,16 @@ const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOff
       <CardContent className="space-y-4">
         <div className="text-center">
           <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {boostOffer.value}
+            {boostOfferInsight.value}
           </h3>
         </div>
 
         <div className="flex items-center justify-center text-sm text-muted-foreground">
           <Clock className="h-4 w-4 mr-1" />
-          <span>Expires: {new Date(boostOffer.expires).toLocaleDateString()}</span>
+          <span>Expires: {boostOfferInsight.expires ? new Date(boostOfferInsight.expires).toLocaleDateString() : 'N/A'}</span>
         </div>
 
-        <Button 
+        <Button
           onClick={handleAcceptOffer}
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
         >

@@ -1,4 +1,6 @@
 
+// Fix props passed to CreatorCard component by removing unknown props and matching expected prop names
+
 import CreatorCard from "@/components/creators/CreatorCard";
 import { Button } from "@/components/ui/button";
 import { ContentCreator } from "@/types/creator";
@@ -26,7 +28,8 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
               key={creator.id} 
               id={creator.id}
               name={creator.name || 'Unknown Creator'}
-              imageUrl={creator.imageUrl || creator.avatarUrl || creator.profileImage || ''}
+              // Used "image" prop instead of imageUrl based on CreatorCard props
+              image={creator.imageUrl || creator.avatarUrl || creator.profileImage || ''}
               isLive={false} 
               isPremium={Boolean(creator.isPremium) || false}
               subscriberCount={creator.subscriberCount || 0}
@@ -62,3 +65,4 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
 };
 
 export default CreatorResults;
+

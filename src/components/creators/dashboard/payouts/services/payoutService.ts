@@ -1,15 +1,16 @@
 
-// Changed imports and typings to fix missing types
+// Adjust import to remove non-existing requestPayoutRequest import
+
 import { 
   getCreatorPayouts, 
   fetchCreatorPayouts, 
-  requestPayoutRequest 
-} from "@/services/creator/creatorPayoutsService"; // adapt function names if needed.
+  requestPayout 
+} from "@/services/creator/creatorPayoutsService";
 
 export const payoutService = {
   getPayouts: (creatorId: string) => getCreatorPayouts(creatorId),
   refreshPayouts: (creatorId: string) => fetchCreatorPayouts(creatorId),
-  requestPayout: (request: any) => requestPayoutRequest(request),
+  requestPayout: (request: any) => requestPayout(request),
 };
 
 export default payoutService;

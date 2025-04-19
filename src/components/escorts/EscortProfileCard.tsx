@@ -1,4 +1,6 @@
 
+// Fix type errors by adjusting Escort type usage and making providesVirtualContent optional prop
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,24 +11,25 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ServiceTypeBadge from './ServiceTypeBadge';
 
 interface EscortProfileCardProps {
-  escort: Escort;
+  escort: Escort & {
+    providesVirtualContent?: boolean;
+    providesInPersonServices?: boolean;
+  };
   onClick?: () => void;
   onBookNow?: () => void;
 }
 
-const EscortProfileCard: React.FC<EscortProfileCardProps> = ({ 
-  escort, 
+const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
+  escort,
   onClick,
-  onBookNow 
+  onBookNow
 }) => {
-  // Get the primary hourly rate
   const getHourlyRate = () => {
     if (escort.price) return escort.price;
     if (escort.rates?.hourly) return escort.rates.hourly;
     return null;
   };
-  
-  // Get service type badge
+
   const getServiceType = () => {
     if (escort.providesInPersonServices && escort.providesVirtualContent) {
       return "both";
@@ -37,30 +40,26 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
     }
     return escort.serviceType || "";
   };
-  
-  // Get avatar image with fallbacks
+
   const getAvatarImage = () => {
-    return escort.profileImage || escort.imageUrl || escort.avatarUrl || 
+    return escort.profileImage || escort.imageUrl || escort.avatarUrl ||
            escort.avatar || escort.avatar_url || '/placeholder-avatar.png';
   };
-  
-  // Format the display name
+
   const getDisplayName = () => {
     return escort.name || 'Anonymous';
   };
-  
-  // Get verification status
+
   const isVerified = () => {
     return escort.isVerified || escort.verified || false;
   };
-  
-  // Get availability status
+
   const isAvailable = () => {
     return escort.availableNow || false;
   };
-  
+
   return (
-    <Card 
+    <Card
       className="overflow-hidden h-full transition-all hover:shadow-md cursor-pointer"
       onClick={onClick}
     >
@@ -71,17 +70,17 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
             {getDisplayName().substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        
+
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           <ServiceTypeBadge type={getServiceType()} />
-          
+
           {isAvailable() && (
             <Badge variant="default" className="bg-green-500 text-white">
               Available Now
             </Badge>
           )}
         </div>
-        
+
         {escort.tags && escort.tags.length > 0 && (
           <div className="absolute bottom-2 left-2">
             <Badge variant="secondary" className="bg-black/70 text-white text-xs">
@@ -91,11 +90,11 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
           </div>
         )}
       </div>
-      
+
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-medium">{getDisplayName()}</h3>
-          
+
           {escort.rating && (
             <div className="flex items-center">
               <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
@@ -103,7 +102,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="space-y-1 mb-3">
           {escort.location && (
             <div className="flex items-center text-sm text-gray-600">
@@ -111,14 +110,14 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
               <span>{escort.location}</span>
             </div>
           )}
-          
+
           {isVerified() && (
             <div className="flex items-center text-sm text-green-600">
               <Check className="w-3.5 h-3.5 mr-1" />
               <span>Verified</span>
             </div>
           )}
-          
+
           {getHourlyRate() && (
             <div className="flex items-center text-sm">
               <DollarSign className="w-3.5 h-3.5 mr-1" />
@@ -126,10 +125,10 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
             </div>
           )}
         </div>
-        
+
         {onBookNow && (
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             className="w-full mt-2"
             onClick={(e) => {
               e.stopPropagation();
@@ -146,3 +145,4 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
 };
 
 export default EscortProfileCard;
+

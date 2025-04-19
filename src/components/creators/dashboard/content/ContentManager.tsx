@@ -1,3 +1,6 @@
+
+// Fix conforming contentType to union type ('article' | 'video' | 'image')
+
 import React from "react";
 import ContentFilters from "./ContentFilters";
 import ContentList from "./ContentList";
@@ -80,7 +83,9 @@ const ContentManagerContent = () => {
         initialValues={selectedContent ? {
           title: selectedContent.title,
           description: selectedContent.description || '',
-          contentType: selectedContent.contentType || 'image',
+          contentType: (selectedContent.contentType === 'article' || selectedContent.contentType === 'video' || selectedContent.contentType === 'image') 
+            ? selectedContent.contentType 
+            : 'image', // fallback default
           isPremium: selectedContent.isPremium || false,
           price: selectedContent.price || 0,
           url: selectedContent.url,
@@ -90,7 +95,7 @@ const ContentManagerContent = () => {
       />
 
       <ContentUploader
-        creatorId={uploadType === 'image' ? 'images' : 'videos'} // Use a generic ID based on the upload type
+        creatorId={uploadType === 'image' ? 'images' : 'videos'} 
         isOpen={isUploaderOpen}
         onCancel={() => setIsUploaderOpen(false)}
         onSuccess={handleUploadSuccess}
@@ -115,3 +120,4 @@ const ContentManager: React.FC<ContentManagerProps> = ({ creatorId }) => {
 };
 
 export default ContentManager;
+

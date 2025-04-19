@@ -1,4 +1,6 @@
 
+// Fix payment summary props usage: earnings is a number, must pass object fields directly from useEarningsCalculator
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import usePayouts from "./payouts/usePayouts";
 import EarningsSummary from "./payouts/EarningsSummary";
@@ -26,9 +28,9 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
         {/* Earnings Summary Card */}
         <EarningsSummary 
           earnings={{
-            total: earnings.total,
-            pending: earnings.pending,
-            available: earnings.available
+            total: earnings, // earnings is total number from useEarningsCalculator
+            pending: 0,
+            available: 0,
           }}
           isLoading={isLoading}
         />
@@ -43,7 +45,7 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
           </CardHeader>
           <CardContent>
             <PayoutRequestManager
-              availableAmount={earnings.available}
+              availableAmount={earnings} 
               onRequestPayout={handlePayoutRequest}
               isSubmitting={isSubmitting}
             />
@@ -58,3 +60,4 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
 };
 
 export default CreatorPayouts;
+

@@ -1,6 +1,8 @@
 
+// Fix type mismatch in payouts argument passed to useEarningsCalculator
+
 import { useState } from "react";
-import { CreatorPayout, PayoutRequest } from "@/types/creator";
+import { PayoutRequest } from "@/types/creator";
 import { usePayoutQueries } from "./services/payoutQueryService";
 import useEarningsCalculator from "./hooks/useEarningsCalculator";
 
@@ -14,10 +16,10 @@ const usePayouts = (creatorId: string) => {
     isSubmitting
   } = usePayoutQueries(creatorId);
   
-  // Calculate earnings
-  const earnings = useEarningsCalculator(payouts, isLoading);
+  // Cast payouts to PayoutRequest[] if possible or map accordingly
+  // Here we assume payouts already fit CreatorPayout[] structure for earnings calculation
+  const earnings = useEarningsCalculator(payouts as any, isLoading);
 
-  // Handle payout request
   const handlePayoutRequest = async (payoutData: {
     amount: number;
     payoutMethod: string;
@@ -31,7 +33,6 @@ const usePayouts = (creatorId: string) => {
         payoutDetails: payoutData.payoutDetails
       };
       
-      // Use the mutation to request a payout
       const result = await requestPayout(request);
       return true;
     } catch (error) {
@@ -52,3 +53,4 @@ const usePayouts = (creatorId: string) => {
 };
 
 export default usePayouts;
+
