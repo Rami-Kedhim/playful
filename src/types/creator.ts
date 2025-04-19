@@ -1,5 +1,5 @@
 
-// Fix missing exports for CreatorPayout and PayoutRequest types
+// Fix missing exports for ContentCreator and related types
 export interface ContentCreator {
   id: string;
   username?: string;
@@ -35,7 +35,7 @@ export interface ContentCreator {
   subscriptionPrice?: number;
 }
 
-// Added exports for PayoutRequest and CreatorPayout for payout system compatibility
+// Added exports for CreatorPayout and PayoutRequest for payout system compatibility
 export interface CreatorPayout {
   id: string;
   creatorId: string;
@@ -90,3 +90,4 @@ export interface CreatorAnalytics {
   topContent: string[];
   period: 'day' | 'week' | 'month' | 'year';
 }
+

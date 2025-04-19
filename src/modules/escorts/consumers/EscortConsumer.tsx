@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { EscortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
 
 interface EscortConsumerProps {
-  neuralService: EscortsNeuralService;
+  neuralService?: EscortsNeuralService;
   onUpdate?: (data: any) => void;
 }
 
@@ -12,25 +12,19 @@ const EscortConsumer: React.FC<EscortConsumerProps> = ({
   onUpdate
 }) => {
   useEffect(() => {
-    // Configure the neural service with consumer-specific settings
-    const success = neuralService.configure({
-      consumerName: 'EscortConsumer',
-      priorityLevel: 'high',
-      useCache: true
-    });
-    
+    const success = neuralService?.configure();
+
     if (!success) {
       console.error('Failed to configure EscortConsumer neural service');
     }
-    
-    // Additional initialization code here
 
     return () => {
       // Cleanup code here
     };
   }, [neuralService]);
 
-  return null; // This component doesn't render anything
+  return null;
 };
 
 export default EscortConsumer;
+

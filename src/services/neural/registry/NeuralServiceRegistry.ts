@@ -7,36 +7,33 @@ class NeuralServiceRegistry {
   private initialized: boolean = false;
 
   constructor() {
-    // Register core services on instantiation
     this.registerCoreServices();
   }
 
   private registerCoreServices() {
-    // Register the AICompanion service
     const aiCompanionService = new AICompanionNeuralService();
     this.registerService(aiCompanionService);
 
-    // Additional core services would be registered here
+    // Register other core services if needed
   }
 
   public async initialize(): Promise<boolean> {
     if (this.initialized) {
-      console.log("Neural service registry already initialized");
+      console.log('Neural service registry already initialized');
       return true;
     }
 
-    console.log("Initializing neural service registry");
-    
-    // Initialize all registered services
+    console.log('Initializing neural service registry');
+
     const initPromises = Array.from(this.services.values()).map(service => service.initialize());
-    
+
     try {
       await Promise.all(initPromises);
       this.initialized = true;
-      console.log("Neural service registry initialized successfully");
+      console.log('Neural service registry initialized successfully');
       return true;
     } catch (error) {
-      console.error("Failed to initialize neural service registry:", error);
+      console.error('Failed to initialize neural service registry:', error);
       return false;
     }
   }
@@ -46,7 +43,7 @@ class NeuralServiceRegistry {
       console.warn(`Service with ID ${service.id} already registered`);
       return false;
     }
-    
+
     this.services.set(service.id, service);
     console.log(`Registered neural service: ${service.name} (${service.id})`);
     return true;
@@ -57,8 +54,7 @@ class NeuralServiceRegistry {
   }
 
   public getServicesByModule(moduleType: ModuleType): BaseNeuralService[] {
-    return Array.from(this.services.values())
-      .filter(service => service.moduleType === moduleType);
+    return Array.from(this.services.values()).filter(service => service.moduleType === moduleType);
   }
 
   public getAllServices(): BaseNeuralService[] {
@@ -70,6 +66,6 @@ class NeuralServiceRegistry {
   }
 }
 
-// Export a singleton instance
 const neuralServiceRegistry = new NeuralServiceRegistry();
 export default neuralServiceRegistry;
+

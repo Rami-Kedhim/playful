@@ -1,8 +1,10 @@
 
+// Fixed import by changing from named import to import type and default export removed
+
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCreatorContext } from '@/modules/creators/providers/CreatorProvider';
-import type { Creator } from '@/types/creator';
+import type { ContentCreator } from '@/types/creator';
 
 export function useCreatorDetail() {
   const context = useCreatorContext();
@@ -12,6 +14,7 @@ export function useCreatorDetail() {
     throw new Error('useCreatorDetail must be used within a CreatorProvider');
   }
   
+  // Use ContentCreator type for individual creator
   const creator = context.getCreatorById?.(id || '');
   const isLoading = context.loading;
   const error = context.error;
@@ -20,9 +23,9 @@ export function useCreatorDetail() {
     creator,
     isLoading,
     error,
-    relatedCreators: context.creators?.filter((c: Creator) => c.id !== id).slice(0, 3) || []
+    relatedCreators: context.creators?.filter((c: ContentCreator) => c.id !== id).slice(0, 3) || []
   };
 }
 
-// Export as named export
-export default useCreatorDetail;
+// no default export to fix TS errors
+

@@ -1,15 +1,14 @@
 
-// Fix import for NeuralService and usage to avoid invalid type import issue
 import { useState, useEffect, useCallback } from 'react';
 import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
-// Import types separately if needed, here we treat NeuralServiceRegistry as default class instance
-import type { NeuralService as NeuralServiceType, ModuleType as ModuleTypeType } from '@/services/neural/registry/NeuralServiceRegistry';
+import type { BaseNeuralService } from '@/services/neural/types/NeuralService';
+import type { ModuleType } from '@/services/neural/types/NeuralService';
 
 /**
  * Hook for working with the Neural Service Registry
  */
 export function useNeuralRegistry() {
-  const [services, setServices] = useState<NeuralServiceType[]>([]);
+  const [services, setServices] = useState<BaseNeuralService[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -19,12 +18,9 @@ export function useNeuralRegistry() {
       setLoading(true);
       setError(null);
       
-      // This will return all registered services
       const allServices = neuralServiceRegistry.getAllServices();
       setServices(allServices);
       
-      // Initialize all services if needed
-      // Changed from initializeAll to initialize to fit available API
       if (neuralServiceRegistry.initialize) {
         await neuralServiceRegistry.initialize();
       }
@@ -37,7 +33,7 @@ export function useNeuralRegistry() {
   }, []);
   
   // Register a new service
-  const registerService = useCallback((service: NeuralServiceType) => {
+  const registerService = useCallback((service: BaseNeuralService) => {
     const success = neuralServiceRegistry.registerService(service);
     if (success) {
       loadServices();
@@ -45,25 +41,23 @@ export function useNeuralRegistry() {
     return success;
   }, [loadServices]);
   
-  // Unregister a service
+  // Unregister a service (not implemented)
   const unregisterService = useCallback((moduleId: string) => {
-    // It seems no unregisterService method, so only call registerService to false or implement no-op
     console.warn('unregisterService method not defined on neuralServiceRegistry');
-    // Return false because unregister not done
     return false;
   }, []);
   
   // Get services by type
-  const getServicesByType = useCallback((moduleType: ModuleTypeType): NeuralServiceType[] => {
-    // If registry supports getServicesByType method, else fallback empty
-    if (neuralServiceRegistry.getServicesByType) {
-      return neuralServiceRegistry.getServicesByType(moduleType);
+  const getServicesByType = useCallback((moduleType: ModuleType): BaseNeuralService[] => {
+    if ("getServicesByModule" in neuralServiceRegistry) {
+      // Use getServicesByModule on registry if available
+      return neuralServiceRegistry.getServicesByModule(moduleType);
     }
     return [];
   }, []);
   
   // Get a specific service
-  const getService = useCallback((moduleId: string): NeuralServiceType | undefined => {
+  const getService = useCallback((moduleId: string): BaseNeuralService | undefined => {
     if (neuralServiceRegistry.getService) {
       return neuralServiceRegistry.getService(moduleId);
     }
@@ -72,15 +66,14 @@ export function useNeuralRegistry() {
   
   // Optimize resource allocation
   const optimizeResources = useCallback(() => {
-    if (neuralServiceRegistry.optimizeResourceAllocation) {
+    if ("optimizeResourceAllocation" in neuralServiceRegistry) {
       neuralServiceRegistry.optimizeResourceAllocation();
-      loadServices(); // Refresh services list after optimization
+      loadServices();
     } else {
       console.warn('optimizeResourceAllocation method not defined on neuralServiceRegistry');
     }
   }, [loadServices]);
   
-  // Load services on mount
   useEffect(() => {
     loadServices();
   }, [loadServices]);
@@ -99,3 +92,4 @@ export function useNeuralRegistry() {
 }
 
 export default useNeuralRegistry;
+

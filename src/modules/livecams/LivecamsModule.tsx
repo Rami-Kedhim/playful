@@ -2,9 +2,8 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
-import LivecamProvider from './providers/LivecamProvider';
+import { LivecamProvider } from './providers/LivecamProvider';
 
-// These are placeholder components until the actual pages are implemented
 const LivecamList: React.FC = () => (
   <div className="p-4">
     <h2 className="text-2xl font-bold mb-4">Livecam List</h2>
@@ -39,3 +38,4 @@ const LivecamsModule: React.FC = () => {
 };
 
 export default LivecamsModule;
+
