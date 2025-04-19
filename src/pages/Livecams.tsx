@@ -112,7 +112,11 @@ const Livecams = () => {
             sortedLivecams.map(livecam => (
               <LivecamCard 
                 key={livecam.id} 
-                model={livecam}
+                model={{
+                  ...livecam,
+                  displayName: livecam.displayName || livecam.name || 'Unnamed',
+                  imageUrl: livecam.imageUrl || livecam.thumbnailUrl || ''
+                }}
                 showBoostControls={false}
                 isBoosted={false}
                 onBoost={() => false}
@@ -129,3 +133,4 @@ const Livecams = () => {
 };
 
 export default Livecams;
+

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -30,7 +31,7 @@ const EscortsContent = () => {
   };
 
   const serviceType = filters.serviceTypes && filters.serviceTypes.length === 1 
-    ? filters.serviceTypes[0] as "" | "in-person" | "virtual" | "both"
+    ? (filters.serviceTypes[0] as "" | "in-person" | "virtual" | "both")
     : "";
   
   const selectedServices = filters.serviceTypes || [];
@@ -47,7 +48,6 @@ const EscortsContent = () => {
             variant="outline" 
             size="sm" 
             onClick={toggleFilters}
-            className="flex items-center"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters {Object.keys(filters).length > 0 && <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
@@ -172,3 +172,4 @@ const Escorts = () => {
 };
 
 export default Escorts;
+

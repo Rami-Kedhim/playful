@@ -14,7 +14,25 @@ const Creators = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [sortBy, setSortBy] = React.useState('relevance');
 
-  // Adjust filtering to handle possible missing avatarUrl/profileImage/location properties safely
+  // Safely get image string fallback with proper type guard
+  const getCreatorImage = (creator: Creator): string => {
+    if ('avatarUrl' in creator && typeof creator.avatarUrl === 'string') {
+      return creator.avatarUrl;
+    }
+    if ('profileImage' in creator && typeof creator.profileImage === 'string') {
+      return creator.profileImage;
+    }
+    return creator.imageUrl || '';
+  };
+
+  // Safely get location string fallback with type guard
+  const getCreatorLocation = (creator: Creator): string => {
+    if ('location' in creator && typeof creator.location === 'string') {
+      return creator.location;
+    }
+    return '';
+  };
+
   const filteredCreators = creators
     ? creators.filter(creator =>
         creator.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -63,16 +81,13 @@ const Creators = () => {
         ) : error ? (
           <p>Error: {error}</p>
         ) : sortedCreators.length > 0 ? (
-          sortedCreators.map(creator => (
+          sortedCreators.map((creator) => (
             <CreatorCard 
               key={creator.id} 
               id={creator.id}
               name={creator.name}
-              // Safe access with type guard
-              image={('avatarUrl' in creator && typeof creator.avatarUrl === 'string' ? creator.avatarUrl : 
-                      ('profileImage' in creator && typeof creator.profileImage === 'string' ? creator.profileImage : 
-                       creator.imageUrl || ''))}
-              location={('location' in creator && typeof creator.location === 'string') ? creator.location : ''}
+              image={getCreatorImage(creator)}
+              location={getCreatorLocation(creator)}
               rating={creator.rating || 0}
               premium={creator.isPremium || false}
               price={creator.price}
@@ -87,3 +102,4 @@ const Creators = () => {
 };
 
 export default Creators;
+
