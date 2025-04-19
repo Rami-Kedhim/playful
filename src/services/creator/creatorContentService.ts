@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorContent } from "@/types/creator";
 import { uploadFile } from "@/services/storageService";
@@ -14,18 +13,18 @@ export const fetchCreatorContent = async (
     // For now, we'll mock some data
     const mockContent: CreatorContent[] = Array.from({ length: 20 }).map((_, index) => ({
       id: `content-${index + 1}`,
-      creator_id: creatorId,
+      creatorId: creatorId,
       title: `Content ${index + 1}`,
       description: index % 3 === 0 ? `Description for content ${index + 1}` : undefined,
-      content_type: index % 2 === 0 ? 'video' : 'image',
+      contentType: index % 2 === 0 ? 'video' : 'image',
       url: `https://example.com/content/${index + 1}`,
-      thumbnail_url: `https://picsum.photos/seed/content${index + 1}/400/300`,
-      is_premium: index % 3 === 0,
+      thumbnailUrl: `https://picsum.photos/seed/content${index + 1}/400/300`,
+      isPremium: index % 3 === 0,
       price: index % 3 === 0 ? (index + 1) * 5 : null,
       status: index % 5 === 0 ? 'draft' : 'published',
-      created_at: new Date(Date.now() - index * 86400000).toISOString(),
-      views_count: Math.floor(Math.random() * 1000),
-      likes_count: Math.floor(Math.random() * 100),
+      createdAt: new Date(Date.now() - index * 86400000).toISOString(),
+      viewsCount: Math.floor(Math.random() * 1000),
+      likesCount: Math.floor(Math.random() * 100),
     }));
 
     // Apply filters
@@ -39,9 +38,9 @@ export const fetchCreatorContent = async (
       );
     }
     
-    if (filters.content_type) {
+    if (filters.contentType) {
       filteredContent = filteredContent.filter(item => 
-        item.content_type === filters.content_type
+        item.contentType === filters.contentType
       );
     }
     
@@ -105,18 +104,18 @@ export const saveContent = async (
     // For now, we'll mock the response
     const newContent: CreatorContent = {
       id: `content-${Date.now()}`,
-      creator_id: creatorId,
+      creatorId: creatorId,
       title: contentData.title || 'Untitled',
       description: contentData.description,
-      content_type: contentData.content_type || 'image',
+      contentType: contentData.content_type || 'image',
       url: contentData.url || '',
-      thumbnail_url: contentData.thumbnail_url,
-      is_premium: contentData.is_premium || false,
+      thumbnailUrl: contentData.thumbnail_url,
+      isPremium: contentData.is_premium || false,
       price: contentData.price || null,
       status: contentData.status || 'draft',
-      created_at: new Date().toISOString(),
-      views_count: 0,
-      likes_count: 0,
+      createdAt: new Date().toISOString(),
+      viewsCount: 0,
+      likesCount: 0,
     };
     
     return {
@@ -140,18 +139,18 @@ export const updateContent = async (
       success: true,
       data: {
         id: contentId,
-        creator_id: contentData.creator_id || 'default-creator',
+        creatorId: contentData.creatorId || 'default-creator',
         title: contentData.title || 'Untitled',
         description: contentData.description,
-        content_type: contentData.content_type || 'image',
+        contentType: contentData.content_type || 'image',
         url: contentData.url || '',
-        thumbnail_url: contentData.thumbnail_url,
-        is_premium: contentData.is_premium || false,
+        thumbnailUrl: contentData.thumbnail_url,
+        isPremium: contentData.is_premium || false,
         price: contentData.price || null,
         status: contentData.status || 'published',
-        created_at: new Date().toISOString(),
-        views_count: contentData.views_count || 0,
-        likes_count: contentData.likes_count || 0,
+        createdAt: new Date().toISOString(),
+        viewsCount: contentData.viewsCount || 0,
+        likesCount: contentData.likesCount || 0,
       }
     };
   } catch (err) {
@@ -185,18 +184,18 @@ export const getContentDetail = async (
     
     const mockContent: CreatorContent = {
       id: contentId,
-      creator_id: `creator-${Date.now()}`,
+      creatorId: `creator-${Date.now()}`,
       title: `Content Detail ${contentId}`,
       description: `Detailed description for content ${contentId}`,
-      content_type: Math.random() > 0.5 ? 'video' : 'image',
+      contentType: Math.random() > 0.5 ? 'video' : 'image',
       url: `https://example.com/content/${contentId}`,
-      thumbnail_url: `https://picsum.photos/seed/content${contentId}/400/300`,
-      is_premium: Math.random() > 0.7,
+      thumbnailUrl: `https://picsum.photos/seed/content${contentId}/400/300`,
+      isPremium: Math.random() > 0.7,
       price: Math.random() > 0.7 ? Math.floor(Math.random() * 50) + 5 : null,
       status: Math.random() > 0.2 ? 'published' : 'draft',
-      created_at: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString(),
-      views_count: Math.floor(Math.random() * 1000),
-      likes_count: Math.floor(Math.random() * 100),
+      createdAt: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString(),
+      viewsCount: Math.floor(Math.random() * 1000),
+      likesCount: Math.floor(Math.random() * 100),
     };
     
     return {

@@ -1,7 +1,6 @@
-
 import { BrainHubAnalytics } from "@/types/brainHubHealth";
 import { brainHub } from "../neural/HermesOxumBrainHub";
-import { neuralServiceRegistry } from "../neural/registry/NeuralServiceRegistry";
+import neuralServiceRegistry from "../neural/registry/NeuralServiceRegistry";
 
 /**
  * Generate analytics for the Brain Hub

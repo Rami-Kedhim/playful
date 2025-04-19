@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,9 +27,7 @@ interface NormalizedVerificationDocument {
   document_type: string;
   status: string;
   url?: string;
-  file_url?: string;
   fileUrl?: string;
-  document_url?: string;
   uploaded_at?: string;
   created_at?: string;
   verification_request_id?: string;
@@ -53,7 +50,6 @@ const VerificationDashboard: React.FC = () => {
     setLoading(true);
     try {
       const data = await getAllVerificationRequests();
-      // Normalize the verification requests
       const normalizedRequests = data.map(request => ({
         ...request,
         userId: request.userId || request.user_id || '',
@@ -80,7 +76,7 @@ const VerificationDashboard: React.FC = () => {
         description: "Verification request approved",
         variant: "success"
       });
-      await fetchVerificationRequests(); // Refresh data
+      await fetchVerificationRequests();
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error approving verification request:', error);
@@ -100,7 +96,7 @@ const VerificationDashboard: React.FC = () => {
         description: "Verification request rejected",
         variant: "success"
       });
-      await fetchVerificationRequests(); // Refresh data
+      await fetchVerificationRequests();
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error rejecting verification request:', error);

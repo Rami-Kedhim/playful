@@ -1,234 +1,221 @@
-
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Loader2, Plus, Send, Image, Mic } from 'lucide-react';
-import useAICompanion from '@/hooks/useAICompanion';
-import AICompanionCard from '@/components/ai-companion/AICompanionCard';
-import AICompanionChatMessage from '@/components/ai-companion/AICompanionChatMessage';
-import AICompanionProfile from '@/components/ai-companion/AICompanionProfile';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Send } from 'lucide-react';
+import { useAuth } from '@/hooks/auth/useAuth';
+import { useToast } from '@/components/ui/use-toast';
+import { AICompanionMessage } from '@/types/ai-companion';
+import {
+  fetchAICompanions,
+  fetchAICompanionById,
+  generateAICompanionContent,
+  sendAICompanionMessage,
+  getAICompanionContext
+} from '@/services/aiCompanionService';
+import { useAICompanions } from '@/hooks/useAICompanions';
+import MainLayout from '@/components/layout/MainLayout';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 
-/**
- * AI Companion Page
- */
-const AICompanionPage: React.FC = () => {
-  const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState('chat');
-  
-  // For demo purposes, we'll use a mock user ID
-  const mockUserId = 'user-123';
-  
-  const { 
-    companions,
-    presetCompanions,
-    selectedCompanion,
-    messages,
-    loading,
-    isLoadingMessages,
-    selectCompanion,
-    sendMessage,
-    generateContent
-  } = useAICompanion(mockUserId);
-  
-  const handleSendMessage = async () => {
-    if (!message.trim() || !selectedCompanion) return;
-    
-    await sendMessage(message.trim());
-    setMessage('');
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-  
-  const handleGenerateImage = async () => {
-    if (!selectedCompanion) return;
-    
-    await generateContent({
-      prompt: "Generate a selfie image based on my profile",
-      type: "image"
-    });
-  };
-  
-  const handleGenerateVoice = async () => {
-    if (!selectedCompanion) return;
-    
-    await generateContent({
-      prompt: "Record a greeting message for the user",
-      type: "voice"
-    });
-  };
-  
+interface AICompanionChatMessageProps {
+  message: AICompanionMessage;
+}
+
+const AICompanionChatMessage: React.FC<AICompanionChatMessageProps> = ({ message }) => {
+  const isUser = message.role === 'user';
+
   return (
-    <div className="container py-6 max-w-7xl">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My AI Companion</h1>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar with AI companions */}
-        <div className="lg:col-span-1 space-y-4">
-          <h2 className="text-xl font-semibold mb-2">My Companions</h2>
-          
-          <Button variant="outline" className="w-full justify-start">
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Companion
-          </Button>
-          
-          <div className="space-y-4 mt-4">
-            {loading ? (
-              <Card className="flex items-center justify-center p-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </Card>
-            ) : (
-              <>
-                {/* User's custom companions */}
-                {companions.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">My Custom Companions</h3>
-                    <div className="space-y-2">
-                      {companions.map((companion) => (
-                        <AICompanionCard 
-                          key={companion.id}
-                          companion={companion}
-                          onSelect={selectCompanion}
-                          isSelected={selectedCompanion?.id === companion.id}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Preset companions */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">Preset Companions</h3>
-                  <div className="space-y-2">
-                    {presetCompanions.map((companion) => (
-                      <AICompanionCard 
-                        key={companion.id}
-                        companion={companion}
-                        onSelect={selectCompanion}
-                        isSelected={selectedCompanion?.id === companion.id}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-        
-        {/* Main content area */}
-        <div className="lg:col-span-3">
-          {selectedCompanion ? (
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full">
-                <TabsTrigger value="chat" className="flex-1">Chat</TabsTrigger>
-                <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
-                <TabsTrigger value="content" className="flex-1">Content</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="chat" className="mt-4">
-                {/* Chat messages */}
-                <div className="flex flex-col h-[60vh] border rounded-md overflow-hidden">
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {isLoadingMessages ? (
-                      <div className="flex items-center justify-center h-full">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : messages.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                        <h3 className="text-lg font-medium mb-2">Start Chatting with {selectedCompanion.name}</h3>
-                        <p className="text-muted-foreground">
-                          Say hello and start your conversation with {selectedCompanion.name}.
-                        </p>
-                      </div>
-                    ) : (
-                      messages.map((msg) => (
-                        <AICompanionChatMessage
-                          key={msg.id}
-                          message={msg}
-                          companionName={selectedCompanion.name}
-                          companionAvatar={selectedCompanion.avatar_url}
-                        />
-                      ))
-                    )}
-                  </div>
-                  
-                  {/* Chat input */}
-                  <div className="border-t p-3">
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleGenerateImage}
-                      >
-                        <Image className="h-5 w-5" />
-                      </Button>
-                      <Button 
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleGenerateVoice}
-                      >
-                        <Mic className="h-5 w-5" />
-                      </Button>
-                      <Input
-                        placeholder={`Message ${selectedCompanion.name}...`}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        className="flex-1"
-                      />
-                      <Button 
-                        onClick={handleSendMessage}
-                        disabled={!message.trim()}
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="profile" className="mt-4">
-                <AICompanionProfile companion={selectedCompanion} />
-              </TabsContent>
-              
-              <TabsContent value="content" className="mt-4">
-                <div className="grid gap-4">
-                  <h2 className="text-xl font-semibold">Premium Content</h2>
-                  <p className="text-muted-foreground">
-                    Unlock exclusive images, voice messages, and more from {selectedCompanion.name}.
-                    This feature is coming soon.
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <Card className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
-              <h3 className="text-xl font-medium mb-4">Select a Companion</h3>
-              <p className="text-muted-foreground mb-6">
-                Choose an AI companion from the list to start chatting or view their profile.
-              </p>
-              <Button 
-                variant="outline"
-                className="mx-auto"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your Own Companion
-              </Button>
-            </Card>
-          )}
-        </div>
+    <div className={`flex w-full py-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`rounded-md p-2 text-sm max-w-[75%] ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100'}`}>
+        {message.content}
       </div>
     </div>
   );
 };
 
-export default AICompanionPage;
+const AICompanionChatInput: React.FC<{ onSendMessage: (message: string) => void }> = ({ onSendMessage }) => {
+  const [message, setMessage] = useState('');
+
+  const handleSendMessage = () => {
+    if (message.trim()) {
+      onSendMessage(message);
+      setMessage('');
+    }
+  };
+
+  return (
+    <div className="flex items-center space-x-2 p-4">
+      <Input
+        type="text"
+        placeholder="Type your message..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        className="flex-grow rounded-md"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleSendMessage();
+          }
+        }}
+      />
+      <Button onClick={handleSendMessage}><Send className="h-4 w-4 mr-2" /> Send</Button>
+    </div>
+  );
+};
+
+const AICompanionChat: React.FC<{ companionId: string }> = ({ companionId }) => {
+  const [messages, setMessages] = useState<AICompanionMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [companionName, setCompanionName] = useState("AI Companion");
+  const [companionAvatar, setCompanionAvatar] = useState("");
+
+  useEffect(() => {
+    const loadInitialMessages = async () => {
+      setLoading(true);
+      try {
+        const context = await getAICompanionContext(companionId);
+        setMessages(context.messages);
+        setCompanionName(context.name);
+        setCompanionAvatar(context.avatar);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load messages');
+        toast({
+          title: "Error loading messages",
+          description: "Failed to load initial messages. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInitialMessages();
+  }, [companionId, toast]);
+
+  useEffect(() => {
+    // Scroll to bottom when messages change
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSendMessage = async (messageContent: string) => {
+    if (!user) {
+      toast({
+        title: "Not authenticated",
+        description: "You must be logged in to send messages.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newMessage: AICompanionMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: messageContent,
+      createdAt: new Date().toISOString(),
+      aiCompanionId: companionId,
+      userId: user.id
+    };
+
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+
+    try {
+      const aiResponse = await sendAICompanionMessage(companionId, messageContent);
+      const aiMessage: AICompanionMessage = {
+        id: Date.now().toString() + '-ai',
+        role: 'assistant',
+        content: aiResponse.content,
+        createdAt: new Date().toISOString(),
+        aiCompanionId: companionId,
+        userId: 'ai'
+      };
+      setMessages(prevMessages => [...prevMessages, aiMessage]);
+    } catch (err: any) {
+      console.error("Error sending message:", err);
+      toast({
+        title: "Error sending message",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <Card className="h-full flex flex-col">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Avatar className="mr-2 h-8 w-8">
+            <AvatarImage src={companionAvatar} alt={companionName} />
+            <AvatarFallback>{companionName.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+          {companionName}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="overflow-y-auto flex-grow" ref={chatContainerRef}>
+        {loading && <Skeleton className="h-5 w-40" />}
+        {error && <p className="text-red-500">Error: {error}</p>}
+        {messages.map(message => (
+          <AICompanionChatMessage key={message.id} message={message} />
+        ))}
+      </CardContent>
+      <CardFooter>
+        <AICompanionChatInput onSendMessage={handleSendMessage} />
+      </CardFooter>
+    </Card>
+  );
+};
+
+const AICompanionList: React.FC = () => {
+  const { aiCompanions, loading, error } = useAICompanions();
+
+  if (loading) return <p>Loading AI Companions...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {aiCompanions?.map(companion => (
+        <Card key={companion.id}>
+          <CardHeader>
+            <CardTitle>{companion.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{companion.description}</p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild><a href={`/ai-companions/${companion.id}`}>Chat</a></Button>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const AICompanionIndex: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const companionId = searchParams.get('companionId');
+
+  return (
+    <MainLayout>
+      <div className="container mx-auto py-10">
+        <h1 className="text-3xl font-semibold mb-6">AI Companions</h1>
+        <Separator className="mb-4" />
+
+        {companionId ? (
+          <AICompanionChat companionId={companionId} />
+        ) : (
+          <AICompanionList />
+        )}
+      </div>
+    </MainLayout>
+  );
+};
+
+export default AICompanionIndex;

@@ -1,10 +1,9 @@
-
 import { BaseNeuralService } from './modules/BaseNeuralService';
 import { EscortsNeuralService } from './modules/EscortsNeuralService';
 import { CreatorsNeuralService } from './modules/CreatorsNeuralService';
 import { LivecamsNeuralService } from './modules/LivecamsNeuralService';
 import { AICompanionNeuralService } from './modules/AICompanionNeuralService';
-import { neuralServiceRegistry } from './registry/NeuralServiceRegistry';
+import neuralServiceRegistry from "./registry/NeuralServiceRegistry";
 
 export interface HealthMetrics {
   cpuUsage: number;

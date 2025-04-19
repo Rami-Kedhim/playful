@@ -27,7 +27,7 @@ export class UberCore {
     }
 
     try {
-      await neuralServiceRegistry.initializeAll();
+      await neuralServiceRegistry.initialize();
       console.info('UberCore initialized with settings:', this.settings);
       this.initialized = true;
       return true;
@@ -60,7 +60,7 @@ export class UberCore {
     }
     
     try {
-      await neuralServiceRegistry.shutdownAll();
+      await neuralServiceRegistry.shutdown();
       this.initialized = false;
       return true;
     } catch (error) {

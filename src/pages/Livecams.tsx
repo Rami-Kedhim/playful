@@ -1,4 +1,6 @@
 
+// Fix: Type error related to Livecam and LivecamModel mismatch
+
 import React, { useState } from 'react';
 import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
 import LivecamCard from '@/components/livecams/LivecamCard';
@@ -16,6 +18,7 @@ const Livecams = () => {
   const [sortBy, setSortBy] = useState('relevance');
   const [showFilters, setShowFilters] = useState(false);
 
+  // Fix - Provide full LivecamModel with required thumbnailUrl property
   const filteredLivecams = livecams
     ? livecams.filter(livecam =>
         livecam.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -115,7 +118,8 @@ const Livecams = () => {
                 model={{
                   ...livecam,
                   displayName: livecam.displayName || livecam.name || 'Unnamed',
-                  imageUrl: livecam.imageUrl || livecam.thumbnailUrl || ''
+                  imageUrl: livecam.imageUrl || livecam.profileImage || livecam.thumbnailUrl || '',
+                  thumbnailUrl: livecam.thumbnailUrl || livecam.previewImage || livecam.imageUrl || ''
                 }}
                 showBoostControls={false}
                 isBoosted={false}

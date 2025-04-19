@@ -1,130 +1,178 @@
-
-/**
- * Neural Service - Higher level operations for the neural system
- */
-import { neuralHub } from './HermesOxumNeuralHub';
+import { BaseNeuralService, NeuralServiceConfig, ModuleType } from './types/NeuralService';
 import { NeuralModel, ModelParameters } from './types/neuralHub';
-import { calculateSystemEfficiency } from './models/modelParameters';
+import neuralServiceRegistry from './registry/NeuralServiceRegistry';
 
-class NeuralService {
-  /**
-   * Get models suitable for a specific task
-   * @param task Task description
-   * @param minAccuracy Minimum required accuracy
-   * @returns Array of suitable models
-   */
-  getSuitableModels(task: string, minAccuracy: number = 0.8): NeuralModel[] {
-    const allModels = neuralHub.getModels();
-    
-    // Filter models based on task keywords and minimum accuracy
-    return allModels.filter(model => {
-      // Only consider active models
-      if (model.status !== 'active') return false;
-      
-      // Check if model has sufficient accuracy
-      if (model.performance.accuracy < minAccuracy) return false;
-      
-      // Match task with model capabilities and specialization
-      const taskWords = task.toLowerCase().split(/\s+/);
-      
-      // Check if any capabilities or specializations match task keywords
-      const hasMatchingCapability = model.capabilities.some(cap => 
-        taskWords.some(word => cap.toLowerCase().includes(word))
-      );
-      
-      // Check specialization if it exists
-      const hasMatchingSpecialization = model.specialization ? 
-        model.specialization.some(spec => 
-          taskWords.some(word => spec.toLowerCase().includes(word))
-        ) : false;
-      
-      return hasMatchingCapability || hasMatchingSpecialization;
-    });
+export class NeuralService implements BaseNeuralService {
+  id: string;
+  moduleId: string;
+  name: string;
+  description: string;
+  moduleType: ModuleType;
+  version: string;
+  config: NeuralServiceConfig;
+  status: 'online' | 'offline' | 'degraded' | 'maintenance';
+  private models: NeuralModel[] = [];
+
+  constructor(
+    id: string,
+    moduleId: string,
+    name: string,
+    description: string,
+    moduleType: ModuleType,
+    version: string,
+    config: NeuralServiceConfig,
+    status: 'online' | 'offline' | 'degraded' | 'maintenance' = 'offline'
+  ) {
+    this.id = id;
+    this.moduleId = moduleId;
+    this.name = name;
+    this.description = description;
+    this.moduleType = moduleType;
+    this.version = version;
+    this.config = config;
+    this.status = status;
   }
-  
-  /**
-   * Optimize model parameters for a specific goal
-   * @param goal What to optimize for: 'speed', 'accuracy', 'efficiency', or 'balance'
-   * @returns Optimized parameters
-   */
-  optimizeParameters(goal: 'speed' | 'accuracy' | 'efficiency' | 'balance'): ModelParameters {
-    const currentParams = neuralHub.getModelParameters();
-    
-    let optimizedParams: ModelParameters = { ...currentParams };
-    
-    switch (goal) {
-      case 'speed':
-        // Optimize for faster processing
-        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.3;
-        if (optimizedParams.cyclePeriod !== undefined) optimizedParams.cyclePeriod = 12;
-        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 2;
-        break;
-        
-      case 'accuracy':
-        // Optimize for accuracy
-        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.15;
-        if (optimizedParams.growthFactor !== undefined) optimizedParams.growthFactor = 1.8;
-        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 5;
-        if (optimizedParams.bifurcationPoint !== undefined) optimizedParams.bifurcationPoint = 0.7;
-        break;
-        
-      case 'efficiency':
-        // Optimize for resource efficiency
-        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.25;
-        if (optimizedParams.growthFactor !== undefined) optimizedParams.growthFactor = 1.2;
-        if (optimizedParams.cyclePeriod !== undefined) optimizedParams.cyclePeriod = 18;
-        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 2;
-        if (optimizedParams.attractorStrength !== undefined) optimizedParams.attractorStrength = 0.5;
-        break;
-        
-      case 'balance':
-        // Balanced approach
-        if (optimizedParams.decayConstant !== undefined) optimizedParams.decayConstant = 0.2;
-        if (optimizedParams.growthFactor !== undefined) optimizedParams.growthFactor = 1.5;
-        if (optimizedParams.cyclePeriod !== undefined) optimizedParams.cyclePeriod = 24;
-        if (optimizedParams.harmonicCount !== undefined) optimizedParams.harmonicCount = 3;
-        if (optimizedParams.bifurcationPoint !== undefined) optimizedParams.bifurcationPoint = 0.6;
-        if (optimizedParams.attractorStrength !== undefined) optimizedParams.attractorStrength = 0.6;
-        break;
+
+  async initialize(): Promise<boolean> {
+    try {
+      this.models = await this.loadModels();
+      this.status = 'online';
+      return true;
+    } catch (error) {
+      console.error(`Failed to initialize NeuralService ${this.name}:`, error);
+      this.status = 'offline';
+      return false;
     }
-    
-    // Calculate efficiency score for optimized parameters
-    const efficiency = calculateSystemEfficiency(optimizedParams);
-    console.log(`Optimized parameters for ${goal}. Efficiency score: ${efficiency.toFixed(2)}`);
-    
-    // Update parameters in neural hub
-    neuralHub.updateModelParameters(optimizedParams);
-    
-    return optimizedParams;
   }
-  
-  /**
-   * Run a batch of predictions using the best available model
-   * @param inputs Array of inputs to process
-   * @param capability Required model capability
-   * @returns Promise resolving to array of results
-   */
-  async runBatchPredictions(inputs: any[], capability: string): Promise<any[]> {
-    // Get suitable models with the required capability
-    const suitableModels = neuralHub.getModelsByCapability(capability);
-    
-    if (suitableModels.length === 0) {
-      throw new Error(`No active models found with capability: ${capability}`);
+
+  updateConfig(config: Partial<NeuralServiceConfig>): void {
+    this.config = { ...this.config, ...config };
+    this.configure();
+  }
+
+  configure(): boolean {
+    if (!this.config.enabled) {
+      this.status = 'offline';
+      return false;
     }
-    
-    // Sort by accuracy to get the best model
-    const bestModel = suitableModels.sort((a, b) => 
-      b.performance.accuracy - a.performance.accuracy
-    )[0];
-    
-    // Process each input with the best model
-    const results = await Promise.all(
-      inputs.map(input => neuralHub.runInference(bestModel.id, input))
-    );
-    
-    return results;
+
+    if (!this.config.apiEndpoint) {
+      console.warn(`${this.name}: API Endpoint is missing.`);
+      this.status = 'degraded';
+      return false;
+    }
+
+    this.status = 'online';
+    return true;
+  }
+
+  getStatus(): string {
+    return this.status;
+  }
+
+  getCapabilities(): string[] {
+    return this.models.flatMap(model => model.capabilities);
+  }
+
+  getMetrics(): Record<string, any> {
+    return {
+      status: this.status,
+      modelCount: this.models.length,
+      ...this.models.reduce((acc, model) => {
+        acc[model.name] = model.performance;
+        return acc;
+      }, {})
+    };
+  }
+
+  private async loadModels(): Promise<NeuralModel[]> {
+    // Mocked model loading - replace with actual logic
+    const mockedModels: Omit<NeuralModel, 'size' | 'precision'>[] = [
+      {
+        id: 'model-1',
+        name: 'TextGenerator',
+        type: 'text',
+        version: '1.0',
+        specialization: 'content-generation',
+        performance: { accuracy: 0.85, latency: 50, resourceUsage: 0.3 },
+        capabilities: ['text-generation', 'content-creation'],
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 'model-2',
+        name: 'ImageEnhancer',
+        type: 'image',
+        version: '1.2',
+        specialization: 'image-processing',
+        performance: { accuracy: 0.92, latency: 75, resourceUsage: 0.5 },
+        capabilities: ['image-enhancement', 'resolution-upscaling'],
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
+
+    return mockedModels.map(model => ({
+      ...model,
+      size: 1024,
+      precision: 32,
+    }));
+  }
+
+  public async processText(input: string, modelName: string, parameters: ModelParameters): Promise<string> {
+    const model = this.models.find(m => m.name === modelName);
+    if (!model) {
+      throw new Error(`Model ${modelName} not found.`);
+    }
+
+    if (!model.capabilities.some(cap => cap === 'text-generation')) {
+      throw new Error(`Model ${modelName} does not support text generation.`);
+    }
+
+    // Mocked text processing - replace with actual API call
+    return `Processed text: ${input} using ${modelName} with temperature ${parameters.temperature}`;
+  }
+
+  public async generateImage(prompt: string, modelName: string, parameters: ModelParameters): Promise<string> {
+    const model = this.models.find(m => m.name === modelName);
+    if (!model) {
+      throw new Error(`Model ${modelName} not found.`);
+    }
+
+    if (!model.capabilities.some(cap => cap === 'image-enhancement')) {
+      throw new Error(`Model ${modelName} does not support image enhancement.`);
+    }
+
+    // Mocked image generation - replace with actual API call
+    return `Generated image URL for prompt: ${prompt} using ${modelName} with learning rate ${parameters.learningRate}`;
+  }
+
+  public async updateModelParameters(modelName: string, parameters: Partial<ModelParameters>): Promise<void> {
+    const modelIndex = this.models.findIndex(m => m.name === modelName);
+    if (modelIndex === -1) {
+      throw new Error(`Model ${modelName} not found.`);
+    }
+
+    const currentModel = this.models[modelIndex];
+    const updatedModel: NeuralModel = {
+      ...currentModel,
+      // Apply parameter updates, ensuring all ModelParameters properties are present
+      ...parameters,
+      temperature: parameters.temperature !== undefined ? parameters.temperature : 0.7,
+      topP: parameters.topP !== undefined ? parameters.topP : 0.9,
+      frequencyPenalty: parameters.frequencyPenalty !== undefined ? parameters.frequencyPenalty : 0.5,
+      presencePenalty: parameters.presencePenalty !== undefined ? parameters.presencePenalty : 0.5,
+      maxTokens: parameters.maxTokens !== undefined ? parameters.maxTokens : 150,
+      stopSequences: parameters.stopSequences !== undefined ? parameters.stopSequences : [],
+      modelName: parameters.modelName !== undefined ? parameters.modelName : 'default',
+      decayConstant: parameters.decayConstant !== undefined ? parameters.decayConstant : 0.1,
+      growthFactor: parameters.growthFactor !== undefined ? parameters.growthFactor : 1.1,
+      cyclePeriod: parameters.cyclePeriod !== undefined ? parameters.cyclePeriod : 30,
+      harmonicCount: parameters.harmonicCount !== undefined ? parameters.harmonicCount : 5,
+    };
+
+    this.models[modelIndex] = updatedModel;
   }
 }
-
-// Singleton instance
-export const neuralService = new NeuralService();

@@ -1,110 +1,112 @@
-
+import { supabase } from "@/supabase";
 import { CreatorAnalytics } from "@/types/creator";
-import { supabase } from "@/integrations/supabase/client";
+
+const TABLE_NAME = "creator_analytics";
 
 /**
- * Fetches analytics data for a creator within a specified period
- * @param creatorId - The UUID of the creator
- * @param period - The time period ('week', 'month', or 'year')
- * @returns Promise with analytics data
+ * Fetches creator analytics for a given creator ID and date.
+ * @param creatorId - The ID of the creator.
+ * @param date - The date for which to fetch analytics.
+ * @returns A promise that resolves to the creator analytics or null if not found.
  */
 export const fetchCreatorAnalytics = async (
   creatorId: string,
-  period: 'week' | 'month' | 'year' = 'week'
-): Promise<CreatorAnalytics[]> => {
+  date: string
+): Promise<CreatorAnalytics | null> => {
   try {
-    // Calculate date range based on period
-    const endDate = new Date();
-    const startDate = new Date();
-    
-    switch (period) {
-      case 'week':
-        startDate.setDate(endDate.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setDate(endDate.getDate() - 30);
-        break;
-      case 'year':
-        startDate.setDate(endDate.getDate() - 365);
-        break;
-    }
-    
-    // Format dates for query
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
-    
-    console.log(`Fetching analytics for creator ${creatorId} from ${startDateStr} to ${endDateStr}`);
-    
-    // Fetch data from Supabase
     const { data, error } = await supabase
-      .from('creator_analytics')
-      .select('*')
-      .eq('creator_id', creatorId)
-      .gte('date', startDateStr)
-      .lte('date', endDateStr)
-      .order('date', { ascending: true });
-    
+      .from(TABLE_NAME)
+      .select("*")
+      .eq("creator_id", creatorId)
+      .eq("date", date)
+      .single();
+
     if (error) {
-      console.error("Supabase error:", error);
-      throw error;
+      console.error("Error fetching creator analytics:", error);
+      return null;
     }
-    
-    // If we have data, return it
-    if (data && data.length > 0) {
-      console.log("Found analytics data:", data.length, "records");
-      return data as CreatorAnalytics[];
-    }
-    
-    // If no data is found, generate mock data for development
-    console.warn("No analytics data found, generating mock data for development");
-    return generateMockAnalyticsData(creatorId, period);
+
+    return data ? {
+      id: data.id,
+      creatorId: data.creator_id,
+      date: data.date,
+      views: data.views,
+      likes: data.likes,
+      shares: data.shares,
+      earnings: data.earnings,
+      createdAt: data.created_at,
+    } : null;
   } catch (error) {
     console.error("Error fetching creator analytics:", error);
-    return generateMockAnalyticsData(creatorId, period);
+    return null;
   }
 };
 
-// Helper function to generate mock data for development and testing
-const generateMockAnalyticsData = (creatorId: string, period: 'week' | 'month' | 'year'): CreatorAnalytics[] => {
-  let days: number;
-  switch (period) {
-    case 'week':
-      days = 7;
-      break;
-    case 'month':
-      days = 30;
-      break;
-    case 'year':
-      days = 365;
-      break;
-    default:
-      days = 7;
+/**
+ * Updates creator analytics for a given creator ID and date.
+ * @param creatorId - The ID of the creator.
+ * @param date - The date for which to update analytics.
+ * @param analytics - The analytics data to update.
+ * @returns A promise that resolves to a boolean indicating success or failure.
+ */
+export const updateCreatorAnalytics = async (
+  creatorId: string,
+  date: string,
+  analytics: Partial<CreatorAnalytics>
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from(TABLE_NAME)
+      .update(analytics)
+      .eq("creator_id", creatorId)
+      .eq("date", date);
+
+    if (error) {
+      console.error("Error updating creator analytics:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error updating creator analytics:", error);
+    return false;
   }
-  
-  const now = new Date();
-  const data: CreatorAnalytics[] = [];
-  
-  // Generate data points for the requested period
-  for (let i = 0; i < days; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    
-    // Generate random metrics that increase over time for more realistic patterns
-    const factor = 1 + (i / days); // Higher for more recent days
-    
-    data.push({
-      id: `mock-${Date.now()}-${i}`,
-      creator_id: creatorId,
-      date: date.toISOString().split('T')[0],
-      views: Math.floor(Math.random() * 200 * factor) + 50,
-      likes: Math.floor(Math.random() * 50 * factor) + 10,
-      shares: Math.floor(Math.random() * 20 * factor) + 5,
-      earnings: parseFloat((Math.random() * 20 * factor + 5).toFixed(2))
-    });
-  }
-  
-  // Return the data in chronological order
-  return data.reverse();
 };
 
-export default fetchCreatorAnalytics;
+/**
+ * Creates creator analytics for a given creator ID and date.
+ * @param creatorId - The ID of the creator.
+ * @param date - The date for which to create analytics.
+ * @param analytics - The analytics data to create.
+ * @returns A promise that resolves to a boolean indicating success or failure.
+ */
+export const createCreatorAnalytics = async (
+  creatorId: string,
+  date: string,
+  analytics: Omit<CreatorAnalytics, "id" | "createdAt">
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from(TABLE_NAME)
+      .insert([
+        {
+          creator_id: creatorId,
+          date: date,
+          views: analytics.views,
+          likes: analytics.likes,
+          shares: analytics.shares,
+          earnings: analytics.earnings,
+        },
+      ]);
+
+    if (error) {
+      console.error("Error creating creator analytics:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error creating creator analytics:", error);
+    return false;
+  }
+};

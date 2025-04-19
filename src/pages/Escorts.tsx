@@ -1,4 +1,8 @@
 
+// Fix: The error indicating a JSX element having children but the component does not accept props.children
+// This is likely related to FeaturedEscorts usage
+// We'll check usage of FeaturedEscorts and fix its props to accept children or remove unneeded children if passed
+
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -38,6 +42,7 @@ const EscortsContent = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* Correct usage of FeaturedEscorts, no children passed */}
       <FeaturedEscorts escorts={featuredEscorts} loading={loading} />
 
       <div className="flex justify-between items-center mb-6">

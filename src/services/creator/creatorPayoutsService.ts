@@ -1,4 +1,3 @@
-
 import { CreatorPayout, PayoutRequest, PayoutResult } from "@/types/creator";
 
 export const getCreatorPayouts = async (creatorId: string): Promise<PayoutResult> => {
@@ -8,7 +7,7 @@ export const getCreatorPayouts = async (creatorId: string): Promise<PayoutResult
     const mockPayouts: CreatorPayout[] = [
       {
         id: '1',
-        creator_id: creatorId,
+        creatorId: creatorId,
         amount: 250.00,
         status: 'completed',
         created_at: '2023-06-01T10:00:00Z',
@@ -16,7 +15,7 @@ export const getCreatorPayouts = async (creatorId: string): Promise<PayoutResult
       },
       {
         id: '2',
-        creator_id: creatorId,
+        creatorId: creatorId,
         amount: 175.50,
         status: 'processing',
         created_at: '2023-06-15T14:30:00Z',
@@ -24,7 +23,7 @@ export const getCreatorPayouts = async (creatorId: string): Promise<PayoutResult
       },
       {
         id: '3',
-        creator_id: creatorId,
+        creatorId: creatorId,
         amount: 120.00,
         status: 'pending',
         created_at: '2023-06-28T09:15:00Z',
@@ -62,7 +61,7 @@ export const requestPayout = async (request: PayoutRequest): Promise<PayoutResul
     // Mock successful response
     const mockPayout: CreatorPayout = {
       id: `payout-${Date.now()}`,
-      creator_id: request.creator_id,
+      creatorId: request.creator_id,
       amount: request.amount,
       status: 'pending',
       created_at: new Date().toISOString(),
