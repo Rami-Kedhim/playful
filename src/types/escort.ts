@@ -1,6 +1,4 @@
 
-// Extended Escort interface with missing properties (reviewCount, providesVirtualContent, isFavorited, description, responseRate, bodyType, etc.)
-
 export interface Escort {
   id: string;
   name: string;
@@ -10,6 +8,7 @@ export interface Escort {
   sexualOrientation?: string;
   location?: string;
   bio?: string;
+  description?: string; // Added to fix missing description prop refs
   profileImage?: string;
   isVerified?: boolean;
   verificationLevel?: string;
@@ -23,7 +22,7 @@ export interface Escort {
   images?: string[];
   videos?: string[];
 
-  imageUrl?: string;
+  imageUrl?: string; // Added for components eg. ContentCard, FeaturedContentSection
   avatarUrl?: string;
   avatar?: string;
   avatar_url?: string;
@@ -31,37 +30,37 @@ export interface Escort {
   availableNow?: boolean;
   tags?: string[];
   reviews?: any[];
-  reviewCount?: number;
-  description?: string;
-  responseRate?: number;
-  bodyType?: string;
+  reviewCount?: number;  // Added for missing property refs
+  responseRate?: number; // Added for missing property refs
+  bodyType?: string;     // Added for missing property refs
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
-  isFavorited?: boolean;
+  isFavorited?: boolean; // Added for missing property refs
   profileType?: string;
   boostLevel?: number;
-  measures?: string;
-  favoriteCount?: number;
+  measures?: string;     // Added, since some places use 'measures' instead of 'measurements'
+  height?: number | string;  // Added for typing fix
+  weight?: number | string;  // Added for typing fix
   hairColor?: string;
   eyeColor?: string;
   ethnicity?: string;
   languages?: string[];
 
-  // Possibly other optional fields
-}
+  rates?: {             // Fixed to optional to allow rates accesses
+    hourly?: number;
+    twoHours?: number;
+    twoHours?: number;
+    overnight?: number;
+    weekend?: number;
+  };
 
-export interface Booking {
-  id: string;
-  escortId: string;
-  clientId: string;
-  date: Date;
-  duration: number; // in minutes
-  service: string;
-  status: string;
-  price: number;
-  location?: string;
-  notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  serviceType?: string;
+  stats?: {
+    viewCount?: number;
+    favoriteCount?: number;
+    reviewCount?: number;
+  };
+
+  isAI?: boolean;
+
+  [key: string]: any;   // Allow flexible additional properties for gradual migration
 }

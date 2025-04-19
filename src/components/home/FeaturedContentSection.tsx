@@ -1,5 +1,5 @@
 
-// Fix ProfileProps interface to include imageUrl and isPremium properties correctly
+// Fix ProfileProps interface to properly include imageUrl and isPremium properties
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +10,10 @@ import ContentCard from './ContentCard';
 export interface ProfileProps {
   id: string;
   name: string;
-  imageUrl?: string;      // made optional for flexibility
+  imageUrl?: string;      // made optional to fix TS errors
   location?: string;
   rating?: number;
-  isPremium?: boolean;    // made optional as boolean
+  isPremium?: boolean;    // made optional
   price?: number;
 }
 
@@ -72,4 +72,3 @@ const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, 
 };
 
 export default FeaturedContentSection;
-

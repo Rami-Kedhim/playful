@@ -1,5 +1,6 @@
 
-// Fixed: import correct Escort type, fixed rate property access, and getServiceType function
+// Fix getHourlyRate function to safely access rates property which might not exist, typing fixes
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,12 +25,12 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
   onBookNow,
 }) => {
   const getHourlyRate = () => {
-    if (escort.price) return escort.price;
-    if (escort.rates?.hourly) return escort.rates.hourly;
+    if (escort.price !== undefined && escort.price !== null) return escort.price;
+    if (escort.rates && escort.rates.hourly !== undefined) return escort.rates.hourly;
     return null;
   };
 
-  const getServiceType = () => {
+  const getServiceType = (): "both" | "in-person" | "virtual" => {
     if (escort.providesInPersonServices && escort.providesVirtualContent) {
       return 'both';
     } else if (escort.providesInPersonServices) {
@@ -37,7 +38,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
     } else if (escort.providesVirtualContent) {
       return 'virtual';
     }
-    // Explicitly return "in-person" as fallback to avoid "" error
+    // Return 'in-person' explicitly as fallback, never empty string
     return 'in-person';
   };
 
@@ -124,7 +125,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
             </div>
           )}
 
-          {getHourlyRate() && (
+          {getHourlyRate() !== null && (
             <div className="flex items-center text-sm">
               <DollarSign className="w-3.5 h-3.5 mr-1" />
               <span>${getHourlyRate()}/hr</span>
@@ -151,4 +152,3 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
 };
 
 export default EscortProfileCard;
-
