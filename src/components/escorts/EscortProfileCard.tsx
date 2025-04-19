@@ -1,3 +1,6 @@
+
+// Fix serviceType type issue by providing a safe fallback that excludes empty string
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,7 +38,8 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
     } else if (escort.providesVirtualContent) {
       return 'virtual';
     }
-    return escort.serviceType || '';
+    // Provide a fallback to avoid empty string causing TS error
+    return (escort.serviceType && escort.serviceType !== '') ? escort.serviceType : 'in-person';
   };
 
   const getAvatarImage = () => {
@@ -148,3 +152,4 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
 };
 
 export default EscortProfileCard;
+

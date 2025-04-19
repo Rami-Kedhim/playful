@@ -1,4 +1,6 @@
 
+// Fix missing required onSubmit prop for BookingDialog and fixes for providesVirtualServices vs providesVirtualContent
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Escort } from "@/types/escort";
@@ -30,6 +32,12 @@ const ProfileInfo = ({
   
   const handleBookNow = () => {
     setBookingDialogOpen(true);
+  };
+
+  // Provide a no-op onSubmit for BookingDialog to satisfy required prop
+  const bookingOnSubmit = (data: any) => {
+    // This can be implemented or logged if needed
+    console.log("BookingDialog onSubmit called", data);
   };
   
   return (
@@ -109,6 +117,7 @@ const ProfileInfo = ({
         escort={escort}
         isOpen={bookingDialogOpen}
         onClose={() => setBookingDialogOpen(false)}
+        onSubmit={bookingOnSubmit}
         onBookNow={onBookingOpen}
       />
     </div>
@@ -116,3 +125,4 @@ const ProfileInfo = ({
 };
 
 export default ProfileInfo;
+
