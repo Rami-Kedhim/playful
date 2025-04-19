@@ -31,16 +31,16 @@ export const LucieHermesIntegration = ({
   const [isVisible, setIsVisible] = useState(Boolean(forceVisible));
   const [customMessage, setCustomMessage] = useState<string | undefined>(undefined);
 
-  // insights is an array
-  const insights: Insight[] = useHermesInsights(user?.id).insights ?? [];
+  // insights is an object with "insights" property being array according to useHermesInsights signature without arguments now
+  const { insights = [] } = useHermesInsights();
 
   // Find specific insights by type
-  const boostOffer = insights.find((ins) => ins.type === 'boostOffer');
-  const vrEvent = insights.find((ins) => ins.type === 'vrEvent');
-  const recommendedProfile = insights.find((ins) => ins.type === 'recommendedProfileId');
+  const boostOffer = insights.find((ins: Insight) => ins.type === 'boostOffer');
+  const vrEvent = insights.find((ins: Insight) => ins.type === 'vrEvent');
+  const recommendedProfile = insights.find((ins: Insight) => ins.type === 'recommendedProfileId');
 
   // Determine if Lucie should be enabled
-  const isLucieEnabled = insights.some((ins) => ins.type === 'lucieEnabled');
+  const isLucieEnabled = insights.some((ins: Insight) => ins.type === 'lucieEnabled');
 
   useEffect(() => {
     if (isLucieEnabled) {

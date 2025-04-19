@@ -23,10 +23,10 @@ const DocumentReview = ({ document, isOpen, onClose, verification, onApprove, on
   };
   
   const documentType = document.documentType || document.document_type || document.type || 'Unknown';
-  const imageUrl = document.fileUrl || document.file_url || document.url || document.document_url || '';
+  const imageUrl = document.fileUrl || document.url || '';
   
   // Handle date timestamp with backward compatibility
-  const uploadDate = document.uploadedAt || document.uploaded_at || document.created_at || new Date().toISOString();
+  const uploadDate = document.uploadedAt || document.uploaded_at || '';
 
   return (
     <Card>
@@ -37,7 +37,7 @@ const DocumentReview = ({ document, isOpen, onClose, verification, onApprove, on
             {formatDocumentType(documentType)}
           </span>
           <Badge variant="outline" className="ml-2">
-            {new Date(uploadDate).toLocaleDateString()}
+            {uploadDate ? new Date(uploadDate).toLocaleDateString() : 'Unknown'}
           </Badge>
         </CardTitle>
       </CardHeader>
@@ -61,3 +61,4 @@ const DocumentReview = ({ document, isOpen, onClose, verification, onApprove, on
 };
 
 export default DocumentReview;
+

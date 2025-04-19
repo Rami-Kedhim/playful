@@ -24,19 +24,20 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
   };
 
   // Use displayName or name fallback for display
-  const displayName = persona.displayName || "Unnamed";
+  const displayName = persona.displayName || persona.name || "Unnamed";
 
   // Use avatarUrl or imageUrl or empty string fallback
-  const imageSrc = persona.avatarUrl || '';
+  const imageSrc = persona.avatarUrl || persona.imageUrl || '';
 
   // Use featured flag from persona or false fallback
   const isFeatured = persona.featured ?? false;
 
   // Use isVerified from persona or false fallback
+  // In UberPersona types isVerified is optional boolean
   const verified = persona.isVerified ?? false;
 
-  // Fix verification level to acceptable levels only (e.g., 'none', 'basic', premium')
-  // Assuming `getVerificationLevel` returns correct enum
+  // Fix verification level to acceptable levels only (e.g., 'none', 'basic', 'premium')
+  // Assuming getVerificationLevel is safe and returns correct enum
   const verificationLevelSafe = getVerificationLevel(persona.verificationLevel || 'none');
 
   // Use persona.price if defined or default 0
@@ -55,7 +56,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
         />
         <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
           {isFeatured && (
-            <Badge className="bg-primary">Featured</Badge>
+            <Badge className="bg-ubx">Featured</Badge>
           )}
           {verified && (
             <VerificationBadge level={verificationLevelSafe} />
@@ -89,3 +90,4 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
+
