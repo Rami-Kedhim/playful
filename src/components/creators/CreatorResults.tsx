@@ -1,6 +1,4 @@
 
-// Fix CreatorResults to match CreatorCard props interface by removing props not in CreatorCardProps interface
-
 import CreatorCard from "@/components/creators/CreatorCard";
 import { Button } from "@/components/ui/button";
 import { ContentCreator } from "@/types/creator";
@@ -13,12 +11,10 @@ interface CreatorResultsProps {
 const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
   return (
     <>
-      {/* Results count */}
       <div className="mb-4">
         <p className="text-gray-400">Showing {creators.length} creators</p>
       </div>
       
-      {/* Results grid */}
       {creators.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {creators.map((creator) => (
@@ -43,7 +39,6 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
         </div>
       )}
       
-      {/* Pagination */}
       <div className="flex justify-center mt-8">
         <Button variant="outline" className="mx-1" disabled>
           Previous
@@ -66,3 +61,4 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
 };
 
 export default CreatorResults;
+

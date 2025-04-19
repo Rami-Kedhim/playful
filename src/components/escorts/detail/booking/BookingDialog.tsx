@@ -16,12 +16,12 @@ export interface BookingDialogProps {
   escort: Escort;
   isOpen: boolean;
   onClose: () => void;
-  onBookNow?: () => void;
-  onSubmit?: (bookingDetails: any) => Promise<void>;
+  onSubmit: (bookingDetails: any) => Promise<void>;
   onCancel?: () => void;
+  onBookNow?: () => void;
 }
 
-const BookingDialog = ({ escort, isOpen, onClose, onBookNow, onSubmit, onCancel }: BookingDialogProps) => {
+const BookingDialog = ({ escort, isOpen, onClose, onSubmit, onCancel, onBookNow }: BookingDialogProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState<string | null>(null);
   const [duration, setDuration] = useState<string>("1hour");
@@ -35,7 +35,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow, onSubmit, onCancel 
     } else if (escort.providesVirtualContent) {
       return "virtual";
     }
-    return "";
+    return "in-person";
   };
   
   const serviceType = getServiceType();
@@ -74,39 +74,22 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow, onSubmit, onCancel 
       return;
     }
     
-    // Call either onBookNow or onSubmit based on what was provided
     if (onBookNow) {
       onBookNow();
     } else if (onSubmit) {
       const bookingDetails = {
-        date: date,
+        date,
         startTime: timeSlot,
-        endTime: calculateEndTime(timeSlot, duration),
-        duration: getDurationInHours(duration),
+        endTime: timeSlot, // Simplified, real app would calculate
+        duration: duration === "overnight" ? 8 : parseInt(duration) || 1,
         service: duration,
         price: getPriceForDuration(duration),
         notes: message,
       };
-      
       onSubmit(bookingDetails);
     }
     
     onClose();
-  };
-  
-  const calculateEndTime = (startTime: string, durationType: string): string => {
-    // Simple calculation for demo purposes
-    return startTime; // In a real app, calculate this properly
-  };
-  
-  const getDurationInHours = (durationType: string): number => {
-    switch (durationType) {
-      case "1hour": return 1;
-      case "2hours": return 2;
-      case "3hours": return 3;
-      case "overnight": return 8;
-      default: return 1;
-    }
   };
   
   const handleDialogClose = () => {
@@ -115,9 +98,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow, onSubmit, onCancel 
     setDuration("1hour");
     setMessage("");
     
-    if (onCancel) {
-      onCancel();
-    }
+    if (onCancel) onCancel();
     
     onClose();
   };
@@ -144,9 +125,7 @@ const BookingDialog = ({ escort, isOpen, onClose, onBookNow, onSubmit, onCancel 
                 selected={date}
                 onSelect={setDate}
                 className="border rounded-md pointer-events-auto"
-                disabled={(date) => {
-                  return date < new Date();
-                }}
+                disabled={(date) => date < new Date()}
               />
             </div>
             

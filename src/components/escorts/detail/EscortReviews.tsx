@@ -1,6 +1,4 @@
 
-// Fix EscortReviews reviewCount safely similar to EscortProfileHeader, with fallback for missing properties
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Star, MessageCircle } from 'lucide-react';
@@ -60,3 +58,4 @@ const EscortReviews: React.FC<EscortReviewsProps> = ({ escort }) => {
 };
 
 export default EscortReviews;
+

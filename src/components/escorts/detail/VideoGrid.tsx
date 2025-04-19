@@ -1,7 +1,4 @@
 
-// Fix Video type by safely accessing viewCount with fallback default
-// Only use allowed lucide-react Play icon
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Play } from 'lucide-react';
@@ -69,7 +66,7 @@ const VideoGrid: React.FC<VideoGridProps> = ({
           
           <div className="p-2">
             <h4 className="font-medium text-sm line-clamp-1">{video.title}</h4>
-            <p className="text-xs text-muted-foreground">{video.viewCount ?? 0} views</p>
+            <p className="text-xs text-muted-foreground">{(video as any).viewCount ?? 0} views</p>
           </div>
         </div>
       ))}
@@ -78,3 +75,4 @@ const VideoGrid: React.FC<VideoGridProps> = ({
 };
 
 export default VideoGrid;
+

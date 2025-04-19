@@ -1,8 +1,3 @@
-
-// Fix import of VerificationLevel to use string literal type for verificationLevel
-// Fix use of isFavorited property missing from Escort type by optional chaining with fallback
-// Fix svg fill logic for favorited heart properly
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { User, MapPin, Verified } from 'lucide-react';
@@ -14,11 +9,9 @@ export interface ProfileHeaderProps {
   onFavoriteToggle?: () => void;
 }
 
-// Define possible verification levels as union for typing
 type VerificationLevelType = 'none' | 'basic' | 'enhanced' | 'premium';
 
 const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
-  // Function to get initials from name
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -27,9 +20,7 @@ const ProfileHeader = ({ escort, onFavoriteToggle }: ProfileHeaderProps) => {
       .toUpperCase();
   };
 
-  // Calculate verification badge based on level
   const getVerificationBadge = () => {
-    // escort.verificationLevel may be string or undefined
     const level = (escort.verificationLevel || 'none') as VerificationLevelType;
     
     if (level === 'none') return null;
