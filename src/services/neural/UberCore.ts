@@ -1,7 +1,8 @@
 
 import { UberPersona } from '@/types/UberPersona';
 import { UberCoreSettings } from '@/types/uber-ecosystem';
-import { neuralServiceRegistry } from './registry/NeuralServiceRegistry';
+// Changed import to default import to fix error
+import neuralServiceRegistry from './registry/NeuralServiceRegistry';
 
 export class UberCore {
   private initialized: boolean = false;
@@ -178,3 +179,4 @@ export class UberCore {
 
 // Export a singleton instance
 export const uberCoreInstance = new UberCore();
+
