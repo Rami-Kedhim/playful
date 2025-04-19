@@ -2,7 +2,14 @@
 import { useState, useEffect } from 'react';
 
 export function useAnalytics() {
-  const [analytics, setAnalytics] = useState<any[]>([]);
+  // Change from any[] to object type
+  const [analytics, setAnalytics] = useState<{
+    views: { total: number; change: string; trend: string };
+    likes: { total: number; change: string; trend: string };
+    revenue: { total: number; change: string; trend: string };
+    subscribers: { total: number; change: string; trend: string };
+    chartData: any[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

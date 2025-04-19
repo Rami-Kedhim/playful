@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -7,7 +8,7 @@ import AnalyticsStats from "./analytics/AnalyticsStats";
 import { Eye, ThumbsUp, DollarSign, Users } from "lucide-react";
 
 const CreatorAnalytics = () => {
-  const { analytics, loading, totalValue, error } = useAnalytics();
+  const { analytics, loading, error } = useAnalytics();
   const [timeRange, setTimeRange] = useState("7days");
 
   if (loading) {
@@ -52,34 +53,38 @@ const CreatorAnalytics = () => {
     );
   }
 
+  if (!analytics) {
+    return null; // or some fallback UI if needed
+  }
+
   const statsData = [
     {
       title: "Total Views",
-      value: analytics?.views?.total || 0,
-      change: analytics?.views?.change || "0%",
+      value: analytics.views.total,
+      change: analytics.views.change,
       icon: <Eye className="h-4 w-4 mr-2" />,
-      trend: analytics?.views?.trend || "neutral"
+      trend: analytics.views.trend
     },
     {
       title: "Likes",
-      value: analytics?.likes?.total || 0,
-      change: analytics?.likes?.change || "0%",
+      value: analytics.likes.total,
+      change: analytics.likes.change,
       icon: <ThumbsUp className="h-4 w-4 mr-2" />,
-      trend: analytics?.likes?.trend || "neutral"
+      trend: analytics.likes.trend
     },
     {
       title: "Revenue",
-      value: `$${analytics?.revenue?.total || 0}`,
-      change: analytics?.revenue?.change || "0%",
+      value: `$${analytics.revenue.total}`,
+      change: analytics.revenue.change,
       icon: <DollarSign className="h-4 w-4 mr-2" />,
-      trend: analytics?.revenue?.trend || "neutral"
+      trend: analytics.revenue.trend
     },
     {
       title: "Subscribers",
-      value: analytics?.subscribers?.total || 0,
-      change: analytics?.subscribers?.change || "0%",
+      value: analytics.subscribers.total,
+      change: analytics.subscribers.change,
       icon: <Users className="h-4 w-4 mr-2" />,
-      trend: analytics?.subscribers?.trend || "neutral"
+      trend: analytics.subscribers.trend
     }
   ];
 
@@ -104,7 +109,7 @@ const CreatorAnalytics = () => {
         </CardHeader>
         <CardContent>
           <AnalyticsChart 
-            data={analytics?.chartData || []} 
+            data={analytics.chartData} 
             timeRange={timeRange}
           />
         </CardContent>

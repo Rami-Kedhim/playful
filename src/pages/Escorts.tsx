@@ -1,6 +1,4 @@
 
-// Fix import of useEscorts hook and typing filters properly
-
 import React, { useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -16,7 +14,7 @@ const EscortsContent = () => {
     escorts, 
     featuredEscorts, 
     loading, 
-    filters = {}, // Default to empty forcing as unknown first
+    filters = {}, 
     updateFilters,
     applyCurrentFilters,
     clearAllFilters
@@ -25,20 +23,20 @@ const EscortsContent = () => {
   // Use useState for showFilters to fix undefined errors
   const [showFilters, setShowFilters] = useState(false);
 
-  // Type guard for filters object properties safely
-  const serviceTypes = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
-  const serviceType = serviceTypes.length === 1 ? (serviceTypes[0] as "" | "in-person" | "virtual" | "both") : "";
+  // Fix filter property type errors by setting defaults with type guards
+  const serviceTypes: string[] = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
+  const serviceType: "" | "in-person" | "virtual" | "both" = serviceTypes.length === 1 && (serviceTypes[0] === "in-person" || serviceTypes[0] === "virtual" || serviceTypes[0] === "both") ? serviceTypes[0] : "";
 
   const selectedServices = serviceTypes;
   
-  const location = typeof filters.location === 'string' ? filters.location : "";
-  const priceRange = Array.isArray(filters.priceRange) ? (filters.priceRange as [number, number]) : [0, 1000];
-  const selectedGenders = Array.isArray(filters.gender) ? filters.gender : [];
-  const selectedOrientations = Array.isArray(filters.orientation) ? filters.orientation : [];
-  const ageRange = Array.isArray(filters.ageRange) ? (filters.ageRange as [number, number]) : [18, 99];
-  const ratingMin = typeof filters.rating === 'number' ? filters.rating : 0;
-  const availableNow = typeof filters.availableNow === 'boolean' ? filters.availableNow : false;
-  const verifiedOnly = typeof filters.verified === 'boolean' ? filters.verified : false;
+  const location: string = typeof filters.location === 'string' ? filters.location : "";
+  const priceRange: [number, number] = Array.isArray(filters.priceRange) && filters.priceRange.length === 2 ? [filters.priceRange[0], filters.priceRange[1]] : [0, 1000];
+  const selectedGenders: string[] = Array.isArray(filters.gender) ? filters.gender : [];
+  const selectedOrientations: string[] = Array.isArray(filters.orientation) ? filters.orientation : [];
+  const ageRange: [number, number] = Array.isArray(filters.ageRange) && filters.ageRange.length === 2 ? [filters.ageRange[0], filters.ageRange[1]] : [18, 99];
+  const ratingMin: number = typeof filters.rating === 'number' ? filters.rating : 0;
+  const availableNow: boolean = typeof filters.availableNow === 'boolean' ? filters.availableNow : false;
+  const verifiedOnly: boolean = typeof filters.verified === 'boolean' ? filters.verified : false;
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -61,10 +59,7 @@ const EscortsContent = () => {
             )}
           </Button>
           
-          <Button 
-            variant="outline" 
-            size="sm"
-          >
+          <Button variant="outline" size="sm">
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Sort
           </Button>
@@ -72,39 +67,16 @@ const EscortsContent = () => {
       </div>
 
       <Tabs defaultValue="all" className="mb-6">
-        <TabsList className="mb-4">
+        <TabsList>
           <TabsTrigger value="all">All Escorts</TabsTrigger>
           <TabsTrigger value="verified">Verified</TabsTrigger>
           <TabsTrigger value="available">Available Now</TabsTrigger>
           <TabsTrigger value="featured">Featured</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="all">
-          <EscortGrid escorts={escorts} loading={loading} />
-        </TabsContent>
-        
-        <TabsContent value="verified">
-          <EscortGrid 
-            escorts={escorts.filter(escort => escort.verified)} 
-            loading={loading} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="available">
-          <EscortGrid 
-            escorts={escorts.filter(escort => escort.availableNow)} 
-            loading={loading} 
-          />
-        </TabsContent>
-        
-        <TabsContent value="featured">
-          <EscortGrid 
-            escorts={escorts.filter(escort => escort.featured)} 
-            loading={loading} 
-          />
-        </TabsContent>
       </Tabs>
-      
+
+      <EscortGrid escorts={escorts} loading={loading} />
+
       {showFilters && (
         <EscortFilters 
           location={location}

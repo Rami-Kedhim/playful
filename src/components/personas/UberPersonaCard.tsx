@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +55,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
             <Badge className="bg-ubx">Featured</Badge>
           )}
           {verified && verificationLevelSafe && (
-            <VerificationBadge level={verificationLevelSafe} />
+            <VerificationBadge level={verificationLevelSafe as any} />
           )}
         </div>
       </div>

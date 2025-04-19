@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useCreatorAuth } from "@/hooks/useCreatorAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -160,21 +159,21 @@ const CreatorDashboard = () => {
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
-          <Tabs.Content value="analytics" className="space-y-4">
-            <CreatorAnalytics creatorId={creatorId || ''} />
-          </Tabs.Content>
+          <TabsContent value="analytics" className="space-y-4">
+            <CreatorAnalytics />
+          </TabsContent>
 
-          <Tabs.Content value="content" className="space-y-4">
+          <TabsContent value="content" className="space-y-4">
             <CreatorContent creatorId={creatorId || ''} />
-          </Tabs.Content>
+          </TabsContent>
 
-          <Tabs.Content value="payouts" className="space-y-4">
+          <TabsContent value="payouts" className="space-y-4">
             <CreatorPayouts creatorId={creatorId || ''} />
-          </Tabs.Content>
+          </TabsContent>
 
-          <Tabs.Content value="settings" className="space-y-4">
+          <TabsContent value="settings" className="space-y-4">
             <CreatorSettings profile={creatorProfile} />
-          </Tabs.Content>
+          </TabsContent>
         </Tabs>
       </div>
     </MainLayout>

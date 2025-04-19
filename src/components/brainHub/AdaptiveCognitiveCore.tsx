@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { NeuralService } from '@/services/neural/NeuralService';
 
 const AdaptiveCognitiveCore = () => {
-  // Create instance of NeuralService
-  const [neuralServiceInstance, setNeuralServiceInstance] = useState<NeuralService | null>(null);
+  const [neuralServiceInstance, setNeuralServiceInstance] = useState<InstanceType<typeof NeuralService> | null>(null);
   const [state, setState] = useState(null);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
