@@ -1,9 +1,20 @@
 
+// Fix using BookingStatus type as value by importing enum properly
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Escort, BookingStatus } from '@/types/escort';
+import { Escort } from '@/types/escort';
+
+// Define BookingStatus as enum for usage as value
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  REJECTED = 'rejected',
+  DECLINED = 'declined',
+  CANCELLED = 'cancelled',
+  COMPLETED = 'completed',
+}
 
 interface BookingConfirmationProps {
   escort: Escort;
@@ -14,7 +25,7 @@ interface BookingConfirmationProps {
 const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
   escort,
   status,
-  onClose
+  onClose,
 }) => {
   const renderStatusContent = () => {
     switch (status) {
@@ -26,7 +37,8 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
               <h3 className="font-medium text-lg">Request Pending</h3>
             </div>
             <p className="text-muted-foreground">
-              Your booking request has been sent to {escort.name}. You'll receive a notification when they respond to your request.
+              Your booking request has been sent to {escort.name}. You'll receive a
+              notification when they respond to your request.
             </p>
             <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded-md">
               <h4 className="font-medium">What happens next?</h4>
@@ -38,7 +50,7 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
             </div>
           </>
         );
-      
+
       case BookingStatus.CONFIRMED:
         return (
           <>
@@ -47,7 +59,8 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
               <h3 className="font-medium text-lg">Booking Confirmed!</h3>
             </div>
             <p className="text-muted-foreground">
-              Great news! {escort.name} has confirmed your booking request. Your appointment is now confirmed.
+              Great news! {escort.name} has confirmed your booking request. Your
+              appointment is now confirmed.
             </p>
             <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 rounded-md">
               <h4 className="font-medium">What happens next?</h4>
@@ -59,7 +72,7 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
             </div>
           </>
         );
-        
+
       case BookingStatus.REJECTED:
       case BookingStatus.DECLINED:
         return (
@@ -69,7 +82,8 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
               <h3 className="font-medium text-lg">Request Declined</h3>
             </div>
             <p className="text-muted-foreground">
-              Unfortunately, {escort.name} was unable to accept your booking request at this time.
+              Unfortunately, {escort.name} was unable to accept your booking request
+              at this time.
             </p>
             <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md">
               <h4 className="font-medium">What you can do now:</h4>
@@ -81,11 +95,12 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
             </div>
           </>
         );
-        
+
       default:
         return (
           <p className="text-muted-foreground">
-            There was an issue with your booking status. Please check your bookings dashboard for more information.
+            There was an issue with your booking status. Please check your bookings
+            dashboard for more information.
           </p>
         );
     }
@@ -98,7 +113,7 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
       </CardHeader>
       <CardContent>
         {renderStatusContent()}
-        
+
         <div className="mt-6">
           <Button onClick={onClose} className="w-full">
             Close
@@ -110,3 +125,4 @@ const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
 };
 
 export default BookingConfirmation;
+

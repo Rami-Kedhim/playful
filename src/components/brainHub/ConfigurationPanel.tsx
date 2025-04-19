@@ -1,7 +1,6 @@
+
 import React, { useState } from 'react';
-import initializeDefaultParameters from '@/services/neural/models/modelParameters';
-import calculateSystemEfficiency from '@/services/neural/models/modelParameters';
-import validateModelParameters from '@/services/neural/models/modelParameters';
+import { initializeDefaultParameters, calculateSystemEfficiency, validateModelParameters } from '@/services/neural/models/modelParameters';
 
 const ConfigurationPanel = () => {
   const [config, setConfig] = useState({
@@ -50,3 +49,4 @@ const ConfigurationPanel = () => {
 };
 
 export default ConfigurationPanel;
+

@@ -1,4 +1,3 @@
-
 /**
  * LucieHermesIntegration - Connects Lucie AI assistant with HERMES
  * This enhances the Lucie assistant with intelligence from HERMES
@@ -15,76 +14,90 @@ export type LucieHermesIntegrationProps = {
   onLucieTriggered?: (reason: string) => void;
 };
 
-export const LucieHermesIntegration = ({ 
-  forceVisible, 
-  onLucieTriggered 
+interface Insight {
+  type: string;
+  value?: string;
+  expires?: string;
+  category?: string;
+  // other possible fields
+  [key: string]: any;
+}
+
+export const LucieHermesIntegration = ({
+  forceVisible,
+  onLucieTriggered,
 }: LucieHermesIntegrationProps) => {
   const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(Boolean(forceVisible));
   const [customMessage, setCustomMessage] = useState<string | undefined>(undefined);
-  
-  // Connect to HERMES insights if user is logged in
-  const { insights } = useHermesInsights(user?.id);
-  
-  // Automatically show Lucie when HERMES suggests it
+
+  // insights is an array
+  const insights: Insight[] = useHermesInsights(user?.id).insights ?? [];
+
+  // Find specific insights by type
+  const boostOffer = insights.find((ins) => ins.type === 'boostOffer');
+  const vrEvent = insights.find((ins) => ins.type === 'vrEvent');
+  const recommendedProfile = insights.find((ins) => ins.type === 'recommendedProfileId');
+
+  // Determine if Lucie should be enabled
+  const isLucieEnabled = insights.some((ins) => ins.type === 'lucieEnabled');
+
   useEffect(() => {
-    if (insights.isLucieEnabled) {
+    if (isLucieEnabled) {
       setIsVisible(true);
-      
-      // Generate a personalized message based on HERMES insights
+
       let personalizedMessage = '';
-      
-      if (insights.boostOffer) {
-        personalizedMessage = `I noticed you might be interested in a boost! I can offer you ${insights.boostOffer.value} off, but it expires in ${insights.boostOffer.expires}.`;
-      } else if (insights.vrEvent) {
-        personalizedMessage = `Have you heard about our ${insights.vrEvent} event? It's happening soon, and I think you'd really enjoy it!`;
-      } else if (insights.recommendedProfileId) {
-        personalizedMessage = `Based on your interests, I think you might like to check out profile ${insights.recommendedProfileId}. They're very popular in your area!`;
+
+      if (boostOffer) {
+        personalizedMessage = `I noticed you might be interested in a boost! I can offer you ${
+          boostOffer.value || ''
+        } off, but it expires in ${boostOffer.expires || ''}.`;
+      } else if (vrEvent) {
+        personalizedMessage = `Have you heard about our ${vrEvent.value || vrEvent.type} event? It's happening soon, and I think you'd really enjoy it!`;
+      } else if (recommendedProfile) {
+        personalizedMessage = `Based on your interests, I think you might like to check out profile ${
+          recommendedProfile.value || recommendedProfile.type
+        }. They're very popular in your area!`;
       } else {
-        const displayName = user?.user_metadata?.username || user?.email?.split('@')[0] || '';
+        const displayName =
+          user?.user_metadata?.username || user?.email?.split('@')[0] || '';
         personalizedMessage = `Hey there${displayName ? ` ${displayName}` : ''}! I noticed you've been exploring our platform. Can I help you find something specific today?`;
       }
-      
+
       setCustomMessage(personalizedMessage);
-      
+
       if (onLucieTriggered) {
         let reason = 'HERMES insight';
-        
-        if (insights.boostOffer) {
-          reason = `Boost offer: ${insights.boostOffer.value}`;
-        } else if (insights.vrEvent) {
-          reason = `VR event: ${insights.vrEvent}`;
-        }
-        
+
+        if (boostOffer) reason = `Boost offer: ${boostOffer.value || ''}`;
+        else if (vrEvent) reason = `VR event: ${vrEvent.value || vrEvent.type}`;
+
         onLucieTriggered(reason);
       }
     }
-  }, [insights, onLucieTriggered, user]);
+  }, [insights, isLucieEnabled, onLucieTriggered, user]);
 
-  // Hide Lucie after a short delay if automatically triggered
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    
-    if (isVisible && insights.isLucieEnabled && !forceVisible) {
-      // Auto-hide after 2 minutes unless user interacts
+
+    if (isVisible && isLucieEnabled && !forceVisible) {
       timeout = setTimeout(() => {
         setIsVisible(false);
-      }, 120000);
+      }, 120000); // Auto-hide after 2 minutes
     }
-    
+
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [isVisible, insights.isLucieEnabled, forceVisible]);
+  }, [isVisible, isLucieEnabled, forceVisible]);
 
-  // If not visible, don't render anything
   if (!isVisible && !forceVisible) {
     return null;
   }
-  
+
   return (
-    <LucieAssistant 
-      initiallyOpen={insights.isLucieEnabled || forceVisible}
+    <LucieAssistant
+      initiallyOpen={isLucieEnabled || Boolean(forceVisible)}
       customInitialMessage={customMessage}
       onClose={() => setIsVisible(false)}
     />

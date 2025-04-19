@@ -12,13 +12,20 @@ interface HermesBoostOfferProps {
   onAcceptOffer?: () => void;
 }
 
+interface BoostOfferInsight {
+  type: string;
+  category?: string;
+  value?: string;
+  expires?: string | Date;
+}
+
 const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOffer }) => {
   const { insights } = useHermesInsights();
 
   const { toast } = useToast();
 
-  // insights is an array, find boostOffer insight
-  const boostOfferInsight = insights.find(insight => insight.type === 'boostOffer');
+  // Find boostOffer type insight in array
+  const boostOfferInsight = (insights as BoostOfferInsight[]).find(insight => insight.type === 'boostOffer');
 
   const handleAcceptOffer = () => {
     toast({
@@ -57,7 +64,7 @@ const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOff
       <CardContent className="space-y-4">
         <div className="text-center">
           <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {boostOfferInsight.value}
+            {boostOfferInsight.value || ""}
           </h3>
         </div>
 

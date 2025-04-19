@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
@@ -17,33 +16,28 @@ interface EscortResultsProps {
   isLoading: boolean;
 }
 
-const EscortResults = ({ 
-  escorts, 
-  clearFilters, 
-  currentPage, 
-  setCurrentPage, 
+const EscortResults = ({
+  escorts,
+  clearFilters,
+  currentPage,
+  setCurrentPage,
   totalPages,
-  isLoading
+  isLoading,
 }: EscortResultsProps) => {
-  // Local loading state for transitions between pages
   const [localLoading, setLocalLoading] = useState(false);
-  
-  // Set local loading briefly when page changes for better UX
+
   useEffect(() => {
     if (currentPage) {
       setLocalLoading(true);
       const timer = setTimeout(() => {
         setLocalLoading(false);
-      }, 500); // Slightly longer delay for more noticeable transition
-      
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [currentPage]);
-  
-  // Combined loading state (either from props or local state)
+
   const loading = isLoading || localLoading;
-  
-  // This handles loading state for when filters are applied
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -62,8 +56,7 @@ const EscortResults = ({
       </div>
     );
   }
-  
-  // Shows empty state when no escorts match the filters
+
   if (!escorts || escorts.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg bg-muted/10 p-8">
@@ -77,47 +70,43 @@ const EscortResults = ({
       </div>
     );
   }
-  
-  // Count escorts by service type
-  const getServiceType = (escort: Escort): { inPerson: boolean, virtual: boolean } => {
-    const inPerson = escort.providesInPersonServices || escort.services?.includes('in-person') || false;
-    const virtual = escort.providesVirtualContent || escort.services?.includes('virtual') || false;
+
+  const getServiceType = (escort: Escort): { inPerson: boolean; virtual: boolean } => {
+    const inPerson =
+      escort.providesInPersonServices || escort.services?.includes('in-person') || false;
+    const virtual =
+      escort.providesVirtualContent || escort.services?.includes('virtual') || false;
     return { inPerson, virtual };
   };
-  
-  const inPersonCount = escorts.filter(e => getServiceType(e).inPerson).length;
-  const virtualCount = escorts.filter(e => getServiceType(e).virtual).length;
-  const bothCount = escorts.filter(e => {
-    const { inPerson, virtual } = getServiceType(e);
-    return inPerson && virtual;
-  }).length;
-  
+
+  const inPersonCount = escorts.filter((e) => getServiceType(e).inPerson).length;
+  const virtualCount = escorts.filter((e) => getServiceType(e).virtual).length;
+
   return (
     <>
-      {/* Results header with count and sorting options */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <p className="text-sm text-muted-foreground">
           Showing {escorts.length} {escorts.length === 1 ? 'escort' : 'escorts'}
         </p>
-        
+
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <BadgeCheck className="h-4 w-4 text-green-500" />
             <span>{escorts.filter(e => e.verified).length} Verified</span>
           </div>
-          
+
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4 text-blue-500" />
             <span>{escorts.filter(e => e.availableNow).length} Available now</span>
           </div>
-          
+
           {inPersonCount > 0 && (
             <div className="hidden sm:flex">
               <ServiceTypeBadgeLabel type="in-person" />
               <span className="ml-1 text-muted-foreground">{inPersonCount}</span>
             </div>
           )}
-          
+
           {virtualCount > 0 && (
             <div className="hidden sm:flex">
               <ServiceTypeBadgeLabel type="virtual" />
@@ -126,20 +115,18 @@ const EscortResults = ({
           )}
         </div>
       </div>
-      
-      {/* Results grid */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {escorts.map((escort) => (
           <EscortCard
             key={escort.id}
             escort={escort}
             className=""
-            featured={escort.featured}
+            featured={escort.featured ?? false}
           />
         ))}
       </div>
-      
-      {/* Enhanced pagination with improved styling */}
+
       {totalPages > 1 && (
         <div className="mt-10 flex justify-center">
           <Pagination 
@@ -150,8 +137,7 @@ const EscortResults = ({
           />
         </div>
       )}
-      
-      {/* Footer with additional information */}
+
       <div className="mt-8 pt-6 border-t text-sm text-muted-foreground flex justify-between items-center">
         <p>All escorts are independent service providers</p>
         <div className="flex items-center gap-1">

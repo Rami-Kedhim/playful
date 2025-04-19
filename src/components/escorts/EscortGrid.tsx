@@ -1,6 +1,5 @@
-
 // Import from a consistent path that doesn't have casing issues
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
 import { Grid } from '@/components/ui/grid';
 import EscortCard from './EscortCard';
 

@@ -1,6 +1,3 @@
-
-// Fix props passed to CreatorCard component by removing unknown props and matching expected prop names
-
 import CreatorCard from "@/components/creators/CreatorCard";
 import { Button } from "@/components/ui/button";
 import { ContentCreator } from "@/types/creator";
@@ -15,27 +12,24 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
     <>
       {/* Results count */}
       <div className="mb-4">
-        <p className="text-gray-400">
-          Showing {creators.length} creators
-        </p>
+        <p className="text-gray-400">Showing {creators.length} creators</p>
       </div>
       
       {/* Results grid */}
       {creators.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {creators.map(creator => (
-            <CreatorCard 
-              key={creator.id} 
+          {creators.map((creator) => (
+            <CreatorCard
+              key={creator.id}
               id={creator.id}
-              name={creator.name || 'Unknown Creator'}
-              // Used "image" prop instead of imageUrl based on CreatorCard props
-              image={creator.imageUrl || creator.avatarUrl || creator.profileImage || ''}
-              isLive={false} 
+              name={creator.name || "Unknown Creator"}
+              image={creator.imageUrl || creator.avatarUrl || creator.profileImage || ""}
               isPremium={Boolean(creator.isPremium) || false}
               subscriberCount={creator.subscriberCount || 0}
-              contentCount={typeof creator.contentCount === 'object' 
-                ? creator.contentCount || { photos: 0, videos: 0 } 
-                : { photos: creator.contentCount || 0, videos: 0 }
+              contentCount={
+                typeof creator.contentCount === "object"
+                  ? creator.contentCount || { photos: 0, videos: 0 }
+                  : { photos: creator.contentCount || 0, videos: 0 }
               }
               price={creator.price || 0}
               isAI={Boolean(creator.isAI) || false}
@@ -54,15 +48,24 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
       
       {/* Pagination */}
       <div className="flex justify-center mt-8">
-        <Button variant="outline" className="mx-1" disabled>Previous</Button>
-        <Button variant="outline" className="mx-1 bg-primary text-primary-foreground hover:bg-primary/90">1</Button>
-        <Button variant="outline" className="mx-1">2</Button>
-        <Button variant="outline" className="mx-1">3</Button>
-        <Button variant="outline" className="mx-1">Next</Button>
+        <Button variant="outline" className="mx-1" disabled>
+          Previous
+        </Button>
+        <Button variant="outline" className="mx-1 bg-primary text-primary-foreground hover:bg-primary/90">
+          1
+        </Button>
+        <Button variant="outline" className="mx-1">
+          2
+        </Button>
+        <Button variant="outline" className="mx-1">
+          3
+        </Button>
+        <Button variant="outline" className="mx-1">
+          Next
+        </Button>
       </div>
     </>
   );
 };
 
 export default CreatorResults;
-

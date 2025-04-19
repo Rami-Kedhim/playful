@@ -1,6 +1,3 @@
-
-// Fix type errors by adjusting Escort type usage and making providesVirtualContent optional prop
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +19,7 @@ interface EscortProfileCardProps {
 const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
   escort,
   onClick,
-  onBookNow
+  onBookNow,
 }) => {
   const getHourlyRate = () => {
     if (escort.price) return escort.price;
@@ -32,18 +29,24 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
 
   const getServiceType = () => {
     if (escort.providesInPersonServices && escort.providesVirtualContent) {
-      return "both";
+      return 'both';
     } else if (escort.providesInPersonServices) {
-      return "in-person";
+      return 'in-person';
     } else if (escort.providesVirtualContent) {
-      return "virtual";
+      return 'virtual';
     }
-    return escort.serviceType || "";
+    return escort.serviceType || '';
   };
 
   const getAvatarImage = () => {
-    return escort.profileImage || escort.imageUrl || escort.avatarUrl ||
-           escort.avatar || escort.avatar_url || '/placeholder-avatar.png';
+    return (
+      escort.profileImage ||
+      escort.imageUrl ||
+      escort.avatarUrl ||
+      escort.avatar ||
+      escort.avatar_url ||
+      '/placeholder-avatar.png'
+    );
   };
 
   const getDisplayName = () => {
@@ -72,7 +75,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
         </Avatar>
 
         <div className="absolute top-2 left-2 flex flex-col gap-1">
-          <ServiceTypeBadge type={getServiceType()} />
+          <ServiceTypeBadge serviceType={getServiceType()} />
 
           {isAvailable() && (
             <Badge variant="default" className="bg-green-500 text-white">
@@ -145,4 +148,3 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
 };
 
 export default EscortProfileCard;
-
