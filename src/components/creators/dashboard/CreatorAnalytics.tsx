@@ -20,7 +20,7 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
     "90days": "year"
   };
   
-  const { analytics, loading, totalValue: summary } = useCreatorAnalytics(
+  const { analytics, loading, totalValue } = useCreatorAnalytics(
     periodMap[timeRange] || "week"
   );
   
@@ -48,43 +48,43 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
       setStatsData([
         {
           title: "Total Views",
-          value: summary,
-          change: getPercentChange(summary, previousPeriodData.views),
+          value: totalValue,
+          change: getPercentChange(totalValue, previousPeriodData.views),
           icon: <Eye className="h-4 w-4" />,
-          trend: summary >= previousPeriodData.views ? "up" : "down"
+          trend: totalValue >= previousPeriodData.views ? "up" : "down"
         },
         {
           title: "Total Likes",
-          value: summary,
-          change: getPercentChange(summary, previousPeriodData.likes),
+          value: totalValue,
+          change: getPercentChange(totalValue, previousPeriodData.likes),
           icon: <ThumbsUp className="h-4 w-4" />,
-          trend: summary >= previousPeriodData.likes ? "up" : "down"
+          trend: totalValue >= previousPeriodData.likes ? "up" : "down"
         },
         {
           title: "Total Shares",
-          value: summary,
-          change: getPercentChange(summary, previousPeriodData.shares),
+          value: totalValue,
+          change: getPercentChange(totalValue, previousPeriodData.shares),
           icon: <Share2 className="h-4 w-4" />,
-          trend: summary >= previousPeriodData.shares ? "up" : "down"
+          trend: totalValue >= previousPeriodData.shares ? "up" : "down"
         },
         {
           title: "Total Earnings",
-          value: `${summary.toFixed(2)} LC`,
-          change: getPercentChange(summary, previousPeriodData.earnings),
+          value: `${totalValue.toFixed(2)} LC`,
+          change: getPercentChange(totalValue, previousPeriodData.earnings),
           icon: <DollarSign className="h-4 w-4" />,
-          trend: summary >= previousPeriodData.earnings ? "up" : "down"
+          trend: totalValue >= previousPeriodData.earnings ? "up" : "down"
         }
       ]);
     }
-  }, [analytics, summary, loading]);
+  }, [analytics, totalValue, loading]);
 
   // Helpers
   const getPreviousPeriodSummary = () => {
     return {
-      views: Math.floor(summary * 0.9),
-      likes: Math.floor(summary * 0.9),
-      shares: Math.floor(summary * 0.9),
-      earnings: summary * 0.9
+      views: Math.floor(totalValue * 0.9),
+      likes: Math.floor(totalValue * 0.9),
+      shares: Math.floor(totalValue * 0.9),
+      earnings: totalValue * 0.9
     };
   };
 
@@ -112,10 +112,10 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
       <AnalyticsHeader timeRange={timeRange} setTimeRange={setTimeRange} />
       
       <AnalyticsSummary 
-        views={summary}
-        likes={summary}
-        shares={summary}
-        earnings={summary}
+        views={totalValue}
+        likes={totalValue}
+        shares={totalValue}
+        earnings={totalValue}
         loading={loading}
       />
       

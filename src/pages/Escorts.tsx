@@ -26,15 +26,15 @@ const EscortsContent = () => {
     applyCurrentFilters();
   }, [applyCurrentFilters]);
 
-  const serviceType = (filters.serviceTypes && filters.serviceTypes.length === 1) 
+  // Use type guard and default values to safely access filters
+  const serviceType = (Array.isArray(filters.serviceTypes) && filters.serviceTypes.length === 1) 
     ? (filters.serviceTypes[0] as "" | "in-person" | "virtual" | "both")
     : "";
-  
-  const selectedServices = filters.serviceTypes || [];
+
+  const selectedServices = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
 
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Correct usage of FeaturedEscorts - no children */}
       <FeaturedEscorts escorts={featuredEscorts} loading={loading} />
 
       <div className="flex justify-between items-center mb-6">
@@ -98,9 +98,9 @@ const EscortsContent = () => {
       
       {showFilters && (
         <EscortFilters 
-          location={filters.location || ""}
+          location={typeof filters.location === "string" ? filters.location : ""}
           setLocation={(location) => updateFilters({ location })}
-          priceRange={filters.priceRange || [0, 1000]}
+          priceRange={Array.isArray(filters.priceRange) ? filters.priceRange as [number, number] : [0, 1000]}
           setPriceRange={(range) => updateFilters({ priceRange: range as [number, number] })}
           serviceType={serviceType}
           setServiceType={(type) => updateFilters({ serviceTypes: type ? [type] : [] })}
@@ -115,9 +115,9 @@ const EscortsContent = () => {
             }
             updateFilters({ serviceTypes: currentServices });
           }}
-          selectedGenders={filters.gender || []}
+          selectedGenders={Array.isArray(filters.gender) ? filters.gender : []}
           toggleGender={(gender) => {
-            const currentGenders = [...(filters.gender || [])];
+            const currentGenders = [...(Array.isArray(filters.gender) ? filters.gender : [])];
             const index = currentGenders.indexOf(gender);
             if (index >= 0) {
               currentGenders.splice(index, 1);
@@ -126,9 +126,9 @@ const EscortsContent = () => {
             }
             updateFilters({ gender: currentGenders });
           }}
-          selectedOrientations={filters.orientation || []}
+          selectedOrientations={Array.isArray(filters.orientation) ? filters.orientation : []}
           toggleOrientation={(orientation) => {
-            const currentOrientations = [...(filters.orientation || [])];
+            const currentOrientations = [...(Array.isArray(filters.orientation) ? filters.orientation : [])];
             const index = currentOrientations.indexOf(orientation);
             if (index >= 0) {
               currentOrientations.splice(index, 1);
@@ -137,13 +137,13 @@ const EscortsContent = () => {
             }
             updateFilters({ orientation: currentOrientations });
           }}
-          ageRange={filters.ageRange || [18, 99]}
+          ageRange={Array.isArray(filters.ageRange) ? filters.ageRange as [number, number] : [18, 99]}
           setAgeRange={(range) => updateFilters({ ageRange: range as [number, number] })}
-          ratingMin={filters.rating || 0}
+          ratingMin={typeof filters.rating === 'number' ? filters.rating : 0}
           setRatingMin={(rating) => updateFilters({ rating })}
-          availableNow={filters.availableNow || false}
+          availableNow={typeof filters.availableNow === 'boolean' ? filters.availableNow : false}
           setAvailableNow={(available) => updateFilters({ availableNow: available })}
-          verifiedOnly={filters.verified || false}
+          verifiedOnly={typeof filters.verified === 'boolean' ? filters.verified : false}
           setVerifiedOnly={(verified) => updateFilters({ verified })}
           onApply={() => {
             applyCurrentFilters();

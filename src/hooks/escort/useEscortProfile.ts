@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 
 export function useEscortProfile() {
@@ -30,10 +30,11 @@ export function useEscortProfile() {
       setError(null);
 
       try {
-        // Access escorts array and find by id, as getEscortById does not exist
         const foundEscort = context.escorts.find(e => e.id === id);
         if (foundEscort) {
-          setEscort(foundEscort);
+          // Fix height to string to satisfy types
+          const fixedEscort = { ...foundEscort, height: String(foundEscort.height) };
+          setEscort(fixedEscort);
         } else {
           setError('Escort not found');
         }
@@ -47,7 +48,6 @@ export function useEscortProfile() {
     fetchEscort();
   }, [id, context]);
 
-  // Mock function to toggle favorite status
   const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
   };
@@ -62,3 +62,4 @@ export function useEscortProfile() {
 }
 
 export default useEscortProfile;
+

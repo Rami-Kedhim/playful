@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,8 +31,6 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Correct type matching by using VerificationLevel from verification type directly
-  // Defensive check for undefined/null values
   const verificationLevelSafe: VerificationLevelType | undefined = 
     persona.verificationLevel && typeof persona.verificationLevel === 'string' 
       ? (persona.verificationLevel as VerificationLevelType) 
@@ -88,4 +85,3 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
-

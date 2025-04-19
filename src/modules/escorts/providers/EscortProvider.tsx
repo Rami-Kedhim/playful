@@ -7,8 +7,8 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import { escortService } from '@/services/escorts/escortService'; // changed from default import to named import
-import { Escort } from '@/types/escort'; // changed to lowercase to resolve casing conflict
+import { escortService } from '@/services/escorts/escortService'; // fixed named import
+import { Escort } from '@/types/escort'; // fixed casing to lowercase
 
 interface EscortContextType {
   escorts: Escort[];
@@ -47,28 +47,23 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   }, []);
 
   const createEscort = async (escort: Partial<Escort>): Promise<Escort | undefined> => {
-    // Assuming no createEscort in service, just a stub fallback (since escortService mock only has getEscorts)
     return undefined;
   };
 
   const updateEscort = async (id: string, updates: Partial<Escort>): Promise<Escort | undefined> => {
-    // Stub fallback
     return undefined;
   };
 
   const deleteEscort = async (id: string): Promise<boolean> => {
-    // Stub fallback
     return false;
   };
 
-  // Load escorts with optional Uber system integration
   const loadEscorts = async (useUberSystem = false) => {
     try {
       setLoading(true);
       const data = await escortService.getEscorts();
       
       if (useUberSystem) {
-        // Apply UberCore enhancements when requested
         console.log("Loading escorts with UberCore integration");
         setEscorts(data.map(escort => ({
           ...escort,

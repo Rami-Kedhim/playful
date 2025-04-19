@@ -1,6 +1,6 @@
 
-// Fix missing exports and property names according to AICompanionMessage type
-// Simplify mock data and use correct properties
+// Fix properties to conform AICompanionMessage type, removing wrong properties 'aiCompanionId' and 'user_id'
+// Changing to 'companionId' and 'userId' consistent with typical JS naming conventions
 
 import { v4 as uuidv4 } from 'uuid';
 import { AICompanionMessage } from '@/types/ai-companion';
@@ -16,24 +16,24 @@ export const aiCompanionService = {
   getCompanionStats: async (companionId: string): Promise<any> => {
     await new Promise(resolve => setTimeout(resolve, 300));
     return {
-      messages_sent: 150,
-      messages_received: 140,
-      total_interaction_time: 3600,
-      last_interaction: new Date().toISOString(),
-      chat_messages: 100,
-      images_generated: 20,
-      voice_messages: 30,
+      messagesSent: 150,
+      messagesReceived: 140,
+      totalInteractionTime: 3600,
+      lastInteraction: new Date().toISOString(),
+      chatMessages: 100,
+      imagesGenerated: 20,
+      voiceMessages: 30,
     };
   },
 
   sendMessage: async (companionId: string, message: string, userId: string): Promise<AICompanionMessage> => {
     const newMessage: AICompanionMessage = {
       id: uuidv4(),
-      aiCompanionId: companionId,
+      companionId,
       content: message,
       role: 'user',
-      created_at: new Date().toISOString(),
-      user_id: userId,
+      createdAt: new Date().toISOString(),
+      userId,
     };
     aiCompanionsMessages.push(newMessage);
     return newMessage;
@@ -42,11 +42,11 @@ export const aiCompanionService = {
   receiveMessage: async (companionId: string, message: string, userId: string): Promise<AICompanionMessage> => {
     const newMessage: AICompanionMessage = {
       id: uuidv4(),
-      aiCompanionId: companionId,
+      companionId,
       content: message,
       role: 'assistant',
-      created_at: new Date().toISOString(),
-      user_id: userId,
+      createdAt: new Date().toISOString(),
+      userId,
     };
     aiCompanionsMessages.push(newMessage);
     return newMessage;
@@ -54,7 +54,7 @@ export const aiCompanionService = {
 
   getMessages: async (companionId: string, userId: string): Promise<AICompanionMessage[]> => {
     await new Promise(resolve => setTimeout(resolve, 400));
-    return aiCompanionsMessages.filter(msg => msg.aiCompanionId === companionId && msg.user_id === userId);
+    return aiCompanionsMessages.filter(msg => msg.companionId === companionId && msg.userId === userId);
   },
 
   updateCompanion: async (companionId: string, updates: any): Promise<any> => {
