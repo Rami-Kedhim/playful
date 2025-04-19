@@ -1,9 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-// Import an instance or default export of NeuralService to fix use errors
 import { NeuralService } from '@/services/neural/NeuralService';
 
-// Create an instance of NeuralService for usage in the component
 const neuralServiceInstance = new NeuralService(
   'adaptive-cognitive-core',
   'adaptive-cognitive-core',
@@ -25,7 +23,6 @@ const AdaptiveCognitiveCore = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [cognitiveLoad, setCognitiveLoad] = useState(0);
 
-  // Initialize neural service instance
   useEffect(() => {
     const initializeCore = async () => {
       try {
@@ -40,9 +37,9 @@ const AdaptiveCognitiveCore = () => {
     initializeCore();
 
     return () => {
-      // No cleanup method on instance - if exists, call it, else skip
-      if (typeof neuralServiceInstance.cleanup === 'function') {
-        neuralServiceInstance.cleanup();
+      // cleanup method may not exist on instance, so safely check before calling
+      if (neuralServiceInstance && typeof (neuralServiceInstance as any).cleanup === 'function') {
+        (neuralServiceInstance as any).cleanup();
       }
     };
   }, []);
@@ -54,7 +51,6 @@ const AdaptiveCognitiveCore = () => {
     setCognitiveLoad(prev => Math.min(prev + 0.2, 1));
 
     try {
-      // The process method doesn't exist on NeuralService directly, likely processText
       const result = await neuralServiceInstance.processText(userInput, 'TextGenerator', {
         temperature: 0.7,
         topP: 0.9,
@@ -91,7 +87,7 @@ const AdaptiveCognitiveCore = () => {
     <div className="adaptive-cognitive-core">
       <div className="cognitive-status">
         <div className="status-indicator">
-          <div 
+          <div
             className={`indicator ${isProcessing ? 'active' : ''}`}
             style={{ opacity: cognitiveLoad * 0.8 + 0.2 }}
           />
@@ -119,8 +115,8 @@ const AdaptiveCognitiveCore = () => {
           placeholder="Enter cognitive input..."
           disabled={isProcessing}
         />
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={isProcessing || !input.trim()}
         >
           Process
