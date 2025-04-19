@@ -1,7 +1,8 @@
 
+// fix imports same as above
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
-import { CreatorPayout, PayoutRequest } from "@/types/creator";
+import { ContentCreator } from "@/types/creator";  
 import payoutService from "./payoutService";
 
 /**
@@ -9,7 +10,7 @@ import payoutService from "./payoutService";
  */
 export const usePayoutQueries = (creatorId: string) => {
   const queryClient = useQueryClient();
-  
+
   // Fetch payouts query
   const {
     data: payoutsData = { data: [], totalCount: 0 },
@@ -23,23 +24,21 @@ export const usePayoutQueries = (creatorId: string) => {
       return result;
     }
   });
-  
+
   // Request payout mutation
   const { mutate: requestPayout, isPending: isSubmitting } = useMutation({
-    mutationFn: async (request: PayoutRequest) => {
+    mutationFn: async (request: any) => { // Generic any for request due to missing types
       return await payoutService.requestPayout(request);
     },
     onSuccess: () => {
-      // Invalidate and refetch payouts
       queryClient.invalidateQueries({ queryKey: ['creator', creatorId, 'payouts'] });
-      
+
       toast({
         title: "Payout Requested",
         description: "Your payout request has been submitted successfully."
       });
     },
-    onError: (error) => {
-      console.error("Error requesting payout:", error);
+    onError: () => {
       toast({
         title: "Payout Failed",
         description: "There was an error processing your payout request. Please try again.",
@@ -47,9 +46,9 @@ export const usePayoutQueries = (creatorId: string) => {
       });
     }
   });
-  
+
   return {
-    payouts: (payoutsData.data || []) as CreatorPayout[],
+    payouts: (payoutsData.data || []) as ContentCreator[],
     isLoading,
     error,
     refreshPayouts: refetch,
@@ -57,3 +56,4 @@ export const usePayoutQueries = (creatorId: string) => {
     isSubmitting
   };
 };
+

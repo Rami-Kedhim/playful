@@ -15,27 +15,28 @@ interface HermesBoostOfferProps {
 const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOffer }) => {
   const { insights } = useHermesInsights();
   const { toast } = useToast();
-  
+
+  // insights is an array, so find the boostOffer insight
+  const boostOffer = insights.find((insight) => insight.type === 'boostOffer');
+
   const handleAcceptOffer = () => {
-    // Process the boost offer
     toast({
       title: "Boost Activated!",
       description: "Your special offer has been applied to your account.",
       variant: "success",
     });
-    
+
     if (onAcceptOffer) {
       onAcceptOffer();
     }
   };
-  
-  // If there's no boost offer, don't render anything
-  if (!insights?.boostOffer) {
+
+  if (!boostOffer) {
     return null;
   }
-  
-  const offerCategory = insights.boostOffer.category || "visibility";
-  
+
+  const offerCategory = boostOffer.category || "visibility";
+
   return (
     <Card className="border-2 border-purple-400 dark:border-purple-600">
       <CardHeader className="pb-2">
@@ -57,15 +58,15 @@ const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOff
       <CardContent className="space-y-4">
         <div className="text-center">
           <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {insights.boostOffer.value}
+            {boostOffer.value}
           </h3>
         </div>
-        
+
         <div className="flex items-center justify-center text-sm text-muted-foreground">
           <Clock className="h-4 w-4 mr-1" />
-          <span>Expires: {new Date(insights.boostOffer.expires).toLocaleDateString()}</span>
+          <span>Expires: {new Date(boostOffer.expires).toLocaleDateString()}</span>
         </div>
-        
+
         <Button 
           onClick={handleAcceptOffer}
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
@@ -78,3 +79,4 @@ const HermesBoostOffer: React.FC<HermesBoostOfferProps> = ({ userId, onAcceptOff
 };
 
 export default HermesBoostOffer;
+

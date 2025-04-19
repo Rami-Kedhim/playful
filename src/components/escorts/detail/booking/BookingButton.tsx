@@ -1,4 +1,6 @@
 
+// Fix Escort type for missing properties like providesVirtualContent
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
@@ -7,7 +9,7 @@ import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
 import BookingDialog from '../../booking/BookingDialog';
 
 interface BookingButtonProps {
-  escort: Escort;
+  escort: Escort & { providesVirtualContent?: boolean; providesInPersonServices?: boolean }; // add missing props as optional
   availability?: any;
   size?: 'sm' | 'lg' | 'default';
   variant?: 'default' | 'outline' | 'ghost';
@@ -62,3 +64,4 @@ const BookingButton: React.FC<BookingButtonProps> = ({
 };
 
 export default BookingButton;
+

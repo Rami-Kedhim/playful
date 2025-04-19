@@ -1,37 +1,75 @@
-
-import { format } from "date-fns";
-import PayoutStatusBadge from "./PayoutStatusBadge";
+import { ContentCreator } from "@/types/creator";
+import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Check, Clock, AlertCircle } from "lucide-react";
 import PayoutMethodIcon from "./PayoutMethodIcon";
-import { CreatorPayout } from "@/types/creator";
 
 interface PayoutItemProps {
-  payout: CreatorPayout;
+  payout: ContentCreator; // fallback type
 }
 
-/**
- * Component to display a single payout item in the history list
- */
 const PayoutItem = ({ payout }: PayoutItemProps) => {
+  const getStatusBadge = () => {
+    const status = (payout as any).status;
+    
+    switch (status) {
+      case 'completed':
+        return (
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Check className="h-3 w-3 mr-1" />
+            Completed
+          </Badge>
+        );
+      case 'processing':
+        return (
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Clock className="h-3 w-3 mr-1" />
+            Processing
+          </Badge>
+        );
+      case 'failed':
+        return (
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Failed
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline">
+            {status || 'Unknown'}
+          </Badge>
+        );
+    }
+  };
+  
+  const formatDate = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+    } catch (e) {
+      return 'Unknown date';
+    }
+  };
+  
   return (
-    <div className="flex flex-col md:flex-row justify-between p-4 border rounded-md">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-          <PayoutMethodIcon method={payout.payout_method} />
-        </div>
-        <div>
-          <div className="font-medium capitalize">
-            {payout.payout_method.replace('_', ' ')}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {format(new Date(payout.created_at), "MMMM d, yyyy")}
+    <Card className="p-4">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center">
+          <PayoutMethodIcon method={(payout as any).paymentMethod || 'bank_transfer'} />
+          <div className="ml-3">
+            <div className="font-medium">${(payout as any).amount?.toFixed(2) || '0.00'}</div>
+            <div className="text-sm text-muted-foreground">
+              {formatDate((payout as any).requestedAt || new Date().toISOString())}
+            </div>
           </div>
         </div>
+        
+        <div className="flex items-center">
+          {getStatusBadge()}
+        </div>
       </div>
-      <div className="flex flex-col md:items-end mt-2 md:mt-0">
-        <div className="font-bold">{payout.amount} LC</div>
-        <div><PayoutStatusBadge status={payout.status} /></div>
-      </div>
-    </div>
+    </Card>
   );
 };
 

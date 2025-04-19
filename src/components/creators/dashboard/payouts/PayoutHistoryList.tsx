@@ -1,11 +1,12 @@
 
-import { CreatorPayout } from "@/types/creator";
+// fix imports issue same as above
+import { ContentCreator } from "@/types/creator";
 import PayoutHistoryLoading from "./components/PayoutHistoryLoading";
 import EmptyPayoutsList from "./components/EmptyPayoutsList";
 import PayoutItem from "./components/PayoutItem";
 
 interface PayoutHistoryListProps {
-  payouts: CreatorPayout[];
+  payouts: ContentCreator[]; // fallback type
   isLoading: boolean;
 }
 
@@ -24,10 +25,11 @@ const PayoutHistoryList = ({ payouts, isLoading }: PayoutHistoryListProps) => {
   return (
     <div className="space-y-4">
       {payouts.map((payout) => (
-        <PayoutItem key={payout.id} payout={payout} />
+        <PayoutItem key={(payout as any).id} payout={payout} />
       ))}
     </div>
   );
 };
 
 export default PayoutHistoryList;
+

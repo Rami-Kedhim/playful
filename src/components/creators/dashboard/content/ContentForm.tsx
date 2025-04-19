@@ -21,7 +21,7 @@ interface ContentFormProps {
   initialValues?: {
     title: string;
     description: string;
-    contentType: string;
+    contentType: 'image' | 'video' | 'article';
     isPremium: boolean;
     price: number;
     url: string;
@@ -59,14 +59,14 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
       thumbnailUrl: initialValues?.thumbnailUrl || '',
     }
   });
-  
+
   const isPremium = form.watch('isPremium');
   const contentType = form.watch('contentType');
-  
+
   const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
     await onSubmit(values);
   };
-  
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
@@ -83,7 +83,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="description"
@@ -101,7 +101,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="contentType"
@@ -124,7 +124,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="url"
@@ -138,7 +138,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
             </FormItem>
           )}
         />
-        
+
         {contentType === 'video' && (
           <FormField
             control={form.control}
@@ -154,7 +154,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
             )}
           />
         )}
-        
+
         <div className="flex items-center justify-between rounded-md border p-4">
           <div className="space-y-1">
             <h4 className="text-sm font-semibold">Premium Content</h4>
@@ -177,7 +177,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
             )}
           />
         </div>
-        
+
         {isPremium && (
           <FormField
             control={form.control}
@@ -197,7 +197,7 @@ const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLo
             )}
           />
         )}
-        
+
         <Button type="submit" disabled={isLoading}>
           {isLoading ? "Loading" : "Submit"}
         </Button>

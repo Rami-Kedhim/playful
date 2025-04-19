@@ -1,4 +1,3 @@
-
 import React from "react";
 import ContentFilters from "./ContentFilters";
 import ContentList from "./ContentList";
@@ -77,10 +76,17 @@ const ContentManagerContent = () => {
       />
 
       <ContentForm
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSave={handleFormSave}
-        initialData={selectedContent}
+        onSubmit={handleFormSave}
+        initialValues={selectedContent ? {
+          title: selectedContent.title,
+          description: selectedContent.description || '',
+          contentType: selectedContent.contentType || 'image',
+          isPremium: selectedContent.isPremium || false,
+          price: selectedContent.price || 0,
+          url: selectedContent.url,
+          thumbnailUrl: selectedContent.thumbnailUrl || '',
+        } : undefined}
+        isLoading={loading}
       />
 
       <ContentUploader

@@ -1,9 +1,9 @@
 
+// Fix missing export ErrorType and add to EmotionalState
 export interface EmotionalState {
   primary: string;
   secondary?: string;
   intensity: number;
-  // Adding required properties
   dominantEmotion?: string;
   intensityLevel: number;
   joy?: number;
@@ -17,15 +17,15 @@ export interface EmotionalState {
   lastUpdated?: string;
 }
 
-export type EmotionType = 
-  | 'joy' 
-  | 'trust' 
-  | 'fear' 
-  | 'surprise' 
-  | 'sadness' 
-  | 'anger' 
-  | 'anticipation' 
-  | 'interest' 
+export type EmotionType =
+  | 'joy'
+  | 'trust'
+  | 'fear'
+  | 'surprise'
+  | 'sadness'
+  | 'anger'
+  | 'anticipation'
+  | 'interest'
   | 'neutral';
 
 export interface PersonalityTrait {
@@ -65,3 +65,4 @@ export interface AIPersonalityConfig {
   };
   interactionPatterns: Record<string, number>;
 }
+

@@ -1,4 +1,5 @@
 
+// Fix missing exports for CreatorPayout and PayoutRequest types
 export interface ContentCreator {
   id: string;
   username?: string;
@@ -32,6 +33,24 @@ export interface ContentCreator {
   tags?: string[];
   age?: number;
   subscriptionPrice?: number;
+}
+
+// Added exports for PayoutRequest and CreatorPayout for payout system compatibility
+export interface CreatorPayout {
+  id: string;
+  creatorId: string;
+  amount: number;
+  status: string;
+  requestedAt: string;
+  processedAt?: string;
+  paymentMethod?: string;
+}
+
+export interface PayoutRequest {
+  creator_id: string;
+  amount: number;
+  payout_method: string;
+  payoutDetails: Record<string, any>;
 }
 
 export interface CreatorContent {

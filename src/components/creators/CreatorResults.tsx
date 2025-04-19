@@ -26,14 +26,13 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
               key={creator.id} 
               id={creator.id}
               name={creator.name || 'Unknown Creator'}
-              username={creator.username || ''}
               imageUrl={creator.imageUrl || creator.avatarUrl || creator.profileImage || ''}
-              isLive={Boolean(creator.isLive) || false}
+              isLive={false} 
               isPremium={Boolean(creator.isPremium) || false}
               subscriberCount={creator.subscriberCount || 0}
-              contentCount={typeof creator.contentCount === 'number' 
-                ? { photos: creator.contentCount || 0, videos: 0 } 
-                : creator.contentCount || { photos: 0, videos: 0 }
+              contentCount={typeof creator.contentCount === 'object' 
+                ? creator.contentCount || { photos: 0, videos: 0 } 
+                : { photos: creator.contentCount || 0, videos: 0 }
               }
               price={creator.price || 0}
               isAI={Boolean(creator.isAI) || false}

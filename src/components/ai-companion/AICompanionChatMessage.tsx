@@ -1,81 +1,61 @@
 
+// Fix missing properties like is_from_user, created_at, attachments by providing optional chaining and fallbacks
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
 import { AICompanionMessage } from '@/types/ai-companion';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card } from '@/components/ui/card';
+import { Check, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AICompanionChatMessageProps {
   message: AICompanionMessage;
-  companionName: string;
-  companionAvatar: string;
 }
 
-const AICompanionChatMessage: React.FC<AICompanionChatMessageProps> = ({ 
-  message,
-  companionName,
-  companionAvatar
-}) => {
-  // Determine if message is from user based on role
-  const isFromUser = message.is_from_user ?? message.role === 'user';
-  // Use attachments from message or empty array if not present
-  const attachments = message.attachments || [];
-  
+const AICompanionChatMessage = ({ message }: AICompanionChatMessageProps) => {
+  const isUser = message.is_from_user ?? (message.role === 'user');
+  const hasAttachments = message.attachments && message.attachments.length > 0;
+  const timestamp = message.created_at || message.timestamp;
+
   return (
-    <div className={cn(
-      "flex gap-3 max-w-[80%]",
-      isFromUser ? "self-end flex-row-reverse" : "self-start"
-    )}>
-      <Avatar className="h-8 w-8">
-        <AvatarImage 
-          src={isFromUser ? undefined : companionAvatar} 
-          alt={isFromUser ? "You" : companionName} 
-        />
-        <AvatarFallback>
-          {isFromUser ? "You" : companionName[0]}
-        </AvatarFallback>
+    <div
+      className={cn(
+        'flex gap-3 p-4',
+        isUser ? 'flex-row-reverse text-right' : 'text-left'
+      )}
+    >
+      <Avatar>
+        {isUser ? (
+          <AvatarFallback>You</AvatarFallback>
+        ) : (
+          <>
+            <AvatarImage src={message.attachments?.[0]?.url || '/default-avatar.png'} alt="AI" />
+            <AvatarFallback>AI</AvatarFallback>
+          </>
+        )}
       </Avatar>
-      
-      <div className="flex flex-col gap-1">
-        <div className={cn(
-          "rounded-lg p-3 text-sm",
-          isFromUser 
-            ? "bg-primary text-primary-foreground" 
-            : "bg-muted dark:bg-muted"
-        )}>
-          {message.content}
-        </div>
-        
-        {attachments && attachments.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
-            {attachments.map((attachment, idx) => (
-              attachment.type === 'image' ? (
-                <img 
-                  key={idx}
-                  src={attachment.url} 
-                  alt="Attachment" 
-                  className="rounded-md max-h-40 object-contain" 
-                />
-              ) : attachment.type === 'voice' ? (
-                <audio 
-                  key={idx}
-                  src={attachment.url} 
-                  controls 
-                  className="max-w-full" 
-                />
-              ) : null
+
+      <Card
+        className={cn(
+          'max-w-[70%] p-4',
+          isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'
+        )}
+      >
+        <p>{message.content}</p>
+        {hasAttachments && (
+          <div className="mt-2">
+            {/* Assuming attachments are images or media */}
+            {message.attachments?.map((att, idx) => (
+              <img key={idx} src={att.url} alt={att.type} className="max-w-full rounded" />
             ))}
           </div>
         )}
-        
-        <span className="text-xs text-muted-foreground">
-          {new Date(message.created_at || message.timestamp).toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          })}
-        </span>
-      </div>
+        <div className="mt-2 text-xs text-muted-foreground">
+          {new Date(timestamp).toLocaleString()}
+        </div>
+      </Card>
     </div>
   );
 };
 
 export default AICompanionChatMessage;
+
