@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationUpgradeTabProps {
   userId: string;
-  currentLevel: 'basic' | 'verified' | 'premium';
+  currentLevel: VerificationLevel;
 }
 
 const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
@@ -19,8 +19,7 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
   const [selectedLevel, setSelectedLevel] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get available upgrade options based on current level
-  const getAvailableUpgrades = (): Array<'verified' | 'premium'> => {
+  const getAvailableUpgrades = (): Array<VerificationLevel> => {
     switch (currentLevel) {
       case 'basic':
         return ['verified', 'premium'];
@@ -48,8 +47,6 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
     try {
       setIsSubmitting(true);
       
-      // In a real app, you would submit this to your backend
-      // For demo purpose, we'll just simulate a delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({

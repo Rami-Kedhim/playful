@@ -1,6 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { neuralServiceRegistry, NeuralService, ModuleType } from '@/services/neural/registry/NeuralServiceRegistry';
+import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
+import NeuralService from '@/services/neural/registry/NeuralServiceRegistry';
+import ModuleType from '@/services/neural/registry/NeuralServiceRegistry';
 
 /**
  * Hook for working with the Neural Service Registry

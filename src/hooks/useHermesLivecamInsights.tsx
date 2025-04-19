@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useHermesInsights } from './useHermesInsights';
 
@@ -44,10 +43,10 @@ export function useHermesLivecamInsights(userId?: string) {
       if (response) {
         // Update insights from response with proper type checking
         setLivecamInsights({
-          recommendedProfileId: response.recommended_profile,
+          recommendedProfileId: response.recommendedProfile,
           // Type-check and provide fallbacks for potentially missing properties
-          popularCategory: response.popular_category,
-          trendingTag: response.trending_tag,
+          popularCategory: response.popularCategory,
+          trendingTag: response.trendingTag,
           isLoading: false
         });
       }

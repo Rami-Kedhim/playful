@@ -1,6 +1,3 @@
-
-// Fix UberPersonaContext types and prop accesses according to current UberPersona interface
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
@@ -188,4 +185,3 @@ export const useUberPersonaContext = (): UberPersonaContextType => {
   }
   return context;
 };
-

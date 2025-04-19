@@ -133,16 +133,16 @@ const MapViewer: React.FC<MapViewerProps> = ({
 
       {showControls && !isLoading && !error && (
         <div className="absolute right-4 bottom-4 flex flex-col gap-2">
-          <Button size="icon" variant="ubx" onClick={handleZoomIn}>
+          <Button size="icon" variant="lucoin" onClick={handleZoomIn}>
             <Plus className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ubx" onClick={handleZoomOut}>
+          <Button size="icon" variant="lucoin" onClick={handleZoomOut}>
             <Minus className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ubx" onClick={handleMyLocation}>
+          <Button size="icon" variant="lucoin" onClick={handleMyLocation}>
             <LocateFixed className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="ubx" onClick={handleToggleLayers}>
+          <Button size="icon" variant="lucoin" onClick={handleToggleLayers}>
             <Layers className="h-4 w-4" />
           </Button>
         </div>

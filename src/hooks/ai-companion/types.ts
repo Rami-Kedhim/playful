@@ -1,4 +1,3 @@
-
 // Define basic types for AI companion interactions
 export interface CompanionMessage {
   id: string;
@@ -105,3 +104,11 @@ export interface AICompanionMessage {
     url: string;
   }>;
 }
+
+export type EmotionalState = 
+  | 'happy'
+  | 'sad'
+  | 'angry'
+  | 'surprised'
+  | 'scared'
+  | 'neutral';

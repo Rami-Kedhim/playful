@@ -1,8 +1,7 @@
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Creator } from '@/types/creator';
 import { mockCreators } from '@/data/mockData';
-import { creatorsNeuralService } from '@/services/neural';
+import { CreatorsNeuralService } from '@/services/neural';
 
 // Context type definition
 interface CreatorContextType {
@@ -31,7 +30,7 @@ export const CreatorProvider: React.FC<{ children: ReactNode }> = ({ children })
         setLoading(true);
         
         // Initialize neural service
-        await creatorsNeuralService.initialize();
+        await CreatorsNeuralService.initialize();
         
         // In a real app, this would be an API call
         // For now, use mock data

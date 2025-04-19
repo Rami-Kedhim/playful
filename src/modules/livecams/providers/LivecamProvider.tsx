@@ -1,8 +1,7 @@
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Livecam } from '@/types/livecam';
 import { mockLivecams } from '@/data/mockData';
-import { livecamsNeuralService } from '@/services/neural';
+import { LivecamsNeuralService } from '@/services/neural';
 
 // Context type definition
 interface LivecamContextType {
@@ -31,7 +30,7 @@ export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children })
         setLoading(true);
         
         // Initialize neural service
-        await livecamsNeuralService.initialize();
+        await LivecamsNeuralService.initialize();
         
         // In a real app, this would be an API call
         // For now, use mock data

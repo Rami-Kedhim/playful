@@ -1,8 +1,7 @@
-
 import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { EscortProvider } from './providers/EscortProvider';
-import { escortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
+import { EscortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
 import { useNeuralService } from '@/hooks/useNeuralService';
 import { Toaster } from '@/components/ui/toaster';
 
@@ -36,7 +35,7 @@ const EscortContent: React.FC<{ escort: any }> = ({ escort }) => (
 );
 
 const EscortsModule: React.FC = () => {
-  const { service, loading, error, toggleEnabled } = useNeuralService(escortsNeuralService.getId());
+  const { service, loading, error, toggleEnabled } = useNeuralService(EscortsNeuralService.getId());
   
   useEffect(() => {
     if (error) {
