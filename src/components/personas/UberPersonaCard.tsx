@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import type { VerificationLevel } from '@/types/verification'; // Import as type only to avoid conflicts
+import type { VerificationLevel as VerificationLevelType } from '@/types/verification'; // Rename for disambiguation
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
@@ -32,8 +32,8 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Ensure verificationLevel is of type VerificationLevel, with fallback
-  const verificationLevelSafe: VerificationLevel = (persona.verificationLevel as VerificationLevel) || 'none';
+  // Safely cast or default to 'none' allowed by VerificationBadge
+  const verificationLevelSafe: VerificationLevelType = (persona.verificationLevel as VerificationLevelType) || 'none';
 
   const price = persona.monetization?.meetingPrice ?? 0;
 
@@ -84,3 +84,4 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
+

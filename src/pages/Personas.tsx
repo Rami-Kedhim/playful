@@ -1,4 +1,6 @@
 
+// Fixed import of FilterOptions (now exported as interface)
+// Fixed use of filterOptions properties (roleFilters, capabilityFilters) which exist in FilterOptions
 import React, { useEffect, useState } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
@@ -30,7 +32,6 @@ const PersonasPage: React.FC = () => {
         const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
         setAllPersonas(mappedPersonas);
 
-        // Clear filters by resetting filterOptions properties explicitly
         updateFilterOptions({
           searchTerm: '',
           location: '',
@@ -194,3 +195,4 @@ const PersonasPage: React.FC = () => {
 };
 
 export default PersonasPage;
+

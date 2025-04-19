@@ -1,4 +1,6 @@
 
+// Updated FilterOptions to include roleFilters and capabilityFilters explicitly
+
 import { useState, useEffect } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 
@@ -72,3 +74,4 @@ export function usePersonaFilter(personas: UberPersona[]) {
 }
 
 export default usePersonaFilter;
+

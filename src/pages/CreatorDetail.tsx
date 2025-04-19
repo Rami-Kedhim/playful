@@ -1,4 +1,5 @@
 
+// Adjust imports to align with useCreators Creator type
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -12,7 +13,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
 import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
-import type { ContentCreator } from "@/types/creator";
+import type { ContentCreator } from "@/types/creator"; // use ContentCreator instead of Creator
 
 type Creator = ContentCreator & { username: string };
 
@@ -47,6 +48,7 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
     ? {
         ...rawCreator,
         username: rawCreator.username || rawCreator.name || 'unknown',
+        imageUrl: rawCreator.avatarUrl || rawCreator.profileImage || rawCreator.imageUrl || '',
       }
     : null;
 

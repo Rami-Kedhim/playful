@@ -67,7 +67,7 @@ const Creators = () => {
               key={creator.id} 
               id={creator.id}
               name={creator.name}
-              image={creator.avatarUrl || creator.profileImage || creator.imageUrl || ''}
+              imageUrl={creator.avatarUrl || creator.profileImage || creator.imageUrl || ''}
               location={creator.location || ''}
               rating={creator.rating || 0}
               premium={creator.isPremium}
@@ -83,3 +83,4 @@ const Creators = () => {
 };
 
 export default Creators;
+
