@@ -1,24 +1,25 @@
 
+// Fix import for default usePersonaFilter and adjust filterOptions accordingly
 import React, { useEffect, useState } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
-import { usePersonaFilter, FilterOptions } from '@/hooks/usePersonaFilter';
+import usePersonaFilter from '@/hooks/usePersonaFilter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card } from '@/components/ui/card';
 import FilterBadge from '@/components/escorts/FilterBadge';
+import type { CheckedState } from '@radix-ui/react-checkbox';
 
 const PersonasPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
   const { loadEscorts, state } = useEscortContext();
 
-  // Fix: pass personas array to updateFilterOptions accordingly; hook returns FilterOptions type
-  const { filteredPersonas, filterOptions, updateFilterOptions } = usePersonaFilter();
+  const { filteredPersonas, filterOptions, updateFilterOptions } = usePersonaFilter(allPersonas);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +32,8 @@ const PersonasPage: React.FC = () => {
         const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
         setAllPersonas(mappedPersonas);
 
-        updateFilterOptions({ personas: mappedPersonas });
+        // Pass mappedPersonas to updateFilterOptions if necessary
+        updateFilterOptions?.({ personas: mappedPersonas });
       } catch (error) {
         console.error('Error loading personas:', error);
       } finally {
@@ -42,7 +44,6 @@ const PersonasPage: React.FC = () => {
     fetchData();
   }, [state.escorts.length, loadEscorts, updateFilterOptions]);
 
-  // Helper to get active filters
   const getActiveFilters = () => {
     const filters: Array<{ key: string; label: string }> = [];
 
@@ -50,14 +51,14 @@ const PersonasPage: React.FC = () => {
       filters.push({ key: 'location', label: `Location: ${filterOptions.location}` });
     }
 
-    if (filterOptions.roleFilters) {
-      Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
+    if (filterOptions.role_filters) {
+      Object.entries(filterOptions.role_filters).forEach(([role, active]) => {
         if (active) filters.push({ key: role, label: role.replace(/^is/, '') });
       });
     }
 
-    if (filterOptions.capabilityFilters) {
-      Object.entries(filterOptions.capabilityFilters).forEach(([capability, active]) => {
+    if (filterOptions.capability_filters) {
+      Object.entries(filterOptions.capability_filters).forEach(([capability, active]) => {
         if (active) filters.push({ key: capability, label: capability.replace(/^has/, '') });
       });
     }
@@ -68,18 +69,18 @@ const PersonasPage: React.FC = () => {
   const handleRemoveFilter = (key: string) => {
     if (key === 'location') {
       updateFilterOptions({ location: '' });
-    } else if (filterOptions.roleFilters && key in filterOptions.roleFilters) {
-      updateFilterOptions({ roleFilters: { ...filterOptions.roleFilters, [key]: false } });
-    } else if (filterOptions.capabilityFilters && key in filterOptions.capabilityFilters) {
-      updateFilterOptions({ capabilityFilters: { ...filterOptions.capabilityFilters, [key]: false } });
+    } else if (filterOptions.role_filters && key in filterOptions.role_filters) {
+      updateFilterOptions({ role_filters: { ...filterOptions.role_filters, [key]: false } });
+    } else if (filterOptions.capability_filters && key in filterOptions.capability_filters) {
+      updateFilterOptions({ capability_filters: { ...filterOptions.capability_filters, [key]: false } });
     }
   };
 
   const clearAllFilters = () => {
     updateFilterOptions({
       location: '',
-      roleFilters: {},
-      capabilityFilters: {},
+      role_filters: {},
+      capability_filters: {},
     });
   };
 
@@ -96,8 +97,8 @@ const PersonasPage: React.FC = () => {
                 <Input
                   id="search"
                   placeholder="Search personas..."
-                  value={filterOptions.searchQuery || ''}
-                  onChange={(e) => updateFilterOptions({ searchQuery: e.target.value })}
+                  value={filterOptions.search_query || ''}
+                  onChange={(e) => updateFilterOptions({ search_query: e.target.value })}
                   className="mt-1"
                 />
               </div>
@@ -116,15 +117,19 @@ const PersonasPage: React.FC = () => {
               <div>
                 <Label className="mb-2 block">Role Types</Label>
                 <div className="space-y-2">
-                  {filterOptions.roleFilters &&
-                    Object.entries(filterOptions.roleFilters).map(([role, active]) => (
+                  {filterOptions.role_filters &&
+                    Object.entries(filterOptions.role_filters).map(([role, active]) => (
                       <div key={role} className="flex items-center space-x-2">
                         <Checkbox
                           id={`role-${role}`}
-                          checked={active}
-                          onCheckedChange={() =>
-                            updateFilterOptions({ roleFilters: { ...filterOptions.roleFilters, [role]: !active } })
-                          }
+                          checked={active as boolean}
+                          onCheckedChange={() => {
+                            const newFilters = {
+                              ...filterOptions.role_filters,
+                              [role]: !active,
+                            };
+                            updateFilterOptions({ role_filters: newFilters });
+                          }}
                         />
                         <Label htmlFor={`role-${role}`} className="capitalize">
                           {role.replace(/^is/, '')}
@@ -137,15 +142,19 @@ const PersonasPage: React.FC = () => {
               <div>
                 <Label className="mb-2 block">Capabilities</Label>
                 <div className="space-y-2">
-                  {filterOptions.capabilityFilters &&
-                    Object.entries(filterOptions.capabilityFilters).map(([capability, active]) => (
+                  {filterOptions.capability_filters &&
+                    Object.entries(filterOptions.capability_filters).map(([capability, active]) => (
                       <div key={capability} className="flex items-center space-x-2">
                         <Checkbox
                           id={`capability-${capability}`}
-                          checked={active}
-                          onCheckedChange={() =>
-                            updateFilterOptions({ capabilityFilters: { ...filterOptions.capabilityFilters, [capability]: !active } })
-                          }
+                          checked={active as boolean}
+                          onCheckedChange={() => {
+                            const newCaps = {
+                              ...filterOptions.capability_filters,
+                              [capability]: !active,
+                            };
+                            updateFilterOptions({ capability_filters: newCaps });
+                          }}
                         />
                         <Label htmlFor={`capability-${capability}`} className="capitalize">
                           {capability.replace(/^has/, '')}
@@ -183,3 +192,4 @@ const PersonasPage: React.FC = () => {
 };
 
 export default PersonasPage;
+

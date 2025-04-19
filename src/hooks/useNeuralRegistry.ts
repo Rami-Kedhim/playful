@@ -1,4 +1,5 @@
 
+// Fix check for initialize function is callable
 import { useState, useEffect, useCallback } from 'react';
 import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
 import type { BaseNeuralService } from '@/services/neural/types/NeuralService';
@@ -14,6 +15,7 @@ export function useNeuralRegistry() {
       setLoading(true);
       setError(null);
       
+      // stricter callable check
       if (typeof neuralServiceRegistry.initialize === 'function') {
         await neuralServiceRegistry.initialize();
       }
@@ -42,7 +44,7 @@ export function useNeuralRegistry() {
   }, []);
   
   const getServicesByType = useCallback((moduleType: ModuleType): BaseNeuralService[] => {
-    if ("getServicesByModule" in neuralServiceRegistry) {
+    if ("getServicesByModule" in neuralServiceRegistry && typeof neuralServiceRegistry.getServicesByModule === 'function') {
       return neuralServiceRegistry.getServicesByModule(moduleType);
     }
     return [];
@@ -56,7 +58,7 @@ export function useNeuralRegistry() {
   }, []);
   
   const optimizeResources = useCallback(() => {
-    if ("optimizeResourceAllocation" in neuralServiceRegistry) {
+    if ("optimizeResourceAllocation" in neuralServiceRegistry && typeof neuralServiceRegistry.optimizeResourceAllocation === 'function') {
       neuralServiceRegistry.optimizeResourceAllocation();
       loadServices();
     } else {

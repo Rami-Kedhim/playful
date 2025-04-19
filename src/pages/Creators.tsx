@@ -1,4 +1,5 @@
 
+// Fix import for CreatorCard props and key prop usage
 import React from 'react';
 import { useCreators } from '@/hooks/useCreators';
 import CreatorCard from '@/components/creators/CreatorCard';
@@ -12,14 +13,12 @@ const Creators = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [sortBy, setSortBy] = React.useState('relevance');
 
-  // Filter creators by name only, safely
   const filteredCreators = creators
     ? creators.filter(creator =>
         creator.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
-  // Sort according to sortBy
   const sortedCreators = [...filteredCreators].sort((a, b) => {
     if (sortBy === 'relevance') return 0;
     if (sortBy === 'rating') {
@@ -74,3 +73,4 @@ const Creators = () => {
 };
 
 export default Creators;
+

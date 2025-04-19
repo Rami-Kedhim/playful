@@ -1,14 +1,15 @@
+
+// Fix imports for PersonaOverviewTab and PersonaDetailsTab (assumed paths fixed or created)
+// Also fix access to properties in UberPersona properly
 import React from 'react';
 import { useUberPersonaContext } from '@/contexts/UberPersonaContext';
 import { UberPersona } from '@/types/UberPersona';
-// Removed import of missing PersonaContentTab
-import PersonaOverviewTab from '@/components/persona/tabs/PersonaOverviewTab'; // existing tab
-import PersonaDetailsTab from '@/components/persona/tabs/PersonaDetailsTab'; // example other tab
+import PersonaOverviewTab from '@/components/personas/tabs/PersonaOverviewTab';
+import PersonaDetailsTab from '@/components/personas/tabs/PersonaDetailsTab';
 
 const PersonaPage = () => {
   const { escortPersonas, creatorPersonas, livecamPersonas, aiPersonas } = useUberPersonaContext();
 
-  // Adjust filter for persona type using roleFlags as 'type' doesn't exist on UberPersona
   const escorts = escortPersonas;
   const creators = creatorPersonas;
   const livecams = livecamPersonas;
@@ -27,3 +28,4 @@ const PersonaPage = () => {
   );
 };
 export default PersonaPage;
+

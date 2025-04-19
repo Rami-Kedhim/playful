@@ -1,4 +1,5 @@
 
+// Ensure VerificationLevel import is consistent only from '@/types/verification'
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +33,6 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Use VerificationLevel from '@/types/verification' only for badges to ensure single source
   const verificationLevelSafe: VerificationLevel = (persona.verificationLevel as VerificationLevel) || VerificationLevel.NONE;
 
   const price = persona.monetization?.meetingPrice ?? 0;
@@ -84,3 +84,4 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
+

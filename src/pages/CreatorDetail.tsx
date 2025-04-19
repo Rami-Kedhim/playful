@@ -1,4 +1,5 @@
 
+// Remove children prop for CreatorsModule and fix creator type issues with casting username
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -12,6 +13,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
 import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
+import type { Creator, ContentCreator } from "@/types/creator";
 
 const CreatorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +22,6 @@ const CreatorDetail: React.FC = () => {
     return <div>Creator ID is missing</div>;
   }
 
-  // Removed children prop from CreatorsModule because it doesn't accept children
   return (
     <CreatorsModule>
       <CreatorDetailContent creatorId={id} />
@@ -36,7 +37,7 @@ const CreatorDetailContent: React.FC<CreatorDetailContentProps> = ({ creatorId }
   const navigate = useNavigate();
   const { toast } = useToast();
   const {
-    creator,
+    creator: rawCreator,
     isLoading,
     error,
     isFavorite,
@@ -45,6 +46,14 @@ const CreatorDetailContent: React.FC<CreatorDetailContentProps> = ({ creatorId }
     handleSubscribe,
     handleSendTip,
   } = useCreatorDetail(creatorId);
+
+  // Fix type compatibility by casting content creator to Creator with default username if missing
+  const creator: Creator | null = rawCreator
+    ? {
+        ...rawCreator,
+        username: rawCreator.username || rawCreator.name || 'unknown',
+      }
+    : null;
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);

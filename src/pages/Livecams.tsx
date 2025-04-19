@@ -1,3 +1,5 @@
+
+// Fix missing import of MainLayout and prop name for LivecamCard
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
 import LivecamCard from '@/components/livecams/LivecamCard';
@@ -6,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { MainLayout } from '@/components/layout';
+import MainLayout from '@/components/layout/MainLayout';
 
 const Livecams = () => {
   const { livecams, loading, error, featuredLivecams, liveLivecams } = useLivecamContext();
@@ -131,3 +133,4 @@ const Livecams = () => {
 };
 
 export default Livecams;
+
