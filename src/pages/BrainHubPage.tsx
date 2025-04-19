@@ -28,7 +28,9 @@ const BrainHubPage = () => {
           },
           specialization: 'natural-language-processing',
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          size: 1024,
+          precision: 32
         },
         {
           id: 'model-2',
@@ -44,7 +46,9 @@ const BrainHubPage = () => {
           },
           specialization: 'character-generation',
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          size: 512,
+          precision: 16
         },
         {
           id: 'model-3',
@@ -60,7 +64,9 @@ const BrainHubPage = () => {
           },
           specialization: 'profile-optimization',
           createdAt: new Date(),
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          size: 2048,
+          precision: 64
         }
       ];
       setModels(mockModels);

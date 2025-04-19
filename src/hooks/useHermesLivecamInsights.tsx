@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useHermesInsights } from './useHermesInsights';
 
@@ -32,7 +31,6 @@ export function useHermesLivecamInsights(userId?: string) {
     try {
       setLivecamInsights(prev => ({ ...prev, isLoading: true }));
       
-      // reportUserAction expects 2 args: eventName, payload object; adjusted call accordingly
       const response = await reportUserAction('viewed_livecam', {
         location: streamerId,
         category: category || 'general'
@@ -92,4 +90,3 @@ export function useHermesLivecamInsights(userId?: string) {
 }
 
 export default useHermesLivecamInsights;
-

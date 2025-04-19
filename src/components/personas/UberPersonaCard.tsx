@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
-// Import enum VerificationLevel from verification types as regular import (not type-only)
-import { VerificationLevel } from '@/types/verification';
+import { VerificationLevel as LocalVerificationLevel } from '@/types/escort';
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
@@ -33,18 +31,16 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Normalize verification level to enum type, default to NONE value
-  let verificationLevelSafe: VerificationLevel = VerificationLevel.NONE;
-  const verificationLevelRaw = persona.verificationLevel || VerificationLevel.NONE;
+  let verificationLevelSafe: LocalVerificationLevel = LocalVerificationLevel.NONE;
+  const verificationLevelRaw = persona.verificationLevel || LocalVerificationLevel.NONE;
 
-  // Validate enum membership by checking values (enum has string values)
   if (
-    verificationLevelRaw === VerificationLevel.NONE ||
-    verificationLevelRaw === VerificationLevel.BASIC ||
-    verificationLevelRaw === VerificationLevel.ENHANCED ||
-    verificationLevelRaw === VerificationLevel.PREMIUM
+    verificationLevelRaw === LocalVerificationLevel.NONE ||
+    verificationLevelRaw === LocalVerificationLevel.BASIC ||
+    verificationLevelRaw === LocalVerificationLevel.ENHANCED ||
+    verificationLevelRaw === LocalVerificationLevel.PREMIUM
   ) {
-    verificationLevelSafe = verificationLevelRaw as VerificationLevel;
+    verificationLevelSafe = verificationLevelRaw as LocalVerificationLevel;
   }
 
   const price = persona.monetization?.meetingPrice ?? 0;
@@ -96,4 +92,3 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
-

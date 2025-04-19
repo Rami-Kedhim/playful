@@ -1,13 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
-import { VerificationStatus, VerificationLevel } from '@/types/escort';
 
 interface VerificationHookResult {
-  status: VerificationStatus;
+  status: string;
   isVerifying: boolean;
   error: string | null;
-  submitVerification: (level?: VerificationLevel) => Promise<void>;
+  submitVerification: (level?: string) => Promise<void>;
   refreshStatus: () => Promise<void>;
 }
 
@@ -20,25 +18,25 @@ interface VerificationHookResult {
  */
 export const useVerificationStatus = (): VerificationHookResult => {
   const { user, profile, updateUserProfile } = useAuth();
-  const [status, setStatus] = useState<VerificationStatus>(VerificationStatus.NONE);
+  const [status, setStatus] = useState<string>('NONE');
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Fetch initial verification status from the user profile
     if (profile?.verification_status) {
-      setStatus(profile.verification_status as VerificationStatus);
+      setStatus(profile.verification_status);
     }
   }, [profile?.verification_status]);
 
   const refreshStatus = async () => {
     // Refresh verification status from the user profile
     if (profile?.verification_status) {
-      setStatus(profile.verification_status as VerificationStatus);
+      setStatus(profile.verification_status);
     }
   };
 
-  const submitVerification = async (level: VerificationLevel = VerificationLevel.BASIC) => {
+  const submitVerification = async (level: string = 'BASIC') => {
     setIsVerifying(true);
     setError(null);
 
@@ -48,7 +46,7 @@ export const useVerificationStatus = (): VerificationHookResult => {
       console.log(`Submitting verification request for level: ${level}`);
 
       // Simulate a successful verification
-      const newStatus = VerificationStatus.PENDING;
+      const newStatus = 'PENDING';
       setStatus(newStatus);
 
       // Update the user profile with the new verification status

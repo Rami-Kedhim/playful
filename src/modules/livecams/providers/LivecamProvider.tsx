@@ -1,6 +1,3 @@
-
-// Fix LivecamsNeuralService usage and substitute mockLivecams with full mock livecam data matching Livecam type
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Livecam } from '@/types/livecam';
 // import { mockLivecams } from '@/data/mockData'; // Removed due to type issues
@@ -28,7 +25,12 @@ const MOCK_LIVECAMS: Livecam[] = [
     tags: ['chatty', 'gaming'],
     featured: true,
     isLive: true,
-    category: 'Casual'
+    category: 'Casual',
+    previewImage: '/images/livecams/luna_preview.jpg',
+    rating: 4.5,
+    price: 19.99,
+    roomType: 'Private',
+    languages: ['English', 'Spanish']
   },
   {
     id: '2',
@@ -39,7 +41,12 @@ const MOCK_LIVECAMS: Livecam[] = [
     tags: ['music', 'singing'],
     featured: false,
     isLive: false,
-    category: 'Music'
+    category: 'Music',
+    previewImage: '/images/livecams/max_preview.jpg',
+    rating: 4.0,
+    price: 15.99,
+    roomType: 'Public',
+    languages: ['English']
   },
   {
     id: '3',
@@ -50,7 +57,12 @@ const MOCK_LIVECAMS: Livecam[] = [
     tags: ['art', 'painting'],
     featured: false,
     isLive: true,
-    category: 'Art'
+    category: 'Art',
+    previewImage: '/images/livecams/nova_preview.jpg',
+    rating: 4.8,
+    price: 29.99,
+    roomType: 'Private',
+    languages: ['English', 'French']
   }
 ];
 
@@ -126,4 +138,3 @@ export const useLivecamContext = (): LivecamContextType => {
   }
   return context;
 };
-

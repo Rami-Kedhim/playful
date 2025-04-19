@@ -1,6 +1,3 @@
-
-// Fix creatorsNeuralService import and creator category access issues
-
 import React, { useEffect, useState } from 'react';
 import { useCreators } from '@/hooks/useCreators';
 import CreatorCard from '@/components/creators/CreatorCard';
@@ -89,4 +86,3 @@ const Creators = () => {
 };
 
 export default Creators;
-

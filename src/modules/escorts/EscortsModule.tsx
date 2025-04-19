@@ -35,7 +35,7 @@ const EscortContent: React.FC<{ escort: any }> = ({ escort }) => (
 );
 
 const EscortsModule: React.FC = () => {
-  const { service, loading, error, toggleEnabled } = useNeuralService(EscortsNeuralService.getId());
+  const { service, loading, error, toggleEnabled } = useNeuralService(EscortsNeuralService.ID);
   
   useEffect(() => {
     if (error) {

@@ -1,61 +1,62 @@
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Escort } from '@/types/Escort';
+import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Escort } from '@/types/escort';
-import escortService from '@/services/escortService';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-
-export const useEscortProfile = (escortId?: string) => {
+export function useEscortProfile() {
+  const context = useEscortContext();
+  const { id } = useParams<{ id: string }>();
   const [escort, setEscort] = useState<Escort | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-
-  const fetchProfile = useCallback(async (id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const fetchedEscort = await escortService.getEscortById(id);
-      if (fetchedEscort) {
-        setEscort(fetchedEscort);
-      } else {
-        setError('Escort profile not found');
-      }
-    } catch (e: any) {
-      setError(e.message || 'Failed to fetch escort profile');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
-    if (escortId) {
-      fetchProfile(escortId);
-    }
-  }, [escortId, fetchProfile]);
-
-  const updateProfile = async (profileData: Partial<Escort>): Promise<boolean> => {
-    if (!escort?.id) return false;
-    try {
-      const updatedEscort = await escortService.updateEscort(escort.id, profileData);
-      if (updatedEscort) {
-        setEscort(updatedEscort);
-        return true;
+    const fetchEscort = async () => {
+      if (!id) {
+        setError('Escort ID is missing');
+        setLoading(false);
+        return;
       }
-      return false;
-    } catch (error) {
-      console.error('Failed to update escort profile:', error);
-      return false;
-    }
+
+      if (!context) {
+        setError('Escort context is not available');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const foundEscort = context.getEscortById(id);
+        if (foundEscort) {
+          setEscort(foundEscort);
+        } else {
+          setError('Escort not found');
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to load escort');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEscort();
+  }, [id, context]);
+
+  // Mock function to toggle favorite status
+  const toggleFavorite = () => {
+    setIsFavorite(!isFavorite);
   };
 
   return {
     escort,
     loading,
     error,
-    fetchProfile,
-    updateProfile,
-    isOwnProfile: user?.id === escort?.id
+    isFavorite,
+    toggleFavorite
   };
-};
+}
 
 export default useEscortProfile;

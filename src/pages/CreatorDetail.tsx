@@ -1,6 +1,3 @@
-
-// Fix to import useCreatorDetail as named import and fix type error on CreatorDetail function
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -8,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Share2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import { useCreatorDetail } from "@/hooks/useCreatorDetail"; // fixed named import
+import { useCreatorDetail } from "@/hooks/useCreatorDetail";
 import CreatorsModule from "@/modules/creators/CreatorsModule";
 import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
@@ -152,4 +149,3 @@ const CreatorDetailContent: React.FC = () => {
 };
 
 export default CreatorDetail;
-

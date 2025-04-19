@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
 import type { BaseNeuralService } from '@/services/neural/types/NeuralService';
@@ -92,4 +91,3 @@ export function useNeuralRegistry() {
 }
 
 export default useNeuralRegistry;
-
