@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -18,6 +19,9 @@ const EscortsContent = () => {
     applyCurrentFilters,
     clearAllFilters
   } = useEscorts();
+
+  // Set missing showFilters state to fix undefined error
+  const [showFilters, setShowFilters] = useState(false);
 
   // Provide default empty filter properties to prevent errors
   const serviceTypes = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
