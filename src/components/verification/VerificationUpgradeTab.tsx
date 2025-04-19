@@ -1,20 +1,17 @@
+
+// Fix import of VerificationLevel enum and update usage in component accordingly
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Star } from 'lucide-react';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import { EscortVerificationLevel } from '@/types/escort';
+import { VerificationLevel } from '@/types/verification';
 
 export interface VerificationUpgradeTabProps {
-  currentLevel: EscortVerificationLevel;
-  onUpgrade: (level: EscortVerificationLevel) => void;
+  currentLevel: VerificationLevel;
+  onUpgrade: (level: VerificationLevel) => void;
 }
-
-const levelsList: EscortVerificationLevel[] = [
-  EscortVerificationLevel.BASIC,
-  EscortVerificationLevel.ENHANCED,
-  EscortVerificationLevel.PREMIUM
-];
 
 const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
   currentLevel,
@@ -23,7 +20,7 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 
   const verificationLevels = [
     {
-      id: EscortVerificationLevel.BASIC,
+      id: VerificationLevel.BASIC,
       title: 'Basic Verification',
       description: 'Email and phone verification',
       price: 'Free',
@@ -34,7 +31,7 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
       ]
     },
     {
-      id: EscortVerificationLevel.ENHANCED,
+      id: VerificationLevel.ENHANCED,
       title: 'Enhanced Verification',
       description: 'ID verification and background check',
       price: '$29.99',
@@ -47,7 +44,7 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
       ]
     },
     {
-      id: EscortVerificationLevel.PREMIUM,
+      id: VerificationLevel.PREMIUM,
       title: 'Premium Verification',
       description: 'Complete verification with priority support',
       price: '$99.99',
@@ -73,8 +70,8 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
         {verificationLevels.map((level) => {
           const isCurrentLevel = currentLevel === level.id;
           const canUpgrade = 
-            (currentLevel === EscortVerificationLevel.BASIC && (level.id === EscortVerificationLevel.ENHANCED || level.id === EscortVerificationLevel.PREMIUM)) || 
-            (currentLevel === EscortVerificationLevel.ENHANCED && level.id === EscortVerificationLevel.PREMIUM);
+            (currentLevel === VerificationLevel.BASIC && (level.id === VerificationLevel.ENHANCED || level.id === VerificationLevel.PREMIUM)) || 
+            (currentLevel === VerificationLevel.ENHANCED && level.id === VerificationLevel.PREMIUM);
           
           return (
             <Card 
@@ -125,3 +122,4 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 };
 
 export default VerificationUpgradeTab;
+

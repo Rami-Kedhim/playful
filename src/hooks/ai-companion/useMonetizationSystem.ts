@@ -1,348 +1,83 @@
 
-import { useState, useCallback } from 'react';
-import { PersonalityType, MonetizationHook } from '@/types/ai-personality';
-import { CompanionMessage } from './types';
-import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '@/integrations/supabase/client';
+// Removed import of non-existent MonetizationHook from '@/types/ai-personality'
+import { useState, useEffect, useCallback } from 'react';
+import { toast } from '@/hooks/use-toast';
 
-interface UseMonetizationSystemProps {
-  companionId: string;
-  userId: string;
-  personalityType: PersonalityType;
-  lucoinBalance?: number;
-  name?: string;
-  onAddMessage: (message: CompanionMessage) => void;
+export interface MonetizationSettings {
+  subscriptionPrice: number;
+  unlockingPrice: number;
+  acceptsLucoin: boolean;
+  acceptsTips: boolean;
+  boostingActive: boolean;
+  meetingPrice: number;
 }
 
-export const useMonetizationSystem = ({
-  companionId,
-  userId,
-  personalityType,
-  lucoinBalance = 0,
-  name = 'Companion',
-  onAddMessage
-}: UseMonetizationSystemProps) => {
-  const [monetizationTriggers, setMonetizationTriggers] = useState<MonetizationHook[]>([]);
-  const [currentMonetizationHook, setCurrentMonetizationHook] = useState<MonetizationHook | null>(null);
-  const [lastMonetizationAttempt, setLastMonetizationAttempt] = useState<Date | null>(null);
+export function useMonetizationSystem(personaId: string) {
+  const [settings, setSettings] = useState<MonetizationSettings>({
+    subscriptionPrice: 0,
+    unlockingPrice: 0,
+    acceptsLucoin: false,
+    acceptsTips: false,
+    boostingActive: false,
+    meetingPrice: 0
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Initialize monetization hooks based on personality type
-  const initializeMonetizationHooks = useCallback(() => {
-    // Create base hook functions first to ensure all required methods are included
-    const triggerPurchaseFlow = async (productId: string, amount: number): Promise<boolean> => {
-      console.log(`Triggering purchase flow for ${productId} at ${amount} coins`);
-      return lucoinBalance >= amount;
-    };
-    
-    const checkUserCredits = async (): Promise<number> => {
-      return lucoinBalance;
-    };
-    
-    const deductCredits = async (amount: number, reason: string): Promise<boolean> => {
-      console.log(`Deducting ${amount} credits for ${reason}`);
-      return lucoinBalance >= amount;
-    };
-    
-    const getSubscriptionStatus = async (): Promise<{ isSubscribed: boolean; plan: string | null }> => {
-      return { isSubscribed: false, plan: null };
-    };
-    
-    const processPayment = async (amount: number): Promise<boolean> => {
-      return lucoinBalance >= amount;
-    };
-    
-    const processPremiumContent = async (): Promise<boolean> => {
-      return true;
-    };
-    
-    const shouldRestrict = (contentType: string): boolean => {
-      return contentType.includes('explicit');
-    };
-    
-    const getContentPrice = (contentType: string): number => {
-      return contentType === 'explicit_content' ? 25 : 15;
-    };
-    
-    const getUserBalance = (): number => {
-      return lucoinBalance;
-    };
-    
-    const hooks: MonetizationHook[] = [
-      {
-        type: 'image',
-        triggerConditions: {
-          messageCount: 5,
-          intimacyLevel: 30
-        },
-        lucoinCost: 10,
-        teaser: "I'd love to show you a special photo of me...",
-        previewUrl: '/blurred-preview.jpg',
-        triggerPurchaseFlow,
-        checkUserCredits,
-        deductCredits,
-        getSubscriptionStatus,
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
-      },
-      {
-        type: 'voice',
-        triggerConditions: {
-          messageCount: 8,
-          intimacyLevel: 40
-        },
-        lucoinCost: 15,
-        teaser: "Would you like to hear my voice? I've recorded something just for you.",
-        triggerPurchaseFlow,
-        checkUserCredits,
-        deductCredits,
-        getSubscriptionStatus,
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
-      },
-      {
-        type: 'explicit_content',
-        triggerConditions: {
-          messageCount: 15,
-          intimacyLevel: 70,
-          keywords: ['bedroom', 'intimate', 'private']
-        },
-        lucoinCost: 25,
-        teaser: "I can share some more intimate thoughts with you...",
-        triggerPurchaseFlow,
-        checkUserCredits,
-        deductCredits,
-        getSubscriptionStatus,
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
-      }
-    ];
-    
-    if (personalityType === 'flirty') {
-      hooks.push({
-        type: 'special_interaction',
-        triggerConditions: {
-          messageCount: 10,
-          intimacyLevel: 60
-        },
-        lucoinCost: 20,
-        teaser: "I have a fun little game we could play in private...",
-        triggerPurchaseFlow,
-        checkUserCredits,
-        deductCredits,
-        getSubscriptionStatus,
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
-      });
-    } else if (personalityType === 'dominant') {
-      hooks.push({
-        type: 'special_interaction',
-        triggerConditions: {
-          messageCount: 12,
-          intimacyLevel: 65
-        },
-        lucoinCost: 30,
-        teaser: "I could give you some special instructions to follow...",
-        triggerPurchaseFlow,
-        checkUserCredits,
-        deductCredits,
-        getSubscriptionStatus,
-        shouldRestrict,
-        processPremiumContent,
-        getContentPrice,
-        getUserBalance,
-        processPayment
-      });
-    }
-    
-    setMonetizationTriggers(hooks);
-  }, [personalityType, lucoinBalance]);
-
-  // Check if monetization should be triggered
-  const checkMonetizationTriggers = useCallback((
-    content: string, 
-    messageCount: number, 
-    intimacyLevel: number,
-    recentMessages: CompanionMessage[]
-  ): boolean => {
-    if (monetizationTriggers.length === 0) return false;
-    
-    // Don't trigger too frequently
-    if (lastMonetizationAttempt) {
-      const timeSinceLastAttempt = new Date().getTime() - lastMonetizationAttempt.getTime();
-      if (timeSinceLastAttempt < 300000) { // 5 minutes
-        return false;
-      }
-    }
-    
-    // Check if monetization was recently triggered
-    const recentTrigger = recentMessages
-      .slice(-10)
-      .some(msg => msg.role === 'assistant' && msg.requiresPayment);
-    
-    if (recentTrigger) return false;
-    
-    // Filter eligible triggers
-    const eligibleTriggers = monetizationTriggers.filter(trigger => {
-      if (trigger.triggerConditions.messageCount && messageCount < trigger.triggerConditions.messageCount) {
-        return false;
-      }
-      
-      if (trigger.triggerConditions.keywords && 
-          !trigger.triggerConditions.keywords.some(keyword => 
-            content.toLowerCase().includes(keyword.toLowerCase()))) {
-        return false;
-      }
-      
-      if (trigger.triggerConditions.intimacyLevel && 
-          intimacyLevel < trigger.triggerConditions.intimacyLevel) {
-        return false;
-      }
-      
-      return true;
-    });
-    
-    if (eligibleTriggers.length === 0) return false;
-    
-    // Select a trigger and set current hook
-    const selectedTrigger = eligibleTriggers[Math.floor(Math.random() * eligibleTriggers.length)];
-    setCurrentMonetizationHook(selectedTrigger);
-    setLastMonetizationAttempt(new Date());
-    
-    // 30% chance of triggering
-    return Math.random() < 0.3;
-  }, [monetizationTriggers, lastMonetizationAttempt]);
-
-  // Process premium content purchase
-  const processPremiumContent = useCallback(async () => {
-    if (!currentMonetizationHook) return false;
-    
-    const cost = currentMonetizationHook.lucoinCost;
-    
-    if (lucoinBalance < cost) {
-      onAddMessage({
-        id: uuidv4(),
-        role: 'system',
-        content: `Insufficient balance: You need ${cost} Lucoins to unlock this content. Current balance: ${lucoinBalance}`,
-        timestamp: new Date(),
-        emotion: 'sadness'
-      });
-      return false;
-    }
-    
+  const loadSettings = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const { error } = await supabase.functions.invoke(
-        'process-companion-payment',
-        {
-          body: {
-            user_id: userId,
-            companion_id: companionId,
-            content_type: currentMonetizationHook.type,
-            amount: cost
-          }
-        }
-      );
-      
-      if (error) {
-        throw error;
-      }
-      
-      let premiumContent = '';
-      let visualElements = undefined;
-      
-      switch (currentMonetizationHook.type) {
-        case 'image':
-          premiumContent = "Here's that special photo I promised you...";
-          visualElements = [{ 
-            data: { 
-              type: 'image',
-              url: '/premium-photo.jpg',
-              alt: `${name}'s special photo`,
-              caption: 'Just for you...'
-            } 
-          }];
-          break;
-        
-        case 'voice':
-          premiumContent = "I've recorded this voice message just for you... [Voice message]";
-          break;
-        
-        case 'explicit_content':
-        case 'special_interaction':
-          premiumContent = currentMonetizationHook.fullContent || 
-            "Let me share something special with you... [Premium content would appear here]";
-          break;
-          
-        default:
-          premiumContent = "Thank you for unlocking this premium content!";
-      }
-      
-      const premiumMessage: CompanionMessage = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: premiumContent,
-        timestamp: new Date(),
-        emotion: 'excited',
-        visualElements,
-        isPremium: true
+      // Simulate fetching monetization settings from an API
+      const fetchedSettings: MonetizationSettings = {
+        subscriptionPrice: 10,
+        unlockingPrice: 5,
+        acceptsLucoin: true,
+        acceptsTips: true,
+        boostingActive: false,
+        meetingPrice: 20
       };
-      
-      onAddMessage(premiumMessage);
-      setCurrentMonetizationHook(null);
-      return true;
-    } catch (error) {
-      console.error('Payment processing error:', error);
-      
-      onAddMessage({
-        id: uuidv4(),
-        role: 'system',
-        content: 'There was an error processing your payment.',
-        timestamp: new Date(),
-        emotion: 'sadness'
-      });
-      
-      return false;
+      setSettings(fetchedSettings);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load monetization settings');
+    } finally {
+      setLoading(false);
     }
-  }, [currentMonetizationHook, lucoinBalance, userId, companionId, name, onAddMessage]);
+  }, [personaId]);
 
-  // Create monetization teaser message
-  const createTeaserMessage = useCallback((): CompanionMessage | null => {
-    if (!currentMonetizationHook) return null;
-    
-    return {
-      id: uuidv4(),
-      role: 'assistant',
-      content: currentMonetizationHook.teaser || "I have something special to share with you...",
-      timestamp: new Date(),
-      emotion: 'flirtatious',
-      requiresPayment: true,
-      paymentAmount: currentMonetizationHook.lucoinCost,
-      suggestedActions: [
-        "Unlock premium content",
-        "Maybe later"
-      ]
-    };
-  }, [currentMonetizationHook]);
+  const updateSettings = useCallback(async (updates: Partial<MonetizationSettings>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const updatedSettings = { ...settings, ...updates };
+      setSettings(updatedSettings);
+      toast({
+        title: 'Monetization Settings Updated',
+        description: 'Your monetization settings have been successfully updated.',
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to update monetization settings');
+      toast({
+        title: 'Error',
+        description: 'Failed to update monetization settings. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [settings]);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
 
   return {
-    monetizationTriggers,
-    currentMonetizationHook,
-    initializeMonetizationHooks,
-    checkMonetizationTriggers,
-    processPremiumContent,
-    createTeaserMessage,
+    settings,
+    loading,
+    error,
+    updateSettings,
   };
-};
+}
 
 export default useMonetizationSystem;
+

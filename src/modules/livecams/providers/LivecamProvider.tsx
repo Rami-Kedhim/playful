@@ -1,6 +1,8 @@
+
+// Fix literal types for roomType in mock livecams => ensure lower case
+
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Livecam } from '@/types/livecam';
-// import { mockLivecams } from '@/data/mockData'; // Removed due to type issues
 import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
 
 interface LivecamContextType {
@@ -29,7 +31,7 @@ const MOCK_LIVECAMS: Livecam[] = [
     previewImage: '/images/livecams/luna_preview.jpg',
     rating: 4.5,
     price: 19.99,
-    roomType: 'Private',
+    roomType: 'private',
     languages: ['English', 'Spanish']
   },
   {
@@ -45,7 +47,7 @@ const MOCK_LIVECAMS: Livecam[] = [
     previewImage: '/images/livecams/max_preview.jpg',
     rating: 4.0,
     price: 15.99,
-    roomType: 'Public',
+    roomType: 'public',
     languages: ['English']
   },
   {
@@ -61,7 +63,7 @@ const MOCK_LIVECAMS: Livecam[] = [
     previewImage: '/images/livecams/nova_preview.jpg',
     rating: 4.8,
     price: 29.99,
-    roomType: 'Private',
+    roomType: 'private',
     languages: ['English', 'French']
   }
 ];
@@ -75,7 +77,6 @@ export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children })
     const loadLivecams = async () => {
       try {
         setLoading(true);
-        // Removed await LivecamsNeuralService.initialize(); since it does not exist
         setLivecams(MOCK_LIVECAMS);
         setError(null);
       } catch (err: any) {
@@ -104,7 +105,6 @@ export const LivecamProvider: React.FC<{ children: ReactNode }> = ({ children })
   const refreshLivecams = async () => {
     try {
       setLoading(true);
-      // refresh with same mock data for now
       setLivecams(MOCK_LIVECAMS);
       setError(null);
     } catch (err: any) {
@@ -138,3 +138,4 @@ export const useLivecamContext = (): LivecamContextType => {
   }
   return context;
 };
+
