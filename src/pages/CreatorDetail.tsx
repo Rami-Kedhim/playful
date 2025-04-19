@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -13,37 +14,47 @@ import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
 
 const CreatorDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+
+  if (!id) {
+    return <div>Creator ID is missing</div>;
+  }
+
   return (
     <CreatorsModule>
-      <CreatorDetailContent />
+      {/* Avoid rendering children directly on CreatorsModule if its type definition disallows it */}
+      <CreatorDetailContent creatorId={id} />
     </CreatorsModule>
   );
 };
 
-const CreatorDetailContent: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+interface CreatorDetailContentProps {
+  creatorId: string;
+}
+
+const CreatorDetailContent: React.FC<CreatorDetailContentProps> = ({ creatorId }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { 
-    creator, 
-    loading, 
-    error, 
+  const {
+    creator,
+    isLoading,
+    error,
     isFavorite,
     isSubscribed,
     canSubscribe,
     handleSubscribe,
-    handleSendTip
-  } = useCreatorDetail(id || '');
+    handleSendTip,
+  } = useCreatorDetail(creatorId);
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast({
       title: "Link copied",
-      description: "Creator profile link copied to clipboard"
+      description: "Creator profile link copied to clipboard",
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <MainLayout>
         <div className="container mx-auto px-4 py-8">
@@ -88,9 +99,7 @@ const CreatorDetailContent: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               {error || "The creator profile you're looking for doesn't exist or has been removed."}
             </p>
-            <Button onClick={() => navigate('/creators')}>
-              Browse Other Creators
-            </Button>
+            <Button onClick={() => navigate("/creators")}>Browse Other Creators</Button>
           </div>
         </div>
       </MainLayout>
@@ -101,7 +110,10 @@ const CreatorDetailContent: React.FC = () => {
     <>
       <Helmet>
         <title>{`${creator.name} - Content Creator | Subscribe for Exclusive Content`}</title>
-        <meta name="description" content={`${creator.name} - Subscribe to access exclusive photos, videos, and live streams. Starting at $${creator.price}/month.`} />
+        <meta
+          name="description"
+          content={`${creator.name} - Subscribe to access exclusive photos, videos, and live streams. Starting at $${creator.price}/month.`}
+        />
       </Helmet>
 
       <MainLayout>
@@ -118,22 +130,15 @@ const CreatorDetailContent: React.FC = () => {
             </Button>
           </div>
 
-          <CreatorHeader 
-            creator={creator} 
-            isSubscribed={isSubscribed}
-            isFavorite={isFavorite}
-          />
+          <CreatorHeader creator={creator} isSubscribed={isSubscribed} isFavorite={isFavorite} />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
             <div className="md:col-span-2">
-              <CreatorTabs 
-                creator={creator} 
-                isSubscribed={isSubscribed}
-              />
+              <CreatorTabs creator={creator} isSubscribed={isSubscribed} />
             </div>
 
             <div className="md:col-span-1">
-              <CreatorSubscriptionCard 
+              <CreatorSubscriptionCard
                 creator={creator}
                 isSubscribed={isSubscribed}
                 canSubscribe={canSubscribe}

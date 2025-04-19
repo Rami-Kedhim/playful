@@ -6,21 +6,16 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { VerificationBadge } from '@/components/verification/VerificationBadge';
-// Import enum VerificationLevel as regular import, not type-only
 import { VerificationLevel } from '@/types/verification';
 
 interface VerificationUpgradeTabProps {
-  userId: string;
+  userId?: string;
   currentLevel: VerificationLevel;
 }
 
-const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
-  currentLevel
-}) => {
+const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({ currentLevel }) => {
   const [selectedLevel, setSelectedLevel] = useState<VerificationLevel | ''>('');
 
-  // Use enum values explicitly here to avoid type conflicts
   const getAvailableUpgrades = (): VerificationLevel[] => {
     switch (currentLevel) {
       case VerificationLevel.BASIC:
@@ -39,9 +34,9 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 
     if (!selectedLevel) {
       toast({
-        title: "No level selected",
-        description: "Please select a verification level to continue.",
-        variant: "destructive"
+        title: 'No level selected',
+        description: 'Please select a verification level to continue.',
+        variant: 'destructive',
       });
       return;
     }
@@ -50,15 +45,14 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       toast({
-        title: "Upgrade request submitted",
-        description: "Your verification upgrade request has been submitted.",
+        title: 'Upgrade request submitted',
+        description: 'Your verification upgrade request has been submitted.',
       });
-
     } catch (error) {
       toast({
-        title: "Request failed",
-        description: "There was an error submitting your upgrade request.",
-        variant: "destructive"
+        title: 'Request failed',
+        description: 'There was an error submitting your upgrade request.',
+        variant: 'destructive',
       });
     }
   };
@@ -90,14 +84,20 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
         </CardHeader>
 
         <CardContent>
-          <RadioGroup value={selectedLevel} onValueChange={(val) => setSelectedLevel(val as VerificationLevel)} className="space-y-4">
+          <RadioGroup
+            value={selectedLevel}
+            onValueChange={val => setSelectedLevel(val as VerificationLevel)}
+            className="space-y-4"
+          >
             {availableUpgrades.includes(VerificationLevel.ENHANCED) && (
               <div className="flex items-start space-x-3 border rounded-md p-4">
                 <RadioGroupItem value={VerificationLevel.ENHANCED} id="enhanced" className="mt-1" />
                 <div className="flex-1">
                   <Label htmlFor="enhanced" className="flex items-center">
-                    <VerificationBadge level={VerificationLevel.ENHANCED} size="sm" />
-                    <span className="ml-2">Enhanced Level</span>
+                    <span className="mr-2">
+                      <ShieldCheck />
+                    </span>
+                    <span>Enhanced Level</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
                     Get an enhanced badge and additional features.
@@ -116,8 +116,10 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
                 <RadioGroupItem value={VerificationLevel.PREMIUM} id="premium" className="mt-1" />
                 <div className="flex-1">
                   <Label htmlFor="premium" className="flex items-center">
-                    <VerificationBadge level={VerificationLevel.PREMIUM} size="sm" />
-                    <span className="ml-2">Premium Level</span>
+                    <span className="mr-2">
+                      <ShieldCheck />
+                    </span>
+                    <span>Premium Level</span>
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
                     Premium verification with additional benefits and higher visibility
@@ -152,4 +154,3 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 };
 
 export default VerificationUpgradeTab;
-

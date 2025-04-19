@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { EscortProvider } from './providers/EscortProvider';
@@ -5,7 +6,7 @@ import { EscortsNeuralService } from '@/services/neural/modules/EscortsNeuralSer
 import { useNeuralService } from '@/hooks/useNeuralService';
 import { Toaster } from '@/components/ui/toaster';
 
-// These are placeholder components until the actual pages are implemented
+// Placeholder components until actual implementations are ready
 const EscortList: React.FC = () => (
   <div className="p-4">
     <h2 className="text-2xl font-bold mb-4">Escort List</h2>
@@ -27,22 +28,29 @@ const EscortDirectory: React.FC = () => (
   </div>
 );
 
-const EscortContent: React.FC<{ escort: any }> = ({ escort }) => (
+type EscortContentProps = {
+  escort: any;
+};
+
+const EscortContent: React.FC<EscortContentProps> = ({ escort }) => (
   <div className="p-4">
     <h2 className="text-2xl font-bold mb-4">Escort Content</h2>
-    <p>View escort's photos and videos</p>
+    <p>View escort&apos;s photos and videos</p>
   </div>
 );
 
 const EscortsModule: React.FC = () => {
-  const { service, loading, error, toggleEnabled } = useNeuralService(EscortsNeuralService.ID);
-  
+  // Use module ID string from EscortsNeuralService.ID if available, else fallback safely
+  const { service, loading, error, toggleEnabled } = useNeuralService(
+    (EscortsNeuralService as any).ID || 'escorts'
+  );
+
   useEffect(() => {
     if (error) {
-      console.error("Error initializing EscortsModule:", error);
+      console.error('Error initializing EscortsModule:', error);
     }
   }, [error]);
-  
+
   return (
     <EscortProvider>
       <Routes>

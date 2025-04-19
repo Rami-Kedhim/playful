@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Escort } from '@/types/Escort';
@@ -29,7 +30,8 @@ export function useEscortProfile() {
       setError(null);
 
       try {
-        const foundEscort = context.getEscortById(id);
+        // Access escorts array and find by id, as getEscortById does not exist
+        const foundEscort = context.escorts.find(e => e.id === id);
         if (foundEscort) {
           setEscort(foundEscort);
         } else {
