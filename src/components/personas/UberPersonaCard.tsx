@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
 import { UberPersona } from '@/types/UberPersona';
 import { hasRealMeets, hasVirtualMeets, hasContent, getVerificationLevel } from '@/utils/personaHelpers';
-import { VerificationLevel } from '@/types/verification';
+import { VerificationLevel as VerificationLevelTS } from '@/types/verification';
 
 interface UberPersonaCardProps {
   persona: UberPersona;
@@ -35,16 +34,17 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
   // Fix verificationLevel with proper enum values, mapping 'advanced' to 'enhanced'
   const verificationLevelRaw = (persona as any).verificationLevel || 'none';
   const verificationLevelNormalized = verificationLevelRaw === 'advanced' ? 'enhanced' : verificationLevelRaw;
-  let verificationLevelSafe: VerificationLevel;
+
+  let verificationLevelSafe: VerificationLevelTS;
   if (
     verificationLevelNormalized === 'none' ||
     verificationLevelNormalized === 'basic' ||
     verificationLevelNormalized === 'enhanced' ||
     verificationLevelNormalized === 'premium'
   ) {
-    verificationLevelSafe = verificationLevelNormalized as VerificationLevel;
+    verificationLevelSafe = verificationLevelNormalized as VerificationLevelTS;
   } else {
-    verificationLevelSafe = VerificationLevel.NONE;
+    verificationLevelSafe = VerificationLevelTS.NONE;
   }
 
   // Use monetization.meetingPrice as price fallback to 0

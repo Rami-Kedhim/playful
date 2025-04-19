@@ -1,5 +1,5 @@
 
-// Fix UberPersonaContext: Use correct UberPersona typings and safely access properties
+// Fix UberPersonaContext types and prop accesses according to current UberPersona interface
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
@@ -106,7 +106,7 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     return allPersonas.filter(persona => 
       persona.monetization?.boostingActive || 
       persona.roleFlags?.isFeatured || 
-      persona.featured
+      (persona as any).featured
     );
   };
   
@@ -122,8 +122,8 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
       let aScore = (aRating * 2) + (aReviewCount / 10);
       let bScore = (bRating * 2) + (bReviewCount / 10);
       
-      if (a.roleFlags?.isFeatured || a.featured) aScore *= boostFactor;
-      if (b.roleFlags?.isFeatured || b.featured) bScore *= boostFactor;
+      if (a.roleFlags?.isFeatured || (a as any).featured) aScore *= boostFactor;
+      if (b.roleFlags?.isFeatured || (b as any).featured) bScore *= boostFactor;
       
       return bScore - aScore;
     });
@@ -188,3 +188,4 @@ export const useUberPersonaContext = (): UberPersonaContextType => {
   }
   return context;
 };
+

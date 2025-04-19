@@ -1,5 +1,5 @@
 
-// Fix imports from "@/types/escort" to use correct names or correct type imports for VerificationDocument and VerificationRequest if missing
+// Fix imports and property access for VerificationDocument and VerificationRequest
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { VerificationDocument, VerificationRequest } from '@/types/escorts';
+// Correct imports from verification types
+import { VerificationDocument, VerificationRequest } from '@/types/verification';
 import { format } from 'date-fns';
 
 interface DocumentReviewModalProps {
@@ -65,16 +66,16 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
         <div className="space-y-4">
           <div className="bg-muted p-4 rounded-md">
             <img 
-              src={document.url || document.fileUrl || 'no-image.png'} 
+              src={document.document_type || document.fileUrl || 'no-image.png'} 
               alt="Verification document" 
               className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
 
           <div>
-            <p><strong>Type:</strong> {document.type || document.document_type || 'Unknown'}</p>
-            <p><strong>Uploaded:</strong> {document.uploadedAt || document.created_at ? 
-              format(new Date(document.uploadedAt || document.created_at), 'PPP') : 
+            <p><strong>Type:</strong> {document.document_type || 'Unknown'}</p>
+            <p><strong>Uploaded:</strong> {document.uploadedAt || document.uploaded_at ? 
+              format(new Date(document.uploadedAt || document.uploaded_at), 'PPP') : 
               'Unknown date'}</p>
           </div>
 
@@ -114,3 +115,4 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
 };
 
 export default DocumentReviewModal;
+

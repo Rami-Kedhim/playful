@@ -9,18 +9,13 @@ interface VerificationLevelsProps {
 }
 
 const VerificationLevels: React.FC<VerificationLevelsProps> = ({ currentLevel }) => {
+  // Remove STANDARD, it's not defined in the enum VerificationLevel
   const levels = [
     {
       id: VerificationLevel.BASIC,
       name: 'Basic Verification',
       description: 'Email and phone number verification',
       requirements: ['Valid email address', 'Phone number verification']
-    },
-    {
-      id: VerificationLevel.STANDARD,
-      name: 'Standard Verification',
-      description: 'ID verification for increased trust',
-      requirements: ['Government-issued ID', 'Selfie with ID']
     },
     {
       id: VerificationLevel.ENHANCED,
@@ -40,7 +35,6 @@ const VerificationLevels: React.FC<VerificationLevelsProps> = ({ currentLevel })
     const levelOrder = [
       VerificationLevel.NONE,
       VerificationLevel.BASIC,
-      VerificationLevel.STANDARD,
       VerificationLevel.ENHANCED,
       VerificationLevel.PREMIUM
     ];
@@ -108,3 +102,4 @@ const VerificationLevels: React.FC<VerificationLevelsProps> = ({ currentLevel })
 };
 
 export default VerificationLevels;
+
