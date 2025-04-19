@@ -1,11 +1,10 @@
 
-// Fix import of VerificationLevel to match usage
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
-// Ensure proper import of VerificationLevel enum
-import { VerificationLevel } from '@/types/verification';
+// Correct import from local verification types to align imports
+import type { VerificationLevel } from '@/types/escort';
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
@@ -15,8 +14,8 @@ interface UberPersonaCardProps {
   className?: string;
 }
 
-const UberPersonaCard: React.FC<UberPersonaCardProps> = ({ 
-  persona, 
+const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
+  persona,
   onClick,
   className = ''
 }) => {
@@ -35,13 +34,15 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
   const verified = persona.roleFlags?.isVerified ?? false;
 
   // Normalize verification level to enum type
-  let verificationLevelSafe: VerificationLevel = VerificationLevel.NONE;
+  let verificationLevelSafe: VerificationLevel = 'none';
   const verificationLevelRaw = persona.verificationLevel || 'none';
+
+  // Simple string check since VerificationLevel is string enum aliases in src/types/escort
   if (
-    verificationLevelRaw === VerificationLevel.NONE ||
-    verificationLevelRaw === VerificationLevel.BASIC ||
-    verificationLevelRaw === VerificationLevel.ENHANCED ||
-    verificationLevelRaw === VerificationLevel.PREMIUM
+    verificationLevelRaw === 'none' ||
+    verificationLevelRaw === 'basic' ||
+    verificationLevelRaw === 'enhanced' ||
+    verificationLevelRaw === 'premium'
   ) {
     verificationLevelSafe = verificationLevelRaw as VerificationLevel;
   }
@@ -49,13 +50,13 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
   const price = persona.monetization?.meetingPrice ?? 0;
 
   return (
-    <Card 
+    <Card
       className={`overflow-hidden transition-transform hover:scale-[1.01] cursor-pointer ${className}`}
       onClick={handleClick}
     >
       <div className="aspect-[3/4] relative">
-        <img 
-          src={imageSrc} 
+        <img
+          src={imageSrc}
           alt={displayName}
           className="object-cover w-full h-full"
         />
