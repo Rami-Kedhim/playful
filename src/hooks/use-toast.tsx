@@ -6,7 +6,7 @@ type ToastProps = {
   title?: string;
   description?: React.ReactNode;
   action?: React.ReactNode;
-  variant?: 'default' | 'destructive' | 'success';
+  variant?: 'default' | 'destructive' | 'success' | 'warning';
 };
 
 export const Toaster = SonnerToaster;
@@ -20,6 +20,8 @@ export function toast({ title, description, variant = 'default', action }: Toast
         ? 'bg-destructive text-destructive-foreground'
         : variant === 'success'
         ? 'bg-green-500 text-white'
+        : variant === 'warning'
+        ? 'bg-amber-500 text-white'
         : ''
     }`
   });

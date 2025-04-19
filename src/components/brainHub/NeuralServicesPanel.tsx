@@ -15,7 +15,7 @@ import {
 import NeuralModuleRegistration from './NeuralModuleRegistration';
 import NeuralServiceCard from './NeuralServiceCard';
 import EmptyServiceState from './EmptyServiceState';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { ModuleType } from '@/services/neural/types/NeuralService';
 import { TrainingProgress } from '@/services/neural/types/neuralHub';
 
@@ -35,7 +35,8 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
     registerService
   } = useNeuralRegistry();
   
-  const [activeTab, setActiveTab] = useState<ModuleType>('ai-companion');
+  // Use ModuleType for the active tab state
+  const [activeTab, setActiveTab] = useState<ModuleType>('ai_companions');
   const [showRegistration, setShowRegistration] = useState(false);
   
   useEffect(() => {
@@ -73,7 +74,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
       let service;
       
       switch (moduleType) {
-        case 'ai-companion':
+        case 'ai_companions':
           service = new AICompanionNeuralService();
           break;
         case 'escorts':
@@ -156,15 +157,15 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
       ) : (
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ModuleType)}>
           <TabsList className="grid grid-cols-4 mb-4">
-            <TabsTrigger value="ai-companion">AI Companion</TabsTrigger>
+            <TabsTrigger value="ai_companions">AI Companion</TabsTrigger>
             <TabsTrigger value="escorts">Escorts</TabsTrigger>
             <TabsTrigger value="creators">Content Creators</TabsTrigger>
             <TabsTrigger value="livecams">Livecams</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="ai-companion">
-            {getServicesByType('ai-companion').length > 0 ? (
-              getServicesByType('ai-companion').map(service => (
+          <TabsContent value="ai_companions">
+            {getServicesByType('ai_companions').length > 0 ? (
+              getServicesByType('ai_companions').map(service => (
                 <NeuralServiceCard 
                   key={service.moduleId} 
                   service={service}
@@ -175,7 +176,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
               <EmptyServiceState
                 icon={<Brain className="h-12 w-12 text-muted-foreground" />}
                 title="AI Companion"
-                onRegister={() => createDefaultService('ai-companion')}
+                onRegister={() => createDefaultService('ai_companions')}
               />
             )}
           </TabsContent>

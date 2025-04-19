@@ -11,9 +11,13 @@ export interface VerificationDocument {
   id: string;
   userId: string;
   documentType: string;
+  document_type?: string; // For backward compatibility
   fileUrl: string;
+  file_path?: string; // For backward compatibility
+  url?: string; // For backward compatibility
   status: VerificationStatus;
   uploadedAt: string;
+  uploaded_at?: string; // For backward compatibility
   reviewedAt?: string;
   reviewedBy?: string;
   notes?: string;

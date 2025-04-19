@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { VerificationDocument, VerificationRequest, VerificationStatus } from '@/types/verification';
 
@@ -64,7 +64,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Document Review - {document.document_type}</DialogTitle>
+          <DialogTitle>Document Review - {document.documentType || document.document_type}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-6">
@@ -80,7 +80,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             {getDocumentUrl() && getDocumentUrl().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
               <img
                 src={getDocumentUrl()}
-                alt={document.document_type?.toString()}
+                alt={(document.documentType || document.document_type || '').toString()}
                 className="w-full h-auto max-h-[500px] object-contain"
               />
             ) : (
@@ -102,10 +102,10 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             <h3 className="font-medium">Document Information</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="font-medium">Type</div>
-              <div>{document.document_type}</div>
+              <div>{document.documentType || document.document_type}</div>
               
               <div className="font-medium">Uploaded</div>
-              <div>{new Date(document.uploaded_at).toLocaleString()}</div>
+              <div>{new Date(document.uploadedAt || document.uploaded_at || Date.now()).toLocaleString()}</div>
               
               <div className="font-medium">Status</div>
               <div>

@@ -3,15 +3,24 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { ProfileProps } from '@/data/mockData';
 
-const CreatorCard: React.FC<ProfileProps> = ({
+export interface CreatorProfileProps {
+  id: string;
+  name: string;
+  image: string;
+  location: string;
+  rating: number;
+  premium?: boolean;
+  price?: number;
+}
+
+const CreatorCard: React.FC<CreatorProfileProps> = ({
   id,
   name,
-  imageUrl,
+  image,
   location,
   rating,
-  isPremium,
+  premium,
   price
 }) => {
   return (
@@ -19,11 +28,11 @@ const CreatorCard: React.FC<ProfileProps> = ({
       <Card className="w-64 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
         <div className="relative">
           <img 
-            src={imageUrl} 
+            src={image} 
             alt={name}
             className="w-full h-40 object-cover"
           />
-          {isPremium && (
+          {premium && (
             <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-500 to-pink-500">
               Premium
             </Badge>

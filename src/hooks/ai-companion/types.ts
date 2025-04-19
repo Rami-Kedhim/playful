@@ -91,3 +91,17 @@ export interface UseAICompanionConversationResult {
   generatingImage: boolean;
   creditCost: number;
 }
+
+export interface AICompanionMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant' | 'system';
+  timestamp: string;
+  emotionalState?: EmotionalState;
+  is_from_user?: boolean; // For backward compatibility
+  created_at?: string; // For backward compatibility
+  attachments?: Array<{
+    type: string;
+    url: string;
+  }>;
+}

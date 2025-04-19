@@ -15,6 +15,18 @@ interface AICompanionCardProps {
 const AICompanionCard: React.FC<AICompanionCardProps> = ({ companion, onSelect, isSelected }) => {
   const { name, description, personality_traits, body_type, relationship_level } = companion;
   
+  // Safely access engagement stats with fallbacks
+  const engagementStats = companion.engagement_stats || { 
+    messages_sent: 0, 
+    messages_received: 0,
+    total_interaction_time: 0
+  };
+  
+  // Get chat messages count with backward compatibility
+  const chatMessagesCount = 'chat_messages' in engagementStats 
+    ? engagementStats.chat_messages 
+    : (engagementStats.messages_sent + engagementStats.messages_received);
+  
   return (
     <Card className={`w-full transition-shadow hover:shadow-md ${isSelected ? 'border-primary' : ''}`}>
       <CardHeader className="pb-2">
@@ -26,30 +38,30 @@ const AICompanionCard: React.FC<AICompanionCardProps> = ({ companion, onSelect, 
       </CardHeader>
       <CardContent className="pb-2">
         <div className="flex flex-wrap gap-1 mb-2">
-          {personality_traits.map((trait) => (
+          {personality_traits && personality_traits.map((trait) => (
             <Badge key={trait} variant="outline" className="text-xs">
               {trait}
             </Badge>
           ))}
-          <Badge variant="outline" className="text-xs">{body_type}</Badge>
+          {body_type && <Badge variant="outline" className="text-xs">{body_type}</Badge>}
         </div>
         
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex items-center gap-1">
             <Heart className="h-3 w-3 text-rose-500" />
-            <span>Affection: {relationship_level.affection}</span>
+            <span>Affection: {relationship_level?.affection || 0}</span>
           </div>
           <div className="flex items-center gap-1">
             <MessageSquare className="h-3 w-3 text-blue-500" />
-            <span>Messages: {companion.engagement_stats.chat_messages}</span>
+            <span>Messages: {chatMessagesCount || 0}</span>
           </div>
           <div className="flex items-center gap-1">
             <Lock className="h-3 w-3 text-amber-500" />
-            <span>Trust: {relationship_level.trust}</span>
+            <span>Trust: {relationship_level?.trust || 0}</span>
           </div>
           <div className="flex items-center gap-1">
             <Unlock className="h-3 w-3 text-emerald-500" />
-            <span>Intimacy: {relationship_level.intimacy}</span>
+            <span>Intimacy: {relationship_level?.intimacy || 0}</span>
           </div>
         </div>
       </CardContent>

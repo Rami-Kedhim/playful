@@ -7,7 +7,8 @@ export type ModuleType =
   | 'ai_companions'
   | 'core'
   | 'security'
-  | 'analytics';
+  | 'analytics'
+  | 'ai-companion'; // Adding this for backward compatibility
 
 // Neural service configuration interface
 export interface NeuralServiceConfig {

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { neuralHub } from '@/services/neural';
 import { TrainingProgress, NeuralModel } from '@/services/neural/types/neuralHub';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -86,7 +86,7 @@ const NeuralSystemsPanel = () => {
   const handleStartTraining = async (type: string) => {
     try {
       const result = await neuralHub.startTraining(type);
-      if (result && result.success) {
+      if (result && (result.status === 'started' || result.status === 'success')) {
         loadData();
         toast({
           title: "Training started",

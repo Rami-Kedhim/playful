@@ -15,31 +15,34 @@ const AICompanionChatMessage: React.FC<AICompanionChatMessageProps> = ({
   companionName,
   companionAvatar
 }) => {
-  const { content, is_from_user, attachments } = message;
+  // Determine if message is from user based on role
+  const isFromUser = message.is_from_user ?? message.role === 'user';
+  // Use attachments from message or empty array if not present
+  const attachments = message.attachments || [];
   
   return (
     <div className={cn(
       "flex gap-3 max-w-[80%]",
-      is_from_user ? "self-end flex-row-reverse" : "self-start"
+      isFromUser ? "self-end flex-row-reverse" : "self-start"
     )}>
       <Avatar className="h-8 w-8">
         <AvatarImage 
-          src={is_from_user ? undefined : companionAvatar} 
-          alt={is_from_user ? "You" : companionName} 
+          src={isFromUser ? undefined : companionAvatar} 
+          alt={isFromUser ? "You" : companionName} 
         />
         <AvatarFallback>
-          {is_from_user ? "You" : companionName[0]}
+          {isFromUser ? "You" : companionName[0]}
         </AvatarFallback>
       </Avatar>
       
       <div className="flex flex-col gap-1">
         <div className={cn(
           "rounded-lg p-3 text-sm",
-          is_from_user 
+          isFromUser 
             ? "bg-primary text-primary-foreground" 
             : "bg-muted dark:bg-muted"
         )}>
-          {content}
+          {message.content}
         </div>
         
         {attachments && attachments.length > 0 && (
@@ -65,7 +68,7 @@ const AICompanionChatMessage: React.FC<AICompanionChatMessageProps> = ({
         )}
         
         <span className="text-xs text-muted-foreground">
-          {new Date(message.created_at).toLocaleTimeString([], { 
+          {new Date(message.created_at || message.timestamp).toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit' 
           })}

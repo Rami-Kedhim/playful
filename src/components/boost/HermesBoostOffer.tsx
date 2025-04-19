@@ -8,7 +8,12 @@ import { useHermesInsights } from '@/hooks/useHermesInsights';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Zap, Clock, X } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+
+interface BoostOffer {
+  value: string;
+  expires: string;
+}
 
 interface HermesBoostOfferProps {
   onAccept?: () => void;
@@ -17,18 +22,29 @@ interface HermesBoostOfferProps {
 
 const HermesBoostOffer = ({ onAccept, onDismiss }: HermesBoostOfferProps) => {
   const { user } = useAuth();
-  const { insights, reportUserAction } = useHermesInsights(user?.id);
+  const { insights, reportUserAction } = useHermesInsights();
   const [isVisible, setIsVisible] = useState(false);
+  const [boostOffer, setBoostOffer] = useState<BoostOffer | null>(null);
   
-  // Show offer when available from HERMES
+  // Extract boost offer from insights when available
   useEffect(() => {
-    if (insights.boostOffer) {
-      setIsVisible(true);
+    if (insights && Array.isArray(insights)) {
+      const offerInsight = insights.find(insight => 
+        insight.type === 'boost_offer' || insight.category === 'promotion'
+      );
+      
+      if (offerInsight && offerInsight.data) {
+        setBoostOffer({
+          value: offerInsight.data.value || '20%',
+          expires: offerInsight.data.expiration || '1 hour'
+        });
+        setIsVisible(true);
+      }
     }
-  }, [insights.boostOffer]);
+  }, [insights]);
   
   // If no offer or dismissed, don't render
-  if (!isVisible || !insights.boostOffer) {
+  if (!isVisible || !boostOffer) {
     return null;
   }
   
@@ -38,7 +54,8 @@ const HermesBoostOffer = ({ onAccept, onDismiss }: HermesBoostOfferProps) => {
     
     toast({
       title: "Boost Offer Applied!",
-      description: `Your ${insights.boostOffer?.value} discount has been applied.`,
+      description: `Your ${boostOffer.value} discount has been applied.`,
+      variant: "success"
     });
     
     setIsVisible(false);
@@ -65,11 +82,11 @@ const HermesBoostOffer = ({ onAccept, onDismiss }: HermesBoostOfferProps) => {
       </CardHeader>
       <CardContent className="pb-3">
         <p className="text-lg font-bold">
-          {insights.boostOffer.value} Discount
+          {boostOffer.value} Discount
         </p>
         <div className="flex items-center mt-1 text-xs text-white/80">
           <Clock className="h-3 w-3 mr-1" />
-          <span>Expires in {insights.boostOffer.expires}</span>
+          <span>Expires in {boostOffer.expires}</span>
         </div>
       </CardContent>
       <CardFooter>
