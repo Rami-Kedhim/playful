@@ -1,6 +1,8 @@
 
+// Fix type usage here by importing HermesInsight type and properly accessing insights array elements
 import { useState, useCallback } from 'react';
 import { useHermesInsights } from './useHermesInsights';
+import type { HermesInsight } from '@/types/seo';
 
 export interface LivecamInsight {
   recommendedProfileId?: string;
@@ -11,10 +13,10 @@ export interface LivecamInsight {
 }
 
 export function useHermesLivecamInsights(userId?: string) {
-  const {
-    reportUserAction,
-    insights: baseInsights,
-  } = useHermesInsights();
+  const { reportUserAction, insights: baseInsightsRaw } = useHermesInsights();
+
+  // Assume insights is HermesInsight[] array
+  const baseInsights = baseInsightsRaw as HermesInsight[];
 
   const [livecamInsights, setLivecamInsights] = useState<LivecamInsight>({ isLoading: false });
 
@@ -24,19 +26,24 @@ export function useHermesLivecamInsights(userId?: string) {
         console.warn('Cannot report to HERMES: missing userId');
         return;
       }
-
       try {
         setLivecamInsights(prev => ({ ...prev, isLoading: true }));
 
-        // reportUserAction expects string action and optional category and data
-        await reportUserAction('viewed_livecam', category || 'general', {
+        // reportUserAction expects 2 args: action string and data object
+        await reportUserAction('viewed_livecam', {
+          category: category || 'general',
           location: streamerId,
         });
 
+        // Extract values from insights array based on type key
+        const recommendedInsight = baseInsights.find(ins => ins.type === 'recommendedProfileId');
+        const popularCategoryInsight = baseInsights.find(ins => ins.type === 'popularCategory');
+        const trendingTagInsight = baseInsights.find(ins => ins.type === 'trendingTag');
+
         setLivecamInsights({
-          recommendedProfileId: baseInsights.recommendedProfileId,
-          popularCategory: baseInsights.popularCategory,
-          trendingTag: baseInsights.trendingTag,
+          recommendedProfileId: recommendedInsight?.value as string | undefined,
+          popularCategory: popularCategoryInsight?.value as string | undefined,
+          trendingTag: trendingTagInsight?.value as string | undefined,
           isLoading: false,
         });
       } catch (error) {
@@ -53,7 +60,8 @@ export function useHermesLivecamInsights(userId?: string) {
 
   const recordLivecamSession = useCallback(
     async (streamerId: string, duration: number, category?: string) => {
-      await reportUserAction('livecam_session', category || 'general', {
+      await reportUserAction('livecam_session', {
+        category: category || 'general',
         location: streamerId,
         sessionTime: duration,
       });
@@ -63,7 +71,8 @@ export function useHermesLivecamInsights(userId?: string) {
 
   const recordLivecamTip = useCallback(
     async (streamerId: string, amount: number, message?: string) => {
-      await reportUserAction('livecam_tip', 'tip', {
+      await reportUserAction('livecam_tip', {
+        category: 'tip',
         location: streamerId,
         amount,
         message,

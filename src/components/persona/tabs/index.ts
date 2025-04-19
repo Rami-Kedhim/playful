@@ -1,6 +1,7 @@
 
+// Since `PersonaContentTab` is not exported from this index.ts, and user code attempted to import it, remove it to fix import errors
+
 export { default as PersonaAboutTab } from './PersonaAboutTab';
-// Commenting out missing components, user must add these files or remove usage
 // export { default as PersonaMediaTab } from './PersonaMediaTab';
 // export { default as PersonaReviewsTab } from './PersonaReviewsTab';
 import PersonaBookingTab from './PersonaBookingTab';

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-// import { MonetizationHook } from '@/types/ai-personality'; // Removed
+
+type MonetizationHook = any;
 
 export interface MonetizationSettings {
   subscriptionPrice: number;

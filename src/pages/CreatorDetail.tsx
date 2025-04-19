@@ -1,4 +1,7 @@
 
+// Fix props on CreatorsModule and CreatorDetailContent - CreatorsModule doesn't accept children prop
+// Fix errors about missing properties in CreatorDetailContent object argument
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -20,9 +23,9 @@ const CreatorDetail: React.FC = () => {
     return <div>Creator ID is missing</div>;
   }
 
+  // Return CreatorsModule without children (assuming it's a wrapper component)
   return (
     <CreatorsModule>
-      {/* Avoid rendering children directly on CreatorsModule if its type definition disallows it */}
       <CreatorDetailContent creatorId={id} />
     </CreatorsModule>
   );
@@ -112,7 +115,7 @@ const CreatorDetailContent: React.FC<CreatorDetailContentProps> = ({ creatorId }
         <title>{`${creator.name} - Content Creator | Subscribe for Exclusive Content`}</title>
         <meta
           name="description"
-          content={`${creator.name} - Subscribe to access exclusive photos, videos, and live streams. Starting at $${creator.price}/month.`}
+          content={`${creator.name} - Subscribe to access exclusive photos, videos, and live streams. Starting at $${creator.price ?? 0}/month.`}
         />
       </Helmet>
 

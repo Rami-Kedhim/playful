@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +21,6 @@ const Livecams: React.FC = () => {
   const [canLoadMore, setCanLoadMore] = useState(true);
   const { toast } = useToast();
   
-  // Fix filter type to match expected LivecamsFilter
   const [filters, setFilters] = useState<LivecamsFilter>({
     status: 'all',
     categories: [],
@@ -41,7 +39,6 @@ const Livecams: React.FC = () => {
   const fetchLivecams = useCallback(async (filterOptions: LivecamsFilter = {}) => {
     setLoading(true);
     try {
-      // Simulate API call
       const data = await simulateApiCall(page, pageSize, filterOptions);
       setLivecams(data.models);
       setTotalCount(data.totalCount);
@@ -76,18 +73,15 @@ const Livecams: React.FC = () => {
   }, [page, pageSize, filters]);
   
   const fetchTrending = useCallback(() => {
-    // Simulate trending models
     const trending = simulateTrending();
     setTrendingModels(trending);
   }, []);
   
   const fetchFeatured = useCallback(() => {
-    // Simulate featured model
     const featured = simulateFeatured();
     setFeaturedLivecams([featured]);
   }, []);
   
-  // Fix the Promise<void> methods
   const handleLoadMore = async () => {
     const hasMore = await fetchMoreModels();
     if (!hasMore) {
@@ -106,7 +100,6 @@ const Livecams: React.FC = () => {
     await fetchLivecams(newFilters);
   };
   
-  // Fix the categories handler to work with string arrays
   const handleCategoryChange = async (categories: string[]) => {
     const newFilters = {...filters, categories};
     setFilters(newFilters);
@@ -155,7 +148,6 @@ const Livecams: React.FC = () => {
               
               <div>
                 <Label htmlFor="categories">Categories</Label>
-                {/* Use checkboxes for multi-select instead */}
                 <div className="space-y-2 mt-2">
                   {['amateur', 'teen', 'mature'].map((category) => (
                     <div key={category} className="flex items-center">
@@ -269,9 +261,6 @@ const Livecams: React.FC = () => {
 
 export default Livecams;
 
-// Update the API simulation functions to match the types
-
-// Simulate API call
 async function simulateApiCall(
   page: number, 
   pageSize: number, 
@@ -281,7 +270,6 @@ async function simulateApiCall(
     setTimeout(() => {
       const allModels = generateMockLivecams();
       
-      // Apply filters
       const filteredModels = allModels.filter(model => {
         if (filterOptions.status && filterOptions.status !== 'all') {
           const isLive = model.isLive;
@@ -309,15 +297,12 @@ async function simulateApiCall(
         return true;
       });
       
-      // Apply sorting
       const sortedModels = [...filteredModels].sort((a, b) => {
         if (filterOptions.sortBy === 'newest') {
-          // Compare by creation date if available, fallback to random sort
           const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
           const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return dateB - dateA;
         } else {
-          // Default to popularity (viewer count)
           return (b.viewerCount || 0) - (a.viewerCount || 0);
         }
       });
@@ -339,19 +324,16 @@ async function simulateApiCall(
   });
 }
 
-// Simulate trending models
 function simulateTrending(): LivecamModel[] {
   const allModels = generateMockLivecams();
   return allModels.slice(0, 5);
 }
 
-// Simulate featured model
 function simulateFeatured(): LivecamModel {
   const allModels = generateMockLivecams();
   return allModels[0];
 }
 
-// Mock livecam data
 function generateMockLivecams(): LivecamModel[] {
   const models: LivecamModel[] = [];
   const categories = ['amateur', 'teen', 'mature'];

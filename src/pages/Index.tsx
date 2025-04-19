@@ -1,4 +1,8 @@
 
+// Fix import of escorts and creators, correct names from mockData to mockCreators and mockLivecams if needed.
+// Here, the mockData exports should have 'mockCreators' and 'mockLivecams' not 'escorts' or 'creators'.
+// So update import to the correct named exports.
+
 import { useState, useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
@@ -13,8 +17,12 @@ import WelcomeAlert from "@/components/layout/WelcomeAlert";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { toast } from "@/hooks/use-toast";
 
-// The mockData actually has 'escorts' and 'creators' arrays, not 'featuredEscorts' or 'featuredCreators'
-import { escorts as featuredEscorts, creators as featuredCreators } from "@/data/mockData";
+// Correct imports of mockCreators and mockLivecams
+import { mockCreators, mockLivecams } from "@/data/mockData";
+
+// For example, map mockLivecams as featuredEscorts for demonstration (temporary)
+const featuredEscorts = mockLivecams; 
+const featuredCreators = mockCreators;
 
 const Index = () => {
   const { user, isAuthenticated } = useAuth();
@@ -65,3 +73,4 @@ const Index = () => {
 };
 
 export default Index;
+
