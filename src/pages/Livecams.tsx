@@ -1,6 +1,4 @@
 
-// Fix prop name for LivecamCard and add missing imports, remove unused props
-
 import React, { useState } from 'react';
 import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
 import LivecamCard from '@/components/livecams/LivecamCard';
@@ -112,7 +110,17 @@ const Livecams = () => {
             <p>Error: {error}</p>
           ) : sortedLivecams.length > 0 ? (
             sortedLivecams.map(livecam => (
-              <LivecamCard key={livecam.id} creator={livecam} />
+              <LivecamCard 
+                key={livecam.id} 
+                id={livecam.id}
+                name={livecam.name}
+                imageUrl={livecam.imageUrl}
+                location={livecam.location}
+                rating={livecam.rating || 0}
+                isLive={livecam.isLive}
+                isPremium={livecam.isPremium}
+                price={livecam.price}
+              />
             ))
           ) : (
             <p>No livecams found.</p>

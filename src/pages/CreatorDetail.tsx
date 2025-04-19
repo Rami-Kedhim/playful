@@ -1,6 +1,4 @@
 
-// Fix imports and creator type usage aligning with ContentCreator for optional username
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -14,7 +12,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
 import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
-import type { ContentCreator } from "@/types/creator";
+import type { ContentCreator, Creator } from "@/types/creator";
 
 const CreatorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,11 +40,12 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
     handleSendTip,
   } = useCreatorDetail(creatorId);
 
-  const creator: ContentCreator | null = rawCreator
+  // Ensure username is always present when casting to Creator
+  const creator: Creator | null = rawCreator
     ? {
         ...rawCreator,
         username: rawCreator.username || rawCreator.name || 'unknown',
-      }
+      } as Creator
     : null;
 
   const handleShare = () => {
@@ -157,3 +156,4 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
 };
 
 export default CreatorDetail;
+

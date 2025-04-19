@@ -1,10 +1,9 @@
 
-// Fix: Force import VerificationLevel from single source
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import { VerificationLevel } from '@/types/verification'; // Use unified import
+import { VerificationLevel } from '@/types/verification';
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
@@ -33,7 +32,6 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Cast verification level explicitly to avoid type conflicts
   const verificationLevelSafe: VerificationLevel = (persona.verificationLevel as VerificationLevel) || VerificationLevel.NONE;
 
   const price = persona.monetization?.meetingPrice ?? 0;

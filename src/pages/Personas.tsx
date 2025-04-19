@@ -1,13 +1,11 @@
 
-// Fix imports/usage of filter options due to missing exports, adjust state update accordingly
-
 import React, { useEffect, useState } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
-import usePersonaFilter from '@/hooks/usePersonaFilter';
+import usePersonaFilter, { FilterOptions } from '@/hooks/usePersonaFilter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -32,7 +30,13 @@ const PersonasPage: React.FC = () => {
         const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
         setAllPersonas(mappedPersonas);
 
-        updateFilterOptions({}); // clear filters (empty update)
+        // Clear filters by resetting filterOptions properties explicitly
+        updateFilterOptions({
+          searchTerm: '',
+          location: '',
+          roleFilters: {},
+          capabilityFilters: {}
+        });
       } catch (error) {
         console.error('Error loading personas:', error);
       } finally {
@@ -50,7 +54,6 @@ const PersonasPage: React.FC = () => {
       filters.push({ key: 'location', label: `Location: ${filterOptions.location}` });
     }
 
-    // Defensive: filterOptions.roleFilters and capabilityFilters might be undefined sometimes
     if (filterOptions.roleFilters) {
       Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
         if (active) filters.push({ key: role, label: role.replace(/^is/, '') });
@@ -78,6 +81,7 @@ const PersonasPage: React.FC = () => {
 
   const clearAllFilters = () => {
     updateFilterOptions({
+      searchTerm: '',
       location: '',
       roleFilters: {},
       capabilityFilters: {},

@@ -1,6 +1,4 @@
 
-// Fix NeuralModel status typing by asserting as const values in mock data 
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,7 +22,7 @@ const BrainHubPage = () => {
           type: 'language',
           version: '2.1',
           capabilities: ['text-generation', 'image-description', 'sentiment-analysis'],
-          status: 'active' as const,
+          status: 'active' as 'active',
           performance: {
             accuracy: 0.89,
             latency: 120,
@@ -42,7 +40,7 @@ const BrainHubPage = () => {
           type: 'language',
           version: '1.5',
           capabilities: ['character-creation', 'dialogue-generation'],
-          status: 'active' as const,
+          status: 'active' as 'active',
           performance: {
             accuracy: 0.85,
             latency: 100,
@@ -60,7 +58,7 @@ const BrainHubPage = () => {
           type: 'multimodal',
           version: '3.0',
           capabilities: ['profile-optimization', 'scheduling-assistant', 'recommendation-engine'],
-          status: 'active' as const,
+          status: 'active' as 'active',
           performance: {
             accuracy: 0.92,
             latency: 150,
@@ -74,7 +72,6 @@ const BrainHubPage = () => {
         }
       ];
 
-      // Cast from neuralHub's model type to metrics's expected type
       const modelsMapped: NeuralMetricsNeuralModel[] = mockModelsHub.map(m => ({
         ...m,
         status: m.status as 'active' | 'inactive' | 'training' | 'error'
@@ -118,11 +115,9 @@ const BrainHubPage = () => {
           </Card>
         </TabsContent>
         <TabsContent value="training" className="space-y-4">
-          {/* Training tab content here */}
           <p>Training tab content would go here</p>
         </TabsContent>
         <TabsContent value="performance" className="space-y-4">
-          {/* Performance tab content here */}
           <p>Performance tab content would go here</p>
         </TabsContent>
       </Tabs>

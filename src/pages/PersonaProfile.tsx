@@ -1,6 +1,4 @@
 
-// Fix initial persona state typing and monetization default keys, provide all required fields
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,7 +66,6 @@ const PersonaProfile: React.FC = () => {
       favoriteCount: 0,
     },
     description: 'A passionate creator with a love for sharing her life.',
-    isAI: false,
   });
 
   return (
@@ -95,7 +92,7 @@ const PersonaProfile: React.FC = () => {
                   <MapPin className="h-4 w-4" />
                   <span>{persona.location}</span>
                   <Star className="h-4 w-4" />
-                  <span>{persona.stats?.rating} ({persona.stats?.reviewCount} reviews)</span>
+                  <span>{persona.stats.rating} ({persona.stats.reviewCount} reviews)</span>
                 </div>
               </div>
               <Button onClick={() => navigate('/messages')}>

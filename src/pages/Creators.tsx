@@ -1,9 +1,7 @@
 
-// Fix prop names and imports for CreatorCard
-
 import React from 'react';
 import { useCreators } from '@/hooks/useCreators';
-import CreatorCard from '@/components/creators/CreatorCard';
+import CreatorCard, { CreatorProfileProps } from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -63,7 +61,16 @@ const Creators = () => {
           <p>Error: {error}</p>
         ) : sortedCreators.length > 0 ? (
           sortedCreators.map(creator => (
-            <CreatorCard key={creator.id} creator={creator} />
+            <CreatorCard 
+              key={creator.id} 
+              id={creator.id}
+              name={creator.name}
+              image={creator.imageUrl}
+              location={creator.location}
+              rating={creator.rating || 0}
+              premium={creator.isPremium}
+              price={creator.price}
+            />
           ))
         ) : (
           <p>No creators found.</p>
