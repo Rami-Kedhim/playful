@@ -5,6 +5,7 @@ export interface RelationshipLevel {
   trust: number;
   affection: number;
   intimacy: number;
+  obedience: number;
 }
 
 export interface AICompanion {
@@ -18,4 +19,21 @@ export interface AICompanion {
   emotional_state?: EmotionalState;
   created_at: string;
   updated_at: string;
+  body_type?: string;
+  voice_type?: string;
+  is_preset?: boolean;
+  engagement_stats?: {
+    messages_sent: number;
+    messages_received: number;
+    total_interaction_time: number;
+    last_interaction?: string;
+  };
+}
+
+export interface AICompanionMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant' | 'system';
+  timestamp: string;
+  emotionalState?: EmotionalState;
 }

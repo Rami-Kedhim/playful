@@ -1,5 +1,6 @@
 
-import { BaseNeuralService, ModuleType } from '../types/NeuralService';
+import { BaseNeuralService } from './BaseNeuralService';
+import { ModuleType } from '../types/NeuralService';
 
 export class LivecamsNeuralService extends BaseNeuralService {
   constructor() {
@@ -7,17 +8,16 @@ export class LivecamsNeuralService extends BaseNeuralService {
       'LivecamsNeuralService', 
       'livecams' as ModuleType, 
       'Livecams Neural Service',
-      'Neural service for livecam features and recommendations',
       '1.0.0'
     );
   }
   
-  getCapabilities(): string[] {
+  override getCapabilities(): string[] {
     return [
       'stream-quality-optimization',
-      'audience-matching',
-      'engagement-prediction',
-      'content-recommendation',
+      'audience-targeting',
+      'engagement-metrics',
+      'recommendation-engine',
       'performance-analytics'
     ];
   }

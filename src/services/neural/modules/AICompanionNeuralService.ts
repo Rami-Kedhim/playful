@@ -1,24 +1,25 @@
 
-import { BaseNeuralService, ModuleType } from '../types/NeuralService';
+import { BaseNeuralService } from './BaseNeuralService';
+import { ModuleType } from '../types/NeuralService';
 
 export class AICompanionNeuralService extends BaseNeuralService {
   constructor() {
     super(
       'AICompanionNeuralService', 
-      'ai-companion' as ModuleType, 
+      'ai_companions' as ModuleType, 
       'AI Companion Neural Service',
-      'Neural service for AI companion features and interactions',
       '1.0.0'
     );
   }
   
-  getCapabilities(): string[] {
+  override getCapabilities(): string[] {
     return [
-      'personality-modeling',
-      'conversation-processing',
-      'emotional-response',
-      'memory-management',
-      'user-preference-learning'
+      'personality-generation',
+      'emotional-modeling',
+      'conversation-memory',
+      'adaptive-learning',
+      'preference-matching',
+      'interaction-optimization'
     ];
   }
 }

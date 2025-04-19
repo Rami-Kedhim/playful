@@ -1,5 +1,6 @@
 
-import { BaseNeuralService, ModuleType } from '../types/NeuralService';
+import { BaseNeuralService } from './BaseNeuralService';
+import { ModuleType } from '../types/NeuralService';
 
 export class CreatorsNeuralService extends BaseNeuralService {
   constructor() {
@@ -7,12 +8,11 @@ export class CreatorsNeuralService extends BaseNeuralService {
       'CreatorsNeuralService', 
       'creators' as ModuleType, 
       'Creators Neural Service',
-      'Neural service for content creators features and recommendations',
       '1.0.0'
     );
   }
   
-  getCapabilities(): string[] {
+  override getCapabilities(): string[] {
     return [
       'content-recommendation',
       'creator-matching',

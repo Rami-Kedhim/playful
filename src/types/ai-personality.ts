@@ -17,3 +17,9 @@ export interface EmotionalState {
   intensityLevel: number;
   lastUpdated: number;
 }
+
+export interface PersonalityTrait {
+  name: string;
+  value: number; // 0-100 scale
+  description?: string;
+}

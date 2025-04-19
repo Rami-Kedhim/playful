@@ -21,13 +21,15 @@ export const AppRoutes = {
   AUTH: '/auth',
   WALLET: '/wallet',
   VERIFICATION: '/verification',
-  PERSONAS: '/personas'
+  PERSONAS: '/personas',
+  SAFETY_ROUTE_SHARE: '/safety/route-share'
 };
 
 export const ServiceCategories = {
   LIVECAMS: 'livecams',
   AI_COMPANION: 'ai-companions',
-  BRAIN_HUB: 'brain-hub'
+  BRAIN_HUB: 'brain-hub',
+  SAFETY: 'safety'
 };
 
 export interface Breadcrumb {
@@ -64,6 +66,8 @@ export const getBreadcrumbsFromPath = (path: string): Breadcrumb[] => {
       label = 'AI Companions';
     } else if (part === 'brain-hub') {
       label = 'Brain Hub';
+    } else if (part === 'route-share' && parts[i-1] === 'safety') {
+      label = 'Route Sharing';
     }
     
     breadcrumbs.push({

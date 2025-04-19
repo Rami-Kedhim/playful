@@ -1,5 +1,6 @@
 
-import { BaseNeuralService, ModuleType } from '../types/NeuralService';
+import { BaseNeuralService } from './BaseNeuralService';
+import { ModuleType } from '../types/NeuralService';
 
 export class EscortsNeuralService extends BaseNeuralService {
   constructor() {
@@ -7,12 +8,11 @@ export class EscortsNeuralService extends BaseNeuralService {
       'EscortsNeuralService', 
       'escorts' as ModuleType, 
       'Escorts Neural Service',
-      'Neural service for escort-related features and recommendations',
       '1.0.0'
     );
   }
   
-  getCapabilities(): string[] {
+  override getCapabilities(): string[] {
     return [
       'profile-enhancement',
       'matching-algorithm',

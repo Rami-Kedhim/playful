@@ -1,99 +1,47 @@
 
-import { NeuralService, ModuleType } from '../types/NeuralService';
+import { BaseNeuralService, ModuleType } from '../types/NeuralService';
 
 class NeuralServiceRegistry {
-  private services: Map<string, NeuralService> = new Map();
-  private initialized: boolean = false;
+  private services: Map<string, BaseNeuralService> = new Map();
   
-  constructor() {
-    this.services = new Map();
-  }
-  
-  registerService(service: NeuralService): boolean {
-    try {
-      if (this.services.has(service.moduleId)) {
-        console.warn(`Service with ID ${service.moduleId} already exists and will be overwritten`);
-      }
-      
-      this.services.set(service.moduleId, service);
-      return true;
-    } catch (error) {
-      console.error('Failed to register neural service:', error);
+  registerService(service: BaseNeuralService): boolean {
+    if (this.services.has(service.id)) {
+      console.warn(`Service with ID ${service.id} is already registered.`);
       return false;
     }
+    
+    this.services.set(service.id, service);
+    console.log(`Service ${service.name} registered successfully.`);
+    return true;
   }
   
-  unregisterService(moduleId: string): boolean {
-    return this.services.delete(moduleId);
+  getServiceById(id: string): BaseNeuralService | undefined {
+    return this.services.get(id);
   }
   
-  getService(moduleId: string): NeuralService | undefined {
-    return this.services.get(moduleId);
+  getServicesByType(type: ModuleType): BaseNeuralService[] {
+    return Array.from(this.services.values())
+      .filter(service => service.moduleType === type);
   }
   
-  getAllServices(): NeuralService[] {
+  getAllServices(): BaseNeuralService[] {
     return Array.from(this.services.values());
   }
   
-  getServicesByType(moduleType: ModuleType): NeuralService[] {
-    return this.getAllServices().filter(service => service.moduleType === moduleType);
+  removeService(id: string): boolean {
+    return this.services.delete(id);
   }
   
-  async initializeAll(): Promise<boolean> {
-    try {
-      for (const service of this.services.values()) {
-        await service.initialize();
-      }
-      
-      this.initialized = true;
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize all neural services:', error);
-      return false;
-    }
+  clear(): void {
+    this.services.clear();
   }
   
-  async shutdownAll(): Promise<boolean> {
-    try {
-      for (const service of this.services.values()) {
-        if (service.shutdown) {
-          await service.shutdown();
-        }
-      }
-      
-      this.initialized = false;
-      return true;
-    } catch (error) {
-      console.error('Failed to shutdown all neural services:', error);
-      return false;
-    }
-  }
-  
-  optimizeResourceAllocation(): void {
-    // Simple resource allocation algorithm
-    const services = this.getAllServices();
-    const serviceCount = services.length;
-    
-    if (serviceCount === 0) return;
-    
-    // Calculate total priority
-    const totalPriority = services.reduce((sum, service) => sum + service.config.priority, 0);
-    
-    // Allocate resources based on priority
-    services.forEach(service => {
-      const normalizedPriority = service.config.priority / (totalPriority || 1);
-      const allocatedResource = Math.round(normalizedPriority * 100);
-      
-      service.updateConfig({
-        resourceAllocation: allocatedResource
-      });
-    });
-    
-    console.log('Resource allocation optimized for all services');
+  getServicesCount(): number {
+    return this.services.size;
   }
 }
 
-// Export the registry singleton
 export const neuralServiceRegistry = new NeuralServiceRegistry();
-export type { NeuralService, ModuleType };
+export type { BaseNeuralService as NeuralService };
+export { ModuleType };
 export default neuralServiceRegistry;

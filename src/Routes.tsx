@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -25,6 +24,7 @@ const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const PersonasPage = lazy(() => import('./pages/Personas'));
 const PersonaPage = lazy(() => import('./pages/PersonaPage')); // New unified persona page
 const VerificationDashboard = lazy(() => import('./pages/admin/VerificationDashboard'));
+const RouteSharePage = lazy(() => import('./pages/RouteSharePage')); // New route share page
 
 // Loading component
 const LoadingFallback = () => (
@@ -113,6 +113,18 @@ const RoutesComponent: React.FC = () => {
             <ProtectedRoute>
               <AppLayout>
                 <VerificationDashboard />
+              </AppLayout>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Safety Route Share */}
+        <Route 
+          path="/safety/route-share" 
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <RouteSharePage />
               </AppLayout>
             </ProtectedRoute>
           } 
