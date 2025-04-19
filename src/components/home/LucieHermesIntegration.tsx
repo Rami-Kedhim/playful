@@ -3,17 +3,28 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
 import LucieAssistant from './LucieAssistant';
+import { HermesInsight } from '@/types/seo';
+
+// Extend HermesInsight with optional extra properties for this component's usage
+interface ExtendedHermesInsight extends HermesInsight {
+  boost_offer?: {
+    value?: string;
+    expires?: string | Date;
+    category?: string;
+  };
+  vr_event?: {
+    value?: string;
+  } | string;
+  recommended_profile?: {
+    value?: string;
+  };
+  type: string;
+}
 
 export type LucieHermesIntegrationProps = {
   forceVisible?: boolean;
   onLucieTriggered?: (reason: string) => void;
 };
-
-interface Insight {
-  type: string;
-  // Use index signature to allow any extra property to avoid type errors
-  [key: string]: any;
-}
 
 export const LucieHermesIntegration = ({
   forceVisible,
@@ -23,20 +34,30 @@ export const LucieHermesIntegration = ({
   const [isVisible, setIsVisible] = useState(Boolean(forceVisible));
   const [customMessage, setCustomMessage] = useState<string | undefined>(undefined);
 
+  // Treat insights as ExtendedHermesInsight[] for this component to access extra props safely
   const { insights = [] } = useHermesInsights();
 
-  // Instead of accessing boost_offer, vr_event directly, safely extract via keys and optional chaining
-  const boostOfferInsight = insights.find((ins: Insight) => ins.type === 'boostOffer');
-  const vrEventInsight = insights.find((ins: Insight) => ins.type === 'vrEvent');
-  const recommendedProfileInsight = insights.find((ins: Insight) => ins.type === 'recommendedProfileId');
+  const insightsTyped = insights as ExtendedHermesInsight[];
 
-  // Determine if Lucie should be enabled
-  const isLucieEnabled = insights.some((ins: Insight) => ins.type === 'lucieEnabled');
+  // Find insights by type safely
+  const boostOfferInsight = insightsTyped.find((ins) => ins.type === 'boostOffer');
+  const vrEventInsight = insightsTyped.find((ins) => ins.type === 'vrEvent');
+  const recommendedProfileInsight = insightsTyped.find((ins) => ins.type === 'recommendedProfileId');
 
-  // Safe getters for nested properties with fallback to empty object
-  const boostOffer = (boostOfferInsight && typeof boostOfferInsight.boost_offer === 'object') ? boostOfferInsight.boost_offer : null;
-  const vrEvent = (vrEventInsight && typeof vrEventInsight.vr_event === 'object') ? vrEventInsight.vr_event : null;
-  const recommendedProfile = (recommendedProfileInsight && typeof recommendedProfileInsight.recommended_profile === 'object') ? recommendedProfileInsight.recommended_profile : null;
+  const isLucieEnabled = insightsTyped.some((ins) => ins.type === 'lucieEnabled');
+
+  // Normalize property presence and types for boostOffer
+  const boostOffer = boostOfferInsight?.boost_offer ?? null;
+
+  // For vrEvent, vr_event could be string or object, coerce to string
+  const vrEvent: string | null = (() => {
+    if (!vrEventInsight) return null;
+    if (typeof vrEventInsight.vr_event === 'string') return vrEventInsight.vr_event;
+    if (typeof vrEventInsight.vr_event === 'object' && vrEventInsight.vr_event?.value) return vrEventInsight.vr_event.value;
+    return null;
+  })();
+
+  const recommendedProfile = recommendedProfileInsight?.recommended_profile ?? null;
 
   useEffect(() => {
     if (isLucieEnabled) {
@@ -49,7 +70,7 @@ export const LucieHermesIntegration = ({
           boostOffer.value || ''
         } off, but it expires in ${boostOffer.expires || ''}.`;
       } else if (vrEvent) {
-        personalizedMessage = `Have you heard about our ${vrEvent.value || 'VR'} event? It's happening soon, and I think you'd really enjoy it!`;
+        personalizedMessage = `Have you heard about our ${vrEvent || 'VR'} event? It's happening soon, and I think you'd really enjoy it!`;
       } else if (recommendedProfile) {
         personalizedMessage = `Based on your interests, I think you might like to check out profile ${
           recommendedProfile.value || ''
@@ -66,12 +87,12 @@ export const LucieHermesIntegration = ({
         let reason = 'HERMES insight';
 
         if (boostOffer) reason = `Boost offer: ${boostOffer.value || ''}`;
-        else if (vrEvent) reason = `VR event: ${vrEvent.value || ''}`;
+        else if (vrEvent) reason = `VR event: ${vrEvent || ''}`;
 
         onLucieTriggered(reason);
       }
     }
-  }, [insights, isLucieEnabled, onLucieTriggered, user]);
+  }, [insightsTyped, isLucieEnabled, onLucieTriggered, user]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -101,4 +122,3 @@ export const LucieHermesIntegration = ({
 };
 
 export default LucieHermesIntegration;
-

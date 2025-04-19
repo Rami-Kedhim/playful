@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
 import { UberPersona } from '@/types/UberPersona';
+
 import { hasRealMeets, hasVirtualMeets, hasContent, getVerificationLevel } from '@/utils/personaHelpers';
 import { VerificationLevel as VerificationLevelTS } from '@/types/verification';
 
@@ -31,7 +32,6 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Fix verificationLevel with proper enum values, mapping 'advanced' to 'enhanced'
   const verificationLevelRaw = (persona as any).verificationLevel || 'none';
   const verificationLevelNormalized = verificationLevelRaw === 'advanced' ? 'enhanced' : verificationLevelRaw;
 
@@ -47,7 +47,6 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
     verificationLevelSafe = VerificationLevelTS.NONE;
   }
 
-  // Use monetization.meetingPrice as price fallback to 0
   const price = persona.monetization?.meetingPrice ?? 0;
 
   return (
