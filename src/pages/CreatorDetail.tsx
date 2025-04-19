@@ -1,6 +1,4 @@
 
-// Adjust imports and fix type incompatibilities
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -17,7 +15,6 @@ import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscri
 
 import type { Creator as CreatorFromHook } from '@/hooks/useCreators';
 
-// We will use the Creator type from useCreators hook only to avoid mismatch
 const CreatorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
@@ -44,15 +41,13 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
     handleSendTip,
   } = useCreatorDetail(creatorId);
 
-  // Fix: Map rawCreator to type CreatorFromHook and ensure mandatory props are present:
-  // imageUrl is required in CreatorFromHook, so provide fallback empty string
-  // price is required, fallback to 0
+  // Ensure all required props for CreatorFromHook type are set with fallbacks
   const creator: CreatorFromHook | null = rawCreator
     ? {
         ...rawCreator,
         username: rawCreator.username || rawCreator.name || 'unknown',
         imageUrl: rawCreator.avatarUrl || rawCreator.profileImage || rawCreator.imageUrl || '',
-        price: rawCreator.price || 0,
+        price: rawCreator.price ?? 0,  // required, fallback 0
       }
     : null;
 

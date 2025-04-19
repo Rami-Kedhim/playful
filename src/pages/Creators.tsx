@@ -70,7 +70,7 @@ const Creators = () => {
               image={creator.avatarUrl || creator.profileImage || creator.imageUrl || ''}
               location={creator.location || ''}
               rating={creator.rating || 0}
-              premium={creator.isPremium}
+              premium={creator.isPremium || false}
               price={creator.price}
             />
           ))
@@ -83,3 +83,4 @@ const Creators = () => {
 };
 
 export default Creators;
+

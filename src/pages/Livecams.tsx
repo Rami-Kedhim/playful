@@ -116,9 +116,9 @@ const Livecams = () => {
                 imageUrl={livecam.imageUrl}
                 location={livecam.location}
                 rating={livecam.rating || 0}
-                isLive={livecam.isLive}
-                isPremium={Boolean(livecam['isPremium'])}
-                price={livecam.price}
+                isLive={livecam.isLive || false}
+                isPremium={Boolean(livecam.isPremium)}
+                price={livecam.price || 0}
               />
             ))
           ) : (

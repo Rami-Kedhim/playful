@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -173,3 +174,4 @@ const Escorts = () => {
 };
 
 export default Escorts;
+
