@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import type { VerificationLevel as VerificationLevelType } from '@/types/verification'; // Rename for disambiguation
+import type { VerificationLevel as VerificationLevelType } from '@/components/verification/VerificationBadge'; // Use type from same component
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
@@ -32,8 +32,9 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // We allow 'none' here to handle no verification. VerifyBadge returns null for 'none' anyway.
-  const verificationLevelSafe: VerificationLevelType | 'none' = (persona.verificationLevel as VerificationLevelType) || 'none';
+  // Correct: restrict to VerificationLevelType only. If no level, use undefined (don't pass 'none')
+  // Type allows undefined, and VerificationBadge will return null if level is undefined
+  const verificationLevelSafe: VerificationLevelType | undefined = persona.verificationLevel as VerificationLevelType | undefined;
 
   const price = persona.monetization?.meetingPrice ?? 0;
 
@@ -52,7 +53,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
           {isFeatured && (
             <Badge className="bg-ubx">Featured</Badge>
           )}
-          {verified && verificationLevelSafe !== 'none' && (
+          {verified && verificationLevelSafe && (
             <VerificationBadge level={verificationLevelSafe} />
           )}
         </div>

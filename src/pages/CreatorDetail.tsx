@@ -1,5 +1,6 @@
 
-// Adjust imports to align with useCreators Creator type
+// Adjust imports and fix type incompatibilities
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -13,11 +14,10 @@ import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
 import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
-import type { ContentCreator } from "@/types/creator"; // use ContentCreator instead of Creator
+
 import type { Creator as CreatorFromHook } from '@/hooks/useCreators';
 
-type Creator = ContentCreator & { username: string };
-
+// We will use the Creator type from useCreators hook only to avoid mismatch
 const CreatorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
@@ -44,12 +44,15 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
     handleSendTip,
   } = useCreatorDetail(creatorId);
 
-  // Convert to CreatorFromHook with required properties
+  // Fix: Map rawCreator to type CreatorFromHook and ensure mandatory props are present:
+  // imageUrl is required in CreatorFromHook, so provide fallback empty string
+  // price is required, fallback to 0
   const creator: CreatorFromHook | null = rawCreator
     ? {
         ...rawCreator,
         username: rawCreator.username || rawCreator.name || 'unknown',
         imageUrl: rawCreator.avatarUrl || rawCreator.profileImage || rawCreator.imageUrl || '',
+        price: rawCreator.price || 0,
       }
     : null;
 
