@@ -12,14 +12,15 @@ import {
   CreatorsNeuralService,
   LivecamsNeuralService
 } from "@/services/neural";
-import { NeuralModel } from '@/types/UberPersona';
 import NeuralModuleRegistration from './NeuralModuleRegistration';
 import NeuralServiceCard from './NeuralServiceCard';
 import EmptyServiceState from './EmptyServiceState';
 import { toast } from "@/components/ui/use-toast";
+import { ModuleType } from '@/services/neural/types/NeuralService';
+import { TrainingProgress } from '@/services/neural/types/neuralHub';
 
 interface NeuralServicesPanelProps {
-  models?: NeuralModel[];
+  models?: any[];
   advancedMode?: boolean;
 }
 
@@ -34,7 +35,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
     registerService
   } = useNeuralRegistry();
   
-  const [activeTab, setActiveTab] = useState('ai-companion');
+  const [activeTab, setActiveTab] = useState<ModuleType>('ai-companion');
   const [showRegistration, setShowRegistration] = useState(false);
   
   useEffect(() => {
@@ -67,17 +68,26 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
   };
   
   // Create default service handlers
-  const createDefaultService = (moduleType: 'ai-companion' | 'escorts' | 'creators' | 'livecams') => {
+  const createDefaultService = (moduleType: ModuleType) => {
     try {
-      const ServiceClass = {
-        'ai-companion': AICompanionNeuralService,
-        'escorts': EscortsNeuralService,
-        'creators': CreatorsNeuralService,
-        'livecams': LivecamsNeuralService
-      }[moduleType];
+      let service;
       
-      const moduleId = `${moduleType}-primary`;
-      const service = new ServiceClass(moduleId);
+      switch (moduleType) {
+        case 'ai-companion':
+          service = new AICompanionNeuralService();
+          break;
+        case 'escorts':
+          service = new EscortsNeuralService();
+          break;
+        case 'creators':
+          service = new CreatorsNeuralService();
+          break;
+        case 'livecams':
+          service = new LivecamsNeuralService();
+          break;
+        default:
+          throw new Error(`Unsupported module type: ${moduleType}`);
+      }
       
       // Register and reload
       const success = registerService(service);
@@ -144,7 +154,7 @@ const NeuralServicesPanel: React.FC<NeuralServicesPanelProps> = ({ models: provi
           <RefreshCw className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ModuleType)}>
           <TabsList className="grid grid-cols-4 mb-4">
             <TabsTrigger value="ai-companion">AI Companion</TabsTrigger>
             <TabsTrigger value="escorts">Escorts</TabsTrigger>

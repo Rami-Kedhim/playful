@@ -80,7 +80,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             {getDocumentUrl() && getDocumentUrl().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
               <img
                 src={getDocumentUrl()}
-                alt={document.document_type.toString()}
+                alt={document.document_type?.toString()}
                 className="w-full h-auto max-h-[500px] object-contain"
               />
             ) : (

@@ -1,8 +1,14 @@
 
-export { neuralHub } from './types/neuralHub';
-export { default as neuralServiceRegistry } from './registry/NeuralServiceRegistry';
-export * from './interfaces/NeuralService';
+// Re-export all neural service modules
+export * from './modules/BaseNeuralService';
+export * from './modules/AICompanionNeuralService';
 export * from './modules/EscortsNeuralService';
 export * from './modules/CreatorsNeuralService';
 export * from './modules/LivecamsNeuralService';
-export * from './modules/AICompanionNeuralService';
+export * from './registry/NeuralServiceRegistry';
+export * from './types/NeuralService';
+export * from './HermesOxumNeuralHub';
+
+// Export neural hub singleton
+import { neuralHub } from './HermesOxumNeuralHub';
+export { neuralHub };

@@ -1,117 +1,76 @@
 
 import { useState, useEffect } from 'react';
-import { hermesApiService } from '@/services/hermes/HermesApiService';
 
-export interface HermesInsights {
-  isLucieEnabled: boolean;
-  recommendedProfileId?: string;
-  recommendedCompanionId?: string;
-  boostOffer?: {
-    value: string;
-    expires: string;
-  };
-  vrEvent?: string;
-  aiSuggestion?: {
-    message: string;
-    confidence: number;
-  };
+interface HermesInsight {
+  id: string;
+  title: string;
+  description: string;
+  score: number;
+  type: 'seo' | 'engagement' | 'conversion' | 'technical';
+  timestamp: string;
 }
 
-export const useHermesInsights = (userId?: string) => {
-  const [insights, setInsights] = useState<HermesInsights>({
-    isLucieEnabled: false
-  });
+export function useHermesInsights(userId?: string) {
+  const [insights, setInsights] = useState<HermesInsight[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Initialize insights when component mounts
+  
   useEffect(() => {
-    if (!userId) return;
-    
-    const loadInsights = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const response = await hermesApiService.analyzeUserAction({
-          user_id: userId,
-          action: 'page_load',
-          interaction_data: {
-            referrer: document.referrer,
-            pathname: window.location.pathname,
-          }
-        });
-        
-        // Process HERMES response into insights
-        setInsights({
-          isLucieEnabled: response.trigger_luxlife || false,
-          recommendedProfileId: response.recommended_profile,
-          recommendedCompanionId: response.recommended_companion_id,
-          boostOffer: response.boost_offer,
-          vrEvent: response.vr_event,
-          aiSuggestion: response.ai_suggestion
-        });
-      } catch (err: any) {
-        console.error('Error loading HERMES insights:', err);
-        setError(err.message || 'Failed to load insights');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     loadInsights();
   }, [userId]);
   
-  // Report user action to HERMES
-  const reportUserAction = async (action: string, category?: string, data?: Record<string, any>) => {
-    if (!userId) return;
-    
+  const loadInsights = async () => {
     try {
-      const response = await hermesApiService.analyzeUserAction({
-        user_id: userId,
-        action,
-        category,
-        interaction_data: data
-      });
+      setLoading(true);
+      setError(null);
       
-      // Update insights with any new HERMES information
-      setInsights(prev => ({
-        ...prev,
-        isLucieEnabled: response.trigger_luxlife || prev.isLucieEnabled,
-        recommendedProfileId: response.recommended_profile || prev.recommendedProfileId,
-        recommendedCompanionId: response.recommended_companion_id || prev.recommendedCompanionId,
-        boostOffer: response.boost_offer || prev.boostOffer,
-        vrEvent: response.vr_event || prev.vrEvent,
-        aiSuggestion: response.ai_suggestion || prev.aiSuggestion
-      }));
+      // Mock data - in a real app, this would be an API call
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      return response;
-    } catch (err) {
-      console.error('Error reporting user action to HERMES:', err);
-      return null;
+      const mockInsights: HermesInsight[] = [
+        {
+          id: '1',
+          title: 'SEO Improvement Opportunity',
+          description: 'Adding more specific keywords could improve visibility.',
+          score: 85,
+          type: 'seo',
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: '2',
+          title: 'Engagement Optimization',
+          description: 'Adding more call-to-action elements could improve conversion rates.',
+          score: 72,
+          type: 'engagement',
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: '3',
+          title: 'Technical Optimization',
+          description: 'Image compression could improve load times by up to 25%.',
+          score: 65,
+          type: 'technical',
+          timestamp: new Date().toISOString()
+        }
+      ];
+      
+      setInsights(mockInsights);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load HERMES insights');
+    } finally {
+      setLoading(false);
     }
   };
   
-  // Get AI companion recommendations
-  const getAICompanionRecommendations = async () => {
-    if (!userId) return [];
-    
-    try {
-      const response = await hermesApiService.getCompanionRecommendations(userId);
-      return response.recommendations || [];
-    } catch (err) {
-      console.error('Error getting companion recommendations:', err);
-      return [];
-    }
+  const getInsightsByType = (type: string): HermesInsight[] => {
+    return insights.filter(insight => insight.type === type);
   };
 
   return {
     insights,
+    getInsightsByType,
     loading,
     error,
-    reportUserAction,
-    getAICompanionRecommendations
+    refreshInsights: loadInsights
   };
-};
-
-export default useHermesInsights;
+}

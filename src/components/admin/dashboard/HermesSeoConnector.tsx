@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useHermesSeo } from '@/hooks/useHermesSeo';
 import { useHermesInsights } from '@/hooks/useHermesInsights';
@@ -77,23 +78,23 @@ const HermesSeoConnector: React.FC<HermesSeoConnectorProps> = ({ userId }) => {
           <div className="flex justify-between">
             <Label>System Health</Label>
             <span className="text-sm text-muted-foreground">
-              Last updated: {new Date(systemHealthMetrics.lastUpdated).toLocaleTimeString()}
+              Last updated: {new Date(systemHealthMetrics.lastUpdated || Date.now()).toLocaleTimeString()}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span>Neural Load</span>
-                <span>{Math.round(systemHealthMetrics.load * 100)}%</span>
+                <span>{Math.round((systemHealthMetrics.load || 0.5) * 100)}%</span>
               </div>
-              <Progress value={systemHealthMetrics.load * 100} />
+              <Progress value={(systemHealthMetrics.load || 0.5) * 100} />
             </div>
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span>User Engagement</span>
-                <span>{Math.round(systemHealthMetrics.userEngagement * 100)}%</span>
+                <span>{Math.round((systemHealthMetrics.userEngagement || 0.5) * 100)}%</span>
               </div>
-              <Progress value={systemHealthMetrics.userEngagement * 100} />
+              <Progress value={(systemHealthMetrics.userEngagement || 0.5) * 100} />
             </div>
           </div>
         </div>

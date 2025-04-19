@@ -1,12 +1,24 @@
 
-import { BaseNeuralService } from './BaseNeuralService';
+import { BaseNeuralService, ModuleType } from '../types/NeuralService';
 
 export class EscortsNeuralService extends BaseNeuralService {
   constructor() {
     super(
       'EscortsNeuralService', 
-      '1.0.0', 
-      'Neural service for escort-related features and recommendations'
+      'escorts' as ModuleType, 
+      'Escorts Neural Service',
+      'Neural service for escort-related features and recommendations',
+      '1.0.0'
     );
+  }
+  
+  getCapabilities(): string[] {
+    return [
+      'profile-enhancement',
+      'matching-algorithm',
+      'relevance-scoring',
+      'safety-verification',
+      'preference-learning'
+    ];
   }
 }

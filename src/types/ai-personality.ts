@@ -1,22 +1,19 @@
 
-export interface PersonalityTrait {
-  name: string;
-  description?: string;
-  intensity: number; // Range from 0 to 100
-}
+export type EmotionType = 'joy' | 'trust' | 'fear' | 'surprise' | 'sadness' | 'anger' | 'anticipation' | 'interest' | 'neutral';
 
-export interface AIPersonality {
-  id: string;
-  name: string;
-  traits: PersonalityTrait[];
-  interests: string[];
-  description: string;
-  voiceType?: string;
-  languageModel?: string;
-  conversationStyle?: 'formal' | 'casual' | 'flirty' | 'professional';
-  backstory?: string;
-  createdAt: Date;
-  updatedAt: Date;
+export interface EmotionalState {
+  // Core emotion values
+  joy: number;
+  trust: number;
+  fear: number;
+  surprise: number;
+  sadness: number;
+  anger: number;
+  anticipation: number;
+  interest: number;
+  
+  // Calculated properties
+  dominantEmotion: EmotionType;
+  intensityLevel: number;
+  lastUpdated: number;
 }
-
-export type EmotionalState = 'neutral' | 'happy' | 'sad' | 'excited' | 'angry' | 'flirty' | 'thoughtful';

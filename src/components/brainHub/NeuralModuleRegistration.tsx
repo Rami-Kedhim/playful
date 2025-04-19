@@ -6,11 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Plus, Brain, AlertCircle } from "lucide-react";
-import { 
-  ModuleType, 
-  neuralServiceRegistry, 
-  NeuralService 
-} from '@/services/neural/registry/NeuralServiceRegistry';
+import { ModuleType, NeuralService } from '@/services/neural/types/NeuralService';
+import neuralServiceRegistry from '@/services/neural/registry/NeuralServiceRegistry';
 import { 
   EscortsNeuralService 
 } from '@/services/neural/modules/EscortsNeuralService';
@@ -54,16 +51,16 @@ const NeuralModuleRegistration: React.FC<NeuralModuleRegistrationProps> = ({ onR
       
       switch (moduleType) {
         case 'escorts':
-          service = new EscortsNeuralService(moduleId);
+          service = new EscortsNeuralService();
           break;
         case 'creators':
-          service = new CreatorsNeuralService(moduleId);
+          service = new CreatorsNeuralService();
           break;
         case 'livecams':
-          service = new LivecamsNeuralService(moduleId);
+          service = new LivecamsNeuralService();
           break;
         case 'ai-companion':
-          service = new AICompanionNeuralService(moduleId);
+          service = new AICompanionNeuralService();
           break;
         default:
           setError('Invalid module type');

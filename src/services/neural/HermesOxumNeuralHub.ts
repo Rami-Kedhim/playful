@@ -1,16 +1,14 @@
-
 import { ContactInfo } from '@/types/escort';
 import { ModelParameters } from './types/neuralHub';
 import { calculateSystemEfficiency, validateModelParameters } from './models/modelParameters';
+import { HealthMetrics } from './types/neuralHub';
 
-// Type definition for learning service
 export interface OxumLearningService {
   initialize(config?: any): Promise<boolean>;
   processUserInput(input: string): Promise<string>;
   getLearnedPatterns(): Promise<any[]>;
 }
 
-// This creates a default contact info with optional website
 export const createDefaultContactInfo = (): ContactInfo => {
   return {
     email: "info@hermes-oxum.ai",
@@ -19,23 +17,19 @@ export const createDefaultContactInfo = (): ContactInfo => {
   };
 };
 
-// Neural Hub implementation
 class HermesOxumNeuralHub {
   private models: any[] = [];
   private isInitialized = false;
   private connectionStatus: 'connected' | 'disconnected' | 'error' = 'disconnected';
   
   constructor() {
-    // Initialize with empty models array
     this.models = [];
   }
   
   async initialize(): Promise<boolean> {
     try {
-      // Simulate initialization delay
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Add some mock models
       this.models = [
         {
           id: 'oxum-gpt-1',
@@ -113,14 +107,12 @@ class HermesOxumNeuralHub {
   }
   
   async shutdown(): Promise<void> {
-    // Simulate shutdown process
     await new Promise(resolve => setTimeout(resolve, 200));
     this.isInitialized = false;
     this.connectionStatus = 'disconnected';
     console.log('Hermes-Oxum Neural Hub shut down successfully');
   }
   
-  // Method to get capabilities across all models
   getAllCapabilities(): string[] {
     if (!this.isInitialized) {
       throw new Error('Neural Hub not initialized');
@@ -134,7 +126,6 @@ class HermesOxumNeuralHub {
     return Array.from(capabilities);
   }
   
-  // Method to check if a specific capability is available
   hasCapability(capability: string): boolean {
     if (!this.isInitialized) {
       throw new Error('Neural Hub not initialized');
@@ -145,24 +136,50 @@ class HermesOxumNeuralHub {
     );
   }
   
-  // Additional methods for NeuralSystemsPanel
-  getHealthMetrics() {
+  getHealthMetrics(): HealthMetrics {
     return {
+      modelCount: this.models.length,
+      activeConnections: Math.floor(Math.random() * 100) + 20,
+      requestsPerMinute: Math.floor(Math.random() * 500) + 50,
+      averageResponseTime: Math.random() * 100 + 50,
+      errorRate: Math.random() * 0.05,
+      uptime: Math.floor(Math.random() * 1000) + 500,
+      models: this.models,
+      cpuUtilization: Math.random() * 0.8 + 0.1,
+      memoryUtilization: Math.random() * 0.7 + 0.2,
+      errorFrequency: Math.floor(Math.random() * 10),
+      systemUptime: Math.floor(Math.random() * 10000) + 3600,
+      networkLatency: Math.random() * 50 + 20,
+      responseTime: Math.random() * 80 + 50,
+      userSatisfactionScore: Math.random() * 0.3 + 0.7,
       load: Math.random() * 0.8 + 0.1,
       userEngagement: Math.random() * 0.9 + 0.1,
-      lastUpdated: Date.now()
+      lastUpdated: Date.now(),
+      systemLoad: Math.random() * 0.8 + 0.1,
+      memoryAllocation: Math.random() * 0.7 + 0.2,
+      networkThroughput: Math.random() * 500 + 100,
+      requestRate: Math.floor(Math.random() * 500) + 50
     };
   }
   
   getActiveTrainingJobs() {
     return [
-      { id: 'job1', type: 'model-training', progress: Math.random() },
-      { id: 'job2', type: 'data-processing', progress: Math.random() * 0.7 }
+      { 
+        id: 'job1', 
+        type: 'model-training', 
+        progress: Math.random(),
+        status: 'training'
+      },
+      { 
+        id: 'job2', 
+        type: 'data-processing', 
+        progress: Math.random() * 0.7,
+        status: 'training'
+      }
     ];
   }
   
   async startTraining(type: string) {
-    // Simulate starting a training job
     await new Promise(resolve => setTimeout(resolve, 300));
     return {
       success: true,
@@ -171,13 +188,11 @@ class HermesOxumNeuralHub {
   }
   
   async stopTraining(jobId: string) {
-    // Simulate stopping a training job
     await new Promise(resolve => setTimeout(resolve, 200));
     return true;
   }
   
   async resetSystem() {
-    // Simulate system reset
     await new Promise(resolve => setTimeout(resolve, 500));
     return true;
   }
@@ -189,7 +204,6 @@ class HermesOxumNeuralHub {
   }
   
   async runInference(modelId: string, input: any) {
-    // Simulate inference
     await new Promise(resolve => setTimeout(resolve, 200));
     return { result: `Processed with ${modelId}: ${JSON.stringify(input)}` };
   }
@@ -218,7 +232,6 @@ class HermesOxumNeuralHub {
     return true;
   }
 
-  // Add these methods for compatibility
   calculateSystemEfficiency(params: ModelParameters): number {
     return calculateSystemEfficiency(params);
   }
@@ -228,6 +241,5 @@ class HermesOxumNeuralHub {
   }
 }
 
-// Export singleton instance
 export const neuralHub = new HermesOxumNeuralHub();
 export default neuralHub;

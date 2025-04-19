@@ -1,6 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { neuralHub } from '@/services/neural';
-import { TrainingProgress, NeuralModel } from '@/types/neural/NeuralSystemMetrics';
+import { TrainingProgress, NeuralModel } from '@/services/neural/types/neuralHub';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,10 +23,10 @@ const NeuralSystemsPanel = () => {
   const loadData = () => {
     try {
       const jobs = neuralHub.getActiveTrainingJobs().map(job => ({
-        id: job.id,
-        modelId: job.id.split('-')[0],
+        id: job.id || '',
+        modelId: job.id?.split('-')[0] || '',
         progress: job.progress,
-        status: 'training' as 'training' | 'paused' | 'completed' | 'failed',
+        status: job.status || 'training',
         startTime: new Date(),
         currentEpoch: Math.floor(job.progress * 100),
         totalEpochs: 100,
@@ -33,209 +34,209 @@ const NeuralSystemsPanel = () => {
         loss: 0.1 + Math.random() * 0.2,
         accuracy: 0.7 + Math.random() * 0.25,
         timeRemaining: Math.floor((1 - job.progress) * 3600),
-        type: job.type,
+        type: job.type || 'unknown',
         targetAccuracy: 0.95,
         estimatedCompletionTime: new Date(Date.now() + (1 - job.progress) * 3600000)
       })) as TrainingProgress[];
       
       setActiveJobs(jobs);
       
-      const models = neuralHub.getModels().map(model => ({
+      // Mock neural models data
+      setNeuralModels(neuralHub.getModels().map((model: any) => ({
         id: model.id,
         name: model.name,
-        type: model.type,
+        type: model.type || 'unknown',
         version: model.version,
-        specialization: model.type,
-        size: 128,
-        precision: 0.92,
-        status: 'active' as 'active' | 'inactive' | 'training' | 'error',
-        capabilities: [model.type, 'analysis', 'prediction'],
+        specialization: model.type || 'general',
+        size: Math.floor(Math.random() * 100) + 10,
+        precision: Math.random() * 0.2 + 0.8,
         performance: {
-          accuracy: 0.7 + Math.random() * 0.25,
-          latency: 150 + Math.random() * 100
+          accuracy: model.performance.accuracy,
+          latency: model.performance.latency,
+          resourceUsage: Math.random()
         },
+        capabilities: model.capabilities || [],
+        status: model.status || 'active',
         createdAt: new Date(),
         updatedAt: new Date()
-      })) as NeuralModel[];
-      
-      setNeuralModels(models);
+      })));
     } catch (error) {
-      toast({
-        description: `Error loading neural systems data: ${error instanceof Error ? error.message : 'Unknown error'}`
-      });
+      console.error("Error loading neural systems data:", error);
     }
   };
   
-  const startTraining = async (type: string) => {
-    try {
-      const result = await neuralHub.startTraining(type);
-      
-      toast({
-        description: `Training job started: ${result.jobId}`
-      });
-      
-      loadData();
-    } catch (error) {
-      toast({
-        description: `Error starting training job: ${error instanceof Error ? error.message : 'Unknown error'}`
-      });
-    }
-  };
-  
-  const stopTraining = async (jobId: string) => {
+  const handleStopTraining = async (jobId: string) => {
     try {
       await neuralHub.stopTraining(jobId);
-      
+      loadData();
       toast({
-        description: `Training job ${jobId} stopped`
+        title: "Training stopped",
+        description: `Training job ${jobId} has been stopped successfully.`
       });
-      
-      setActiveJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
     } catch (error) {
+      console.error("Error stopping training job:", error);
       toast({
-        description: `Error stopping training job: ${error instanceof Error ? error.message : 'Unknown error'}`
+        title: "Error stopping training",
+        description: "There was a problem stopping the training job.",
+        variant: "destructive"
       });
     }
   };
   
-  const resetSystem = async () => {
+  const handleStartTraining = async (type: string) => {
     try {
-      const result = await neuralHub.resetSystem();
-      
-      if (result) {
-        toast({
-          description: "Neural system reset successfully"
-        });
+      const result = await neuralHub.startTraining(type);
+      if (result && result.success) {
         loadData();
-      } else {
         toast({
-          description: "Neural system reset failed"
+          title: "Training started",
+          description: `New training job started with ID: ${result.jobId}`
         });
       }
     } catch (error) {
+      console.error("Error starting training:", error);
       toast({
-        description: `Error resetting system: ${error instanceof Error ? error.message : 'Unknown error'}`
+        title: "Error starting training",
+        description: "There was a problem starting the training job.",
+        variant: "destructive"
       });
     }
   };
-
+  
   return (
-    <div className="space-y-8">
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Active Training Jobs</h2>
-          <div className="space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => startTraining('content-matching')}
-            >
-              Train Content Matching
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => startTraining('user-preferences')}
-            >
-              Train User Preferences
-            </Button>
-          </div>
-        </div>
-        
-        {activeJobs.length > 0 ? (
-          <div className="space-y-4">
-            {activeJobs.map(job => (
-              <Card key={job.id} className="p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <div>
-                    <span className="font-medium">{job.type}</span>
-                    <Badge 
-                      variant={job.status === 'training' ? 'default' : 'outline'} 
-                      className="ml-2"
-                    >
-                      {job.status}
-                    </Badge>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={() => stopTraining(job.id as string)}
-                    >
-                      {job.status === 'training' ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
-                    </Button>
-                    <Button 
-                      variant="ghost" 
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Card className="p-4">
+          <h3 className="text-lg font-medium mb-4">Active Training Jobs</h3>
+          {activeJobs.length > 0 ? (
+            <div className="space-y-4">
+              {activeJobs.map((job) => (
+                <div key={job.id} className="space-y-2">
+                  <div className="flex justify-between">
+                    <div>
+                      <span className="font-medium">{job.type}</span>
+                      <Badge
+                        variant={job.status === 'training' ? 'default' : 'outline'}
+                        className="ml-2"
+                      >
+                        {job.status}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
                       size="icon"
-                      onClick={() => stopTraining(job.id as string)}
+                      onClick={() => handleStopTraining(job.id)}
                     >
-                      <TrashIcon size={16} />
+                      <PauseIcon className="h-4 w-4" />
                     </Button>
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Progress: {Math.round(job.progress * 100)}%</span>
-                    <span>Loss: {job.loss.toFixed(4)}</span>
-                    <span>Accuracy: {job.accuracy.toFixed(4)}</span>
+                  <Progress value={job.progress * 100} />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>
+                      {job.currentEpoch}/{job.totalEpochs} epochs
+                    </span>
+                    <span>{Math.round(job.progress * 100)}%</span>
                   </div>
-                  <Progress value={job.progress * 100} className="h-2" />
                 </div>
-              </Card>
-            ))}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center p-4 text-muted-foreground">
+              <p>No active training jobs</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => handleStartTraining('model-training')}
+              >
+                <PlayIcon className="h-4 w-4 mr-2" />
+                Start Training
+              </Button>
+            </div>
+          )}
+        </Card>
+
+        <Card className="p-4">
+          <h3 className="text-lg font-medium mb-4">System Performance</h3>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span className="text-sm">CPU Utilization</span>
+                <span className="text-sm font-medium">67%</span>
+              </div>
+              <Progress value={67} />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span className="text-sm">Memory Usage</span>
+                <span className="text-sm font-medium">42%</span>
+              </div>
+              <Progress value={42} />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span className="text-sm">Network Throughput</span>
+                <span className="text-sm font-medium">78%</span>
+              </div>
+              <Progress value={78} />
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Avg. Response Time</p>
+                <p className="text-lg font-medium">128ms</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Requests/min</p>
+                <p className="text-lg font-medium">432</p>
+              </div>
+            </div>
           </div>
-        ) : (
-          <Card className="p-4 text-center text-muted-foreground">
-            No active training jobs
-          </Card>
-        )}
+        </Card>
       </div>
-      
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Available Models</h2>
+
+      <Card className="p-4">
+        <h3 className="text-lg font-medium mb-4">Deployed Models</h3>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Model</TableHead>
+                <TableHead>Name</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Version</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Accuracy</TableHead>
                 <TableHead>Latency</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {neuralModels.map(model => (
+              {neuralModels.map((model) => (
                 <TableRow key={model.id}>
                   <TableCell className="font-medium">{model.name}</TableCell>
                   <TableCell>{model.type}</TableCell>
                   <TableCell>{model.version}</TableCell>
                   <TableCell>
-                    <Badge 
+                    <Badge
                       variant={model.status === 'active' ? 'default' : 'outline'}
                     >
                       {model.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{(model.performance.accuracy * 100).toFixed(1)}%</TableCell>
-                  <TableCell>{model.performance.latency.toFixed(1)} ms</TableCell>
+                  <TableCell>
+                    {(model.performance.accuracy * 100).toFixed(1)}%
+                  </TableCell>
+                  <TableCell>{model.performance.latency}ms</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon">
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-      </div>
-      
-      <div className="flex justify-end">
-        <Button 
-          variant="outline" 
-          onClick={resetSystem}
-        >
-          Reset System
-        </Button>
-      </div>
+      </Card>
     </div>
   );
 };

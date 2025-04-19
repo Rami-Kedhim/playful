@@ -1,30 +1,35 @@
 
-import React from 'react';
-import { Card } from "@/components/ui/card";
+import React, { ReactNode } from 'react';
 import { Button } from "@/components/ui/button";
-import { Power } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { PlusCircle } from "lucide-react";
 
 interface EmptyServiceStateProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   title: string;
+  description?: string;
   onRegister: () => void;
 }
 
 const EmptyServiceState: React.FC<EmptyServiceStateProps> = ({
   icon,
   title,
+  description = "No neural services are registered for this category yet.",
   onRegister
 }) => {
   return (
-    <Card className="p-8 text-center">
-      <div className="flex flex-col items-center space-y-4">
-        {icon}
-        <p>No {title} neural services registered</p>
-        <Button onClick={onRegister}>
-          <Power className="mr-2 h-4 w-4" />
-          Register Service
+    <Card className="border-dashed">
+      <CardContent className="flex flex-col items-center justify-center p-10 text-center">
+        <div className="text-muted-foreground mb-4">
+          {icon}
+        </div>
+        <h3 className="text-lg font-medium mb-2">{title} Neural Service</h3>
+        <p className="text-muted-foreground mb-4 max-w-md">{description}</p>
+        <Button variant="outline" onClick={onRegister}>
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Register Default Service
         </Button>
-      </div>
+      </CardContent>
     </Card>
   );
 };

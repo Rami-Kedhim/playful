@@ -9,9 +9,14 @@ export enum VerificationLevel {
 
 export type DocumentType = 'id_card' | 'passport' | 'drivers_license';
 
-export type VerificationStatus = 'pending' | 'approved' | 'rejected';
+export enum VerificationStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected'
+}
 
 export interface VerificationDocument {
+  id: string;
   type: DocumentType;
   frontImageUrl?: string;
   backImageUrl?: string;

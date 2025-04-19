@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { EmotionalState } from '@/types/ai-personality';
+import { EmotionalState, EmotionType } from '@/types/ai-personality';
 import { 
   Heart, 
   Brain, 

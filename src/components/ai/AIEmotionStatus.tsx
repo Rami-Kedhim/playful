@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { EmotionalState } from '@/types/ai-personality';
+import { EmotionalState, EmotionType } from '@/types/ai-personality';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -19,8 +19,8 @@ interface AIEmotionStatusProps {
   showIntensity?: boolean;
 }
 
-const getEmotionColor = (emotion: string): string => {
-  switch (emotion.toLowerCase()) {
+const getEmotionColor = (emotion: EmotionType): string => {
+  switch (emotion) {
     case 'joy':
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     case 'trust':
@@ -42,8 +42,8 @@ const getEmotionColor = (emotion: string): string => {
   }
 };
 
-const getEmotionIcon = (emotion: string) => {
-  switch (emotion.toLowerCase()) {
+const getEmotionIcon = (emotion: EmotionType) => {
+  switch (emotion) {
     case 'joy':
       return <Smile className="h-4 w-4" />;
     case 'trust':
@@ -78,9 +78,9 @@ const AIEmotionStatus: React.FC<AIEmotionStatusProps> = ({
     return (
       <Badge 
         variant="outline" 
-        className={`${getEmotionColor(dominantEmotion || '')} flex items-center gap-1`}
+        className={`${getEmotionColor(dominantEmotion)} flex items-center gap-1`}
       >
-        {getEmotionIcon(dominantEmotion || '')}
+        {getEmotionIcon(dominantEmotion)}
         {dominantEmotion}
         {showIntensity && intensityLevel && <span className="text-xs">({intensityLevel}%)</span>}
       </Badge>
@@ -89,14 +89,14 @@ const AIEmotionStatus: React.FC<AIEmotionStatusProps> = ({
 
   // Get the top 3 emotions
   const emotions = [
-    { name: 'joy', value: emotionalState.joy },
-    { name: 'trust', value: emotionalState.trust },
-    { name: 'fear', value: emotionalState.fear },
-    { name: 'surprise', value: emotionalState.surprise },
-    { name: 'sadness', value: emotionalState.sadness },
-    { name: 'anger', value: emotionalState.anger },
-    { name: 'anticipation', value: emotionalState.anticipation },
-    { name: 'interest', value: emotionalState.interest }
+    { name: 'joy' as EmotionType, value: emotionalState.joy },
+    { name: 'trust' as EmotionType, value: emotionalState.trust },
+    { name: 'fear' as EmotionType, value: emotionalState.fear },
+    { name: 'surprise' as EmotionType, value: emotionalState.surprise },
+    { name: 'sadness' as EmotionType, value: emotionalState.sadness },
+    { name: 'anger' as EmotionType, value: emotionalState.anger },
+    { name: 'anticipation' as EmotionType, value: emotionalState.anticipation },
+    { name: 'interest' as EmotionType, value: emotionalState.interest }
   ].sort((a, b) => b.value - a.value).slice(0, 3);
 
   return (

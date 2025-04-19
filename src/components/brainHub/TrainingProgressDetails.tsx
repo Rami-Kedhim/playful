@@ -31,15 +31,17 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
   // Generate mock accuracy history data
   const generateAccuracyHistory = () => {
     const data = [];
-    const startAccuracy = trainingJob.accuracy - (trainingJob.currentEpoch * 0.03);
+    const currentAccuracy = trainingJob.accuracy || 0.85;
+    const startAccuracy = currentAccuracy - ((trainingJob.currentEpoch || 10) * 0.03);
     const baseAccuracy = Math.max(0.4, startAccuracy);
+    const targetAccuracy = trainingJob.targetAccuracy || 0.95;
     
-    for (let i = 0; i <= trainingJob.currentEpoch; i++) {
-      const accuracy = baseAccuracy + (i * ((trainingJob.accuracy - baseAccuracy) / trainingJob.currentEpoch));
+    for (let i = 0; i <= (trainingJob.currentEpoch || 10); i++) {
+      const accuracy = baseAccuracy + (i * ((currentAccuracy - baseAccuracy) / (trainingJob.currentEpoch || 10)));
       data.push({
         epoch: i,
         accuracy: Number((accuracy).toFixed(4)),
-        target: Number(trainingJob.targetAccuracy.toFixed(4))
+        target: Number(targetAccuracy.toFixed(4))
       });
     }
     return data;
@@ -56,7 +58,7 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
       case 'training': return "bg-blue-500";
       case 'completed': return "bg-green-500";
       case 'failed': return "bg-red-500";
-      case 'stopped': return "bg-amber-500";
+      case 'paused': return "bg-amber-500";
       default: return "bg-gray-500";
     }
   };
@@ -66,13 +68,15 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
       case 'training': return "In Progress";
       case 'completed': return "Completed";
       case 'failed': return "Failed";
-      case 'stopped': return "Stopped";
+      case 'paused': return "Paused";
       default: return trainingJob.status;
     }
   };
   
   const getEstimatedTimeRemaining = () => {
     if (trainingJob.status !== 'training') return 'N/A';
+    
+    if (!trainingJob.estimatedCompletionTime) return 'Calculating...';
     
     const now = new Date();
     const estCompletion = new Date(trainingJob.estimatedCompletionTime);
@@ -121,7 +125,7 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
             <div className="flex items-center">
               <span className="text-sm font-medium">Progress</span>
               <span className="ml-2 text-xs bg-primary/10 text-primary py-0.5 px-2 rounded-full">
-                Epoch {trainingJob.currentEpoch} of {trainingJob.totalEpochs}
+                Epoch {trainingJob.currentEpoch || 0} of {trainingJob.totalEpochs || 100}
               </span>
             </div>
             <span className="text-sm font-medium">{trainingJob.progress}%</span>
@@ -132,12 +136,12 @@ const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <span className="text-xs text-muted-foreground">Current Accuracy</span>
-            <div className="font-medium text-lg">{(trainingJob.accuracy * 100).toFixed(1)}%</div>
+            <div className="font-medium text-lg">{((trainingJob.accuracy || 0) * 100).toFixed(1)}%</div>
           </div>
           
           <div>
             <span className="text-xs text-muted-foreground">Target Accuracy</span>
-            <div className="font-medium text-lg">{(trainingJob.targetAccuracy * 100).toFixed(1)}%</div>
+            <div className="font-medium text-lg">{((trainingJob.targetAccuracy || 0) * 100).toFixed(1)}%</div>
           </div>
           
           <div>
