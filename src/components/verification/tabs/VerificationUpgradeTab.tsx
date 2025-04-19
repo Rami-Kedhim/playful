@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-// Use string enums from escort types here to avoid conflicts
-import type { VerificationLevel } from '@/types/escort';
+// Correct import from verification types not escort
+import type { VerificationLevel } from '@/types/verification';
 
 interface VerificationUpgradeTabProps {
   userId: string;

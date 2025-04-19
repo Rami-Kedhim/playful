@@ -3,8 +3,8 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
-// Correct import from local verification types to align imports
-import type { VerificationLevel } from '@/types/escort';
+// Fix import: use VerificationLevel from verification types not escort
+import type { VerificationLevel } from '@/types/verification';
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
@@ -37,7 +37,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
   let verificationLevelSafe: VerificationLevel = 'none';
   const verificationLevelRaw = persona.verificationLevel || 'none';
 
-  // Simple string check since VerificationLevel is string enum aliases in src/types/escort
+  // Simple string check since VerificationLevel is string enum aliases in src/types/verification
   if (
     verificationLevelRaw === 'none' ||
     verificationLevelRaw === 'basic' ||

@@ -53,7 +53,8 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
         setHilbertSpace({
           dimension: 4,
           getCoordinates: (persona: UberPersona): number[] => {
-            const seed = persona.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            // Safe access of type since it is optional on UberPersona
+            const seed = (persona.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             return [
               Math.sin(seed * 0.1) * 0.5 + 0.5,
               Math.cos(seed * 0.1) * 0.5 + 0.5,
