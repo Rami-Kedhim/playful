@@ -30,8 +30,6 @@ const defaultHilbertSpace: HilbertSpace = {
   getCoordinates: (_: UberPersona): number[] => [0.5, 0.5, 0.5, 0.5],
 };
 
-const UberPersonaContext = createContext<UberPersonaContextType | undefined>(undefined);
-
 /** Helpers for persona filtering/grouping */
 const filterByTypeFlag = (
   personas: UberPersona[],
@@ -42,6 +40,35 @@ const filterByTypeFlag = (
       persona.roleFlags?.[typeFlag as keyof UberPersona['roleFlags']] || false
   );
 };
+
+const getEscorts = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isEscort');
+const getCreators = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isCreator');
+const getLivecams = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isLivecam');
+const getAIPersonas = (allPersonas: UberPersona[]) => filterByTypeFlag(allPersonas, 'isAI');
+
+const getBoostedPersonas = (allPersonas: UberPersona[]): UberPersona[] =>
+  allPersonas.filter(p => p.monetization?.boostingActive || p.roleFlags?.isFeatured);
+
+const rankPersonas = (personas: UberPersona[], boostFactor = 1.0) => {
+  const copy = [...personas];
+  copy.sort((a, b) => {
+    const aRating = a.stats?.rating ?? 0;
+    const aReviewCount = a.stats?.reviewCount ?? 0;
+    const bRating = b.stats?.rating ?? 0;
+    const bReviewCount = b.stats?.reviewCount ?? 0;
+
+    let aScore = aRating * 2 + aReviewCount / 10;
+    let bScore = bRating * 2 + bReviewCount / 10;
+
+    if (a.roleFlags?.isFeatured) aScore *= boostFactor;
+    if (b.roleFlags?.isFeatured) bScore *= boostFactor;
+
+    return bScore - aScore;
+  });
+  return copy;
+};
+
+const UberPersonaContext = createContext<UberPersonaContextType | undefined>(undefined);
 
 const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { escorts } = useEscortContext();
@@ -96,39 +123,6 @@ const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, [escorts]);
 
-  const getEscorts = () => filterByTypeFlag(allPersonas, 'isEscort');
-
-  const getCreators = () => filterByTypeFlag(allPersonas, 'isCreator');
-
-  const getLivecams = () => filterByTypeFlag(allPersonas, 'isLivecam');
-
-  const getAIPersonas = () => filterByTypeFlag(allPersonas, 'isAI');
-
-  const getPersonaById = (id: string): UberPersona | undefined =>
-    allPersonas.find(p => p.id === id);
-
-  const getBoostedPersonas = (): UberPersona[] =>
-    allPersonas.filter(p => p.monetization?.boostingActive || p.roleFlags?.isFeatured);
-
-  const rankPersonas = (personas: UberPersona[], boostFactor = 1.0) => {
-    const copy = [...personas];
-    copy.sort((a, b) => {
-      const aRating = a.stats?.rating ?? 0;
-      const aReviewCount = a.stats?.reviewCount ?? 0;
-      const bRating = b.stats?.rating ?? 0;
-      const bReviewCount = b.stats?.reviewCount ?? 0;
-
-      let aScore = aRating * 2 + aReviewCount / 10;
-      let bScore = bRating * 2 + bReviewCount / 10;
-
-      if (a.roleFlags?.isFeatured) aScore *= boostFactor;
-      if (b.roleFlags?.isFeatured) bScore *= boostFactor;
-
-      return bScore - aScore;
-    });
-    return copy;
-  };
-
   const refreshEcosystem = async () => {
     try {
       setLoading(true);
@@ -146,17 +140,20 @@ const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const getPersonaById = (id: string): UberPersona | undefined =>
+    allPersonas.find(p => p.id === id);
+
   const value: UberPersonaContextType = {
     allPersonas,
-    escortPersonas: getEscorts(),
-    creatorPersonas: getCreators(),
-    livecamPersonas: getLivecams(),
-    aiPersonas: getAIPersonas(),
+    escortPersonas: getEscorts(allPersonas),
+    creatorPersonas: getCreators(allPersonas),
+    livecamPersonas: getLivecams(allPersonas),
+    aiPersonas: getAIPersonas(allPersonas),
     loading,
     error,
     refreshEcosystem,
     getPersonaById,
-    boostedPersonas: getBoostedPersonas(),
+    boostedPersonas: getBoostedPersonas(allPersonas),
     rankPersonas,
     hilbertSpace,
   };
