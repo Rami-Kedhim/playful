@@ -1,5 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+// Fix import of useEscorts hook and typing filters properly
+
+import React, { useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
 import EscortGrid from '@/components/escorts/EscortGrid';
@@ -14,30 +16,29 @@ const EscortsContent = () => {
     escorts, 
     featuredEscorts, 
     loading, 
-    filters = {}, // Default to empty object
+    filters = {}, // Default to empty forcing as unknown first
     updateFilters,
     applyCurrentFilters,
     clearAllFilters
   } = useEscorts();
 
-  // Initialize showFilters state here to fix undefined errors
+  // Use useState for showFilters to fix undefined errors
   const [showFilters, setShowFilters] = useState(false);
 
-  // Provide defaults for filter properties to avoid TS errors
-  const serviceTypes: string[] = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
-  const serviceType: "" | "in-person" | "virtual" | "both" =
-    serviceTypes.length === 1 ? (serviceTypes[0] as "" | "in-person" | "virtual" | "both") : "";
-  const selectedServices: string[] = serviceTypes;
+  // Type guard for filters object properties safely
+  const serviceTypes = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
+  const serviceType = serviceTypes.length === 1 ? (serviceTypes[0] as "" | "in-person" | "virtual" | "both") : "";
 
-  // Default filters with fallback values
-  const location: string = typeof filters.location === "string" ? filters.location : "";
-  const priceRange: [number, number] = Array.isArray(filters.priceRange) ? (filters.priceRange as [number, number]) : [0, 1000];
-  const selectedGenders: string[] = Array.isArray(filters.gender) ? filters.gender : [];
-  const selectedOrientations: string[] = Array.isArray(filters.orientation) ? filters.orientation : [];
-  const ageRange: [number, number] = Array.isArray(filters.ageRange) ? (filters.ageRange as [number, number]) : [18, 99];
-  const ratingMin: number = typeof filters.rating === 'number' ? filters.rating : 0;
-  const availableNow: boolean = typeof filters.availableNow === 'boolean' ? filters.availableNow : false;
-  const verifiedOnly: boolean = typeof filters.verified === 'boolean' ? filters.verified : false;
+  const selectedServices = serviceTypes;
+  
+  const location = typeof filters.location === 'string' ? filters.location : "";
+  const priceRange = Array.isArray(filters.priceRange) ? (filters.priceRange as [number, number]) : [0, 1000];
+  const selectedGenders = Array.isArray(filters.gender) ? filters.gender : [];
+  const selectedOrientations = Array.isArray(filters.orientation) ? filters.orientation : [];
+  const ageRange = Array.isArray(filters.ageRange) ? (filters.ageRange as [number, number]) : [18, 99];
+  const ratingMin = typeof filters.rating === 'number' ? filters.rating : 0;
+  const availableNow = typeof filters.availableNow === 'boolean' ? filters.availableNow : false;
+  const verifiedOnly = typeof filters.verified === 'boolean' ? filters.verified : false;
 
   return (
     <div className="container mx-auto py-8 px-4">

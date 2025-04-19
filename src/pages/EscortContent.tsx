@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort'; // lowercase import to avoid casing conflicts
 
 interface EscortContentProps {
   escort: Escort;
@@ -14,7 +14,7 @@ const EscortContent: React.FC<EscortContentProps> = ({ escort }) => {
   const contentStats = {
     photos: 25,
     videos: 8,
-    stories: 12
+    stories: 12,
   };
 
   return (

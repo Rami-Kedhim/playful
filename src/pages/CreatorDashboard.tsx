@@ -1,12 +1,12 @@
 
 import { useState } from "react";
 import { useCreatorAuth } from "@/hooks/useCreatorAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare, Upload, DollarSign, Settings, AlertCircle, ChevronRight } from "lucide-react";
+import { MessageSquare, Upload, AlertCircle, ChevronRight, Zap } from "lucide-react";
 import CreatorAnalytics from "@/components/creators/dashboard/CreatorAnalytics";
 import CreatorContent from "@/components/creators/dashboard/CreatorContent";
 import CreatorPayouts from "@/components/creators/dashboard/CreatorPayouts";
@@ -18,7 +18,7 @@ const CreatorDashboard = () => {
   const { isCreator, creatorProfile, loading, canCreate, creatorId } = useCreatorAuth();
   const [activeTab, setActiveTab] = useState("analytics");
   const { user } = useAuth();
-  
+
   if (loading) {
     return (
       <MainLayout>
@@ -29,7 +29,7 @@ const CreatorDashboard = () => {
       </MainLayout>
     );
   }
-  
+
   if (!isCreator) {
     return (
       <MainLayout>
@@ -89,7 +89,7 @@ const CreatorDashboard = () => {
             </Button>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="bg-primary/10">
             <CardHeader className="pb-2">
@@ -104,7 +104,7 @@ const CreatorDashboard = () => {
               </Button>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">
@@ -122,7 +122,7 @@ const CreatorDashboard = () => {
               )}
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">
@@ -136,7 +136,7 @@ const CreatorDashboard = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">
@@ -151,7 +151,7 @@ const CreatorDashboard = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid grid-cols-4 w-full md:w-auto">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -159,22 +159,22 @@ const CreatorDashboard = () => {
             <TabsTrigger value="payouts">Earnings & Payouts</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="analytics" className="space-y-4">
+
+          <Tabs.Content value="analytics" className="space-y-4">
             <CreatorAnalytics creatorId={creatorId || ''} />
-          </TabsContent>
-          
-          <TabsContent value="content" className="space-y-4">
+          </Tabs.Content>
+
+          <Tabs.Content value="content" className="space-y-4">
             <CreatorContent creatorId={creatorId || ''} />
-          </TabsContent>
-          
-          <TabsContent value="payouts" className="space-y-4">
+          </Tabs.Content>
+
+          <Tabs.Content value="payouts" className="space-y-4">
             <CreatorPayouts creatorId={creatorId || ''} />
-          </TabsContent>
-          
-          <TabsContent value="settings" className="space-y-4">
+          </Tabs.Content>
+
+          <Tabs.Content value="settings" className="space-y-4">
             <CreatorSettings profile={creatorProfile} />
-          </TabsContent>
+          </Tabs.Content>
         </Tabs>
       </div>
     </MainLayout>

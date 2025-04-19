@@ -2,20 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { NeuralService } from '@/services/neural/NeuralService';
 
-const neuralServiceInstance = new NeuralService(
-  'adaptive-cognitive-core',
-  'adaptive-cognitive-core',
-  'Adaptive Cognitive Core',
-  'Processes cognitive input adaptively',
-  'core',
-  '1.0',
-  {
-    enabled: true,
-    version: '1.0',
-  }
-);
-
 const AdaptiveCognitiveCore = () => {
+  // Create instance of NeuralService
+  const [neuralServiceInstance, setNeuralServiceInstance] = useState<NeuralService | null>(null);
   const [state, setState] = useState(null);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
@@ -24,9 +13,22 @@ const AdaptiveCognitiveCore = () => {
   const [cognitiveLoad, setCognitiveLoad] = useState(0);
 
   useEffect(() => {
-    const initializeCore = async () => {
+    const init = async () => {
       try {
-        await neuralServiceInstance.initialize();
+        const instance = new NeuralService(
+          'adaptive-cognitive-core',
+          'adaptive-cognitive-core',
+          'Adaptive Cognitive Core',
+          'Processes cognitive input adaptively',
+          'core',
+          '1.0',
+          {
+            enabled: true,
+            version: '1.0',
+          }
+        );
+        await instance.initialize();
+        setNeuralServiceInstance(instance);
         setState({ initialized: true });
       } catch (err) {
         setError('Failed to initialize neural service');
@@ -34,18 +36,17 @@ const AdaptiveCognitiveCore = () => {
       }
     };
 
-    initializeCore();
+    init();
 
     return () => {
-      // cleanup method may not exist on instance, so safely check before calling
-      if (neuralServiceInstance && typeof (neuralServiceInstance as any).cleanup === 'function') {
-        (neuralServiceInstance as any).cleanup();
+      if (neuralServiceInstance && typeof neuralServiceInstance.cleanup === 'function') {
+        neuralServiceInstance.cleanup();
       }
     };
   }, []);
 
   const processInput = async (userInput: string) => {
-    if (!userInput.trim()) return;
+    if (!userInput.trim() || !neuralServiceInstance) return;
 
     setIsProcessing(true);
     setCognitiveLoad(prev => Math.min(prev + 0.2, 1));
