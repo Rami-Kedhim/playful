@@ -1,351 +1,187 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
-import { UberCoreSettings, UberSearchFilters } from '@/types/uber-ecosystem';
-import { uberCoreInstance } from '@/services/neural/UberCore';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
-import { toast } from '@/components/ui/use-toast';
+import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
+import { UberCore, uberCoreInstance } from '@/services/neural/UberCore';
 
-// Context interface for the Uber ecosystem
-interface UberEcosystemContextType {
-  isInitialized: boolean;
-  isLoading: boolean;
+interface UberPersonaContextType {
+  allPersonas: UberPersona[];
+  escortPersonas: UberPersona[];
+  creatorPersonas: UberPersona[];
+  livecamPersonas: UberPersona[];
+  aiPersonas: UberPersona[];
+  loading: boolean;
   error: string | null;
-  personas: UberPersona[];
-  settings: UberCoreSettings;
-  updateSettings: (newSettings: Partial<UberCoreSettings>) => void;
-  searchPersonas: (filters: UberSearchFilters) => UberPersona[];
-  findSimilarProfiles: (personaId: string, count?: number) => UberPersona[];
-  getPersonaById: (id: string) => UberPersona | undefined;
   refreshEcosystem: () => Promise<void>;
+  getPersonaById: (id: string) => UberPersona | undefined;
+  boostedPersonas: UberPersona[];
+  rankPersonas: (personas: UberPersona[], boostFactor?: number) => UberPersona[];
+  hilbertSpace: {
+    dimension: number;
+    getCoordinates: (persona: UberPersona) => number[];
+  };
 }
 
-// Create context with default values
-const UberEcosystemContext = createContext<UberEcosystemContextType>({
-  isInitialized: false,
-  isLoading: false,
-  error: null,
-  personas: [],
-  settings: {
-    boostingEnabled: true,
-    boostingAlgorithm: 'OxumAlgorithm',
-    orderByBoost: true,
-    autonomyLevel: 65,
-    resourceAllocation: 80,
-    hilbertDimension: 8,
-    aiEnhancementLevel: 40
-  },
-  updateSettings: () => {},
-  searchPersonas: () => [],
-  findSimilarProfiles: () => [],
-  getPersonaById: () => undefined,
-  refreshEcosystem: async () => {}
-});
+const defaultHilbertSpace = {
+  dimension: 4,
+  getCoordinates: (_: UberPersona): number[] => [0.5, 0.5, 0.5, 0.5]
+};
 
-export const UberEcosystemProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // State
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [personas, setPersonas] = useState<UberPersona[]>([]);
-  const [settings, setSettings] = useState<UberCoreSettings>({
-    boostingEnabled: true,
-    boostingAlgorithm: 'OxumAlgorithm',
-    orderByBoost: true,
-    autonomyLevel: 65,
-    resourceAllocation: 80,
-    hilbertDimension: 8,
-    aiEnhancementLevel: 40
-  });
-  
-  // Get data sources
+const UberPersonaContext = createContext<UberPersonaContextType | undefined>(undefined);
+
+export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { escorts } = useEscortContext();
+  const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState<boolean>(false);
+  const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
   
-  // Initialize UberCore and ecosystem
   useEffect(() => {
-    const initialize = async () => {
+    const initSystem = async () => {
       try {
-        setIsLoading(true);
+        setLoading(true);
         
-        // Initialize UberCore
-        const initialized = await uberCoreInstance.initialize();
+        await uberCoreInstance.initialize();
         
-        if (initialized) {
-          setIsInitialized(true);
-          
-          // Load data from available sources
-          if (escorts && escorts.length > 0) {
-            const uberPersonas: UberPersona[] = [];
-            
-            // Convert escorts to UberPersonas
-            for (const escort of escorts) {
-              const persona = convertToUberPersona(escort);
-              if (persona) {
-                uberPersonas.push(persona);
-              }
-            }
-            
-            // Update personas state
-            setPersonas(uberPersonas);
-            
-            console.log(`UberEcosystem: Converted ${uberPersonas.length} entities to UberPersonas`);
-          }
-          
-          setError(null);
-        } else {
-          setError('Failed to initialize UberCore');
+        if (escorts && escorts.length > 0) {
+          const mappedPersonas = mapEscortsToUberPersonas(escorts);
+          setAllPersonas(mappedPersonas);
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to initialize Uber ecosystem');
-        toast({
-          title: "Initialization Error",
-          description: "Failed to initialize the Uber ecosystem. Some features may not work correctly.",
-          variant: "destructive"
+        
+        setHilbertSpace({
+          dimension: 4,
+          getCoordinates: (persona: UberPersona): number[] => {
+            const seed = persona.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            return [
+              Math.sin(seed * 0.1) * 0.5 + 0.5,
+              Math.cos(seed * 0.1) * 0.5 + 0.5,
+              Math.sin(seed * 0.2) * 0.5 + 0.5,
+              Math.cos(seed * 0.2) * 0.5 + 0.5
+            ];
+          }
         });
+        
+        setInitialized(true);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Failed to initialize UberPersona ecosystem');
+        console.error('UberPersona initialization error:', err);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
-    initialize();
+    initSystem();
     
-    // Cleanup on unmount
     return () => {
-      uberCoreInstance.shutdown().catch(console.error);
+      uberCoreInstance.shutdown?.()?.catch(console.error);
     };
   }, [escorts]);
   
-  // Helper function to convert escort to UberPersona
-  const convertToUberPersona = (escort: any): UberPersona => {
-    return {
-      id: escort.id,
-      name: escort.name,
-      displayName: escort.displayName || escort.name,
-      type: 'escort',
-      avatarUrl: escort.profileImage || escort.images?.[0],
-      imageUrl: escort.images?.[0],
-      bio: escort.description || escort.bio,
-      description: escort.description || escort.bio,
-      location: escort.location,
-      age: escort.age,
-      ethnicity: escort.ethnicity,
-      isVerified: escort.isVerified || false,
-      isActive: escort.isActive || true,
-      isAI: false,
-      isPremium: escort.isPremium || false,
-      isOnline: escort.isOnline || false,
-      rating: escort.rating,
-      languages: escort.languages || [],
-      services: escort.services || [],
-      traits: escort.traits || [],
-      tags: escort.tags || [],
-      featured: escort.featured || false,
-      roleFlags: {
-        isEscort: true,
-        isCreator: false,
-        isLivecam: false,
-        isAI: false,
-        isVerified: escort.isVerified || false,
-        isFeatured: escort.featured || false
-      },
-      capabilities: {
-        hasPhotos: true,
-        hasVideos: !!escort.videos?.length,
-        hasStories: false,
-        hasChat: true,
-        hasVoice: false,
-        hasBooking: true,
-        hasLiveStream: false,
-        hasExclusiveContent: false,
-        hasContent: !!escort.videos?.length || !!escort.images?.length,
-        hasRealMeets: true,
-        hasVirtualMeets: false
-      },
-      stats: {
-        rating: escort.rating || 0,
-        reviewCount: escort.reviewCount || 0,
-        viewCount: escort.viewCount || 0,
-        favoriteCount: escort.favoriteCount || 0,
-        bookingCount: escort.bookingCount || 0,
-        responseTime: escort.responseTime || 30
-      },
-      monetization: {
-        acceptsLucoin: true,
-        acceptsTips: true,
-        subscriptionPrice: 0,
-        unlockingPrice: 0,
-        boostingActive: escort.featured || false,
-        meetingPrice: escort.price || 0
-      },
-      price: escort.price || 0,
-      availability: {
-        schedule: escort.availability || {},
-        nextAvailable: escort.nextAvailable || 'Available now'
-      },
-      systemMetadata: {
-        version: '1.0',
-        lastUpdated: new Date().toISOString(),
-        personalityIndex: Math.random(),
-        statusFlags: {
-          needsModeration: false,
-          isPromoted: escort.featured || false,
-          isArchived: false
-        }
-      }
-    };
-  };
+  const getEscorts = () => allPersonas.filter(persona => 
+    (persona as any).type === 'escort' || persona.roleFlags?.isEscort
+  );
   
-  // Update settings function
-  const updateSettings = (newSettings: Partial<UberCoreSettings>) => {
-    setSettings(prevSettings => ({
-      ...prevSettings,
-      ...newSettings
-    }));
-  };
+  const getCreators = () => allPersonas.filter(persona => 
+    (persona as any).type === 'creator' || persona.roleFlags?.isCreator
+  );
   
-  // Search personas function
-  const searchPersonas = (filters: UberSearchFilters): UberPersona[] => {
-    if (!isInitialized) return [];
-    
-    // Simple search implementation
-    return personas.filter(persona => {
-      // Type filter
-      if (filters.type && filters.type.length > 0 && !filters.type.includes(persona.type)) {
-        return false;
-      }
-      
-      // Location filter
-      if (filters.location && 
-          persona.location && 
-          !persona.location.toLowerCase().includes(filters.location.toLowerCase())) {
-        return false;
-      }
-      
-      // Rating filter
-      if (typeof filters.minRating === 'number' && 
-          (typeof persona.rating !== 'number' || persona.rating < filters.minRating)) {
-        return false;
-      }
-      
-      // Price filter
-      if (typeof filters.maxPrice === 'number' && 
-          (typeof persona.price === 'number' && persona.price > filters.maxPrice)) {
-        return false;
-      }
-      
-      // Verification filter
-      if (filters.isVerified === true && !persona.isVerified) {
-        return false;
-      }
-      
-      // Tags filter
-      if (filters.tags && 
-          filters.tags.length > 0 && 
-          (!persona.tags || !filters.tags.some(tag => persona.tags!.includes(tag)))) {
-        return false;
-      }
-      
-      return true;
-    });
-  };
+  const getLivecams = () => allPersonas.filter(persona => 
+    (persona as any).type === 'livecam' || persona.roleFlags?.isLivecam
+  );
   
-  // Find similar profiles function
-  const findSimilarProfiles = (personaId: string, count: number = 5): UberPersona[] => {
-    if (!isInitialized) return [];
-    
-    const sourcePersona = personas.find(p => p.id === personaId);
-    if (!sourcePersona) return [];
-    
-    // Simple similarity calculation based on tags and type
-    return personas
-      .filter(p => p.id !== personaId)
-      .map(p => {
-        // Calculate similarity score
-        let score = 0;
-        
-        // Same type
-        if (p.type === sourcePersona.type) score += 2;
-        
-        // Similar age (within 5 years)
-        if (typeof p.age === 'number' && 
-            typeof sourcePersona.age === 'number' && 
-            Math.abs(p.age - sourcePersona.age) <= 5) {
-          score += 1;
-        }
-        
-        // Tags overlap
-        if (p.tags && sourcePersona.tags) {
-          const overlap = p.tags.filter(tag => sourcePersona.tags!.includes(tag)).length;
-          score += overlap * 0.5;
-        }
-        
-        return { persona: p, score };
-      })
-      .sort((a, b) => b.score - a.score)
-      .slice(0, count)
-      .map(item => item.persona);
-  };
+  const getAIPersonas = () => allPersonas.filter(persona => 
+    (persona as any).type === 'ai' || persona.roleFlags?.isAI || persona.isAI === true
+  );
   
-  // Get persona by ID function
   const getPersonaById = (id: string): UberPersona | undefined => {
-    return personas.find(persona => persona.id === id);
+    return allPersonas.find(persona => persona.id === id);
   };
   
-  // Refresh ecosystem function
-  const refreshEcosystem = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
+  const getBoostedPersonas = (): UberPersona[] => {
+    return allPersonas.filter(persona => 
+      persona.monetization?.boostingActive || 
+      persona.roleFlags?.isFeatured || 
+      (persona as any).featured
+    );
+  };
+  
+  const rankPersonas = (personas: UberPersona[], boostFactor = 1.0): UberPersona[] => {
+    const ranked = [...personas];
+    
+    ranked.sort((a, b) => {
+      const aRating = a.stats?.rating ?? 0;
+      const aReviewCount = a.stats?.reviewCount || 0;
+      const bRating = b.stats?.rating ?? 0;
+      const bReviewCount = b.stats?.reviewCount || 0;
       
-      // Refresh data from available sources
+      let aScore = (aRating * 2) + (aReviewCount / 10);
+      let bScore = (bRating * 2) + (bReviewCount / 10);
+      
+      if (a.roleFlags?.isFeatured || (a as any).featured) aScore *= boostFactor;
+      if (b.roleFlags?.isFeatured || (b as any).featured) bScore *= boostFactor;
+      
+      return bScore - aScore;
+    });
+    
+    return ranked;
+  };
+  
+  const refreshEcosystem = async () => {
+    try {
+      setLoading(true);
+      
       if (escorts && escorts.length > 0) {
-        const uberPersonas: UberPersona[] = [];
-        
-        // Convert escorts to UberPersonas
-        for (const escort of escorts) {
-          const persona = convertToUberPersona(escort);
-          if (persona) {
-            uberPersonas.push(persona);
-          }
-        }
-        
-        // Update personas state
-        setPersonas(uberPersonas);
+        const mappedPersonas = mapEscortsToUberPersonas(escorts);
+        setAllPersonas(mappedPersonas);
       }
       
       setError(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to refresh Uber ecosystem');
+      setError(err.message || 'Failed to refresh UberPersona ecosystem');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
   
-  // Context value
-  const value: UberEcosystemContextType = {
-    isInitialized,
-    isLoading,
+  const value = {
+    allPersonas,
+    escortPersonas: getEscorts(),
+    creatorPersonas: getCreators(),
+    livecamPersonas: getLivecams(),
+    aiPersonas: getAIPersonas(),
+    loading,
     error,
-    personas,
-    settings,
-    updateSettings,
-    searchPersonas,
-    findSimilarProfiles,
+    refreshEcosystem,
     getPersonaById,
-    refreshEcosystem
+    boostedPersonas: getBoostedPersonas(),
+    rankPersonas,
+    hilbertSpace
   };
   
-  // Render provider
+  if (loading && !initialized) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="h-12 w-12 rounded-full border-4 border-t-ubx animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Initializing UberPersona ecosystem...</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
-    <UberEcosystemContext.Provider value={value}>
+    <UberPersonaContext.Provider value={value}>
       {children}
-    </UberEcosystemContext.Provider>
+    </UberPersonaContext.Provider>
   );
 };
 
-// Custom hook to use the Uber ecosystem
-export const useUberEcosystem = (): UberEcosystemContextType => {
-  const context = useContext(UberEcosystemContext);
+export const useUberPersonaContext = (): UberPersonaContextType => {
+  const context = useContext(UberPersonaContext);
   if (!context) {
-    throw new Error('useUberEcosystem must be used within an UberEcosystemProvider');
+    throw new Error('useUberPersonaContext must be used within UberPersonaProvider');
   }
   return context;
 };

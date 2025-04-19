@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,9 +32,6 @@ const MapViewer: React.FC<MapViewerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // In a real app, this would initialize a map library like Google Maps or Mapbox
-  // For simplicity here, we'll just show a placeholder
-  
   useEffect(() => {
     setIsLoading(true);
     
@@ -43,7 +39,6 @@ const MapViewer: React.FC<MapViewerProps> = ({
       const initMap = async () => {
         if (!mapContainerRef.current) return;
         
-        // In a real app, this would initialize the map
         console.log('Initializing map with:', {
           origin,
           destination,
@@ -51,7 +46,6 @@ const MapViewer: React.FC<MapViewerProps> = ({
           markers
         });
         
-        // Simulate map loading
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         setIsLoading(false);
@@ -67,12 +61,10 @@ const MapViewer: React.FC<MapViewerProps> = ({
 
   const handleZoomIn = () => {
     console.log('Zoom in');
-    // In a real app, this would zoom in the map
   };
 
   const handleZoomOut = () => {
     console.log('Zoom out');
-    // In a real app, this would zoom out the map
   };
 
   const handleMyLocation = () => {
@@ -81,7 +73,6 @@ const MapViewer: React.FC<MapViewerProps> = ({
         position => {
           const { latitude, longitude } = position.coords;
           console.log('Current location:', { latitude, longitude });
-          // In a real app, this would center the map on the user's location
         },
         error => {
           console.error('Error getting location:', error);
@@ -94,7 +85,6 @@ const MapViewer: React.FC<MapViewerProps> = ({
 
   const handleToggleLayers = () => {
     console.log('Toggle layers');
-    // In a real app, this would toggle between map layers
   };
 
   return (
@@ -120,10 +110,9 @@ const MapViewer: React.FC<MapViewerProps> = ({
           </div>
         ) : (
           <>
-            {/* Map is loaded, this is where we'd render the actual map */}
             {origin && (
               <div className="absolute left-4 top-4">
-                <Badge variant="secondary" className="flex items-center gap-1.5">
+                <Badge variant="ubx" className="flex items-center gap-1.5">
                   <MapPin className="h-3 w-3" />
                   Origin
                 </Badge>
@@ -132,7 +121,7 @@ const MapViewer: React.FC<MapViewerProps> = ({
             
             {destination && (
               <div className="absolute right-4 top-4">
-                <Badge variant="primary" className="flex items-center gap-1.5">
+                <Badge variant="ubx" className="flex items-center gap-1.5">
                   <Navigation className="h-3 w-3" />
                   Destination
                 </Badge>
@@ -144,16 +133,16 @@ const MapViewer: React.FC<MapViewerProps> = ({
 
       {showControls && !isLoading && !error && (
         <div className="absolute right-4 bottom-4 flex flex-col gap-2">
-          <Button size="icon" variant="secondary" onClick={handleZoomIn}>
+          <Button size="icon" variant="ubx" onClick={handleZoomIn}>
             <Plus className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="secondary" onClick={handleZoomOut}>
+          <Button size="icon" variant="ubx" onClick={handleZoomOut}>
             <Minus className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="secondary" onClick={handleMyLocation}>
+          <Button size="icon" variant="ubx" onClick={handleMyLocation}>
             <LocateFixed className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="secondary" onClick={handleToggleLayers}>
+          <Button size="icon" variant="ubx" onClick={handleToggleLayers}>
             <Layers className="h-4 w-4" />
           </Button>
         </div>

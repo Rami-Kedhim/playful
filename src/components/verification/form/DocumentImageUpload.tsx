@@ -1,14 +1,12 @@
-
 import React, { useState } from 'react';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Upload, X } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
-import { VerificationFormValues } from '@/types/verification';
 
 interface DocumentImageUploadProps {
-  form: UseFormReturn<VerificationFormValues>;
-  fieldName: string; // Add the missing prop
+  form: UseFormReturn<any>;
+  fieldName: string;
   label: string;
   description?: string;
   optional?: boolean;

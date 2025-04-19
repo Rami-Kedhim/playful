@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
   onReject,
   loading,
 }) => {
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = React.useState('');
   const isPending = request.status === VerificationStatus.PENDING || request.status === VerificationStatus.IN_REVIEW;
   
   const handleApprove = async () => {
@@ -54,8 +53,8 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
             Submitted:{' '}
             {request.submittedAt
               ? format(new Date(request.submittedAt), 'MMM dd, yyyy h:mm a')
-              : request.created_at || request.createdAt 
-                ? format(new Date(request.created_at || request.createdAt), 'MMM dd, yyyy h:mm a')
+              : request.created_at
+                ? format(new Date(request.created_at), 'MMM dd, yyyy h:mm a')
                 : format(new Date(), 'MMM dd, yyyy h:mm a')}
           </span>
         </div>

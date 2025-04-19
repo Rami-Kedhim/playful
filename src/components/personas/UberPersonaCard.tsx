@@ -42,7 +42,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
     verificationLevelNormalized === 'enhanced' ||
     verificationLevelNormalized === 'premium'
   ) {
-    verificationLevelSafe = verificationLevelNormalized as VerificationLevelTS;
+    verificationLevelSafe = verificationLevelNormalized as unknown as VerificationLevelTS;
   } else {
     verificationLevelSafe = VerificationLevelTS.NONE;
   }

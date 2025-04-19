@@ -37,6 +37,7 @@ export const LucieHermesIntegration = ({
   // Treat insights as ExtendedHermesInsight[] for this component to access extra props safely
   const { insights = [] } = useHermesInsights();
 
+  // Cast insights to ExtendedHermesInsight array
   const insightsTyped = insights as ExtendedHermesInsight[];
 
   // Find insights by type safely
