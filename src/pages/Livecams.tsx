@@ -112,13 +112,12 @@ const Livecams = () => {
             sortedLivecams.map(livecam => (
               <LivecamCard 
                 key={livecam.id} 
-                id={livecam.id}
                 name={livecam.name}
                 imageUrl={livecam.imageUrl}
                 location={livecam.location}
                 rating={livecam.rating || 0}
                 isLive={livecam.isLive}
-                isPremium={livecam.isPremium}
+                isPremium={Boolean(livecam['isPremium'])}
                 price={livecam.price}
               />
             ))
@@ -132,3 +131,4 @@ const Livecams = () => {
 };
 
 export default Livecams;
+

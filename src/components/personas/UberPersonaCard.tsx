@@ -32,8 +32,8 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Safely cast or default to 'none' allowed by VerificationBadge
-  const verificationLevelSafe: VerificationLevelType = (persona.verificationLevel as VerificationLevelType) || 'none';
+  // We allow 'none' here to handle no verification. VerifyBadge returns null for 'none' anyway.
+  const verificationLevelSafe: VerificationLevelType | 'none' = (persona.verificationLevel as VerificationLevelType) || 'none';
 
   const price = persona.monetization?.meetingPrice ?? 0;
 
@@ -52,7 +52,7 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
           {isFeatured && (
             <Badge className="bg-ubx">Featured</Badge>
           )}
-          {verified && (
+          {verified && verificationLevelSafe !== 'none' && (
             <VerificationBadge level={verificationLevelSafe} />
           )}
         </div>

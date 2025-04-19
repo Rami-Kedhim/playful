@@ -14,6 +14,7 @@ import CreatorHeader from "@/components/creators/detail/CreatorHeader";
 import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
 import type { ContentCreator } from "@/types/creator"; // use ContentCreator instead of Creator
+import type { Creator as CreatorFromHook } from '@/hooks/useCreators';
 
 type Creator = ContentCreator & { username: string };
 
@@ -43,8 +44,8 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
     handleSendTip,
   } = useCreatorDetail(creatorId);
 
-  // Ensure username is always present when casting to Creator
-  const creator: Creator | null = rawCreator
+  // Convert to CreatorFromHook with required properties
+  const creator: CreatorFromHook | null = rawCreator
     ? {
         ...rawCreator,
         username: rawCreator.username || rawCreator.name || 'unknown',

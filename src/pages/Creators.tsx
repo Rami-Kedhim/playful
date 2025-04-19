@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
-import type { ContentCreator } from '@/types/creator';
+import type { Creator } from '@/hooks/useCreators';
 
 const Creators = () => {
   const { creators, loading, error } = useCreators();
@@ -67,7 +67,7 @@ const Creators = () => {
               key={creator.id} 
               id={creator.id}
               name={creator.name}
-              imageUrl={creator.avatarUrl || creator.profileImage || creator.imageUrl || ''}
+              image={creator.avatarUrl || creator.profileImage || creator.imageUrl || ''}
               location={creator.location || ''}
               rating={creator.rating || 0}
               premium={creator.isPremium}
