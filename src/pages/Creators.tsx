@@ -14,6 +14,7 @@ const Creators = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const [sortBy, setSortBy] = React.useState('relevance');
 
+  // Adjust filtering to handle possible missing avatarUrl/profileImage/location properties safely
   const filteredCreators = creators
     ? creators.filter(creator =>
         creator.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -67,8 +68,11 @@ const Creators = () => {
               key={creator.id} 
               id={creator.id}
               name={creator.name}
-              image={creator.avatarUrl || creator.profileImage || creator.imageUrl || ''}
-              location={creator.location || ''}
+              // Use optional chaining with fallbacks for image url
+              image={('avatarUrl' in creator ? creator.avatarUrl : undefined) 
+                     || ('profileImage' in creator ? creator.profileImage : undefined) 
+                     || creator.imageUrl || ''}
+              location={'location' in creator ? creator.location : ''}
               rating={creator.rating || 0}
               premium={creator.isPremium || false}
               price={creator.price}
@@ -83,4 +87,3 @@ const Creators = () => {
 };
 
 export default Creators;
-

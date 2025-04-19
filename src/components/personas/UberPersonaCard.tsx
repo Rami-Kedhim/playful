@@ -2,8 +2,8 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import type { VerificationLevel } from '@/types/verification'; // Correct import from types
+import VerificationBadge from '@/components/verification/VerificationBadge';
+import type { VerificationLevel } from '@/types/verification'; // Import VerificationLevel from types
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
@@ -84,4 +84,3 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 };
 
 export default UberPersonaCard;
-
