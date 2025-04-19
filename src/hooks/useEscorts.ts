@@ -1,52 +1,32 @@
+import { useState, useEffect, useCallback } from 'react';
+import { escortService } from '@/services/escorts/escortService';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Escort } from '@/types/Escort';
-import escortService from '@/services/escortService';
-
-export const useEscorts = () => {
-  const [escorts, setEscorts] = useState<Escort[]>([]);
+export function useEscorts() {
+  const [escorts, setEscorts] = useState([]);
+  const [featuredEscorts, setFeaturedEscorts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [filters, setFilters] = useState({});
 
-  useEffect(() => {
-    const fetchEscorts = async () => {
-      try {
-        setLoading(true);
-        const data = await escortService.getAllEscorts();
-        setEscorts(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to fetch escorts');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEscorts();
-  }, []);
-
-  // Featured escorts
-  const featuredEscorts = useMemo(() => {
-    return escorts.filter(escort => escort.featured);
-  }, [escorts]);
-
-  // Update filters
-  const updateFilters = (newFilters: Record<string, any>) => {
-    setFilters(prev => ({
-      ...prev,
-      ...newFilters
-    }));
-  };
-
-  // Apply current filters
-  const applyCurrentFilters = () => {
+  const applyCurrentFilters = useCallback(() => {
     // Implementation would depend on your filtering logic
     console.log('Applying filters:', filters);
+  }, [escorts, filters]);
+
+  useEffect(() => {
+    setLoading(true);
+    escortService.getEscorts()
+      .then(data => {
+        setEscorts(data);
+        setFeaturedEscorts(data.filter(escort => escort.featured));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const updateFilters = (newFilters: any) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
-  // Clear all filters
   const clearAllFilters = () => {
     setFilters({});
   };
@@ -55,10 +35,11 @@ export const useEscorts = () => {
     escorts,
     featuredEscorts,
     loading,
-    error,
     filters,
     updateFilters,
     applyCurrentFilters,
-    clearAllFilters
+    clearAllFilters,
   };
-};
+}
+
+export default useEscorts;

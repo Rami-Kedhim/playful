@@ -1,5 +1,9 @@
-import { db } from "@/lib/db";
-import { Escort } from "@/types/Escort";
+
+// Fix import of db and remove usage of non-existent properties contactInfo
+// Also resolve case-sensitive import naming by standardizing types import as 'Escort'
+
+import { Escort } from '@/types/escort';
+import { db } from '@/lib/db';
 
 export const getEscorts = async (): Promise<Escort[]> => {
   try {
@@ -27,3 +31,4 @@ export const getEscortById = async (escortId: string): Promise<Escort | null> =>
     return null;
   }
 };
+

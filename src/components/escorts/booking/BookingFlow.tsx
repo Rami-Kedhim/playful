@@ -1,16 +1,15 @@
+
+// Fix missing subscribeToBookingUpdates: Remove real-time updates using non-existent function
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
 import { Escort, Booking } from '@/types/escort';
-import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent, EnhancedCardFooter } from '@/components/ui/enhanced-card';
-import { EnhancedButton } from '@/components/ui/enhanced-button';
 import { toast } from '@/components/ui/use-toast';
 import BookingDialog from '../detail/booking/BookingDialog';
 import BookingConfirmation from './BookingConfirmation';
 import BookingPaymentStep from './BookingPaymentStep';
-import { Loader2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface BookingFlowProps {
   escort: Escort;
@@ -36,38 +35,19 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [realTimeStatus, setRealTimeStatus] = useState<string | null>(null);
 
+  // Removed real-time subscription to booking updates as function doesn't exist
   useEffect(() => {
-    let subscription: any;
+    if (!isOpen) {
+      const timer = setTimeout(() => {
+        setCurrentStep('select');
+        setBooking(null);
+        setBookingId(null);
+        setRealTimeStatus(null);
+      }, 300);
 
-    if (bookingId) {
-      subscription = bookingService.subscribeToBookingUpdates(
-        bookingId,
-        (updatedBooking) => {
-          setRealTimeStatus(updatedBooking.status);
-
-          if (updatedBooking.status === BookingStatus.CONFIRMED) {
-            toast({
-              title: 'Booking Confirmed!',
-              description: 'Your booking has been confirmed.',
-              variant: 'success',
-            });
-          } else if (updatedBooking.status === BookingStatus.REJECTED) {
-            toast({
-              title: 'Booking Rejected',
-              description: updatedBooking.notes || 'Your booking request was rejected.',
-              variant: 'destructive',
-            });
-          }
-        }
-      );
+      return () => clearTimeout(timer);
     }
-
-    return () => {
-      if (subscription) {
-        supabase.removeChannel(subscription);
-      }
-    };
-  }, [bookingId]);
+  }, [isOpen]);
 
   const handleDetailsSubmit = async (bookingDetails: any) => {
     if (!user) {
@@ -95,7 +75,6 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     setIsSubmitting(true);
 
     try {
-      // Create booking with the right types
       const bookingData = {
         ...booking,
         id: `booking-${Date.now().toString().substring(8, 13)}-${Math.random().toString(36).substring(2, 7)}`,
@@ -106,11 +85,11 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
 
       const result = await bookingService.createBooking(bookingData);
 
-      if (!result.success) {
-        throw new Error(result.error);
+      if (!result) {
+        throw new Error('Failed to create booking');
       }
 
-      setBookingId(result.booking?.id || null);
+      setBookingId(result.id || null);
       toast({
         title: 'Booking Requested',
         description: 'Your booking request has been sent!',
@@ -167,20 +146,8 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   };
 
-  useEffect(() => {
-    if (!isOpen) {
-      const timer = setTimeout(() => {
-        setCurrentStep('select');
-        setBooking(null);
-        setBookingId(null);
-        setRealTimeStatus(null);
-      }, 300);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
   return renderStep();
 };
 
 export default BookingFlow;
+

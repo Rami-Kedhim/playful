@@ -1,17 +1,19 @@
+
+// Fix missing exports and property names according to AICompanionMessage type
+// Simplify mock data and use correct properties
+
 import { v4 as uuidv4 } from 'uuid';
 import { AICompanionMessage } from '@/types/ai-companion';
 
-const aiCompanions: AICompanionMessage[] = [];
+const aiCompanionsMessages: AICompanionMessage[] = [];
 
 export const aiCompanionService = {
   generateContent: async (params: any): Promise<string> => {
-    // Simulate content generation
     await new Promise(resolve => setTimeout(resolve, 500));
     return `AI Generated Content for: ${params.prompt}`;
   },
 
   getCompanionStats: async (companionId: string): Promise<any> => {
-    // Simulate fetching companion stats
     await new Promise(resolve => setTimeout(resolve, 300));
     return {
       messages_sent: 150,
@@ -27,50 +29,47 @@ export const aiCompanionService = {
   sendMessage: async (companionId: string, message: string, userId: string): Promise<AICompanionMessage> => {
     const newMessage: AICompanionMessage = {
       id: uuidv4(),
-      companionId: companionId,
+      aiCompanionId: companionId,
       content: message,
-      sender: 'user',
-      timestamp: new Date().toISOString(),
-      userId: userId,
+      role: 'user',
+      created_at: new Date().toISOString(),
+      user_id: userId,
     };
-    aiCompanions.push(newMessage);
+    aiCompanionsMessages.push(newMessage);
     return newMessage;
   },
 
   receiveMessage: async (companionId: string, message: string, userId: string): Promise<AICompanionMessage> => {
     const newMessage: AICompanionMessage = {
       id: uuidv4(),
-      companionId: companionId,
+      aiCompanionId: companionId,
       content: message,
-      sender: 'companion',
-      timestamp: new Date().toISOString(),
-      userId: userId,
+      role: 'assistant',
+      created_at: new Date().toISOString(),
+      user_id: userId,
     };
-    aiCompanions.push(newMessage);
+    aiCompanionsMessages.push(newMessage);
     return newMessage;
   },
 
   getMessages: async (companionId: string, userId: string): Promise<AICompanionMessage[]> => {
-    // Simulate fetching messages
     await new Promise(resolve => setTimeout(resolve, 400));
-    return aiCompanions.filter(msg => msg.companionId === companionId && msg.userId === userId);
+    return aiCompanionsMessages.filter(msg => msg.aiCompanionId === companionId && msg.user_id === userId);
   },
 
   updateCompanion: async (companionId: string, updates: any): Promise<any> => {
-    // Simulate updating companion
     await new Promise(resolve => setTimeout(resolve, 300));
     return { id: companionId, ...updates };
   },
 
   createCompanion: async (params: any): Promise<any> => {
-    // Simulate creating a new AI companion
     await new Promise(resolve => setTimeout(resolve, 600));
     return { id: uuidv4(), ...params };
   },
 
   deleteCompanion: async (companionId: string): Promise<boolean> => {
-    // Simulate deleting an AI companion
     await new Promise(resolve => setTimeout(resolve, 200));
     return true;
   },
 };
+

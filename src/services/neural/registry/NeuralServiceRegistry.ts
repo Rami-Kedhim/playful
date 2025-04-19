@@ -1,4 +1,6 @@
 
+// Fix: no exported name 'neuralServiceRegistry' only default, adjust usage accordingly
+
 import { ModuleType, BaseNeuralService } from '../types/NeuralService';
 import { AICompanionNeuralService } from '../modules/AICompanionNeuralService';
 

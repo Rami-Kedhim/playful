@@ -1,11 +1,9 @@
 
-// Fix import and verificationLevel type mismatch to use type from verification types only
-
+// Fix import and cast to correct VerificationLevel enum from '@/types/verification'
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import VerificationBadge from '@/components/verification/VerificationBadge';
-// Force import of VerificationLevel from types/verification only to avoid mismatch
 import type { VerificationLevel } from '@/types/verification';
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
@@ -35,11 +33,11 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Cast VerificationLevel explicitly to correct type
+  // Cast VerificationLevel explicitly to correct type (from /types/verification)
   // Defensive check for undefined/null values
   const verificationLevelSafe: VerificationLevel | undefined = 
     persona.verificationLevel && typeof persona.verificationLevel === 'string' 
-      ? persona.verificationLevel as VerificationLevel 
+      ? (persona.verificationLevel as VerificationLevel) 
       : undefined;
 
   const price = persona.monetization?.meetingPrice ?? 0;
