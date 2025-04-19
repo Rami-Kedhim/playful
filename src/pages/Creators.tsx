@@ -1,18 +1,16 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useCreators } from '@/hooks/useCreators';
 import CreatorCard from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
 
-// Assume CreatorCard expects prop creator as per original codebase
 const Creators = () => {
   const { creators, loading, error } = useCreators();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('relevance');
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [sortBy, setSortBy] = React.useState('relevance');
 
   // Filter creators by name only, safely
   const filteredCreators = creators
@@ -76,4 +74,3 @@ const Creators = () => {
 };
 
 export default Creators;
-

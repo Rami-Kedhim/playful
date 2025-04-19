@@ -20,7 +20,7 @@ const CreatorDetail: React.FC = () => {
     return <div>Creator ID is missing</div>;
   }
 
-  // Remove children prop from CreatorsModule usage since it doesn't accept children
+  // Removed children prop from CreatorsModule because it doesn't accept children
   return (
     <CreatorsModule>
       <CreatorDetailContent creatorId={id} />

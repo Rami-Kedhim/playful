@@ -5,7 +5,7 @@ import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
-import { usePersonaFilter } from '@/hooks/usePersonaFilter';
+import { usePersonaFilter, FilterOptions } from '@/hooks/usePersonaFilter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,9 +17,9 @@ const PersonasPage: React.FC = () => {
   const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
   const { loadEscorts, state } = useEscortContext();
 
+  // Fix: pass personas array to updateFilterOptions accordingly; hook returns FilterOptions type
   const { filteredPersonas, filterOptions, updateFilterOptions } = usePersonaFilter();
 
-  // Adapted to match returned structure from usePersonaFilter
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -42,6 +42,7 @@ const PersonasPage: React.FC = () => {
     fetchData();
   }, [state.escorts.length, loadEscorts, updateFilterOptions]);
 
+  // Helper to get active filters
   const getActiveFilters = () => {
     const filters: Array<{ key: string; label: string }> = [];
 
@@ -49,13 +50,17 @@ const PersonasPage: React.FC = () => {
       filters.push({ key: 'location', label: `Location: ${filterOptions.location}` });
     }
 
-    Object.entries(filterOptions.roleFilters || {}).forEach(([role, active]) => {
-      if (active) filters.push({ key: role, label: role.replace(/^is/, '') });
-    });
+    if (filterOptions.roleFilters) {
+      Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
+        if (active) filters.push({ key: role, label: role.replace(/^is/, '') });
+      });
+    }
 
-    Object.entries(filterOptions.capabilityFilters || {}).forEach(([capability, active]) => {
-      if (active) filters.push({ key: capability, label: capability.replace(/^has/, '') });
-    });
+    if (filterOptions.capabilityFilters) {
+      Object.entries(filterOptions.capabilityFilters).forEach(([capability, active]) => {
+        if (active) filters.push({ key: capability, label: capability.replace(/^has/, '') });
+      });
+    }
 
     return filters;
   };
@@ -118,9 +123,7 @@ const PersonasPage: React.FC = () => {
                           id={`role-${role}`}
                           checked={active}
                           onCheckedChange={() =>
-                            updateFilterOptions({
-                              roleFilters: { ...filterOptions.roleFilters, [role]: !active },
-                            })
+                            updateFilterOptions({ roleFilters: { ...filterOptions.roleFilters, [role]: !active } })
                           }
                         />
                         <Label htmlFor={`role-${role}`} className="capitalize">
@@ -141,12 +144,7 @@ const PersonasPage: React.FC = () => {
                           id={`capability-${capability}`}
                           checked={active}
                           onCheckedChange={() =>
-                            updateFilterOptions({
-                              capabilityFilters: {
-                                ...filterOptions.capabilityFilters,
-                                [capability]: !active,
-                              },
-                            })
+                            updateFilterOptions({ capabilityFilters: { ...filterOptions.capabilityFilters, [capability]: !active } })
                           }
                         />
                         <Label htmlFor={`capability-${capability}`} className="capitalize">
@@ -162,25 +160,18 @@ const PersonasPage: React.FC = () => {
           <div className="lg:col-span-3">
             <div className="flex flex-wrap gap-2 mb-4">
               {getActiveFilters().map((filter) => (
-                <FilterBadge
-                  key={filter.key}
-                  label={filter.label}
-                  onRemove={() => handleRemoveFilter(filter.key)}
-                />
+                <FilterBadge key={filter.key} label={filter.label} onRemove={() => handleRemoveFilter(filter.key)} />
               ))}
 
               {getActiveFilters().length > 0 && (
-                <button
-                  onClick={clearAllFilters}
-                  className="text-sm text-blue-500 hover:underline"
-                >
+                <button onClick={clearAllFilters} className="text-sm text-blue-500 hover:underline">
                   Clear all filters
                 </button>
               )}
             </div>
 
             <UberPersonaGrid
-              personas={filterOptions.filteredPersonas || []}
+              personas={filteredPersonas || []}
               loading={loading}
               emptyMessage="No personas found. Please try adjusting your filters."
             />
@@ -192,4 +183,3 @@ const PersonasPage: React.FC = () => {
 };
 
 export default PersonasPage;
-

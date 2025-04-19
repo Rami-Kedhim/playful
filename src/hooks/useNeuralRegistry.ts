@@ -14,7 +14,7 @@ export function useNeuralRegistry() {
       setLoading(true);
       setError(null);
       
-      if (neuralServiceRegistry.initialize) {
+      if (typeof neuralServiceRegistry.initialize === 'function') {
         await neuralServiceRegistry.initialize();
       }
       
@@ -49,7 +49,7 @@ export function useNeuralRegistry() {
   }, []);
   
   const getService = useCallback((moduleId: string): BaseNeuralService | undefined => {
-    if (neuralServiceRegistry.getService) {
+    if (typeof neuralServiceRegistry.getService === 'function') {
       return neuralServiceRegistry.getService(moduleId);
     }
     return undefined;

@@ -27,8 +27,7 @@ export function useHermesLivecamInsights(userId?: string) {
       try {
         setLivecamInsights(prev => ({ ...prev, isLoading: true }));
 
-        // Correct reportUserAction usage; send two arguments in separate calls if required
-        await reportUserAction('viewed_livecam', streamerId);
+        // Correct reportUserAction usage; call with two arguments respectively
         await reportUserAction('viewed_livecam', streamerId);
 
         const recommendedInsight = baseInsights.find(ins => ins.type === 'recommendedProfileId');
@@ -56,14 +55,12 @@ export function useHermesLivecamInsights(userId?: string) {
   const recordLivecamSession = useCallback(
     async (streamerId: string, duration: number, category?: string) => {
       await reportUserAction('livecam_session', streamerId);
-      await reportUserAction('livecam_session', streamerId);
     },
     [reportUserAction],
   );
 
   const recordLivecamTip = useCallback(
     async (streamerId: string, amount: number, message?: string) => {
-      await reportUserAction('livecam_tip', streamerId);
       await reportUserAction('livecam_tip', streamerId);
     },
     [reportUserAction],

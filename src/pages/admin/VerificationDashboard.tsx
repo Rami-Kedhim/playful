@@ -11,17 +11,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
-import { VerificationRequest as EscortVerificationRequest, VerificationStatus as EscortVerificationStatus } from '@/types/verification';
+import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
 import { getAllVerificationRequests, approveVerificationRequest, rejectVerificationRequest } from '@/services/verificationService';
 import { toast } from '@/components/ui/use-toast';
 import DocumentReviewModal from '@/components/admin/DocumentReviewModal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle, XCircle } from 'lucide-react';
 
-interface NormalizedVerificationRequest extends EscortVerificationRequest {
+interface NormalizedVerificationRequest extends Omit<VerificationRequest, 'requested_level'> {
   userId: string;
-  requestedLevel?: string;
-  requested_level?: string;
+  requested_level: VerificationLevel;
 }
 
 interface NormalizedVerificationDocument {
@@ -40,7 +39,7 @@ interface NormalizedVerificationDocument {
 const VerificationDashboard: React.FC = () => {
   const [requests, setRequests] = useState<NormalizedVerificationRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<EscortVerificationStatus | ''>('');
+  const [selectedStatus, setSelectedStatus] = useState<VerificationStatus | ''>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<NormalizedVerificationDocument | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<NormalizedVerificationRequest | null>(null);
@@ -58,9 +57,9 @@ const VerificationDashboard: React.FC = () => {
       const normalizedRequests = data.map(request => ({
         ...request,
         userId: request.userId || request.user_id || '',
-        requestedLevel: request.requestedLevel || request.requested_level || ''
+        requested_level: (request.requested_level as VerificationLevel) || VerificationLevel.BASIC
       }));
-      setRequests(normalizedRequests as NormalizedVerificationRequest[]);
+      setRequests(normalizedRequests);
     } catch (error) {
       console.error('Error fetching verification requests:', error);
       toast({
@@ -81,7 +80,7 @@ const VerificationDashboard: React.FC = () => {
         description: "Verification request approved",
         variant: "success"
       });
-      fetchVerificationRequests(); // Refresh data
+      await fetchVerificationRequests(); // Refresh data
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error approving verification request:', error);
@@ -101,7 +100,7 @@ const VerificationDashboard: React.FC = () => {
         description: "Verification request rejected",
         variant: "success"
       });
-      fetchVerificationRequests(); // Refresh data
+      await fetchVerificationRequests(); // Refresh data
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error rejecting verification request:', error);
@@ -125,7 +124,7 @@ const VerificationDashboard: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleStatusChange = (status: EscortVerificationStatus | '') => {
+  const handleStatusChange = (status: VerificationStatus | '') => {
     setSelectedStatus(status);
   };
 
@@ -157,17 +156,17 @@ const VerificationDashboard: React.FC = () => {
           className="max-w-md"
         />
 
-        <Select value={selectedStatus} onValueChange={(value) => handleStatusChange(value as EscortVerificationStatus)}>
+        <Select value={selectedStatus} onValueChange={(value) => handleStatusChange(value as VerificationStatus)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">All Statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_review">In Review</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-            <SelectItem value="expired">Expired</SelectItem>
+            <SelectItem value={VerificationStatus.PENDING}>Pending</SelectItem>
+            <SelectItem value={VerificationStatus.IN_REVIEW}>In Review</SelectItem>
+            <SelectItem value={VerificationStatus.APPROVED}>Approved</SelectItem>
+            <SelectItem value={VerificationStatus.REJECTED}>Rejected</SelectItem>
+            <SelectItem value={VerificationStatus.EXPIRED}>Expired</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -194,23 +193,23 @@ const VerificationDashboard: React.FC = () => {
                 <TableRow key={request.id}>
                   <TableCell>{request.userId}</TableCell>
                   <TableCell>
-                    {request.status === 'approved' && (
+                    {request.status === VerificationStatus.APPROVED && (
                       <div className="flex items-center gap-1 text-green-500">
                         <CheckCircle className="h-4 w-4" />
                         Approved
                       </div>
                     )}
-                    {request.status === 'rejected' && (
+                    {request.status === VerificationStatus.REJECTED && (
                       <div className="flex items-center gap-1 text-red-500">
                         <XCircle className="h-4 w-4" />
                         Rejected
                       </div>
                     )}
-                    {request.status !== 'approved' && request.status !== 'rejected' && (
+                    {request.status !== VerificationStatus.APPROVED && request.status !== VerificationStatus.REJECTED && (
                       <span>{request.status}</span>
                     )}
                   </TableCell>
-                  <TableCell>{request.requestedLevel || request.requested_level}</TableCell>
+                  <TableCell>{request.requested_level}</TableCell>
                   <TableCell>{new Date(request.submittedAt || request.created_at || "").toLocaleDateString()}</TableCell>
                   <TableCell>
                     {request.documents && request.documents.length > 0 ? (
@@ -248,4 +247,3 @@ const VerificationDashboard: React.FC = () => {
 };
 
 export default VerificationDashboard;
-
