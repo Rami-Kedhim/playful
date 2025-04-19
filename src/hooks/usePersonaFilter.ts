@@ -1,49 +1,57 @@
+
 import { useState, useEffect } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 
-interface FilterOptions {
+export interface FilterOptions {
   searchTerm: string;
-  category: string;
   location: string;
-  minRating: number;
-  isVerified: boolean;
+  roleFilters: Record<string, boolean>;
+  capabilityFilters: Record<string, boolean>;
 }
 
 export function usePersonaFilter(personas: UberPersona[]) {
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     searchTerm: '',
-    category: 'all',
-    location: 'any',
-    minRating: 0,
-    isVerified: false,
+    location: '',
+    roleFilters: {},
+    capabilityFilters: {},
   });
   const [filteredPersonas, setFilteredPersonas] = useState<UberPersona[]>(personas);
 
   useEffect(() => {
     let results = [...personas];
 
-    if (filterOptions.searchTerm) {
+    const searchTerm = filterOptions.searchTerm.toLowerCase();
+    if (searchTerm) {
       results = results.filter(persona =>
-        persona.displayName?.toLowerCase().includes(filterOptions.searchTerm.toLowerCase())
+        persona.displayName?.toLowerCase().includes(searchTerm)
       );
     }
 
-    if (filterOptions.category !== 'all') {
-      results = results.filter(persona => persona.roleFlags?.[filterOptions.category] === true);
-    }
-
-    if (filterOptions.location !== 'any') {
+    if (filterOptions.location) {
       results = results.filter(persona =>
-        persona.location?.toLowerCase() === filterOptions.location.toLowerCase()
+        persona.location?.toLowerCase().includes(filterOptions.location.toLowerCase())
       );
     }
 
-    if (filterOptions.minRating > 0) {
-      results = results.filter(persona => (persona.stats?.rating || 0) >= filterOptions.minRating);
+    if (filterOptions.roleFilters) {
+      Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
+        if (active) {
+          results = results.filter(persona =>
+            persona.roleFlags ? persona.roleFlags[role as keyof typeof persona.roleFlags] === true : false
+          );
+        }
+      });
     }
 
-    if (filterOptions.isVerified) {
-      results = results.filter(persona => persona.roleFlags?.isVerified === true);
+    if (filterOptions.capabilityFilters) {
+      Object.entries(filterOptions.capabilityFilters).forEach(([capability, active]) => {
+        if (active) {
+          results = results.filter(persona =>
+            persona.capabilities ? Boolean(persona.capabilities[capability as keyof typeof persona.capabilities]) : false
+          );
+        }
+      });
     }
 
     setFilteredPersonas(results);

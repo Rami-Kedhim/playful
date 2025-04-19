@@ -12,7 +12,9 @@ import MainLayout from "@/components/layout/MainLayout";
 import CreatorHeader from "@/components/creators/detail/CreatorHeader";
 import CreatorTabs from "@/components/creators/detail/CreatorTabs";
 import CreatorSubscriptionCard from "@/components/creators/detail/CreatorSubscriptionCard";
-import type { ContentCreator, Creator } from "@/types/creator";
+import type { ContentCreator } from "@/types/creator";
+
+type Creator = ContentCreator & { username: string };
 
 const CreatorDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,7 +47,7 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
     ? {
         ...rawCreator,
         username: rawCreator.username || rawCreator.name || 'unknown',
-      } as Creator
+      }
     : null;
 
   const handleShare = () => {
