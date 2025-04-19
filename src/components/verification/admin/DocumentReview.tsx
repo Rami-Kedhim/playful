@@ -1,3 +1,5 @@
+
+// Fix access to 'type' property on VerificationDocument, use documentType instead
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +23,8 @@ const DocumentReview = ({ document, isOpen, onClose, verification, onApprove, on
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
   
-  const documentType = document.documentType || document.document_type || document.type || 'Unknown';
+  // Use appropriate property for document type
+  const documentType = document.documentType || document.document_type || 'Unknown';
   const imageUrl = document.fileUrl || document.url || '';
   
   // Handle date timestamp with backward compatibility

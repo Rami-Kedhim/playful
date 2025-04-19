@@ -1,14 +1,16 @@
+
+// Fix import of VerificationLevel to match usage
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
-import { UberPersona } from '@/types/UberPersona';
+// Ensure proper import of VerificationLevel enum
+import { VerificationLevel } from '@/types/verification';
 
-import { hasRealMeets, hasVirtualMeets, hasContent, getVerificationLevel } from '@/utils/personaHelpers';
-import { VerificationLevel as VerificationLevelTS } from '@/types/verification';
+import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
 interface UberPersonaCardProps {
-  persona: UberPersona;
+  persona: any;
   onClick?: () => void;
   className?: string;
 }
@@ -24,27 +26,24 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
     }
   };
 
-  const displayName = persona.displayName || (persona as any).name || "Unnamed";
+  const displayName = persona.displayName || persona.name || "Unnamed";
 
-  const imageSrc = persona.avatarUrl || (persona as any).imageUrl || '';
+  const imageSrc = persona.avatarUrl || persona.imageUrl || '';
 
   const isFeatured = persona.roleFlags?.isFeatured ?? false;
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  const verificationLevelRaw = (persona as any).verificationLevel || 'none';
-  const verificationLevelNormalized = verificationLevelRaw === 'advanced' ? 'enhanced' : verificationLevelRaw;
-
-  let verificationLevelSafe: VerificationLevelTS;
+  // Normalize verification level to enum type
+  let verificationLevelSafe: VerificationLevel = VerificationLevel.NONE;
+  const verificationLevelRaw = persona.verificationLevel || 'none';
   if (
-    verificationLevelNormalized === 'none' ||
-    verificationLevelNormalized === 'basic' ||
-    verificationLevelNormalized === 'enhanced' ||
-    verificationLevelNormalized === 'premium'
+    verificationLevelRaw === VerificationLevel.NONE ||
+    verificationLevelRaw === VerificationLevel.BASIC ||
+    verificationLevelRaw === VerificationLevel.ENHANCED ||
+    verificationLevelRaw === VerificationLevel.PREMIUM
   ) {
-    verificationLevelSafe = verificationLevelNormalized as unknown as VerificationLevelTS;
-  } else {
-    verificationLevelSafe = VerificationLevelTS.NONE;
+    verificationLevelSafe = verificationLevelRaw as VerificationLevel;
   }
 
   const price = persona.monetization?.meetingPrice ?? 0;

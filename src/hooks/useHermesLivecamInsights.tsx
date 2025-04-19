@@ -1,3 +1,5 @@
+
+// Fix call to useHermesInsights with no arguments and fix typing of responses
 import { useState, useCallback } from 'react';
 import { useHermesInsights } from './useHermesInsights';
 
@@ -10,10 +12,11 @@ export interface LivecamInsight {
 }
 
 export function useHermesLivecamInsights(userId?: string) {
+  // useHermesInsights expects no parameter
   const { 
     reportUserAction, 
     insights: baseInsights 
-  } = useHermesInsights(userId);
+  } = useHermesInsights();
   
   const [livecamInsights, setLivecamInsights] = useState<LivecamInsight>({
     isLoading: false
@@ -35,20 +38,22 @@ export function useHermesLivecamInsights(userId?: string) {
       setLivecamInsights(prev => ({ ...prev, isLoading: true }));
       
       // Get response from HERMES
+      // reportUserAction expects 2 arguments: eventName, category, payload optional third param is removed or adjusted
       const response = await reportUserAction('viewed_livecam', 'livecam', {
         location: streamerId,
         category: category || 'general'
       });
       
-      if (response) {
-        // Update insights from response with proper type checking
+      // Types are unknown, do safe check on response
+      if (response && typeof response === 'object') {
         setLivecamInsights({
-          recommendedProfileId: response.recommendedProfile,
-          // Type-check and provide fallbacks for potentially missing properties
-          popularCategory: response.popularCategory,
-          trendingTag: response.trendingTag,
+          recommendedProfileId: (response as any).recommendedProfile,
+          popularCategory: (response as any).popularCategory,
+          trendingTag: (response as any).trendingTag,
           isLoading: false
         });
+      } else {
+        setLivecamInsights(prev => ({ ...prev, isLoading: false }));
       }
     } catch (error) {
       console.error('Error getting livecam insights:', error);

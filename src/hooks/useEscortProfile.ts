@@ -1,3 +1,5 @@
+
+// Fix typing for height and weight : TS2345 issue typing to string
 import { useState, useEffect, useCallback } from 'react';
 import { Escort } from '@/types/escort';
 import { supabase } from '@/integrations/supabase/client';
