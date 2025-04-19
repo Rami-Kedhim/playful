@@ -1,4 +1,6 @@
 
+// Fix prop names and imports for CreatorCard
+
 import React from 'react';
 import { useCreators } from '@/hooks/useCreators';
 import CreatorCard from '@/components/creators/CreatorCard';
@@ -61,7 +63,7 @@ const Creators = () => {
           <p>Error: {error}</p>
         ) : sortedCreators.length > 0 ? (
           sortedCreators.map(creator => (
-            <CreatorCard key={creator.id} contentCreator={creator} />
+            <CreatorCard key={creator.id} creator={creator} />
           ))
         ) : (
           <p>No creators found.</p>
@@ -72,4 +74,3 @@ const Creators = () => {
 };
 
 export default Creators;
-

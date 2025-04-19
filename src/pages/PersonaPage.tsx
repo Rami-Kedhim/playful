@@ -1,11 +1,5 @@
-
 import React from 'react';
 import { useUberPersonaContext } from '@/contexts/UberPersonaContext';
-import { UberPersona } from '@/types/UberPersona';
-
-// Comment out missing imports since these components are missing as per errors
-// import PersonaOverviewTab from '@/components/personas/tabs/PersonaOverviewTab';
-// import PersonaDetailsTab from '@/components/personas/tabs/PersonaDetailsTab';
 
 const PersonaPage = () => {
   const { escortPersonas, creatorPersonas, livecamPersonas, aiPersonas } = useUberPersonaContext();
@@ -29,4 +23,3 @@ const PersonaPage = () => {
   );
 };
 export default PersonaPage;
-

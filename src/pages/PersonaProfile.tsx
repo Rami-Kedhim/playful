@@ -1,4 +1,6 @@
 
+// Fix initial persona state typing and monetization default keys, provide all required fields
+
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +20,6 @@ const PersonaProfile: React.FC = () => {
   const { personaId } = useParams<{ personaId: string }>();
   const navigate = useNavigate();
 
-  // Provide default values for all required UberPersona properties to fix TS errors
   const [persona, setPersona] = useState<UberPersona>({
     id: personaId || '1',
     username: 'unknown',
@@ -27,7 +28,7 @@ const PersonaProfile: React.FC = () => {
     location: 'New York, NY',
     language: '',
     bio: '',
-    age: 0,
+    age: 25,
     ethnicity: '',
     tags: ['travel', 'fashion', 'lifestyle', 'beauty'],
     createdAt: new Date(),
@@ -52,7 +53,14 @@ const PersonaProfile: React.FC = () => {
       hasRealMeets: false,
       hasVirtualMeets: false,
     },
-    monetization: {},
+    monetization: {
+      acceptsLucoin: false,
+      acceptsTips: false,
+      subscriptionPrice: 0,
+      unlockingPrice: 0,
+      boostingActive: false,
+      meetingPrice: 0
+    },
     stats: {
       rating: 4.8,
       reviewCount: 120,
@@ -131,4 +139,3 @@ const PersonaProfile: React.FC = () => {
 };
 
 export default PersonaProfile;
-

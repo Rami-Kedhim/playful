@@ -1,4 +1,6 @@
 
+// Fix imports and creator type usage aligning with ContentCreator for optional username
+
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -22,7 +24,6 @@ const CreatorDetail: React.FC = () => {
   }
 
   return (
-    // Remove children from CreatorsModule since it doesn't accept props
     <CreatorsModule />
   );
 };
@@ -41,7 +42,6 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
     handleSendTip,
   } = useCreatorDetail(creatorId);
 
-  // Use ContentCreator type and fix prop typing
   const creator: ContentCreator | null = rawCreator
     ? {
         ...rawCreator,
@@ -157,4 +157,3 @@ export const CreatorDetailContent: React.FC<{ creatorId: string }> = ({ creatorI
 };
 
 export default CreatorDetail;
-

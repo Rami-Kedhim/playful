@@ -1,4 +1,6 @@
 
+// Fix imports/usage of filter options due to missing exports, adjust state update accordingly
+
 import React, { useEffect, useState } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
@@ -30,7 +32,7 @@ const PersonasPage: React.FC = () => {
         const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
         setAllPersonas(mappedPersonas);
 
-        updateFilterOptions({}); // Remove 'personas' from update to fix type error
+        updateFilterOptions({}); // clear filters (empty update)
       } catch (error) {
         console.error('Error loading personas:', error);
       } finally {
@@ -48,6 +50,7 @@ const PersonasPage: React.FC = () => {
       filters.push({ key: 'location', label: `Location: ${filterOptions.location}` });
     }
 
+    // Defensive: filterOptions.roleFilters and capabilityFilters might be undefined sometimes
     if (filterOptions.roleFilters) {
       Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
         if (active) filters.push({ key: role, label: role.replace(/^is/, '') });
@@ -114,50 +117,48 @@ const PersonasPage: React.FC = () => {
               <div>
                 <Label className="mb-2 block">Role Types</Label>
                 <div className="space-y-2">
-                  {filterOptions.roleFilters &&
-                    Object.entries(filterOptions.roleFilters).map(([role, active]) => (
-                      <div key={role} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`role-${role}`}
-                          checked={active as boolean}
-                          onCheckedChange={() => {
-                            const newFilters = {
-                              ...filterOptions.roleFilters,
-                              [role]: !active,
-                            };
-                            updateFilterOptions({ roleFilters: newFilters });
-                          }}
-                        />
-                        <Label htmlFor={`role-${role}`} className="capitalize">
-                          {role.replace(/^is/, '')}
-                        </Label>
-                      </div>
-                    ))}
+                  {filterOptions.roleFilters && Object.entries(filterOptions.roleFilters).map(([role, active]) => (
+                    <div key={role} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`role-${role}`}
+                        checked={active as boolean}
+                        onCheckedChange={() => {
+                          const newFilters = {
+                            ...filterOptions.roleFilters,
+                            [role]: !active,
+                          };
+                          updateFilterOptions({ roleFilters: newFilters });
+                        }}
+                      />
+                      <Label htmlFor={`role-${role}`} className="capitalize">
+                        {role.replace(/^is/, '')}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
 
               <div>
                 <Label className="mb-2 block">Capabilities</Label>
                 <div className="space-y-2">
-                  {filterOptions.capabilityFilters &&
-                    Object.entries(filterOptions.capabilityFilters).map(([capability, active]) => (
-                      <div key={capability} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`capability-${capability}`}
-                          checked={active as boolean}
-                          onCheckedChange={() => {
-                            const newCaps = {
-                              ...filterOptions.capabilityFilters,
-                              [capability]: !active,
-                            };
-                            updateFilterOptions({ capabilityFilters: newCaps });
-                          }}
-                        />
-                        <Label htmlFor={`capability-${capability}`} className="capitalize">
-                          {capability.replace(/^has/, '')}
-                        </Label>
-                      </div>
-                    ))}
+                  {filterOptions.capabilityFilters && Object.entries(filterOptions.capabilityFilters).map(([capability, active]) => (
+                    <div key={capability} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`capability-${capability}`}
+                        checked={active as boolean}
+                        onCheckedChange={() => {
+                          const newCaps = {
+                            ...filterOptions.capabilityFilters,
+                            [capability]: !active,
+                          };
+                          updateFilterOptions({ capabilityFilters: newCaps });
+                        }}
+                      />
+                      <Label htmlFor={`capability-${capability}`} className="capitalize">
+                        {capability.replace(/^has/, '')}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

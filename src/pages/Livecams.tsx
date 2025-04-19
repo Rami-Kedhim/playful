@@ -1,6 +1,7 @@
 
-// Fix missing import of MainLayout and prop name for LivecamCard
-import React, { useState, useEffect, useCallback } from 'react';
+// Fix prop name for LivecamCard and add missing imports, remove unused props
+
+import React, { useState } from 'react';
 import { useLivecamContext } from '@/modules/livecams/providers/LivecamProvider';
 import LivecamCard from '@/components/livecams/LivecamCard';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,7 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 
 const Livecams = () => {
-  const { livecams, loading, error, featuredLivecams, liveLivecams } = useLivecamContext();
+  const { livecams, loading, error } = useLivecamContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
@@ -35,20 +36,6 @@ const Livecams = () => {
       return 0;
     }
   });
-
-  const handleFilterChange = (category: string) => {
-    setFilterCategory(category);
-  };
-
-  const handleSortChange = (sortOption: string) => {
-    setSortBy(sortOption);
-  };
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setFilterCategory('all');
-    setSortBy('relevance');
-  };
 
   return (
     <MainLayout>
@@ -76,7 +63,7 @@ const Livecams = () => {
         {showFilters && (
           <div className="mb-6 p-4 border rounded-md">
             <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-              <Select value={filterCategory} onValueChange={handleFilterChange}>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
@@ -88,7 +75,7 @@ const Livecams = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={sortBy} onValueChange={handleSortChange}>
+              <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -99,7 +86,11 @@ const Livecams = () => {
                 </SelectContent>
               </Select>
 
-              <Button variant="ghost" onClick={clearFilters}>
+              <Button variant="ghost" onClick={() => {
+                setSearchQuery('');
+                setFilterCategory('all');
+                setSortBy('relevance');
+              }}>
                 Clear Filters
               </Button>
             </div>
@@ -121,7 +112,7 @@ const Livecams = () => {
             <p>Error: {error}</p>
           ) : sortedLivecams.length > 0 ? (
             sortedLivecams.map(livecam => (
-              <LivecamCard key={livecam.id} livecam={livecam} />
+              <LivecamCard key={livecam.id} creator={livecam} />
             ))
           ) : (
             <p>No livecams found.</p>
@@ -133,4 +124,3 @@ const Livecams = () => {
 };
 
 export default Livecams;
-

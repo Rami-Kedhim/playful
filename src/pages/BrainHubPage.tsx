@@ -1,4 +1,6 @@
 
+// Fix NeuralModel status typing by asserting as const values in mock data 
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -75,7 +77,7 @@ const BrainHubPage = () => {
       // Cast from neuralHub's model type to metrics's expected type
       const modelsMapped: NeuralMetricsNeuralModel[] = mockModelsHub.map(m => ({
         ...m,
-        status: m.status  // Already compatible with required unions by asserting as const above
+        status: m.status as 'active' | 'inactive' | 'training' | 'error'
       }));
 
       setModels(modelsMapped);
@@ -129,4 +131,3 @@ const BrainHubPage = () => {
 };
 
 export default BrainHubPage;
-
