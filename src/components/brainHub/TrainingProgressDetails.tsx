@@ -1,229 +1,139 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Legend
-} from "recharts";
-import { AlertTriangle, CheckCircle, Clock, Brain, ChartLine } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, AlertCircle, Clock, Activity, Info } from 'lucide-react';
 import { TrainingProgress } from '@/services/neural/types/neuralHub';
 
 interface TrainingProgressDetailsProps {
-  trainingJob: TrainingProgress;
-  onStopTraining: (modelId: string) => void;
-  modelName?: string;
+  progress: TrainingProgress;
+  onCancel?: () => void;
 }
 
-const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ 
-  trainingJob, 
-  onStopTraining,
-  modelName = "Neural Model"
-}) => {
-  // Generate mock accuracy history data
-  const generateAccuracyHistory = () => {
-    const data = [];
-    const currentAccuracy = trainingJob.accuracy || 0.85;
-    const startAccuracy = currentAccuracy - ((trainingJob.currentEpoch || 10) * 0.03);
-    const baseAccuracy = Math.max(0.4, startAccuracy);
-    const targetAccuracy = trainingJob.targetAccuracy || 0.95;
-    
-    for (let i = 0; i <= (trainingJob.currentEpoch || 10); i++) {
-      const accuracy = baseAccuracy + (i * ((currentAccuracy - baseAccuracy) / (trainingJob.currentEpoch || 10)));
-      data.push({
-        epoch: i,
-        accuracy: Number((accuracy).toFixed(4)),
-        target: Number(targetAccuracy.toFixed(4))
-      });
-    }
-    return data;
-  };
-
-  const accuracyHistory = generateAccuracyHistory();
-  
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-  
-  const getStatusColor = () => {
-    switch (trainingJob.status) {
-      case 'training': return "bg-blue-500";
-      case 'completed': return "bg-green-500";
-      case 'failed': return "bg-red-500";
-      case 'paused': return "bg-amber-500";
-      default: return "bg-gray-500";
-    }
-  };
-
-  const getStatusText = () => {
-    switch (trainingJob.status) {
-      case 'training': return "In Progress";
-      case 'completed': return "Completed";
-      case 'failed': return "Failed";
-      case 'paused': return "Paused";
-      default: return trainingJob.status;
+const TrainingProgressDetails: React.FC<TrainingProgressDetailsProps> = ({ progress, onCancel }) => {
+  // Format remaining time
+  const formatTimeRemaining = (seconds: number) => {
+    if (seconds < 60) {
+      return `${seconds} seconds`;
+    } else if (seconds < 3600) {
+      return `${Math.floor(seconds / 60)} minutes`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      return `${hours} hours ${minutes} minutes`;
     }
   };
   
-  const getEstimatedTimeRemaining = () => {
-    if (trainingJob.status !== 'training') return 'N/A';
-    
-    if (!trainingJob.estimatedCompletionTime) return 'Calculating...';
-    
-    const now = new Date();
-    const estCompletion = new Date(trainingJob.estimatedCompletionTime);
-    const diffMs = estCompletion.getTime() - now.getTime();
-    
-    if (diffMs <= 0) return 'Completing soon...';
-    
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffSecs = Math.floor((diffMs % 60000) / 1000);
-    
-    return `${diffMins}m ${diffSecs}s`;
+  // Determine status badge
+  const getStatusBadge = () => {
+    switch (progress.status) {
+      case 'training':
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            <Activity className="h-3 w-3 mr-1" />
+            Training
+          </Badge>
+        );
+      case 'completed':
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Completed
+          </Badge>
+        );
+      case 'failed':
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Failed
+          </Badge>
+        );
+      case 'queued':
+        return (
+          <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+            <Clock className="h-3 w-3 mr-1" />
+            Queued
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            <Info className="h-3 w-3 mr-1" />
+            {progress.status}
+          </Badge>
+        );
+    }
   };
-
+  
   return (
     <Card className="w-full">
-      <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="text-lg flex items-center">
-            <Brain className="mr-2 h-5 w-5 text-primary" />
-            {modelName} Training
-          </CardTitle>
-          <div className="flex items-center mt-1">
-            <Badge className={getStatusColor()}>
-              {getStatusText()}
-            </Badge>
-            <span className="ml-2 text-xs text-muted-foreground">
-              Started: {formatTime(trainingJob.startTime)}
-            </span>
-          </div>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg">{progress.type} Training</CardTitle>
+          {getStatusBadge()}
         </div>
-        
-        {trainingJob.status === 'training' && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onStopTraining(trainingJob.modelId)}
-          >
-            Stop Training
-          </Button>
-        )}
+        <p className="text-sm text-muted-foreground">
+          Model ID: <span className="font-mono text-xs">{progress.modelId}</span>
+        </p>
       </CardHeader>
-      
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              <span className="text-sm font-medium">Progress</span>
-              <span className="ml-2 text-xs bg-primary/10 text-primary py-0.5 px-2 rounded-full">
-                Epoch {trainingJob.currentEpoch || 0} of {trainingJob.totalEpochs || 100}
-              </span>
-            </div>
-            <span className="text-sm font-medium">{trainingJob.progress}%</span>
+        <div className="space-y-1">
+          <div className="flex justify-between text-sm">
+            <span>Progress</span>
+            <span>{Math.round(progress.progress)}%</span>
           </div>
-          <Progress value={trainingJob.progress} className="h-2" />
+          <Progress value={progress.progress} className="h-2" />
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <span className="text-xs text-muted-foreground">Current Accuracy</span>
-            <div className="font-medium text-lg">{((trainingJob.accuracy || 0) * 100).toFixed(1)}%</div>
+            <p className="text-xs text-muted-foreground">Current Epoch</p>
+            <p className="font-medium">
+              {progress.currentEpoch}/{progress.totalEpochs}
+            </p>
           </div>
-          
           <div>
-            <span className="text-xs text-muted-foreground">Target Accuracy</span>
-            <div className="font-medium text-lg">{((trainingJob.targetAccuracy || 0) * 100).toFixed(1)}%</div>
+            <p className="text-xs text-muted-foreground">Time Remaining</p>
+            <p className="font-medium">{formatTimeRemaining(progress.timeRemaining)}</p>
           </div>
-          
           <div>
-            <span className="text-xs text-muted-foreground">Time Remaining</span>
-            <div className="font-medium">{getEstimatedTimeRemaining()}</div>
+            <p className="text-xs text-muted-foreground">Accuracy</p>
+            <p className="font-medium">{(progress.accuracy * 100).toFixed(2)}%</p>
           </div>
-          
           <div>
-            <span className="text-xs text-muted-foreground">Status</span>
-            <div className="font-medium flex items-center">
-              {trainingJob.status === 'training' && <Clock className="h-4 w-4 mr-1 text-blue-500" />}
-              {trainingJob.status === 'completed' && <CheckCircle className="h-4 w-4 mr-1 text-green-500" />}
-              {trainingJob.status === 'failed' && <AlertTriangle className="h-4 w-4 mr-1 text-red-500" />}
-              {getStatusText()}
-            </div>
+            <p className="text-xs text-muted-foreground">Target Accuracy</p>
+            <p className="font-medium">{progress.targetAccuracy}%</p>
           </div>
         </div>
         
-        {trainingJob.message && (
-          <div className={`text-sm p-2 rounded ${
-            trainingJob.status === 'failed' ? 'bg-red-50 text-red-700' : 
-            trainingJob.status === 'completed' ? 'bg-green-50 text-green-700' : 
-            'bg-blue-50 text-blue-700'
-          }`}>
-            {trainingJob.message}
+        {/* Status message display */}
+        {progress.message && (
+          <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
+            <p className="font-medium">Status Message:</p>
+            <p>{progress.message}</p>
           </div>
         )}
         
-        {trainingJob.error && (
-          <div className="flex items-start text-sm text-red-500 bg-red-50 p-2 rounded">
-            <AlertTriangle className="h-4 w-4 mr-2 mt-0.5" />
-            <span>{trainingJob.error}</span>
+        {/* Error message display */}
+        {progress.error && (
+          <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+            <p className="font-medium">Error:</p>
+            <p>{progress.error}</p>
           </div>
         )}
         
-        <div className="pt-4">
-          <div className="flex items-center mb-2">
-            <ChartLine className="h-4 w-4 mr-1 text-primary" />
-            <span className="text-sm font-medium">Accuracy Progression</span>
+        {/* Actions */}
+        {progress.status === 'training' && onCancel && (
+          <div className="flex justify-end">
+            <button
+              onClick={onCancel}
+              className="text-sm text-red-600 hover:text-red-800 transition-colors"
+            >
+              Cancel Training
+            </button>
           </div>
-          <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={accuracyHistory}
-                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis 
-                  dataKey="epoch" 
-                  label={{ value: 'Epoch', position: 'insideBottomRight', offset: -10 }} 
-                />
-                <YAxis 
-                  domain={[0, 1]} 
-                  tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
-                  label={{ value: 'Accuracy', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  formatter={(value) => `${(Number(value) * 100).toFixed(1)}%`}
-                  labelFormatter={(label) => `Epoch ${label}`}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="accuracy" 
-                  stroke="#3b82f6" 
-                  name="Current Accuracy" 
-                  strokeWidth={2} 
-                  dot={{ r: 1 }}
-                  activeDot={{ r: 5 }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="target" 
-                  stroke="#10b981" 
-                  name="Target Accuracy"
-                  strokeWidth={1}
-                  strokeDasharray="5 5"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

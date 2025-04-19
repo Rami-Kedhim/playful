@@ -21,7 +21,8 @@ interface EmotionalStateIndicatorProps {
 const EmotionalStateIndicator = ({ emotionalState, size = 'md' }: EmotionalStateIndicatorProps) => {
   if (!emotionalState) return null;
   
-  const { dominantEmotion, intensityLevel } = emotionalState;
+  const dominantEmotion = emotionalState.dominantEmotion || emotionalState.primary;
+  const intensityLevel = emotionalState.intensityLevel || emotionalState.intensity;
   
   // Define icon sizes
   const iconSizes = {
@@ -42,7 +43,7 @@ const EmotionalStateIndicator = ({ emotionalState, size = 'md' }: EmotionalState
   
   // Map emotions to icons
   const getEmotionIcon = () => {
-    switch (dominantEmotion) {
+    switch (dominantEmotion as EmotionType) {
       case 'joy':
         return <Heart size={iconSize} className={`${getIntensityColor(intensityLevel)}`} />;
       case 'interest':
@@ -72,23 +73,23 @@ const EmotionalStateIndicator = ({ emotionalState, size = 'md' }: EmotionalState
         <div className="space-y-1 text-xs">
           <div className="flex justify-between">
             <span>Joy:</span>
-            <span>{Math.round(emotionalState.joy)}%</span>
+            <span>{Math.round(emotionalState.joy || 0)}%</span>
           </div>
           <div className="flex justify-between">
             <span>Interest:</span>
-            <span>{Math.round(emotionalState.interest)}%</span>
+            <span>{Math.round(emotionalState.interest || 0)}%</span>
           </div>
           <div className="flex justify-between">
             <span>Trust:</span>
-            <span>{Math.round(emotionalState.trust)}%</span>
+            <span>{Math.round(emotionalState.trust || 0)}%</span>
           </div>
           <div className="flex justify-between">
             <span>Sadness:</span>
-            <span>{Math.round(emotionalState.sadness)}%</span>
+            <span>{Math.round(emotionalState.sadness || 0)}%</span>
           </div>
           <div className="flex justify-between">
             <span>Anger:</span>
-            <span>{Math.round(emotionalState.anger)}%</span>
+            <span>{Math.round(emotionalState.anger || 0)}%</span>
           </div>
         </div>
       </div>

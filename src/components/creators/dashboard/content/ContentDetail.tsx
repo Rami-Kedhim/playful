@@ -1,208 +1,115 @@
-
-import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { CreatorContent } from "@/types/creator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Eye, ThumbsUp, Lock, Globe } from "lucide-react";
-import { format } from "date-fns";
+import { Edit as EditIcon, Trash2 as TrashIcon, File as FileIcon } from 'lucide-react';
+import { CreatorContent } from '@/types/creator';
 
 interface ContentDetailProps {
-  contentId: string | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onEdit: (content: CreatorContent) => void;
-  fetchContentDetail: (id: string) => Promise<CreatorContent | null>;
+  content: CreatorContent;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-const ContentDetail: React.FC<ContentDetailProps> = ({
-  contentId,
-  isOpen,
-  onClose,
-  onEdit,
-  fetchContentDetail,
-}) => {
-  const [content, setContent] = useState<CreatorContent | null>(null);
-  const [loading, setLoading] = useState(false);
+const ContentDetailItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <div>
+    <h4 className="text-sm font-medium">{label}</h4>
+    <p className="text-sm text-muted-foreground">{value}</p>
+  </div>
+);
 
-  useEffect(() => {
-    const loadContentDetail = async () => {
-      if (contentId && isOpen) {
-        setLoading(true);
-        try {
-          const result = await fetchContentDetail(contentId);
-          if (result) {
-            setContent(result);
-          }
-        } catch (error) {
-          console.error("Error loading content detail:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadContentDetail();
-  }, [contentId, isOpen, fetchContentDetail]);
-
-  const handleEdit = () => {
-    if (content) {
-      onEdit(content);
-      onClose();
+const ContentDetail: React.FC<ContentDetailProps> = ({ content, onEdit, onDelete }) => {
+  const renderContentPreview = () => {
+    switch (content.contentType) {
+      case 'video':
+        return (
+          <div className="aspect-video bg-black rounded-lg overflow-hidden">
+            <video
+              src={content.url}
+              controls
+              className="w-full h-full object-contain"
+              poster={content.thumbnailUrl}
+            />
+          </div>
+        );
+      case 'image':
+        return (
+          <div className="aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+            <img
+              src={content.url}
+              alt={content.title}
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+        );
+      default:
+        return (
+          <div className="aspect-video bg-zinc-900 rounded-lg flex items-center justify-center">
+            <FileIcon className="h-12 w-12 text-zinc-500" />
+          </div>
+        );
     }
-  };
-
-  const renderContent = () => {
-    if (!content) return null;
-
-    if (content.content_type === 'image') {
-      return (
-        <div className="aspect-video relative rounded-md overflow-hidden bg-muted">
-          <img
-            src={content.url}
-            alt={content.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      );
-    }
-
-    if (content.content_type === 'video') {
-      return (
-        <div className="aspect-video relative rounded-md overflow-hidden bg-muted">
-          {content.thumbnail_url ? (
-            <div className="relative">
-              <img
-                src={content.thumbnail_url}
-                alt={content.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Button variant="secondary" size="sm" onClick={() => window.open(content.url, '_blank')}>
-                  Play Video
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <Button variant="secondary" onClick={() => window.open(content.url, '_blank')}>
-                Play Video
-              </Button>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="aspect-video flex items-center justify-center bg-muted rounded-md">
-        <p className="text-muted-foreground">Preview not available</p>
-      </div>
-    );
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px]">
-        <DialogHeader>
-          <DialogTitle>Content Details</DialogTitle>
-        </DialogHeader>
-
-        {loading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-            <div className="flex gap-2">
-              <Skeleton className="h-6 w-24" />
-              <Skeleton className="h-6 w-24" />
-            </div>
-          </div>
-        ) : content ? (
-          <div className="space-y-6">
-            {renderContent()}
-
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-xl font-semibold">{content.title}</h3>
-                {content.description && (
-                  <p className="text-sm text-muted-foreground mt-1">{content.description}</p>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Badge variant={content.content_type === 'video' ? 'default' : 'secondary'}>
-                  {content.content_type.toUpperCase()}
-                </Badge>
-                <Badge variant={content.is_premium ? 'default' : 'outline'}>
-                  {content.is_premium ? (
-                    <><Lock className="mr-1 h-3 w-3" /> Premium</>
-                  ) : (
-                    <><Globe className="mr-1 h-3 w-3" /> Free</>
-                  )}
-                </Badge>
-                <Badge variant={content.status === 'published' ? 'success' : 'outline'}>
-                  {content.status}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <Label className="text-muted-foreground flex items-center">
-                    <CalendarIcon className="h-4 w-4 mr-2" />
-                    Created
-                  </Label>
-                  <p>{format(new Date(content.created_at), 'PPP')}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground flex items-center">
-                    <Eye className="h-4 w-4 mr-2" />
-                    Views
-                  </Label>
-                  <p>{content.views_count?.toLocaleString() || 0}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground flex items-center">
-                    <ThumbsUp className="h-4 w-4 mr-2" />
-                    Likes
-                  </Label>
-                  <p>{content.likes_count?.toLocaleString() || 0}</p>
-                </div>
-                {content.is_premium && content.price && (
-                  <div>
-                    <Label className="text-muted-foreground">Price</Label>
-                    <p>{content.price} LC</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Content not found</p>
-          </div>
-        )}
-
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={onClose}>
-            Close
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{content.title}</h1>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => onEdit(content.id)}>
+            <EditIcon className="h-4 w-4 mr-1" />
+            Edit
           </Button>
-          {content && (
-            <Button onClick={handleEdit}>
-              Edit Content
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <Button variant="destructive" size="sm" onClick={() => onDelete(content.id)}>
+            <TrashIcon className="h-4 w-4 mr-1" />
+            Delete
+          </Button>
+        </div>
+      </div>
+
+      {renderContentPreview()}
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Content Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <ContentDetailItem label="Content Type" value={content.contentType} />
+              <ContentDetailItem 
+                label="Premium Content" 
+                value={content.isPremium ? "Yes" : "No"} 
+              />
+              <ContentDetailItem 
+                label="Date Created" 
+                value={new Date(content.createdAt).toLocaleDateString()} 
+              />
+              <ContentDetailItem 
+                label="Views" 
+                value={content.viewCount.toString()} 
+              />
+              <ContentDetailItem 
+                label="Likes" 
+                value={content.likeCount.toString()} 
+              />
+              {content.isPremium && (
+                <ContentDetailItem 
+                  label="Price" 
+                  value={`$${content.price?.toFixed(2)}`} 
+                />
+              )}
+            </div>
+
+            <div className="pt-2">
+              <h4 className="text-sm font-medium mb-1">Description</h4>
+              <p className="text-sm text-muted-foreground">
+                {content.description || "No description provided"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

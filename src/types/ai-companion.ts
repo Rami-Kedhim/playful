@@ -27,6 +27,9 @@ export interface AICompanion {
     messages_received: number;
     total_interaction_time: number;
     last_interaction?: string;
+    chat_messages?: number;
+    images_generated?: number;
+    voice_messages?: number;
   };
 }
 
@@ -36,4 +39,10 @@ export interface AICompanionMessage {
   role: 'user' | 'assistant' | 'system';
   timestamp: string;
   emotionalState?: EmotionalState;
+  is_from_user?: boolean;
+  created_at?: string;
+  attachments?: Array<{
+    type: string;
+    url: string;
+  }>;
 }

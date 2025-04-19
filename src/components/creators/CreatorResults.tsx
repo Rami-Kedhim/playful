@@ -1,5 +1,5 @@
 
-import CreatorCard from "@/components/cards/CreatorCard";
+import CreatorCard from "@/components/creators/CreatorCard";
 import { Button } from "@/components/ui/button";
 import { ContentCreator } from "@/types/creator";
 
@@ -25,15 +25,18 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
             <CreatorCard 
               key={creator.id} 
               id={creator.id}
-              name={creator.name}
-              username={creator.username}
+              name={creator.name || 'Unknown Creator'}
+              username={creator.username || ''}
               imageUrl={creator.imageUrl || creator.avatarUrl || creator.profileImage || ''}
-              isLive={creator.isLive || false}
-              isPremium={creator.isPremium}
-              subscriberCount={creator.subscriberCount}
-              contentCount={creator.contentCount || { photos: 0, videos: 0 }}
-              price={creator.price}
-              isAI={creator.isAI || false}
+              isLive={Boolean(creator.isLive) || false}
+              isPremium={Boolean(creator.isPremium) || false}
+              subscriberCount={creator.subscriberCount || 0}
+              contentCount={typeof creator.contentCount === 'number' 
+                ? { photos: creator.contentCount || 0, videos: 0 } 
+                : creator.contentCount || { photos: 0, videos: 0 }
+              }
+              price={creator.price || 0}
+              isAI={Boolean(creator.isAI) || false}
               rating={creator.rating || 0}
             />
           ))}

@@ -23,7 +23,7 @@ const AICompanionCard: React.FC<AICompanionCardProps> = ({ companion, onSelect, 
   };
   
   // Get chat messages count with backward compatibility
-  const chatMessagesCount = 'chat_messages' in engagementStats 
+  const chatMessagesCount = engagementStats.chat_messages !== undefined 
     ? engagementStats.chat_messages 
     : (engagementStats.messages_sent + engagementStats.messages_received);
   

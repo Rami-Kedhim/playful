@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Brain, RefreshCw, Activity } from 'lucide-react';
 import { SeoOptimizationResult } from '@/services/seo/HermesSeoService';
 import { neuralHub } from '@/services/neural';
@@ -17,7 +17,7 @@ interface HermesSeoConnectorProps {
 }
 
 const HermesSeoConnector: React.FC<HermesSeoConnectorProps> = ({ userId }) => {
-  const { insights } = useHermesInsights(userId);
+  const { insights, getHealthMetrics } = useHermesInsights();
   const { optimizationResult } = useHermesSeo();
   const [isAutoOptimizing, setIsAutoOptimizing] = useState(false);
   const [systemHealthMetrics, setSystemHealthMetrics] = useState(neuralHub.getHealthMetrics());

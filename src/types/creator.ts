@@ -1,18 +1,37 @@
 
 export interface ContentCreator {
   id: string;
-  username: string;
-  displayName: string;
-  avatarUrl: string;
+  username?: string;
+  name: string;
+  avatarUrl?: string;
+  profileImage?: string;
+  imageUrl?: string;
   bio?: string;
-  coverImageUrl?: string;
-  subscriberCount?: number;
-  contentCount?: number;
-  isPremium?: boolean;
-  isVerified?: boolean;
-  categories?: string[];
+  location?: string;
+  subscriberCount: number;
+  contentCount?: {
+    photos: number;
+    videos: number;
+    stories?: number;
+  };
   rating?: number;
-  ratingCount?: number;
+  isVerified?: boolean;
+  isPremium?: boolean;
+  isAI?: boolean;
+  isScraped?: boolean;
+  price?: number;
+  lastSynced?: string;
+  isLive?: boolean;
+  hasLiveStream?: boolean;
+  isFeatured?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  description?: string;
+  ethnicity?: string;
+  languages?: string[];
+  tags?: string[];
+  age?: number;
+  subscriptionPrice?: number;
 }
 
 export interface CreatorContent {
@@ -20,35 +39,35 @@ export interface CreatorContent {
   creatorId: string;
   title: string;
   description?: string;
+  contentType: string;
   url: string;
   thumbnailUrl?: string;
-  contentType: 'image' | 'video' | 'audio' | 'text' | 'livestream';
-  status: 'draft' | 'published' | 'archived' | 'processing';
   isPremium: boolean;
   price?: number;
+  createdAt: string;
+  updatedAt?: string;
+  publishedAt?: string;
+  status: 'draft' | 'published' | 'archived';
   viewCount: number;
   likeCount: number;
-  createdAt: string;
-  publishedAt?: string;
-  updatedAt: string;
   tags?: string[];
+  // Legacy fields for backward compatibility
+  content_type?: string;
+  thumbnail_url?: string;
+  is_premium?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  published_at?: string;
+  views_count?: number;
+  likes_count?: number;
 }
 
-export interface CreatorPayout {
-  id: string;
-  creatorId: string;
-  amount: number;
-  status: 'pending' | 'processed' | 'failed';
-  payoutMethod: string;
-  requestedAt: string;
-  processedAt?: string;
-  notes?: string;
-}
-
-export interface PayoutRequest {
-  creatorId: string;
-  amount: number;
-  payoutMethod: string;
-  accountDetails: Record<string, any>;
-  notes?: string;
+export interface CreatorAnalytics {
+  views: number;
+  likes: number;
+  shares: number;
+  earnings: number;
+  subscriberGrowth: number;
+  topContent: string[];
+  period: 'day' | 'week' | 'month' | 'year';
 }

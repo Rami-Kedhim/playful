@@ -1,140 +1,208 @@
-
-import React, { useEffect, useState } from "react";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CreatorContent } from "@/types/creator";
-import BasicInfoFields from "./form/BasicInfoFields";
-import ContentTypeFields from "./form/ContentTypeFields";
-import MediaUrlFields from "./form/MediaUrlFields";
-import PremiumContentFields from "./form/PremiumContentFields";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ContentFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: Partial<CreatorContent>) => void;
-  initialData?: CreatorContent;
+  onSubmit: (values: z.infer<typeof formSchema>) => Promise<void>;
+  initialValues?: {
+    title: string;
+    description: string;
+    contentType: string;
+    isPremium: boolean;
+    price: number;
+    url: string;
+    thumbnailUrl: string;
+  };
+  isLoading?: boolean;
 }
 
-const ContentForm: React.FC<ContentFormProps> = ({
-  isOpen,
-  onClose,
-  onSave,
-  initialData,
-}) => {
-  const [formData, setFormData] = useState<Partial<CreatorContent>>({
-    title: "",
-    description: "",
-    content_type: "image",
-    url: "",
-    thumbnail_url: "",
-    is_premium: false,
-    price: null,
-    status: "draft",
-  });
+const formSchema = z.object({
+  title: z.string().min(2, {
+    message: "Title must be at least 2 characters.",
+  }),
+  description: z.string().optional(),
+  contentType: z.enum(['image', 'video', 'article']),
+  isPremium: z.boolean().default(false),
+  price: z.number().optional().default(0),
+  url: z.string().url({
+    message: "Please enter a valid URL.",
+  }),
+  thumbnailUrl: z.string().url({
+    message: "Please enter a valid URL for the thumbnail.",
+  }).optional(),
+});
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        title: initialData.title || "",
-        description: initialData.description || "",
-        content_type: initialData.content_type || "image",
-        url: initialData.url || "",
-        thumbnail_url: initialData.thumbnail_url || "",
-        is_premium: initialData.is_premium || false,
-        price: initialData.price || null,
-        status: initialData.status || "draft",
-      });
-    } else {
-      // Reset form for new content
-      setFormData({
-        title: "",
-        description: "",
-        content_type: "image",
-        url: "",
-        thumbnail_url: "",
-        is_premium: false,
-        price: null,
-        status: "draft",
-      });
+const ContentForm: React.FC<ContentFormProps> = ({ onSubmit, initialValues, isLoading }) => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: initialValues?.title || '',
+      description: initialValues?.description || '',
+      contentType: initialValues?.contentType || 'image',
+      isPremium: initialValues?.isPremium || false,
+      price: initialValues?.price || 0,
+      url: initialValues?.url || '',
+      thumbnailUrl: initialValues?.thumbnailUrl || '',
     }
-  }, [initialData, isOpen]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  });
+  
+  const isPremium = form.watch('isPremium');
+  const contentType = form.watch('contentType');
+  
+  const handleFormSubmit = async (values: z.infer<typeof formSchema>) => {
+    await onSubmit(values);
   };
-
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSwitchChange = (checked: boolean) => {
-    setFormData({ ...formData, is_premium: checked });
-  };
-
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value === "" ? null : Number(value) });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
+  
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>
-            {initialData ? "Edit Content" : "Add New Content"}
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            <BasicInfoFields
-              title={formData.title || ""}
-              description={formData.description || ""}
-              onChange={handleChange}
-            />
-
-            <ContentTypeFields
-              contentType={formData.content_type || "image"}
-              status={formData.status || "draft"}
-              onSelectChange={handleSelectChange}
-            />
-
-            <MediaUrlFields
-              contentUrl={formData.url || ""}
-              thumbnailUrl={formData.thumbnail_url || ""}
-              onChange={handleChange}
-            />
-
-            <PremiumContentFields
-              isPremium={formData.is_premium || false}
-              price={formData.price}
-              onSwitchChange={handleSwitchChange}
-              onNumberChange={handleNumberChange}
-            />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter content title" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Write a brief description about the content"
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="contentType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Content Type</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a content type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="image">Image</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="article">Article</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Content URL</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter content URL" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        {contentType === 'video' && (
+          <FormField
+            control={form.control}
+            name="thumbnailUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Thumbnail URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter thumbnail URL" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        
+        <div className="flex items-center justify-between rounded-md border p-4">
+          <div className="space-y-1">
+            <h4 className="text-sm font-semibold">Premium Content</h4>
+            <p className="text-sm text-muted-foreground">
+              Make this content available only to subscribers
+            </p>
           </div>
-
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">Save Content</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          <FormField
+            control={form.control}
+            name="isPremium"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        {isPremium && (
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter price"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Loading" : "Submit"}
+        </Button>
+      </form>
+    </Form>
   );
 };
 

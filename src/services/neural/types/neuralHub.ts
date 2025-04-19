@@ -1,4 +1,3 @@
-
 export interface TrainingProgress {
   id: string;
   modelId: string;
@@ -14,6 +13,8 @@ export interface TrainingProgress {
   type: string;
   targetAccuracy: number;
   estimatedCompletionTime: Date;
+  message?: string;
+  error?: string;
 }
 
 export interface NeuralModel {

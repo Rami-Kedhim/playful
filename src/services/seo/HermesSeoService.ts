@@ -1,57 +1,79 @@
 
 export interface SeoOptimizationResult {
-  id: string;
-  title: string;
-  description: string;
-  keywords: string[];
-  optimizedText: string;
-  score: number;
-  improvements: string[];
-  created_at: string;
+  originalContent: string;
+  optimizedContent: string;
+  seoScore: number;
+  recommendations: string[];
+  keywordDensity: Record<string, number>;
+  readabilityScore: number;
+  visibilityScore?: number; // Added
+  priorityKeywords?: string[]; // Added
+  metaDescription?: string;
+  metaTags?: string[];
 }
 
-export interface HermesSeoService {
-  optimizeContent(content: string): Promise<SeoOptimizationResult>;
-  getOptimizationHistory(): Promise<SeoOptimizationResult[]>;
-  getContentScore(content: string): Promise<number>;
+export interface SeoOptimizationRequest {
+  contentId: string;
+  contentType: string;
+  content: string;
+  targetKeywords?: string[];
 }
 
-export class DefaultHermesSeoService implements HermesSeoService {
-  async optimizeContent(content: string): Promise<SeoOptimizationResult> {
+// The service interface
+const hermesSeoService = {
+  optimizeContent: async (content: string): Promise<SeoOptimizationResult> => {
     // Mock implementation
     return {
-      id: `seo-${Date.now()}`,
-      title: "Optimized Title",
-      description: "This content was optimized by Hermes SEO system",
-      keywords: ["optimized", "seo", "content"],
-      optimizedText: content,
-      score: 85,
-      improvements: ["Added keywords", "Optimized meta description"],
-      created_at: new Date().toISOString()
+      originalContent: content,
+      optimizedContent: content,
+      seoScore: 65,
+      recommendations: ['Add more keywords', 'Improve readability'],
+      keywordDensity: {},
+      readabilityScore: 75,
+      visibilityScore: 80,
+      priorityKeywords: ['escort', 'premium', 'booking'],
+      metaDescription: 'Optimized content for better search visibility',
+      metaTags: ['escort', 'premium', 'booking']
     };
-  }
+  },
 
-  async getOptimizationHistory(): Promise<SeoOptimizationResult[]> {
+  enhanceContentSeo: async (
+    contentId: string,
+    contentType: string,
+    title: string,
+    description: string,
+    keywords: string[]
+  ): Promise<SeoOptimizationResult> => {
     // Mock implementation
-    return [
-      {
-        id: `seo-${Date.now() - 1000}`,
-        title: "First Optimization",
-        description: "Previously optimized content",
-        keywords: ["first", "optimization"],
-        optimizedText: "Sample optimized text",
-        score: 75,
-        improvements: ["Initial optimization"],
-        created_at: new Date(Date.now() - 86400000).toISOString()
-      }
-    ];
-  }
+    return {
+      originalContent: description,
+      optimizedContent: description,
+      seoScore: 70,
+      recommendations: ['Improve title keywords', 'Add more related terms'],
+      keywordDensity: {},
+      readabilityScore: 80,
+      visibilityScore: 75,
+      priorityKeywords: keywords,
+      metaDescription: title,
+      metaTags: keywords
+    };
+  },
 
-  async getContentScore(content: string): Promise<number> {
-    // Mock scoring algorithm
-    return Math.min(100, 50 + content.length / 10);
-  }
-}
+  applyOptimizations: async (
+    contentId: string,
+    optimizations: SeoOptimizationResult
+  ): Promise<boolean> => {
+    // Mock implementation
+    return true;
+  },
 
-// Export a default instance
-export const hermesSeoService = new DefaultHermesSeoService();
+  getOptimizationHistory: async (): Promise<SeoOptimizationResult[]> => {
+    return [];
+  },
+
+  getContentScore: async (content: string): Promise<number> => {
+    return 75;
+  }
+};
+
+export { hermesSeoService };

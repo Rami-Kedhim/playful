@@ -1,4 +1,3 @@
-
 /**
  * Hook for accessing HERMES intelligence in React components
  * This manages the state and interaction with the HERMES API
@@ -14,6 +13,7 @@ export interface HermesInsight {
   boostOffer?: {
     value: string;
     expires: string;
+    category?: string;
   };
   vrEvent?: string;
   isLoading: boolean;
@@ -148,15 +148,28 @@ export function useHermesInsights(userId?: string) {
       return [];
     }
   }, [userId]);
-
+  
+  /**
+   * Get system health metrics
+   */
+  const getHealthMetrics = useCallback(() => {
+    // Mock implementation for system health metrics
+    return {
+      load: Math.random(),
+      userEngagement: Math.random(),
+      lastUpdated: Date.now()
+    };
+  }, []);
+  
   return {
     insights,
     reportUserAction,
     recordProfileView,
     recordFavorite,
     recordBoostRequest,
-    recordAICompanionInteraction, // New method
-    getAICompanionRecommendations // New method
+    recordAICompanionInteraction,
+    getAICompanionRecommendations,
+    getHealthMetrics
   };
 }
 

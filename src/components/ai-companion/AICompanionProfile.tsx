@@ -22,7 +22,14 @@ const AICompanionProfile: React.FC<AICompanionProfileProps> = ({ companion }) =>
     engagement_stats
   } = companion;
   
-  const lastActive = engagement_stats.last_interaction 
+  // Set default values for stats if they don't exist
+  const stats = {
+    chat_messages: engagement_stats?.chat_messages ?? 0,
+    images_generated: engagement_stats?.images_generated ?? 0,
+    voice_messages: engagement_stats?.voice_messages ?? 0
+  };
+  
+  const lastActive = engagement_stats?.last_interaction 
     ? new Date(engagement_stats.last_interaction).toLocaleDateString()
     : 'Never';
   
@@ -40,50 +47,54 @@ const AICompanionProfile: React.FC<AICompanionProfileProps> = ({ companion }) =>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-1">
-          {personality_traits.map((trait) => (
+          {personality_traits?.map((trait) => (
             <Badge key={trait} className="bg-primary/10 text-primary border-primary/20">
               {trait}
             </Badge>
-          ))}
-          <Badge className="bg-secondary/10 text-secondary border-secondary/20">
-            {body_type}
-          </Badge>
-          <Badge className="bg-secondary/10 text-secondary border-secondary/20">
-            {voice_type} voice
-          </Badge>
+          )) || null}
+          {body_type && (
+            <Badge className="bg-secondary/10 text-secondary border-secondary/20">
+              {body_type}
+            </Badge>
+          )}
+          {voice_type && (
+            <Badge className="bg-secondary/10 text-secondary border-secondary/20">
+              {voice_type} voice
+            </Badge>
+          )}
         </div>
         
         <div className="space-y-2">
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Trust</span>
-              <span>{relationship_level.trust}%</span>
+              <span>{relationship_level?.trust ?? 0}%</span>
             </div>
-            <Progress value={relationship_level.trust} className="h-2" />
+            <Progress value={relationship_level?.trust ?? 0} className="h-2" />
           </div>
           
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Affection</span>
-              <span>{relationship_level.affection}%</span>
+              <span>{relationship_level?.affection ?? 0}%</span>
             </div>
-            <Progress value={relationship_level.affection} className="h-2" />
+            <Progress value={relationship_level?.affection ?? 0} className="h-2" />
           </div>
           
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Intimacy</span>
-              <span>{relationship_level.intimacy}%</span>
+              <span>{relationship_level?.intimacy ?? 0}%</span>
             </div>
-            <Progress value={relationship_level.intimacy} className="h-2" />
+            <Progress value={relationship_level?.intimacy ?? 0} className="h-2" />
           </div>
           
           <div className="space-y-1">
             <div className="flex justify-between text-sm">
               <span>Obedience</span>
-              <span>{relationship_level.obedience}%</span>
+              <span>{relationship_level?.obedience ?? 0}%</span>
             </div>
-            <Progress value={relationship_level.obedience} className="h-2" />
+            <Progress value={relationship_level?.obedience ?? 0} className="h-2" />
           </div>
         </div>
         
@@ -91,15 +102,15 @@ const AICompanionProfile: React.FC<AICompanionProfileProps> = ({ companion }) =>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <p className="text-muted-foreground">Messages</p>
-              <p className="font-medium">{engagement_stats.chat_messages}</p>
+              <p className="font-medium">{stats.chat_messages}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Images</p>
-              <p className="font-medium">{engagement_stats.images_generated}</p>
+              <p className="font-medium">{stats.images_generated}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Voice Clips</p>
-              <p className="font-medium">{engagement_stats.voice_messages}</p>
+              <p className="font-medium">{stats.voice_messages}</p>
             </div>
             <div>
               <p className="text-muted-foreground">Last Active</p>

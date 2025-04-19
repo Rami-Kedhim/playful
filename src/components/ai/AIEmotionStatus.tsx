@@ -72,15 +72,16 @@ const AIEmotionStatus: React.FC<AIEmotionStatusProps> = ({
 }) => {
   if (!emotionalState) return null;
   
-  const { dominantEmotion, intensityLevel } = emotionalState;
+  const dominantEmotion = emotionalState.dominantEmotion || 'neutral';
+  const intensityLevel = emotionalState.intensityLevel || emotionalState.intensity;
   
   if (compact) {
     return (
       <Badge 
         variant="outline" 
-        className={`${getEmotionColor(dominantEmotion)} flex items-center gap-1`}
+        className={`${getEmotionColor(dominantEmotion as EmotionType)} flex items-center gap-1`}
       >
-        {getEmotionIcon(dominantEmotion)}
+        {getEmotionIcon(dominantEmotion as EmotionType)}
         {dominantEmotion}
         {showIntensity && intensityLevel && <span className="text-xs">({intensityLevel}%)</span>}
       </Badge>
@@ -89,14 +90,14 @@ const AIEmotionStatus: React.FC<AIEmotionStatusProps> = ({
 
   // Get the top 3 emotions
   const emotions = [
-    { name: 'joy' as EmotionType, value: emotionalState.joy },
-    { name: 'trust' as EmotionType, value: emotionalState.trust },
-    { name: 'fear' as EmotionType, value: emotionalState.fear },
-    { name: 'surprise' as EmotionType, value: emotionalState.surprise },
-    { name: 'sadness' as EmotionType, value: emotionalState.sadness },
-    { name: 'anger' as EmotionType, value: emotionalState.anger },
-    { name: 'anticipation' as EmotionType, value: emotionalState.anticipation },
-    { name: 'interest' as EmotionType, value: emotionalState.interest }
+    { name: 'joy' as EmotionType, value: emotionalState.joy || 0 },
+    { name: 'trust' as EmotionType, value: emotionalState.trust || 0 },
+    { name: 'fear' as EmotionType, value: emotionalState.fear || -0 },
+    { name: 'surprise' as EmotionType, value: emotionalState.surprise || 0 },
+    { name: 'sadness' as EmotionType, value: emotionalState.sadness || 0 },
+    { name: 'anger' as EmotionType, value: emotionalState.anger || 0 },
+    { name: 'anticipation' as EmotionType, value: emotionalState.anticipation || 0 },
+    { name: 'interest' as EmotionType, value: emotionalState.interest || 0 }
   ].sort((a, b) => b.value - a.value).slice(0, 3);
 
   return (
@@ -125,7 +126,7 @@ const AIEmotionStatus: React.FC<AIEmotionStatusProps> = ({
             </div>
           )}
           <div className="text-xs text-muted-foreground">
-            <span className="font-semibold">Updated:</span> {new Date(emotionalState.lastUpdated).toLocaleTimeString()}
+            <span className="font-semibold">Updated:</span> {new Date(emotionalState.lastUpdated || Date.now()).toLocaleTimeString()}
           </div>
         </div>
       </CardContent>

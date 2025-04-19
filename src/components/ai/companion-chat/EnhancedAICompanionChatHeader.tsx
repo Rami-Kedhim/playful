@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -156,7 +155,7 @@ const EnhancedAICompanionChatHeader: React.FC<AICompanionChatHeaderProps> = ({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Current mood: {emotionalState.dominantEmotion || 'neutral'}</p>
+                <p>Current mood: {emotionalState.dominantEmotion || emotionalState.primary || 'neutral'}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
