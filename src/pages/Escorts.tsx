@@ -5,7 +5,7 @@ import EscortFilters from '@/components/escorts/filters/EscortFilters';
 import EscortGrid from '@/components/escorts/EscortGrid';
 import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Filter, SlidersHorizontal } from 'lucide-react';
 import EscortsModule from '@/modules/escorts/EscortsModule';
 
@@ -20,23 +20,40 @@ const EscortsContent = () => {
     clearAllFilters
   } = useEscorts();
 
-  // Use useState for showFilters to fix undefined errors
-  const [showFilters, setShowFilters] = useState(false);
+  // Provide a fallback typing for filters as empty object might cause TS errors
+  const typedFilters = filters as Partial<{
+    serviceTypes: string[];
+    location: string;
+    priceRange: [number, number];
+    gender: string[];
+    orientation: string[];
+    ageRange: [number, number];
+    rating: number;
+    availableNow: boolean;
+    verified: boolean;
+  }>;
 
-  // Fix filter property type errors by setting defaults with type guards
-  const serviceTypes: string[] = Array.isArray(filters.serviceTypes) ? filters.serviceTypes : [];
-  const serviceType: "" | "in-person" | "virtual" | "both" = serviceTypes.length === 1 && (serviceTypes[0] === "in-person" || serviceTypes[0] === "virtual" || serviceTypes[0] === "both") ? serviceTypes[0] : "";
+  // Fix filter property type errors by setting defaults with type guards and fallbacks
+  const serviceTypes: string[] = Array.isArray(typedFilters.serviceTypes) ? typedFilters.serviceTypes : [];
+  const serviceType: "" | "in-person" | "virtual" | "both" = 
+    serviceTypes.length === 1 && ["in-person", "virtual", "both"].includes(serviceTypes[0]) 
+    ? (serviceTypes[0] as "" | "in-person" | "virtual" | "both")
+    : "";
 
   const selectedServices = serviceTypes;
   
-  const location: string = typeof filters.location === 'string' ? filters.location : "";
-  const priceRange: [number, number] = Array.isArray(filters.priceRange) && filters.priceRange.length === 2 ? [filters.priceRange[0], filters.priceRange[1]] : [0, 1000];
-  const selectedGenders: string[] = Array.isArray(filters.gender) ? filters.gender : [];
-  const selectedOrientations: string[] = Array.isArray(filters.orientation) ? filters.orientation : [];
-  const ageRange: [number, number] = Array.isArray(filters.ageRange) && filters.ageRange.length === 2 ? [filters.ageRange[0], filters.ageRange[1]] : [18, 99];
-  const ratingMin: number = typeof filters.rating === 'number' ? filters.rating : 0;
-  const availableNow: boolean = typeof filters.availableNow === 'boolean' ? filters.availableNow : false;
-  const verifiedOnly: boolean = typeof filters.verified === 'boolean' ? filters.verified : false;
+  const location: string = typeof typedFilters.location === 'string' ? typedFilters.location : "";
+  const priceRange: [number, number] = Array.isArray(typedFilters.priceRange) && typedFilters.priceRange.length === 2 
+    ? [typedFilters.priceRange[0], typedFilters.priceRange[1]] 
+    : [0, 1000];
+  const selectedGenders: string[] = Array.isArray(typedFilters.gender) ? typedFilters.gender : [];
+  const selectedOrientations: string[] = Array.isArray(typedFilters.orientation) ? typedFilters.orientation : [];
+  const ageRange: [number, number] = Array.isArray(typedFilters.ageRange) && typedFilters.ageRange.length === 2 
+    ? [typedFilters.ageRange[0], typedFilters.ageRange[1]] 
+    : [18, 99];
+  const ratingMin: number = typeof typedFilters.rating === 'number' ? typedFilters.rating : 0;
+  const availableNow: boolean = typeof typedFilters.availableNow === 'boolean' ? typedFilters.availableNow : false;
+  const verifiedOnly: boolean = typeof typedFilters.verified === 'boolean' ? typedFilters.verified : false;
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -142,6 +159,7 @@ const EscortsContent = () => {
 };
 
 const Escorts = () => {
+  const [showFilters, setShowFilters] = useState(false);
   return (
     <EscortsModule>
       <EscortsContent />

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"; // Added TabsContent import
 import { useAnalytics } from "@/hooks/useAnalytics";
 import AnalyticsChart from "./analytics/AnalyticsChart";
 import AnalyticsStats from "./analytics/AnalyticsStats";
@@ -54,7 +54,15 @@ const CreatorAnalytics = () => {
   }
 
   if (!analytics) {
-    return null; // or some fallback UI if needed
+    return null;
+  }
+
+  // Normalize trend to "up" | "down" | "neutral"
+  function normalizeTrend(trend: string): "up" | "down" | "neutral" {
+    if (trend === "up" || trend === "down" || trend === "neutral") {
+      return trend;
+    }
+    return "neutral";
   }
 
   const statsData = [
@@ -63,29 +71,29 @@ const CreatorAnalytics = () => {
       value: analytics.views.total,
       change: analytics.views.change,
       icon: <Eye className="h-4 w-4 mr-2" />,
-      trend: analytics.views.trend
+      trend: normalizeTrend(analytics.views.trend),
     },
     {
       title: "Likes",
       value: analytics.likes.total,
       change: analytics.likes.change,
       icon: <ThumbsUp className="h-4 w-4 mr-2" />,
-      trend: analytics.likes.trend
+      trend: normalizeTrend(analytics.likes.trend),
     },
     {
       title: "Revenue",
       value: `$${analytics.revenue.total}`,
       change: analytics.revenue.change,
       icon: <DollarSign className="h-4 w-4 mr-2" />,
-      trend: analytics.revenue.trend
+      trend: normalizeTrend(analytics.revenue.trend),
     },
     {
       title: "Subscribers",
       value: analytics.subscribers.total,
       change: analytics.subscribers.change,
       icon: <Users className="h-4 w-4 mr-2" />,
-      trend: analytics.subscribers.trend
-    }
+      trend: normalizeTrend(analytics.subscribers.trend),
+    },
   ];
 
   return (
@@ -108,10 +116,7 @@ const CreatorAnalytics = () => {
           <CardTitle>Performance Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <AnalyticsChart 
-            data={analytics.chartData} 
-            timeRange={timeRange}
-          />
+          <AnalyticsChart data={analytics.chartData} timeRange={timeRange} />
         </CardContent>
       </Card>
     </div>

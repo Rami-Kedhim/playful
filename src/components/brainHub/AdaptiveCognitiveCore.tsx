@@ -38,8 +38,9 @@ const AdaptiveCognitiveCore = () => {
     init();
 
     return () => {
-      if (neuralServiceInstance && typeof neuralServiceInstance.cleanup === 'function') {
-        neuralServiceInstance.cleanup();
+      // cleanup method does not exist in NeuralService, remove or safely call if exists
+      if (neuralServiceInstance && typeof (neuralServiceInstance as any).cleanup === 'function') {
+        (neuralServiceInstance as any).cleanup();
       }
     };
   }, []);
