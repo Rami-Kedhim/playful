@@ -18,15 +18,23 @@ const PersonaProfile: React.FC = () => {
   const { personaId } = useParams<{ personaId: string }>();
   const navigate = useNavigate();
 
+  // Initialize persona with required fields and default values
   const [persona, setPersona] = useState<UberPersona>({
     id: personaId || '1',
+    username: '',
+    displayName: 'Unknown Persona',
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     rating: 4.8,
     reviewCount: 120,
     isVerified: true,
     location: 'New York, NY',
     description: 'A passionate creator with a love for sharing her life.',
-    tags: ['travel', 'fashion', 'lifestyle', 'beauty']
+    tags: ['travel', 'fashion', 'lifestyle', 'beauty'],
+    language: '',
+    bio: '',
+    isAI: false,
+    roleFlags: {},
+    monetization: {},
   } as UberPersona);
 
   return (
@@ -48,7 +56,7 @@ const PersonaProfile: React.FC = () => {
           <div className="p-6 pt-12">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-2xl font-semibold">{persona.id}</h1>
+                <h1 className="text-2xl font-semibold">{persona.displayName}</h1>
                 <div className="flex items-center space-x-2 text-muted-foreground">
                   <MapPin className="h-4 w-4" />
                   <span>{persona.location}</span>

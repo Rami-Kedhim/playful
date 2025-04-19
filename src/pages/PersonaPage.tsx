@@ -1,6 +1,4 @@
 
-// Fix imports for PersonaOverviewTab and PersonaDetailsTab (assumed paths fixed or created)
-// Also fix access to properties in UberPersona properly
 import React from 'react';
 import { useUberPersonaContext } from '@/contexts/UberPersonaContext';
 import { UberPersona } from '@/types/UberPersona';

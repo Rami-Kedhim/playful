@@ -1,12 +1,11 @@
 
-// Fix import for default usePersonaFilter and adjust filterOptions accordingly
 import React, { useEffect, useState } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import UberPersonaGrid from '@/components/personas/UberPersonaGrid';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import EnhancedAppLayout from '@/components/layout/EnhancedAppLayout';
-import usePersonaFilter from '@/hooks/usePersonaFilter';
+import usePersonaFilter, { FilterOptions } from '@/hooks/usePersonaFilter';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -32,7 +31,6 @@ const PersonasPage: React.FC = () => {
         const mappedPersonas = mapEscortsToUberPersonas(state.escorts);
         setAllPersonas(mappedPersonas);
 
-        // Pass mappedPersonas to updateFilterOptions if necessary
         updateFilterOptions?.({ personas: mappedPersonas });
       } catch (error) {
         console.error('Error loading personas:', error);
@@ -51,14 +49,14 @@ const PersonasPage: React.FC = () => {
       filters.push({ key: 'location', label: `Location: ${filterOptions.location}` });
     }
 
-    if (filterOptions.role_filters) {
-      Object.entries(filterOptions.role_filters).forEach(([role, active]) => {
+    if (filterOptions.roleFilters) {
+      Object.entries(filterOptions.roleFilters).forEach(([role, active]) => {
         if (active) filters.push({ key: role, label: role.replace(/^is/, '') });
       });
     }
 
-    if (filterOptions.capability_filters) {
-      Object.entries(filterOptions.capability_filters).forEach(([capability, active]) => {
+    if (filterOptions.capabilityFilters) {
+      Object.entries(filterOptions.capabilityFilters).forEach(([capability, active]) => {
         if (active) filters.push({ key: capability, label: capability.replace(/^has/, '') });
       });
     }
@@ -69,18 +67,18 @@ const PersonasPage: React.FC = () => {
   const handleRemoveFilter = (key: string) => {
     if (key === 'location') {
       updateFilterOptions({ location: '' });
-    } else if (filterOptions.role_filters && key in filterOptions.role_filters) {
-      updateFilterOptions({ role_filters: { ...filterOptions.role_filters, [key]: false } });
-    } else if (filterOptions.capability_filters && key in filterOptions.capability_filters) {
-      updateFilterOptions({ capability_filters: { ...filterOptions.capability_filters, [key]: false } });
+    } else if (filterOptions.roleFilters && key in filterOptions.roleFilters) {
+      updateFilterOptions({ roleFilters: { ...filterOptions.roleFilters, [key]: false } });
+    } else if (filterOptions.capabilityFilters && key in filterOptions.capabilityFilters) {
+      updateFilterOptions({ capabilityFilters: { ...filterOptions.capabilityFilters, [key]: false } });
     }
   };
 
   const clearAllFilters = () => {
     updateFilterOptions({
       location: '',
-      role_filters: {},
-      capability_filters: {},
+      roleFilters: {},
+      capabilityFilters: {},
     });
   };
 
@@ -97,8 +95,8 @@ const PersonasPage: React.FC = () => {
                 <Input
                   id="search"
                   placeholder="Search personas..."
-                  value={filterOptions.search_query || ''}
-                  onChange={(e) => updateFilterOptions({ search_query: e.target.value })}
+                  value={filterOptions.searchQuery || ''}
+                  onChange={(e) => updateFilterOptions({ searchQuery: e.target.value })}
                   className="mt-1"
                 />
               </div>
@@ -117,18 +115,18 @@ const PersonasPage: React.FC = () => {
               <div>
                 <Label className="mb-2 block">Role Types</Label>
                 <div className="space-y-2">
-                  {filterOptions.role_filters &&
-                    Object.entries(filterOptions.role_filters).map(([role, active]) => (
+                  {filterOptions.roleFilters &&
+                    Object.entries(filterOptions.roleFilters).map(([role, active]) => (
                       <div key={role} className="flex items-center space-x-2">
                         <Checkbox
                           id={`role-${role}`}
                           checked={active as boolean}
                           onCheckedChange={() => {
                             const newFilters = {
-                              ...filterOptions.role_filters,
+                              ...filterOptions.roleFilters,
                               [role]: !active,
                             };
-                            updateFilterOptions({ role_filters: newFilters });
+                            updateFilterOptions({ roleFilters: newFilters });
                           }}
                         />
                         <Label htmlFor={`role-${role}`} className="capitalize">
@@ -142,18 +140,18 @@ const PersonasPage: React.FC = () => {
               <div>
                 <Label className="mb-2 block">Capabilities</Label>
                 <div className="space-y-2">
-                  {filterOptions.capability_filters &&
-                    Object.entries(filterOptions.capability_filters).map(([capability, active]) => (
+                  {filterOptions.capabilityFilters &&
+                    Object.entries(filterOptions.capabilityFilters).map(([capability, active]) => (
                       <div key={capability} className="flex items-center space-x-2">
                         <Checkbox
                           id={`capability-${capability}`}
                           checked={active as boolean}
                           onCheckedChange={() => {
                             const newCaps = {
-                              ...filterOptions.capability_filters,
+                              ...filterOptions.capabilityFilters,
                               [capability]: !active,
                             };
-                            updateFilterOptions({ capability_filters: newCaps });
+                            updateFilterOptions({ capabilityFilters: newCaps });
                           }}
                         />
                         <Label htmlFor={`capability-${capability}`} className="capitalize">

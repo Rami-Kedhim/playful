@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Star } from 'lucide-react';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import { VerificationLevel as VLType } from '@/types/verification';
+import { VerificationLevel } from '@/types/verification';
 
 export interface VerificationUpgradeTabProps {
-  currentLevel: VLType;
-  onUpgrade: (level: VLType) => void;
+  currentLevel: VerificationLevel;
+  onUpgrade: (level: VerificationLevel) => void;
 }
 
 const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
@@ -18,7 +18,7 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
 
   const verificationLevels = [
     {
-      id: VLType.BASIC,
+      id: VerificationLevel.BASIC,
       title: 'Basic Verification',
       description: 'Email and phone verification',
       price: 'Free',
@@ -29,7 +29,7 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
       ]
     },
     {
-      id: VLType.ENHANCED,
+      id: VerificationLevel.ENHANCED,
       title: 'Enhanced Verification',
       description: 'ID verification and background check',
       price: '$29.99',
@@ -42,7 +42,7 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
       ]
     },
     {
-      id: VLType.PREMIUM,
+      id: VerificationLevel.PREMIUM,
       title: 'Premium Verification',
       description: 'Complete verification with priority support',
       price: '$99.99',
@@ -68,8 +68,8 @@ const VerificationUpgradeTab: React.FC<VerificationUpgradeTabProps> = ({
         {verificationLevels.map((level) => {
           const isCurrentLevel = currentLevel === level.id;
           const canUpgrade = 
-            (currentLevel === VLType.BASIC && (level.id === VLType.ENHANCED || level.id === VLType.PREMIUM)) || 
-            (currentLevel === VLType.ENHANCED && level.id === VLType.PREMIUM);
+            (currentLevel === VerificationLevel.BASIC && (level.id === VerificationLevel.ENHANCED || level.id === VerificationLevel.PREMIUM)) || 
+            (currentLevel === VerificationLevel.ENHANCED && level.id === VerificationLevel.PREMIUM);
           
           return (
             <Card 

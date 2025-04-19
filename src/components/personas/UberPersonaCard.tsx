@@ -1,5 +1,4 @@
 
-// Ensure VerificationLevel import is consistent only from '@/types/verification'
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
