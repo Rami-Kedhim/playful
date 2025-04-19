@@ -1,4 +1,5 @@
 
+// Fix import path for bookingFormSchema and BookingFormValues
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,8 +15,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// Fix import path of bookingFormSchema and BookingFormValues
-import { bookingFormSchema, BookingFormValues } from '../../detail/booking/types';
+import { bookingFormSchema, BookingFormValues } from '../detail/booking/types';
 import ServiceTypeBadgeLabel from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 interface BookingDialogProps {
@@ -63,7 +63,6 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
     { value: 'overnight', label: 'Overnight' },
   ];
 
-  // Fix properties for serviceType check
   const getServiceType = () => {
     if (escort.providesInPersonServices && escort.providesVirtualContent) {
       return "both";
@@ -262,3 +261,4 @@ const BookingDialog: React.FC<BookingDialogProps> = ({
 };
 
 export default BookingDialog;
+

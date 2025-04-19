@@ -1,3 +1,6 @@
+
+// Fix imports and property access related to escort services and providesVirtualContent
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
@@ -71,12 +74,12 @@ const EscortResults = ({
     );
   }
 
-  // Fix: Property `providesVirtualContent` and `providesInPersonServices` might not exist in types, ensure safe access
+  // Fix: Property `providesVirtualContent` and `providesInPersonServices` used correctly from Escort type, correct naming for service checking
   const getServiceType = (escort: Escort): { inPerson: boolean; virtual: boolean } => {
     const inPerson =
       Boolean(escort.providesInPersonServices) || (escort.services?.includes('in-person') ?? false);
     const virtual =
-      Boolean(escort.providesVirtualServices) || (escort.services?.includes('virtual') ?? false);
+      Boolean(escort.providesVirtualContent) || (escort.services?.includes('virtual') ?? false);
     return { inPerson, virtual };
   };
 
@@ -151,3 +154,4 @@ const EscortResults = ({
 };
 
 export default EscortResults;
+

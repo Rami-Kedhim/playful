@@ -1,6 +1,5 @@
 
-// Fix the getServiceType function to never return empty string to avoid TS error
-
+// Fixed: import correct Escort type, fixed rate property access, and getServiceType function
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,7 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
     } else if (escort.providesVirtualContent) {
       return 'virtual';
     }
-    // Fallback to default 'in-person' instead of empty string
+    // Explicitly return "in-person" as fallback to avoid "" error
     return 'in-person';
   };
 
@@ -102,10 +101,10 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-medium">{getDisplayName()}</h3>
 
-          {escort.rating && (
+          {escort.rating !== undefined && (
             <div className="flex items-center">
               <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-              <span className="text-sm">{escort.rating}</span>
+              <span className="text-sm">{escort.rating.toFixed(1)}</span>
             </div>
           )}
         </div>

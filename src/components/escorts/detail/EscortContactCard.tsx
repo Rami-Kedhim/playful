@@ -1,11 +1,13 @@
 
+// Fix: Import Escort type and safe access to rates and reviewCount properties
+
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Escort } from "@/types/escort";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, Calendar, MapPin, Clock, Heart, Star, Shield, BadgeCheck } from "lucide-react";
+import { MessageSquare, Calendar, MapPin, Clock, Heart, BadgeCheck, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import StarRating from "@/components/ui/StarRating";
@@ -27,20 +29,20 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
 }) => {
   const { toggleFavorite, isFavorite } = useFavorites();
   const favorite = isFavorite(escort.id);
-  
-  // Get consistent reviews count
-  const reviewsCount = typeof escort.reviews === 'number' ? escort.reviews : (escort.reviewCount || 0);
-  
+
+  // Safe access to reviewCount, fallback to 0 if undefined
+  const reviewsCount = typeof escort.reviewCount === 'number' ? escort.reviewCount : 0;
+
   const handleFavoriteToggle = () => {
     toggleFavorite(escort.id);
   };
-  
+
   return (
     <Card>
       <CardHeader className="pb-2 pt-4">
         <div className="flex items-center space-x-4">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={escort.imageUrl} alt={escort.name} />
+            <AvatarImage src={escort.imageUrl || escort.profileImage || ''} alt={escort.name} />
             <AvatarFallback>{escort.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
@@ -71,8 +73,8 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
         
         <div>
           <div className="flex items-center">
-            <StarRating rating={escort.rating} size={18} />
-            <span className="ml-2 text-sm">{escort.rating.toFixed(1)}</span>
+            <StarRating rating={escort.rating || 0} size={18} />
+            <span className="ml-2 text-sm">{escort.rating ? escort.rating.toFixed(1) : '0.0'}</span>
             <span className="ml-auto text-sm text-muted-foreground">
               {reviewsCount} reviews
             </span>
@@ -149,3 +151,4 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
 };
 
 export default EscortContactCard;
+

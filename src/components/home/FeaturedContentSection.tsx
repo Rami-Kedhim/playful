@@ -1,19 +1,19 @@
 
-// Fix to accept correct props by adding imageUrl & isPremium to ProfileProps interface
+// Fix ProfileProps interface to include imageUrl and isPremium properties correctly
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ContentCard from './ContentCard';
 
-// Extend ProfileProps interface to include imageUrl and isPremium
 export interface ProfileProps {
   id: string;
   name: string;
-  imageUrl?: string;
+  imageUrl?: string;      // made optional for flexibility
   location?: string;
   rating?: number;
-  isPremium?: boolean;
+  isPremium?: boolean;    // made optional as boolean
   price?: number;
 }
 
@@ -24,11 +24,9 @@ interface FeaturedContentSectionProps {
 }
 
 const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, profiles = [], viewMoreLink }) => {
-  // Create a safe description text that avoids the toLowerCase error
   const getDescriptionText = () => {
     if (!title) return "Check out our featured content";
     
-    // Extract the content type from the title, safely handling undefined
     const contentType = title.replace('Featured ', '').toLowerCase();
     return `Check out our featured ${contentType}`;
   };
@@ -74,3 +72,4 @@ const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, 
 };
 
 export default FeaturedContentSection;
+
