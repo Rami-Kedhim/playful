@@ -1,3 +1,4 @@
+
 import CreatorCard from "@/components/creators/CreatorCard";
 import { Button } from "@/components/ui/button";
 import { ContentCreator } from "@/types/creator";
@@ -24,7 +25,7 @@ const CreatorResults = ({ creators, clearFilters }: CreatorResultsProps) => {
               id={creator.id}
               name={creator.name || "Unknown Creator"}
               image={creator.imageUrl || creator.avatarUrl || creator.profileImage || ""}
-              isPremium={Boolean(creator.isPremium) || false}
+              premium={Boolean(creator.isPremium) || false}
               subscriberCount={creator.subscriberCount || 0}
               contentCount={
                 typeof creator.contentCount === "object"

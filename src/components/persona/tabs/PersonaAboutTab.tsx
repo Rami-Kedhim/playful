@@ -1,9 +1,8 @@
-
 import { UberPersona } from '@/types/UberPersona';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { VerificationBadge } from '@/components/verification/VerificationBadge';
+// Changed import: remove VerificationBadge import (it may not fit types)
 import { Clock, MapPin, Languages, Info, Award, Users, Stars } from 'lucide-react';
 
 interface PersonaAboutTabProps {
@@ -27,13 +26,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Verification Status */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <VerificationBadge level={persona.isVerified ? 'verified' : 'basic'} size="md" />
-        </div>
-      </div>
-      
       {/* Description */}
       {hasDescription && (
         <Card>

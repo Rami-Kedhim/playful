@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,14 +13,14 @@ interface EscortProfileHeaderProps {
 const EscortProfileHeader: React.FC<EscortProfileHeaderProps> = ({ escort, onContactClick }) => {
   // Determine service type based on escort properties
   const getServiceType = (): ServiceTypeFilter => {
-    if (escort.providesInPersonServices && escort.providesVirtualContent) {
+    if (escort.providesInPersonServices && escort.providesVirtualServices) {
       return "both";
     } else if (escort.providesInPersonServices) {
       return "in-person";
-    } else if (escort.providesVirtualContent) {
+    } else if (escort.providesVirtualServices) {
       return "virtual";
     }
-    return "";
+    return "in-person"; // fallback default
   };
 
   const serviceType = getServiceType();

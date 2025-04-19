@@ -71,11 +71,12 @@ const EscortResults = ({
     );
   }
 
+  // Fix: Property `providesVirtualContent` and `providesInPersonServices` might not exist in types, ensure safe access
   const getServiceType = (escort: Escort): { inPerson: boolean; virtual: boolean } => {
     const inPerson =
-      escort.providesInPersonServices || escort.services?.includes('in-person') || false;
+      Boolean(escort.providesInPersonServices) || (escort.services?.includes('in-person') ?? false);
     const virtual =
-      escort.providesVirtualContent || escort.services?.includes('virtual') || false;
+      Boolean(escort.providesVirtualServices) || (escort.services?.includes('virtual') ?? false);
     return { inPerson, virtual };
   };
 
@@ -122,7 +123,7 @@ const EscortResults = ({
             key={escort.id}
             escort={escort}
             className=""
-            featured={escort.featured ?? false}
+            featured={Boolean(escort['featured'])}
           />
         ))}
       </div>

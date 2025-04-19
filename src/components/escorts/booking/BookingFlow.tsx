@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
-import { Escort, Booking, BookingStatus } from '@/types/escort';
+import { Escort, Booking } from '@/types/escort';
 import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent, EnhancedCardFooter } from '@/components/ui/enhanced-card';
 import { EnhancedButton } from '@/components/ui/enhanced-button';
 import { toast } from '@/components/ui/use-toast';
@@ -21,6 +21,13 @@ interface BookingFlowProps {
 
 type BookingStep = 'select' | 'details' | 'payment' | 'confirmation';
 
+const BookingStatus = {
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  REJECTED: 'rejected',
+  DECLINED: 'rejected',
+};
+
 const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -28,25 +35,24 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
   const [booking, setBooking] = useState<Partial<Booking> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
-  const [realTimeStatus, setRealTimeStatus] = useState<BookingStatus | null>(null);
-  
+  const [realTimeStatus, setRealTimeStatus] = useState<string | null>(null);
+
   useEffect(() => {
     let subscription: any;
-    
+
     if (bookingId) {
       subscription = bookingService.subscribeToBookingUpdates(
         bookingId,
         (updatedBooking) => {
-          setRealTimeStatus(updatedBooking.status as BookingStatus);
-          
+          setRealTimeStatus(updatedBooking.status);
+
           if (updatedBooking.status === BookingStatus.CONFIRMED) {
             toast({
               title: 'Booking Confirmed!',
               description: 'Your booking has been confirmed.',
               variant: 'success',
             });
-          } else if (updatedBooking.status === BookingStatus.REJECTED || 
-                     updatedBooking.status === BookingStatus.DECLINED) {
+          } else if (updatedBooking.status === BookingStatus.REJECTED) {
             toast({
               title: 'Booking Rejected',
               description: updatedBooking.notes || 'Your booking request was rejected.',
@@ -56,14 +62,14 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
         }
       );
     }
-    
+
     return () => {
       if (subscription) {
         supabase.removeChannel(subscription);
       }
     };
   }, [bookingId]);
-  
+
   const handleDetailsSubmit = async (bookingDetails: any) => {
     if (!user) {
       toast({
@@ -74,21 +80,21 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       navigate('/auth');
       return;
     }
-    
+
     setBooking({
       escortId: escort.id,
       clientId: user.id,
       ...bookingDetails,
     });
-    
+
     setCurrentStep('payment');
   };
-  
+
   const handlePaymentComplete = async () => {
     if (!booking || !user) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Create booking with the right types
       const bookingData = {
@@ -98,19 +104,19 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
         status: BookingStatus.PENDING,
         totalPrice: booking.price || 0
       } as unknown as Booking;
-      
+
       const result = await bookingService.createBooking(bookingData);
-      
+
       if (!result.success) {
         throw new Error(result.error);
       }
-      
+
       setBookingId(result.booking?.id || null);
       toast({
         title: 'Booking Requested',
         description: 'Your booking request has been sent!',
       });
-      
+
       setCurrentStep('confirmation');
     } catch (error: any) {
       toast({
@@ -122,7 +128,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       setIsSubmitting(false);
     }
   };
-  
+
   const renderStep = () => {
     switch (currentStep) {
       case 'select':
@@ -134,7 +140,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
             onSubmit={handleDetailsSubmit}
           />
         );
-        
+
       case 'payment':
         return (
           <BookingPaymentStep
@@ -147,7 +153,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
             onCancel={() => setCurrentStep('select')}
           />
         );
-        
+
       case 'confirmation':
         return (
           <BookingConfirmation
@@ -156,12 +162,12 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
             onClose={onClose}
           />
         );
-        
+
       default:
         return null;
     }
   };
-  
+
   useEffect(() => {
     if (!isOpen) {
       const timer = setTimeout(() => {
@@ -170,11 +176,11 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
         setBookingId(null);
         setRealTimeStatus(null);
       }, 300);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
-  
+
   return renderStep();
 };
 

@@ -1,8 +1,10 @@
 
+// Removed usage of missing 'hasExclusiveContent' import from '@/types/UberPersona' and replaced with local logic
+
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { UberPersona, hasExclusiveContent } from '@/types/UberPersona';
+import { UberPersona } from '@/types/UberPersona';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlayIcon, LockIcon, ImageIcon } from "lucide-react";
@@ -14,8 +16,8 @@ interface PersonaContentTabProps {
 export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona }) => {
   const [selectedTab, setSelectedTab] = useState('photos');
 
-  // Use the helper function for type-safe capability checks
-  const showExclusiveContent = hasExclusiveContent(persona);
+  // Determine if persona has exclusive content by checking monetization flag
+  const showExclusiveContent = persona.monetization?.subscriptionPrice !== undefined || false;
 
   // Generate placeholder content based on persona type
   const generatePlaceholderContent = (type: 'photos' | 'videos') => {
@@ -29,7 +31,7 @@ export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona })
               <img 
                 src={`https://source.unsplash.com/random/300x200?portrait&sig=${persona.id}${index}`} 
                 className="object-cover w-full h-full"
-                alt={`${persona.name} content ${index}`}
+                alt={`${persona.displayName || persona.id} content ${index}`}
               />
             ) : (
               <div className="flex items-center justify-center h-full bg-gray-800 text-white">
@@ -121,3 +123,4 @@ export const PersonaContentTab: React.FC<PersonaContentTabProps> = ({ persona })
 };
 
 export default PersonaContentTab;
+
