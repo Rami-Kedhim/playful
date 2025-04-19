@@ -5,7 +5,7 @@ import {
   EmotionalState,
   PersonalityType
 } from '@/types/ai-personality';
-import { aiPersonalityService } from '@/services/ai/aiPersonalityService';
+import AIPersonalityService from '@/services/ai/aiPersonalityService';
 
 export interface UseAIPersonalityProps {
   personalityType: PersonalityType;
@@ -23,11 +23,11 @@ export const useAIPersonality = ({
 
   // Load personality configuration on mount
   useEffect(() => {
-    const personality = aiPersonalityService.getPersonalityTemplate(personalityType);
+    const personality = AIPersonalityService.getPersonalityTemplate(personalityType);
     setPersonalityConfig(personality);
     
     if (!initialEmotionalState) {
-      const defaultState = aiPersonalityService.createPersonalizedEmotionalState(personalityType);
+      const defaultState = AIPersonalityService.createPersonalizedEmotionalState(personalityType);
       setEmotionalState(defaultState);
     }
   }, [personalityType, initialEmotionalState]);
@@ -37,7 +37,7 @@ export const useAIPersonality = ({
     if (!emotionalState) return null;
 
     try {
-      const updatedState = await aiPersonalityService.updateEmotionalState(
+      const updatedState = await AIPersonalityService.updateEmotionalState(
         emotionalState,
         message,
         personalityType
@@ -55,7 +55,7 @@ export const useAIPersonality = ({
   const generateResponseTone = useCallback(() => {
     if (!emotionalState) return 'friendly and welcoming';
     
-    return aiPersonalityService.generateResponseTone(
+    return AIPersonalityService.generateResponseTone(
       emotionalState, 
       personalityType
     );
@@ -104,3 +104,4 @@ export const useAIPersonality = ({
 };
 
 export default useAIPersonality;
+

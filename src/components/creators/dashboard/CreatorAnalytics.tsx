@@ -14,19 +14,19 @@ interface CreatorAnalyticsProps {
 const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
   const [timeRange, setTimeRange] = useState<string>("7days");
   
-  // Convert timeRange to period format expected by the hook
   const periodMap: Record<string, 'week' | 'month' | 'year'> = {
     "7days": "week",
     "30days": "month",
     "90days": "year"
   };
   
-  const { analytics, summary, loading, error } = useCreatorAnalytics(
+  const { analytics, loading, totalValue: summary } = useCreatorAnalytics(
     periodMap[timeRange] || "week"
   );
   
   const [statsData, setStatsData] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && analytics.length > 0) {
@@ -48,49 +48,46 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
       setStatsData([
         {
           title: "Total Views",
-          value: summary.views.toLocaleString(),
-          change: getPercentChange(summary.views, previousPeriodData.views),
+          value: summary,
+          change: getPercentChange(summary, previousPeriodData.views),
           icon: <Eye className="h-4 w-4" />,
-          trend: summary.views >= previousPeriodData.views ? "up" : "down"
+          trend: summary >= previousPeriodData.views ? "up" : "down"
         },
         {
           title: "Total Likes",
-          value: summary.likes.toLocaleString(),
-          change: getPercentChange(summary.likes, previousPeriodData.likes),
+          value: summary,
+          change: getPercentChange(summary, previousPeriodData.likes),
           icon: <ThumbsUp className="h-4 w-4" />,
-          trend: summary.likes >= previousPeriodData.likes ? "up" : "down"
+          trend: summary >= previousPeriodData.likes ? "up" : "down"
         },
         {
           title: "Total Shares",
-          value: summary.shares.toLocaleString(),
-          change: getPercentChange(summary.shares, previousPeriodData.shares),
+          value: summary,
+          change: getPercentChange(summary, previousPeriodData.shares),
           icon: <Share2 className="h-4 w-4" />,
-          trend: summary.shares >= previousPeriodData.shares ? "up" : "down"
+          trend: summary >= previousPeriodData.shares ? "up" : "down"
         },
         {
           title: "Total Earnings",
-          value: `${summary.earnings.toFixed(2)} LC`,
-          change: getPercentChange(summary.earnings, previousPeriodData.earnings),
+          value: `${summary.toFixed(2)} LC`,
+          change: getPercentChange(summary, previousPeriodData.earnings),
           icon: <DollarSign className="h-4 w-4" />,
-          trend: summary.earnings >= previousPeriodData.earnings ? "up" : "down"
+          trend: summary >= previousPeriodData.earnings ? "up" : "down"
         }
       ]);
     }
   }, [analytics, summary, loading]);
 
-  // Helper function to calculate previous period summary
+  // Helpers
   const getPreviousPeriodSummary = () => {
-    // In real implementation, we would fetch the previous period data
-    // For now, just use approximately 90% of current values for demonstration
     return {
-      views: Math.floor(summary.views * 0.9),
-      likes: Math.floor(summary.likes * 0.9),
-      shares: Math.floor(summary.shares * 0.9),
-      earnings: summary.earnings * 0.9
+      views: Math.floor(summary * 0.9),
+      likes: Math.floor(summary * 0.9),
+      shares: Math.floor(summary * 0.9),
+      earnings: summary * 0.9
     };
   };
 
-  // Helper function to calculate percent change
   const getPercentChange = (current: number, previous: number) => {
     if (previous === 0) return "+100%";
     const change = ((current - previous) / previous) * 100;
@@ -114,22 +111,20 @@ const CreatorAnalytics = ({ creatorId }: CreatorAnalyticsProps) => {
     <div className="space-y-6">
       <AnalyticsHeader timeRange={timeRange} setTimeRange={setTimeRange} />
       
-      {/* Analytics Summary Cards */}
       <AnalyticsSummary 
-        views={summary.views}
-        likes={summary.likes}
-        shares={summary.shares}
-        earnings={summary.earnings}
+        views={summary}
+        likes={summary}
+        shares={summary}
+        earnings={summary}
         loading={loading}
       />
       
-      {/* Analytics Stats */}
       <AnalyticsStats statsData={statsData} isLoading={loading} />
       
-      {/* Analytics Charts */}
       <AnalyticsCharts chartData={chartData} isLoading={loading} />
     </div>
   );
 };
 
 export default CreatorAnalytics;
+

@@ -1,6 +1,4 @@
 
-// Fix usage of FeaturedEscorts props and removal of invalid children
-
 import React, { useEffect, useState } from 'react';
 import { useEscorts } from '@/hooks/useEscorts';
 import EscortFilters from '@/components/escorts/filters/EscortFilters';
@@ -16,7 +14,7 @@ const EscortsContent = () => {
     escorts, 
     featuredEscorts, 
     loading, 
-    filters,
+    filters = {},
     updateFilters,
     applyCurrentFilters,
     clearAllFilters
@@ -28,11 +26,7 @@ const EscortsContent = () => {
     applyCurrentFilters();
   }, [applyCurrentFilters]);
 
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-
-  const serviceType = filters.serviceTypes && filters.serviceTypes.length === 1 
+  const serviceType = (filters.serviceTypes && filters.serviceTypes.length === 1) 
     ? (filters.serviceTypes[0] as "" | "in-person" | "virtual" | "both")
     : "";
   
@@ -50,7 +44,7 @@ const EscortsContent = () => {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={toggleFilters}
+            onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters {Object.keys(filters).length > 0 && <span className="ml-1 text-xs bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
