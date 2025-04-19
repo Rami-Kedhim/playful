@@ -1,11 +1,10 @@
 
-// Fix VerificationLevel usage by using enum values correctly
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
-// Import enum VerificationLevel from verification types
-import type { VerificationLevel } from '@/types/verification';
+// Import enum VerificationLevel from verification types as regular import (not type-only)
+import { VerificationLevel } from '@/types/verification';
 
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 

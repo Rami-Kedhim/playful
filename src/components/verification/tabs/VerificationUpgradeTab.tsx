@@ -1,5 +1,4 @@
 
-// Fix string literals in VerificationUpgradeTab to use enum values properly
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { ShieldCheck, ShieldAlert } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { VerificationBadge } from '@/components/verification/VerificationBadge';
-// Use VerificationLevel enum import from verification types for strict typing
-import type { VerificationLevel } from '@/types/verification';
+// Import enum VerificationLevel as regular import, not type-only
+import { VerificationLevel } from '@/types/verification';
 
 interface VerificationUpgradeTabProps {
   userId: string;

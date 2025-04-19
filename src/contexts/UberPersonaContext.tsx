@@ -1,10 +1,9 @@
 
-// Fix uses of persona.type and enforce optional chaining because UberPersona may have optional type
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
-import { UberCore, uberCoreInstance } from '@/services/neural/UberCore';
+import { uberCoreInstance } from '@/services/neural/UberCore';
 
 interface UberPersonaContextType {
   allPersonas: UberPersona[];
@@ -84,19 +83,19 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   // Safely filter by roleFlags and optional type property
   const getEscorts = () => allPersonas.filter(persona =>
-    persona.type === 'escort' || persona.roleFlags?.isEscort === true
+    (persona as any).type === 'escort' || persona.roleFlags?.isEscort === true
   );
 
   const getCreators = () => allPersonas.filter(persona =>
-    persona.type === 'creator' || persona.roleFlags?.isCreator === true
+    (persona as any).type === 'creator' || persona.roleFlags?.isCreator === true
   );
 
   const getLivecams = () => allPersonas.filter(persona =>
-    persona.type === 'livecam' || persona.roleFlags?.isLivecam === true
+    (persona as any).type === 'livecam' || persona.roleFlags?.isLivecam === true
   );
 
   const getAIPersonas = () => allPersonas.filter(persona =>
-    persona.type === 'ai' || persona.roleFlags?.isAI === true || (persona as any).isAI === true
+    (persona as any).type === 'ai' || persona.roleFlags?.isAI === true || (persona as any).isAI === true
   );
 
   const getPersonaById = (id: string): UberPersona | undefined => {
@@ -189,4 +188,3 @@ export const useUberPersonaContext = (): UberPersonaContextType => {
   }
   return context;
 };
-
