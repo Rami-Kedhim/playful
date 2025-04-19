@@ -1,15 +1,9 @@
 
-// Remove incorrect import of VerificationLevel from '@/types/escort', as it's not exported there
-// Use correct local type if needed or remove import if not strictly needed for the badges
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { VerificationBadge } from '../verification/VerificationBadge';
-
-// Remove this import since it's causing error; instead infer VerificationLevel from badge props or type
-// import { VerificationLevel as LocalVerificationLevel } from '@/types/escort';
-
+import { VerificationLevel } from '@/types/verification';
 import { hasRealMeets, hasVirtualMeets, hasContent } from '@/utils/personaHelpers';
 
 interface UberPersonaCardProps {
@@ -37,8 +31,8 @@ const UberPersonaCard: React.FC<UberPersonaCardProps> = ({
 
   const verified = persona.roleFlags?.isVerified ?? false;
 
-  // Without import of VerificationLevel, use a simple string fallback or define a local enum if needed
-  const verificationLevelSafe = (persona.verificationLevel || 'none') as string;
+  // Fix: Cast to VerificationLevel type safely
+  const verificationLevelSafe: VerificationLevel = (persona.verificationLevel as VerificationLevel) || VerificationLevel.NONE;
 
   const price = persona.monetization?.meetingPrice ?? 0;
 

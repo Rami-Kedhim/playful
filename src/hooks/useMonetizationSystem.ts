@@ -1,7 +1,6 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-
-type MonetizationHook = any;
 
 export interface MonetizationSettings {
   subscriptionPrice: number;
@@ -28,7 +27,7 @@ export function useMonetizationSystem(personaId: string) {
     setLoading(true);
     setError(null);
     try {
-      // Simulate fetching monetization settings from an API
+      // Simulated fetch
       const fetchedSettings: MonetizationSettings = {
         subscriptionPrice: 10,
         unlockingPrice: 5,
@@ -49,7 +48,6 @@ export function useMonetizationSystem(personaId: string) {
     setLoading(true);
     setError(null);
     try {
-      // Simulate updating monetization settings via an API
       const updatedSettings = { ...settings, ...updates };
       setSettings(updatedSettings);
       toast({
@@ -81,3 +79,4 @@ export function useMonetizationSystem(personaId: string) {
 }
 
 export default useMonetizationSystem;
+

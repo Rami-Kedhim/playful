@@ -1,10 +1,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-// Removed import of non-existent 'CompanionMessage' and 'MonetizationHook' from '@/types/ai-personality'
-// Define minimal types here instead to avoid errors
-type MonetizationHook = any;
-type CompanionMessage = any;
+// Define simple local types to fix missing imports
+interface CompanionMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: Date;
+}
 
 export function useAICompanionWithMemory() {
   const [messages, setMessages] = useState<CompanionMessage[]>([]);

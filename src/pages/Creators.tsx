@@ -1,42 +1,33 @@
+
 import React, { useEffect, useState } from 'react';
 import { useCreators } from '@/hooks/useCreators';
 import CreatorCard from '@/components/creators/CreatorCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { CreatorsNeuralService } from '@/services/neural/modules/CreatorsNeuralService';
 
+// Assume CreatorCard expects prop creator as per original codebase
 const Creators = () => {
   const { creators, loading, error } = useCreators();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
 
-  useEffect(() => {
-    if (CreatorsNeuralService) {
-      console.log('Creators Neural Service is available');
-    }
-  }, []);
-
-  // Since 'category' does not exist on Creator type, we skip filtering by category safely
+  // Filter creators by name only, safely
   const filteredCreators = creators
     ? creators.filter(creator =>
         creator.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : [];
 
+  // Sort according to sortBy
   const sortedCreators = [...filteredCreators].sort((a, b) => {
-    if (sortBy === 'relevance') {
-      return 0;
-    } else if (sortBy === 'rating') {
-      const ratingA = a.rating || 0;
-      const ratingB = b.rating || 0;
-      return ratingB - ratingA;
-    } else {
-      return 0;
+    if (sortBy === 'relevance') return 0;
+    if (sortBy === 'rating') {
+      return (b.rating || 0) - (a.rating || 0);
     }
+    return 0;
   });
 
   return (
@@ -64,7 +55,6 @@ const Creators = () => {
       <Tabs defaultValue="all" className="mb-4">
         <TabsList>
           <TabsTrigger value="all">All</TabsTrigger>
-          {/* Removed tabs that depend on unknown filters */}
         </TabsList>
       </Tabs>
 
@@ -86,3 +76,4 @@ const Creators = () => {
 };
 
 export default Creators;
+

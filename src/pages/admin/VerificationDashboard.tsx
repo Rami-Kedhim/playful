@@ -11,15 +11,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from '@/components/ui/input';
-import { VerificationRequest, VerificationStatus } from '@/types/escort';
+import { VerificationRequest as EscortVerificationRequest, VerificationStatus as EscortVerificationStatus } from '@/types/verification';
 import { getAllVerificationRequests, approveVerificationRequest, rejectVerificationRequest } from '@/services/verificationService';
 import { toast } from '@/components/ui/use-toast';
 import DocumentReviewModal from '@/components/admin/DocumentReviewModal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CheckCircle, XCircle } from 'lucide-react';
 
-// Updated interface to handle inconsistencies between types
-interface NormalizedVerificationRequest extends VerificationRequest {
+interface NormalizedVerificationRequest extends EscortVerificationRequest {
   userId: string;
   requestedLevel?: string;
   requested_level?: string;
@@ -41,16 +40,16 @@ interface NormalizedVerificationDocument {
 const VerificationDashboard: React.FC = () => {
   const [requests, setRequests] = useState<NormalizedVerificationRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<VerificationStatus | ''>('');
+  const [selectedStatus, setSelectedStatus] = useState<EscortVerificationStatus | ''>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<NormalizedVerificationDocument | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<NormalizedVerificationRequest | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     fetchVerificationRequests();
   }, []);
-  
+
   const fetchVerificationRequests = async () => {
     setLoading(true);
     try {
@@ -73,7 +72,7 @@ const VerificationDashboard: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const handleApproveDocument = async (documentId: string, requestId: string) => {
     try {
       await approveVerificationRequest(requestId);
@@ -93,7 +92,7 @@ const VerificationDashboard: React.FC = () => {
       });
     }
   };
-  
+
   const handleRejectDocument = async (documentId: string, requestId: string, reason: string) => {
     try {
       await rejectVerificationRequest(requestId, reason);
@@ -113,7 +112,7 @@ const VerificationDashboard: React.FC = () => {
       });
     }
   };
-  
+
   const filteredRequests = requests.filter(request => {
     const searchMatch = request.userId?.toLowerCase().includes(searchQuery.toLowerCase());
     const statusMatch = selectedStatus ? request.status === selectedStatus : true;
@@ -126,14 +125,13 @@ const VerificationDashboard: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleStatusChange = (status: VerificationStatus | '') => {
+  const handleStatusChange = (status: EscortVerificationStatus | '') => {
     setSelectedStatus(status);
   };
 
-  // Modified to handle the normalized document and request types
   const renderDocumentReviewModal = () => {
     if (!selectedDocument || !selectedRequest) return null;
-    
+
     return (
       <DocumentReviewModal
         isOpen={isModalOpen}
@@ -145,11 +143,11 @@ const VerificationDashboard: React.FC = () => {
       />
     );
   };
-  
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Verification Requests</h1>
-      
+
       <div className="flex items-center justify-between mb-4">
         <Input
           type="text"
@@ -158,8 +156,8 @@ const VerificationDashboard: React.FC = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-md"
         />
-        
-        <Select value={selectedStatus} onValueChange={(value) => handleStatusChange(value as VerificationStatus)}>
+
+        <Select value={selectedStatus} onValueChange={(value) => handleStatusChange(value as EscortVerificationStatus)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
@@ -173,7 +171,7 @@ const VerificationDashboard: React.FC = () => {
           </SelectContent>
         </Select>
       </div>
-      
+
       {loading ? (
         <p>Loading verification requests...</p>
       ) : (
@@ -216,18 +214,20 @@ const VerificationDashboard: React.FC = () => {
                   <TableCell>{new Date(request.submittedAt || request.created_at || "").toLocaleDateString()}</TableCell>
                   <TableCell>
                     {request.documents && request.documents.length > 0 ? (
-                      <Button 
-                        variant="secondary" 
+                      <Button
+                        variant="secondary"
                         size="sm"
-                        onClick={() => handleDocumentClick(
-                          {
-                            id: request.documents[0].id,
-                            document_type: request.documents[0].document_type || request.documents[0].type || '',
-                            status: request.documents[0].status || 'pending',
-                            url: request.documents[0].url || request.documents[0].file_url || '',
-                          } as NormalizedVerificationDocument, 
-                          request
-                        )}
+                        onClick={() =>
+                          handleDocumentClick(
+                            {
+                              id: request.documents[0].id,
+                              document_type: request.documents[0].document_type || request.documents[0].type || '',
+                              status: request.documents[0].status || 'pending',
+                              url: request.documents[0].url || request.documents[0].file_url || '',
+                            } as NormalizedVerificationDocument,
+                            request
+                          )
+                        }
                       >
                         Review Document
                       </Button>
@@ -241,10 +241,11 @@ const VerificationDashboard: React.FC = () => {
           </Table>
         </div>
       )}
-      
+
       {renderDocumentReviewModal()}
     </div>
   );
 };
 
 export default VerificationDashboard;
+
