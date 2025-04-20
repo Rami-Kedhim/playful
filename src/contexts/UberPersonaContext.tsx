@@ -43,7 +43,7 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [initialized, setInitialized] = useState<boolean>(false);
   const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
 
-  interface CompatibleEscort extends Omit<Escort, 'height'> {
+  interface CompatibleEscort extends Escort {
     height?: string | number;
   }
 
