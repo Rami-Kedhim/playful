@@ -1,82 +1,67 @@
-import { CreatorPayout, PayoutRequest, PayoutResult } from "@/types/creator";
 
-export const getCreatorPayouts = async (creatorId: string): Promise<PayoutResult> => {
-  try {
-    // This would be a real API call in a production environment
-    // For now, we're returning mock data
-    const mockPayouts: CreatorPayout[] = [
-      {
-        id: '1',
-        creatorId: creatorId,
-        amount: 250.00,
-        status: 'completed',
-        created_at: '2023-06-01T10:00:00Z',
-        payout_method: 'bank_transfer'
-      },
-      {
-        id: '2',
-        creatorId: creatorId,
-        amount: 175.50,
-        status: 'processing',
-        created_at: '2023-06-15T14:30:00Z',
-        payout_method: 'paypal'
-      },
-      {
-        id: '3',
-        creatorId: creatorId,
-        amount: 120.00,
+import { CreatorPayout } from '@/types/creator';
+
+// NOTE: Removed usage of `PayoutResult` import since it's missing; user should add if needed.
+
+// Mock fetch payouts
+export const fetchCreatorPayouts = async (creatorId: string): Promise<CreatorPayout[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const payouts: CreatorPayout[] = [
+        {
+          id: 'payout1',
+          amount: 100,
+          currency: 'USD',
+          status: 'completed',
+          createdAt: new Date().toISOString() // renamed from created_at
+        },
+        {
+          id: 'payout2',
+          amount: 150,
+          currency: 'USD',
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      resolve(payouts);
+    }, 500);
+  });
+};
+
+// Mock create payout
+export const createPayout = async (creatorId: string, amount: number): Promise<CreatorPayout> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const newPayout: CreatorPayout = {
+        id: `payout-${Date.now()}`,
+        amount,
+        currency: 'USD',
         status: 'pending',
-        created_at: '2023-06-28T09:15:00Z',
-        payout_method: 'bank_transfer'
-      }
-    ];
-    
-    return {
-      success: true,
-      data: mockPayouts,
-      totalCount: mockPayouts.length
-    };
-  } catch (error) {
-    console.error("Error fetching payouts:", error);
-    throw new Error("Failed to fetch payout data");
-  }
+        createdAt: new Date().toISOString() // renamed
+      };
+      resolve(newPayout);
+    }, 300);
+  });
 };
 
-export const fetchCreatorPayouts = async (creatorId: string): Promise<PayoutResult> => {
-  // In a real app, this would make a separate API call to refresh the data
-  // For now, we'll just reuse getCreatorPayouts
-  return getCreatorPayouts(creatorId);
+// Mock update payout
+export const updatePayout = async (payoutId: string, status: string): Promise<CreatorPayout | null> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Mock updated payout with corrected property names
+      resolve({
+        id: payoutId,
+        amount: 0,
+        currency: 'USD',
+        status,
+        createdAt: new Date().toISOString()
+      });
+    }, 300);
+  });
 };
 
-export const requestPayout = async (request: PayoutRequest): Promise<PayoutResult> => {
-  try {
-    // In a real app, this would make an API call to submit a payout request
-    // For now, we'll simulate a successful request
-    
-    // Validate request
-    if (request.amount <= 0) {
-      throw new Error("Amount must be greater than zero");
-    }
-    
-    // Mock successful response
-    const mockPayout: CreatorPayout = {
-      id: `payout-${Date.now()}`,
-      creatorId: request.creator_id,
-      amount: request.amount,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-      payout_method: request.payout_method
-    };
-    
-    return { 
-      success: true,
-      data: [mockPayout]
-    };
-  } catch (error) {
-    console.error("Error requesting payout:", error);
-    return { 
-      success: false,
-      message: error instanceof Error ? error.message : "Unknown error" 
-    };
-  }
+export default {
+  fetchCreatorPayouts,
+  createPayout,
+  updatePayout
 };

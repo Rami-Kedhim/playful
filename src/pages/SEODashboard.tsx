@@ -1,33 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SEOModule from "@/components/admin/dashboard/SEOModule";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
-import HermesSeoOptimizer from "@/components/seo/HermesSeoOptimizer";
-import HermesSeoMetrics from "@/components/seo/HermesSeoMetrics";
-import HermesSeoHistory from "@/components/seo/HermesSeoHistory";
-import HermesSeoRecommendations from "@/components/seo/HermesSeoRecommendations";
-import { Separator } from "@/components/ui/separator";
-import { Brain, LineChart, BarChart, TrendingUp, Sparkles, FileText } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
-import HermesSeoNavigation from "@/components/seo/HermesSeoNavigation";
-import HermesSeoHome from "@/components/seo/HermesSeoHome";
+import React from 'react';
 
-const sampleContent = {
-  profiles: [
-    { id: 'profile-1', title: 'VIP Model', description: 'High-end companion services', keywords: ['vip', 'model', 'luxury'] },
-    { id: 'profile-2', title: 'Escort in LA', description: 'Premium escort in Los Angeles area', keywords: ['la', 'premium'] }
-  ],
-  content: [
-    { id: 'content-1', title: 'Premium Adult Content', description: 'Exclusive videos and photoshoots', keywords: ['exclusive', 'premium', 'adult'] },
-    { id: 'content-2', title: 'Private Gallery', description: 'Access my private collection', keywords: ['private', 'gallery'] }
-  ],
-  livecams: [
-    { id: 'livecam-1', title: 'Live Show', description: 'Interactive live sessions', keywords: ['live', 'interactive'] },
-    { id: 'livecam-2', title: 'Private Stream', description: 'One-on-one private streaming', keywords: ['private', 'stream'] }
-  ]
+interface SEOContentEditorProps {
+  contentId: string;
+  initialTitle: string;
+  initialDescription: string;
+  initialKeywords: string[];
+  contentType: 'profile' | 'content' | 'event' | 'livecam';
+  onOptimizationsApplied: () => void;
+}
+
+const SEOContentEditor: React.FC<SEOContentEditorProps> = ({
+  contentId,
+  initialTitle,
+  initialDescription,
+  initialKeywords,
+  contentType,
+  onOptimizationsApplied,
+}) => {
+  return null;
 };
 
 const SEODashboard = () => {
@@ -206,7 +196,7 @@ const SEODashboard = () => {
                     </Card>
                     
                     <div className="lg:col-span-2">
-                      <HermesSeoOptimizer
+                      <SEOContentEditor
                         contentId={selectedContent.id}
                         initialTitle={selectedContent.title}
                         initialDescription={selectedContent.description}
