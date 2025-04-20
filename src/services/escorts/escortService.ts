@@ -1,6 +1,4 @@
 
-// Combine existing functions into an exported escortService object to fix import error
-
 import { Escort } from '@/types/escort';
 import { db } from '@/lib/db';
 
