@@ -2,10 +2,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
-import { Escort } from '@/types/escort';
-// Fixed import path for ServiceTypeFilter
-import { ServiceTypeFilter } from '../filters/ServiceTypeBadgeLabel';
-import BookingDialog from '../detail/booking/BookingDialog';
+// Changed import to fixed casing for Escort type
+import { Escort } from '@/types/Escort';
+import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
+import BookingDialog from '../../detail/booking/BookingDialog';
 
 interface BookingButtonProps {
   escort: Escort & { providesVirtualContent?: boolean; providesInPersonServices?: boolean };
@@ -57,7 +57,7 @@ const BookingButton: React.FC<BookingButtonProps> = ({
         escort={escort}
         isOpen={showBookingDialog}
         onClose={() => setShowBookingDialog(false)}
-        onSubmit={async () => {}} // no-op submit for required prop
+        onSubmit={async () => {}} // Provide a no-op submit since it is required
       />
     </>
   );

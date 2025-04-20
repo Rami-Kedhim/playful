@@ -5,8 +5,14 @@ import EscortCard from './EscortCard';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
+interface ExtendedEscort extends Escort {
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  featured?: boolean;
+}
+
 interface FeaturedEscortsProps {
-  escorts: Escort[];
+  escorts: ExtendedEscort[];
   loading?: boolean;
   limit?: number;
 }
@@ -67,4 +73,3 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
 };
 
 export default FeaturedEscorts;
-
