@@ -1,15 +1,37 @@
 
-// Removed invalid '@/lib/db' import and replaced with local mocks for demonstration
+// Combine existing functions into an exported escortService object to fix import error
 
-// Mock escortService file to avoid error on missing db import
-export async function fetchEscorts() {
-  return [
-    {
-      id: '1',
-      name: 'Sample Escort',
-      price: 100,
-      description: 'Sample escort description',
-      // Additional fields as per Escort type
-    }
-  ];
-}
+import { Escort } from '@/types/escort';
+import { db } from '@/lib/db';
+
+const getEscorts = async (): Promise<Escort[]> => {
+  try {
+    const escorts = await db.escort.findMany({
+      where: {
+        isAI: false
+      }
+    });
+    return escorts;
+  } catch {
+    return [];
+  }
+};
+
+const getEscortById = async (escortId: string): Promise<Escort | null> => {
+  try {
+    const escort = await db.escort.findUnique({
+      where: {
+        id: escortId,
+        isAI: false
+      }
+    });
+    return escort;
+  } catch {
+    return null;
+  }
+};
+
+export const escortService = {
+  getEscorts,
+  getEscortById
+};
