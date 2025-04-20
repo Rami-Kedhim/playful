@@ -20,6 +20,8 @@ const EscortsContent = () => {
     clearAllFilters
   } = useEscorts();
 
+  const [showFilters, setShowFilters] = useState(false);
+
   // Provide a fallback typing for filters as empty object might cause TS errors
   const typedFilters = filters as Partial<{
     serviceTypes: string[];
@@ -159,7 +161,6 @@ const EscortsContent = () => {
 };
 
 const Escorts = () => {
-  const [showFilters, setShowFilters] = useState(false);
   return (
     <EscortsModule>
       <EscortsContent />
