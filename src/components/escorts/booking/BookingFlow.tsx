@@ -1,11 +1,12 @@
 
-// Fix missing subscribeToBookingUpdates: Remove real-time updates using non-existent function
+// Fix: Import Escort from '@/types/Escort' instead of '@/types/escort'
+// Ensure height property in BookingFlow usage coerced to string if number
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
-import { Escort, Booking } from '@/types/escort';
+import { Escort, Booking } from '@/types/Escort'; // <-- Changed import here
 import { toast } from '@/components/ui/use-toast';
 import BookingDialog from '../detail/booking/BookingDialog';
 import BookingConfirmation from './BookingConfirmation';
@@ -35,7 +36,6 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [realTimeStatus, setRealTimeStatus] = useState<string | null>(null);
 
-  // Removed real-time subscription to booking updates as function doesn't exist
   useEffect(() => {
     if (!isOpen) {
       const timer = setTimeout(() => {
@@ -49,6 +49,17 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
   }, [isOpen]);
 
+  // Normalize escort object to have string height (if number)
+  const normalizedEscort = React.useMemo(() => {
+    if (escort.height !== undefined && typeof escort.height !== 'string') {
+      return {
+        ...escort,
+        height: String(escort.height),
+      };
+    }
+    return escort;
+  }, [escort]);
+
   const handleDetailsSubmit = async (bookingDetails: any) => {
     if (!user) {
       toast({
@@ -61,7 +72,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
     }
 
     setBooking({
-      escortId: escort.id,
+      escortId: normalizedEscort.id,
       clientId: user.id,
       ...bookingDetails,
     });
@@ -112,7 +123,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       case 'select':
         return (
           <BookingDialog
-            escort={escort}
+            escort={normalizedEscort}
             isOpen={isOpen}
             onClose={onClose}
             onSubmit={handleDetailsSubmit}
@@ -122,7 +133,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       case 'payment':
         return (
           <BookingPaymentStep
-            escort={escort}
+            escort={normalizedEscort}
             booking={booking as Partial<Booking>}
             onBack={() => setCurrentStep('select')}
             onComplete={handlePaymentComplete}
@@ -135,7 +146,7 @@ const BookingFlow: React.FC<BookingFlowProps> = ({ escort, isOpen, onClose }) =>
       case 'confirmation':
         return (
           <BookingConfirmation
-            escort={escort}
+            escort={normalizedEscort}
             status={realTimeStatus || BookingStatus.PENDING}
             onClose={onClose}
           />

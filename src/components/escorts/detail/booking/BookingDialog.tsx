@@ -1,5 +1,5 @@
 
-// Fix usage of providesVirtualContent and import type accordingly
+// Fix import to use '@/types/Escort' instead of '@/types/escort' to unify imports and avoid casing issues
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, DollarSign, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // Fixed import casing
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -248,3 +248,4 @@ const BookingDialog = ({
 };
 
 export default BookingDialog;
+
