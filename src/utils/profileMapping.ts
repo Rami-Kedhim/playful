@@ -1,6 +1,4 @@
-
 // Fix import Escort casing to '@/types/Escort' and add safe optional chaining to videos
-// Adjust Toys to TypeScript for safer video array length checking
 
 import { Escort } from '@/types/Escort';
 import { ContentCreator } from '@/types/creator';
@@ -247,4 +245,3 @@ export const getProfileTypeClass = (type: string): string => {
     default: return '';
   }
 };
-

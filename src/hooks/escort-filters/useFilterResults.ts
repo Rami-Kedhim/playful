@@ -62,7 +62,7 @@ export const useFilterResults = (
         }
         
         // Filter by verified status
-        if (filters.verifiedOnly && !escort.verified) {
+        if (filters.verifiedOnly && !(escort.isVerified || escort.verified)) {
           return false;
         }
         
@@ -192,8 +192,8 @@ const matchesGender = (escort: Escort, genders: string[]): boolean => {
 };
 
 const matchesOrientation = (escort: Escort, orientations: string[]): boolean => {
-  const escortOrientation = escort.orientation || escort.sexualOrientation;
-  return escortOrientation ? orientations.includes(escortOrientation.toLowerCase()) : false;
+  const escortOrientation = (escort.sexualOrientation || escort.orientation)?.toLowerCase();
+  return escortOrientation ? orientations.includes(escortOrientation) : false;
 };
 
 const matchesAgeRange = (escort: Escort, range: [number, number]): boolean => {
@@ -217,8 +217,8 @@ const matchesServiceType = (escort: Escort, type: ServiceTypeFilter): boolean =>
   }
 
   // Fallback to service arrays
-  if (Array.isArray(escort.serviceTypes)) {
-    return escort.serviceTypes.includes(type);
+  if (Array.isArray(escort.serviceType)) {
+    return escort.serviceType.includes(type);
   }
   
   if (Array.isArray(escort.services)) {

@@ -1,14 +1,13 @@
 
 import { useState, useEffect, useCallback } from "react";
-import { useFilterResults } from "@/hooks/escort-filters/useFilterResults";
-import { Escort } from "@/types/escort";
-import { EscortFilterState, EscortFilterActions, EscortFilterHook } from "@/types/escortFilters";
+import useFilterResults from "@/hooks/escort-filters/useFilterResults";
+import { Escort } from "@/types/Escort"; // Use 'Escort' with capital E and string height
 
 interface UseEscortFilterProps {
   escorts: Escort[];
 }
 
-export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilterHook => {
+export const useEscortFilter = ({ escorts }: UseEscortFilterProps) => {
   // Filter state
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [location, setLocation] = useState<string>("");
@@ -160,3 +159,4 @@ export const useEscortFilter = ({ escorts }: UseEscortFilterProps): EscortFilter
 };
 
 export default useEscortFilter;
+
