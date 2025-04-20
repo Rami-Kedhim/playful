@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
-// Changed import to fixed casing for Escort type
 import { Escort } from '@/types/Escort';
-import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
-import BookingDialog from '../../detail/booking/BookingDialog';
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import BookingDialog from '@/components/escorts/detail/booking/BookingDialog';
 
 interface BookingButtonProps {
   escort: Escort & { providesVirtualContent?: boolean; providesInPersonServices?: boolean };
@@ -64,3 +63,4 @@ const BookingButton: React.FC<BookingButtonProps> = ({
 };
 
 export default BookingButton;
+

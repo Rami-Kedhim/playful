@@ -1,10 +1,10 @@
 
-// Fix using BookingStatus type as value by importing enum properly
+// Fix import path and casing issue here:
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 // Define BookingStatus as enum for usage as value
 export enum BookingStatus {
