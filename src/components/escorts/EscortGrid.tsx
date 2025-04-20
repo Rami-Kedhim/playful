@@ -1,4 +1,4 @@
-// Import from a consistent path that doesn't have casing issues
+
 import { Escort } from '@/types/escort';
 import { Grid } from '@/components/ui/grid';
 import EscortCard from './EscortCard';
@@ -45,7 +45,21 @@ const EscortGrid: React.FC<EscortGridProps> = ({
       {escorts.map(escort => (
         <EscortCard
           key={escort.id}
-          escort={escort}
+          id={escort.id}
+          name={escort.name}
+          age={escort.age ?? 0}
+          location={escort.location ?? ''}
+          rating={escort.rating ?? 0}
+          reviews={escort.reviewCount ?? 0}
+          tags={escort.tags ?? []}
+          imageUrl={escort.imageUrl ?? escort.profileImage ?? (escort.images?.[0] ?? '')}
+          price={escort.price ?? 0}
+          verified={escort.isVerified ?? escort.verified ?? false}
+          gender={escort.gender ?? ''}
+          sexualOrientation={escort.sexualOrientation}
+          availableNow={escort.availableNow ?? false}
+          lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
+          responseRate={escort.responseRate}
           onClick={() => onEscortClick?.(escort)}
         />
       ))}

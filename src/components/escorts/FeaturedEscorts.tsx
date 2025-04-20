@@ -46,7 +46,20 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
       {escorts.slice(0, limit).map(escort => (
         <EscortCard 
           key={escort.id} 
-          escort={{ ...escort, username: (escort as any).username || escort.name }} // Add fallback for username
+          id={escort.id}
+          name={escort.name}
+          age={escort.age ?? 0}
+          gender={escort.gender ?? ''}
+          sexualOrientation={escort.sexualOrientation}
+          location={escort.location ?? ''}
+          bio={escort.bio} // Not in EscortCardProps, will be ignored
+          rating={escort.rating ?? 0}
+          reviews={escort.reviewCount ?? 0}
+          tags={escort.tags ?? []}
+          imageUrl={escort.imageUrl ?? escort.profileImage ?? (escort.images?.[0] ?? '')}
+          price={escort.price ?? 0}
+          verified={escort.isVerified ?? escort.verified ?? false}
+          availableNow={escort.availableNow ?? false}
           featured 
         />
       ))}
@@ -55,4 +68,3 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
 };
 
 export default FeaturedEscorts;
-

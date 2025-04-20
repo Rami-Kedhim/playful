@@ -1,6 +1,4 @@
 
-// Fix imports and property access related to escort services and providesVirtualContent
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
@@ -74,7 +72,6 @@ const EscortResults = ({
     );
   }
 
-  // Fix: Property `providesVirtualContent` and `providesInPersonServices` used correctly from Escort type, correct naming for service checking
   const getServiceType = (escort: Escort): { inPerson: boolean; virtual: boolean } => {
     const inPerson =
       Boolean(escort.providesInPersonServices) || (escort.services?.includes('in-person') ?? false);
@@ -124,7 +121,21 @@ const EscortResults = ({
         {escorts.map((escort) => (
           <EscortCard
             key={escort.id}
-            escort={escort}
+            id={escort.id}
+            name={escort.name}
+            age={escort.age ?? 0}
+            location={escort.location ?? ''}
+            rating={escort.rating ?? 0}
+            reviews={escort.reviewCount ?? 0}
+            tags={escort.tags ?? []}
+            imageUrl={escort.imageUrl ?? escort.profileImage ?? (escort.images?.[0] ?? '')}
+            price={escort.price ?? 0}
+            verified={escort.isVerified ?? escort.verified ?? false}
+            gender={escort.gender ?? ''}
+            sexualOrientation={escort.sexualOrientation}
+            availableNow={escort.availableNow ?? false}
+            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
+            responseRate={escort.responseRate}
             className=""
             featured={Boolean(escort['featured'])}
           />
@@ -154,4 +165,3 @@ const EscortResults = ({
 };
 
 export default EscortResults;
-

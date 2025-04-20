@@ -1,4 +1,7 @@
-import { Escort } from '@/types/escort';
+
+// Fix import casing to avoid TS1261 from duplicate casing import
+
+import { Escort } from '@/types/Escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
 import { UberPersona } from '@/types/UberPersona';
