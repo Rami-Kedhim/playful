@@ -1,9 +1,7 @@
 
-// Fix: Import Escort type and safe access to rates and reviewCount properties
-
 import React from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -151,4 +149,3 @@ const EscortContactCard: React.FC<EscortContactCardProps> = ({
 };
 
 export default EscortContactCard;
-
