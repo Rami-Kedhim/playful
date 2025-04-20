@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { serviceCategories } from "@/data/serviceCategories";
 import ServiceCategoryBadge from "../ServiceCategoryBadge";
 import { Sparkles } from "lucide-react";
@@ -91,3 +91,4 @@ const ServicesTab = ({ escort }: ServicesTabProps) => {
 };
 
 export default ServicesTab;
+

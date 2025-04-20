@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/Escort";
+import { Escort, VerificationLevel } from "@/types/Escort";
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
 import RatesTab from "./RatesTab";
@@ -14,11 +14,7 @@ interface ProfileTabsProps {
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  const verificationLevel = (escort.verification_level || escort.verificationLevel || "none") as
-    | "none"
-    | "basic"
-    | "enhanced"
-    | "premium";
+  const verificationLevel = (escort.verificationLevel || escort.verificationLevel || "none") as VerificationLevel;
 
   return (
     <Card className="mt-6">
@@ -69,3 +65,4 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
 };
 
 export default ProfileTabs;
+

@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Play } from 'lucide-react';
-import { Video } from '@/types/escort';
+import { Video } from '@/types/Escort';
 
 interface VideoGridProps {
   videos: Video[];
@@ -58,7 +58,6 @@ const VideoGrid: React.FC<VideoGridProps> = ({
             </div>
           )}
           
-          {/* Use isPublic or default to false */}
           {video.isPublic && (
             <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-1 rounded">
               Premium

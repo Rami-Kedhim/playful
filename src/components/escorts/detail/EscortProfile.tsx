@@ -1,8 +1,6 @@
 
-// Fix import to unify to '@/types/Escort' and normalize height to string
-
 import { useState } from "react";
-import { Escort } from "@/types/Escort";
+import { Escort, VerificationLevel } from "@/types/Escort";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import MediaSection from "./MediaSection";
 import ProfileInfo from "./ProfileInfo";
@@ -20,10 +18,15 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [messageOpen, setMessageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Normalize height to string to satisfy type
-  const normalizedEscort = {
+  // Normalize height and verificationLevel to satisfy type
+  const normalizedEscort: Escort = {
     ...escort,
-    height: escort.height !== undefined && typeof escort.height !== "string" ? String(escort.height) : escort.height,
+    height:
+      escort.height !== undefined && typeof escort.height !== "string"
+        ? String(escort.height)
+        : escort.height,
+    verificationLevel:
+      (escort.verificationLevel as VerificationLevel) || "none",
   };
 
   const handleFavoriteToggle = () => {
