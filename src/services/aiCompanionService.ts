@@ -1,75 +1,70 @@
+import { AICompanionMessage } from '@/hooks/ai-companion/types';
 
-// Fix properties to conform AICompanionMessage type, removing wrong properties 'aiCompanionId' and 'user_id'
-// Changing to 'companionId' and 'userId' consistent with typical JS naming conventions
-
-import { v4 as uuidv4 } from 'uuid';
-import { AICompanionMessage } from '@/types/ai-companion';
-
-const aiCompanionsMessages: AICompanionMessage[] = [];
-
-export const aiCompanionService = {
-  generateContent: async (params: any): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return `AI Generated Content for: ${params.prompt}`;
+// Mock AI companion service
+const aiCompanionService = {
+  getCompanionMessages: async (companionId: string, userId: string): Promise<AICompanionMessage[]> => {
+    // Simulate fetching messages from a database or API
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const messages: AICompanionMessage[] = [
+          {
+            id: '1',
+            content: 'Hello there! How can I assist you today?',
+            role: 'assistant',
+            timestamp: new Date().toISOString(),
+          },
+          {
+            id: '2',
+            content: 'I need some help with planning my trip.',
+            role: 'user',
+            timestamp: new Date().toISOString(),
+          },
+        ];
+        resolve(messages);
+      }, 500);
+    });
   },
 
-  getCompanionStats: async (companionId: string): Promise<any> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return {
-      messagesSent: 150,
-      messagesReceived: 140,
-      totalInteractionTime: 3600,
-      lastInteraction: new Date().toISOString(),
-      chatMessages: 100,
-      imagesGenerated: 20,
-      voiceMessages: 30,
-    };
+  sendMessage: async (companionId: string, userId: string, content: string): Promise<AICompanionMessage> => {
+    // Simulate sending a message and receiving a response
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newMessage: AICompanionMessage = {
+          id: Date.now().toString(),
+          content: content,
+          role: 'user',
+          timestamp: new Date().toISOString(),
+          is_from_user: true,
+        };
+        resolve(newMessage);
+      }, 500);
+    });
   },
 
-  sendMessage: async (companionId: string, message: string, userId: string): Promise<AICompanionMessage> => {
-    const newMessage: AICompanionMessage = {
-      id: uuidv4(),
-      companionId,
-      content: message,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-      userId,
-    };
-    aiCompanionsMessages.push(newMessage);
-    return newMessage;
+  getAIResponse: async (companionId: string, userId: string, message: string): Promise<AICompanionMessage> => {
+    // Simulate getting a response from the AI
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const aiResponse: AICompanionMessage = {
+          id: Date.now().toString(),
+          content: `AI response to: ${message}`,
+          role: 'assistant',
+          timestamp: new Date().toISOString(),
+        };
+        resolve(aiResponse);
+      }, 1000);
+    });
   },
 
-  receiveMessage: async (companionId: string, message: string, userId: string): Promise<AICompanionMessage> => {
-    const newMessage: AICompanionMessage = {
-      id: uuidv4(),
-      companionId,
-      content: message,
-      role: 'assistant',
-      createdAt: new Date().toISOString(),
-      userId,
-    };
-    aiCompanionsMessages.push(newMessage);
-    return newMessage;
-  },
-
-  getMessages: async (companionId: string, userId: string): Promise<AICompanionMessage[]> => {
-    await new Promise(resolve => setTimeout(resolve, 400));
-    return aiCompanionsMessages.filter(msg => msg.companionId === companionId && msg.userId === userId);
-  },
-
-  updateCompanion: async (companionId: string, updates: any): Promise<any> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return { id: companionId, ...updates };
-  },
-
-  createCompanion: async (params: any): Promise<any> => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    return { id: uuidv4(), ...params };
-  },
-
-  deleteCompanion: async (companionId: string): Promise<boolean> => {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return true;
+  generateContent: async (prompt: string, type: string): Promise<string> => {
+    // Simulate generating content based on the prompt and type
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const generatedContent = `Generated ${type} content for prompt: ${prompt}`;
+        resolve(generatedContent);
+      }, 1500);
+    });
   },
 };
 
+export default aiCompanionService;

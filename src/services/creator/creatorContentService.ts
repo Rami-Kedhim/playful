@@ -23,8 +23,8 @@ export const fetchCreatorContent = async (
       price: index % 3 === 0 ? (index + 1) * 5 : null,
       status: index % 5 === 0 ? 'draft' : 'published',
       createdAt: new Date(Date.now() - index * 86400000).toISOString(),
-      viewsCount: Math.floor(Math.random() * 1000),
-      likesCount: Math.floor(Math.random() * 100),
+      viewCount: Math.floor(Math.random() * 1000),
+      likeCount: Math.floor(Math.random() * 100),
     }));
 
     // Apply filters
@@ -114,8 +114,8 @@ export const saveContent = async (
       price: contentData.price || null,
       status: contentData.status || 'draft',
       createdAt: new Date().toISOString(),
-      viewsCount: 0,
-      likesCount: 0,
+      viewCount: 0,
+      likeCount: 0,
     };
     
     return {
@@ -149,8 +149,8 @@ export const updateContent = async (
         price: contentData.price || null,
         status: contentData.status || 'published',
         createdAt: new Date().toISOString(),
-        viewsCount: contentData.viewsCount || 0,
-        likesCount: contentData.likesCount || 0,
+        viewCount: contentData.viewCount || 0,
+        likeCount: contentData.likeCount || 0,
       }
     };
   } catch (err) {
@@ -194,8 +194,8 @@ export const getContentDetail = async (
       price: Math.random() > 0.7 ? Math.floor(Math.random() * 50) + 5 : null,
       status: Math.random() > 0.2 ? 'published' : 'draft',
       createdAt: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString(),
-      viewsCount: Math.floor(Math.random() * 1000),
-      likesCount: Math.floor(Math.random() * 100),
+      viewCount: Math.floor(Math.random() * 1000),
+      likeCount: Math.floor(Math.random() * 100),
     };
     
     return {

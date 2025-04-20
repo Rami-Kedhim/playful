@@ -1,47 +1,49 @@
-
-import { VerificationDocument, VerificationRequest } from '@/types/verification';
+import { VerificationDocument, VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
 
 // Mock verification requests data
 const mockVerificationRequests: VerificationRequest[] = [
   {
     id: '1',
     profile_id: 'prof-123',
-    status: 'pending',
-    requested_level: 'basic',
+    status: VerificationStatus.PENDING,
+    requested_level: VerificationLevel.BASIC,
     created_at: new Date().toISOString(),
     documents: [
       {
         id: 'doc-1',
         document_type: 'ID Card',
-        file_path: 'https://picsum.photos/id/1018/800/600',
-        uploaded_at: new Date().toISOString(),
-        status: 'pending',
-        verification_request_id: '1'
+        fileUrl: 'https://picsum.photos/id/1018/800/600',
+        uploadedAt: new Date().toISOString(),
+        status: VerificationStatus.PENDING,
+        verification_request_id: '1',
+        userId: 'test'
       },
       {
         id: 'doc-2',
         document_type: 'Selfie',
-        file_path: 'https://picsum.photos/id/1025/800/600',
-        uploaded_at: new Date().toISOString(),
-        status: 'pending',
-        verification_request_id: '1'
+        fileUrl: 'https://picsum.photos/id/1025/800/600',
+        uploadedAt: new Date().toISOString(),
+        status: VerificationStatus.PENDING,
+        verification_request_id: '1',
+        userId: 'test'
       }
     ]
   },
   {
     id: '2',
     profile_id: 'prof-456',
-    status: 'pending',
-    requested_level: 'advanced',
+    status: VerificationStatus.PENDING,
+    requested_level: VerificationLevel.ENHANCED,
     created_at: new Date(Date.now() - 86400000).toISOString(),
     documents: [
       {
         id: 'doc-3',
         document_type: 'Passport',
-        file_path: 'https://picsum.photos/id/1035/800/600',
-        uploaded_at: new Date(Date.now() - 86400000).toISOString(),
-        status: 'pending',
-        verification_request_id: '2'
+        fileUrl: 'https://picsum.photos/id/1035/800/600',
+        uploadedAt: new Date(Date.now() - 86400000).toISOString(),
+        status: VerificationStatus.PENDING,
+        verification_request_id: '2',
+        userId: 'test'
       }
     ]
   }
@@ -76,7 +78,7 @@ export const approveVerificationRequest = async (id: string): Promise<boolean> =
   
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
-    status: 'approved',
+    status: VerificationStatus.APPROVED,
     reviewed_at: new Date().toISOString(),
     reviewed_by: 'admin-user-id'
   };
@@ -85,7 +87,13 @@ export const approveVerificationRequest = async (id: string): Promise<boolean> =
   if (mockVerificationRequests[index].documents) {
     mockVerificationRequests[index].documents = mockVerificationRequests[index].documents!.map(doc => ({
       ...doc,
-      status: 'approved'
+      status: VerificationStatus.APPROVED,
+      id: doc.id,
+      userId: doc.userId,
+      documentType: doc.documentType,
+      fileUrl: doc.fileUrl,
+      uploadedAt: doc.uploadedAt,
+      verification_request_id: doc.verification_request_id
     }));
   }
   
@@ -103,7 +111,7 @@ export const rejectVerificationRequest = async (id: string, reason: string): Pro
   
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
-    status: 'rejected',
+    status: VerificationStatus.REJECTED,
     reviewed_at: new Date().toISOString(),
     reviewed_by: 'admin-user-id',
     reviewer_notes: reason
@@ -126,8 +134,8 @@ export const createVerificationRequest = async (
   const newDocuments: VerificationDocument[] = documents.map((doc, index) => ({
     ...doc,
     id: `doc-${Date.now()}-${index}`,
-    status: 'pending',
-    uploaded_at: new Date().toISOString(),
+    status: VerificationStatus.PENDING,
+    uploadedAt: new Date().toISOString(),
     verification_request_id: newRequestId
   }));
   
@@ -135,8 +143,8 @@ export const createVerificationRequest = async (
   const newRequest: VerificationRequest = {
     id: newRequestId,
     profile_id: profileId,
-    status: 'pending',
-    requested_level: level,
+    status: VerificationStatus.PENDING,
+    requested_level: level as any,
     created_at: new Date().toISOString(),
     documents: newDocuments
   };
