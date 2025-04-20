@@ -1,10 +1,12 @@
+
+// Added `featured` to props type to fix TS errors on usage.
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Clock, Star } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { Escort } from '@/types/escort';
 
 export interface EscortCardProps {
   id: string;
@@ -22,6 +24,7 @@ export interface EscortCardProps {
   availableNow?: boolean;
   lastActive?: Date;
   responseRate?: number;
+  featured?: boolean;
 }
 
 const EscortCard: React.FC<EscortCardProps> = ({
@@ -39,7 +42,8 @@ const EscortCard: React.FC<EscortCardProps> = ({
   sexualOrientation,
   availableNow,
   lastActive,
-  responseRate
+  responseRate,
+  featured,
 }) => {
   return (
     <Link to={`/escorts/${id}`}>
@@ -62,6 +66,12 @@ const EscortCard: React.FC<EscortCardProps> = ({
           {availableNow && (
             <Badge className="absolute top-2 left-2 bg-blue-500 text-white border-0">
               Available Now
+            </Badge>
+          )}
+
+          {featured && (
+            <Badge className="absolute bottom-2 right-2 bg-yellow-400 text-black border-0">
+              Featured
             </Badge>
           )}
           
@@ -120,3 +130,4 @@ const EscortCard: React.FC<EscortCardProps> = ({
 };
 
 export default EscortCard;
+

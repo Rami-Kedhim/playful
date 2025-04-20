@@ -1,6 +1,11 @@
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UberPersona } from '@/types/UberPersona';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
+import { Escort } from '@/types/Escort';  // Use correct casing and single source of truth
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
@@ -68,28 +73,34 @@ const rankPersonas = (personas: UberPersona[], boostFactor = 1.0) => {
   return copy;
 };
 
-const UberPersonaContext = createContext<UberPersonaContextType | undefined>(undefined);
+const UberEcosystemContext = createContext<any>(undefined);
 
-const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+// Fix type of height to accept string or number, for compatibility
+interface CompatibleEscort extends Omit<Escort, 'height'> {
+  height?: string | number;
+}
+
+const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const { escorts } = useEscortContext();
-  const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+
+  // We ensure compatible typings here by casting or mapping if needed
+  // For simplicity, cast escorts to CompatibleEscort[] before mapEscortsToUberPersonas
+
+  const [allPersonas, setAllPersonas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
   const [hilbertSpace, setHilbertSpace] = useState<HilbertSpace>(defaultHilbertSpace);
 
   useEffect(() => {
-    const initUberEcosystem = async () => {
+    async function init() {
       try {
         setLoading(true);
-
         await uberCoreInstance.initialize();
-
         if (escorts && escorts.length > 0) {
-          const mappedPersonas = mapEscortsToUberPersonas(escorts);
+          const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
           setAllPersonas(mappedPersonas);
         }
-
         setHilbertSpace({
           dimension: 4,
           getCoordinates: (persona: UberPersona): number[] => {
@@ -105,7 +116,6 @@ const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             ];
           },
         });
-
         setInitialized(true);
         setError(null);
       } catch (err: any) {
@@ -114,9 +124,8 @@ const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } finally {
         setLoading(false);
       }
-    };
-
-    initUberEcosystem();
+    }
+    init();
 
     return () => {
       uberCoreInstance.shutdown?.()?.catch(console.error);
@@ -128,7 +137,7 @@ const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(true);
 
       if (escorts && escorts.length > 0) {
-        const mappedPersonas = mapEscortsToUberPersonas(escorts);
+        const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
         setAllPersonas(mappedPersonas);
       }
 
@@ -170,18 +179,18 @@ const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   return (
-    <UberPersonaContext.Provider value={value}>
+    <UberEcosystemContext.Provider value={value}>
       {children}
-    </UberPersonaContext.Provider>
+    </UberEcosystemContext.Provider>
   );
 };
 
-export const useUberPersonaContext = (): UberPersonaContextType => {
-  const context = useContext(UberPersonaContext);
+export const useUberEcosystemContext = () => {
+  const context = useContext(UberEcosystemContext);
   if (!context) {
-    throw new Error('useUberPersonaContext must be used within UberPersonaProvider');
+    throw new Error('useUberEcosystemContext must be used within UberEcosystemProvider');
   }
   return context;
 };
 
-export default UberPersonaContext;
+export default UberEcosystemContext;

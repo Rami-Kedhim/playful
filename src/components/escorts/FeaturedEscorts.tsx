@@ -1,6 +1,8 @@
 
+// Removed featured prop from EscortCard usages and instead pass it as optional prop added to EscortCardProps
+
 import React from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; 
 import EscortCard from './EscortCard';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -59,8 +61,7 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
           price={escort.price ?? 0}
           verified={escort.isVerified ?? escort.verified ?? false}
           availableNow={escort.availableNow ?? false}
-          featured 
-          // bio prop removed, not in EscortCardProps
+          featured={escort.featured ?? false}
         />
       ))}
     </div>
@@ -68,3 +69,4 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
 };
 
 export default FeaturedEscorts;
+

@@ -1,9 +1,11 @@
 
+// Added featured to EscortCard props to fix typings, use correct import for Escort type
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import EscortCard from "@/components/escorts/EscortCard";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BadgeCheck, Calendar, MapPin } from "lucide-react";
 import ServiceTypeBadgeLabel from "./filters/ServiceTypeBadgeLabel";
@@ -136,8 +138,7 @@ const EscortResults = ({
             availableNow={escort.availableNow ?? false}
             lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
             responseRate={escort.responseRate ?? undefined}
-            featured={Boolean(escort['featured'])}
-            // className prop removed because EscortCardProps does not have it
+            featured={escort.featured ?? false}
           />
         ))}
       </div>
@@ -165,3 +166,4 @@ const EscortResults = ({
 };
 
 export default EscortResults;
+

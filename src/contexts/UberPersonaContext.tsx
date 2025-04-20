@@ -1,59 +1,60 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UberPersona } from '@/types/UberPersona';
+import { Escort } from '@/types/Escort';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
 
 interface UberPersonaContextType {
-  allPersonas: UberPersona[];
-  escortPersonas: UberPersona[];
-  creatorPersonas: UberPersona[];
-  livecamPersonas: UberPersona[];
-  aiPersonas: UberPersona[];
+  allPersonas: any[];
+  escortPersonas: any[];
+  creatorPersonas: any[];
+  livecamPersonas: any[];
+  aiPersonas: any[];
   loading: boolean;
   error: string | null;
   refreshEcosystem: () => Promise<void>;
-  getPersonaById: (id: string) => UberPersona | undefined;
-  boostedPersonas: UberPersona[];
-  rankPersonas: (personas: UberPersona[], boostFactor?: number) => UberPersona[];
+  getPersonaById: (id: string) => any | undefined;
+  boostedPersonas: any[];
+  rankPersonas: (personas: any[], boostFactor?: number) => any[];
   hilbertSpace: {
     dimension: number;
-    getCoordinates: (persona: UberPersona) => number[];
+    getCoordinates: (persona: any) => number[];
   };
 }
 
 const defaultHilbertSpace = {
   dimension: 4,
-  getCoordinates: (_: UberPersona): number[] => [0.5, 0.5, 0.5, 0.5]
+  getCoordinates: (_: any): number[] => [0.5, 0.5, 0.5, 0.5]
 };
 
 const UberPersonaContext = createContext<UberPersonaContextType | undefined>(undefined);
 
 export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { escorts } = useEscortContext();
-  const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
+  const [allPersonas, setAllPersonas] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
   const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
 
+  interface CompatibleEscort extends Omit<Escort, 'height'> {
+    height?: string | number;
+  }
+
   useEffect(() => {
     const initSystem = async () => {
       try {
         setLoading(true);
-
         await uberCoreInstance.initialize();
 
         if (escorts && escorts.length > 0) {
-          const mappedPersonas = mapEscortsToUberPersonas(escorts);
+          const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
           setAllPersonas(mappedPersonas);
         }
 
         setHilbertSpace({
           dimension: 4,
-          getCoordinates: (persona: UberPersona): number[] => {
-            // Safe access of type since it is optional on UberPersona
+          getCoordinates: (persona: any): number[] => {
             const seed = (persona.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             return [
               Math.sin(seed * 0.1) * 0.5 + 0.5,
@@ -81,7 +82,6 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     };
   }, [escorts]);
 
-  // Safely filter by roleFlags and optional type property
   const getEscorts = () => allPersonas.filter(persona =>
     (persona as any).type === 'escort' || persona.roleFlags?.isEscort === true
   );
@@ -134,31 +134,36 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   const refreshEcosystem = async () => {
     try {
       setLoading(true);
-
       if (escorts && escorts.length > 0) {
-        const mappedPersonas = mapEscortsToUberPersonas(escorts);
+        const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
         setAllPersonas(mappedPersonas);
       }
-
+      setLoading(false);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to refresh UberPersona ecosystem');
-    } finally {
-      setLoading(false);
     }
   };
 
   const value = {
     allPersonas,
-    escortPersonas: getEscorts(),
-    creatorPersonas: getCreators(),
-    livecamPersonas: getLivecams(),
-    aiPersonas: getAIPersonas(),
+    escortPersonas: allPersonas.filter(p => p.roleFlags?.isEscort),
+    creatorPersonas: allPersonas.filter(p => p.roleFlags?.isCreator),
+    livecamPersonas: allPersonas.filter(p => p.roleFlags?.isLivecam),
+    aiPersonas: allPersonas.filter(p => p.roleFlags?.isAI),
     loading,
     error,
-    refreshEcosystem,
-    getPersonaById,
-    boostedPersonas: getBoostedPersonas(),
+    refreshEcosystem: async () => {
+      setLoading(true);
+      if (escorts && escorts.length > 0) {
+        const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
+        setAllPersonas(mappedPersonas);
+      }
+      setLoading(false);
+      setError(null);
+    },
+    getPersonaById: (id: string) => allPersonas.find(p => p.id === id),
+    boostedPersonas: allPersonas.filter(p => p.monetization?.boostingActive || p.roleFlags?.isFeatured),
     rankPersonas,
     hilbertSpace
   };
