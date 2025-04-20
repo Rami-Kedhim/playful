@@ -8,8 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BadgeCheck, Calendar, MapPin } from "lucide-react";
 import ServiceTypeBadgeLabel from "./filters/ServiceTypeBadgeLabel";
 
+interface ExtendedEscort extends Escort {
+  sexualOrientation?: string;
+  lastActive?: string | Date;
+}
+
 interface EscortResultsProps {
-  escorts: Escort[];
+  escorts: ExtendedEscort[];
   clearFilters: () => void;
   currentPage: number;
   setCurrentPage: (page: number) => void;
@@ -72,7 +77,7 @@ const EscortResults = ({
     );
   }
 
-  const getServiceType = (escort: Escort): { inPerson: boolean; virtual: boolean } => {
+  const getServiceType = (escort: ExtendedEscort): { inPerson: boolean; virtual: boolean } => {
     const inPerson =
       Boolean(escort.providesInPersonServices) || (escort.services?.includes('in-person') ?? false);
     const virtual =

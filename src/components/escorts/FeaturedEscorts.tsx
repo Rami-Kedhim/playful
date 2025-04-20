@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Escort } from '@/types/escort';  // Use consistent import with correct casing
+import { Escort } from '@/types/Escort';  // Fixed import casing to avoid TypeScript conflicts
 import EscortCard from './EscortCard';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
