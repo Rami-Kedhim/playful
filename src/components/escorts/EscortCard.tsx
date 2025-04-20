@@ -1,79 +1,121 @@
-
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle, Clock, Star } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { Escort } from '@/types/escort';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { VerificationBadge } from '@/components/verification/VerificationBadge';
-import ServiceTypeBadge from './ServiceTypeBadge';
 
-interface EscortCardProps {
-  escort: Escort;
-  onClick?: () => void;
-  className?: string;
-  featured?: boolean;
+export interface EscortCardProps {
+  id: string;
+  name: string;
+  age: number;
+  location: string;
+  rating: number;
+  reviews: number;
+  tags: string[];
+  imageUrl: string;
+  price: number;
+  verified: boolean;
+  gender: string;
+  sexualOrientation?: string;
+  availableNow?: boolean;
+  lastActive?: Date;
+  responseRate?: number;
 }
 
-const EscortCard: React.FC<EscortCardProps> = ({ 
-  escort, 
-  onClick,
-  className = '',
-  featured = false
+const EscortCard: React.FC<EscortCardProps> = ({
+  id,
+  name,
+  age,
+  location,
+  rating,
+  reviews,
+  tags,
+  imageUrl,
+  price,
+  verified,
+  gender,
+  sexualOrientation,
+  availableNow,
+  lastActive,
+  responseRate
 }) => {
   return (
-    <Card 
-      className={`overflow-hidden transition-all duration-200 hover:shadow-md ${
-        featured ? 'border-primary/40' : ''
-      } ${className}`}
-      onClick={onClick}
-    >
-      <CardHeader className="p-0 relative">
-        <div className="aspect-[3/4] overflow-hidden">
-          <img 
-            src={escort.profileImage || 'https://via.placeholder.com/300x400?text=No+Image'} 
-            alt={escort.name}
-            className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-          />
-        </div>
-        
-        {featured && (
-          <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-medium">
-            Featured
+    <Link to={`/escorts/${id}`}>
+      <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+        <div className="relative">
+          <div className="aspect-[3/4] overflow-hidden">
+            <img 
+              src={imageUrl || "https://via.placeholder.com/300x400"} 
+              alt={name}
+              className="object-cover w-full h-full"
+            />
           </div>
-        )}
-        
-        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-          {escort.serviceType && (
-            <ServiceTypeBadge serviceType={escort.serviceType} />
+          
+          {verified && (
+            <Badge className="absolute top-2 right-2 bg-green-500 text-white border-0">
+              <CheckCircle className="h-3 w-3 mr-1" /> Verified
+            </Badge>
           )}
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-3">
-        <div className="flex justify-between items-start">
-          <h3 className="font-medium text-lg truncate">{escort.name}</h3>
-          <VerificationBadge level={escort.isVerified ? 'verified' : 'basic'} size="sm" />
-        </div>
-        
-        <div className="text-sm text-muted-foreground mt-1">
-          {escort.age && <span>{escort.age} • </span>}
-          {escort.location || 'Location N/A'}
-        </div>
-      </CardContent>
-      
-      <CardFooter className="p-3 pt-0 flex justify-between items-center">
-        <div className="flex items-center">
-          <div className="text-sm font-medium">
-            {escort.price ? `$${escort.price}` : 'Price on request'}
+          
+          {availableNow && (
+            <Badge className="absolute top-2 left-2 bg-blue-500 text-white border-0">
+              Available Now
+            </Badge>
+          )}
+          
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+            <div className="text-white font-medium">
+              {name}, {age}
+            </div>
+            <div className="text-white/80 text-sm flex items-center">
+              <span>{location}</span>
+            </div>
           </div>
         </div>
         
-        {escort.rating !== undefined && (
-          <div className="flex items-center">
-            <span className="text-yellow-500 mr-1">★</span>
-            <span className="text-sm">{escort.rating.toFixed(1)}</span>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center">
+              <Star className="h-4 w-4 text-yellow-400 mr-1" />
+              <span className="font-medium">{rating.toFixed(1)}</span>
+              <span className="text-gray-500 text-sm ml-1">({reviews})</span>
+            </div>
+            <span className="font-bold text-green-600">${price}/hr</span>
           </div>
-        )}
-      </CardFooter>
-    </Card>
+          
+          <div className="flex flex-wrap gap-1 mb-3">
+            {tags.slice(0, 3).map((tag, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+            {tags.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{tags.length - 3} more
+              </Badge>
+            )}
+          </div>
+          
+          {lastActive && (
+            <div className="text-gray-500 text-xs flex items-center mt-2">
+              <Clock className="h-3 w-3 mr-1" />
+              {availableNow 
+                ? 'Online now'
+                : `Active ${formatDistanceToNow(lastActive, { addSuffix: true })}`
+              }
+            </div>
+          )}
+          
+          {responseRate !== undefined && (
+            <div className="text-gray-500 text-xs mt-1">
+              Response rate: {responseRate}%
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 

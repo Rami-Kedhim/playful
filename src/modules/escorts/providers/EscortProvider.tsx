@@ -1,3 +1,6 @@
+
+// Fix import path casing for Escort
+
 import React, {
   createContext,
   useContext,
@@ -61,7 +64,7 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     try {
       setLoading(true);
       const data = await escortService.getEscorts();
-      
+
       if (useUberSystem) {
         console.log("Loading escorts with UberCore integration");
         setEscorts(data.map(escort => ({
@@ -72,7 +75,7 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       } else {
         setEscorts(data);
       }
-      
+
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to load escorts');

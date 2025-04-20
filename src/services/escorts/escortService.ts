@@ -1,4 +1,6 @@
 
+// Fix import path casing for Escort
+
 import { Escort } from '@/types/escort';
 import { db } from '@/lib/db';
 

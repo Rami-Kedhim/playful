@@ -1,6 +1,3 @@
-// Fix casing conflict by consistently importing escort from '@/types/escort' with lowercase path
-
-// Import Escort at the top; unify import path casing to lowercase 'escort'
 import { Escort } from '@/types/escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
@@ -56,7 +53,7 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     stats: {
       rating: escort.rating || 0,
       reviewCount: escort.reviewCount || 0,
-      responseTime: escort.responseRate || 0.8, // Changed from responseRate to responseTime
+      responseTime: escort.responseRate || 0.8,
       viewCount: 0,
       favoriteCount: 0
     },
@@ -116,7 +113,7 @@ export const mapCreatorToUberPersona = (creator: ContentCreator): UberPersona =>
     stats: {
       rating: creator.rating || 0,
       reviewCount: 0,
-      responseTime: 0.5, // Changed responseRate to responseTime
+      responseTime: 0.5,
       viewCount: 0,
       favoriteCount: 0
     },
@@ -177,7 +174,7 @@ export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
     stats: {
       rating: livecam.rating || 0,
       reviewCount: 0,
-      responseTime: 0.9, // Changed responseRate to responseTime
+      responseTime: 0.9,
       viewCount: livecam.viewerCount || 0,
       favoriteCount: 0
     },
