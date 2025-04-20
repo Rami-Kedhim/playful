@@ -1,5 +1,7 @@
 
-import { VerificationLevel, VerificationStatus, VerificationDocument, VerificationRequest } from '@/types/verification';
+// Fix exports and definitions in verification index
+
+import { VerificationLevel, VerificationStatus, VerificationDocument } from '@/types/verification';
 
 export const canSubmitVerification = async (userId: string): Promise<{ canSubmit: boolean; reason?: string; cooldownRemaining?: number }> => {
   // Mock implementation - would typically check with backend
@@ -36,10 +38,8 @@ export const getVerificationLevelLabel = (level: VerificationLevel): string => {
   switch (level) {
     case VerificationLevel.NONE: return 'Not Verified';
     case VerificationLevel.BASIC: return 'Basic Verification';
-    case VerificationLevel.STANDARD: return 'Standard Verification';
     case VerificationLevel.ENHANCED: return 'Enhanced Verification';
     case VerificationLevel.PREMIUM: return 'Premium Verification';
-    case VerificationLevel.VIP: return 'VIP Verification';
     default: return 'Unknown';
   }
 };
@@ -80,8 +80,8 @@ export const normalizeDocument = (doc: any): VerificationDocument => {
     document_url: doc.document_url || doc.url || doc.fileUrl || doc.file_url || doc.file_path || '',
     file_path: doc.file_path || doc.file_url || doc.fileUrl || doc.url || doc.document_url || '',
     status: doc.status || 'pending',
-    uploaded_at: doc.uploaded_at ? new Date(doc.uploaded_at) : new Date(),
-    uploadedAt: doc.uploadedAt ? new Date(doc.uploadedAt) : new Date(),
+    uploaded_at: doc.uploaded_at ? new Date(doc.uploaded_at).toISOString() : new Date().toISOString(),
+    uploadedAt: doc.uploadedAt ? new Date(doc.uploadedAt).toISOString() : new Date().toISOString(),
     verification_id: doc.verification_id || ''
   };
 };

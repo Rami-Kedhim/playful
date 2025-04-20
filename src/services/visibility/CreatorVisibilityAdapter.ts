@@ -11,11 +11,13 @@ export class CreatorVisibilityAdapter {
   }
 
   public getCreatorsByRegion(region: string): ContentCreator[] {
-    return this.creators.filter(creator => creator.region === region);
+    // Note: region property may indeed not exist on ContentCreator, remove or use any fallback
+    return this.creators.filter(creator => (creator.region ?? '') === region);
   }
 
   public getCreatorsByLanguage(language: string): ContentCreator[] {
-    return this.creators.filter(creator => creator.languages?.includes(language));
+    // Note: languages (array) property exists, changed from language singular to languages plural
+    return this.creators.filter(creator => creator.languages?.includes(language) || false);
   }
 
   // Add placeholders for methods so interface matches usage
@@ -24,7 +26,7 @@ export class CreatorVisibilityAdapter {
     let filteredCreators = this.creators;
 
     if (filter?.region) {
-      filteredCreators = filteredCreators.filter(c => c.region === filter.region);
+      filteredCreators = filteredCreators.filter(c => (c.region ?? '') === filter.region);
     }
     if (filter?.tags) {
       filteredCreators = filteredCreators.filter(c =>

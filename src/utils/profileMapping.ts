@@ -1,8 +1,7 @@
-
 import { Escort } from '@/types/escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/UberPersona';
 
 /**
  * Maps an escort model to the UberPersona format

@@ -32,7 +32,10 @@ function isPersonaOnline(persona: UberPersona): boolean {
 }
 
 function getPersonaPrice(persona: UberPersona): number {
-  return persona?.price ?? 0;
+  // price is not part of UberPersona in types, fallback to monetization.meetingPrice if available
+  if (typeof (persona as any).price === 'number') return (persona as any).price;
+  if (persona?.monetization?.meetingPrice) return persona.monetization.meetingPrice;
+  return 0;
 }
 
 function hasRealMeets(persona: UberPersona): boolean {
@@ -60,4 +63,3 @@ export {
   hasVirtualMeets,
   hasContent,
 };
-

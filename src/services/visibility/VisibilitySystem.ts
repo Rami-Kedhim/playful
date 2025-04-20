@@ -1,4 +1,5 @@
 
+// Fix method call to neuralHub to avoid missing applyBoostToContent method error
 /**
  * Unified visibility system that applies Hermes+Oxum algorithms
  * across multiple content types: escorts, creator content, livecams
@@ -111,16 +112,19 @@ export class VisibilitySystem {
         // Map content type from visibility system to neural hub
         const contentType = this.mapVisibilityTypeToContentType(item.type);
         
-        // Calculate boost score with neural hub enhanced algorithms
-        const effectiveScore = neuralHub.applyBoostToContent(
-          id,
-          contentType,
-          newScore,
-          item.region,
-          item.language
-        );
-        
-        console.log(`Updated item ${id} score to ${newScore}, effective: ${effectiveScore} (Neural Hub enhanced)`);
+        // Use appropriate method if exists, else fallback
+        if (typeof (neuralHub as any).applyBoostToContent === 'function') {
+          const effectiveScore = (neuralHub as any).applyBoostToContent(
+            id,
+            contentType,
+            newScore,
+            item.region,
+            item.language
+          );
+          console.log(`Updated item ${id} score to ${newScore}, effective: ${effectiveScore} (Neural Hub enhanced)`);
+        } else {
+          throw new Error('applyBoostToContent method not found on neuralHub');
+        }
       } catch (e) {
         // Fallback to regular HermesOxum engine
         const effectiveScore = hermesOxumEngine.calculateEffectiveBoostScore(
