@@ -27,7 +27,7 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
         {/* Earnings Summary Card */}
         <EarningsSummary 
           earnings={{
-            total: earnings, // earnings is total number from useEarningsCalculator
+            total: earnings, 
             pending: 0,
             available: 0,
           }}

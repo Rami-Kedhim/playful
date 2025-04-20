@@ -1,6 +1,5 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-// Fix import to CreatorPayout type for payouts instead of ContentCreator (previous fallback type)
 import { CreatorPayout } from "@/types/creator";
 import PayoutHistoryList from "./PayoutHistoryList";
 import PayoutHistoryLoading from "./components/PayoutHistoryLoading";
@@ -8,7 +7,7 @@ import EmptyPayoutsList from "./components/EmptyPayoutsList";
 import PayoutsInProgress from "./components/PayoutsInProgress";
 
 interface PayoutHistoryProps {
-  payouts: CreatorPayout[]; // corrected type
+  payouts: CreatorPayout[];
   isLoading: boolean;
 }
 

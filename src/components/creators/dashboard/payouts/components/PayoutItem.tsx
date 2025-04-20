@@ -1,4 +1,5 @@
-import { ContentCreator } from "@/types/creator";
+
+import { CreatorPayout } from "@/types/creator";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -6,12 +7,12 @@ import { Check, Clock, AlertCircle } from "lucide-react";
 import PayoutMethodIcon from "./PayoutMethodIcon";
 
 interface PayoutItemProps {
-  payout: ContentCreator; // fallback type
+  payout: CreatorPayout;
 }
 
 const PayoutItem = ({ payout }: PayoutItemProps) => {
   const getStatusBadge = () => {
-    const status = (payout as any).status;
+    const status = payout.status;
     
     switch (status) {
       case 'completed':
@@ -22,6 +23,7 @@ const PayoutItem = ({ payout }: PayoutItemProps) => {
           </Badge>
         );
       case 'processing':
+      case 'pending':
         return (
           <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
             <Clock className="h-3 w-3 mr-1" />
@@ -56,11 +58,11 @@ const PayoutItem = ({ payout }: PayoutItemProps) => {
     <Card className="p-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center">
-          <PayoutMethodIcon method={(payout as any).paymentMethod || 'bank_transfer'} />
+          <PayoutMethodIcon method={payout.paymentMethod || 'bank_transfer'} />
           <div className="ml-3">
-            <div className="font-medium">${(payout as any).amount?.toFixed(2) || '0.00'}</div>
+            <div className="font-medium">${payout.amount.toFixed(2)}</div>
             <div className="text-sm text-muted-foreground">
-              {formatDate((payout as any).requestedAt || new Date().toISOString())}
+              {formatDate(payout.requestedAt || new Date().toISOString())}
             </div>
           </div>
         </div>
