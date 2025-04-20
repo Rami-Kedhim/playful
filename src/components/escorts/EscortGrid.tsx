@@ -1,5 +1,5 @@
 
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import EscortCard from './EscortCard';
 
 interface EscortGridProps {

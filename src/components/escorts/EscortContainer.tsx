@@ -20,9 +20,14 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   // Use the filtered hook that syncs with URL
   const filterState = useEscortFilterWithUrl({ escorts });
 
-  // Casting setServiceTypeFilter to function with expected signature
+  // Restrict to allowed values only for serviceTypeFilter when setting
   const safeSetServiceTypeFilter = (value: ServiceTypeFilter) => {
-    filterState.setServiceTypeFilter(value);
+    if (value === "" || value === "in-person" || value === "virtual" || value === "both") {
+      filterState.setServiceTypeFilter(value);
+    } else {
+      // Ignore or reset to empty if invalid
+      filterState.setServiceTypeFilter("");
+    }
   };
 
   // Consider both internal and external loading states
