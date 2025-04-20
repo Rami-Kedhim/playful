@@ -1,11 +1,7 @@
 
-// Harmonize all Escort imports to '@/types/escort'
-// Add UberPersona import from '@/types/UberPersona'
-
-// Import statements
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Escort } from '@/types/escort';
-import { UberPersona } from '@/types/UberPersona';
+import { Escort } from '@/types/escort';  // Unified casing for Escort
+import { UberPersona } from '@/types/UberPersona'; // Ensure UberPersona import
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
@@ -43,6 +39,7 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [initialized, setInitialized] = useState<boolean>(false);
   const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
 
+  // Adjusted CompatibleEscort to fully extend Escort, with optional height of string or number
   interface CompatibleEscort extends Escort {
     height?: string | number;
   }
@@ -54,13 +51,13 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
         await uberCoreInstance.initialize();
 
         if (escorts && escorts.length > 0) {
-          // Fix: Ensure CompatibleEscort has required Escort properties (id, name, etc)
-          const sanitizedEscorts = escorts.map(e => ({
+          // Ensure all required fields exist, convert height to string if number
+          const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
             ...e,
             height: typeof e.height === 'number' ? e.height.toString() : e.height ?? ''
-          })) as CompatibleEscort[];
+          }));
 
-          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
+          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
           setAllPersonas(mappedPersonas);
         }
 
@@ -151,7 +148,7 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
           ...e,
           height: typeof e.height === 'number' ? e.height.toString() : e.height ?? '',
         })) as CompatibleEscort[];
-        const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
+        const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
         setAllPersonas(mappedPersonas);
       }
       setLoading(false);
@@ -203,4 +200,3 @@ export const useUberPersonaContext = (): UberPersonaContextType => {
   }
   return context;
 };
-

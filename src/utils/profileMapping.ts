@@ -1,4 +1,5 @@
-import { Escort } from '@/types/escort';
+
+import { Escort } from '@/types/escort';  // Unified casing: use lowercase path consistently
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
 import { UberPersona } from '@/types/UberPersona';
