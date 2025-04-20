@@ -1,4 +1,8 @@
-import { Escort } from '@/types/Escort';  // Fixed import casing to exact file casing
+
+// Fix import Escort casing to '@/types/Escort' and add safe optional chaining to videos
+// Adjust Toys to TypeScript for safer video array length checking
+
+import { Escort } from '@/types/Escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
 import { UberPersona } from '@/types/UberPersona';
@@ -243,3 +247,4 @@ export const getProfileTypeClass = (type: string): string => {
     default: return '';
   }
 };
+

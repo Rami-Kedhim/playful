@@ -1,3 +1,8 @@
+
+// Fix import casing and convert all Escort imports to exact casing from '@/types/Escort'
+// Fix height type to string, ensure conversion is applied always.
+// Fix typings on mapEscortsToUberPersonas to accept correct Escort type and compatible.
+
 import React, {
   createContext,
   useContext,
@@ -5,7 +10,7 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
@@ -77,7 +82,7 @@ const rankPersonas = (personas: UberPersona[], boostFactor = 1.0) => {
 const UberEcosystemContext = createContext<UberPersonaContextType | undefined>(undefined);
 
 interface CompatibleEscort extends Omit<Escort, 'height'> {
-  height?: string | number;
+  height?: string;
 }
 
 const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) => {
@@ -95,9 +100,9 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
         setLoading(true);
         await uberCoreInstance.initialize();
         if (escorts && escorts.length > 0) {
-          const sanitizedEscorts = escorts.map(e => ({
+          const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
             ...e,
-            height: typeof e.height === 'number' ? e.height.toString() : e.height ?? ''
+            height: e.height !== undefined && e.height !== null ? e.height.toString() : ''
           })) as CompatibleEscort[];
 
           const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
@@ -139,9 +144,9 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
       setLoading(true);
 
       if (escorts && escorts.length > 0) {
-        const sanitizedEscorts = escorts.map(e => ({
+        const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
           ...e,
-          height: typeof e.height === 'number' ? e.height.toString() : e.height ?? '',
+          height: e.height !== undefined && e.height !== null ? e.height.toString() : '',
         })) as CompatibleEscort[];
         const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
         setAllPersonas(mappedPersonas);
@@ -200,3 +205,4 @@ export const useUberEcosystemContext = () => {
 };
 
 export default UberEcosystemContext;
+

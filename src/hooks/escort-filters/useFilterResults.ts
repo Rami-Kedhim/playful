@@ -1,6 +1,8 @@
 
+// Fix import casing to exact '@/types/Escort' and fix property usage errors
+
 import { useState, useEffect, useMemo } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
 
 // Filter criteria interface
@@ -170,7 +172,7 @@ const matchesSearchQuery = (escort: Escort, query: string): boolean => {
 };
 
 const matchesLocation = (escort: Escort, location: string): boolean => {
-  return escort.location?.toLowerCase().includes(location.toLowerCase());
+  return escort.location?.toLowerCase().includes(location.toLowerCase()) ?? false;
 };
 
 const matchesPriceRange = (escort: Escort, range: [number, number]): boolean => {
@@ -180,7 +182,7 @@ const matchesPriceRange = (escort: Escort, range: [number, number]): boolean => 
 
 const matchesServices = (escort: Escort, services: string[]): boolean => {
   return services.some(service => 
-    escort.services?.includes(service as any) || 
+    escort.services?.includes(service) || 
     escort.tags?.includes(service)
   );
 };
@@ -195,7 +197,7 @@ const matchesOrientation = (escort: Escort, orientations: string[]): boolean => 
 };
 
 const matchesAgeRange = (escort: Escort, range: [number, number]): boolean => {
-  return escort.age >= range[0] && escort.age <= range[1];
+  return escort.age !== undefined && escort.age >= range[0] && escort.age <= range[1];
 };
 
 const matchesRating = (escort: Escort, min: number): boolean => {
@@ -220,10 +222,11 @@ const matchesServiceType = (escort: Escort, type: ServiceTypeFilter): boolean =>
   }
   
   if (Array.isArray(escort.services)) {
-    return escort.services.includes(type as any);
+    return escort.services.includes(type);
   }
   
   return false;
 };
 
 export default useFilterResults;
+
