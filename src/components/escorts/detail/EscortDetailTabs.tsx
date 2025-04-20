@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // Changed to capital E
 import EscortReviews from './tabs/EscortReviews';
 import EscortRates from './tabs/EscortRates';
 import EscortServices from './tabs/EscortServices';
@@ -107,3 +107,4 @@ const EscortDetailTabs: React.FC<EscortDetailTabsProps> = ({ escort }) => {
 };
 
 export default EscortDetailTabs;
+
