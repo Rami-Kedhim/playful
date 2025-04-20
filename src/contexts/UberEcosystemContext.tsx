@@ -1,3 +1,4 @@
+
 import React, {
   createContext,
   useContext,
@@ -6,6 +7,7 @@ import React, {
   ReactNode,
 } from 'react';
 import { Escort } from '@/types/Escort';  // Use correct casing and single source of truth
+import { UberPersona } from '@/types/UberPersona'; // Import missing UberPersona type
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
@@ -73,7 +75,7 @@ const rankPersonas = (personas: UberPersona[], boostFactor = 1.0) => {
   return copy;
 };
 
-const UberEcosystemContext = createContext<any>(undefined);
+const UberEcosystemContext = createContext<UberPersonaContextType | undefined>(undefined);
 
 // Fix type of height to accept string or number, for compatibility
 interface CompatibleEscort extends Omit<Escort, 'height'> {
@@ -86,7 +88,7 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
   // We ensure compatible typings here by casting or mapping if needed
   // For simplicity, cast escorts to CompatibleEscort[] before mapEscortsToUberPersonas
 
-  const [allPersonas, setAllPersonas] = useState<any[]>([]);
+  const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -98,7 +100,12 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
         setLoading(true);
         await uberCoreInstance.initialize();
         if (escorts && escorts.length > 0) {
-          const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
+          // Map escorts ensuring height is string for type compatibility
+          const sanitizedEscorts = escorts.map(e => ({
+            ...e,
+            height: typeof e.height === 'number' ? e.height.toString() : e.height ?? '',
+          })) as CompatibleEscort[];
+          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
           setAllPersonas(mappedPersonas);
         }
         setHilbertSpace({
@@ -137,7 +144,11 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
       setLoading(true);
 
       if (escorts && escorts.length > 0) {
-        const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
+        const sanitizedEscorts = escorts.map(e => ({
+          ...e,
+          height: typeof e.height === 'number' ? e.height.toString() : e.height ?? '',
+        })) as CompatibleEscort[];
+        const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
         setAllPersonas(mappedPersonas);
       }
 

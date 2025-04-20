@@ -130,4 +130,3 @@ const EscortCard: React.FC<EscortCardProps> = ({
 };
 
 export default EscortCard;
-

@@ -134,9 +134,9 @@ const EscortResults = ({
             price={escort.price ?? 0}
             verified={escort.isVerified ?? escort.verified ?? false}
             gender={escort.gender ?? ''}
-            sexualOrientation={escort.sexualOrientation}
+            sexualOrientation={escort.sexualOrientation ?? ''} {/* Fixed optional */}
             availableNow={escort.availableNow ?? false}
-            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
+            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined} {/* Fixed optional */}
             responseRate={escort.responseRate ?? undefined}
             featured={escort.featured ?? false}
           />
@@ -166,4 +166,3 @@ const EscortResults = ({
 };
 
 export default EscortResults;
-

@@ -52,7 +52,7 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
           name={escort.name}
           age={escort.age ?? 0}
           gender={escort.gender ?? ''}
-          sexualOrientation={escort.sexualOrientation}
+          sexualOrientation={escort.sexualOrientation ?? ''}  {/* Fix optional chaining */}
           location={escort.location ?? ''}
           rating={escort.rating ?? 0}
           reviews={escort.reviewCount ?? 0}
@@ -69,4 +69,3 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
 };
 
 export default FeaturedEscorts;
-
