@@ -1,5 +1,5 @@
 
-// Removed featured prop from EscortCard usages and instead pass it as optional prop added to EscortCardProps
+// Fixed trailing comments that cause TS errors after prop values by removing inline comments
 
 import React from 'react';
 import { Escort } from '@/types/Escort'; 
@@ -52,7 +52,7 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
           name={escort.name}
           age={escort.age ?? 0}
           gender={escort.gender ?? ''}
-          sexualOrientation={escort.sexualOrientation ?? ''}  {/* Fix optional chaining */}
+          sexualOrientation={escort.sexualOrientation ?? ''}
           location={escort.location ?? ''}
           rating={escort.rating ?? 0}
           reviews={escort.reviewCount ?? 0}

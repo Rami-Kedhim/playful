@@ -1,5 +1,5 @@
 
-// Added featured to EscortCard props to fix typings, use correct import for Escort type
+// Fixed trailing comments that cause TS errors after prop values by removing inline comments
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -134,9 +134,9 @@ const EscortResults = ({
             price={escort.price ?? 0}
             verified={escort.isVerified ?? escort.verified ?? false}
             gender={escort.gender ?? ''}
-            sexualOrientation={escort.sexualOrientation ?? ''} {/* Fixed optional */}
+            sexualOrientation={escort.sexualOrientation ?? ''}
             availableNow={escort.availableNow ?? false}
-            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined} {/* Fixed optional */}
+            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
             responseRate={escort.responseRate ?? undefined}
             featured={escort.featured ?? false}
           />
