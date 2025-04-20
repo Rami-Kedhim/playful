@@ -1,5 +1,5 @@
 
-// Also fix same hook like above for useAICompanion.ts to avoid duplicate code and errors
+// Fix AICompanionState interface usage and remove undefined methods; fix store usage
 
 import { useState, useEffect, useCallback } from 'react';
 import useAICompanionStore from '@/store/aiCompanionStore';
@@ -20,32 +20,21 @@ export function useAICompanion(userId?: string, companionId?: string) {
     companions,
     activeCompanion,
     messages,
-    loading,
+    isLoading,
     error,
 
     fetchCompanions,
     setActiveCompanion,
-    createCompanion,
-    updateCompanion,
 
     fetchMessages,
     sendMessage,
-
-    generateContent,
-    fetchUnlockableContent,
-
-    updateRelationshipLevel
   } = useAICompanionStore();
 
-  const currentMessages = companionId ? messages[companionId] || [] : [];
-
-  const currentUnlockableContent = companionId
-    ? fetchUnlockableContent ? (fetchUnlockableContent[companionId] || []) : []
-    : [];
+  const currentMessages = companionId ? messages || [] : [];
 
   const loadCompanions = useCallback(async () => {
     if (userId) {
-      await fetchCompanions(userId);
+      await fetchCompanions();
     }
   }, [userId, fetchCompanions]);
 
@@ -57,48 +46,20 @@ export function useAICompanion(userId?: string, companionId?: string) {
       setChatError(null);
 
       try {
-        await fetchMessages(userId, id);
-        await fetchUnlockableContent && await fetchUnlockableContent(userId, id);
+        await fetchMessages(companionId || '');
       } catch (err: any) {
         setChatError(err.message || 'Failed to load companion data');
       } finally {
         setIsLoadingMessages(false);
       }
     }
-  }, [userId, companions, setActiveCompanion, fetchMessages, fetchUnlockableContent]);
-
-  const handleCreateCompanion = useCallback(async (params: any) => {
-    if (!userId) return null;
-
-    const newCompanion = await createCompanion(userId, params);
-
-    if (newCompanion) {
-      await handleSelectCompanion(newCompanion.id);
-    }
-
-    return newCompanion;
-  }, [userId, createCompanion, handleSelectCompanion]);
-
-  const handleUpdateCompanion = useCallback(async (id: string, params: any) => {
-    if (!userId) return null;
-
-    return await updateCompanion(userId, id, params);
-  }, [userId, updateCompanion]);
+  }, [userId, companions, setActiveCompanion, fetchMessages, companionId]);
 
   const handleSendMessage = useCallback(async (content: string) => {
     if (!userId || !companionId) return null;
     
     return await sendMessage(userId, companionId, content);
   }, [userId, companionId, sendMessage]);
-
-  const handleGenerateContent = useCallback(async (params: any) => {
-    if (!userId || !companionId) return null;
-
-    return await generateContent(userId, {
-      ...params,
-      companion_id: companionId
-    });
-  }, [userId, companionId, generateContent]);
 
   useEffect(() => {
     loadCompanions();
@@ -114,21 +75,13 @@ export function useAICompanion(userId?: string, companionId?: string) {
     companions,
     selectedCompanion: activeCompanion,
     messages: currentMessages,
-    loading,
+    isLoading,
     isLoadingMessages,
     error,
     chatError,
     loadCompanions,
     selectCompanion: handleSelectCompanion,
-    createCompanion: handleCreateCompanion,
-    updateCompanion: handleUpdateCompanion,
     sendMessage: handleSendMessage,
-    generateContent: handleGenerateContent,
-    fetchUnlockableContent: (contentType?: "image" | "voice" | "video") =>
-      userId && companionId && fetchUnlockableContent ? fetchUnlockableContent(userId, companionId, contentType) : Promise.resolve([]),
-    updateRelationshipLevel: (updates: Partial<any>) =>
-      userId && companionId ? updateRelationshipLevel(userId, companionId, updates) : Promise.resolve(null),
-    presetCompanions: []
   };
 }
 

@@ -1,11 +1,13 @@
 
+// Fix property references for userId and requested_level; use camelCase consistently
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, UserCheck, UserX } from 'lucide-react';
-import { VerificationRequest } from '@/types/verification';
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
 interface ReviewRequestModalProps {
   open: boolean;
@@ -24,23 +26,19 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
   onReject,
   isLoading = false
 }) => {
-  const [notes, setNotes] = useState('');
-
+  const [notes, setNotes] = React.useState('');
+  const isPending = request?.status === VerificationStatus.PENDING || request?.status === VerificationStatus.IN_REVIEW;
+  
   const handleApprove = async () => {
-    if (!request) return;
+    if (!isPending || !request) return;
     await onApprove(request.id, notes);
-    setNotes('');
-    onClose();
   };
-
+  
   const handleReject = async () => {
-    if (!request) return;
+    if (!isPending || !request) return;
     await onReject(request.id, notes);
-    setNotes('');
-    onClose();
   };
-
-  // Fix property name for requested level
+  
   const requestedLevel = request?.requested_level || 'unknown';
 
   return (
@@ -54,7 +52,7 @@ const ReviewRequestModal: React.FC<ReviewRequestModalProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="font-medium">User ID:</div>
-              <div>{request.userId || request.user_id || request.profile_id || ''}</div>
+              <div>{request.userId || request.profile_id || ''}</div>
 
               <div className="font-medium">Status:</div>
               <div className="capitalize">{request.status}</div>

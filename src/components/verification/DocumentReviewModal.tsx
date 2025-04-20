@@ -1,5 +1,5 @@
 
-// Fix imports and property access for VerificationDocument and VerificationRequest
+// Fix property references in this similar modal to the correct camelCase props
 
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -66,16 +66,16 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
         <div className="space-y-4">
           <div className="bg-muted p-4 rounded-md">
             <img 
-              src={document.document_type || document.fileUrl || 'no-image.png'} 
+              src={document.fileUrl || ''} 
               alt="Verification document" 
               className="w-full h-auto max-h-[400px] object-contain"
             />
           </div>
 
           <div>
-            <p><strong>Type:</strong> {document.document_type || 'Unknown'}</p>
-            <p><strong>Uploaded:</strong> {document.uploadedAt || document.uploaded_at ? 
-              format(new Date(document.uploadedAt || document.uploaded_at), 'PPP') : 
+            <p><strong>Type:</strong> {document.documentType || 'Unknown'}</p>
+            <p><strong>Uploaded:</strong> {document.uploadedAt ? 
+              format(new Date(document.uploadedAt), 'PPP') : 
               'Unknown date'}</p>
           </div>
 
@@ -115,4 +115,3 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
 };
 
 export default DocumentReviewModal;
-

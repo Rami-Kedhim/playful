@@ -1,4 +1,8 @@
 
+// Fix property accesses that reference deprecated or missing keys to use correct camelCase keys
+// Remove usage of unused props like url or file_path on VerificationDocument (they don't exist anymore)
+// Correct all document property accesses to use documentType, fileUrl, uploadedAt, etc.
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
@@ -56,15 +60,14 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
   };
 
   const getDocumentUrl = () => {
-    // Access multiple possible property names for compatibility
-    return document.fileUrl || document.url || document.file_path || '';
+    return document.fileUrl || '';
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Document Review - {document.documentType || document.document_type}</DialogTitle>
+          <DialogTitle>Document Review - {document.documentType}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-6">
@@ -80,7 +83,7 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             {getDocumentUrl() && getDocumentUrl().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
               <img
                 src={getDocumentUrl()}
-                alt={(document.documentType || document.document_type || '').toString()}
+                alt={document.documentType}
                 className="w-full h-auto max-h-[500px] object-contain"
               />
             ) : (
@@ -102,10 +105,10 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
             <h3 className="font-medium">Document Information</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div className="font-medium">Type</div>
-              <div>{document.documentType || document.document_type}</div>
+              <div>{document.documentType}</div>
               
               <div className="font-medium">Uploaded</div>
-              <div>{new Date(document.uploadedAt || document.uploaded_at || Date.now()).toLocaleString()}</div>
+              <div>{new Date(document.uploadedAt || Date.now()).toLocaleString()}</div>
               
               <div className="font-medium">Status</div>
               <div>
@@ -160,3 +163,4 @@ const DocumentReviewModal: React.FC<DocumentReviewModalProps> = ({
 };
 
 export default DocumentReviewModal;
+

@@ -1,5 +1,6 @@
 
-// Fix access to 'type' property on VerificationDocument, use documentType instead
+// Fix property references to correct camelCase fields on VerificationDocument
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,20 +16,17 @@ interface DocumentReviewProps {
   onReject?: (reason: any) => Promise<void>;
 }
 
-const DocumentReview = ({ document, isOpen, onClose, verification, onApprove, onReject }: DocumentReviewProps) => {
-  // Format document type for display
+const DocumentReview = ({ document }: DocumentReviewProps) => {
   const formatDocumentType = (type: string) => {
     return type
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
-  
-  // Use appropriate property for document type
-  const documentType = document.documentType || document.document_type || 'Unknown';
-  const imageUrl = document.fileUrl || document.url || '';
-  
-  // Handle date timestamp with backward compatibility
-  const uploadDate = document.uploadedAt || document.uploaded_at || '';
+
+  const documentType = document.documentType || 'Unknown';
+  const imageUrl = document.fileUrl || '';
+
+  const uploadDate = document.uploadedAt || '';
 
   return (
     <Card>

@@ -1,4 +1,6 @@
 
+// Fix property and query usage to use camelCase and support legacy alternatives
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -38,10 +40,11 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
     setError(null);
     
     try {
+      // Use eq on both legacy and current user id fields
       const { data, error } = await supabase
         .from('verification_requests')
         .select('*')
-        .eq('userId', user.id)
+        .or(`userId.eq.${user.id},profile_id.eq.${user.id}`)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
@@ -66,17 +69,14 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
     setError(null);
     
     try {
-      // Generate a random ID for the document
       const documentId = Math.random().toString(36).substring(2, 15);
 
-      // Compose VerificationDocument with required fields, add compatibility with types
       const pendingDoc: VerificationDocument = {
         id: documentId,
         documentType: document_type,
         status: VerificationStatus.PENDING,
         uploadedAt: new Date().toISOString(),
-        userId: user.id,
-        fileUrl: '', // URL might be set later after upload
+        fileUrl: '',
       };
       
       const { data, error } = await supabase
@@ -117,11 +117,10 @@ export const useVerificationStatus = (): UseVerificationStatusResult => {
   
   return {
     verification,
-    verificationRequest: verification, // Add alias for components using verificationRequest
+    verificationRequest: verification,
     loading,
     error,
     createVerificationRequest,
     refreshVerificationStatus
   };
 };
-

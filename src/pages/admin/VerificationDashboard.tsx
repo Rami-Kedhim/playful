@@ -1,4 +1,6 @@
 
+// Fix property references to correct camelCase properties on request and documents
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,14 +11,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { VerificationRequest, VerificationStatus, VerificationLevel, VerificationDocument } from '@/types/verification';
+import { VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
+import { getAllVerificationRequests } from '@/services/verificationService';
 
 interface NormalizedVerificationDocument {
   id: string;
-  document_type: string;
+  documentType: string;
   status: string;
-  url: string;
-  uploaded_at?: string;
+  fileUrl: string;
+  uploadedAt?: string;
 }
 
 const VerificationDashboard = () => {
@@ -29,10 +32,8 @@ const VerificationDashboard = () => {
       const data = await getAllVerificationRequests();
       const normalizedRequests = data.map(request => ({
         ...request,
-        userId: request.userId || request.user_id || request.profile_id || '',
-        // requested_level can be typed based on VerificationLevel enum
+        userId: request.userId || request.profile_id || request.profile_id || '',
         requested_level: (request.requested_level as VerificationLevel) || VerificationLevel.BASIC,
-        // ensure documents are normalized (optional)
         documents: request.documents || [],
       }));
       setRequests(normalizedRequests);
@@ -45,7 +46,6 @@ const VerificationDashboard = () => {
     setSelectedRequest(request);
   };
 
-  // Example usage in rendering - fix document properties usage:
   return (
     <Table>
       <TableHeader>
@@ -76,10 +76,10 @@ const VerificationDashboard = () => {
                   onClick={() =>
                     handleDocumentClick({
                       id: request.documents[0].id,
-                      document_type: request.documents[0].document_type || request.documents[0].documentType || '',
-                      status: request.documents[0].status || 'pending',
-                      url: request.documents[0].url || request.documents[0].fileUrl || '',
-                      uploaded_at: request.documents[0].uploadedAt || request.documents[0].uploaded_at || '',
+                      documentType: request.documents[0].documentType,
+                      status: request.documents[0].status,
+                      fileUrl: request.documents[0].fileUrl,
+                      uploadedAt: request.documents[0].uploadedAt,
                     }, request)
                   }
                 >
@@ -94,8 +94,4 @@ const VerificationDashboard = () => {
   );
 };
 
-// Note: getAllVerificationRequests() must be imported from the service or replaced by actual data source
-import { getAllVerificationRequests } from '@/services/verificationService';
-
 export default VerificationDashboard;
-

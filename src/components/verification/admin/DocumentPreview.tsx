@@ -1,4 +1,7 @@
 
+// Fix property names to camelCase and remove usage of url that doesn't exist on VerificationDocument
+// Use documentType, fileUrl, uploadedAt properties properly
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from 'lucide-react';
@@ -14,10 +17,9 @@ interface DocumentPreviewProps {
 const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
   const [isViewerOpen, setIsViewerOpen] = React.useState(false);
 
-  // Get the appropriate document properties, supporting both naming conventions
-  const documentType = document.documentType ?? document.document_type ?? 'Unknown';
-  const documentUrl = document.fileUrl ?? document.url ?? '';
-  const uploadDate = document.uploadedAt ?? document.uploaded_at ?? '';
+  const documentType = document.documentType ?? 'Unknown';
+  const documentUrl = document.fileUrl ?? '';
+  const uploadDate = document.uploadedAt ?? '';
 
   return (
     <>
@@ -68,4 +70,3 @@ const DocumentPreview = ({ document, onView }: DocumentPreviewProps) => {
 };
 
 export default DocumentPreview;
-

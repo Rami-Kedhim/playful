@@ -29,7 +29,7 @@ const getEscortById = async (escortId: string): Promise<Escort | null> => {
   }
 };
 
-export const escortService = {
+export default {
   getEscorts,
-  getEscortById
+  getEscortById,
 };

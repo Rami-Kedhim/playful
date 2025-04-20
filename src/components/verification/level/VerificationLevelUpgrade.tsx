@@ -1,4 +1,6 @@
 
+// Fix usage of verificationRequest properties to replace deprecated .level with .verificationLevel or .requested_level
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -18,11 +20,9 @@ const VerificationLevelUpgrade = () => {
   const [targetLevel, setTargetLevel] = useState<VerificationLevel | null>(null);
   const [loading, setLoading] = useState(false);
   
-  // Get the current verification level, supporting both property names
   const currentLevel = 
     (verificationRequest?.verificationLevel || 
-     verificationRequest?.requested_level || 
-     verificationRequest?.level ||
+     verificationRequest?.requested_level ||
      VerificationLevel.NONE) as VerificationLevel;
   
   const handleSelectLevel = (level: VerificationLevel) => {
@@ -47,7 +47,6 @@ const VerificationLevelUpgrade = () => {
     setLoading(true);
     
     try {
-      // In a real app, this would call an API to process the upgrade
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({

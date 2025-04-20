@@ -1,4 +1,3 @@
-
 import React, {
   createContext,
   useContext,
@@ -7,8 +6,8 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import { escortService } from '@/services/escorts/escortService'; // fixed named import
-import { Escort } from '@/types/escort'; // fixed casing to lowercase
+import escortService from '@/services/escorts/escortService';
+import { Escort } from '@/types/escort';
 
 interface EscortContextType {
   escorts: Escort[];
@@ -112,4 +111,3 @@ export const useEscortContext = (): EscortContextType => {
   }
   return context;
 };
-
