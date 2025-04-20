@@ -1,6 +1,10 @@
 
 // Unified Escort interface merged from multiple definitions and cleaned up for consistency
 
+// Strict serviceType union for common usage
+export type EscortServiceType = 'in-person' | 'virtual' | 'both';
+
+// Unified Escort interface
 export interface Escort {
   id: string;
   name: string;
@@ -25,7 +29,7 @@ export interface Escort {
   rating?: number;
   reviewCount?: number;
   reviews?: any[];
-  serviceType?: 'in-person' | 'virtual' | 'both' | string;
+  serviceType?: EscortServiceType | string; // unify to allow both strict and flexible string
   services?: string[];
   tags?: string[];
   languages?: string[];
@@ -76,8 +80,7 @@ export interface Availability {
   }[];
 }
 
-// Booking and Video remain separated, but can be included here for convenience
-
+// Booking interface unified
 export interface Booking {
   id: string;
   escortId: string;
@@ -107,4 +110,3 @@ export interface Video {
   duration?: number;
   isPublic?: boolean;
 }
-

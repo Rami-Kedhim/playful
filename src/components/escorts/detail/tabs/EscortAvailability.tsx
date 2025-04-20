@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // fixed import casing consistent
+
 import { Calendar } from '@/components/ui/calendar';
 
 interface EscortAvailabilityProps {
@@ -76,3 +77,4 @@ const EscortAvailability: React.FC<EscortAvailabilityProps> = ({ escort }) => {
 };
 
 export default EscortAvailability;
+
