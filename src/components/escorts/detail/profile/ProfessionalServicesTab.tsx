@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { serviceCategories, mapLegacyServiceToId } from "@/data/serviceCategories";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +10,8 @@ interface ProfessionalServicesTabProps {
 }
 
 const ProfessionalServicesTab = ({ escort }: ProfessionalServicesTabProps) => {
-  // Use services if available, otherwise fall back to tags
-  const servicesToShow = escort.services || escort.tags || [];
+  // Use services if available, otherwise fall back to tags, default empty array to avoid errors
+  const servicesToShow = escort.services ?? escort.tags ?? [];
   
   // Group services by category
   const servicesByCategory = React.useMemo(() => {
@@ -97,3 +97,4 @@ const ProfessionalServicesTab = ({ escort }: ProfessionalServicesTabProps) => {
 };
 
 export default ProfessionalServicesTab;
+

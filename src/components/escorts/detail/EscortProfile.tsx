@@ -18,7 +18,7 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [messageOpen, setMessageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Normalize height and verificationLevel to satisfy type
+  // Normalize height and verificationLevel to satisfy type - explicitly cast verificationLevel
   const normalizedEscort: Escort = {
     ...escort,
     height:

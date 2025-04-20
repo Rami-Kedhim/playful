@@ -1,6 +1,5 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
 import { Escort, VerificationLevel } from "@/types/Escort";
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
@@ -18,50 +17,48 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
   const verificationLevel = (escort.verificationLevel || "none") as VerificationLevel;
 
   return (
-    <Card className="mt-6">
-      <CardContent className="p-6">
-        <Tabs defaultValue="about">
-          <TabsList className="grid grid-cols-4 mb-6">
-            <TabsTrigger value="about" className="gap-2">
-              <UserCheck className="h-4 w-4 hidden sm:inline" />
-              <span>About</span>
-            </TabsTrigger>
-            <TabsTrigger value="services" className="gap-2">
-              <Info className="h-4 w-4 hidden sm:inline" />
-              <span>Services</span>
-            </TabsTrigger>
-            <TabsTrigger value="rates" className="gap-2">
-              <DollarSign className="h-4 w-4 hidden sm:inline" />
-              <span>Rates</span>
-            </TabsTrigger>
-            <TabsTrigger value="safety" className="gap-2">
-              <Shield className="h-4 w-4 hidden sm:inline" />
-              <span>Safety</span>
-            </TabsTrigger>
-          </TabsList>
+    <div className="mt-6">
+      <Tabs defaultValue="about">
+        <TabsList className="grid grid-cols-4 mb-6">
+          <TabsTrigger value="about" className="gap-2">
+            <UserCheck className="h-4 w-4 hidden sm:inline" />
+            <span>About</span>
+          </TabsTrigger>
+          <TabsTrigger value="services" className="gap-2">
+            <Info className="h-4 w-4 hidden sm:inline" />
+            <span>Services</span>
+          </TabsTrigger>
+          <TabsTrigger value="rates" className="gap-2">
+            <DollarSign className="h-4 w-4 hidden sm:inline" />
+            <span>Rates</span>
+          </TabsTrigger>
+          <TabsTrigger value="safety" className="gap-2">
+            <Shield className="h-4 w-4 hidden sm:inline" />
+            <span>Safety</span>
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="about">
-            <AboutTab escort={escort} />
-          </TabsContent>
+        <TabsContent value="about">
+          <AboutTab escort={escort} />
+        </TabsContent>
 
-          <TabsContent value="services">
-            <ServicesTab escort={escort} />
-          </TabsContent>
+        <TabsContent value="services">
+          <ServicesTab escort={escort} />
+        </TabsContent>
 
-          <TabsContent value="rates">
-            <RatesTab escort={escort} />
-          </TabsContent>
+        <TabsContent value="rates">
+          <RatesTab escort={escort} />
+        </TabsContent>
 
-          <TabsContent value="safety">
-            <SafetyTips />
+        <TabsContent value="safety">
+          <SafetyTips />
 
-            <div className="mt-6">
-              <VerificationBadge level={verificationLevel} />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          <div className="mt-6">
+            <VerificationBadge level={verificationLevel} />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

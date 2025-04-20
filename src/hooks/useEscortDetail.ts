@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { useToast } from '@/components/ui/use-toast';
 import { useWallet } from '@/hooks/useWallet';
 
@@ -117,3 +117,4 @@ export const useEscortDetail = (escortId?: string) => {
 };
 
 export default useEscortDetail;
+
