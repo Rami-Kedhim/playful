@@ -1,12 +1,11 @@
 
-// Fix the AICompanionService message object keys to conform to AICompanionMessage type and remove unknown props
+// Adjusted AI Companion Service mock to match typings and remove unknown keys like user_id, added userId param when needed.
 
 import { AICompanionMessage } from '@/hooks/ai-companion/types';
 
 // Mock AI companion service
 const aiCompanionService = {
   getCompanionMessages: async (companionId: string, userId: string): Promise<AICompanionMessage[]> => {
-    // Simulate fetching messages from a database or API
     return new Promise((resolve) => {
       setTimeout(() => {
         const messages: AICompanionMessage[] = [
@@ -29,7 +28,6 @@ const aiCompanionService = {
   },
 
   sendMessage: async (companionId: string, userId: string, content: string): Promise<AICompanionMessage> => {
-    // Simulate sending a message and receiving a response
     return new Promise((resolve) => {
       setTimeout(() => {
         const newMessage: AICompanionMessage = {
@@ -37,7 +35,6 @@ const aiCompanionService = {
           content: content,
           role: 'user',
           timestamp: new Date().toISOString(),
-          is_from_user: true,
         };
         resolve(newMessage);
       }, 500);
@@ -45,7 +42,6 @@ const aiCompanionService = {
   },
 
   getAIResponse: async (companionId: string, userId: string, message: string): Promise<AICompanionMessage> => {
-    // Simulate getting a response from the AI
     return new Promise((resolve) => {
       setTimeout(() => {
         const aiResponse: AICompanionMessage = {
@@ -60,7 +56,6 @@ const aiCompanionService = {
   },
 
   generateContent: async (prompt: string, type: string): Promise<string> => {
-    // Simulate generating content based on the prompt and type
     return new Promise((resolve) => {
       setTimeout(() => {
         const generatedContent = `Generated ${type} content for prompt: ${prompt}`;

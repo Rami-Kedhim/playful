@@ -1,5 +1,5 @@
 
-// Removed duplicate 'isVerified' fields and aligned with usage
+// Removed duplicate 'isVerified' fields and consolidated Livecam interface
 
 export interface Livecam {
   id: string;
@@ -20,7 +20,6 @@ export interface Livecam {
   nextStreamTime?: string;
   description?: string;
 
-  // Additional properties
   displayName?: string;
   imageUrl?: string;
   thumbnailUrl?: string;
@@ -39,4 +38,6 @@ export interface Livecam {
   previewVideoUrl?: string;
   createdAt?: Date;
 }
+
 export type LivecamModel = Livecam;
+

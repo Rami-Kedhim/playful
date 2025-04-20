@@ -1,57 +1,27 @@
-export enum VerificationStatus {
-  PENDING = 'pending',
-  IN_REVIEW = 'in_review',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  EXPIRED = 'expired',
-  SUSPENDED = 'suspended'
-}
 
-export enum VerificationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  ENHANCED = 'enhanced',
-  PREMIUM = 'premium'
-}
-
-export type DocumentType = 'id_card' | 'passport' | 'driver_license' | 'utility_bill';
+// Removed duplicate identifier declarations
 
 export interface VerificationDocument {
   id: string;
-  userId: string;
-  documentType: string;
-  document_type?: string; // For backward compatibility
+  type: string;
   fileUrl: string;
-  file_path?: string; // For backward compatibility
-  url?: string; // For backward compatibility
-  status: VerificationStatus;
   uploadedAt: string;
-  uploaded_at?: string; // For backward compatibility
-  reviewedAt?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
   reviewedBy?: string;
-  notes?: string;
+  reviewedAt?: Date;
 }
 
 export interface VerificationRequest {
   id: string;
-  userId?: string;
-  user_id?: string; // backward compatibility
-  profile_id?: string;
-  requestDate?: string;
-  requested_level?: VerificationLevel;
-  verificationLevel?: VerificationLevel;
-  level?: VerificationLevel;
-  status: VerificationStatus;
+  userId: string;
+  status: 'pending' | 'in_review' | 'approved' | 'rejected';
+  verificationLevel: 'none' | 'basic' | 'enhanced' | 'premium';
   documents: VerificationDocument[];
-  reviewedAt?: string;
-  reviewed_by?: string;
-  rejectionReason?: string;
-  submittedAt?: string;
-  created_at?: string;
+  submittedAt: string;
   updatedAt?: string;
-  reviewed_at?: string;
-  reviewed_by?: string;
   rejectionReason?: string;
-  reviewer_notes?: string;
-  expires_at?: string;
+  reviewedBy?: string;
+  reviewedAt?: Date;
 }
+

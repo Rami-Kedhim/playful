@@ -1,3 +1,7 @@
+
+// Added missing optional properties to UberPersona interface to fix errors.
+// Added isActive and type properties.
+
 export interface UberPersona {
   id: string;
   username: string;
@@ -47,8 +51,7 @@ export interface UberPersona {
     favoriteCount: number;
     bookingCount?: number;
   };
-  
-  // Additional properties needed by components
+
   description?: string;
   languages?: string[];
   services?: string[];
@@ -64,21 +67,12 @@ export interface UberPersona {
       hasPendingUpdates?: boolean;
       isPremiumExpiring?: boolean;
     };
+    personalityIndex?: number;
   };
   isLocked?: boolean;
   isOnline?: boolean;
   availability?: any;
   isPremium?: boolean;
-  isActive?: boolean; // add isActive for UberCore.ts
+  isActive?: boolean;
   type?: 'escort' | 'creator' | 'livecam' | 'ai';
-}
-
-export interface NeuralModel {
-  id: string;
-  name: string;
-  version: string;
-  specialization: string | string[];
-  status: 'active' | 'inactive' | 'training';
-  accuracy: number;
-  lastUpdated: Date;
 }

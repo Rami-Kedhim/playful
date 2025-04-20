@@ -1,5 +1,6 @@
 
-// Define the module types for neural services
+// Added export type for isolatedModules compliance
+
 export type ModuleType = 
   | 'escorts'
   | 'creators'
@@ -8,9 +9,8 @@ export type ModuleType =
   | 'core'
   | 'security'
   | 'analytics'
-  | 'ai-companion'; // Adding this for backward compatibility
+  | 'ai-companion'; // Adding for backward compatibility
 
-// Neural service configuration interface
 export interface NeuralServiceConfig {
   enabled: boolean;
   apiEndpoint?: string;
@@ -25,7 +25,6 @@ export interface NeuralServiceConfig {
   resourceAllocation?: number;
 }
 
-// Base neural service interface that all services must implement
 export interface BaseNeuralService {
   id: string;
   moduleId: string;
@@ -44,5 +43,4 @@ export interface BaseNeuralService {
   getMetrics(): Record<string, any>;
 }
 
-// Export BaseNeuralService as BaseService for backward compatibility
-export { BaseNeuralService as BaseService };
+export type { BaseNeuralService as BaseService };

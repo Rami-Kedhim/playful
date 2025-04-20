@@ -1,6 +1,11 @@
 
+// Fixed UberCore to use optional chaining and update types according to UberPersona.
+// Removed calls to non-existent neuralServiceRegistry methods.
+// Adjusted systemMetadata to only known optional properties.
+// Added isActive and type properties where checked.
+
 import { UberPersona } from '@/types/UberPersona';
-import { UberCoreSettings } from '@/types/uber-ecosystem';
+import { UberCoreSettings } from '@/services/neural/types/UberCoreService';
 import neuralServiceRegistry from './registry/NeuralServiceRegistry';
 
 export class UberCore {
@@ -17,11 +22,11 @@ export class UberCore {
 
   public isAvailable(persona: UberPersona): boolean {
     if (!persona) return false;
-    
+
     const availability = persona.availability?.schedule;
     return (persona.isActive ?? false) && !!availability;
   }
-  
+
   public async initialize(): Promise<boolean> {
     if (this.initialized) {
       return true;
@@ -37,65 +42,49 @@ export class UberCore {
       return false;
     }
   }
-  
+
   public updateSettings(newSettings: Partial<UberCoreSettings>): void {
     this.settings = {
       ...this.settings,
       ...newSettings
     };
 
-    // Check if optimizeResourceAllocation exists before calling
-    if (typeof (neuralServiceRegistry as any).optimizeResourceAllocation === 'function' && typeof newSettings.resourceAllocation === 'number') {
-      (neuralServiceRegistry as any).optimizeResourceAllocation();
-    }
-    
+    // Removed call to optimizeResourceAllocation - method does not exist
     console.info('UberCore settings updated:', this.settings);
   }
-  
+
   public getSettings(): UberCoreSettings {
     return { ...this.settings };
   }
-  
+
   public async shutdown(): Promise<boolean> {
     if (!this.initialized) {
       return true;
     }
-    
-    // Check if shutdown exists before calling
-    if (typeof (neuralServiceRegistry as any).shutdown === 'function') {
-      try {
-        await (neuralServiceRegistry as any).shutdown();
-        this.initialized = false;
-        return true;
-      } catch (error) {
-        console.error('Error shutting down UberCore:', error);
-        return false;
-      }
-    }
-    // Fallback
+
+    // Removed call to neuralServiceRegistry.shutdown - method does not exist
     this.initialized = false;
     return true;
   }
-  
+
   public async processPersona(persona: UberPersona): Promise<UberPersona> {
     if (!this.initialized) {
       await this.initialize();
     }
-    
+
     try {
       const processedPersona: UberPersona = { ...persona };
-      
+
       if (!processedPersona.systemMetadata) {
         processedPersona.systemMetadata = {
-          // Remove unsupported 'version' to fix TS errors
-          lastUpdated: new Date().toISOString(),
-          // Only add known optional props
-          // version: '1.0', // removed due to type error
-          personalityIndex: Math.random()
+          // Removed 'version' due to type incompatibility
+          lastSynced: new Date(),
+          personalityIndex: Math.random(),
+          statusFlags: processedPersona.systemMetadata?.statusFlags ?? {}
         };
       }
-      
-      switch ((processedPersona.type ?? '')) {
+
+      switch (processedPersona.type ?? '') {
         case 'escort':
           break;
         case 'creator':
@@ -108,14 +97,14 @@ export class UberCore {
           // no action
           break;
       }
-      
+
       return processedPersona;
     } catch (error) {
       console.error('Error processing persona:', error);
       return persona;
     }
   }
-  
+
   public getPersonaStatus(persona: UberPersona): {
     isLocked: boolean;
     isOnline: boolean;
@@ -127,35 +116,36 @@ export class UberCore {
       availability: persona.availability?.nextAvailable ?? 'Unknown',
     };
   }
-  
+
   public calculateMatchScore(personaA: UberPersona, personaB: UberPersona): number {
     let score = 0;
-    
+
     if (personaA.type === personaB.type) score += 10;
     if (personaA.location === personaB.location) score += 20;
-    
+
     if (personaA.tags && personaB.tags) {
       const sharedTags = personaA.tags.filter(tag => personaB.tags?.includes(tag));
       score += sharedTags.length * 5;
     }
-    
+
     return Math.min(100, score);
   }
-  
+
   public isPremiumPersona(persona: UberPersona): boolean {
     return persona.isPremium === true;
   }
-  
+
   public requiresNeuralBoost(persona: UberPersona): boolean {
     if (!this.settings.boostingEnabled) return false;
-    
+
     const isPremium = persona.isPremium === true;
-    
+
     const useNeural = persona.systemMetadata?.statusFlags?.needsModeration === true || 
                       persona.systemMetadata?.personalityIndex !== undefined;
-    
+
     return isPremium || useNeural;
   }
 }
 
 export const uberCoreInstance = new UberCore();
+
