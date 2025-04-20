@@ -1,10 +1,12 @@
 
+// Fix import to unify to '@/types/Escort' and normalize height to string type
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
-import { Escort } from '@/types/escort'; // unified single import
-import { Booking } from '@/types/booking'; // Booking from booking.ts which defines it
+import { Escort } from '@/types/Escort'; // unified import casing
+import { Booking } from '@/types/booking';
 import { toast } from '@/components/ui/use-toast';
 import BookingDialog from '../detail/booking/BookingDialog';
 import BookingConfirmation from './BookingConfirmation';

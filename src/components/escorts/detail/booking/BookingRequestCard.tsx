@@ -1,8 +1,10 @@
 
+// Fix import to unify to '@/types/Escort' and normalize height to string
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // unified import
 import { Calendar, Clock, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import BookingDialog from './BookingDialog';

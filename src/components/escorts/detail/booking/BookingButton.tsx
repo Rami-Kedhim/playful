@@ -1,10 +1,12 @@
 
+// Fix import to unify to '@/types/Escort' and normalize height to string
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
-import { Escort } from '@/types/escort'; // unified import
-import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
-import BookingDialog from '../../detail/booking/BookingDialog';
+import { Escort } from '@/types/Escort'; // unified import
+import { ServiceTypeFilter } from '@/components/escorts/filters/ServiceTypeBadgeLabel';
+import BookingDialog from '@/components/escorts/detail/booking/BookingDialog';
 
 interface BookingButtonProps {
   escort: Escort & { providesVirtualContent?: boolean; providesInPersonServices?: boolean };
@@ -23,7 +25,7 @@ const BookingButton: React.FC<BookingButtonProps> = ({
 }) => {
   const [showBookingDialog, setShowBookingDialog] = useState(false);
 
-  // Normalize height to string to satisfy type issues
+  // Normalize height to string to satisfy type
   const normalizedEscort = {
     ...escort,
     height: escort.height !== undefined && typeof escort.height !== 'string'

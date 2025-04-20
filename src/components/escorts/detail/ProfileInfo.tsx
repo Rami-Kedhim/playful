@@ -1,7 +1,9 @@
 
+// Fix import to unify to '@/types/Escort' and normalize height to string
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort"; // unify import casing
 import ProfileHeader from "./ProfileHeader";
 import ProfileActions from "./ProfileActions";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

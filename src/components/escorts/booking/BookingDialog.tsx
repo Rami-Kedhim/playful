@@ -1,8 +1,10 @@
 
+// Fix import to unify to '@/types/Escort' and fix casing import to avoid TS error
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Escort } from '@/types/escort'; // unified import
+import { Escort } from '@/types/Escort'; // unified import casing
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
