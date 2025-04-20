@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import useEscortFilter from './useEscortFilter';
 import useFilterStateWithUrl from './useFilterStateWithUrl';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 interface UseEscortFilterWithUrlProps {
   escorts: Escort[];
@@ -38,22 +38,22 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
     setFilters: (newFilters) => {
       // Update local state with URL values
       if (newFilters.serviceTypeFilter !== undefined) {
-        filterState.setServiceTypeFilter(newFilters.serviceTypeFilter);
+        filterState.setServiceTypeFilter(String(newFilters.serviceTypeFilter) as "" | "in-person" | "virtual" | "both");
       }
       if (newFilters.verifiedOnly !== undefined) {
-        filterState.setVerifiedOnly(newFilters.verifiedOnly);
+        filterState.setVerifiedOnly(Boolean(newFilters.verifiedOnly));
       }
       if (newFilters.availableNow !== undefined) {
-        filterState.setAvailableNow(newFilters.availableNow);
+        filterState.setAvailableNow(Boolean(newFilters.availableNow));
       }
       if (newFilters.location !== undefined) {
-        filterState.setLocation(newFilters.location);
+        filterState.setLocation(String(newFilters.location));
       }
       if (newFilters.searchQuery !== undefined) {
-        filterState.setSearchQuery(newFilters.searchQuery);
+        filterState.setSearchQuery(String(newFilters.searchQuery));
       }
       if (newFilters.ratingMin !== undefined) {
-        filterState.setRatingMin(newFilters.ratingMin);
+        filterState.setRatingMin(Number(newFilters.ratingMin));
       }
     },
     defaultValues
@@ -83,3 +83,4 @@ export const useEscortFilterWithUrl = ({ escorts }: UseEscortFilterWithUrlProps)
 };
 
 export default useEscortFilterWithUrl;
+

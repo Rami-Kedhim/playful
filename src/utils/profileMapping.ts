@@ -1,5 +1,3 @@
-// Fix import Escort casing to '@/types/Escort' and add safe optional chaining to videos
-
 import { Escort } from '@/types/Escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
@@ -216,12 +214,12 @@ export const mapLivecamsToUberPersonas = (livecams: LivecamModel[]): UberPersona
 const generateHilbertVector = (id: string, dimension: number = 4): number[] => {
   const seed = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const vector: number[] = [];
-  
+
   for (let i = 0; i < dimension; i++) {
     const value = Math.sin(seed * (i + 1) * 0.1) * 0.5 + 0.5;
     vector.push(value);
   }
-  
+
   return vector;
 };
 

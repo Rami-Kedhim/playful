@@ -1,11 +1,12 @@
 
 import { useState } from "react";
 import { useEscortFilterWithUrl } from "@/hooks/useEscortFilterWithUrl";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import QuickFilterBar from "./QuickFilterBar";
 import HeaderSection from "./container/HeaderSection";
 import FilterSection from "./container/FilterSection";
 import ResultsSection from "./container/ResultsSection";
+import { ServiceTypeFilter } from "@/components/escorts/filters/ServiceTypeBadgeLabel";
 
 interface EscortContainerProps {
   escorts: Escort[];
@@ -18,6 +19,11 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
   
   // Use the filtered hook that syncs with URL
   const filterState = useEscortFilterWithUrl({ escorts });
+
+  // Casting setServiceTypeFilter to function with expected signature
+  const safeSetServiceTypeFilter = (value: ServiceTypeFilter) => {
+    filterState.setServiceTypeFilter(value);
+  };
 
   // Consider both internal and external loading states
   const combinedIsLoading = filterState.isLoading || externalLoading;
@@ -32,7 +38,7 @@ const EscortContainer = ({ escorts, services, isLoading: externalLoading = false
       {/* Quick filter bar for mobile and desktop */}
       <QuickFilterBar
         serviceTypeFilter={filterState.serviceTypeFilter}
-        setServiceTypeFilter={filterState.setServiceTypeFilter}
+        setServiceTypeFilter={safeSetServiceTypeFilter}
         verifiedOnly={filterState.verifiedOnly}
         setVerifiedOnly={filterState.setVerifiedOnly}
         availableNow={filterState.availableNow}
