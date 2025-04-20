@@ -1,4 +1,3 @@
-
 // Extending Escort interface with Booking and Video interfaces to solve missing exports
 
 export interface Escort {
@@ -92,4 +91,3 @@ export interface Video {
   duration?: number;
   isPublic?: boolean;
 }
-
