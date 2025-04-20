@@ -1,8 +1,9 @@
 
-// fix imports same as above
+// Use correct typing and fix payoutsData accessing
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
-import { ContentCreator } from "@/types/creator";  
+import { CreatorPayout } from "@/types/creator";
 import payoutService from "./payoutService";
 
 /**
@@ -13,11 +14,11 @@ export const usePayoutQueries = (creatorId: string) => {
 
   // Fetch payouts query
   const {
-    data: payoutsData = { data: [], totalCount: 0 },
+    data: payoutsData = [],
     isLoading,
     error,
     refetch
-  } = useQuery({
+  } = useQuery<CreatorPayout[]>({
     queryKey: ['creator', creatorId, 'payouts'],
     queryFn: async () => {
       const result = await payoutService.getPayouts(creatorId);
@@ -48,7 +49,7 @@ export const usePayoutQueries = (creatorId: string) => {
   });
 
   return {
-    payouts: (payoutsData.data || []) as ContentCreator[],
+    payouts: payoutsData || [],
     isLoading,
     error,
     refreshPayouts: refetch,
