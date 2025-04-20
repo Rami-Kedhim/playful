@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, ReactNode } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { EscortProvider } from './providers/EscortProvider';
 import { EscortsNeuralService } from '@/services/neural/modules/EscortsNeuralService';
@@ -39,7 +39,8 @@ const EscortContent: React.FC<EscortContentProps> = ({ escort }) => (
   </div>
 );
 
-const EscortsModule: React.FC = () => {
+// Add children prop explicitly to allow children
+const EscortsModule: React.FC<{ children?: ReactNode }> = ({ children }) => {
   // Use module ID string from EscortsNeuralService.ID if available, else fallback safely
   const { service, loading, error, toggleEnabled } = useNeuralService(
     (EscortsNeuralService as any).ID || 'escorts'
@@ -53,12 +54,18 @@ const EscortsModule: React.FC = () => {
 
   return (
     <EscortProvider>
-      <Routes>
-        <Route path="/" element={<EscortList />} />
-        <Route path="/profile/:id" element={<EscortProfile />} />
-        <Route path="/directory" element={<EscortDirectory />} />
-        <Route path="/content/:id" element={<EscortContent escort={{}} />} />
-      </Routes>
+      {children ? (
+        <>
+          {children}
+        </>
+      ) : (
+        <Routes>
+          <Route path="/" element={<EscortList />} />
+          <Route path="/profile/:id" element={<EscortProfile />} />
+          <Route path="/directory" element={<EscortDirectory />} />
+          <Route path="/content/:id" element={<EscortContent escort={{}} />} />
+        </Routes>
+      )}
       <Toaster />
     </EscortProvider>
   );
