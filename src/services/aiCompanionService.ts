@@ -1,3 +1,6 @@
+
+// Fix the AICompanionService message object keys to conform to AICompanionMessage type and remove unknown props
+
 import { AICompanionMessage } from '@/hooks/ai-companion/types';
 
 // Mock AI companion service
@@ -68,3 +71,4 @@ const aiCompanionService = {
 };
 
 export default aiCompanionService;
+

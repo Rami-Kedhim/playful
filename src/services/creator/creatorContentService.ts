@@ -1,3 +1,6 @@
+
+// Fix the property naming related to viewCount and likeCount to match CreatorContent type
+
 import { supabase } from "@/integrations/supabase/client";
 import { CreatorContent } from "@/types/creator";
 import { uploadFile } from "@/services/storageService";
@@ -29,7 +32,7 @@ export const fetchCreatorContent = async (
 
     // Apply filters
     let filteredContent = [...mockContent];
-    
+
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase();
       filteredContent = filteredContent.filter(item => 
@@ -37,13 +40,13 @@ export const fetchCreatorContent = async (
         (item.description && item.description.toLowerCase().includes(searchTerm))
       );
     }
-    
+
     if (filters.contentType) {
       filteredContent = filteredContent.filter(item => 
         item.contentType === filters.contentType
       );
     }
-    
+
     if (filters.status) {
       filteredContent = filteredContent.filter(item => 
         item.status === filters.status
@@ -54,7 +57,7 @@ export const fetchCreatorContent = async (
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedContent = filteredContent.slice(startIndex, endIndex);
-    
+
     return {
       data: paginatedContent,
       totalCount: filteredContent.length

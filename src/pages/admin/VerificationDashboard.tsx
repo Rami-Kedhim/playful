@@ -1,3 +1,6 @@
+
+// We fix the incorrect property names for documents and remove usage of 'type' since it's not in VerificationDocument
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -52,7 +55,7 @@ const VerificationDashboard: React.FC = () => {
       const data = await getAllVerificationRequests();
       const normalizedRequests = data.map(request => ({
         ...request,
-        userId: request.userId || request.user_id || '',
+        userId: request.userId || request.user_id || request.profile_id || '',
         requested_level: (request.requested_level as VerificationLevel) || VerificationLevel.BASIC
       }));
       setRequests(normalizedRequests);
@@ -187,7 +190,7 @@ const VerificationDashboard: React.FC = () => {
             <TableBody>
               {filteredRequests.map(request => (
                 <TableRow key={request.id}>
-                  <TableCell>{request.userId}</TableCell>
+                  <TableCell>{request.userId || request.profile_id}</TableCell>
                   <TableCell>
                     {request.status === VerificationStatus.APPROVED && (
                       <div className="flex items-center gap-1 text-green-500">
@@ -201,7 +204,7 @@ const VerificationDashboard: React.FC = () => {
                         Rejected
                       </div>
                     )}
-                    {request.status !== VerificationStatus.APPROVED && request.status !== VerificationStatus.REJECTED && (
+                    {(request.status !== VerificationStatus.APPROVED && request.status !== VerificationStatus.REJECTED) && (
                       <span>{request.status}</span>
                     )}
                   </TableCell>
@@ -216,9 +219,10 @@ const VerificationDashboard: React.FC = () => {
                           handleDocumentClick(
                             {
                               id: request.documents[0].id,
-                              document_type: request.documents[0].document_type || request.documents[0].type || '',
+                              document_type: request.documents[0].document_type || request.documents[0].documentType || '',
                               status: request.documents[0].status || 'pending',
-                              url: request.documents[0].url || request.documents[0].file_url || '',
+                              url: request.documents[0].url || request.documents[0].fileUrl || request.documents[0].file_url || '',
+                              uploaded_at: request.documents[0].uploadedAt || request.documents[0].uploaded_at || '',
                             } as NormalizedVerificationDocument,
                             request
                           )
@@ -243,3 +247,4 @@ const VerificationDashboard: React.FC = () => {
 };
 
 export default VerificationDashboard;
+
