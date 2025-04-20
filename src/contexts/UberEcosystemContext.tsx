@@ -1,4 +1,7 @@
 
+// Fix import statement for Escort to be '@/types/escort' consistently
+// Fix CompatibleEscort type usage to satisfy TS while maintaining data integrity
+
 import React, {
   createContext,
   useContext,
@@ -6,8 +9,8 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { Escort } from '@/types/escort';  // Consistent import
-import { UberPersona } from '@/types/UberPersona'; // Make sure this exists and is type only import
+import { Escort } from '@/types/escort';
+import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
@@ -96,13 +99,12 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
         setLoading(true);
         await uberCoreInstance.initialize();
         if (escorts && escorts.length > 0) {
-          // Ensure height is string for compatibility
           const sanitizedEscorts = escorts.map(e => ({
             ...e,
             height: typeof e.height === 'number' ? e.height.toString() : e.height ?? ''
           })) as CompatibleEscort[];
 
-          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
+          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
           setAllPersonas(mappedPersonas);
         }
         setHilbertSpace({
@@ -145,7 +147,7 @@ const UberEcosystemProvider: React.FC<{children: ReactNode}> = ({ children }) =>
           ...e,
           height: typeof e.height === 'number' ? e.height.toString() : e.height ?? '',
         })) as CompatibleEscort[];
-        const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
+        const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
         setAllPersonas(mappedPersonas);
       }
 

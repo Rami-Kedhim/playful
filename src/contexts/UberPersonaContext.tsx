@@ -1,37 +1,43 @@
+
+// Harmonize all Escort imports to '@/types/escort'
+// Add UberPersona import from '@/types/UberPersona'
+
+// Import statements
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
+import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
 
 interface UberPersonaContextType {
-  allPersonas: any[];
-  escortPersonas: any[];
-  creatorPersonas: any[];
-  livecamPersonas: any[];
-  aiPersonas: any[];
+  allPersonas: UberPersona[];
+  escortPersonas: UberPersona[];
+  creatorPersonas: UberPersona[];
+  livecamPersonas: UberPersona[];
+  aiPersonas: UberPersona[];
   loading: boolean;
   error: string | null;
   refreshEcosystem: () => Promise<void>;
-  getPersonaById: (id: string) => any | undefined;
-  boostedPersonas: any[];
-  rankPersonas: (personas: any[], boostFactor?: number) => any[];
+  getPersonaById: (id: string) => UberPersona | undefined;
+  boostedPersonas: UberPersona[];
+  rankPersonas: (personas: UberPersona[], boostFactor?: number) => UberPersona[];
   hilbertSpace: {
     dimension: number;
-    getCoordinates: (persona: any) => number[];
+    getCoordinates: (persona: UberPersona) => number[];
   };
 }
 
 const defaultHilbertSpace = {
   dimension: 4,
-  getCoordinates: (_: any): number[] => [0.5, 0.5, 0.5, 0.5]
+  getCoordinates: (_: UberPersona): number[] => [0.5, 0.5, 0.5, 0.5]
 };
 
 const UberPersonaContext = createContext<UberPersonaContextType | undefined>(undefined);
 
 export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { escorts } = useEscortContext();
-  const [allPersonas, setAllPersonas] = useState<any[]>([]);
+  const [allPersonas, setAllPersonas] = useState<UberPersona[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState<boolean>(false);
@@ -48,13 +54,19 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
         await uberCoreInstance.initialize();
 
         if (escorts && escorts.length > 0) {
-          const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
+          // Fix: Ensure CompatibleEscort has required Escort properties (id, name, etc)
+          const sanitizedEscorts = escorts.map(e => ({
+            ...e,
+            height: typeof e.height === 'number' ? e.height.toString() : e.height ?? ''
+          })) as CompatibleEscort[];
+
+          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
           setAllPersonas(mappedPersonas);
         }
 
         setHilbertSpace({
           dimension: 4,
-          getCoordinates: (persona: any): number[] => {
+          getCoordinates: (persona: UberPersona): number[] => {
             const seed = (persona.id || '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             return [
               Math.sin(seed * 0.1) * 0.5 + 0.5,
@@ -83,19 +95,19 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   }, [escorts]);
 
   const getEscorts = () => allPersonas.filter(persona =>
-    (persona as any).type === 'escort' || persona.roleFlags?.isEscort === true
+    persona.roleFlags?.isEscort === true
   );
 
   const getCreators = () => allPersonas.filter(persona =>
-    (persona as any).type === 'creator' || persona.roleFlags?.isCreator === true
+    persona.roleFlags?.isCreator === true
   );
 
   const getLivecams = () => allPersonas.filter(persona =>
-    (persona as any).type === 'livecam' || persona.roleFlags?.isLivecam === true
+    persona.roleFlags?.isLivecam === true
   );
 
   const getAIPersonas = () => allPersonas.filter(persona =>
-    (persona as any).type === 'ai' || persona.roleFlags?.isAI === true || (persona as any).isAI === true
+    persona.roleFlags?.isAI === true || (persona as any).isAI === true
   );
 
   const getPersonaById = (id: string): UberPersona | undefined => {
@@ -135,35 +147,33 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     try {
       setLoading(true);
       if (escorts && escorts.length > 0) {
-        const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
+        const sanitizedEscorts = escorts.map(e => ({
+          ...e,
+          height: typeof e.height === 'number' ? e.height.toString() : e.height ?? '',
+        })) as CompatibleEscort[];
+        const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
         setAllPersonas(mappedPersonas);
       }
       setLoading(false);
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to refresh UberPersona ecosystem');
+    } finally {
+      setLoading(false);
     }
   };
 
   const value = {
     allPersonas,
-    escortPersonas: allPersonas.filter(p => p.roleFlags?.isEscort),
-    creatorPersonas: allPersonas.filter(p => p.roleFlags?.isCreator),
-    livecamPersonas: allPersonas.filter(p => p.roleFlags?.isLivecam),
-    aiPersonas: allPersonas.filter(p => p.roleFlags?.isAI),
+    escortPersonas: getEscorts(),
+    creatorPersonas: getCreators(),
+    livecamPersonas: getLivecams(),
+    aiPersonas: getAIPersonas(),
     loading,
     error,
-    refreshEcosystem: async () => {
-      setLoading(true);
-      if (escorts && escorts.length > 0) {
-        const mappedPersonas = mapEscortsToUberPersonas(escorts as CompatibleEscort[]);
-        setAllPersonas(mappedPersonas);
-      }
-      setLoading(false);
-      setError(null);
-    },
-    getPersonaById: (id: string) => allPersonas.find(p => p.id === id),
-    boostedPersonas: allPersonas.filter(p => p.monetization?.boostingActive || p.roleFlags?.isFeatured),
+    refreshEcosystem,
+    getPersonaById,
+    boostedPersonas: getBoostedPersonas(),
     rankPersonas,
     hilbertSpace
   };
@@ -193,3 +203,4 @@ export const useUberPersonaContext = (): UberPersonaContextType => {
   }
   return context;
 };
+
