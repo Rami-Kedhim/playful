@@ -135,9 +135,9 @@ const EscortResults = ({
             sexualOrientation={escort.sexualOrientation}
             availableNow={escort.availableNow ?? false}
             lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
-            responseRate={escort.responseRate}
-            className=""
+            responseRate={escort.responseRate ?? undefined}
             featured={Boolean(escort['featured'])}
+            // className prop removed because EscortCardProps does not have it
           />
         ))}
       </div>

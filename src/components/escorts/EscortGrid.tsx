@@ -1,6 +1,5 @@
 
 import { Escort } from '@/types/escort';
-import { Grid } from '@/components/ui/grid';
 import EscortCard from './EscortCard';
 
 interface EscortGridProps {
@@ -59,8 +58,8 @@ const EscortGrid: React.FC<EscortGridProps> = ({
           sexualOrientation={escort.sexualOrientation}
           availableNow={escort.availableNow ?? false}
           lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
-          responseRate={escort.responseRate}
-          onClick={() => onEscortClick?.(escort)}
+          responseRate={escort.responseRate ?? undefined}
+          // onClick prop removed because EscortCardProps does not have it
         />
       ))}
     </div>

@@ -52,7 +52,6 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
           gender={escort.gender ?? ''}
           sexualOrientation={escort.sexualOrientation}
           location={escort.location ?? ''}
-          bio={escort.bio} // Not in EscortCardProps, will be ignored
           rating={escort.rating ?? 0}
           reviews={escort.reviewCount ?? 0}
           tags={escort.tags ?? []}
@@ -61,6 +60,7 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
           verified={escort.isVerified ?? escort.verified ?? false}
           availableNow={escort.availableNow ?? false}
           featured 
+          // bio prop removed, not in EscortCardProps
         />
       ))}
     </div>
