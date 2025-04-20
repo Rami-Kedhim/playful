@@ -1,4 +1,6 @@
 
+// Cleaned duplicate exports and used export type for types for isolatedModules compliance
+
 export * from './UberPersona';
 // Export neural types with export type to avoid TS error
 export type * from './neural/NeuralSystemMetrics';

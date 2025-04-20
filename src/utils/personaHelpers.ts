@@ -1,3 +1,6 @@
+
+// Added missing helper functions hasRealMeets, hasVirtualMeets, hasContent to fix imports and typings
+
 import { UberPersona } from '@/types/UberPersona';
 
 function getPersonaType(persona: UberPersona): string {
@@ -21,7 +24,7 @@ function getPersonaTags(persona: UberPersona): string[] {
 }
 
 function isPersonaVerified(persona: UberPersona): boolean {
-  return persona?.isVerified ?? false;
+  return persona?.roleFlags?.isVerified ?? false;
 }
 
 function isPersonaOnline(persona: UberPersona): boolean {
@@ -30,6 +33,20 @@ function isPersonaOnline(persona: UberPersona): boolean {
 
 function getPersonaPrice(persona: UberPersona): number {
   return persona?.price ?? 0;
+}
+
+// New helpers added
+
+function hasRealMeets(persona: UberPersona): boolean {
+  return !!persona?.capabilities?.hasRealMeets;
+}
+
+function hasVirtualMeets(persona: UberPersona): boolean {
+  return !!persona?.capabilities?.hasVirtualMeets;
+}
+
+function hasContent(persona: UberPersona): boolean {
+  return !!persona?.capabilities?.hasContent;
 }
 
 export {
@@ -41,4 +58,7 @@ export {
   isPersonaVerified,
   isPersonaOnline,
   getPersonaPrice,
+  hasRealMeets,
+  hasVirtualMeets,
+  hasContent,
 };

@@ -1,4 +1,6 @@
 
+// Fixed imports, removed neuralServiceRegistry duplicate, fixed HealthMetrics usage, removed unknown props
+
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { neuralHub } from '../HermesOxumNeuralHub';
 
@@ -10,7 +12,7 @@ class NeuralMetricsService {
     const services = neuralServiceRegistry.getAllServices();
     const systemHealth = neuralHub.getHealthMetrics();
     
-    const serviceMetrics = {};
+    const serviceMetrics: Record<string, any> = {};
     let totalHealth = 0;
     
     services.forEach(service => {
@@ -31,7 +33,7 @@ class NeuralMetricsService {
     const activeServices = services.filter(s => s.config.enabled).length;
     const overallHealth = activeServices > 0 
       ? totalHealth / activeServices
-      : 1 * 100; // dummy fallback for stability
+      : 100; // fallback
     
     const recommendations = this.generateRecommendations(
       services,
@@ -44,11 +46,11 @@ class NeuralMetricsService {
       overallHealth: Math.round(overallHealth),
       services: serviceMetrics,
       systemMetrics: {
-        cpuUsage: systemHealth.cpuUtilization ? systemHealth.cpuUtilization * 100 : 0,
-        memoryUsage: systemHealth.memoryUtilization ? systemHealth.memoryUtilization * 100 : 0,
+        cpuUsage: systemHealth.cpuUsage || 0,
+        memoryUsage: systemHealth.memoryUsage || 0,
         responseTime: systemHealth.responseTime ?? 0,
-        operationsPerSecond: systemHealth.operationsPerSecond ?? 0,
-        errorRate: systemHealth.errorRate ? systemHealth.errorRate * 100 : 0
+        operationsPerSecond: systemHealth.requestsPerSecond ?? 0,
+        errorRate: systemHealth.errorRate || 0
       },
       recommendations
     };
@@ -69,22 +71,22 @@ class NeuralMetricsService {
     return this.reports[this.reports.length - 1];
   }
   
-  getHistoricalReports(startTime, endTime) {
+  getHistoricalReports(startTime: Date, endTime: Date) {
     return this.reports.filter(r => r.timestamp >= startTime && r.timestamp <= endTime);
   }
   
-  generateRecommendations(services, systemHealth, overallHealth) {
-    const recommendations = [];
+  generateRecommendations(services: any[], systemHealth: any, overallHealth: number): string[] {
+    const recommendations: string[] = [];
     
-    if ((systemHealth.cpuUtilization ?? 0) > 0.7) {
+    if ((systemHealth.cpuUsage || 0) > 80) {
       recommendations.push('High CPU usage detected. Consider scaling resources or optimizing processing.');
     }
     
-    if ((systemHealth.memoryUtilization ?? 0) > 0.8) {
+    if ((systemHealth.memoryUsage || 0) > 85) {
       recommendations.push('Memory usage is high. Review memory allocation or check for memory leaks.');
     }
     
-    if ((systemHealth.errorRate ?? 0) > 0.05) {
+    if ((systemHealth.errorRate || 0) > 5) {
       recommendations.push('Error rate exceeds recommended threshold. Investigate potential issues.');
     }
     

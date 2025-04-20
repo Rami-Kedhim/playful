@@ -1,9 +1,8 @@
 
-// Fix literal types for roomType in mock livecams => ensure lower case
+// Added required isVerified boolean property to mock livecams to fix TS errors
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { Livecam } from '@/types/livecam';
-import { LivecamsNeuralService } from '@/services/neural/modules/LivecamsNeuralService';
 
 interface LivecamContextType {
   livecams: Livecam[];
@@ -32,7 +31,8 @@ const MOCK_LIVECAMS: Livecam[] = [
     rating: 4.5,
     price: 19.99,
     roomType: 'private',
-    languages: ['English', 'Spanish']
+    languages: ['English', 'Spanish'],
+    isVerified: true
   },
   {
     id: '2',
@@ -48,7 +48,8 @@ const MOCK_LIVECAMS: Livecam[] = [
     rating: 4.0,
     price: 15.99,
     roomType: 'public',
-    languages: ['English']
+    languages: ['English'],
+    isVerified: false
   },
   {
     id: '3',
@@ -64,7 +65,8 @@ const MOCK_LIVECAMS: Livecam[] = [
     rating: 4.8,
     price: 29.99,
     roomType: 'private',
-    languages: ['English', 'French']
+    languages: ['English', 'French'],
+    isVerified: true
   }
 ];
 
@@ -138,4 +140,3 @@ export const useLivecamContext = (): LivecamContextType => {
   }
   return context;
 };
-
