@@ -1,23 +1,20 @@
 
-// fix imports to correct type name or imports of CreatorPayout (which seems missing from creator.ts)
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-// Changed import to CreatorPayout type from creator
-import { ContentCreator } from "@/types/creator"; // fallback import to avoid error for demonstration
+// Fix import to CreatorPayout type for payouts instead of ContentCreator (previous fallback type)
+import { CreatorPayout } from "@/types/creator";
 import PayoutHistoryList from "./PayoutHistoryList";
 import PayoutHistoryLoading from "./components/PayoutHistoryLoading";
 import EmptyPayoutsList from "./components/EmptyPayoutsList";
 import PayoutsInProgress from "./components/PayoutsInProgress";
 
 interface PayoutHistoryProps {
-  payouts: ContentCreator[]; // fallback ContentCreator for type
+  payouts: CreatorPayout[]; // corrected type
   isLoading: boolean;
 }
 
 const PayoutHistory = ({ payouts, isLoading }: PayoutHistoryProps) => {
   // Filter completed payouts
-  const completedPayouts = payouts.filter(
-    payout => (payout as any).status === 'completed'
-  );
+  const completedPayouts = payouts.filter(payout => payout.status === 'completed');
 
   return (
     <Card>
@@ -39,9 +36,9 @@ const PayoutHistory = ({ payouts, isLoading }: PayoutHistoryProps) => {
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Completed Payouts</h3>
               {completedPayouts.length > 0 ? (
-                <PayoutHistoryList 
-                  payouts={completedPayouts} 
-                  isLoading={false} // Adding the missing isLoading prop
+                <PayoutHistoryList
+                  payouts={completedPayouts}
+                  isLoading={false}
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">No completed payouts yet.</p>
@@ -55,4 +52,3 @@ const PayoutHistory = ({ payouts, isLoading }: PayoutHistoryProps) => {
 };
 
 export default PayoutHistory;
-

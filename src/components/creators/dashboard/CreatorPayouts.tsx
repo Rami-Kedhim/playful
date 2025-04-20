@@ -1,6 +1,4 @@
 
-// Fix payment summary props usage: earnings is a number, must pass object fields directly from useEarningsCalculator
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import usePayouts from "./payouts/usePayouts";
 import EarningsSummary from "./payouts/EarningsSummary";
