@@ -1,7 +1,3 @@
-
-// Fix import statement for Escort to be '@/types/escort' consistently
-// Fix CompatibleEscort type usage to satisfy TS while maintaining data integrity
-
 import React, {
   createContext,
   useContext,
@@ -204,4 +200,3 @@ export const useUberEcosystemContext = () => {
 };
 
 export default UberEcosystemContext;
-

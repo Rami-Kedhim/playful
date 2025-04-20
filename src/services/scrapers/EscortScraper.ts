@@ -1,4 +1,3 @@
-
 // Add Rates interface as it was missing causing TS error
 import { Escort } from '@/types/escort';
 

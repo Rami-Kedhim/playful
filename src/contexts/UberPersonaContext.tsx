@@ -1,3 +1,4 @@
+// Already fixed in last step: import Escort from '@/types/escort' lowercase and UberPersona from '@/types/UberPersona'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Escort } from '@/types/escort';  // Unified casing for Escort
