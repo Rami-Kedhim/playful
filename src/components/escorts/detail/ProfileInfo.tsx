@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort, VerificationLevel } from "@/types/Escort";
+import { Escort, VerificationLevel } from "@/types/escort"; // use correct casing here too
 import ProfileHeader from "./ProfileHeader";
 import ProfileActions from "./ProfileActions";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,7 +28,7 @@ const ProfileInfo = ({
   const [serviceTab, setServiceTab] = useState("in-person");
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
-  // Normalize height and verificationLevel
+  // Normalize height and verificationLevel to match expected types
   const normalizedEscort: Escort = {
     ...escort,
     height:
@@ -36,7 +36,7 @@ const ProfileInfo = ({
         ? String(escort.height)
         : escort.height,
     verificationLevel:
-      (escort.verificationLevel as VerificationLevel) || "none",
+      ((escort.verificationLevel as VerificationLevel) || "none") as VerificationLevel,
   };
 
   const handleBookNow = () => {

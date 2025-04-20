@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort, VerificationLevel } from "@/types/Escort";
+import { Escort, VerificationLevel } from "@/types/escort"; // use correct lowercase import
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
 import RatesTab from "./RatesTab";
