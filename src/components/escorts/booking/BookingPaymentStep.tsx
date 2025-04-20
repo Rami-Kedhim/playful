@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Escort, Booking } from '@/types/escort';
+import { Escort, Booking } from '@/types/Escort';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +28,14 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  // Normalize height if necessary as string (optional enhancement)
+  const normalizedEscort = {
+    ...escort,
+    height: escort.height !== undefined && typeof escort.height !== 'string'
+      ? String(escort.height)
+      : escort.height,
+  };
+
   const formatDate = (dateString: string | Date | undefined) => {
     if (!dateString) return 'N/A';
     return format(new Date(dateString), 'EEEE, MMMM d, yyyy');
@@ -64,15 +73,15 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
       <CardContent className="space-y-6">
         <div className="flex items-center space-x-4">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={escort.profileImage || escort.imageUrl || escort.avatar} />
-            <AvatarFallback>{escort.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={normalizedEscort.profileImage || normalizedEscort.imageUrl || normalizedEscort.avatar} />
+            <AvatarFallback>{normalizedEscort.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="font-medium">{escort.name}</h3>
-            {escort.location && (
+            <h3 className="font-medium">{normalizedEscort.name}</h3>
+            {normalizedEscort.location && (
               <div className="flex items-center text-sm text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5 mr-1" />
-                <span>{escort.location}</span>
+                <span>{normalizedEscort.location}</span>
               </div>
             )}
           </div>
@@ -177,3 +186,4 @@ const BookingPaymentStep: React.FC<BookingPaymentStepProps> = ({
 };
 
 export default BookingPaymentStep;
+

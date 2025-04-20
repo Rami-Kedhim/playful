@@ -1,6 +1,8 @@
 
+// Fix import to unify to '@/types/Escort' and normalize height to string
+
 import { useState } from "react";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import MediaSection from "./MediaSection";
 import ProfileInfo from "./ProfileInfo";
@@ -17,21 +19,27 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  
+
+  // Normalize height to string to satisfy type
+  const normalizedEscort = {
+    ...escort,
+    height: escort.height !== undefined && typeof escort.height !== "string" ? String(escort.height) : escort.height,
+  };
+
   const handleFavoriteToggle = () => {
     toggleFavorite(escort.id);
   };
-  
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Left column - Media */}
       <div className="lg:col-span-2">
-        <MediaSection escort={escort} />
+        <MediaSection escort={normalizedEscort} />
 
         {/* Mobile view of profile info - only visible on small screens */}
         <div className="block lg:hidden mt-6">
-          <ProfileInfo 
-            escort={escort}
+          <ProfileInfo
+            escort={normalizedEscort}
             onFavoriteToggle={handleFavoriteToggle}
             onBookingOpen={() => setBookingOpen(true)}
             onMessageOpen={() => setMessageOpen(true)}
@@ -39,13 +47,13 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
           />
         </div>
 
-        <ProfileTabs escort={escort} />
+        <ProfileTabs escort={normalizedEscort} />
       </div>
-      
+
       {/* Right column - Info */}
       <div className="hidden lg:block">
-        <ProfileInfo 
-          escort={escort}
+        <ProfileInfo
+          escort={normalizedEscort}
           onFavoriteToggle={handleFavoriteToggle}
           onBookingOpen={() => setBookingOpen(true)}
           onMessageOpen={() => setMessageOpen(true)}
@@ -54,8 +62,8 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
       </div>
 
       {/* Dialog manager - handles all dialogs */}
-      <DialogManager 
-        escort={escort} 
+      <DialogManager
+        escort={normalizedEscort}
         onBookNow={onBookNow}
         bookingOpen={bookingOpen}
         messageOpen={messageOpen}
@@ -69,3 +77,4 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
 };
 
 export default EscortProfile;
+
