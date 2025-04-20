@@ -1,5 +1,4 @@
-
-import { Escort } from '@/types/escort';  // Fixed import casing to all lowercase
+import { Escort } from '@/types/Escort';  // Fixed import casing to exact file casing
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
 import { UberPersona } from '@/types/UberPersona';

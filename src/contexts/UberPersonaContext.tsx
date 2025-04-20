@@ -1,8 +1,6 @@
-// Already fixed in last step: import Escort from '@/types/escort' lowercase and UberPersona from '@/types/UberPersona'
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Escort } from '@/types/escort';  // Unified casing for Escort
-import { UberPersona } from '@/types/UberPersona'; // Ensure UberPersona import
+import { Escort } from '@/types/Escort';  // Unified import to exact casing
+import { UberPersona } from '@/types/UberPersona';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 import { mapEscortsToUberPersonas } from '@/utils/profileMapping';
 import { uberCoreInstance } from '@/services/neural/UberCore';
@@ -40,7 +38,6 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [initialized, setInitialized] = useState<boolean>(false);
   const [hilbertSpace, setHilbertSpace] = useState(defaultHilbertSpace);
 
-  // Adjusted CompatibleEscort to fully extend Escort, with optional height of string or number
   interface CompatibleEscort extends Escort {
     height?: string | number;
   }
@@ -52,7 +49,6 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
         await uberCoreInstance.initialize();
 
         if (escorts && escorts.length > 0) {
-          // Ensure all required fields exist, convert height to string if number
           const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
             ...e,
             height: typeof e.height === 'number' ? e.height.toString() : e.height ?? ''

@@ -1,7 +1,7 @@
 
-// Fix import path casing for Escort to all lowercase
+// Fix import path casing for Escort to match file casing exactly
 
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { db } from '@/lib/db';
 
 const getEscorts = async (): Promise<Escort[]> => {
@@ -35,3 +35,4 @@ export default {
   getEscorts,
   getEscortById,
 };
+

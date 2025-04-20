@@ -1,5 +1,5 @@
 
-// Fix import path casing for Escort to all lowercase
+// Fix import path casing for Escort to exact casing
 
 import React, {
   createContext,
@@ -10,7 +10,7 @@ import React, {
   ReactNode,
 } from 'react';
 import escortService from '@/services/escorts/escortService';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 interface EscortContextType {
   escorts: Escort[];
@@ -114,3 +114,4 @@ export const useEscortContext = (): EscortContextType => {
   }
   return context;
 };
+
