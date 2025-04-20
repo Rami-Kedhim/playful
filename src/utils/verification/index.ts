@@ -1,13 +1,10 @@
 
-// Fix exports and definitions in verification index
+// Fix normalizeDocument keys: remove non-existing keys and fix typings
 
-import { VerificationLevel, VerificationStatus, VerificationDocument } from '@/types/verification';
+import { VerificationDocument, VerificationLevel, VerificationStatus } from '@/types/verification';
 
 export const canSubmitVerification = async (userId: string): Promise<{ canSubmit: boolean; reason?: string; cooldownRemaining?: number }> => {
-  // Mock implementation - would typically check with backend
-  return {
-    canSubmit: true
-  };
+  return { canSubmit: true };
 };
 
 export const submitVerificationRequest = async (
@@ -17,19 +14,14 @@ export const submitVerificationRequest = async (
   selfieFile: File | null,
   backFile: File | null
 ): Promise<{ success: boolean; message: string; requestId?: string }> => {
-  // Mock implementation - would typically call an API
-  return {
-    success: true,
-    message: "Verification request submitted successfully.",
-    requestId: `ver-${Date.now().toString(36)}`
-  };
+  return { success: true, message: 'Verification request submitted successfully.', requestId: `ver-${Date.now().toString(36)}` };
 };
 
 export const getDocumentTypeLabel = (docType: string): string => {
   switch (docType) {
     case 'id_card': return 'ID Card';
     case 'passport': return 'Passport';
-    case 'drivers_license': return 'Driver\'s License';
+    case 'drivers_license': return "Driver's License";
     default: return docType;
   }
 };
@@ -69,19 +61,12 @@ export const getVerificationStatusColor = (status: VerificationStatus | string):
 export const normalizeDocument = (doc: any): VerificationDocument => {
   return {
     id: doc.id,
-    user_id: doc.user_id || doc.userId,
-    userId: doc.userId || doc.user_id,
-    document_type: doc.document_type || doc.documentType || doc.type,
-    documentType: doc.documentType || doc.document_type || doc.type,
-    type: doc.type || doc.document_type || doc.documentType,
-    file_url: doc.file_url || doc.fileUrl || doc.url || doc.document_url || doc.file_path || '',
-    fileUrl: doc.fileUrl || doc.file_url || doc.url || doc.document_url || doc.file_path || '',
-    url: doc.url || doc.fileUrl || doc.file_url || doc.document_url || doc.file_path || '',
-    document_url: doc.document_url || doc.url || doc.fileUrl || doc.file_url || doc.file_path || '',
-    file_path: doc.file_path || doc.file_url || doc.fileUrl || doc.url || doc.document_url || '',
+    documentType: doc.document_type || doc.documentType || doc.type,
+    fileUrl: doc.file_url || doc.fileUrl || doc.url || doc.document_url || '',
+    uploadedAt: doc.uploaded_at ? new Date(doc.uploaded_at).toISOString() : new Date().toISOString(),
     status: doc.status || 'pending',
-    uploaded_at: doc.uploaded_at ? new Date(doc.uploaded_at).toISOString() : new Date().toISOString(),
-    uploadedAt: doc.uploadedAt ? new Date(doc.uploadedAt).toISOString() : new Date().toISOString(),
-    verification_id: doc.verification_id || ''
+    rejectionReason: doc.rejectionReason || doc.rejectReason || undefined,
+    reviewedBy: doc.reviewedBy || undefined,
+    reviewedAt: doc.reviewedAt ? new Date(doc.reviewedAt).toISOString() : undefined,
   };
 };

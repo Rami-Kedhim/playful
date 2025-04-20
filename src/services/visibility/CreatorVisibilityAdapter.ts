@@ -1,5 +1,5 @@
 
-// Fix CreatorVisibilityAdapter filter property name to languages, and usage of region.
+// Fix property 'region' access using optional chaining to avoid errors
 
 import { ContentCreator } from '@/types/creator';
 
@@ -11,18 +11,15 @@ export class CreatorVisibilityAdapter {
   }
 
   public getCreatorsByRegion(region: string): ContentCreator[] {
-    // Note: region property may indeed not exist on ContentCreator, remove or use any fallback
+    // Safe optional chaining for region
     return this.creators.filter(creator => (creator.region ?? '') === region);
   }
 
   public getCreatorsByLanguage(language: string): ContentCreator[] {
-    // Note: languages (array) property exists, changed from language singular to languages plural
     return this.creators.filter(creator => creator.languages?.includes(language) || false);
   }
 
-  // Add placeholders for methods so interface matches usage
   public getSortedCreators(filter?: { region?: string; tags?: string[]; limit?: number }): string[] {
-    // Just return ids from filtered creators based on filter criteria
     let filteredCreators = this.creators;
 
     if (filter?.region) {
@@ -34,12 +31,12 @@ export class CreatorVisibilityAdapter {
       );
     }
 
-    // Return IDs, limited if set
-    return filteredCreators.slice(0, filter?.limit || filteredCreators.length).map(c => c.id);
+    return filteredCreators
+      .slice(0, filter?.limit || filteredCreators.length)
+      .map(c => c.id);
   }
 
   public recordCreatorView(creatorId: string): void {
-    // Just a stub for record view
     console.log(`Recorded view for creator ${creatorId}`);
   }
 }

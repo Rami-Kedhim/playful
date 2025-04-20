@@ -1,4 +1,3 @@
-
 import { VerificationFormValues, VerificationSubmissionResponse, VerificationEligibilityResponse } from '@/types/verification';
 import { uploadVerificationDocument } from './documentUpload';
 

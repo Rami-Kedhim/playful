@@ -1,3 +1,6 @@
+// Fix casing conflict by consistently importing from '@/types/escort'
+
+// Import Escort at the top; unify import path casing
 import { Escort } from '@/types/escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
@@ -13,7 +16,7 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     id: escort.id,
     username: escort.name.toLowerCase().replace(/\s+/g, '_'),
     displayName: escort.name,
-    avatarUrl: escort.avatarUrl || escort.avatar || escort.images[0] || '',
+    avatarUrl: escort.avatarUrl || escort.avatar || escort.images?.[0] || '',
     location: escort.location || '',
     language: (escort.languages && escort.languages.length > 0) ? escort.languages[0] : 'English',
     bio: escort.bio || escort.description || '',
@@ -35,11 +38,11 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
       hasVideos: (escort.videos && escort.videos.length > 0) || false,
       hasStories: false,
       hasChat: true,
-      hasBooking: escort.providesInPersonServices || true,
+      hasBooking: escort.providesInPersonServices ?? true,
       hasLiveStream: escort.providesVirtualContent || false,
       hasExclusiveContent: false,
       hasContent: false,
-      hasRealMeets: escort.providesInPersonServices || true,
+      hasRealMeets: escort.providesInPersonServices ?? true,
       hasVirtualMeets: escort.providesVirtualContent || false
     },
     monetization: {
@@ -53,7 +56,7 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     stats: {
       rating: escort.rating || 0,
       reviewCount: escort.reviewCount || 0,
-      responseRate: escort.responseRate || 0.8,
+      responseTime: escort.responseRate || 0.8, // Changed from responseRate to responseTime
       viewCount: 0,
       favoriteCount: 0
     },
@@ -113,7 +116,7 @@ export const mapCreatorToUberPersona = (creator: ContentCreator): UberPersona =>
     stats: {
       rating: creator.rating || 0,
       reviewCount: 0,
-      responseRate: 0.5,
+      responseTime: 0.5, // Changed responseRate to responseTime
       viewCount: 0,
       favoriteCount: 0
     },
@@ -174,7 +177,7 @@ export const mapLivecamToUberPersona = (livecam: LivecamModel): UberPersona => {
     stats: {
       rating: livecam.rating || 0,
       reviewCount: 0,
-      responseRate: 0.9,
+      responseTime: 0.9, // Changed responseRate to responseTime
       viewCount: livecam.viewerCount || 0,
       favoriteCount: 0
     },
