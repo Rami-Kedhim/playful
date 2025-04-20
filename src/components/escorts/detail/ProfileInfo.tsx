@@ -28,7 +28,7 @@ const ProfileInfo = ({
   const [serviceTab, setServiceTab] = useState("in-person");
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
-  // Normalize height and verificationLevel to satisfy type
+  // Normalize height and verificationLevel
   const normalizedEscort: Escort = {
     ...escort,
     height:
@@ -43,7 +43,6 @@ const ProfileInfo = ({
     setBookingDialogOpen(true);
   };
 
-  // onSubmit that returns a resolved promise
   const bookingOnSubmit = async (data: any) => {
     console.log("BookingDialog onSubmit called", data);
     return Promise.resolve();
@@ -127,4 +126,3 @@ const ProfileInfo = ({
 };
 
 export default ProfileInfo;
-

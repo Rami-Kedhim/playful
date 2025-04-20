@@ -13,8 +13,8 @@ interface ProfileTabsProps {
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  // Cast verificationLevel to VerificationLevel union type to fix typing error
-  const verificationLevel = (escort.verificationLevel || "none") as VerificationLevel;
+  // Cast verificationLevel to VerificationLevel union type with safe fallback
+  const verificationLevel: VerificationLevel = (escort.verificationLevel as VerificationLevel) || "none";
 
   return (
     <div className="mt-6">
@@ -63,4 +63,3 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
 };
 
 export default ProfileTabs;
-

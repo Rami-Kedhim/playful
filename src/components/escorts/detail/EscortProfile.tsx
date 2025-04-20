@@ -18,7 +18,7 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [messageOpen, setMessageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Normalize height and verificationLevel to satisfy type - explicitly cast verificationLevel
+  // Normalize height and verificationLevel
   const normalizedEscort: Escort = {
     ...escort,
     height:
@@ -35,11 +35,9 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left column - Media */}
       <div className="lg:col-span-2">
         <MediaSection escort={normalizedEscort} />
 
-        {/* Mobile view of profile info - only visible on small screens */}
         <div className="block lg:hidden mt-6">
           <ProfileInfo
             escort={normalizedEscort}
@@ -53,7 +51,6 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
         <ProfileTabs escort={normalizedEscort} />
       </div>
 
-      {/* Right column - Info */}
       <div className="hidden lg:block">
         <ProfileInfo
           escort={normalizedEscort}
@@ -64,7 +61,6 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
         />
       </div>
 
-      {/* Dialog manager - handles all dialogs */}
       <DialogManager
         escort={normalizedEscort}
         onBookNow={onBookNow}
@@ -80,4 +76,3 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
 };
 
 export default EscortProfile;
-
