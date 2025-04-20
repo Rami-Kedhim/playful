@@ -1,4 +1,6 @@
 
+// Fix import and prop types for PayoutItem to use CreatorPayout
+
 import { CreatorPayout } from "@/types/creator";
 import { formatDistanceToNow } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +15,7 @@ interface PayoutItemProps {
 const PayoutItem = ({ payout }: PayoutItemProps) => {
   const getStatusBadge = () => {
     const status = payout.status;
-    
+
     switch (status) {
       case 'completed':
         return (
@@ -45,7 +47,7 @@ const PayoutItem = ({ payout }: PayoutItemProps) => {
         );
     }
   };
-  
+
   const formatDate = (dateString: string) => {
     try {
       return formatDistanceToNow(new Date(dateString), { addSuffix: true });
@@ -53,7 +55,7 @@ const PayoutItem = ({ payout }: PayoutItemProps) => {
       return 'Unknown date';
     }
   };
-  
+
   return (
     <Card className="p-4">
       <div className="flex justify-between items-center">
@@ -66,7 +68,7 @@ const PayoutItem = ({ payout }: PayoutItemProps) => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center">
           {getStatusBadge()}
         </div>
@@ -76,3 +78,4 @@ const PayoutItem = ({ payout }: PayoutItemProps) => {
 };
 
 export default PayoutItem;
+

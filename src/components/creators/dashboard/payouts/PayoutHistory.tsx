@@ -1,4 +1,6 @@
 
+// Fix imports and typing for payouts to use CreatorPayout[] not ContentCreator[]
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreatorPayout } from "@/types/creator";
 import PayoutHistoryList from "./PayoutHistoryList";
@@ -51,3 +53,4 @@ const PayoutHistory = ({ payouts, isLoading }: PayoutHistoryProps) => {
 };
 
 export default PayoutHistory;
+
