@@ -1,11 +1,9 @@
 
-// Fixed trailing comments that cause TS errors after prop values by removing inline comments
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import EscortCard from "@/components/escorts/EscortCard";
-import { Escort } from "@/types/Escort";
+import { Escort } from "@/types/escort";  // Use consistent import
 import { Skeleton } from "@/components/ui/skeleton";
 import { BadgeCheck, Calendar, MapPin } from "lucide-react";
 import ServiceTypeBadgeLabel from "./filters/ServiceTypeBadgeLabel";
@@ -95,7 +93,7 @@ const EscortResults = ({
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <BadgeCheck className="h-4 w-4 text-green-500" />
-            <span>{escorts.filter(e => e.verified).length} Verified</span>
+            <span>{escorts.filter(e => e.verified ?? e.isVerified).length} Verified</span>
           </div>
 
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -134,9 +132,9 @@ const EscortResults = ({
             price={escort.price ?? 0}
             verified={escort.isVerified ?? escort.verified ?? false}
             gender={escort.gender ?? ''}
-            sexualOrientation={escort.sexualOrientation ?? ''}
+            sexualOrientation={escort.sexualOrientation} 
             availableNow={escort.availableNow ?? false}
-            lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
+            lastActive={escort.lastActive ? (escort.lastActive instanceof Date ? escort.lastActive : new Date(escort.lastActive)) : undefined}
             responseRate={escort.responseRate ?? undefined}
             featured={escort.featured ?? false}
           />
@@ -166,3 +164,4 @@ const EscortResults = ({
 };
 
 export default EscortResults;
+

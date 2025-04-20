@@ -1,8 +1,6 @@
 
-// Fixed trailing comments that cause TS errors after prop values by removing inline comments
-
 import React from 'react';
-import { Escort } from '@/types/Escort'; 
+import { Escort } from '@/types/escort';  // Use consistent import with correct casing
 import EscortCard from './EscortCard';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -52,7 +50,7 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
           name={escort.name}
           age={escort.age ?? 0}
           gender={escort.gender ?? ''}
-          sexualOrientation={escort.sexualOrientation ?? ''}
+          sexualOrientation={escort.sexualOrientation}
           location={escort.location ?? ''}
           rating={escort.rating ?? 0}
           reviews={escort.reviewCount ?? 0}
@@ -69,3 +67,4 @@ const FeaturedEscorts: React.FC<FeaturedEscortsProps> = ({
 };
 
 export default FeaturedEscorts;
+

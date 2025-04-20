@@ -1,4 +1,4 @@
-import { Escort } from '@/types/Escort';
+import { Escort } from '@/types/escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
 import { UberPersona } from '@/types/UberPersona';
@@ -32,7 +32,7 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     },
     capabilities: {
       hasPhotos: (escort.images && escort.images.length > 0) || false,
-      hasVideos: (escort.videos && escort.videos.length > 0) || false,
+      hasVideos: (escort.videos?.length ?? 0) > 0,
       hasStories: false,
       hasChat: true,
       hasBooking: escort.providesInPersonServices ?? true,
@@ -212,9 +212,8 @@ export const mapLivecamsToUberPersonas = (livecams: LivecamModel[]): UberPersona
  * Helper function to generate a stable Hilbert vector for an entity
  */
 const generateHilbertVector = (id: string, dimension: number = 4): number[] => {
-  // Generate a deterministic vector based on the ID
   const seed = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const vector = [];
+  const vector: number[] = [];
   
   for (let i = 0; i < dimension; i++) {
     const value = Math.sin(seed * (i + 1) * 0.1) * 0.5 + 0.5;
