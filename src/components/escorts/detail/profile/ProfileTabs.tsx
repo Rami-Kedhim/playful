@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
 import RatesTab from "./RatesTab";
@@ -14,9 +14,12 @@ interface ProfileTabsProps {
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  // Convert verificationLevel to the expected type, using either property name
-  const verificationLevel = (escort.verification_level || escort.verificationLevel || "none") as "none" | "basic" | "enhanced" | "premium";
-  
+  const verificationLevel = (escort.verification_level || escort.verificationLevel || "none") as
+    | "none"
+    | "basic"
+    | "enhanced"
+    | "premium";
+
   return (
     <Card className="mt-6">
       <CardContent className="p-6">
@@ -39,22 +42,22 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
               <span>Safety</span>
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="about">
             <AboutTab escort={escort} />
           </TabsContent>
-          
+
           <TabsContent value="services">
             <ServicesTab escort={escort} />
           </TabsContent>
-          
+
           <TabsContent value="rates">
             <RatesTab escort={escort} />
           </TabsContent>
-          
+
           <TabsContent value="safety">
             <SafetyTips />
-            
+
             <div className="mt-6">
               <VerificationBadge level={verificationLevel} />
             </div>

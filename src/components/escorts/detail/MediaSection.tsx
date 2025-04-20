@@ -1,29 +1,24 @@
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Escort } from '@/types/escort';
-import GalleryGrid from './GalleryGrid';
-import VideoGrid from './VideoGrid';
+
+import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Escort, Video } from "@/types/Escort";
+import GalleryGrid from "./GalleryGrid";
+import VideoGrid from "./VideoGrid";
 
 interface MediaSectionProps {
   escort: Escort;
 }
 
 const MediaSection: React.FC<MediaSectionProps> = ({ escort }) => {
-  // Ensure escort has all the necessary properties
-  const hasPhotos = Boolean(
-    (escort.gallery && escort.gallery.length > 0) ||
-    (escort.gallery_images && escort.gallery_images.length > 0) ||
-    (escort.images && escort.images.length > 0)
-  );
-  
-  const hasVideos = Boolean(
-    escort.videos && escort.videos.length > 0
-  );
-  
-  // If there's no media, don't render the component
+  const hasPhotos =
+    Boolean(escort.gallery && escort.gallery.length > 0) ||
+    Boolean(escort.gallery_images && escort.gallery_images.length > 0) ||
+    Boolean(escort.images && escort.images.length > 0);
+
+  const hasVideos = Boolean(escort.videos && escort.videos.length > 0);
+
   if (!hasPhotos && !hasVideos) return null;
-  
-  // Get gallery images from whatever property is available
+
   const getGalleryImages = (): string[] => {
     if (escort.gallery && escort.gallery.length > 0) {
       return escort.gallery;
@@ -34,15 +29,14 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort }) => {
     }
     return [];
   };
-  
-  const getVideos = (): any[] => {
+
+  const getVideos = (): Video[] => {
     if (escort.videos && escort.videos.length > 0) {
       return escort.videos;
     }
     return [];
   };
-  
-  
+
   return (
     <div className="mt-8">
       <Tabs defaultValue="photos">
@@ -50,13 +44,13 @@ const MediaSection: React.FC<MediaSectionProps> = ({ escort }) => {
           {hasPhotos && <TabsTrigger value="photos">Photos ({getGalleryImages().length})</TabsTrigger>}
           {hasVideos && <TabsTrigger value="videos">Videos ({getVideos().length})</TabsTrigger>}
         </TabsList>
-        
+
         {hasPhotos && (
           <TabsContent value="photos" className="mt-4">
             <GalleryGrid images={getGalleryImages()} />
           </TabsContent>
         )}
-        
+
         {hasVideos && (
           <TabsContent value="videos" className="mt-4">
             <VideoGrid videos={getVideos()} />

@@ -1,24 +1,23 @@
 
-import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Star, MessageCircle } from 'lucide-react';
-import { Escort } from '@/types/escort';
+import React from "react";
+import { Card } from "@/components/ui/card";
+import { Star, MessageCircle } from "lucide-react";
+import { Escort } from "@/types/Escort";
 
 interface EscortReviewsProps {
   escort: Escort;
 }
 
 const EscortReviews: React.FC<EscortReviewsProps> = ({ escort }) => {
-  // Use a consistent way to get the review count with fallback
-  const reviewsCount = typeof escort.reviewCount === 'number' ? escort.reviewCount : 0;
-  
+  const reviewsCount = escort.reviewCount ?? escort.stats?.reviewCount ?? 0;
+  const rating = escort.rating ?? 0;
+
   return (
     <Card className="p-6">
       <h3 className="text-xl font-semibold mb-4 flex items-center">
         <MessageCircle className="h-5 w-5 mr-2 text-primary" />
         Client Reviews
       </h3>
-      
       <div className="mb-6">
         <div className="flex items-center space-x-2">
           <div className="flex">
@@ -26,20 +25,20 @@ const EscortReviews: React.FC<EscortReviewsProps> = ({ escort }) => {
               <Star
                 key={star}
                 className={`h-5 w-5 ${
-                  star <= Math.round(escort.rating || 0)
-                    ? 'text-yellow-400 fill-yellow-400' 
-                    : 'text-gray-300'
+                  star <= Math.round(rating)
+                    ? "text-yellow-400 fill-yellow-400"
+                    : "text-gray-300"
                 }`}
               />
             ))}
           </div>
-          <span className="text-lg font-bold">{escort.rating?.toFixed(1) || 'No rating'}</span>
+          <span className="text-lg font-bold">{rating ? rating.toFixed(1) : "No rating"}</span>
           <span className="text-muted-foreground">
-            ({reviewsCount} {reviewsCount === 1 ? 'review' : 'reviews'})
+            ({reviewsCount} {reviewsCount === 1 ? "review" : "reviews"})
           </span>
         </div>
       </div>
-      
+
       {reviewsCount > 0 ? (
         <div className="space-y-4">
           <p className="text-muted-foreground">Review data will be loaded here.</p>

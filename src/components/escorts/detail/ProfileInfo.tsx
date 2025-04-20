@@ -1,9 +1,7 @@
 
-// Fix import to unify to '@/types/Escort' and normalize height to string
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/Escort"; // unify import casing
+import { Escort } from "@/types/Escort";
 import ProfileHeader from "./ProfileHeader";
 import ProfileActions from "./ProfileActions";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,12 +18,12 @@ interface ProfileInfoProps {
   onShareOpen: () => void;
 }
 
-const ProfileInfo = ({ 
-  escort, 
+const ProfileInfo = ({
+  escort,
   onFavoriteToggle,
   onBookingOpen,
   onMessageOpen,
-  onShareOpen
+  onShareOpen,
 }: ProfileInfoProps) => {
   const [serviceTab, setServiceTab] = useState("in-person");
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
@@ -33,18 +31,18 @@ const ProfileInfo = ({
   // Normalize height to string to satisfy type
   const normalizedEscort = {
     ...escort,
-    height: escort.height !== undefined && typeof escort.height !== 'string'
-      ? String(escort.height)
-      : escort.height,
+    height:
+      escort.height !== undefined && typeof escort.height !== "string"
+        ? String(escort.height)
+        : escort.height,
   };
 
   const handleBookNow = () => {
     setBookingDialogOpen(true);
   };
 
-  // Provide a correct Promise returning onSubmit for BookingDialog
+  // onSubmit that returns a resolved promise
   const bookingOnSubmit = async (data: any) => {
-    // This can be implemented or logged if needed
     console.log("BookingDialog onSubmit called", data);
     return Promise.resolve();
   };
@@ -53,24 +51,17 @@ const ProfileInfo = ({
     <div className="space-y-6">
       <Card className="overflow-hidden">
         <CardContent className="p-6">
-          <ProfileHeader 
-            escort={normalizedEscort} 
-            onFavoriteToggle={onFavoriteToggle} 
-          />
-          
+          <ProfileHeader escort={normalizedEscort} onFavoriteToggle={onFavoriteToggle} />
+
           <div className="mt-6 mb-6">
-            <Tabs 
-              value={serviceTab} 
-              onValueChange={setServiceTab}
-              className="w-full"
-            >
+            <Tabs value={serviceTab} onValueChange={setServiceTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="in-person">In Person</TabsTrigger>
                 <TabsTrigger value="content">Virtual Content</TabsTrigger>
                 <TabsTrigger value="livestream">Live Stream</TabsTrigger>
               </TabsList>
             </Tabs>
-            
+
             <div className="mt-4">
               {serviceTab === "in-person" && (
                 <div className="space-y-4">
@@ -82,11 +73,11 @@ const ProfileInfo = ({
                   </Button>
                 </div>
               )}
-              
+
               {serviceTab === "content" && (
                 <div className="space-y-4">
                   <p className="text-muted-foreground text-sm">
-                    Access {normalizedEscort.name}'s exclusive photos, videos, and premium content.
+                    Access {normalizedEscort.name}&apos;s exclusive photos, videos, and premium content.
                   </p>
                   <Button asChild className="w-full">
                     <Link to={`/escort/${normalizedEscort.id}/content`}>
@@ -96,11 +87,11 @@ const ProfileInfo = ({
                   </Button>
                 </div>
               )}
-              
+
               {serviceTab === "livestream" && (
                 <div className="space-y-4">
                   <p className="text-muted-foreground text-sm">
-                    Join {normalizedEscort.name}'s live streams for real-time interaction and personalized experiences.
+                    Join {normalizedEscort.name}&apos;s live streams for real-time interaction and personalized experiences.
                   </p>
                   <Button asChild className="w-full">
                     <Link to={`/escort/${normalizedEscort.id}/live`}>
@@ -112,8 +103,8 @@ const ProfileInfo = ({
               )}
             </div>
           </div>
-          
-          <ProfileActions 
+
+          <ProfileActions
             escort={normalizedEscort}
             onBookingOpen={onBookingOpen}
             onMessageOpen={onMessageOpen}
@@ -121,8 +112,8 @@ const ProfileInfo = ({
           />
         </CardContent>
       </Card>
-      
-      <BookingDialog 
+
+      <BookingDialog
         escort={normalizedEscort}
         isOpen={bookingDialogOpen}
         onClose={() => setBookingDialogOpen(false)}
@@ -134,4 +125,3 @@ const ProfileInfo = ({
 };
 
 export default ProfileInfo;
-

@@ -1,10 +1,41 @@
 
-// Unified Escort interface merged from multiple definitions and cleaned up for consistency
+// Unified Escort interface with full properties matching usage in components
 
-// Strict serviceType union for common usage
-export type EscortServiceType = 'in-person' | 'virtual' | 'both';
+export type EscortServiceType = 'in-person' | 'virtual' | 'both' | string;
 
-// Unified Escort interface
+export interface Video {
+  id: string;
+  url: string;
+  thumbnail?: string;
+  title?: string;
+  duration?: number;
+  isPublic?: boolean;
+}
+
+export interface Availability {
+  day: string;
+  slots?: {
+    start: string;
+    end: string;
+  }[];
+}
+
+export interface Rates {
+  hourly?: number;
+  twoHours?: number;
+  twoHour?: number; // legacy
+  overnight?: number;
+  weekend?: number;
+}
+
+export interface Stats {
+  viewCount?: number;
+  favoriteCount?: number;
+  reviewCount?: number;
+}
+
+export type VerificationLevel = 'none' | 'basic' | 'enhanced' | 'premium' | string;
+
 export interface Escort {
   id: string;
   name: string;
@@ -17,19 +48,24 @@ export interface Escort {
   bio?: string;
   description?: string;
   profileImage?: string;
+  imageUrl?: string;
+  avatar?: string;
+  avatarUrl?: string;
+  avatar_url?: string;
   images?: string[];
   gallery?: string[];
   gallery_images?: string[];
   videos?: Video[];
   isVerified?: boolean;
   verified?: boolean;
-  verificationLevel?: string;
-  verification_level?: string; // Legacy field
+  is_verified?: boolean;
+  verificationLevel?: VerificationLevel;
+  verification_level?: VerificationLevel; // legacy
   price?: number;
   rating?: number;
   reviewCount?: number;
   reviews?: any[];
-  serviceType?: EscortServiceType | string; // unify to allow both strict and flexible string
+  serviceType?: EscortServiceType | string;
   services?: string[];
   tags?: string[];
   languages?: string[];
@@ -39,50 +75,25 @@ export interface Escort {
   weight?: string | number;
   hairColor?: string;
   eyeColor?: string;
-  availability?: Record<string, any> | Availability[];
+  availability?: Availability[] | string[] | Record<string, any>;
   nextAvailable?: string;
   availableNow?: boolean;
   providesInPersonServices?: boolean;
   providesVirtualContent?: boolean;
   profileType?: string;
-  avatar?: string;
-  avatarUrl?: string;
-  avatar_url?: string;
-  imageUrl?: string;
   featured?: boolean;
+  is_featured?: boolean;
   boostLevel?: number;
   responseRate?: number;
   isAI?: boolean;
   isFavorited?: boolean;
-  is_featured?: boolean;
-  is_verified?: boolean;
   created_at?: string | Date;
   updated_at?: string | Date;
   userId?: string;
-
-  rates?: {
-    hourly?: number;
-    twoHours?: number;
-    twoHour?: number;
-    overnight?: number;
-    weekend?: number;
-  };
-
-  stats?: {
-    viewCount?: number;
-    favoriteCount?: number;
-    reviewCount?: number;
-  };
-
-  [key: string]: any; // Allow additional dynamic properties
-}
-
-export interface Availability {
-  day: string;
-  slots?: {
-    start: string;
-    end: string;
-  }[];
+  rates?: Rates;
+  stats?: Stats;
+  lastActive?: string | Date; // For EscortCard lastActive prop
+  [key: string]: any;
 }
 
 export interface Booking {
@@ -105,13 +116,3 @@ export interface Booking {
   createdAt: string | Date;
   updatedAt?: string | Date;
 }
-
-export interface Video {
-  id: string;
-  url: string;
-  thumbnail?: string;
-  title?: string;
-  duration?: number;
-  isPublic?: boolean;
-}
-
