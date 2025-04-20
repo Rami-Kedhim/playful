@@ -1,6 +1,3 @@
-
-// Add missing VerificationLevel enum exports and DocumentType type to fix import errors
-
 export enum VerificationStatus {
   PENDING = 'pending',
   IN_REVIEW = 'in_review',
@@ -48,9 +45,6 @@ export interface VerificationRequest {
   documents: VerificationDocument[];
   reviewedAt?: string;
   reviewed_by?: string;
-  rejectionReason?: string;
-  reviewedAt?: string;
-  reviewedBy?: string;
   rejectionReason?: string;
   submittedAt?: string;
   created_at?: string;

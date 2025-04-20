@@ -1,14 +1,13 @@
-
 export interface Livecam {
   id: string;
   name: string;
+  isVerified: boolean;
   username: string;
   isLive: boolean;
   viewerCount: number;
   tags: string[];
   profileImage: string;
   previewImage: string;
-  isVerified: boolean;
   rating: number;
   price: number;
   roomType: 'public' | 'private' | 'premium';
@@ -32,7 +31,6 @@ export interface Livecam {
   isStreaming?: boolean;
   boosted?: boolean;
   boostScore?: number;
-  isVerified?: boolean;
   isFeatured?: boolean;
   isPopular?: boolean;
   previewVideoUrl?: string;

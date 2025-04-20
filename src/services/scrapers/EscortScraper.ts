@@ -1,5 +1,4 @@
-
-import { Escort, Rates } from '@/types/escort';
+import { Escort } from '@/types/escort';
 
 export class EscortScraper {
   private baseUrl: string;

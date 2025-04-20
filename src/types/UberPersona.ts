@@ -1,4 +1,3 @@
-
 export interface UberPersona {
   id: string;
   username: string;
@@ -60,11 +59,18 @@ export interface UberPersona {
     lastSynced?: Date;
     boostScore?: number;
     hilbertSpaceVector?: number[];
+    statusFlags?: {
+      needsModeration?: boolean;
+      hasPendingUpdates?: boolean;
+      isPremiumExpiring?: boolean;
+    };
   };
   isLocked?: boolean;
   isOnline?: boolean;
   availability?: any;
   isPremium?: boolean;
+  isActive?: boolean; // add isActive for UberCore.ts
+  type?: 'escort' | 'creator' | 'livecam' | 'ai';
 }
 
 export interface NeuralModel {

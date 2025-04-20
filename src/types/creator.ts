@@ -1,4 +1,3 @@
-
 // Fix missing exports for ContentCreator and related types
 export interface ContentCreator {
   id: string;
@@ -82,12 +81,12 @@ export interface CreatorContent {
 }
 
 export interface CreatorAnalytics {
+  id?: string; // added optional id to fix ts error
   views: number;
   likes: number;
   shares: number;
   earnings: number;
-  subscriberGrowth: number;
-  topContent: string[];
-  period: 'day' | 'week' | 'month' | 'year';
+  subscriberGrowth?: number;
+  topContent?: string[];
+  period?: 'day' | 'week' | 'month' | 'year';
 }
-

@@ -15,8 +15,8 @@ const mockVerificationRequests: VerificationRequest[] = [
         fileUrl: 'https://picsum.photos/id/1018/800/600',
         uploadedAt: new Date().toISOString(),
         status: VerificationStatus.PENDING,
-        verification_request_id: '1',
-        userId: 'test'
+        userId: 'test',
+        documentType: 'ID Card'
       },
       {
         id: 'doc-2',
@@ -24,8 +24,8 @@ const mockVerificationRequests: VerificationRequest[] = [
         fileUrl: 'https://picsum.photos/id/1025/800/600',
         uploadedAt: new Date().toISOString(),
         status: VerificationStatus.PENDING,
-        verification_request_id: '1',
-        userId: 'test'
+        userId: 'test',
+        documentType: 'Selfie'
       }
     ]
   },
@@ -42,8 +42,8 @@ const mockVerificationRequests: VerificationRequest[] = [
         fileUrl: 'https://picsum.photos/id/1035/800/600',
         uploadedAt: new Date(Date.now() - 86400000).toISOString(),
         status: VerificationStatus.PENDING,
-        verification_request_id: '2',
-        userId: 'test'
+        userId: 'test',
+        documentType: 'Passport'
       }
     ]
   }
@@ -83,17 +83,15 @@ export const approveVerificationRequest = async (id: string): Promise<boolean> =
     reviewed_by: 'admin-user-id'
   };
   
-  // Also approve all documents
   if (mockVerificationRequests[index].documents) {
-    mockVerificationRequests[index].documents = mockVerificationRequests[index].documents!.map(doc => ({
+    mockVerificationRequests[index].documents = mockVerificationRequests[index].documents.map(doc => ({
       ...doc,
       status: VerificationStatus.APPROVED,
       id: doc.id,
       userId: doc.userId,
       documentType: doc.documentType,
       fileUrl: doc.fileUrl,
-      uploadedAt: doc.uploadedAt,
-      verification_request_id: doc.verification_request_id
+      uploadedAt: doc.uploadedAt
     }));
   }
   
@@ -136,7 +134,9 @@ export const createVerificationRequest = async (
     id: `doc-${Date.now()}-${index}`,
     status: VerificationStatus.PENDING,
     uploadedAt: new Date().toISOString(),
-    verification_request_id: newRequestId
+    userId: doc.userId,
+    documentType: doc.documentType,
+    fileUrl: doc.fileUrl
   }));
   
   // Create the request

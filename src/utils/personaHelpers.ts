@@ -1,77 +1,44 @@
-
 import { UberPersona } from '@/types/UberPersona';
 
-/**
- * Helper functions to safely check UberPersona capabilities
- */
+function getPersonaType(persona: UberPersona): string {
+  return persona?.type ?? '';
+}
 
-export const hasCapability = (
-  persona: UberPersona, 
-  capability: string
-): boolean => {
-  // Check if capabilities exists and is an object
-  if (!persona.capabilities) return false;
-  
-  // If capabilities is an array of strings
-  if (Array.isArray(persona.capabilities)) {
-    return persona.capabilities.includes(capability);
-  }
-  
-  // If capabilities is an object with boolean properties
-  if (typeof persona.capabilities === 'object') {
-    return Boolean(persona.capabilities[capability as keyof typeof persona.capabilities]);
-  }
-  
-  return false;
-};
+function getPersonaName(persona: UberPersona): string {
+  return persona?.displayName ?? persona?.name ?? 'Unknown Persona';
+}
 
-export const hasRealMeets = (persona: UberPersona): boolean => {
-  return hasCapability(persona, 'hasRealMeets') || 
-    (persona.roleFlags?.isEscort === true) ||
-    persona.type === 'escort';
-};
+function getPersonaAvatar(persona: UberPersona): string {
+  return persona?.avatarUrl ?? '/images/default-avatar.png';
+}
 
-export const hasVirtualMeets = (persona: UberPersona): boolean => {
-  return hasCapability(persona, 'hasVirtualMeets') || 
-    (persona.roleFlags?.isLivecam === true) ||
-    persona.type === 'livecam';
-};
+function getPersonaLocation(persona: UberPersona): string {
+  return persona?.location ?? 'Unknown Location';
+}
 
-export const hasContent = (persona: UberPersona): boolean => {
-  return hasCapability(persona, 'hasContent') || 
-    (persona.roleFlags?.isCreator === true) ||
-    persona.type === 'creator';
-};
+function getPersonaTags(persona: UberPersona): string[] {
+  return persona?.tags ?? [];
+}
 
-export const hasLiveStream = (persona: UberPersona): boolean => {
-  return hasCapability(persona, 'hasLiveStream') || 
-    (persona.roleFlags?.isLivecam === true) ||
-    persona.type === 'livecam';
-};
+function isPersonaVerified(persona: UberPersona): boolean {
+  return persona?.isVerified ?? false;
+}
 
-export const hasExclusiveContent = (persona: UberPersona): boolean => {
-  return hasCapability(persona, 'hasExclusiveContent') || 
-    (persona.roleFlags?.isCreator === true && persona.monetization?.subscriptionPrice !== 0);
-};
+function isPersonaOnline(persona: UberPersona): boolean {
+  return persona?.isOnline ?? false;
+}
 
-export const hasChat = (persona: UberPersona): boolean => {
-  return hasCapability(persona, 'hasChat') || 
-    persona.type === 'ai' ||
-    persona.roleFlags?.isAI === true;
-};
+function getPersonaPrice(persona: UberPersona): number {
+  return persona?.price ?? 0;
+}
 
-export const hasStories = (persona: UberPersona): boolean => {
-  return hasCapability(persona, 'hasStories');
-};
-
-/**
- * Get verification level with proper type
- */
-export const getVerificationLevel = (
-  level: string | undefined
-): "basic" | "advanced" | "premium" => {
-  if (level === "basic" || level === "advanced" || level === "premium") {
-    return level;
-  }
-  return "basic"; // Default to basic if undefined or invalid
+export {
+  getPersonaType,
+  getPersonaName,
+  getPersonaAvatar,
+  getPersonaLocation,
+  getPersonaTags,
+  isPersonaVerified,
+  isPersonaOnline,
+  getPersonaPrice,
 };

@@ -1,5 +1,6 @@
-import { supabase } from "@/supabase";
-import { CreatorAnalytics } from "@/types/creator";
+import { supabase } from '@/integrations/supabase/client';
+import { CreatorAnalytics } from '@/types/creator';
+import { format, subDays } from 'date-fns';
 
 const TABLE_NAME = "creator_analytics";
 
@@ -15,11 +16,11 @@ export const fetchCreatorAnalytics = async (
 ): Promise<CreatorAnalytics | null> => {
   try {
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from('creator_analytics')
       .select("*")
       .eq("creator_id", creatorId)
       .eq("date", date)
-      .single();
+      .maybeSingle(); // safer querying
 
     if (error) {
       console.error("Error fetching creator analytics:", error);
