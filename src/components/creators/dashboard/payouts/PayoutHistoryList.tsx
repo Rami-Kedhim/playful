@@ -1,5 +1,5 @@
 
-// Fix prop types to use CreatorPayout[] and not ContentCreator[]
+// Fix prop types to use CreatorPayout[] instead of ContentCreator[]
 
 import { CreatorPayout } from "@/types/creator";
 import PayoutHistoryLoading from "./components/PayoutHistoryLoading";
@@ -33,4 +33,3 @@ const PayoutHistoryList = ({ payouts, isLoading }: PayoutHistoryListProps) => {
 };
 
 export default PayoutHistoryList;
-
