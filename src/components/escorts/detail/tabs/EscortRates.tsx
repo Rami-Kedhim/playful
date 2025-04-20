@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort'; // Changed casing to capital E
 import { Calendar } from 'lucide-react';
 
 interface EscortRatesProps {
