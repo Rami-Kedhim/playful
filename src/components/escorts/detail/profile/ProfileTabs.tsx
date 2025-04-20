@@ -14,7 +14,8 @@ interface ProfileTabsProps {
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  const verificationLevel = (escort.verificationLevel || escort.verificationLevel || "none") as VerificationLevel;
+  // Cast verificationLevel to VerificationLevel union type to fix typing error
+  const verificationLevel = (escort.verificationLevel || "none") as VerificationLevel;
 
   return (
     <Card className="mt-6">

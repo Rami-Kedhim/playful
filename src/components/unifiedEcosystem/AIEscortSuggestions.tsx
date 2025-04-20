@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 interface AIEscortSuggestionsProps {
   relatedEscorts?: Escort[];
@@ -73,3 +73,4 @@ const AIEscortSuggestions: React.FC<AIEscortSuggestionsProps> = ({
 };
 
 export default AIEscortSuggestions;
+
