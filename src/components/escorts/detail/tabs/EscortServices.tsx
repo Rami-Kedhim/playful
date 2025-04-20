@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { Check } from 'lucide-react';
 
 interface EscortServicesProps {
@@ -11,11 +11,11 @@ interface EscortServicesProps {
 
 const EscortServices: React.FC<EscortServicesProps> = ({ escort }) => {
   const { services } = escort;
-  
+
   return (
     <Card className="p-6">
       <h3 className="text-xl font-semibold mb-4">Services Offered</h3>
-      
+
       {services && services.length > 0 ? (
         <div className="space-y-6">
           <div className="flex flex-wrap gap-2">
@@ -26,7 +26,7 @@ const EscortServices: React.FC<EscortServicesProps> = ({ escort }) => {
               </Badge>
             ))}
           </div>
-          
+
           <div className="mt-6 text-sm text-muted-foreground">
             <p>* Services may vary depending on availability and preferences.</p>
             <p>* Additional services may be available upon request.</p>

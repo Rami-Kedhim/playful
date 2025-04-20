@@ -35,11 +35,11 @@ const EscortDetailTabs: React.FC<EscortDetailTabsProps> = ({ escort }) => {
                   <ul className="list-none p-0 space-y-2">
                     <li className="flex justify-between">
                       <span className="text-gray-500">Age:</span> 
-                      <span>{escort.age}</span>
+                      <span>{escort.age ?? 'N/A'}</span>
                     </li>
                     <li className="flex justify-between">
                       <span className="text-gray-500">Gender:</span> 
-                      <span>{escort.gender}</span>
+                      <span>{escort.gender ?? 'N/A'}</span>
                     </li>
                     {escort.sexualOrientation && (
                       <li className="flex justify-between">
@@ -47,7 +47,7 @@ const EscortDetailTabs: React.FC<EscortDetailTabsProps> = ({ escort }) => {
                         <span>{escort.sexualOrientation}</span>
                       </li>
                     )}
-                    {escort.languages && (
+                    {escort.languages && escort.languages.length > 0 && (
                       <li className="flex justify-between">
                         <span className="text-gray-500">Languages:</span> 
                         <span>{escort.languages.join(', ')}</span>

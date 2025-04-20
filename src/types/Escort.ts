@@ -1,4 +1,5 @@
 
+// Update Escort interface to include optional sexualOrientation property
 export interface Escort {
   id: string;
   name: string;
@@ -29,6 +30,7 @@ export interface Escort {
     hourly?: number;
     twoHour?: number;
     overnight?: number;
+    weekend?: number;
   };
   imageUrl?: string;
   avatarUrl?: string;
@@ -52,6 +54,5 @@ export interface Escort {
   responseRate?: number;
   isAI?: boolean;
 
-  sexualOrientation?: string; // Added property
+  sexualOrientation?: string; // Added property here
 }
-
