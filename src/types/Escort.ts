@@ -20,7 +20,7 @@ export interface Escort {
   images?: string[];
   gallery?: string[];
   gallery_images?: string[];
-  videos?: string[];
+  videos?: Video[];
   isVerified?: boolean;
   verified?: boolean;
   verificationLevel?: string;
@@ -54,6 +54,11 @@ export interface Escort {
   responseRate?: number;
   isAI?: boolean;
   isFavorited?: boolean;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  created_at?: string | Date;
+  updated_at?: string | Date;
+  userId?: string;
 
   rates?: {
     hourly?: number;
@@ -80,7 +85,6 @@ export interface Availability {
   }[];
 }
 
-// Booking interface unified
 export interface Booking {
   id: string;
   escortId: string;
@@ -110,3 +114,4 @@ export interface Video {
   duration?: number;
   isPublic?: boolean;
 }
+
