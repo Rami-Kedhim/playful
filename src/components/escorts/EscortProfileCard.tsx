@@ -1,12 +1,10 @@
 
-// Fix getHourlyRate function to safely access rates property which might not exist, typing fixes
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { StarIcon, MapPin, Clock, DollarSign, Check } from 'lucide-react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import ServiceTypeBadge from './ServiceTypeBadge';
 
@@ -152,3 +150,4 @@ const EscortProfileCard: React.FC<EscortProfileCardProps> = ({
 };
 
 export default EscortProfileCard;
+

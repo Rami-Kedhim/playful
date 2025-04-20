@@ -2,11 +2,16 @@
 import { Escort } from '@/types/Escort';
 import EscortCard from './EscortCard';
 
+interface ExtendedEscort extends Escort {
+  sexualOrientation?: string;
+  lastActive?: string | Date;
+}
+
 interface EscortGridProps {
-  escorts: Escort[];
+  escorts: ExtendedEscort[];
   loading?: boolean;
   emptyMessage?: string;
-  onEscortClick?: (escort: Escort) => void;
+  onEscortClick?: (escort: ExtendedEscort) => void;
   totalPages?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
@@ -59,7 +64,6 @@ const EscortGrid: React.FC<EscortGridProps> = ({
           availableNow={escort.availableNow ?? false}
           lastActive={escort.lastActive ? new Date(escort.lastActive) : undefined}
           responseRate={escort.responseRate ?? undefined}
-          // onClick prop removed because EscortCardProps does not have it
         />
       ))}
     </div>
@@ -67,3 +71,4 @@ const EscortGrid: React.FC<EscortGridProps> = ({
 };
 
 export default EscortGrid;
+

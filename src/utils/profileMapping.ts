@@ -32,7 +32,7 @@ export const mapEscortToUberPersona = (escort: Escort): UberPersona => {
     },
     capabilities: {
       hasPhotos: (escort.images && escort.images.length > 0) || false,
-      hasVideos: (escort.videos?.length ?? 0) > 0,
+      hasVideos: (escort.videos && escort.videos.length > 0) || false,
       hasStories: false,
       hasChat: true,
       hasBooking: escort.providesInPersonServices ?? true,
