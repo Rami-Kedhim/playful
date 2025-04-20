@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Escort } from '@/types/Escort'; // Changed to capital E
+import { Escort } from '@/types/Escort';
 import EscortReviews from './tabs/EscortReviews';
 import EscortRates from './tabs/EscortRates';
 import EscortServices from './tabs/EscortServices';
@@ -21,14 +21,14 @@ const EscortDetailTabs: React.FC<EscortDetailTabsProps> = ({ escort }) => {
         <TabsTrigger value="services">Services</TabsTrigger>
         <TabsTrigger value="reviews">Reviews</TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="about">
         <Card>
           <CardContent className="pt-6">
             <div className="prose max-w-none">
               <h3 className="text-xl font-semibold mb-2">About Me</h3>
               <p>{escort.bio}</p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mt-6">
                 <div>
                   <h4 className="font-semibold">Details</h4>
@@ -55,7 +55,7 @@ const EscortDetailTabs: React.FC<EscortDetailTabsProps> = ({ escort }) => {
                     )}
                   </ul>
                 </div>
-                
+
                 <div>
                   <h4 className="font-semibold">Appearance</h4>
                   <ul className="list-none p-0 space-y-2">
@@ -90,15 +90,15 @@ const EscortDetailTabs: React.FC<EscortDetailTabsProps> = ({ escort }) => {
           </CardContent>
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="rates">
         <EscortRates escort={escort} />
       </TabsContent>
-      
+
       <TabsContent value="services">
         <EscortServices escort={escort} />
       </TabsContent>
-      
+
       <TabsContent value="reviews">
         <EscortReviews escort={escort} />
       </TabsContent>

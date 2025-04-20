@@ -16,14 +16,14 @@ export interface Escort {
   languages?: string[];
   reviewCount?: number;
   ethnicity?: string;
-  height?: string;
-  weight?: string;
+  height?: string | number;
+  weight?: string | number;
   hairColor?: string;
   eyeColor?: string;
   bodyType?: string;
   availability?: Record<string, any>;
   nextAvailable?: string;
-  
+
   // Additional properties required by components
   rates?: {
     hourly?: number;
@@ -51,4 +51,7 @@ export interface Escort {
   boostLevel?: number;
   responseRate?: number;
   isAI?: boolean;
+
+  sexualOrientation?: string; // Added property
 }
+
