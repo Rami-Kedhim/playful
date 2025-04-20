@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/escort'; // unified import
 import { ServiceTypeFilter } from '../../filters/ServiceTypeBadgeLabel';
 import BookingDialog from '../../detail/booking/BookingDialog';
 
@@ -23,12 +23,20 @@ const BookingButton: React.FC<BookingButtonProps> = ({
 }) => {
   const [showBookingDialog, setShowBookingDialog] = useState(false);
 
+  // Normalize height to string to satisfy type issues
+  const normalizedEscort = {
+    ...escort,
+    height: escort.height !== undefined && typeof escort.height !== 'string'
+      ? String(escort.height)
+      : escort.height,
+  };
+
   const getServiceType = (): ServiceTypeFilter => {
-    if (escort.providesInPersonServices && escort.providesVirtualContent) {
+    if (normalizedEscort.providesInPersonServices && normalizedEscort.providesVirtualContent) {
       return "both";
-    } else if (escort.providesInPersonServices) {
+    } else if (normalizedEscort.providesInPersonServices) {
       return "in-person";
-    } else if (escort.providesVirtualContent) {
+    } else if (normalizedEscort.providesVirtualContent) {
       return "virtual";
     }
     return "in-person";
@@ -53,7 +61,7 @@ const BookingButton: React.FC<BookingButtonProps> = ({
       </Button>
 
       <BookingDialog
-        escort={escort}
+        escort={normalizedEscort}
         isOpen={showBookingDialog}
         onClose={() => setShowBookingDialog(false)}
         onSubmit={async () => {}} // Provide a no-op submit since it is required
@@ -63,3 +71,4 @@ const BookingButton: React.FC<BookingButtonProps> = ({
 };
 
 export default BookingButton;
+

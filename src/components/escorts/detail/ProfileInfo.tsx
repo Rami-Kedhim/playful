@@ -1,6 +1,4 @@
 
-// Fix onSubmit handler to return Promise<void> and add missing props to BookingDialog, fix use of providesVirtualContent
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Escort } from "@/types/escort";
@@ -29,7 +27,15 @@ const ProfileInfo = ({
 }: ProfileInfoProps) => {
   const [serviceTab, setServiceTab] = useState("in-person");
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
-  
+
+  // Normalize height to string to satisfy type
+  const normalizedEscort = {
+    ...escort,
+    height: escort.height !== undefined && typeof escort.height !== 'string'
+      ? String(escort.height)
+      : escort.height,
+  };
+
   const handleBookNow = () => {
     setBookingDialogOpen(true);
   };
@@ -40,13 +46,13 @@ const ProfileInfo = ({
     console.log("BookingDialog onSubmit called", data);
     return Promise.resolve();
   };
-  
+
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden">
         <CardContent className="p-6">
           <ProfileHeader 
-            escort={escort} 
+            escort={normalizedEscort} 
             onFavoriteToggle={onFavoriteToggle} 
           />
           
@@ -67,7 +73,7 @@ const ProfileInfo = ({
               {serviceTab === "in-person" && (
                 <div className="space-y-4">
                   <p className="text-muted-foreground text-sm">
-                    Book {escort.name} for in-person encounters and enjoy personalized services.
+                    Book {normalizedEscort.name} for in-person encounters and enjoy personalized services.
                   </p>
                   <Button onClick={handleBookNow} className="w-full">
                     Book Now
@@ -78,10 +84,10 @@ const ProfileInfo = ({
               {serviceTab === "content" && (
                 <div className="space-y-4">
                   <p className="text-muted-foreground text-sm">
-                    Access {escort.name}'s exclusive photos, videos, and premium content.
+                    Access {normalizedEscort.name}'s exclusive photos, videos, and premium content.
                   </p>
                   <Button asChild className="w-full">
-                    <Link to={`/escort/${escort.id}/content`}>
+                    <Link to={`/escort/${normalizedEscort.id}/content`}>
                       <ImageIcon className="mr-2 h-4 w-4" />
                       View Content
                     </Link>
@@ -92,10 +98,10 @@ const ProfileInfo = ({
               {serviceTab === "livestream" && (
                 <div className="space-y-4">
                   <p className="text-muted-foreground text-sm">
-                    Join {escort.name}'s live streams for real-time interaction and personalized experiences.
+                    Join {normalizedEscort.name}'s live streams for real-time interaction and personalized experiences.
                   </p>
                   <Button asChild className="w-full">
-                    <Link to={`/escort/${escort.id}/live`}>
+                    <Link to={`/escort/${normalizedEscort.id}/live`}>
                       <VideoIcon className="mr-2 h-4 w-4" />
                       Join Live Stream
                     </Link>
@@ -106,7 +112,7 @@ const ProfileInfo = ({
           </div>
           
           <ProfileActions 
-            escort={escort}
+            escort={normalizedEscort}
             onBookingOpen={onBookingOpen}
             onMessageOpen={onMessageOpen}
             onShareOpen={onShareOpen}
@@ -115,7 +121,7 @@ const ProfileInfo = ({
       </Card>
       
       <BookingDialog 
-        escort={escort}
+        escort={normalizedEscort}
         isOpen={bookingDialogOpen}
         onClose={() => setBookingDialogOpen(false)}
         onSubmit={bookingOnSubmit}
@@ -126,3 +132,4 @@ const ProfileInfo = ({
 };
 
 export default ProfileInfo;
+

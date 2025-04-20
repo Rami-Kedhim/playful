@@ -27,38 +27,41 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
   const getSuggestedTimes = () => {
     const now = new Date();
     const timeSlots = [];
-    
-    // Start at the next hour, rounded up
     const startHour = now.getHours() + 1;
-    
-    // Create 3 time slots
     for (let i = 0; i < 3; i++) {
       const hour = (startHour + i * 2) % 24;
       const isPM = hour >= 12;
       const displayHour = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
       timeSlots.push(`${displayHour}:00 ${isPM ? 'PM' : 'AM'}`);
     }
-    
     return timeSlots;
   };
-  
+
   const suggestedTimes = getSuggestedTimes();
-  
+
   const getTomorrowDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow;
   };
-  
+
   const getDayAfterTomorrow = () => {
     const dayAfter = new Date();
     dayAfter.setDate(dayAfter.getDate() + 2);
     return dayAfter;
   };
-  
+
   const handleDateSelection = (date: Date) => {
     setSelectedDate(date);
     setIsDialogOpen(true);
+  };
+
+  // Normalize height to string to satisfy type
+  const normalizedEscort = {
+    ...escort,
+    height: escort.height !== undefined && typeof escort.height !== 'string'
+      ? String(escort.height)
+      : escort.height,
   };
 
   return (
@@ -71,7 +74,7 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
           <span className="text-sm text-muted-foreground">Hourly Rate</span>
           <div className="text-2xl font-bold">${escort.price || escort.rates?.hourly || 200}</div>
         </div>
-        
+
         <div className="space-y-2">
           <p className="text-sm font-medium">Quick Availability</p>
           <div className="grid grid-cols-2 gap-2">
@@ -84,7 +87,7 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
               <Calendar className="h-4 w-4" />
               <span>Tomorrow</span>
             </Button>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -96,7 +99,7 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
             </Button>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <p className="text-sm font-medium">Popular Times</p>
           <div className="grid grid-cols-3 gap-2">
@@ -114,7 +117,7 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
             ))}
           </div>
         </div>
-        
+
         <Button 
           className="w-full"
           onClick={() => setIsDialogOpen(true)}
@@ -122,9 +125,9 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
           Book Now
         </Button>
       </CardContent>
-      
+
       <BookingDialog
-        escort={escort}
+        escort={normalizedEscort}
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onSubmit={handleSubmit}
@@ -134,3 +137,4 @@ const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
 };
 
 export default BookingRequestCard;
+

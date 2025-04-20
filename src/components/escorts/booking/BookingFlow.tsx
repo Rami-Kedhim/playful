@@ -1,12 +1,10 @@
 
-// Fix: Import Escort from '@/types/Escort' instead of '@/types/escort'
-// Ensure height property in BookingFlow usage coerced to string if number
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { bookingService } from '@/services/bookingService';
-import { Escort, Booking } from '@/types/Escort'; // <-- Changed import here
+import { Escort } from '@/types/escort'; // unified single import
+import { Booking } from '@/types/booking'; // Booking from booking.ts which defines it
 import { toast } from '@/components/ui/use-toast';
 import BookingDialog from '../detail/booking/BookingDialog';
 import BookingConfirmation from './BookingConfirmation';
