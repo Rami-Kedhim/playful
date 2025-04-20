@@ -28,7 +28,7 @@ export const usePayoutQueries = (creatorId: string) => {
 
   // Request payout mutation
   const { mutate: requestPayout, isPending: isSubmitting } = useMutation({
-    mutationFn: async (request: any) => { // Generic any for request due to missing types
+    mutationFn: async (request: any) => {
       return await payoutService.requestPayout(request);
     },
     onSuccess: () => {
@@ -49,7 +49,7 @@ export const usePayoutQueries = (creatorId: string) => {
   });
 
   return {
-    payouts: payoutsData || [],
+    payouts: payoutsData,
     isLoading,
     error,
     refreshPayouts: refetch,
@@ -57,4 +57,3 @@ export const usePayoutQueries = (creatorId: string) => {
     isSubmitting
   };
 };
-

@@ -1,8 +1,6 @@
 
 import { CreatorPayout } from '@/types/creator';
 
-// NOTE: Removed usage of `PayoutResult` import since it's missing; user should add if needed.
-
 // Mock fetch payouts
 export const fetchCreatorPayouts = async (creatorId: string): Promise<CreatorPayout[]> => {
   return new Promise((resolve) => {
@@ -10,17 +8,17 @@ export const fetchCreatorPayouts = async (creatorId: string): Promise<CreatorPay
       const payouts: CreatorPayout[] = [
         {
           id: 'payout1',
+          creatorId,
           amount: 100,
-          currency: 'USD',
           status: 'completed',
-          createdAt: new Date().toISOString() // renamed from created_at
+          requestedAt: new Date().toISOString()
         },
         {
           id: 'payout2',
+          creatorId,
           amount: 150,
-          currency: 'USD',
           status: 'pending',
-          createdAt: new Date().toISOString()
+          requestedAt: new Date().toISOString()
         }
       ];
       resolve(payouts);
@@ -34,10 +32,10 @@ export const createPayout = async (creatorId: string, amount: number): Promise<C
     setTimeout(() => {
       const newPayout: CreatorPayout = {
         id: `payout-${Date.now()}`,
+        creatorId,
         amount,
-        currency: 'USD',
         status: 'pending',
-        createdAt: new Date().toISOString() // renamed
+        requestedAt: new Date().toISOString()
       };
       resolve(newPayout);
     }, 300);
@@ -48,20 +46,31 @@ export const createPayout = async (creatorId: string, amount: number): Promise<C
 export const updatePayout = async (payoutId: string, status: string): Promise<CreatorPayout | null> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Mock updated payout with corrected property names
       resolve({
         id: payoutId,
+        creatorId: '',
         amount: 0,
-        currency: 'USD',
         status,
-        createdAt: new Date().toISOString()
+        requestedAt: new Date().toISOString()
       });
     }, 300);
   });
 };
 
-export default {
-  fetchCreatorPayouts,
-  createPayout,
-  updatePayout
+// Mock requestPayout function as default export (simulate)
+const requestPayout = async (request: any): Promise<CreatorPayout> => {
+  // Simulate API call and response
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: `payout-${Date.now()}`,
+        creatorId: request.creator_id,
+        amount: request.amount,
+        status: 'pending',
+        requestedAt: new Date().toISOString()
+      });
+    }, 500);
+  });
 };
+
+export default requestPayout;

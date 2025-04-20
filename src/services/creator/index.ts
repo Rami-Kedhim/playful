@@ -9,8 +9,9 @@ import {
   deleteContent,
   getContentDetail
 } from './creatorContentService';
-import { getCreatorPayouts, fetchCreatorPayouts, requestPayout } from './creatorPayoutsService';
 import { creatorReviewsService } from './reviews';
+import { fetchCreatorPayouts } from './creatorPayoutsService';
+import requestPayout from './creatorPayoutsService';
 
 // Export individual functions from creatorReviewsService for backward compatibility
 const { fetchCreatorReviews, addReview: addCreatorReview } = creatorReviewsService;
@@ -28,7 +29,6 @@ export {
   getContentDetail,
   
   // Payouts
-  getCreatorPayouts,
   fetchCreatorPayouts,
   requestPayout,
   

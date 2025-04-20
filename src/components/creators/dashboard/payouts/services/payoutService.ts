@@ -1,6 +1,4 @@
 
-// Use named exports correctly, and fix import of requestPayout to default import
-
 import {
   fetchCreatorPayouts,
   createPayout,
@@ -16,4 +14,3 @@ export const payoutService = {
 };
 
 export default payoutService;
-

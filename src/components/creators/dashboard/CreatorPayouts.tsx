@@ -6,6 +6,7 @@ import usePayouts from "./payouts/usePayouts";
 import EarningsSummary from "./payouts/EarningsSummary";
 import PayoutHistory from "./payouts/PayoutHistory";
 import PayoutRequestManager from "./payouts/components/PayoutRequestManager";
+import { CreatorPayout } from "@/types/creator";
 
 interface CreatorPayoutsProps {
   creatorId: string;
@@ -54,10 +55,9 @@ const CreatorPayouts = ({ creatorId }: CreatorPayoutsProps) => {
       </div>
       
       {/* Payout History Section */}
-      <PayoutHistory payouts={payouts} isLoading={isLoading} />
+      <PayoutHistory payouts={payouts as CreatorPayout[]} isLoading={isLoading} />
     </div>
   );
 };
 
 export default CreatorPayouts;
-
