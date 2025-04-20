@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import EscortCard from "@/components/escorts/EscortCard";
-import { Escort } from "@/types/escort";  // Use consistent import
+import { Escort } from "@/types/Escort";  // Fixed casing here
 import { Skeleton } from "@/components/ui/skeleton";
 import { BadgeCheck, Calendar, MapPin } from "lucide-react";
 import ServiceTypeBadgeLabel from "./filters/ServiceTypeBadgeLabel";
