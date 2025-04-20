@@ -1,3 +1,4 @@
+
 import { VerificationDocument, VerificationRequest, VerificationStatus, VerificationLevel } from '@/types/verification';
 
 // Mock verification requests data
@@ -11,21 +12,17 @@ const mockVerificationRequests: VerificationRequest[] = [
     documents: [
       {
         id: 'doc-1',
-        document_type: 'ID Card',
+        documentType: 'id_card',
         fileUrl: 'https://picsum.photos/id/1018/800/600',
         uploadedAt: new Date().toISOString(),
         status: VerificationStatus.PENDING,
-        userId: 'test',
-        documentType: 'ID Card'
       },
       {
         id: 'doc-2',
-        document_type: 'Selfie',
+        documentType: 'selfie',
         fileUrl: 'https://picsum.photos/id/1025/800/600',
         uploadedAt: new Date().toISOString(),
         status: VerificationStatus.PENDING,
-        userId: 'test',
-        documentType: 'Selfie'
       }
     ]
   },
@@ -38,12 +35,10 @@ const mockVerificationRequests: VerificationRequest[] = [
     documents: [
       {
         id: 'doc-3',
-        document_type: 'Passport',
+        documentType: 'passport',
         fileUrl: 'https://picsum.photos/id/1035/800/600',
         uploadedAt: new Date(Date.now() - 86400000).toISOString(),
         status: VerificationStatus.PENDING,
-        userId: 'test',
-        documentType: 'Passport'
       }
     ]
   }
@@ -53,7 +48,6 @@ const mockVerificationRequests: VerificationRequest[] = [
  * Get all verification requests
  */
 export const getAllVerificationRequests = async (): Promise<VerificationRequest[]> => {
-  // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 800));
   return [...mockVerificationRequests];
 };
@@ -73,28 +67,23 @@ export const getVerificationRequestById = async (id: string): Promise<Verificati
 export const approveVerificationRequest = async (id: string): Promise<boolean> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   const index = mockVerificationRequests.findIndex(req => req.id === id);
-  
+
   if (index === -1) return false;
-  
+
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
     status: VerificationStatus.APPROVED,
-    reviewed_at: new Date().toISOString(),
-    reviewed_by: 'admin-user-id'
+    reviewedAt: new Date().toISOString(),
+    reviewedBy: 'admin-user-id'
   };
-  
+
   if (mockVerificationRequests[index].documents) {
     mockVerificationRequests[index].documents = mockVerificationRequests[index].documents.map(doc => ({
       ...doc,
-      status: VerificationStatus.APPROVED,
-      id: doc.id,
-      userId: doc.userId,
-      documentType: doc.documentType,
-      fileUrl: doc.fileUrl,
-      uploadedAt: doc.uploadedAt
+      status: VerificationStatus.APPROVED
     }));
   }
-  
+
   return true;
 };
 
@@ -104,51 +93,46 @@ export const approveVerificationRequest = async (id: string): Promise<boolean> =
 export const rejectVerificationRequest = async (id: string, reason: string): Promise<boolean> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
   const index = mockVerificationRequests.findIndex(req => req.id === id);
-  
+
   if (index === -1) return false;
-  
+
   mockVerificationRequests[index] = {
     ...mockVerificationRequests[index],
     status: VerificationStatus.REJECTED,
-    reviewed_at: new Date().toISOString(),
-    reviewed_by: 'admin-user-id',
+    reviewedAt: new Date().toISOString(),
+    reviewedBy: 'admin-user-id',
     reviewer_notes: reason
   };
-  
+
   return true;
 };
 
 // Add a new verification request
 export const createVerificationRequest = async (
-  profileId: string, 
-  level: 'basic' | 'advanced' | 'premium', 
-  documents: Omit<VerificationDocument, 'id' | 'status' | 'uploaded_at' | 'verification_request_id'>[]
+  profileId: string,
+  level: 'basic' | 'enhanced' | 'premium',
+  documents: Omit<VerificationDocument, 'id' | 'status' | 'uploadedAt' | 'verification_request_id'>[]
 ): Promise<VerificationRequest> => {
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   const newRequestId = `req-${Date.now()}`;
-  
-  // Create document objects
+
   const newDocuments: VerificationDocument[] = documents.map((doc, index) => ({
     ...doc,
     id: `doc-${Date.now()}-${index}`,
     status: VerificationStatus.PENDING,
     uploadedAt: new Date().toISOString(),
-    userId: doc.userId,
-    documentType: doc.documentType,
-    fileUrl: doc.fileUrl
   }));
-  
-  // Create the request
+
   const newRequest: VerificationRequest = {
     id: newRequestId,
     profile_id: profileId,
     status: VerificationStatus.PENDING,
     requested_level: level as any,
     created_at: new Date().toISOString(),
-    documents: newDocuments
+    documents: newDocuments,
   };
-  
+
   mockVerificationRequests.push(newRequest);
   return newRequest;
 };
@@ -158,5 +142,5 @@ export default {
   getVerificationRequestById,
   approveVerificationRequest,
   rejectVerificationRequest,
-  createVerificationRequest
+  createVerificationRequest,
 };

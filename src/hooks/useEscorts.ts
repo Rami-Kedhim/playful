@@ -1,5 +1,7 @@
+
 import { useState, useEffect, useCallback } from 'react';
-import { escortService } from '@/services/escorts/escortService';
+// Correct import of default export
+import escortService from '@/services/escorts/escortService';
 
 export function useEscorts() {
   const [escorts, setEscorts] = useState([]);
@@ -8,7 +10,6 @@ export function useEscorts() {
   const [filters, setFilters] = useState({});
 
   const applyCurrentFilters = useCallback(() => {
-    // Implementation would depend on your filtering logic
     console.log('Applying filters:', filters);
   }, [escorts, filters]);
 

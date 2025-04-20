@@ -1,5 +1,5 @@
 
-// Added missing helper functions hasRealMeets, hasVirtualMeets, hasContent to fix imports and typings
+// Fix personaHelpers.ts to align with UberPersona props
 
 import { UberPersona } from '@/types/UberPersona';
 
@@ -8,7 +8,7 @@ function getPersonaType(persona: UberPersona): string {
 }
 
 function getPersonaName(persona: UberPersona): string {
-  return persona?.displayName ?? persona?.name ?? 'Unknown Persona';
+  return persona?.displayName ?? 'Unknown Persona';
 }
 
 function getPersonaAvatar(persona: UberPersona): string {
@@ -35,8 +35,6 @@ function getPersonaPrice(persona: UberPersona): number {
   return persona?.price ?? 0;
 }
 
-// New helpers added
-
 function hasRealMeets(persona: UberPersona): boolean {
   return !!persona?.capabilities?.hasRealMeets;
 }
@@ -62,3 +60,4 @@ export {
   hasVirtualMeets,
   hasContent,
 };
+

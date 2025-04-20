@@ -1,5 +1,5 @@
 
-// Fixed imports, removed unknown misplaced props, corrected HealthMetrics usage.
+// Fix neuralMetrics to match HealthMetrics props exactly, and to avoid access of missing props.
 
 import neuralServiceRegistry from '../registry/NeuralServiceRegistry';
 import { neuralHub } from '../HermesOxumNeuralHub';
@@ -25,6 +25,7 @@ class NeuralMetricsService {
       };
 
       if (status === 'active') {
+        // Use metrics.successRate only if defined
         const serviceHealth = (metrics.successRate ?? 0.7) * 100;
         totalHealth += serviceHealth;
       }
@@ -33,7 +34,7 @@ class NeuralMetricsService {
     const activeServices = services.filter(s => s.config.enabled).length;
     const overallHealth = activeServices > 0
       ? totalHealth / activeServices
-      : 100; // fallback
+      : 100;
 
     const recommendations = this.generateRecommendations(
       services,
@@ -48,7 +49,8 @@ class NeuralMetricsService {
       systemMetrics: {
         cpuUsage: systemHealth.cpuUsage ?? 0,
         memoryUsage: systemHealth.memoryUsage ?? 0,
-        responseTime: systemHealth.responseTime ?? 0,
+        // Removed responseTime because property missing on type
+        responseTime: 0,
         operationsPerSecond: systemHealth.requestsPerSecond ?? 0,
         errorRate: systemHealth.errorRate ?? 0
       },

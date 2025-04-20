@@ -1,4 +1,12 @@
+
+// Add Rates interface as it was missing causing TS error
 import { Escort } from '@/types/escort';
+
+interface Rates {
+  hourly: number;
+  halfHour: number;
+  overnight: number;
+}
 
 export class EscortScraper {
   private baseUrl: string;
@@ -10,83 +18,63 @@ export class EscortScraper {
     this.apiKey = apiKey;
   }
 
-  /**
-   * Initialize the scraper
-   */
   public async initialize(): Promise<boolean> {
-    // Simulating an initialization process
     await new Promise(resolve => setTimeout(resolve, 500));
     this.isInitialized = true;
     return true;
   }
 
-  /**
-   * Get all escorts from the source
-   */
   public async getEscorts(): Promise<Escort[]> {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    
-    // Simulate API call with mock data
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     return this.generateMockEscorts(10);
   }
 
-  /**
-   * Get escort by ID
-   */
   public async getEscortById(id: string): Promise<Escort | null> {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    
-    // Simulate API call
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     const mockEscort = this.generateMockEscorts(1, id)[0];
     return mockEscort || null;
   }
 
-  /**
-   * Search escorts by query
-   */
   public async searchEscorts(query: string): Promise<Escort[]> {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    
-    // Simulate API call
+
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     const mockEscorts = this.generateMockEscorts(5);
-    return mockEscorts.filter(escort => 
+    return mockEscorts.filter(escort =>
       escort.name.toLowerCase().includes(query.toLowerCase()) ||
       escort.location.toLowerCase().includes(query.toLowerCase()) ||
       escort.services.some(s => s.toLowerCase().includes(query.toLowerCase()))
     );
   }
 
-  /**
-   * Generate mock escort data for testing
-   */
   private generateMockEscorts(count: number, specificId?: string): Escort[] {
     const escorts: Escort[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       const id = specificId || `scraped-escort-${i}`;
-      
+
       const gender = Math.random() > 0.7 ? 'male' : 'female';
-      const age = Math.floor(Math.random() * 15) + 21; // 21-35
-      
+      const age = Math.floor(Math.random() * 15) + 21;
+
       const rates: Rates = {
-        hourly: Math.floor(Math.random() * 300) + 200,  // $200-$500
-        halfHour: Math.floor(Math.random() * 150) + 150, // $150-$300
-        overnight: Math.floor(Math.random() * 1000) + 1000 // $1000-$2000
+        hourly: Math.floor(Math.random() * 300) + 200,
+        halfHour: Math.floor(Math.random() * 150) + 150,
+        overnight: Math.floor(Math.random() * 1000) + 1000
       };
-      
-      // Create escort with appropriate type structure
+
       const mockEscort: Escort = {
         id,
         name: `Scraped ${gender === 'male' ? 'John' : 'Jane'} ${id.slice(-3)}`,
@@ -109,7 +97,7 @@ export class EscortScraper {
           `https://picsum.photos/seed/${id}-3/800/1200`
         ],
         rates,
-        rating: Math.random() * 2 + 3, // 3.0-5.0
+        rating: Math.random() * 2 + 3,
         reviewCount: Math.floor(Math.random() * 50) + 5,
         verified: Math.random() > 0.5,
         isVerified: Math.random() > 0.5,
@@ -118,21 +106,16 @@ export class EscortScraper {
           `https://picsum.photos/seed/${id}-1/800/1200`,
           `https://picsum.photos/seed/${id}-2/800/1200`,
         ],
-        contactInfo: {
-          email: `escort${id.slice(-3)}@example.com`,
-          phone: `+1555${Math.floor(Math.random() * 10000000).toString().padStart(7, '0')}`,
-          website: `https://example.com/escorts/${id}`
-        },
+        // Removed contactInfo as not in Escort type
         boostLevel: Math.floor(Math.random() * 5)
       };
-      
+
       escorts.push(mockEscort);
     }
-    
+
     return escorts;
   }
-  
-  // Static method to get instance
+
   public static getInstance(): EscortScraper {
     return new EscortScraper();
   }

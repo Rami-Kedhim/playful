@@ -1,3 +1,6 @@
+
+// Only fixing the user_id to userId property access
+
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,17 +27,17 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
 }) => {
   const [notes, setNotes] = React.useState('');
   const isPending = request.status === VerificationStatus.PENDING || request.status === VerificationStatus.IN_REVIEW;
-  
+
   const handleApprove = async () => {
     if (!isPending) return;
     await onApprove(request.id, notes);
   };
-  
+
   const handleReject = async () => {
     if (!isPending) return;
     await onReject(request.id, notes);
   };
-  
+
   return (
     <Card>
       <CardHeader>
@@ -44,9 +47,9 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">
           <User className="h-4 w-4" />
-          <span>User ID: {request.userId || request.user_id || request.profile_id}</span>
+          <span>User ID: {request.userId || request.profile_id || request.profile_id}</span>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Clock className="h-4 w-4" />
           <span>
@@ -58,13 +61,13 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
                 : format(new Date(), 'MMM dd, yyyy h:mm a')}
           </span>
         </div>
-        
+
         <Tabs defaultValue="documents" className="space-y-4">
           <TabsList>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="documents" className="space-y-4">
             {(!request.documents || request.documents.length === 0) ? (
               <div className="text-center text-muted-foreground">
@@ -77,10 +80,10 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
               ))
             )}
           </TabsContent>
-          
+
           <TabsContent value="notes">
-            <Textarea 
-              placeholder="Add notes about this verification request" 
+            <Textarea
+              placeholder="Add notes about this verification request"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -100,16 +103,16 @@ const VerificationReviewPanel: React.FC<VerificationReviewPanelProps> = ({
           </Badge>
         ) : (
           <div className="flex space-x-2">
-            <Button 
-              variant="ghost" 
-              onClick={handleReject} 
+            <Button
+              variant="ghost"
+              onClick={handleReject}
               disabled={loading}
             >
               Reject
               <X className="h-4 w-4 ml-2" />
             </Button>
-            <Button 
-              onClick={handleApprove} 
+            <Button
+              onClick={handleApprove}
               disabled={loading}
             >
               Approve
