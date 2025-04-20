@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Escort, VerificationLevel } from "@/types/escort"; // always import from lowercase path
+import { Escort, VerificationLevel } from "@/types/Escort"; // Use complete type from '@/types/Escort'
 import { useFavorites } from "@/contexts/FavoritesContext";
 import MediaSection from "./MediaSection";
 import ProfileInfo from "./ProfileInfo";
@@ -18,16 +18,11 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [messageOpen, setMessageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Normalize height and verificationLevel to expected type with fallback
+  // Normalize verificationLevel with safe fallback cast only
   const normalizedEscort: Escort = {
     ...escort,
-    height:
-      escort.height !== undefined && typeof escort.height !== "string"
-        ? String(escort.height)
-        : escort.height,
-    // Use explicit cast or fallback 'none' if undefined
     verificationLevel:
-      ((escort.verificationLevel as VerificationLevel) || "none") as VerificationLevel,
+      (escort.verificationLevel as VerificationLevel) || "none",
   };
 
   const handleFavoriteToggle = () => {
@@ -77,3 +72,4 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
 };
 
 export default EscortProfile;
+

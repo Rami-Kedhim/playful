@@ -1,7 +1,4 @@
 
-// Fix CompatibleEscort height to string only for type compliance with Escort
-// Fix import casing for Escort from '@/types/Escort'
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Escort } from '@/types/Escort';
 import { UberPersona } from '@/types/UberPersona';
@@ -53,12 +50,13 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
         await uberCoreInstance.initialize();
 
         if (escorts && escorts.length > 0) {
-          const sanitizedEscorts: CompatibleEscort[] = escorts.map(e => ({
+          // Sanitize escorts: convert height to string safely
+          const sanitizedEscorts: Escort[] = escorts.map(e => ({
             ...e,
-            height: e.height !== undefined && e.height !== null ? e.height.toString() : ''
+            height: e.height !== undefined && e.height !== null ? String(e.height) : ''
           }));
 
-          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts as Escort[]);
+          const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
           setAllPersonas(mappedPersonas);
         }
 
@@ -145,10 +143,10 @@ export const UberPersonaProvider: React.FC<{ children: ReactNode }> = ({ childre
     try {
       setLoading(true);
       if (escorts && escorts.length > 0) {
-        const sanitizedEscorts = escorts.map(e => ({
+        const sanitizedEscorts: Escort[] = escorts.map(e => ({
           ...e,
-          height: e.height !== undefined && e.height !== null ? e.height.toString() : '',
-        })) as CompatibleEscort[];
+          height: e.height !== undefined && e.height !== null ? String(e.height) : '',
+        }));
         const mappedPersonas = mapEscortsToUberPersonas(sanitizedEscorts);
         setAllPersonas(mappedPersonas);
       }
@@ -201,4 +199,3 @@ export const useUberPersonaContext = (): UberPersonaContextType => {
   }
   return context;
 };
-

@@ -1,6 +1,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort, VerificationLevel } from "@/types/escort"; // use correct lowercase import
+import { Escort, VerificationLevel } from "@/types/Escort"; // Use correct casing
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
 import RatesTab from "./RatesTab";
@@ -13,7 +13,7 @@ interface ProfileTabsProps {
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  // Cast verificationLevel to VerificationLevel union type with safe fallback
+  // Cast verificationLevel to VerificationLevel with fallback
   const verificationLevel: VerificationLevel = (escort.verificationLevel as VerificationLevel) || "none";
 
   return (
@@ -63,3 +63,4 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
 };
 
 export default ProfileTabs;
+
