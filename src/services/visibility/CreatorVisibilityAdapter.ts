@@ -1,5 +1,5 @@
 
-// Fix property 'region' access using optional chaining to avoid errors
+// Fix property 'region' access using optional chaining and cast
 
 import { ContentCreator } from '@/types/creator';
 
@@ -11,8 +11,8 @@ export class CreatorVisibilityAdapter {
   }
 
   public getCreatorsByRegion(region: string): ContentCreator[] {
-    // Safe optional chaining for region
-    return this.creators.filter(creator => (creator.region ?? '') === region);
+    // Safe optional chaining for region with casting
+    return this.creators.filter(creator => ((creator as any).region ?? '') === region);
   }
 
   public getCreatorsByLanguage(language: string): ContentCreator[] {
@@ -23,7 +23,7 @@ export class CreatorVisibilityAdapter {
     let filteredCreators = this.creators;
 
     if (filter?.region) {
-      filteredCreators = filteredCreators.filter(c => (c.region ?? '') === filter.region);
+      filteredCreators = filteredCreators.filter(c => ((c as any).region ?? '') === filter.region);
     }
     if (filter?.tags) {
       filteredCreators = filteredCreators.filter(c =>
@@ -42,3 +42,4 @@ export class CreatorVisibilityAdapter {
 }
 
 export default CreatorVisibilityAdapter;
+

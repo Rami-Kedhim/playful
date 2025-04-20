@@ -1,7 +1,8 @@
 
-// Fix normalizeDocument keys: remove non-existing keys and fix typings
+// Fix normalizeDocument keys: allow reviewedAt to be string or Date
+// Fix imports to avoid importing non-existing types from requestSubmission
 
-import { VerificationDocument, VerificationLevel, VerificationStatus } from '@/types/verification';
+import { VerificationLevel, VerificationStatus, VerificationDocument } from '@/types/verification';
 
 export const canSubmitVerification = async (userId: string): Promise<{ canSubmit: boolean; reason?: string; cooldownRemaining?: number }> => {
   return { canSubmit: true };
@@ -67,6 +68,7 @@ export const normalizeDocument = (doc: any): VerificationDocument => {
     status: doc.status || 'pending',
     rejectionReason: doc.rejectionReason || doc.rejectReason || undefined,
     reviewedBy: doc.reviewedBy || undefined,
-    reviewedAt: doc.reviewedAt ? new Date(doc.reviewedAt).toISOString() : undefined,
+    reviewedAt: doc.reviewedAt ? (typeof doc.reviewedAt === 'string' ? doc.reviewedAt : new Date(doc.reviewedAt).toISOString()) : undefined,
   };
 };
+

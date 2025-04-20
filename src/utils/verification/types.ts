@@ -1,5 +1,7 @@
 
-import { VerificationRequest, VerificationStatus } from "@/types/escort";
+// Fix imports of VerificationRequest and VerificationStatus from '@/types/verification'
+
+import { VerificationRequest, VerificationStatus } from '@/types/verification';
 
 /**
  * Additional verification information
@@ -36,3 +38,4 @@ export interface VerificationStatusResponse {
   status: VerificationStatus;
   lastRequest?: VerificationRequest;
 }
+

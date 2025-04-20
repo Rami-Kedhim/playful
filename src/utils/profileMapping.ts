@@ -1,6 +1,6 @@
-// Fix casing conflict by consistently importing from '@/types/escort'
+// Fix casing conflict by consistently importing escort from '@/types/escort' with lowercase path
 
-// Import Escort at the top; unify import path casing
+// Import Escort at the top; unify import path casing to lowercase 'escort'
 import { Escort } from '@/types/escort';
 import { ContentCreator } from '@/types/creator';
 import { LivecamModel } from '@/types/livecam';
