@@ -1,4 +1,3 @@
-
 // Brain Hub Security Engine - Manages security monitoring and threat detection
 import { v4 as uuidv4 } from 'uuid';
 
@@ -250,6 +249,22 @@ class BrainHubSecurityEngine {
         }
       });
     }
+  }
+
+  // Add this method for compatibility with aiOrchestration usage
+  public runSecurityChecks(message: string, context: Record<string, any>): { allowed: boolean; reason?: string } {
+    // Very basic mock security check: prohibit messages with banned words
+    const bannedWords = ['hack', 'exploit', 'malware', 'virus', 'attack'];
+    const loweredMessage = message.toLowerCase();
+
+    for (const word of bannedWords) {
+      if (loweredMessage.includes(word)) {
+        return { allowed: false, reason: `Message contains disallowed word: ${word}` };
+      }
+    }
+    // Additional context-based checks could be implemented here
+
+    return { allowed: true };
   }
 }
 
