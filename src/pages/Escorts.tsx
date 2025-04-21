@@ -7,7 +7,8 @@ import FeaturedEscorts from '@/components/escorts/FeaturedEscorts';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Filter, SlidersHorizontal } from 'lucide-react';
-import EscortsModule from '@/modules/escorts/EscortsModule';
+
+// Removed import of missing EscortsModule
 
 const EscortsContent = () => {
   const { 
@@ -22,7 +23,6 @@ const EscortsContent = () => {
 
   const [showFilters, setShowFilters] = useState(false);
 
-  // Provide a fallback typing for filters as empty object might cause TS errors
   const typedFilters = filters as Partial<{
     serviceTypes: string[];
     location: string;
@@ -35,7 +35,6 @@ const EscortsContent = () => {
     verified: boolean;
   }>;
 
-  // Fix filter property type errors by setting defaults with type guards and fallbacks
   const serviceTypes: string[] = Array.isArray(typedFilters.serviceTypes) ? typedFilters.serviceTypes : [];
   const serviceType: "" | "in-person" | "virtual" | "both" = 
     serviceTypes.length === 1 && ["in-person", "virtual", "both"].includes(serviceTypes[0]) 
@@ -162,11 +161,9 @@ const EscortsContent = () => {
 
 const Escorts = () => {
   return (
-    <EscortsModule>
-      <EscortsContent />
-    </EscortsModule>
+    // Removed EscortsModule wrapper because missing
+    <EscortsContent />
   );
 };
 
 export default Escorts;
-
