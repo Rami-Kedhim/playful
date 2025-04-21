@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -34,7 +35,7 @@ const LoadingFallback = () => (
 
 const RoutesComponent: React.FC = () => {
   const { user: authUser, profile: authProfile } = useAuth();
-  
+
   const user: User | null = authUser ? {
     id: authUser.id,
     username: authUser.username || '',
@@ -49,7 +50,7 @@ const RoutesComponent: React.FC = () => {
     avatar_url: authUser.avatar_url || '',
     avatarUrl: authUser.avatarUrl || authUser.avatar_url || ''
   } : null;
-  
+
   const profile: UserProfile | null = authProfile ? {
     id: authProfile.id,
     userId: authProfile.id,
@@ -66,14 +67,14 @@ const RoutesComponent: React.FC = () => {
     phone: authProfile.phone || '',
     profileImageUrl: authProfile.profileImageUrl || authProfile.avatar_url || ''
   } : null;
-  
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <RouterRoutes>
         {/* Public routes */}
         <Route path={AppRoutes.AUTH} element={<AuthPage />} />
-        
-        {/* Routes using AppLayout */}
+
+        {/* Main App routes */}
         <Route path={AppRoutes.HOME} element={<AppLayout><HomePage /></AppLayout>} />
         <Route 
           path={AppRoutes.PROFILE} 
@@ -95,11 +96,9 @@ const RoutesComponent: React.FC = () => {
         <Route path={AppRoutes.SEARCH} element={<AppLayout><SearchPage /></AppLayout>} />
         <Route path={AppRoutes.BRAIN_HUB} element={<ProtectedRoute><AppLayout><BrainHubPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.WALLET} element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/verification" element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
-        <Route path="/personas" element={<AppLayout><PersonasPage /></AppLayout>} />
-        
-        {/* Removed old or irrelevant persona routes */}
-        
+        <Route path={AppRoutes.VERIFICATION} element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
+        <Route path={AppRoutes.PERSONAS} element={<AppLayout><PersonasPage /></AppLayout>} />
+
         {/* Admin verification route */}
         <Route 
           path="/admin/verifications" 
@@ -123,7 +122,7 @@ const RoutesComponent: React.FC = () => {
             </ProtectedRoute>
           } 
         />
-        
+
         {/* 404 route */}
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
       </RouterRoutes>
@@ -132,3 +131,4 @@ const RoutesComponent: React.FC = () => {
 };
 
 export default RoutesComponent;
+
