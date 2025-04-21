@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -25,7 +26,7 @@ const PersonasPage = lazy(() => import('./pages/Personas'));
 const VerificationDashboard = lazy(() => import('./pages/admin/VerificationDashboard'));
 const RouteSharePage = lazy(() => import('./pages/RouteSharePage'));
 const BookPage = React.lazy(() => import('./pages/BookPage'));
-const LiveCamPage = React.lazy(() => import('./pages/LiveCamPage'));
+const LivecamPage = React.lazy(() => import('./pages/LivecamPage')); // Fixed casing
 const GeneratePage = React.lazy(() => import('./pages/GeneratePage'));
 
 // Loading component

@@ -1,107 +1,66 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Loader2 } from "lucide-react";
-import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
+import { BoostPackage } from "../types";
+import { CheckCircle, Clock } from "lucide-react";
 
-export interface BoostPackagesProps {
-  packages?: any[];
-  boostPackages?: any[];
-  selectedPackage: string | null;
+interface BoostPackagesProps {
+  boostPackages: BoostPackage[];
+  selectedPackage: string;
   onSelectPackage: (packageId: string) => void;
-  formatBoostDuration?: (duration: string) => string;
-  formatDuration?: (duration: string) => string;
-  getBoostPrice?: () => number;
-  dailyBoostUsage?: number;
-  dailyBoostLimit?: number;
-  onPurchase?: () => void;
-  loading?: boolean;
-  onCancel?: () => void;
-  disabled?: boolean;
+  formatDuration: (duration: string) => string;
+  disabled: boolean;
 }
 
-const BoostPackages = ({
-  packages = [],
-  boostPackages = [],
+const BoostPackages: React.FC<BoostPackagesProps> = ({
+  boostPackages,
   selectedPackage,
   onSelectPackage,
-  formatBoostDuration,
   formatDuration,
-  dailyBoostUsage = 0,
-  dailyBoostLimit = 4,
-  onPurchase,
-  loading = false,
-  onCancel,
-  disabled = false
-}: BoostPackagesProps) => {
-  // Use either packages or boostPackages
-  const packagesToDisplay = packages.length > 0 ? packages : boostPackages;
-  
-  // Use the appropriate formatter function
-  const formatDurationFn = formatBoostDuration || formatDuration || ((duration: string) => duration);
-
+  disabled
+}) => {
   return (
-    <div className="space-y-4">
-      <div className="text-sm text-muted-foreground mb-2">
-        Daily boost usage: <span className="font-medium">{dailyBoostUsage} of {dailyBoostLimit}</span>
-      </div>
-      
-      <div className="grid grid-cols-1 gap-3">
-        {packagesToDisplay.map((pkg) => (
-          <Card
-            key={pkg.id}
-            className={`p-4 cursor-pointer border-2 ${
-              selectedPackage === pkg.id ? 'border-primary' : 'border-border'
-            }`}
-            onClick={() => onSelectPackage(pkg.id)}
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-medium">{pkg.name}</div>
-                <div className="text-xs text-muted-foreground">
-                  Duration: {formatDurationFn(pkg.duration)}
-                </div>
-                {pkg.description && (
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {pkg.description}
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col items-end">
-                <div className="font-bold">{GLOBAL_UBX_RATE} UBX</div>
-                {selectedPackage === pkg.id && (
-                  <div className="text-primary">
-                    <Check size={16} />
-                  </div>
-                )}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {boostPackages.map((pkg) => (
+        <Card
+          key={pkg.id}
+          className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+            selectedPackage === pkg.id
+              ? "border-primary ring-2 ring-primary/20"
+              : ""
+          } ${disabled ? "opacity-60 pointer-events-none" : ""}`}
+          onClick={() => !disabled && onSelectPackage(pkg.id)}
+        >
+          <div className="flex justify-between items-start">
+            <div>
+              <h4 className="font-medium">{pkg.name}</h4>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Clock className="mr-1 h-3 w-3" />
+                {formatDuration(pkg.duration)}
               </div>
             </div>
-          </Card>
-        ))}
-      </div>
-      
-      <div className="flex justify-between space-x-2 mt-4">
-        <Button
-          variant="outline"
-          onClick={onCancel}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={onPurchase}
-          disabled={!selectedPackage || loading || disabled || dailyBoostUsage >= dailyBoostLimit}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            'Purchase Boost'
-          )}
-        </Button>
-      </div>
+            {selectedPackage === pkg.id && (
+              <CheckCircle className="h-5 w-5 text-primary" />
+            )}
+          </div>
+
+          <div className="mt-3 text-sm space-y-1">
+            {pkg.features.map((feature, i) => (
+              <div key={i} className="flex items-center">
+                <CheckCircle className="h-3 w-3 text-green-500 mr-2" />
+                <span>{feature}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 pt-2 border-t flex items-center justify-between">
+            <span className="text-sm font-semibold">{pkg.price_ubx} UBX</span>
+            {pkg.description && (
+              <span className="text-xs text-muted-foreground">{pkg.description}</span>
+            )}
+          </div>
+        </Card>
+      ))}
     </div>
   );
 };

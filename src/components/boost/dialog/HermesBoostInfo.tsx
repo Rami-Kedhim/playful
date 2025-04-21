@@ -1,46 +1,55 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { HermesBoostStatus } from '@/hooks/boost/useHermesOxumBoost';
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { HermesBoostStatus } from "../types";
+import { Info, Users, TrendingUp } from "lucide-react";
 
-export interface HermesBoostInfoProps {
-  hermesData: HermesBoostStatus | null;
+interface HermesBoostInfoProps {
+  hermesStatus: HermesBoostStatus;
 }
 
-const HermesBoostInfo = ({ hermesData }: HermesBoostInfoProps) => {
-  if (!hermesData || !hermesData.active) {
-    return null;
-  }
-
+const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({
+  hermesStatus
+}) => {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Hermes Boost Status</CardTitle>
-        <CardDescription>Boost processing through Hermes-Oxum system</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {hermesData.queuePosition && (
+    <Card className="mt-4">
+      <CardContent className="pt-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Info className="h-4 w-4 text-blue-500" />
+          <h3 className="text-sm font-medium">Hermes-Oxum Analytics</h3>
+        </div>
+        
+        <div className="space-y-4">
           <div>
-            <div className="flex justify-between text-xs mb-1">
+            <div className="flex justify-between text-sm mb-1">
               <span>Queue Position</span>
-              <span>{hermesData.queuePosition}</span>
+              <span className="font-medium">#{hermesStatus.position}</span>
             </div>
-            <Progress value={Math.max(0, 100 - (hermesData.queuePosition * 10))} className="h-1" />
+            <Progress value={100 - (hermesStatus.position / hermesStatus.activeUsers) * 100} className="h-2" />
           </div>
-        )}
-        
-        {hermesData.estimatedTimeMinutes && (
-          <div className="text-xs">
-            Estimated processing time: {hermesData.estimatedTimeMinutes} minute(s)
+          
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="p-2 bg-muted/50 rounded flex flex-col">
+              <span className="text-muted-foreground flex items-center mb-1">
+                <Users className="h-3 w-3 mr-1" />
+                Active Users
+              </span>
+              <span className="font-semibold">{hermesStatus.activeUsers}</span>
+            </div>
+            
+            <div className="p-2 bg-muted/50 rounded flex flex-col">
+              <span className="text-muted-foreground flex items-center mb-1">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                Visibility Score
+              </span>
+              <span className="font-semibold">{hermesStatus.estimatedVisibility}%</span>
+            </div>
           </div>
-        )}
-        
-        {hermesData.hermesScore && (
-          <div className="text-xs">
-            Hermes Score: {hermesData.hermesScore}
+          
+          <div className="text-xs text-muted-foreground">
+            Last updated: {new Date(hermesStatus.lastUpdateTime).toLocaleString()}
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
