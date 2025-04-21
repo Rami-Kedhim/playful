@@ -3,8 +3,10 @@ import { useState, useCallback, useEffect } from 'react';
 import { lucieOrchestrator } from '@/core/Lucie';
 import { useToast } from '@/hooks/use-toast';
 import { LucieMessage } from './ai-lucie/types';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export function useLucieAssistant() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<LucieMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -38,12 +40,14 @@ export function useLucieAssistant() {
     setError(null);
 
     try {
+      // Provide userId for context or fallback to 'anonymous'
+      const userId = user?.id || 'anonymous';
+
       const sessionId = 'lucie-' + Date.now().toString();
-      const userContext = {};
+      const userContext = { userId };
 
-      const response = await lucieOrchestrator.routePrompt(sessionId, userContext);
+      const response = await lucieOrchestrator.routePrompt(content, userContext);
 
-      // Note: The responseText is on response.responseText, so use that
       const userMessage: LucieMessage = {
         id: Date.now().toString(),
         role: 'user',
@@ -64,10 +68,15 @@ export function useLucieAssistant() {
     } catch (err: any) {
       setError('Failed to get a response. Please try again.');
       console.error('Error sending message to Lucie:', err);
+      toast({
+        title: "Error",
+        description: "Failed to get response from assistant.",
+        variant: "destructive",
+      });
     } finally {
       setIsTyping(false);
     }
-  }, [messages]);
+  }, [user]);
 
   const toggleChat = useCallback(() => {
     setIsOpen(prev => !prev);
