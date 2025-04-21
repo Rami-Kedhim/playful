@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useVerificationStatus } from './hooks/useVerificationStatus';
 import VerificationForm from './form/VerificationForm';
-import VerificationStatus from './VerificationStatus';  // Fix import path here
+import VerificationStatus from './VerificationStatus';
 import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
 import VerificationLevelType from './level/VerificationLevelType';
 
@@ -16,6 +16,10 @@ const VerificationContainer = () => {
   const handleSelectType = (type: string) => {
     setSelectedType(type);
   };
+
+  // Extract status and level safely
+  const status = verification?.status?.toLowerCase() || 'none';
+  const level = verification?.verificationLevel || verification?.requested_level || 'none';
 
   return (
     <Card className="w-full">
@@ -34,11 +38,16 @@ const VerificationContainer = () => {
           </TabsList>
           
           <TabsContent value="status">
-            <VerificationStatus 
-              verification={verification} 
-              loading={loading} 
-              error={error} 
-            />
+            {loading ? (
+              <div>Loading...</div>
+            ) : error ? (
+              <div className="text-destructive">Error: {error}</div>
+            ) : (
+              <VerificationStatus 
+                status={status as 'none' | 'pending' | 'approved' | 'rejected'}
+                level={level}
+              />
+            )}
           </TabsContent>
           
           <TabsContent value="verify">
