@@ -1,9 +1,7 @@
 
-// Fix import VerificationLevel enum from '@/types/verification' and use it for verificationLevel typing
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort } from "@/types/Escort";
+import { Escort } from "@/types/escort"; // Use strict Escort interface here
 import { VerificationLevel } from "@/types/verification";
 import ProfileHeader from "./ProfileHeader";
 import ProfileActions from "./ProfileActions";
@@ -32,14 +30,16 @@ const ProfileInfo = ({
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
   // Normalize verificationLevel with proper enum and fallback to VerificationLevel.NONE
+  const normalizedVerificationLevel: VerificationLevel =
+    escort.verificationLevel &&
+    typeof escort.verificationLevel === "string" &&
+    Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
+      ? (escort.verificationLevel as VerificationLevel)
+      : VerificationLevel.NONE;
+
   const normalizedEscort: Escort = {
     ...escort,
-    verificationLevel:
-      escort.verificationLevel &&
-      typeof escort.verificationLevel === "string" &&
-      Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
-        ? (escort.verificationLevel as VerificationLevel)
-        : VerificationLevel.NONE,
+    verificationLevel: normalizedVerificationLevel,
   };
 
   const handleBookNow = () => {
@@ -129,4 +129,3 @@ const ProfileInfo = ({
 };
 
 export default ProfileInfo;
-

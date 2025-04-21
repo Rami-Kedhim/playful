@@ -1,8 +1,6 @@
 
-// Fix import to use VerificationLevel from '@/types/verification' for strict enum usage and cast accordingly
-
 import { useState } from "react";
-import { Escort } from "@/types/Escort";
+import { Escort } from "@/types/escort"; // Use strict Escort interface here
 import { VerificationLevel } from "@/types/verification";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import MediaSection from "./MediaSection";
@@ -22,14 +20,17 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [shareOpen, setShareOpen] = useState(false);
 
   // Normalize verificationLevel with VerificationLevel enum and fallback to 'none'
+  const normalizedVerificationLevel: VerificationLevel =
+    escort.verificationLevel &&
+    typeof escort.verificationLevel === "string" &&
+    Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
+      ? (escort.verificationLevel as VerificationLevel)
+      : VerificationLevel.NONE;
+
+  // Create normalized escort with correct verificationLevel type
   const normalizedEscort: Escort = {
     ...escort,
-    verificationLevel:
-      escort.verificationLevel &&
-      typeof escort.verificationLevel === "string" &&
-      Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
-        ? (escort.verificationLevel as VerificationLevel)
-        : VerificationLevel.NONE,
+    verificationLevel: normalizedVerificationLevel,
   };
 
   const handleFavoriteToggle = () => {
@@ -79,4 +80,3 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
 };
 
 export default EscortProfile;
-
