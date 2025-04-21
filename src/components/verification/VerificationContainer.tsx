@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useVerificationStatus } from './hooks/useVerificationStatus';
 import VerificationForm from './form/VerificationForm';
-import VerificationStatus from './status/VerificationStatus';
+import VerificationStatus from './VerificationStatus';  // Fix import path here
 import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
 import VerificationLevelType from './level/VerificationLevelType';
 
@@ -63,3 +64,4 @@ const VerificationContainer = () => {
 };
 
 export default VerificationContainer;
+
