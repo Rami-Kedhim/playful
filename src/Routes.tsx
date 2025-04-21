@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -99,8 +98,8 @@ const RoutesComponent: React.FC = () => {
         <Route path="/verification" element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
         <Route path="/personas" element={<AppLayout><PersonasPage /></AppLayout>} />
         
-        {/* Removed unified persona routes to fix missing PersonaPage component */}
-
+        {/* Removed old or irrelevant persona routes */}
+        
         {/* Admin verification route */}
         <Route 
           path="/admin/verifications" 

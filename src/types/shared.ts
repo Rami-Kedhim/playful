@@ -1,5 +1,5 @@
 
-// Shared type definitions used across modules
+// Merged types for common usage:
 
 export type ID = string;
 
@@ -10,3 +10,5 @@ export interface BasePersona {
   location?: string;
   [key: string]: any;
 }
+
+// Add other common shared types here as needed...
