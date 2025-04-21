@@ -3,7 +3,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { AppRoutes } from '@/utils/navigation';
 import { useAuth } from '@/hooks/auth/useAuthContext';
-import { Book, Video, Image, Generate } from 'lucide-react';
+import { Book, Video, Image, ArrowRight } from 'lucide-react';
 
 const MainNav: React.FC<{ className?: string }> = ({ className }) => {
   const { isAuthenticated } = useAuth();
@@ -62,7 +62,7 @@ const MainNav: React.FC<{ className?: string }> = ({ className }) => {
               isActive ? 'font-bold text-primary flex items-center space-x-1' : 'flex items-center space-x-1'
             }
           >
-            <Generate size={16} />
+            <ArrowRight size={16} />
             <span>Generate</span>
           </NavLink>
         </li>
@@ -85,3 +85,4 @@ const MainNav: React.FC<{ className?: string }> = ({ className }) => {
 };
 
 export default MainNav;
+
