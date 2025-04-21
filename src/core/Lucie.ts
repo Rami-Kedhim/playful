@@ -171,6 +171,6 @@ export class Lucie {
   }
 }
 
-export const lucie = new Lucie();
+export const lucieOrchestrator = new Lucie();
 
-export default lucie;
+export default lucieOrchestrator;

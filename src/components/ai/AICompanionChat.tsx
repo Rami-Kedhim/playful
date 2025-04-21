@@ -4,8 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import AICompanionChatList from './companion-chat/AICompanionChatList';
 import AICompanionChatControls from './companion-chat/AICompanionChatControls';
 import AICompanionChatHeader from './companion-chat/AICompanionChatHeader';
-import { lucieAIOrchestrator } from '@/utils/core/aiOrchestration';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { lucieOrchestrator } from '@/core/Lucie';
+import { useAuth } from '@/hooks/auth/useAuth';
 import { toast } from 'sonner';
 
 export interface AICompanionChatProps {
@@ -46,13 +46,11 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   const sessionId = companionId || (user?.id ? `${user.id}-session` : `anon-session-${Date.now()}`);
 
   useEffect(() => {
-    // On mount, add initial assistant message
     if (messages.length === 0) {
       setMessages([{ id: 'welcome', role: 'assistant', content: initialMessage, timestamp: new Date() }]);
     }
   }, [initialMessage, messages.length]);
 
-  // Send message via Lucie orchestrator
   const handleSendMessage = async (userInput: string) => {
     if (!userInput.trim()) return;
 
@@ -61,33 +59,28 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       return;
     }
 
-    // Append user message immediately with timestamp
     const userMessage = { id: `user-${Date.now()}`, role: 'user', content: userInput, timestamp: new Date() };
     setMessages((prev) => [...prev, userMessage]);
+
     setIsTyping(true);
     setError(null);
 
     try {
       const userContext = {
         userId: user.id,
-        profileId: companionId
+        walletId: user.walletId,
+        personalityType,
+        characterId: companionId,
       };
 
-      // Use Lucie AI orchestrator to get response with token gating and wallet deduction
-      const response = await lucieAIOrchestrator.orchestrateResponse(
-        sessionId,
-        userInput,
-        userContext,
-        messages
-      );
+      // Call Lucie AI routePrompt method with context that includes wallet for token deductions
+      const response = await lucieOrchestrator.routePrompt(userInput, userContext);
 
-      // Fix to use response.responseText property
       const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: response.responseText, timestamp: new Date() };
       setMessages((prev) => [...prev, assistantMessage]);
-
     } catch (err: any) {
-      console.error('Error while sending message through Lucie:', err);
       setError('Failed to get a response. Please try again.');
+      console.error('Error sending message through Lucie:', err);
     } finally {
       setIsTyping(false);
     }

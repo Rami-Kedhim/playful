@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { lucieAIOrchestrator } from '@/utils/core/aiOrchestration';
-import { useToast } from '@/components/ui/use-toast';
+import { lucieOrchestrator } from '@/core/Lucie';
+import { useToast } from '@/hooks/use-toast';
 import { LucieMessage } from './ai-lucie/types';
 
 export function useLucieAssistant() {
@@ -38,20 +38,12 @@ export function useLucieAssistant() {
     setError(null);
 
     try {
-      // Compose sessionId with user ID or anon
       const sessionId = 'lucie-' + Date.now().toString();
+      const userContext = {};
 
-      const userContext = {}; // Can be extended
+      const response = await lucieOrchestrator.routePrompt(sessionId, userContext);
 
-      // Use routePrompt from Lucie orchestrator
-      // Note: orchestrateResponse returns { responseText, meta }
-      const response = await lucieAIOrchestrator.orchestrateResponse(sessionId, content, userContext, messages);
-
-      // Fix: properties exist on response.responseText and meta, so use response.responseText here
-      // moderation flags are not returned in the current orchestrateResponse interface
-      // So skip moderation checks here
-
-      // Add user message with proper timestamp
+      // Note: The responseText is on response.responseText, so use that
       const userMessage: LucieMessage = {
         id: Date.now().toString(),
         role: 'user',
@@ -59,7 +51,6 @@ export function useLucieAssistant() {
         timestamp: new Date(),
       };
 
-      // Add Lucie's response message with timestamp and default neutral emotion
       const lucieMessage: LucieMessage = {
         id: 'lucie-' + Date.now().toString(),
         role: 'assistant',
@@ -78,7 +69,6 @@ export function useLucieAssistant() {
     }
   }, [messages]);
 
-  // Toggle the assistant open/closed
   const toggleChat = useCallback(() => {
     setIsOpen(prev => !prev);
   }, []);
@@ -89,10 +79,9 @@ export function useLucieAssistant() {
     isOpen,
     error,
     sendMessage,
-    toggleChat,
+    toggleChat
   };
 }
 
 export type { LucieMessage } from './ai-lucie/types';
 export default useLucieAssistant;
-
