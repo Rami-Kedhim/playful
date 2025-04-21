@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 import { cn } from '@/lib/utils';
+import { AppRoutes } from '@/utils/navigation';
 
 interface MobileMenuProps {
   className?: string;
@@ -24,25 +25,30 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ className }) => {
       </SheetTrigger>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
         <nav className="flex flex-col gap-4 mt-6">
-          <Link to="/" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
+          <Link to={AppRoutes.HOME} onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
             Home
           </Link>
-          <Link to="/escorts" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
+          <Link to={AppRoutes.ESCORTS} onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
             Escorts
           </Link>
-
+          <Link to={AppRoutes.CREATORS} onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
+            Creators
+          </Link>
+          <Link to={AppRoutes.LIVECAMS} onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
+            Live Cams
+          </Link>
           {isAuthenticated ? (
             <>
               <Link to="/bookings" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
                 Bookings
               </Link>
-              <Link to="/messages" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
+              <Link to={AppRoutes.MESSAGES} onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
                 Messages
               </Link>
               <Link to="/dashboard" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
                 Dashboard
               </Link>
-              <Link to="/profile" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
+              <Link to={AppRoutes.PROFILE} onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">
                 Profile
               </Link>
               <Link to="/settings" onClick={() => setOpen(false)} className="px-2 py-1 hover:underline">

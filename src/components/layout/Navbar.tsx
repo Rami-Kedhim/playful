@@ -16,8 +16,12 @@ const Navbar: React.FC = () => {
       <nav className="flex h-14 items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
-            <Shield className="h-6 w-6 mr-2" />
-            <span className="text-xl font-bold">Lucie</span>
+            <img
+              src="/lovable-uploads/270a89d4-565b-4654-b8ae-20b959208800.png"
+              alt="UberEscorts Logo"
+              className="h-6 w-6 mr-2"
+            />
+            <span className="text-xl font-bold">UberEscorts</span>
           </Link>
           <div className="hidden md:flex items-center gap-1 md:gap-2">
             <Button variant="ghost" asChild>
@@ -28,7 +32,7 @@ const Navbar: React.FC = () => {
             </Button>
             {isAuthenticated && (
               <Button variant="ghost" asChild>
-                <Link to="/ai">AI Companions</Link>
+                <Link to="/ai-companions">AI Companions</Link>
               </Button>
             )}
             {canAccessAdminFeatures && (

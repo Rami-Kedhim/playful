@@ -100,6 +100,8 @@ const RoutesComponent: React.FC = () => {
         <Route path={AppRoutes.MESSAGES} element={<ProtectedRoute><AppLayout><MessagesPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.METAVERSE} element={<AppLayout><MetaversePage /></AppLayout>} />
         <Route path={AppRoutes.SEARCH} element={<AppLayout><SearchPage /></AppLayout>} />
+
+        {/* Correctly referenced brain hub, wallet and verification */}
         <Route path={AppRoutes.BRAIN_HUB} element={<ProtectedRoute><AppLayout><BrainHubPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.WALLET} element={<ProtectedRoute><AppLayout><WalletPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.VERIFICATION} element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
@@ -128,7 +130,7 @@ const RoutesComponent: React.FC = () => {
           </ProtectedRoute>
         } />
 
-        {/* Existing Admin and safety routes */}
+        {/* Admin and safety routes */}
         <Route 
           path="/admin/verifications" 
           element={
