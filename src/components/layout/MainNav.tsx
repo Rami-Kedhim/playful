@@ -2,7 +2,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { AppRoutes } from '@/utils/navigation';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 
 const MainNav: React.FC<{ className?: string }> = ({ className }) => {
