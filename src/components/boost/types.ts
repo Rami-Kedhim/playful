@@ -49,8 +49,9 @@ export interface HermesBoostStatus {
 }
 
 export interface HermesBoostInfoProps {
-  status?: HermesBoostStatus;
   hermesStatus?: HermesBoostStatus;
+  status?: HermesBoostStatus;
+  hermesData?: HermesBoostStatus;
 }
 
 export interface AnalyticsData {
@@ -60,7 +61,7 @@ export interface AnalyticsData {
   conversionRate: number;
   boostEfficiency: number;
   
-  // Additional properties needed
+  // Make these optional to avoid type conflicts
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
@@ -69,11 +70,20 @@ export interface AnalyticsData {
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
   };
   clicks?: {
     today: number;
     yesterday: number;
     weeklyAverage: number;
     withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  searchRanking?: {
+    withoutBoost: number;
+    withBoost: number;
+    improvement: number;
   };
 }

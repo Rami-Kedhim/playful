@@ -1,166 +1,293 @@
-import { create } from 'zustand';
 
-interface AIModelMonetizationState {
-  models: Record<string, AIModel>;
-  isLoading: boolean;
-  error: string | null;
-  balance: number;
-  
-  addModel: (model: AIModel) => void;
-  removeModel: (modelId: string) => void;
-  boostModel: (modelId: string, ubxAmount: number, durationHours: number) => Promise<boolean>;
-  getModelBoostLevel: (modelId: string) => number;
-  getProfileBoostLevel: (profileId: string) => number;
-  boostProfile: (profileId: string, ubxAmount: number, durationHours: number) => Promise<boolean>;
-  unlockImage: (profileId: string, imageUrl: string, price: number) => Promise<boolean>;
-  isImageUnlocked: (profileId: string, imageUrl: string) => boolean;
-  unlockVideo: (profileId: string, videoId: string, price: number) => Promise<boolean>;
-  isVideoUnlocked: (profileId: string, videoId: string) => boolean;
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { AIProfile } from '@/types/ai-profile';
+import { boostService } from '@/services/boostService';
+import { toast } from '@/hooks/use-toast';
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+
+interface AIProfileBoost {
+  profileId: string;
+  expiresAt: Date;
+  boostLevel: number;
 }
 
-const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) => ({
-  models: {},
-  isLoading: false,
-  error: null,
-  balance: 1000,
-  
-  addModel: (model) => {
-    set((state) => ({
-      models: {
-        ...state.models,
-        [model.id]: model
-      }
-    }));
-  },
-  
-  removeModel: (modelId) => {
-    set((state) => {
-      const { [modelId]: removedModel, ...remainingModels } = state.models;
-      return { models: remainingModels };
-    });
-  },
-  
-  boostModel: async (modelId, ubxAmount, durationHours) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      if (ubxAmount !== GLOBAL_UBX_RATE) {
-        throw new Error("Invalid boost amount - must match global UBX rate");
-      }
+interface AIUnlockedContent {
+  profileId: string;
+  contentIds: string[];
+  type: 'image' | 'video' | 'message';
+}
+
+interface AIModelMonetizationState {
+  balance: number;
+  boosts: AIProfileBoost[];
+  unlockedContent: AIUnlockedContent[];
+  subscriptions: string[];
+  unlockImage: (profileId: string, imageId: string) => boolean;
+  isImageUnlocked: (profileId: string, imageId: string) => boolean;
+  unlockVideo: (profileId: string, videoId: string) => boolean;
+  isVideoUnlocked: (profileId: string, videoId: string) => boolean;
+  boostProfile: (profileId: string, amount: number, durationHours: number) => Promise<boolean>;
+  getProfileBoostLevel: (profileId: string) => number;
+  sendMessage: (profileId: string, amount: number) => boolean;
+  subscribe: (profileId: string, amount: number) => boolean;
+  isSubscribed: (profileId: string) => boolean;
+}
+
+const useAIModelMonetizationStore = create<AIModelMonetizationState>()(
+  persist(
+    (set, get) => ({
+      balance: 5000, // Starting balance
+      boosts: [],
+      unlockedContent: [],
+      subscriptions: [],
       
-      const boostLevel = Math.ceil(ubxAmount / 10);
-      
-      const boostExpiry = new Date();
-      boostExpiry.setHours(boostExpiry.getHours() + durationHours);
-      
-      set((state) => {
-        const existingModel = state.models[modelId] || { id: modelId, name: `Model-${modelId}`, boostLevel: 0 };
+      unlockImage: (profileId, imageId) => {
+        const state = get();
+        const cost = 25; // Example cost
         
-        return {
-          models: {
-            ...state.models,
-            [modelId]: {
-              ...existingModel,
-              boostLevel,
-              boostExpiry
-            }
-          },
-          isLoading: false
-        };
-      });
-      
-      return true;
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
-      return false;
-    }
-  },
-  
-  getModelBoostLevel: (modelId) => {
-    const model = get().models[modelId];
-    if (!model) return 0;
-    
-    if (model.boostExpiry && model.boostExpiry < new Date()) {
-      set((state) => ({
-        models: {
-          ...state.models,
-          [modelId]: {
-            ...state.models[modelId],
-            boostLevel: 0,
-            boostExpiry: undefined
+        if (state.balance < cost) {
+          toast({
+            title: "Insufficient balance",
+            description: "You don't have enough UBX to unlock this image",
+            variant: "destructive"
+          });
+          return false;
+        }
+        
+        if (state.isImageUnlocked(profileId, imageId)) {
+          return true; // Already unlocked
+        }
+        
+        let found = false;
+        const updatedUnlockedContent = [...state.unlockedContent];
+        
+        // Find existing entry for this profile and type
+        for (const entry of updatedUnlockedContent) {
+          if (entry.profileId === profileId && entry.type === 'image') {
+            entry.contentIds.push(imageId);
+            found = true;
+            break;
           }
         }
-      }));
-      return 0;
-    }
-    
-    return model.boostLevel;
-  },
-  
-  getProfileBoostLevel: (profileId) => {
-    return Math.floor(Math.random() * 5);
-  },
-  
-  boostProfile: async (profileId, ubxAmount, durationHours) => {
-    set({ isLoading: true, error: null });
-    
-    try {
-      const packages = await boostService.fetchBoostPackages();
-      const closestPackage = packages.reduce((closest, pkg) => {
-        const pkgHours = parseInt(pkg.duration.split(':')[0]);
-        const currentClosestHours = closest ? parseInt(closest.duration.split(':')[0]) : 0;
         
-        if (Math.abs(pkgHours - durationHours) < Math.abs(currentClosestHours - durationHours)) {
-          return pkg;
+        // Create new entry if not found
+        if (!found) {
+          updatedUnlockedContent.push({
+            profileId,
+            contentIds: [imageId],
+            type: 'image'
+          });
         }
-        return closest;
-      }, null);
+        
+        set(state => ({
+          balance: state.balance - cost,
+          unlockedContent: updatedUnlockedContent
+        }));
+        
+        toast({
+          title: "Image Unlocked",
+          description: "You have successfully unlocked this image"
+        });
+        
+        return true;
+      },
       
-      if (!closestPackage) {
-        throw new Error("No suitable boost package found");
+      isImageUnlocked: (profileId, imageId) => {
+        const state = get();
+        return state.unlockedContent.some(entry => 
+          entry.profileId === profileId && 
+          entry.type === 'image' && 
+          entry.contentIds.includes(imageId)
+        );
+      },
+      
+      unlockVideo: (profileId, videoId) => {
+        const state = get();
+        const cost = 50; // Example cost
+        
+        if (state.balance < cost) {
+          toast({
+            title: "Insufficient balance",
+            description: "You don't have enough UBX to unlock this video",
+            variant: "destructive"
+          });
+          return false;
+        }
+        
+        if (state.isVideoUnlocked(profileId, videoId)) {
+          return true; // Already unlocked
+        }
+        
+        let found = false;
+        const updatedUnlockedContent = [...state.unlockedContent];
+        
+        // Find existing entry for this profile and type
+        for (const entry of updatedUnlockedContent) {
+          if (entry.profileId === profileId && entry.type === 'video') {
+            entry.contentIds.push(videoId);
+            found = true;
+            break;
+          }
+        }
+        
+        // Create new entry if not found
+        if (!found) {
+          updatedUnlockedContent.push({
+            profileId,
+            contentIds: [videoId],
+            type: 'video'
+          });
+        }
+        
+        set(state => ({
+          balance: state.balance - cost,
+          unlockedContent: updatedUnlockedContent
+        }));
+        
+        toast({
+          title: "Video Unlocked",
+          description: "You have successfully unlocked this video"
+        });
+        
+        return true;
+      },
+      
+      isVideoUnlocked: (profileId, videoId) => {
+        const state = get();
+        return state.unlockedContent.some(entry => 
+          entry.profileId === profileId && 
+          entry.type === 'video' && 
+          entry.contentIds.includes(videoId)
+        );
+      },
+      
+      boostProfile: async (profileId, amount, durationHours) => {
+        const state = get();
+        
+        // Check if amount matches the global rate
+        if (amount !== GLOBAL_UBX_RATE) {
+          toast({
+            title: "Price Error",
+            description: `The boost price (${amount}) does not match the global rate (${GLOBAL_UBX_RATE})`,
+            variant: "destructive"
+          });
+          return false;
+        }
+        
+        if (state.balance < amount) {
+          toast({
+            title: "Insufficient balance",
+            description: "You don't have enough UBX to boost this profile",
+            variant: "destructive"
+          });
+          return false;
+        }
+        
+        // Calculate boost level based on amount
+        const boostLevel = Math.ceil(amount / 20);
+        
+        // Set expiry date
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + durationHours);
+        
+        // Remove any existing boost for this profile
+        const filteredBoosts = state.boosts.filter(boost => boost.profileId !== profileId);
+        
+        set(state => ({
+          balance: state.balance - amount,
+          boosts: [
+            ...filteredBoosts,
+            {
+              profileId,
+              expiresAt,
+              boostLevel
+            }
+          ]
+        }));
+        
+        toast({
+          title: "Profile Boosted",
+          description: `Profile has been boosted for ${durationHours} hours`
+        });
+        
+        return true;
+      },
+      
+      getProfileBoostLevel: (profileId) => {
+        const state = get();
+        const now = new Date();
+        
+        // Find boost for this profile that hasn't expired
+        const boost = state.boosts.find(b => 
+          b.profileId === profileId && 
+          new Date(b.expiresAt) > now
+        );
+        
+        return boost ? boost.boostLevel : 0;
+      },
+      
+      sendMessage: (profileId, amount) => {
+        const state = get();
+        
+        if (state.balance < amount) {
+          toast({
+            title: "Insufficient balance",
+            description: "You don't have enough UBX to send this message",
+            variant: "destructive"
+          });
+          return false;
+        }
+        
+        set(state => ({
+          balance: state.balance - amount
+        }));
+        
+        return true;
+      },
+      
+      subscribe: (profileId, amount) => {
+        const state = get();
+        
+        if (state.balance < amount) {
+          toast({
+            title: "Insufficient balance",
+            description: "You don't have enough UBX for this subscription",
+            variant: "destructive"
+          });
+          return false;
+        }
+        
+        if (state.isSubscribed(profileId)) {
+          toast({
+            title: "Already Subscribed",
+            description: "You are already subscribed to this model"
+          });
+          return false;
+        }
+        
+        set(state => ({
+          balance: state.balance - amount,
+          subscriptions: [...state.subscriptions, profileId]
+        }));
+        
+        toast({
+          title: "Subscription Successful",
+          description: "You have successfully subscribed to this AI model"
+        });
+        
+        return true;
+      },
+      
+      isSubscribed: (profileId) => {
+        const state = get();
+        return state.subscriptions.includes(profileId);
       }
-      
-      const result = await boostService.purchaseBoost(profileId, closestPackage.id);
-      
-      if (!result.success) {
-        throw new Error(result.message || "Failed to boost profile");
-      }
-      
-      set({ isLoading: false });
-      return true;
-    } catch (error: any) {
-      set({ error: error.message, isLoading: false });
-      return false;
+    }),
+    {
+      name: 'ai-model-monetization'
     }
-  },
-  
-  unlockImage: async (profileId, imageUrl, price) => {
-    const currentBalance = get().balance;
-    if (currentBalance < price) {
-      return false;
-    }
-    
-    set(state => ({ balance: state.balance - price }));
-    return true;
-  },
-  
-  isImageUnlocked: (profileId, imageUrl) => {
-    return true;
-  },
-  
-  unlockVideo: async (profileId, videoId, price) => {
-    const currentBalance = get().balance;
-    if (currentBalance < price) {
-      return false;
-    }
-    
-    set(state => ({ balance: state.balance - price }));
-    return true;
-  },
-  
-  isVideoUnlocked: (profileId, videoId) => {
-    return false;
-  }
-}));
+  )
+);
 
 export default useAIModelMonetizationStore;

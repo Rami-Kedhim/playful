@@ -1,5 +1,5 @@
 
-import { BoostStatus, BoostEligibility } from "@/types/boost";
+import { BoostStatus, BoostEligibility, BoostAnalytics } from "@/types/boost";
 import { GLOBAL_UBX_RATE } from "@/utils/oxum/globalPricing";
 
 // Mock implementation of boost service
@@ -127,5 +127,38 @@ export const boostService = {
         message: "Failed to cancel boost"
       };
     }
+  },
+  
+  /**
+   * Fetch boost analytics
+   */
+  fetchBoostAnalytics: async (profileId: string): Promise<BoostAnalytics> => {
+    // In a real app, this would fetch real analytics data
+    return {
+      additionalViews: Math.floor(Math.random() * 500) + 100,
+      engagementIncrease: Math.floor(Math.random() * 30) + 10,
+      rankingPosition: Math.floor(Math.random() * 10) + 1,
+      views: {
+        today: Math.floor(Math.random() * 200) + 50,
+        yesterday: Math.floor(Math.random() * 180) + 40,
+        weeklyAverage: Math.floor(Math.random() * 150) + 60,
+        withBoost: Math.floor(Math.random() * 300) + 100,
+        withoutBoost: Math.floor(Math.random() * 150) + 50,
+        increase: Math.floor(Math.random() * 50) + 20
+      },
+      clicks: {
+        today: Math.floor(Math.random() * 50) + 10,
+        yesterday: Math.floor(Math.random() * 45) + 8,
+        weeklyAverage: Math.floor(Math.random() * 40) + 12,
+        withBoost: Math.floor(Math.random() * 80) + 20,
+        withoutBoost: Math.floor(Math.random() * 40) + 10,
+        increase: Math.floor(Math.random() * 30) + 15
+      },
+      searchRanking: {
+        withoutBoost: Math.floor(Math.random() * 20) + 10,
+        withBoost: Math.floor(Math.random() * 8) + 1,
+        improvement: Math.floor(Math.random() * 15) + 5
+      }
+    };
   }
 };

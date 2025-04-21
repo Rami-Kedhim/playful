@@ -5,7 +5,7 @@ export interface BoostStatus {
   startTime?: Date;
   endTime?: Date;
   timeRemaining?: string;
-  progress: number | undefined;  // Explicitly defined with union type
+  progress?: number;  // Making it optional to resolve type conflicts
   profileId?: string;
   remainingTime?: string;
   expiresAt?: Date;
@@ -29,22 +29,31 @@ export interface BoostPackage {
 export interface BoostEligibility {
   isEligible: boolean;
   reasons?: string[];
+  minimumProfileCompleteness?: number;
+  missingFields?: string[];
+  minRequiredBalance?: number;
 }
 
 export interface BoostAnalytics {
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
+  additionalViews?: number;
+  engagementIncrease?: number;
+  rankingPosition?: number;
   effectiveness?: number;
   views?: {
-    withoutBoost: number;
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
     withBoost: number;
-    increase: number;
+    withoutBoost?: number;
+    increase?: number;
   };
   clicks?: {
-    withoutBoost: number;
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
     withBoost: number;
-    increase: number;
+    withoutBoost?: number;
+    increase?: number;
   };
   searchRanking?: {
     withoutBoost: number;

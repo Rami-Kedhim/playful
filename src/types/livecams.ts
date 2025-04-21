@@ -1,22 +1,35 @@
 
-export interface LivecamModel {
-  id: string;
-  name: string;
-  isOnline: boolean;
-  viewerCount?: number;
-  thumbnailUrl?: string;
-  categories?: string[];
-}
-
 export interface Livecam {
   id: string;
-  modelId: string;
-  title: string;
-  isLive: boolean;
-  startTime?: Date;
-  viewerCount: number;
+  title?: string;
+  description?: string;
   thumbnailUrl?: string;
   streamUrl?: string;
-  model?: LivecamModel;
+  viewCount?: number;
+  isBoosted?: boolean;
+  boostExpiry?: string;
   tags?: string[];
+  price?: number;
+  currency?: string;
+}
+
+export interface LivecamModel {
+  id: string;
+  username: string;
+  displayName: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+  isLive: boolean;
+  viewerCount?: number;
+  categories?: string[];
+  tags?: string[];
+  country?: string;
+  language?: string;
+  age?: number;
+  bio?: string;
+  rating?: number;
+  pricePerMinute?: number;
+  isFavorite?: boolean;
+  isSubscribed?: boolean;
+  isBoosted?: boolean;
 }
