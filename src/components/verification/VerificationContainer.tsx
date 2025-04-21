@@ -24,10 +24,14 @@ const VerificationContainer = () => {
   const status = allowedStatusValues.includes(rawStatus as any) ? (rawStatus as typeof allowedStatusValues[number]) : 'none';
 
   // Properly type level as a VerificationLevel enum, fallback to enum value VerificationLevel.NONE
-  const level: VerificationLevel =
-    (verification?.verificationLevel as VerificationLevel) ||
-    (verification?.requested_level as VerificationLevel) ||
-    VerificationLevel.NONE;
+  let level: VerificationLevel = VerificationLevel.NONE;
+
+  // Defensive checks: verify verificationLevel or requested_level is a valid VerificationLevel enum value
+  if (verification?.verificationLevel && Object.values(VerificationLevel).includes(verification.verificationLevel)) {
+    level = verification.verificationLevel;
+  } else if (verification?.requested_level && Object.values(VerificationLevel).includes(verification.requested_level)) {
+    level = verification.requested_level;
+  }
 
   return (
     <Card className="w-full">
@@ -79,4 +83,3 @@ const VerificationContainer = () => {
 };
 
 export default VerificationContainer;
-
