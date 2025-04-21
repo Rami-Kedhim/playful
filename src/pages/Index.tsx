@@ -1,8 +1,4 @@
 
-// Fix import of escorts and creators, correct names from mockData to mockCreators and mockLivecams if needed.
-// Here, the mockData exports should have 'mockCreators' and 'mockLivecams' not 'escorts' or 'creators'.
-// So update import to the correct named exports.
-
 import { useState, useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
@@ -17,11 +13,10 @@ import WelcomeAlert from "@/components/layout/WelcomeAlert";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { toast } from "@/hooks/use-toast";
 
-// Correct imports of mockCreators and mockLivecams
+// Import mock data for featured content correctly
 import { mockCreators, mockLivecams } from "@/data/mockData";
 
-// For example, map mockLivecams as featuredEscorts for demonstration (temporary)
-const featuredEscorts = mockLivecams; 
+const featuredEscorts = mockLivecams;
 const featuredCreators = mockCreators;
 
 const Index = () => {
@@ -30,7 +25,7 @@ const Index = () => {
 
   useEffect(() => {
     toast({
-      title: "Welcome to Oxum",
+      title: "Welcome to UberEscorts",
       description: "Find your perfect match today!",
       variant: "success",
     });
@@ -73,4 +68,3 @@ const Index = () => {
 };
 
 export default Index;
-
