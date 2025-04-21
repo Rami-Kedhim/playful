@@ -1,4 +1,7 @@
-import { Escort, ServiceTypeString } from '../types/escorts';
+
+// Fix import for Escort and remove incorrect import of ServiceTypeString, fix property use and casing
+
+import { Escort } from '../types/Escort';
 
 const escortProfiles: Escort[] = [
   {
@@ -7,8 +10,8 @@ const escortProfiles: Escort[] = [
     age: 28,
     location: "Los Angeles, CA",
     gender: "female",
-    services: ["dinner", "events", "travel", "companionship"] as ServiceTypeString[],
-    rate: {
+    services: ["dinner", "events", "travel", "companionship"],
+    rates: {
       hourly: 300,
       twoHours: 550,
       overnight: 1800,
@@ -33,8 +36,8 @@ const escortProfiles: Escort[] = [
     age: 24,
     location: "Miami, FL",
     gender: "female",
-    services: ["massage", "roleplay", "dinner"] as ServiceTypeString[],
-    rate: {
+    services: ["massage", "roleplay", "dinner"],
+    rates: {
       hourly: 250,
       twoHours: 450,
       overnight: 1500,
@@ -45,7 +48,7 @@ const escortProfiles: Escort[] = [
     avatar: "https://images.unsplash.com/photo-1500648767791-00d5a4ee9baa?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80",
     verified: false,
     languages: ["English", "Spanish"],
-     subscriptionPrice: 14.99,
+    subscriptionPrice: 14.99,
     contentStats: {
       photos: 98,
       videos: 8,
@@ -59,8 +62,8 @@ const escortProfiles: Escort[] = [
     age: 26,
     location: "New York, NY",
     gender: "female",
-    services: ["companionship", "travel", "overnight"] as ServiceTypeString[],
-    rate: {
+    services: ["companionship", "travel", "overnight"],
+    rates: {
       hourly: 320,
       twoHours: 600,
       overnight: 2000,
@@ -71,7 +74,7 @@ const escortProfiles: Escort[] = [
     avatar: "https://images.unsplash.com/photo-1544005313-943150e15969?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     verified: true,
     languages: ["English", "Chinese"],
-     subscriptionPrice: 24.99,
+    subscriptionPrice: 24.99,
     contentStats: {
       photos: 142,
       videos: 21,
@@ -85,8 +88,8 @@ const escortProfiles: Escort[] = [
     age: 29,
     location: "London, UK",
     gender: "female",
-    services: ["massage", "dinner", "events"] as ServiceTypeString[],
-    rate: {
+    services: ["massage", "dinner", "events"],
+    rates: {
       hourly: 280,
       twoHours: 500,
       overnight: 1700,
@@ -97,7 +100,7 @@ const escortProfiles: Escort[] = [
     avatar: "https://images.unsplash.com/photo-1507038366474-4a81299394b8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     verified: false,
     languages: ["English", "Urdu"],
-     subscriptionPrice: 12.99,
+    subscriptionPrice: 12.99,
     contentStats: {
       photos: 85,
       videos: 5,
@@ -111,8 +114,8 @@ const escortProfiles: Escort[] = [
     age: 25,
     location: "Paris, France",
     gender: "female",
-    services: ["roleplay", "travel", "companionship"] as ServiceTypeString[],
-    rate: {
+    services: ["roleplay", "travel", "companionship"],
+    rates: {
       hourly: 270,
       twoHours: 480,
       overnight: 1600,
@@ -123,7 +126,7 @@ const escortProfiles: Escort[] = [
     avatar: "https://images.unsplash.com/photo-1488426862026-3ee9233d68fc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     verified: false,
     languages: ["English", "French"],
-     subscriptionPrice: 17.99,
+    subscriptionPrice: 17.99,
     contentStats: {
       photos: 110,
       videos: 12,
@@ -137,8 +140,8 @@ const escortProfiles: Escort[] = [
     age: 27,
     location: "Tokyo, Japan",
     gender: "female",
-    services: ["massage", "overnight", "events"] as ServiceTypeString[],
-    rate: {
+    services: ["massage", "overnight", "events"],
+    rates: {
       hourly: 310,
       twoHours: 570,
       overnight: 1900,
@@ -149,7 +152,7 @@ const escortProfiles: Escort[] = [
     avatar: "https://images.unsplash.com/photo-1531427186611-ecfd6d936e63?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     verified: true,
     languages: ["English", "Japanese"],
-     subscriptionPrice: 22.99,
+    subscriptionPrice: 22.99,
     contentStats: {
       photos: 135,
       videos: 18,
@@ -163,8 +166,8 @@ const escortProfiles: Escort[] = [
     age: 26,
     location: "Moscow, Russia",
     gender: "female",
-    services: ["companionship", "dinner", "travel"] as ServiceTypeString[],
-    rate: {
+    services: ["companionship", "dinner", "travel"],
+    rates: {
       hourly: 290,
       twoHours: 520,
       overnight: 1850,
@@ -175,7 +178,7 @@ const escortProfiles: Escort[] = [
     avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     verified: false,
     languages: ["English", "Russian"],
-     subscriptionPrice: 15.99,
+    subscriptionPrice: 15.99,
     contentStats: {
       photos: 102,
       videos: 9,
@@ -189,8 +192,8 @@ const escortProfiles: Escort[] = [
     age: 28,
     location: "Shanghai, China",
     gender: "female",
-    services: ["massage", "roleplay", "overnight"] as ServiceTypeString[],
-    rate: {
+    services: ["massage", "roleplay", "overnight"],
+    rates: {
       hourly: 330,
       twoHours: 620,
       overnight: 2100,
@@ -201,7 +204,7 @@ const escortProfiles: Escort[] = [
     avatar: "https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     verified: true,
     languages: ["English", "Chinese"],
-     subscriptionPrice: 25.99,
+    subscriptionPrice: 25.99,
     contentStats: {
       photos: 150,
       videos: 24,

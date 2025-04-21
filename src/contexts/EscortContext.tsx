@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { Escort } from '@/types/escort';
 
@@ -34,15 +33,12 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setError(null);
     
     try {
-      // Placeholder for actual API call
-      // In a real app, we would fetch from an API endpoint
       const mockEscorts: Escort[] = [
         {
           id: "1",
           name: "Emma",
           age: 28,
           location: "New York",
-          gender: "female",
           rating: 4.9,
           reviewCount: 120,
           verified: true,
@@ -66,7 +62,6 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           name: "Sophia",
           age: 26,
           location: "Los Angeles",
-          gender: "female",
           rating: 4.8,
           reviewCount: 95,
           verified: true,
@@ -96,7 +91,6 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   };
 
-  // Initialize data on first load
   React.useEffect(() => {
     refreshEscorts();
   }, []);

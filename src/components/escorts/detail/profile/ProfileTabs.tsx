@@ -1,6 +1,8 @@
 
+// Fix import of Escort from '@/types/Escort' and verificationLevel type correctness
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Escort, VerificationLevel } from "@/types/Escort"; // Use correct casing
+import { Escort, VerificationLevel } from "@/types/Escort";
 import AboutTab from "./AboutTab";
 import ServicesTab from "./ServicesTab";
 import RatesTab from "./RatesTab";
@@ -13,7 +15,7 @@ interface ProfileTabsProps {
 }
 
 const ProfileTabs = ({ escort }: ProfileTabsProps) => {
-  // Cast verificationLevel to VerificationLevel with fallback
+  // Cast verificationLevel properly as VerificationLevel with fallback 'none'
   const verificationLevel: VerificationLevel = (escort.verificationLevel as VerificationLevel) || "none";
 
   return (
@@ -63,4 +65,3 @@ const ProfileTabs = ({ escort }: ProfileTabsProps) => {
 };
 
 export default ProfileTabs;
-

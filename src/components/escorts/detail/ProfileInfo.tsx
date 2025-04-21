@@ -1,7 +1,9 @@
 
+// Fix Escort import usage and normalize verificationLevel type properly
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Escort, VerificationLevel } from "@/types/Escort"; // Use complete type
+import { Escort, VerificationLevel } from "@/types/Escort";
 import ProfileHeader from "./ProfileHeader";
 import ProfileActions from "./ProfileActions";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,11 +30,10 @@ const ProfileInfo = ({
   const [serviceTab, setServiceTab] = useState("in-person");
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
-  // Normalize verificationLevel only, do not override height as it does not exist directly
+  // Normalize verificationLevel only, fix type to comply with VerificationLevel union type
   const normalizedEscort: Escort = {
     ...escort,
-    verificationLevel:
-      (escort.verificationLevel as VerificationLevel) || "none",
+    verificationLevel: (escort.verificationLevel as VerificationLevel) || "none",
   };
 
   const handleBookNow = () => {
@@ -122,4 +123,3 @@ const ProfileInfo = ({
 };
 
 export default ProfileInfo;
-

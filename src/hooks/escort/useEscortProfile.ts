@@ -1,7 +1,9 @@
 
+// Fix typing and import Escort from '@/types/Escort' to unify types across codebase
+
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Escort } from '@/types/escort';
+import { Escort, VerificationLevel } from '@/types/Escort';
 import { useEscortContext } from '@/modules/escorts/providers/EscortProvider';
 
 export function useEscortProfile() {
@@ -33,7 +35,12 @@ export function useEscortProfile() {
         const foundEscort = context.escorts.find(e => e.id === id);
         if (foundEscort) {
           // Fix height string type - explicitly convert to string
-          const fixedEscort = { ...foundEscort, height: String(foundEscort.height) };
+          // Also fix verificationLevel type by casting properly
+          const fixedEscort: Escort = {
+            ...foundEscort,
+            height: String(foundEscort.height),
+            verificationLevel: (foundEscort.verificationLevel as VerificationLevel) || "none",
+          };
           setEscort(fixedEscort);
         } else {
           setError('Escort not found');

@@ -1,6 +1,8 @@
 
+// Same fix as useProfileImageManagement for update object fields, remove avatar
+
 import { useState } from 'react';
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 
 export const useEscortMedia = (
   updateEscortProfile: (id: string, updates: Partial<Escort>) => Promise<Escort | null>
@@ -13,9 +15,8 @@ export const useEscortMedia = (
     setError(null);
     
     try {
-      // Update escort with new profile image
+      // Update escort with new profile image fields only
       const updatedEscort = await updateEscortProfile(escortId, {
-        avatar: imageUrl,
         profileImage: imageUrl,
         imageUrl: imageUrl // Update all image-related fields
       });
