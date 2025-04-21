@@ -8,12 +8,10 @@ import UBXSection from "@/components/home/UBXSection";
 import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
 import LucieAssistant from "@/components/home/LucieAssistant";
-import MetaverseSection from "@/components/home/MetaverseSection";
 import WelcomeAlert from "@/components/layout/WelcomeAlert";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { toast } from "@/hooks/use-toast";
 
-// Import mock data for featured content correctly
 import { mockCreators, mockLivecams } from "@/data/mockData";
 
 const featuredEscorts = mockLivecams;
@@ -26,7 +24,7 @@ const Index = () => {
   useEffect(() => {
     toast({
       title: "Welcome to UberEscorts",
-      description: "Find your perfect match today!",
+      description: "Discover verified escorts and creators with UBX tokens for secure transactions.",
       variant: "success",
     });
   }, []);
@@ -61,8 +59,6 @@ const Index = () => {
 
       <UBXSection />
 
-      <MetaverseSection />
-
       <TrustSection />
 
       <CtaSection />
@@ -73,3 +69,4 @@ const Index = () => {
 };
 
 export default Index;
+

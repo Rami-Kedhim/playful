@@ -37,7 +37,7 @@ const HeroSection = ({ searchLocation, setSearchLocation }: HeroSectionProps) =>
             </h1>
             
             <p className="text-xl text-gray-300 max-w-xl">
-              UberEscorts unifies verification, secure payments, live content and GPS safety in one powerful ecosystem.
+              UberEscorts unifies verification, secure payments with UBX tokens, live content, and GPS safety in one powerful ecosystem.
             </p>
             
             <div className="relative mt-8">
@@ -102,14 +102,14 @@ const HeroSection = ({ searchLocation, setSearchLocation }: HeroSectionProps) =>
                   Chat with Lucie
                 </Button>
                 <Button size="sm" variant="secondary">
-                  Learn about Lucoin
+                  Learn about UBX Token
                 </Button>
               </div>
               
               {showLucie && (
                 <div className="mt-4 p-3 bg-white/5 rounded-lg">
                   <p className="text-sm text-gray-300">
-                    I can help you verify your profile, show you how to use Lucoin, or explain our security features. What would you like to know?
+                    I can help you verify your profile, show you how to use UBX tokens, or explain our security features. What would you like to know?
                   </p>
                 </div>
               )}
