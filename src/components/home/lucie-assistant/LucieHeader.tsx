@@ -1,18 +1,35 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Minus, Sparkles } from 'lucide-react';
+import { X, Minus, Sparkles, Volume2, Volume1, VolumeX, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LucieVoiceType } from '@/services/speechSynthesisService';
 
 interface LucieHeaderProps {
   onClose?: () => void;
   onMinimize?: () => void;
   showAnimation?: boolean;
+  isSpeechEnabled?: boolean;
+  onToggleSpeech?: () => void;
+  onChangeVoice?: (voice: LucieVoiceType) => void;
+  currentVoice?: LucieVoiceType;
 }
 
 const LucieHeader: React.FC<LucieHeaderProps> = ({ 
   onClose, 
   onMinimize,
-  showAnimation = false
+  showAnimation = false,
+  isSpeechEnabled = false,
+  onToggleSpeech,
+  onChangeVoice,
+  currentVoice = 'feminine'
 }) => {
   const [sparkleActive, setSparkleActive] = useState(false);
 
@@ -47,6 +64,60 @@ const LucieHeader: React.FC<LucieHeaderProps> = ({
       </div>
       
       <div className="flex items-center space-x-1">
+        {onToggleSpeech && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/20"
+              >
+                {isSpeechEnabled ? (
+                  currentVoice === 'feminine' ? (
+                    <Volume2 className="h-4 w-4" />
+                  ) : (
+                    <Volume1 className="h-4 w-4" />
+                  )
+                ) : (
+                  <VolumeX className="h-4 w-4" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Voice Settings</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onToggleSpeech}>
+                {isSpeechEnabled ? 'Disable Voice' : 'Enable Voice'}
+              </DropdownMenuItem>
+              
+              {isSpeechEnabled && onChangeVoice && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Voice Type</DropdownMenuLabel>
+                  <DropdownMenuItem 
+                    onClick={() => onChangeVoice('feminine')}
+                    className={currentVoice === 'feminine' ? 'bg-primary/10' : ''}
+                  >
+                    Feminine
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onChangeVoice('masculine')}
+                    className={currentVoice === 'masculine' ? 'bg-primary/10' : ''}
+                  >
+                    Masculine
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onChangeVoice('neutral')}
+                    className={currentVoice === 'neutral' ? 'bg-primary/10' : ''}
+                  >
+                    Neutral
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        
         {onMinimize && (
           <Button
             onClick={onMinimize}

@@ -1,18 +1,23 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { SendHorizontal, Sparkles } from 'lucide-react';
+import { SendHorizontal, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 interface LucieInputBoxProps {
   onSendMessage: (message: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  onToggleSpeech?: () => void;
+  isSpeechEnabled?: boolean;
 }
 
 const LucieInputBox: React.FC<LucieInputBoxProps> = ({ 
   onSendMessage, 
   placeholder = "Type your message...",
-  disabled = false
+  disabled = false,
+  onToggleSpeech,
+  isSpeechEnabled = false
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -72,7 +77,31 @@ const LucieInputBox: React.FC<LucieInputBoxProps> = ({
           rows={1}
         />
         
-        <div className="flex items-center pr-2 pb-2">
+        <div className="flex items-center gap-2 pr-2 pb-2">
+          {onToggleSpeech && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={onToggleSpeech}
+                    className="rounded-full h-8 w-8 p-0"
+                  >
+                    {isSpeechEnabled ? (
+                      <Volume2 className="h-4 w-4 text-primary" />
+                    ) : (
+                      <VolumeX className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{isSpeechEnabled ? 'Disable voice' : 'Enable voice'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           <Button
             type="submit"
             size="sm"
