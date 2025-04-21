@@ -1,8 +1,18 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { SendHorizontal, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { SendHorizontal, Sparkles, Volume2, VolumeX, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { useLucieSpeech } from '@/hooks/lucie/useLucieSpeech';
+import { useToast } from '@/hooks/use-toast';
 
 interface LucieInputBoxProps {
   onSendMessage: (message: string) => void;
@@ -21,7 +31,34 @@ const LucieInputBox: React.FC<LucieInputBoxProps> = ({
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [isVoiceSettingsOpen, setIsVoiceSettingsOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { toast } = useToast();
+  
+  // Initialize Lucie speech engine
+  const { 
+    isEnabled: speechEnabled,
+    toggleSpeech,
+    speak,
+    stopSpeech,
+    supported: speechSupported,
+    currentlySpeaking
+  } = useLucieSpeech({
+    autoSpeak: false,
+    voiceType: localStorage.getItem('lucie_voice_type') as any || 'feminine'
+  });
+
+  // We maintain our own state since we might receive props from parent
+  useEffect(() => {
+    if (onToggleSpeech) {
+      // External toggle control
+    } else {
+      // Internal toggle - just pass the current state when requested
+      if (typeof isSpeechEnabled !== 'undefined') {
+        // No-op, we're using the provided state
+      }
+    }
+  }, [isSpeechEnabled, onToggleSpeech]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +91,61 @@ const LucieInputBox: React.FC<LucieInputBoxProps> = ({
     }
   };
 
+  const toggleVoiceSettings = () => {
+    setIsVoiceSettingsOpen(!isVoiceSettingsOpen);
+  };
+
+  const changeVoiceType = (type: string) => {
+    localStorage.setItem('lucie_voice_type', type);
+    window.location.reload(); // Hard refresh to apply new voice settings
+  };
+
+  const handleSpeechToggle = () => {
+    if (onToggleSpeech) {
+      onToggleSpeech();
+    } else if (speechSupported) {
+      toggleSpeech();
+      
+      toast({
+        title: speechEnabled ? "Speech disabled" : "Speech enabled",
+        description: speechEnabled ? "Lucie will no longer speak responses" : "Lucie will now speak responses",
+      });
+    } else {
+      toast({
+        title: "Speech not supported",
+        description: "Your browser does not support speech synthesis",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const renderQuickActions = () => {
+    const quickActions = [
+      { text: "Tell me about Pulse Boost", icon: <Zap className="h-3 w-3" /> },
+      { text: "How do I earn UBX?", icon: <Sparkles className="h-3 w-3" /> },
+      { text: "What's my boost status?", icon: <Zap className="h-3 w-3" /> },
+    ];
+
+    return (
+      <div className="flex flex-wrap gap-2 mb-2">
+        {quickActions.map((action, index) => (
+          <Button
+            key={index}
+            variant="outline"
+            size="sm"
+            className="text-xs py-1 h-auto"
+            onClick={() => {
+              onSendMessage(action.text);
+            }}
+          >
+            {action.icon}
+            <span className="ml-1">{action.text}</span>
+          </Button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -61,6 +153,9 @@ const LucieInputBox: React.FC<LucieInputBoxProps> = ({
         isFocused ? 'bg-muted/50' : 'bg-background'
       }`}
     >
+      {/* Quick action buttons for common Pulse Boost queries */}
+      {renderQuickActions()}
+
       <div className={`flex items-end rounded-lg border overflow-hidden transition-shadow ${
         isFocused ? 'shadow-md border-primary/50' : 'shadow-sm'
       }`}>
@@ -78,7 +173,30 @@ const LucieInputBox: React.FC<LucieInputBoxProps> = ({
         />
         
         <div className="flex items-center gap-2 pr-2 pb-2">
-          {onToggleSpeech && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleSpeechToggle}
+                  className="rounded-full h-8 w-8 p-0"
+                >
+                  {(onToggleSpeech ? isSpeechEnabled : speechEnabled) ? (
+                    <Volume2 className={`h-4 w-4 text-primary ${currentlySpeaking ? 'animate-pulse' : ''}`} />
+                  ) : (
+                    <VolumeX className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{(onToggleSpeech ? isSpeechEnabled : speechEnabled) ? 'Disable voice' : 'Enable voice'}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          {(onToggleSpeech ? isSpeechEnabled : speechEnabled) && (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -86,22 +204,19 @@ const LucieInputBox: React.FC<LucieInputBoxProps> = ({
                     type="button"
                     size="sm"
                     variant="ghost"
-                    onClick={onToggleSpeech}
-                    className="rounded-full h-8 w-8 p-0"
+                    onClick={toggleVoiceSettings}
+                    className="rounded-full h-8 w-8 p-0 text-xs"
                   >
-                    {isSpeechEnabled ? (
-                      <Volume2 className="h-4 w-4 text-primary" />
-                    ) : (
-                      <VolumeX className="h-4 w-4" />
-                    )}
+                    🎤
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{isSpeechEnabled ? 'Disable voice' : 'Enable voice'}</p>
+                  <p>Voice settings</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           )}
+          
           <Button
             type="submit"
             size="sm"
@@ -120,6 +235,26 @@ const LucieInputBox: React.FC<LucieInputBoxProps> = ({
           </Button>
         </div>
       </div>
+      
+      {/* Voice settings dropdown */}
+      {isVoiceSettingsOpen && (
+        <div className="mt-2 p-2 border rounded-md bg-background shadow-md">
+          <Label htmlFor="voice-type" className="text-xs mb-1 block">Voice Type</Label>
+          <Select
+            value={localStorage.getItem('lucie_voice_type') || 'feminine'}
+            onValueChange={changeVoiceType}
+          >
+            <SelectTrigger id="voice-type" className="w-full">
+              <SelectValue placeholder="Select voice type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="feminine">Feminine</SelectItem>
+              <SelectItem value="masculine">Masculine</SelectItem>
+              <SelectItem value="neutral">Neutral</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       
       <div className="mt-1.5 text-xs text-muted-foreground text-center">
         Press Enter to send, Shift+Enter for new line
