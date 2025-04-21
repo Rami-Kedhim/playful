@@ -5,35 +5,55 @@ import { Link } from "react-router-dom";
 
 const UBXCoinIcon = () => {
   return (
+    // Redesign the UBX token icon to match a golden crypto coin style with radial gradients and rich gold tones
     <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 shadow-lg flex items-center justify-center select-none">
-      {/* Outer rim */}
-      <div className="absolute inset-0 rounded-full border-4 border-yellow-700 shadow-inner"></div>
+      {/* Outer golden rim with shine */}
+      <div className="absolute inset-0 rounded-full border-4 border-yellow-700 shadow-inner" />
+      <div className="absolute inset-0 rounded-full bg-gradient-radial from-yellow-300 via-yellow-400 to-yellow-700 opacity-40" />
 
-      {/* Circuit pattern simplified */}
+      {/* Inner coin design: circular bands and small gem-like shapes */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 240 240"
-        className="w-40 h-40 text-yellow-700"
+        viewBox="0 0 200 200"
+        className="w-40 h-40 text-yellow-800 drop-shadow-lg"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="2"
       >
-        {/* Circuits & outer text outline (simplified) */}
-        <circle cx="120" cy="120" r="110" stroke="goldenrod" strokeWidth="2"/>
-        <path d="M70 40 L70 100 M170 40 L170 100 M70 140 L70 200 M170 140 L170 200" stroke="goldenrod" />
-        <circle cx="120" cy="120" r="60" stroke="goldenrod" />
-        <path d="M120 60 v120 M90 90 h60 M90 150 h60" stroke="goldenrod"/>
+        {/* Main coin circle with subtle gradient */}
+        <circle cx="100" cy="100" r="90" stroke="gold" strokeWidth="4" fill="url(#goldenGradient)" />
+        {/* Inner rings for depth */}
+        <circle cx="100" cy="100" r="70" stroke="goldenrod" strokeWidth="2" />
+        <circle cx="100" cy="100" r="50" stroke="goldenrod" strokeWidth="1.5" />
+        {/* Corner diamond gems */}
+        <circle cx="50" cy="50" r="5" fill="goldenrod" />
+        <circle cx="150" cy="50" r="5" fill="goldenrod" />
+        <circle cx="50" cy="150" r="5" fill="goldenrod" />
+        <circle cx="150" cy="150" r="5" fill="goldenrod" />
+        {/* Central UBX letter design */}
+        <text
+          x="100"
+          y="110"
+          textAnchor="middle"
+          fill="gold"
+          fontFamily="'Courier New', monospace"
+          fontWeight="900"
+          fontSize="60"
+          letterSpacing="0.02em"
+          stroke="rgba(255, 255, 255, 0.3)"
+          strokeWidth="1"
+          paintOrder="stroke"
+        >
+          UBX
+        </text>
+        <defs>
+          <radialGradient id="goldenGradient" cx="0.5" cy="0.5" r="0.6">
+            <stop offset="0%" stopColor="#f7e56a" />
+            <stop offset="60%" stopColor="#cca83a" />
+            <stop offset="100%" stopColor="#6b4800" />
+          </radialGradient>
+        </defs>
       </svg>
-
-      {/* Center letter U shaped like Bitcoin B */}
-      <div className="absolute text-yellow-100 text-7xl font-black drop-shadow-lg flex flex-col items-center leading-[0.75] pointer-events-none select-none">
-        <span style={{ fontFamily: "'Courier New', Courier, monospace" }}>
-          U
-        </span>
-        <span className="text-yellow-300" style={{ fontFamily: "'Courier New', Courier, monospace", fontWeight: 900, fontSize: '3.5rem', lineHeight: 0.7 }}>
-          BX
-        </span>
-      </div>
     </div>
   );
 };
@@ -57,12 +77,12 @@ const UBXSection = () => {
           <ul className="mb-8 space-y-4">
             <li className="flex items-start gap-3">
               <div className="inline-block rounded-full bg-yellow-600 p-1 shrink-0 mt-1 w-6 h-6 flex justify-center items-center">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  strokeWidth={3} 
-                  stroke="yellow" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={3}
+                  stroke="yellow"
                   className="w-4 h-4"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -77,12 +97,12 @@ const UBXSection = () => {
             </li>
             <li className="flex items-start gap-3">
               <div className="inline-block rounded-full bg-yellow-600 p-1 shrink-0 mt-1 w-6 h-6 flex justify-center items-center">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  strokeWidth={3} 
-                  stroke="yellow" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={3}
+                  stroke="yellow"
                   className="w-4 h-4"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -97,12 +117,12 @@ const UBXSection = () => {
             </li>
             <li className="flex items-start gap-3">
               <div className="inline-block rounded-full bg-yellow-600 p-1 shrink-0 mt-1 w-6 h-6 flex justify-center items-center">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  strokeWidth={3} 
-                  stroke="yellow" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={3}
+                  stroke="yellow"
                   className="w-4 h-4"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -141,4 +161,3 @@ const UBXSection = () => {
 };
 
 export default UBXSection;
-
