@@ -1,74 +1,100 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send } from 'lucide-react';
+import { SendHorizontal, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface LucieInputBoxProps {
   onSendMessage: (message: string) => void;
-  isDisabled?: boolean;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 const LucieInputBox: React.FC<LucieInputBoxProps> = ({ 
   onSendMessage, 
-  isDisabled = false,
-  placeholder = "Ask Lucie a question..." 
+  placeholder = "Type your message...",
+  disabled = false
 }) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Auto focus input when component mounts or disabled state changes
-  useEffect(() => {
-    if (inputRef.current && !isDisabled) {
-      inputRef.current.focus();
-    }
-  }, [isDisabled]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const trimmedMessage = message.trim();
-    if (trimmedMessage && !isDisabled) {
-      onSendMessage(trimmedMessage);
+    if (message.trim() && !disabled) {
+      onSendMessage(message.trim());
       setMessage('');
+      
+      // Refocus the textarea
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    }
+  };
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
+    }
+  }, [message]);
+
+  // Handle Shift+Enter vs Enter for submission
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
   return (
-    <form 
-      onSubmit={handleSubmit} 
-      className="p-3 border-t flex gap-2 relative"
+    <form
+      onSubmit={handleSubmit}
+      className={`border-t p-3 transition-all duration-200 ${
+        isFocused ? 'bg-muted/50' : 'bg-background'
+      }`}
     >
-      <input
-        ref={inputRef}
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        placeholder={placeholder}
-        className={`flex-1 bg-background border transition-all duration-200 ${
-          isFocused ? 'border-primary/50 ring-2 ring-primary/20' : 'border-muted-foreground/20'
-        } rounded-md px-3 py-2 text-sm focus:outline-none`}
-        disabled={isDisabled}
-      />
-      <Button 
-        type="submit" 
-        size="icon" 
-        disabled={!message.trim() || isDisabled}
-        className={`aspect-square h-9 w-9 transition-all ${
-          message.trim() && !isDisabled 
-            ? 'bg-primary hover:bg-primary/90 scale-100'
-            : 'bg-muted hover:bg-muted/90 scale-95'
-        }`}
-      >
-        <Send 
-          className={`h-4 w-4 transition-transform ${
-            message.trim() && !isDisabled ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-70'
-          }`} 
+      <div className={`flex items-end rounded-lg border overflow-hidden transition-shadow ${
+        isFocused ? 'shadow-md border-primary/50' : 'shadow-sm'
+      }`}>
+        <textarea
+          ref={textareaRef}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className="min-h-[40px] max-h-[120px] flex-1 resize-none bg-transparent py-3 px-4 focus:outline-none"
+          rows={1}
         />
-      </Button>
+        
+        <div className="flex items-center pr-2 pb-2">
+          <Button
+            type="submit"
+            size="sm"
+            disabled={!message.trim() || disabled}
+            className={`rounded-full h-8 w-8 p-0 transition-transform ${
+              message.trim() ? 'scale-100 opacity-100' : 'scale-95 opacity-70'
+            }`}
+          >
+            {message.trim().toLowerCase().includes('thank') || 
+             message.trim().toLowerCase().includes('congratulation') || 
+             message.trim().toLowerCase().includes('amazing') ? (
+              <Sparkles className="h-4 w-4" />
+            ) : (
+              <SendHorizontal className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+      
+      <div className="mt-1.5 text-xs text-muted-foreground text-center">
+        Press Enter to send, Shift+Enter for new line
+      </div>
     </form>
   );
 };

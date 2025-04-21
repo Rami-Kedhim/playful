@@ -21,13 +21,13 @@ export const LucieHermesIntegration = ({
   // Use Hermes insights to determine if Lucie should be shown
   const { insights, reportUserAction } = useHermesInsights();
   
-  // Extract relevant insights from the array
+  // Extract relevant insights
   const boostOfferInsight = insights.find(i => i.type === 'boost');
   const vrEventInsight = insights.find(i => i.type === 'vr_event');
   const recommendationInsight = insights.find(i => i.type === 'recommendation');
   
   // Default values if we can't find proper insights
-  const isLucieEnabled = insights.some(i => i.type === 'ai_enabled') || false;
+  const isLucieEnabled = insights.some(i => i.type === 'ai_enabled') || true;
   const boostOffer = boostOfferInsight?.data?.boostOffer;
   const vrEvent = vrEventInsight?.description;
   const recommendedProfileId = recommendationInsight?.data?.profileId;
@@ -37,10 +37,10 @@ export const LucieHermesIntegration = ({
     if (!initialized) {
       setInitialized(true);
       
-      // For demo purposes, show Lucie 50% of the time if not forced
-      const shouldShowLucie = Math.random() > 0.5;
+      // For demo purposes, show Lucie based on conditions or forced visibility
+      const shouldShowLucie = forceVisible || Math.random() > 0.5;
       
-      if (shouldShowLucie || forceVisible) {
+      if (shouldShowLucie) {
         setIsVisible(true);
 
         let personalizedMessage = '';

@@ -15,6 +15,7 @@ interface ConfettiPiece {
   rotation: number;
   shape: 'circle' | 'square' | 'rectangle' | 'triangle';
   swayFactor: number;
+  duration: number;
 }
 
 const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
@@ -22,22 +23,24 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
   
   useEffect(() => {
     if (show) {
-      // Generate confetti pieces with more variety
+      // Enhanced color palette with more vibrant options
       const colors = [
         '#9b87f5', '#6366f1', '#f43f5e', '#22c55e', '#f59e0b', 
-        '#06b6d4', '#ec4899', '#facc15', '#3b82f6', '#a855f7'
+        '#06b6d4', '#ec4899', '#facc15', '#3b82f6', '#a855f7',
+        '#8b5cf6', '#10b981', '#ef4444', '#14b8a6', '#f97316'
       ];
       const shapes = ['circle', 'square', 'rectangle', 'triangle'] as const;
       
-      const newPieces = Array.from({ length: 60 }, (_, i) => ({
+      const newPieces = Array.from({ length: 80 }, (_, i) => ({
         id: i,
         color: colors[Math.floor(Math.random() * colors.length)],
-        left: Math.random() * 100,
-        delay: Math.random() * 0.5,
-        size: 4 + Math.random() * 8, // Random size between 4-12px
+        left: Math.random() * 100, // Random horizontal position
+        delay: Math.random() * 0.8, // Increased delay variance
+        size: 4 + Math.random() * 10, // Random size between 4-14px
         rotation: Math.random() * 360, // Random rotation angle
         shape: shapes[Math.floor(Math.random() * shapes.length)],
-        swayFactor: Math.random() * 20 - 10 // Random sway between -10 and 10
+        swayFactor: Math.random() * 30 - 15, // Random sway between -15 and 15
+        duration: 1.5 + Math.random() * 2 // Random duration between 1.5-3.5s
       }));
       
       setPieces(newPieces);
@@ -46,7 +49,7 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
       const timer = setTimeout(() => {
         setPieces([]);
         if (onComplete) onComplete();
-      }, 4000); // Increased to allow for longer animation durations
+      }, 5000); // Increased duration for longer animations
       
       return () => clearTimeout(timer);
     }
@@ -72,8 +75,8 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
                    piece.shape === 'triangle' ? `${piece.size * 0.866}px` : `${piece.size}px`,
             transform: `rotate(${piece.rotation}deg)`,
             animationDelay: `${piece.delay}s`,
-            animationDuration: `${1.5 + Math.random() * 1.5}s`, // More variable duration
-            // Add random horizontal movement for more realistic physics
+            animationDuration: `${piece.duration}s`,
+            // Add custom property for sway factor
             '--sway-factor': `${piece.swayFactor}px`,
             clipPath: piece.shape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none',
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -84,14 +87,20 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
       ))}
       
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes triangleFall {
+        @keyframes confettiDrop {
           0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
           10% { opacity: 1; }
-          100% { transform: translateY(50px) rotate(360deg); opacity: 0; }
+          25% { transform: translateY(0) rotate(90deg) translateX(var(--sway-factor, 5px)); opacity: 1; }
+          50% { transform: translateY(20px) rotate(180deg) translateX(calc(var(--sway-factor, 5px) * -1)); opacity: 0.9; }
+          75% { transform: translateY(35px) rotate(270deg) translateX(var(--sway-factor, 5px)); opacity: 0.7; }
+          90% { opacity: 0.3; }
+          100% { transform: translateY(50px) rotate(360deg) translateX(calc(var(--sway-factor, 5px) * -1)); opacity: 0; }
         }
+        
         .clip-path-triangle {
           clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         }
+        
         .confetti-piece {
           position: absolute;
           opacity: 0;
@@ -100,7 +109,7 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
           transform-origin: center center;
           box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
         }
-      `}} />
+      ` }} />
     </div>
   );
 };

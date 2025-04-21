@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { LucieMessage } from '@/hooks/useLucieAssistant';
 import LucieTypingIndicator from './LucieTypingIndicator';
@@ -20,6 +21,7 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
   const [confettiKey, setConfettiKey] = useState(0);
 
+  // Enhanced celebratory phrases detection
   const celebratoryPhrases = [
     'congratulations', 'well done', 'great job', 'awesome', 'excellent',
     'perfect', 'amazing', 'fantastic', 'wonderful', 'bravo', 'success',
@@ -29,6 +31,7 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
     'extraordinary', 'remarkable', 'exceptional', 'stellar', 'great work'
   ];
 
+  // More sophisticated celebration detection
   const isCelebratoryMessage = (content: string): boolean => {
     const lowerContent = content.toLowerCase();
     
@@ -52,6 +55,7 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
     return false;
   };
 
+  // Watch for celebratory messages
   useEffect(() => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];

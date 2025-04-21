@@ -35,11 +35,13 @@ export function useLucieAssistant() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const initializedRef = useRef(false);
+  const sessionStartedRef = useRef(false);
 
   // Initialize with welcome message only once
   useEffect(() => {
-    if (messages.length === 0 && !initializedRef.current) {
-      initializedRef.current = true;
+    if (!sessionStartedRef.current && isOpen && messages.length === 0) {
+      sessionStartedRef.current = true;
+      
       const welcomeMessage: LucieMessage = {
         id: 'welcome-' + Date.now(),
         role: 'assistant',
@@ -52,9 +54,17 @@ export function useLucieAssistant() {
         ],
         emotion: "friendly"
       };
+      
       setMessages([welcomeMessage]);
     }
-  }, [messages.length]);
+  }, [messages.length, isOpen]);
+
+  // Reset the session when chat is closed
+  useEffect(() => {
+    if (!isOpen) {
+      sessionStartedRef.current = false;
+    }
+  }, [isOpen]);
 
   // Send a message to Lucie orchestrator
   const sendMessage = useCallback(async (content: string) => {
@@ -101,7 +111,7 @@ export function useLucieAssistant() {
       }
 
       // Generate relevant suggested actions based on the response
-      const suggestedActions = generateSuggestedActions(content, response.responseText);
+      const suggestedActions = response.suggestedActions || generateSuggestedActions(content, response.responseText);
 
       // Create the Lucie response message
       const lucieMessage: LucieMessage = {
@@ -110,7 +120,7 @@ export function useLucieAssistant() {
         content: response.responseText,
         timestamp: new Date(),
         emotion,
-        suggestedActions: response.suggestedActions || suggestedActions
+        suggestedActions
       };
 
       setMessages(prev => [...prev, lucieMessage]);
@@ -133,9 +143,9 @@ export function useLucieAssistant() {
   }, []);
 
   const clearMessages = useCallback(() => {
-    // Keep only the welcome message
+    // Reset the messages list
     setMessages([]);
-    initializedRef.current = false;
+    sessionStartedRef.current = false; // Allow re-initialization
   }, []);
 
   // Helper to generate suggested actions based on context

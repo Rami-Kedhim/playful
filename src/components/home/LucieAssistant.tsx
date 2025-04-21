@@ -7,7 +7,9 @@ import { useLucieAssistant } from '@/hooks/useLucieAssistant';
 import LucieHeader from './lucie-assistant/LucieHeader';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
 import LucieInputBox from './lucie-assistant/LucieInputBox';
+import LucieConfetti from './lucie-assistant/LucieConfetti';
 import { useUserAIContext } from '@/hooks/useUserAIContext';
+import AICompanionChatStyles from '@/components/ai/companion-chat/AICompanionChatStyles';
 
 interface LucieAssistantProps {
   initiallyOpen?: boolean;
@@ -119,6 +121,8 @@ const LucieAssistant = ({
 
   return (
     <>
+      <AICompanionChatStyles />
+
       {/* Enhanced Floating button with pulse effect */}
       <Button
         onClick={toggleChat}
@@ -139,7 +143,7 @@ const LucieAssistant = ({
           key={`chat-window-${celebrationTrigger}`} // Re-render on celebration for animations
         >
           <LucieHeader 
-            onClose={isOpen ? toggleChat : onClose} 
+            onClose={onClose || toggleChat} 
             onMinimize={toggleChat}
             showAnimation={true}
           />
@@ -150,6 +154,13 @@ const LucieAssistant = ({
             onSuggestedActionClick={handleSuggestedActionClick}
           />
           <LucieInputBox onSendMessage={handleSendMessage} />
+            
+          {celebration && (
+            <LucieConfetti 
+              show={celebration} 
+              onComplete={() => setCelebration(false)} 
+            />
+          )}
         </Card>
       )}
       
