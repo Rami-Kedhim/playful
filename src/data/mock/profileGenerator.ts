@@ -1,5 +1,4 @@
-
-import { Escort } from "@/types/escort";
+import { Escort } from "@/types/Escort";
 
 // Define image module type
 interface ImageModule {

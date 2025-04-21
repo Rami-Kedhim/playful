@@ -1,6 +1,8 @@
 
+// Fix import of Escort to capitalized path and missing 'gallery' property issue with type assertion
+
 import { useState } from 'react';
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 interface Gallery {
   imageUrls: string[];

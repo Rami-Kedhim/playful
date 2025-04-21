@@ -1,5 +1,5 @@
 
-// Fix Escort import usage and normalize verificationLevel type properly
+// Fix import and typings for Escort and VerificationLevel to unify usage and fix assignment errors
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,10 +30,15 @@ const ProfileInfo = ({
   const [serviceTab, setServiceTab] = useState("in-person");
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
 
-  // Normalize verificationLevel only, fix type to comply with VerificationLevel union type
+  // Normalize verificationLevel with proper type and fallback to "none"
   const normalizedEscort: Escort = {
     ...escort,
-    verificationLevel: (escort.verificationLevel as VerificationLevel) || "none",
+    verificationLevel:
+      escort.verificationLevel &&
+      typeof escort.verificationLevel === "string" &&
+      ["none", "basic", "enhanced", "premium"].includes(escort.verificationLevel)
+        ? (escort.verificationLevel as VerificationLevel)
+        : "none",
   };
 
   const handleBookNow = () => {
