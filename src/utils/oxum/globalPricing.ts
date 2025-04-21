@@ -1,81 +1,58 @@
 
-/**
- * Oxum Pricing System Constants
- * Core constants for the Oxum Global Price Symmetry system
- */
-
-// Pricing constants
-export const GLOBAL_UBX_RATE = 1000; // Boosting price = 1000 UBX for all
-export const PRICE_TOLERANCE = 0.001; // Tolerance for floating point errors (0.1%)
-export const MAX_RETRY_ATTEMPTS = 3; // Maximum number of validation retries
-
-// Mock implementation for OxumSystemTestHarness
-export const runPricingSystemSelfTest = async () => {
-  // Mock implementation
-  return {
-    success: true,
-    testsRun: 5,
-    testsPassed: 5,
-    failedTests: []
-  };
-};
-
-export const getOxumPriceSystemHealth = async () => {
-  // Mock implementation
-  return {
-    status: 'healthy',
-    lastUpdate: new Date().toISOString(),
-    metrics: {
-      responseTime: 120,
-      errorRate: 0.01,
-      uptime: 99.9
-    }
-  };
-};
-
-export const emergencyPriceValidationOverride = async (options: { force: boolean }) => {
-  // Mock implementation
-  return {
-    success: options.force,
-    timestamp: new Date().toISOString(),
-    message: options.force ? 'Override applied successfully' : 'Override failed'
-  };
-};
+// Global price constants for the Oxum system
+export const GLOBAL_UBX_RATE = 25;
+export const BASE_PRICE_UBX = 50;
+export const PRIME_PRICE_MULTIPLIER = 1.5;
 
 /**
- * Validates if a price complies with the global price symmetry rule
+ * Validates that the price conforms to the global price symmetry rule
+ * @param price The price to validate
+ * @returns true if valid, otherwise throws error
  */
-export const validateGlobalPrice = (price: number, metadata?: Record<string, any>) => {
-  // Check if the price is within tolerance of the global rate
-  const difference = Math.abs(price - GLOBAL_UBX_RATE);
-  const percentageDifference = difference / GLOBAL_UBX_RATE;
-  
-  if (percentageDifference > PRICE_TOLERANCE) {
-    throw new Error(`Price ${price} violates Oxum Rule #001: Global Price Symmetry. Expected ${GLOBAL_UBX_RATE}.`);
+export const validateGlobalPrice = (price: number): boolean => {
+  if (price < GLOBAL_UBX_RATE) {
+    throw new Error(`Price ${price} UBX violates Oxum Rule #001: Price below global minimum (${GLOBAL_UBX_RATE} UBX)`);
   }
   
   return true;
+}
+
+/**
+ * Calculates the recommended boost price based on profile metrics
+ * @param profileLevel The profile level (0-10)
+ * @param engagement The engagement score (0-100)
+ * @returns Recommended boost price in UBX
+ */
+export const calculateBoostPriceUBX = (profileLevel: number, engagement: number): number => {
+  const baseFactor = Math.max(1, profileLevel / 5);
+  const engagementFactor = Math.max(1, engagement / 50);
+  
+  return Math.ceil(BASE_PRICE_UBX * baseFactor * engagementFactor);
 };
 
 /**
- * Validates price with retries for network resilience
+ * Converts Lucoins to UBX tokens
+ * @param lucoins Amount in Lucoins
+ * @returns Equivalent amount in UBX
  */
-export const validateGlobalPriceWithRetry = async (
-  price: number,
-  metadata?: Record<string, any>,
-  attempts: number = MAX_RETRY_ATTEMPTS
-) => {
-  let lastError;
-  
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return validateGlobalPrice(price, metadata);
-    } catch (error) {
-      lastError = error;
-      // In a real system, would add backoff delay here
-      await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, i)));
-    }
-  }
-  
-  throw lastError;
+export const convertLucoinToUBX = (lucoins: number): number => {
+  return Math.ceil(lucoins * 2.5);
+};
+
+/**
+ * Converts UBX to Lucoins
+ * @param ubx Amount in UBX
+ * @returns Equivalent amount in Lucoins
+ */
+export const convertUBXToLucoin = (ubx: number): number => {
+  return Math.floor(ubx / 2.5);
+};
+
+/**
+ * Formats price in UBX with proper currency symbol
+ * @param amount The amount in UBX
+ * @returns Formatted string with UBX symbol
+ */
+export const formatUBXPrice = (amount: number): string => {
+  return `${amount} UBX`;
 };

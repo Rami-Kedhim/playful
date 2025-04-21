@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +24,10 @@ interface BoostDialogTabsProps {
   onCancel: () => Promise<boolean>;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
+  
+  // Add missing properties that are expected by the component
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
@@ -39,11 +43,17 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   onPurchase,
   onCancel,
   dailyBoostUsage,
-  dailyBoostLimit
+  dailyBoostLimit,
+  activeTab: initialActiveTab,
+  setActiveTab: externalSetActiveTab
 }) => {
-  const [activeTab, setActiveTab] = useState(boostStatus.isActive ? "active" : "packages");
+  const [internalActiveTab, setInternalActiveTab] = useState(boostStatus.isActive ? "active" : "packages");
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
+  
+  // Use either the external or internal tab state
+  const activeTab = initialActiveTab || internalActiveTab;
+  const setActiveTab = externalSetActiveTab || setInternalActiveTab;
   
   // Ensure eligibility object has all needed properties
   const compatibleEligibility: BoostEligibility = {
@@ -108,7 +118,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     } else {
       setActiveTab("packages");
     }
-  }, [boostStatus.isActive]);
+  }, [boostStatus.isActive, setActiveTab]);
   
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -190,7 +200,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           <div className="space-y-6">
             <BoostActivePackage 
               boostStatus={compatibleStatus}
-              hermesStatus={safeHermesStatus}
+              hermesData={safeHermesStatus}
             />
             
             <div className="flex justify-end mt-6">

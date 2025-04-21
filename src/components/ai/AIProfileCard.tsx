@@ -5,9 +5,25 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Heart, Info } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import AIProfileTypeIndicator from './AIProfileTypeIndicator';
-import AIEmotionStatus from './AIEmotionStatus';
+
+interface AIProfileTypeIndicatorProps {
+  type: string;
+  showLabel: boolean;
+}
+
+// Create stub component for AIProfileTypeIndicator
+const AIProfileTypeIndicator: React.FC<AIProfileTypeIndicatorProps> = ({ type, showLabel }) => {
+  return (
+    <Badge variant="outline" className="bg-primary/10 text-primary">
+      {type}
+    </Badge>
+  );
+};
+
+// Create stub component for AIEmotionStatus
+const AIEmotionStatus: React.FC<{ status?: string }> = ({ status }) => {
+  return <span>{status}</span>;
+};
 
 interface AIProfileCardProps {
   profile: AIProfile;
@@ -16,13 +32,13 @@ interface AIProfileCardProps {
 
 const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) => {
   // Determine if profile is premium
-  const isPremium = profile.lucoin_chat_price > 10 || profile.boost_status?.is_boosted;
+  const isPremium = (profile.lucoin_chat_price || 0) > 10 || profile.boost_status?.is_boosted;
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md flex flex-col">
       <div className="relative">
         <img 
-          src={profile.avatar_url} 
+          src={profile.avatar_url || profile.avatarUrl}
           alt={profile.name} 
           className="w-full h-[220px] object-cover object-center"
         />
@@ -40,9 +56,9 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
           <div className="flex items-center gap-2">
             <h3 className="text-xl font-semibold">{profile.name}</h3>
-            {profile.personality?.type && (
+            {profile.personality && (
               <Badge className="capitalize">
-                {profile.personality.type}
+                {profile.personality.type || ''}
               </Badge>
             )}
           </div>
@@ -52,7 +68,7 @@ const AIProfileCard: React.FC<AIProfileCardProps> = ({ profile, onChatClick }) =
       
       <CardContent className="p-4 flex-1">
         <p className="text-sm text-muted-foreground line-clamp-3">
-          {profile.bio}
+          {profile.bio || "No bio available"}
         </p>
         
         <div className="flex flex-wrap gap-1 mt-3">

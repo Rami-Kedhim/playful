@@ -37,7 +37,9 @@ export interface Livecam {
   isPopular?: boolean;
   previewVideoUrl?: string;
   createdAt?: Date;
+  
+  // Explicitly add title property needed by components
+  title?: string;
 }
 
 export type LivecamModel = Livecam;
-

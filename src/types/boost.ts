@@ -36,9 +36,9 @@ export interface BoostEligibility {
 }
 
 export interface BoostAnalytics {
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
   effectiveness?: number;
   views?: {
     today: number;

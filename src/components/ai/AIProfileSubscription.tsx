@@ -15,9 +15,12 @@ const AIProfileSubscription: React.FC<AIProfileSubscriptionProps> = ({
   onSubscribe 
 }) => {
   const subscriptionPrice = profile.subscription_price || 29;
-  const photosCount = profile.premium_content_count?.photos || 0;
-  const videosCount = profile.premium_content_count?.videos || 0;
-  const messagesCount = profile.premium_content_count?.messages || 0;
+  
+  // Handle potential undefined or non-object premium_content_count
+  const premiumContent = profile.premium_content_count || {};
+  const photosCount = typeof premiumContent === 'object' ? (premiumContent.photos || 0) : 0;
+  const videosCount = typeof premiumContent === 'object' ? (premiumContent.videos || 0) : 0;
+  const messagesCount = typeof premiumContent === 'object' ? (premiumContent.messages || 0) : 0;
 
   return (
     <Card className="overflow-hidden border-gradient-to-r from-purple-500 to-pink-500">

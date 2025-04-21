@@ -10,7 +10,7 @@ import HomePage from "./pages/HomePage";
 import Wallet from "./pages/Wallet";
 import UpdatedWallet from "./pages/UpdatedWallet";
 import PulseBoost from "./pages/PulseBoost";
-import LivecamPage from "./pages/LivecamPage"; // Fixed casing
+import LivecamPage from "./pages/LivecamPage";
 
 // Create stub providers for missing contexts
 const createStubContextFile = () => {

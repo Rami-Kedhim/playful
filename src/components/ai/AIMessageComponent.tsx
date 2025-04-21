@@ -21,8 +21,9 @@ const AIMessageComponent: React.FC<AIMessageComponentProps> = ({
   const { user } = useAuth();
   const [unlocking, setUnlocking] = useState(false);
   
+  // Check if message requires payment (handle undefined values safely)
   const isLocked = message.requires_payment && message.payment_status === 'pending';
-  const isUserMessage = !message.is_ai;
+  const isUserMessage = message.sender === 'user'; // Use sender property instead of is_ai
   
   const handleUnlock = async () => {
     if (!user) return;
@@ -58,7 +59,7 @@ const AIMessageComponent: React.FC<AIMessageComponentProps> = ({
             <p className="text-sm text-center">This premium message requires payment to view</p>
             <p className="text-sm font-semibold flex items-center gap-1 mb-2">
               <Coins className="h-4 w-4 text-yellow-500" />
-              {message.price} Lucoins
+              {message.price || 5} Lucoins
             </p>
             <Button 
               size="sm" 

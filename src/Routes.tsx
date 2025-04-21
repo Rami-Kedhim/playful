@@ -5,7 +5,7 @@ import HomePage from './pages/HomePage';
 import ProfilePage from './pages/Profile';
 import WalletPage from './pages/Wallet';
 import SearchPage from './pages/Search';
-import LivecamPage from './pages/LivecamPage'; // Fixed casing
+import LivecamPage from './pages/LivecamPage';
 import LivecamDetail from './pages/LivecamDetail';
 import AIModelPage from './pages/AIModelPage';
 import AIModelDetail from './pages/AIModelDetail';
@@ -42,17 +42,19 @@ const EscortProfilePage = () => <StubPage title="Escort Profile" />;
 const CreatorPage = () => <StubPage title="Creator" />;
 const CreatorProfilePage = () => <StubPage title="Creator Profile" />;
 
-// Define profile page props
+// Define profile page props explicitly to match component expectations
 interface ProfilePageProps {
-  user: any;
-  profile: any;
+  user?: any; // Make props optional
+  profile?: any;
 }
+
+const ProfileWithStubs = (props: ProfilePageProps) => <ProfilePage {...props} />;
 
 const Routes = () => {
   return (
     <RouterRoutes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/profile" element={<ProfilePage user={{}} profile={{}} />} />
+      <Route path="/profile" element={<ProfileWithStubs />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/login" element={<LoginPage />} />
