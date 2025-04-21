@@ -11,6 +11,7 @@ export interface Livecam {
   tags?: string[];
   price?: number;
   currency?: string;
+  username?: string; // Added to fix error in LivecamCard.tsx
 }
 
 export interface LivecamModel {
@@ -32,4 +33,5 @@ export interface LivecamModel {
   isFavorite?: boolean;
   isSubscribed?: boolean;
   isBoosted?: boolean;
+  description?: string; // Added to fix error in LivecamInfo.tsx
 }

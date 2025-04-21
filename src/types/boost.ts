@@ -5,7 +5,7 @@ export interface BoostStatus {
   startTime?: Date;
   endTime?: Date;
   timeRemaining?: string;
-  progress?: number;  // Making it optional to resolve type conflicts
+  progress?: number;  // Making it required to resolve type conflicts
   profileId?: string;
   remainingTime?: string;
   expiresAt?: Date;
@@ -28,6 +28,7 @@ export interface BoostPackage {
 
 export interface BoostEligibility {
   isEligible: boolean;
+  eligible?: boolean; // For compatibility with components/boost/types.ts
   reasons?: string[];
   minimumProfileCompleteness?: number;
   missingFields?: string[];

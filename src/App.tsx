@@ -10,8 +10,9 @@ import HomePage from "./pages/HomePage";
 import Wallet from "./pages/Wallet";
 import UpdatedWallet from "./pages/UpdatedWallet";
 import PulseBoost from "./pages/PulseBoost";
+import LivecamPage from "./pages/LivecamPage"; // Fixed casing
 
-// Create context files that don't exist but are imported
+// Create stub providers for missing contexts
 const createStubContextFile = () => {
   const StubProvider = ({ children }: { children: React.ReactNode }) => <>{children}</>;
   return { StubProvider };
@@ -44,7 +45,6 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const AIChat = lazy(() => import('./pages/AIChat'));
 const CreatorDashboard = lazy(() => import('./pages/CreatorDashboard'));
 const EscortProfile = lazy(() => import('./pages/EscortProfile'));
-const LivecamPage = lazy(() => import('./pages/LivecamPage'));
 const LivecamDetail = lazy(() => import('./pages/LivecamDetail'));
 const AIModelPage = lazy(() => import('./pages/AIModelPage'));
 const AIModelDetail = lazy(() => import('./pages/AIModelDetail'));

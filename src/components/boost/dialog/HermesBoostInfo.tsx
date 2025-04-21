@@ -10,11 +10,12 @@ const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({
   hermesData
 }) => {
   // Use whichever prop is provided (for compatibility)
-  const data = hermesData || hermesStatus || status;
-  
-  if (!data) {
-    return null;
-  }
+  const data: HermesBoostStatus = hermesData || hermesStatus || status || {
+    position: 0,
+    activeUsers: 0,
+    estimatedVisibility: 0,
+    lastUpdateTime: new Date().toISOString()
+  };
   
   return (
     <Card className="mt-4">
@@ -30,7 +31,7 @@ const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({
               <span>Queue Position</span>
               <span className="font-medium">#{data.position}</span>
             </div>
-            <Progress value={100 - (data.position / data.activeUsers) * 100} className="h-2" />
+            <Progress value={100 - (data.position / Math.max(data.activeUsers, 1)) * 100} className="h-2" />
           </div>
           
           <div className="grid grid-cols-2 gap-3 text-sm">

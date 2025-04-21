@@ -23,7 +23,10 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
     );
   }
 
-  if (!eligibility.isEligible && eligibility.reasons && eligibility.reasons.length > 0) {
+  // Support both naming conventions (isEligible and eligible)
+  const isActuallyEligible = eligibility.isEligible || eligibility.eligible;
+
+  if (!isActuallyEligible && eligibility.reasons && eligibility.reasons.length > 0) {
     return (
       <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
@@ -54,7 +57,7 @@ const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({
     );
   }
 
-  if (eligibility.isEligible) {
+  if (isActuallyEligible) {
     return (
       <Alert className="bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800">
         <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />

@@ -21,6 +21,7 @@ export interface BoostStatus {
 
 export interface BoostEligibility {
   eligible: boolean;
+  isEligible?: boolean; // For compatibility with both naming conventions
   reasons?: string[];
   minimumProfileCompleteness?: number;
   missingFields?: string[];
@@ -46,6 +47,8 @@ export interface HermesBoostStatus {
   activeUsers: number;
   estimatedVisibility: number;
   lastUpdateTime: string;
+  isActive?: boolean; // For compatibility
+  active?: boolean; // For compatibility
 }
 
 export interface HermesBoostInfoProps {
@@ -61,7 +64,7 @@ export interface AnalyticsData {
   conversionRate: number;
   boostEfficiency: number;
   
-  // Make these optional to avoid type conflicts
+  // Make all optional to resolve conflicts
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
@@ -73,14 +76,7 @@ export interface AnalyticsData {
     withoutBoost?: number;
     increase?: number;
   };
-  clicks?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
+  // Removed duplicate clicks property
   searchRanking?: {
     withoutBoost: number;
     withBoost: number;

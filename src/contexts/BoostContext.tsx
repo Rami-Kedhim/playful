@@ -1,128 +1,93 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { BoostStatus, BoostPackage } from '@/types/boost';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useBoostEffects } from '@/hooks/boost/useBoostEffects';
-import { useBoostOperations } from '@/hooks/boost/useBoostOperations';
-import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { BoostStatus } from '@/types/boost';
+import { AnalyticsData } from '@/components/boost/types';
+import { useBoostManager } from '@/hooks/boost';
 
 // Define the context interface
 export interface BoostContextType {
   boostStatus: BoostStatus;
+  boostAnalytics: AnalyticsData | null;
   isLoading: boolean;
-  error: string | null;
-  dailyBoostUsage: number;
-  dailyBoostLimit: number;
   purchaseBoost: (packageId: string) => Promise<boolean>;
   cancelBoost: () => Promise<boolean>;
-  boostAnalytics: AnalyticsData | null;
   fetchAnalytics: () => Promise<AnalyticsData | null>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
 }
 
 // Create context with default values
-const BoostContext = createContext<BoostContextType | undefined>(undefined);
+export const BoostContext = createContext<BoostContextType | undefined>(undefined);
 
 // Provider component
-interface BoostProviderProps {
-  children: ReactNode;
-}
-
-export const BoostProvider = ({ children }: BoostProviderProps) => {
-  const { user } = useAuth();
-  const [boostAnalytics, setBoostAnalytics] = useState<AnalyticsData | null>(null);
+export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   
-  // Use custom hooks to separate logic
+  // Get the current user ID (this would ideally come from an auth context)
+  const userId = "current-user-id"; // Placeholder
+  
+  // Use the boost manager hook
   const {
     boostStatus,
-    isLoading,
-    error,
-    dailyBoostUsage,
-    dailyBoostLimit,
-    setBoostStatus,
-    setIsLoading,
-    setError,
-    setDailyBoostUsage
-  } = useBoostEffects(user?.id);
-
-  const {
-    checkActiveBoost,
-    purchaseBoost: purchaseBoostOperation,
+    eligibility,
+    purchaseBoost,
     cancelBoost,
-    fetchAnalytics: fetchBoostAnalytics
-  } = useBoostOperations(
-    user?.id, 
-    boostStatus, 
-    setBoostStatus, 
-    setIsLoading, 
-    setError, 
-    setDailyBoostUsage
-  );
+    loading,
+    error,
+    getBoostAnalytics,
+    dailyBoostUsage,
+    dailyBoostLimit
+  } = useBoostManager(userId);
   
-  // Wrapper function that accepts packageId string to match the interface
-  const purchaseBoost = async (packageId: string): Promise<boolean> => {
-    // Find the package by ID - in a real app this would fetch from an API or cache
-    const mockPackages = [
-      {
-        id: "boost-1",
-        name: "1-Hour Boost",
-        duration: "01:00:00",
-        price_ubx: 5,
-        description: "Quick visibility boost",
-        features: ["Top search position", "Featured badge"]
-      },
-      {
-        id: "boost-3",
-        name: "3-Hour Boost",
-        duration: "03:00:00",
-        price_ubx: 15,
-        description: "Standard visibility boost",
-        features: ["Top search position", "Featured badge", "Profile highlighting"]
-      },
-      {
-        id: "boost-24",
-        name: "24-Hour Boost",
-        duration: "24:00:00",
-        price_ubx: 50,
-        description: "Full day visibility boost",
-        features: ["Top search position", "Featured badge", "Profile highlighting", "Priority in all listings"]
-      }
-    ] as BoostPackage[];
+  // Fetch analytics on load and when boost status changes
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await getBoostAnalytics();
+      setAnalyticsData(data);
+    };
     
-    const packageToBoost = mockPackages.find(p => p.id === packageId);
-    if (!packageToBoost) {
-      return false;
+    fetchData();
+  }, [boostStatus.isActive, getBoostAnalytics]);
+  
+  // Function to fetch analytics on demand
+  const fetchAnalytics = async () => {
+    try {
+      const data = await getBoostAnalytics();
+      setAnalyticsData(data);
+      return data;
+    } catch (err) {
+      console.error("Error fetching analytics:", err);
+      return null;
     }
-    
-    return await purchaseBoostOperation(packageToBoost);
   };
   
-  // Fetch analytics data for current boost
-  const fetchAnalytics = async (): Promise<AnalyticsData | null> => {
-    const analytics = await fetchBoostAnalytics();
-    if (analytics) {
-      setBoostAnalytics(analytics);
-    }
-    return analytics;
-  };
-
-  // Create a fixed boostStatus object that includes the required progress property
-  const enhancedBoostStatus: BoostStatus = {
+  // Create a safe boostStatus object with progress 
+  const safeBoostStatus: BoostStatus = {
     ...boostStatus,
-    progress: typeof boostStatus.progress === 'number' ? boostStatus.progress : 0
+    progress: boostStatus.progress || 0
   };
-
+  
+  // Create safe analytics data
+  const safeAnalyticsData: AnalyticsData = analyticsData || {
+    impressions: 0,
+    clicks: 0,
+    engagementRate: 0,
+    conversionRate: 0,
+    boostEfficiency: 0
+  };
+  
   const value: BoostContextType = {
-    boostStatus: enhancedBoostStatus,
-    isLoading,
+    boostStatus: safeBoostStatus,
+    isLoading: loading,
     error,
     dailyBoostUsage,
     dailyBoostLimit,
     purchaseBoost,
     cancelBoost,
-    boostAnalytics,
+    boostAnalytics: safeAnalyticsData,
     fetchAnalytics
   };
-
+  
   return (
     <BoostContext.Provider value={value}>
       {children}
@@ -130,13 +95,11 @@ export const BoostProvider = ({ children }: BoostProviderProps) => {
   );
 };
 
-// Hook for using the boost context
+// Hook for easy context consumption
 export const useBoostContext = () => {
   const context = useContext(BoostContext);
-  
   if (context === undefined) {
     throw new Error('useBoostContext must be used within a BoostProvider');
   }
-  
   return context;
 };

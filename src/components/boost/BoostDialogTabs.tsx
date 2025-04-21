@@ -1,165 +1,231 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Zap, CheckCircle, XCircle, Info } from "lucide-react";
-import { BoostStatus, BoostEligibility, HermesBoostStatus } from "./types";
-import BoostPackages from "./dialog/BoostPackages";
-import BoostEligibilityCheck from "./dialog/BoostEligibilityCheck";
-import BoostActivePackage from "./dialog/BoostActivePackage";
-import HermesBoostInfo from "./dialog/HermesBoostInfo";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, CheckCircle2, PlusCircle, Loader2, ZapOff, Zap } from 'lucide-react';
+import BoostEligibilityCheck from './dialog/BoostEligibilityCheck';
+import BoostPackages from './dialog/BoostPackages';
+import HermesBoostInfo from './dialog/HermesBoostInfo';
+import BoostActivePackage from './dialog/BoostActivePackage';
+import { BoostStatus, BoostEligibility } from '@/types/boost';
 
 interface BoostDialogTabsProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  isLoading: boolean;
   boostStatus: BoostStatus;
   eligibility: BoostEligibility;
+  hermesStatus?: any;
   boostPackages: any[];
-  selectedPackage: string | null;
+  selectedPackage: string;
   setSelectedPackage: (packageId: string) => void;
-  handlePurchase: () => Promise<boolean>;
-  handleCancel: () => Promise<boolean>;
-  handleDialogClose: () => void;
-  boostAnalytics: any;
-  formatBoostDuration: (duration: string) => string;
+  formatDuration: (duration: string) => string;
   getBoostPrice: () => number;
-  loading: boolean;
-  dailyBoostUsage?: number;
-  dailyBoostLimit?: number;
-  hermesBoostStatus?: HermesBoostStatus;
+  onPurchase: () => Promise<boolean>;
+  onCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
 }
 
-const BoostDialogTabs = ({
-  activeTab,
-  setActiveTab,
+const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
+  isLoading,
   boostStatus,
   eligibility,
+  hermesStatus = null,
   boostPackages,
   selectedPackage,
   setSelectedPackage,
-  handlePurchase,
-  handleCancel,
-  handleDialogClose,
-  boostAnalytics,
-  formatBoostDuration,
+  formatDuration,
   getBoostPrice,
-  loading,
-  dailyBoostUsage = 0,
-  dailyBoostLimit = 3,
-  hermesBoostStatus
-}: BoostDialogTabsProps) => {
-  // Function to wrap and make handlePurchase return a boolean
-  const handlePurchaseWrapper = async (): Promise<boolean> => {
+  onPurchase,
+  onCancel,
+  dailyBoostUsage,
+  dailyBoostLimit
+}) => {
+  const [activeTab, setActiveTab] = useState(boostStatus.isActive ? "active" : "packages");
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  
+  // Ensure eligibility object has all needed properties
+  const compatibleEligibility: BoostEligibility = {
+    isEligible: eligibility.isEligible || eligibility.eligible || false,
+    eligible: eligibility.eligible || eligibility.isEligible || false,
+    reasons: eligibility.reasons || [],
+    minimumProfileCompleteness: eligibility.minimumProfileCompleteness,
+    missingFields: eligibility.missingFields,
+    minRequiredBalance: eligibility.minRequiredBalance
+  };
+  
+  // Ensure BoostStatus object has proper types
+  const compatibleStatus: BoostStatus = {
+    ...boostStatus,
+    progress: boostStatus.progress || 0
+  };
+  
+  // Ensure hermesStatus has required properties
+  const safeHermesStatus = hermesStatus ? {
+    position: hermesStatus.position || 0,
+    activeUsers: hermesStatus.activeUsers || 0,
+    estimatedVisibility: hermesStatus.estimatedVisibility || 0,
+    lastUpdateTime: hermesStatus.lastUpdateTime || new Date().toISOString(),
+  } : undefined;
+  
+  // Handle purchase button click
+  const handlePurchase = async () => {
+    if (!selectedPackage) return;
+    
+    setPurchaseLoading(true);
     try {
-      return await handlePurchase();
+      // Convert void return to boolean for expected type
+      await onPurchase();
+      return true;
     } catch (error) {
-      console.error("Error in handlePurchase:", error);
+      console.error("Purchase error:", error);
       return false;
+    } finally {
+      setPurchaseLoading(false);
     }
   };
   
+  // Handle cancel button click
+  const handleCancel = async () => {
+    setCancelLoading(true);
+    try {
+      // Convert void return to boolean for expected type
+      await onCancel();
+      return true;
+    } catch (error) {
+      console.error("Cancel error:", error);
+      return false;
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+  
+  // Set active tab when boost status changes
+  React.useEffect(() => {
+    if (boostStatus.isActive) {
+      setActiveTab("active");
+    } else {
+      setActiveTab("packages");
+    }
+  }, [boostStatus.isActive]);
+  
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab}>
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="packages" disabled={loading}>
-          <Zap className="mr-2 h-4 w-4" />
-          Boost Packages
-        </TabsTrigger>
-        <TabsTrigger value="eligibility" disabled={loading}>
-          <Info className="mr-2 h-4 w-4" />
-          Eligibility
-        </TabsTrigger>
-        <TabsTrigger value="active" disabled={loading}>
-          {boostStatus.isActive ? (
-            <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-          ) : (
-            <XCircle className="mr-2 h-4 w-4" />
-          )}
-          Active Boost
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="packages" className="space-y-4 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Available Boost Packages</h3>
-            <p className="text-sm text-muted-foreground">
-              Select a package to boost your visibility
-            </p>
-          </div>
-          <Badge variant="outline" className="flex gap-1">
-            <Zap className="h-3 w-3" />
-            {dailyBoostUsage}/{dailyBoostLimit} today
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <div className="flex justify-between items-center mb-6">
+        <TabsList>
+          <TabsTrigger 
+            value="packages" 
+            disabled={isLoading}
+            className="flex items-center gap-1"
+          >
+            <PlusCircle className="h-4 w-4" />
+            <span>Packages</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="active" 
+            disabled={isLoading || !compatibleStatus.isActive}
+            className="flex items-center gap-1"
+          >
+            <Zap className="h-4 w-4" />
+            <span>Active Boost</span>
+          </TabsTrigger>
+        </TabsList>
+        
+        {compatibleStatus.isActive && (
+          <Badge variant="secondary" className="px-2 py-1 text-xs">
+            Active
           </Badge>
-        </div>
-
-        <BoostPackages 
-          boostPackages={boostPackages} 
-          selectedPackage={selectedPackage || ""} 
-          onSelectPackage={setSelectedPackage}
-          formatDuration={formatBoostDuration} 
-          disabled={loading || !eligibility.eligible} 
+        )}
+      </div>
+      
+      <BoostEligibilityCheck 
+        eligibility={compatibleEligibility}
+        loading={isLoading} 
+      />
+      
+      <TabsContent value="packages" className="mt-6">
+        <BoostPackages
+          boostPackages={boostPackages}
+          selectedPackage={selectedPackage}
+          formatDuration={formatDuration}
+          setSelectedPackage={setSelectedPackage}
+          dailyBoostUsage={dailyBoostUsage}
+          dailyBoostLimit={dailyBoostLimit}
+          disabled={!compatibleEligibility.isEligible || isLoading}
         />
         
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={handleDialogClose}>
-            Cancel
-          </Button>
-          <Button 
-            onClick={handlePurchaseWrapper}
-            disabled={!selectedPackage || loading || !eligibility.eligible}
+        <div className="flex justify-end mt-6">
+          <Button
+            onClick={handlePurchase}
+            disabled={
+              !compatibleEligibility.isEligible || 
+              !selectedPackage || 
+              purchaseLoading || 
+              dailyBoostUsage >= dailyBoostLimit
+            }
+            className="ml-auto"
           >
-            {loading ? (
+            {purchaseLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing
+                Processing...
               </>
             ) : (
               <>
-                Purchase Boost
-                {getBoostPrice() > 0 && ` (${getBoostPrice()} UBX)`}
+                <Zap className="mr-2 h-4 w-4" />
+                Apply Boost ({getBoostPrice()} UBX)
               </>
             )}
           </Button>
         </div>
-      </TabsContent>
 
-      <TabsContent value="eligibility" className="space-y-4 py-4">
-        <BoostEligibilityCheck 
-          eligibility={eligibility} 
-          loading={loading}
-        />
-        
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={handleDialogClose}>
-            Close
-          </Button>
-          <Button 
-            onClick={() => setActiveTab("packages")}
-            disabled={!eligibility.eligible || loading}
-          >
-            View Packages
-          </Button>
+        <div className="mt-8">
+          <HermesBoostInfo status={safeHermesStatus} />
         </div>
       </TabsContent>
-
-      <TabsContent value="active" className="space-y-4 py-4">
-        <BoostActivePackage 
-          boostStatus={boostStatus}
-          handleCancel={handleCancel}
-          analytics={boostAnalytics}
-          loading={loading}
-        />
-        
-        {hermesBoostStatus && (
-          <HermesBoostInfo hermesStatus={hermesBoostStatus} />
+      
+      <TabsContent value="active" className="mt-6">
+        {compatibleStatus.isActive ? (
+          <div className="space-y-6">
+            <BoostActivePackage 
+              boostStatus={compatibleStatus}
+              hermesStatus={safeHermesStatus}
+            />
+            
+            <div className="flex justify-end mt-6">
+              <Button 
+                variant="destructive" 
+                onClick={handleCancel}
+                disabled={cancelLoading}
+              >
+                {cancelLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Cancelling...
+                  </>
+                ) : (
+                  <>
+                    <ZapOff className="mr-2 h-4 w-4" />
+                    Cancel Boost
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-6 text-center">
+            <p className="text-muted-foreground">No active boost</p>
+            <Button 
+              variant="secondary" 
+              onClick={() => setActiveTab("packages")}
+              className="mt-2"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Get a Boost
+            </Button>
+          </div>
         )}
-        
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={handleDialogClose}>
-            Close
-          </Button>
-        </div>
       </TabsContent>
     </Tabs>
   );
