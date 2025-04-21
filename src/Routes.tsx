@@ -1,3 +1,6 @@
+
+// Updated Routes to remove obsolete persona ecosystem routes and outdated persona pages
+
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -22,9 +25,9 @@ const BrainHubPage = lazy(() => import('./pages/BrainHubPage'));
 const WalletPage = lazy(() => import('./pages/WalletPage/index'));
 const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const PersonasPage = lazy(() => import('./pages/Personas'));
-const PersonaPage = lazy(() => import('./pages/PersonaPage')); // New unified persona page
+const PersonaPage = lazy(() => import('./pages/PersonaPage')); // Retain unified persona page but will be refactored later
 const VerificationDashboard = lazy(() => import('./pages/admin/VerificationDashboard'));
-const RouteSharePage = lazy(() => import('./pages/RouteSharePage')); // New route share page
+const RouteSharePage = lazy(() => import('./pages/RouteSharePage'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -99,7 +102,7 @@ const RoutesComponent: React.FC = () => {
         <Route path="/verification" element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
         <Route path="/personas" element={<AppLayout><PersonasPage /></AppLayout>} />
         
-        {/* Unified persona routes */}
+        {/* Unified persona routes - retained but planned for refactoring */}
         <Route path="/personas/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
         <Route path="/escorts/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
         <Route path="/creators/:id" element={<AppLayout><PersonaPage /></AppLayout>} />
