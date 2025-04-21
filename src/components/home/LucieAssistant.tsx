@@ -7,7 +7,6 @@ import { useLucieAssistant } from '@/hooks/useLucieAssistant';
 import LucieHeader from './lucie-assistant/LucieHeader';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
 import LucieInputBox from './lucie-assistant/LucieInputBox';
-import LucieTypingIndicator from './lucie-assistant/LucieTypingIndicator';
 import { useUserAIContext } from '@/hooks/useUserAIContext';
 
 interface LucieAssistantProps {
@@ -51,8 +50,12 @@ const LucieAssistant = ({
   useEffect(() => {
     if (customInitialMessage && messages.length === 1) {
       const welcomeMessage = messages[0];
-      if (welcomeMessage.role === 'assistant' && welcomeMessage.content.includes("I'm Lucie")) {
-        clearMessages();
+      if (welcomeMessage && welcomeMessage.role === 'assistant' && welcomeMessage.content.includes("I'm Lucie")) {
+        // Only clear once to prevent infinite loop
+        const shouldClear = welcomeMessage.content !== customInitialMessage;
+        if (shouldClear) {
+          clearMessages();
+        }
       }
     }
   }, [customInitialMessage, messages, clearMessages]);

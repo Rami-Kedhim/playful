@@ -89,22 +89,22 @@ const AICompanionChatStyles: React.FC = () => {
           opacity: 1;
         }
         25% {
-          transform: translateY(0) rotate(90deg) translateX(5px);
+          transform: translateY(0) rotate(90deg) translateX(var(--sway-factor, 5px));
           opacity: 1;
         }
         50% {
-          transform: translateY(20px) rotate(180deg) translateX(-5px);
+          transform: translateY(20px) rotate(180deg) translateX(calc(var(--sway-factor, 5px) * -1));
           opacity: 0.9;
         }
         75% {
-          transform: translateY(35px) rotate(270deg) translateX(8px);
+          transform: translateY(35px) rotate(270deg) translateX(var(--sway-factor, 5px));
           opacity: 0.7;
         }
         90% {
           opacity: 0.3;
         }
         100% {
-          transform: translateY(50px) rotate(360deg) translateX(-8px);
+          transform: translateY(50px) rotate(360deg) translateX(calc(var(--sway-factor, 5px) * -1));
           opacity: 0;
         }
       }
@@ -136,6 +136,42 @@ const AICompanionChatStyles: React.FC = () => {
         background-size: 200% 100%;
         animation: sparkle 2s infinite linear;
         pointer-events: none;
+      }
+
+      /* Animation for celebration effects */
+      @keyframes celebration-scale {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .animate-celebration {
+        animation: celebration-scale 0.5s ease-in-out;
+      }
+
+      /* Pop animation for UI elements */
+      @keyframes pop {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .animate-pop {
+        animation: pop 0.4s ease-out forwards;
       }
     `}} />
   );

@@ -92,6 +92,14 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
         .clip-path-triangle {
           clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         }
+        .confetti-piece {
+          position: absolute;
+          opacity: 0;
+          animation: confettiDrop 2s ease-in-out forwards;
+          will-change: transform, opacity;
+          transform-origin: center center;
+          box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
       `}} />
     </div>
   );

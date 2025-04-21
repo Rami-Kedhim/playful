@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { lucieOrchestrator } from '@/core/Lucie';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/auth/useAuth';
@@ -33,10 +34,12 @@ export function useLucieAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const initializedRef = useRef(false);
 
-  // Initialize with welcome message
+  // Initialize with welcome message only once
   useEffect(() => {
-    if (messages.length === 0) {
+    if (messages.length === 0 && !initializedRef.current) {
+      initializedRef.current = true;
       const welcomeMessage: LucieMessage = {
         id: 'welcome-' + Date.now(),
         role: 'assistant',
@@ -107,7 +110,7 @@ export function useLucieAssistant() {
         content: response.responseText,
         timestamp: new Date(),
         emotion,
-        suggestedActions
+        suggestedActions: response.suggestedActions || suggestedActions
       };
 
       setMessages(prev => [...prev, lucieMessage]);
@@ -132,6 +135,7 @@ export function useLucieAssistant() {
   const clearMessages = useCallback(() => {
     // Keep only the welcome message
     setMessages([]);
+    initializedRef.current = false;
   }, []);
 
   // Helper to generate suggested actions based on context
