@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ContentCard, { ProfileProps } from './ContentCard';
+import { AppRoutes } from '@/utils/navigation';
 
 interface FeaturedContentSectionProps {
   title: string;
@@ -13,7 +15,7 @@ interface FeaturedContentSectionProps {
 const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, profiles = [], viewMoreLink }) => {
   const getDescriptionText = () => {
     if (!title) return "Check out our featured content";
-    
+
     const contentType = title.replace('Featured ', '').toLowerCase();
     return `Check out our featured ${contentType}`;
   };
@@ -51,7 +53,8 @@ const FeaturedContentSection: React.FC<FeaturedContentSectionProps> = ({ title, 
       </CardContent>
       <CardFooter>
         <Button variant="outline" asChild>
-          <a href={viewMoreLink}>View More</a>
+          {/* Use Link for client-side navigation */}
+          <a href={viewMoreLink}>{`View More`}</a>
         </Button>
       </CardFooter>
     </Card>

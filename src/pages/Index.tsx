@@ -7,12 +7,12 @@ import FeaturedContentSection from "@/components/home/FeaturedContentSection";
 import UBXSection from "@/components/home/UBXSection";
 import TrustSection from "@/components/home/TrustSection";
 import CtaSection from "@/components/home/CtaSection";
-import LucieAssistant from "@/components/home/LucieAssistant";
 import WelcomeAlert from "@/components/layout/WelcomeAlert";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { toast } from "@/hooks/use-toast";
 
 import { mockCreators, mockLivecams } from "@/data/mockData";
+import { AppRoutes } from "@/utils/navigation";
 
 const featuredEscorts = mockLivecams;
 const featuredCreators = mockCreators;
@@ -43,17 +43,17 @@ const Index = () => {
 
       <HowItWorksSection />
 
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="container mx-auto px-4 py-8 space-y-10">
         <FeaturedContentSection
           title="Featured Escorts"
           profiles={featuredEscorts}
-          viewMoreLink="/escorts"
+          viewMoreLink={AppRoutes.ESCORTS}
         />
 
         <FeaturedContentSection
           title="Featured Creators"
           profiles={featuredCreators}
-          viewMoreLink="/creators"
+          viewMoreLink={AppRoutes.CREATORS}
         />
       </div>
 
@@ -62,9 +62,6 @@ const Index = () => {
       <TrustSection />
 
       <CtaSection />
-
-      {/* Remove LucieAssistant from homepage since user said shows unrelated branding */}
-      {/* <LucieAssistant /> */}
     </>
   );
 };
