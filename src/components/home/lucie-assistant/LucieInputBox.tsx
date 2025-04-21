@@ -1,57 +1,54 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { SendIcon } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface LucieInputBoxProps {
   onSendMessage: (message: string) => void;
+  isDisabled?: boolean;
 }
 
-const LucieInputBox: React.FC<LucieInputBoxProps> = ({ onSendMessage }) => {
+const LucieInputBox: React.FC<LucieInputBoxProps> = ({ onSendMessage, isDisabled = false }) => {
   const [message, setMessage] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input when component mounts
+  // Auto focus input when component mounts
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      onSendMessage(message);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const trimmedMessage = message.trim();
+    if (trimmedMessage && !isDisabled) {
+      onSendMessage(trimmedMessage);
       setMessage('');
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   return (
-    <div className="p-4 border-t border-white/10 flex gap-2">
-      <Input
+    <form onSubmit={handleSubmit} className="p-3 border-t flex gap-2">
+      <input
         ref={inputRef}
+        type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
-        className="flex-1 bg-white/5 border-white/10"
+        placeholder="Ask Lucie a question..."
+        className="flex-1 bg-background border border-muted-foreground/20 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+        disabled={isDisabled}
       />
-      <Button
-        onClick={handleSendMessage}
-        disabled={!message.trim()}
-        className="aspect-square p-2"
-        variant="default"
+      <Button 
+        type="submit" 
+        size="icon" 
+        disabled={!message.trim() || isDisabled}
+        className="aspect-square h-9 w-9"
       >
-        <SendIcon className="h-4 w-4" />
+        <Send className="h-4 w-4" />
       </Button>
-    </div>
+    </form>
   );
 };
 

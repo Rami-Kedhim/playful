@@ -8,7 +8,7 @@ import { AppRoutes } from "@/utils/navigation";
 import WelcomeAlert from "@/components/layout/WelcomeAlert";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { toast } from "@/hooks/use-toast";
-import LucieAssistant from "@/components/home/LucieAssistant";
+import LucieHermesIntegration from "@/components/home/LucieHermesIntegration";
 
 const Index = () => {
   const { user, isAuthenticated } = useAuth();
@@ -79,8 +79,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Add Lucie AI Assistant to the home page */}
-      <LucieAssistant initiallyOpen={false} />
+      {/* Add Lucie AI Assistant with Hermes integration */}
+      <LucieHermesIntegration />
 
       <footer className="bg-background border-t border-muted-foreground py-10 mt-20">
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-muted-foreground">

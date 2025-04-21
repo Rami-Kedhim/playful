@@ -1,46 +1,60 @@
 
 import React from 'react';
-import { X, Minimize2 } from 'lucide-react';
+import { X, Minus, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface LucieHeaderProps {
   onClose?: () => void;
   onMinimize?: () => void;
+  onSettings?: () => void;
 }
 
 const LucieHeader: React.FC<LucieHeaderProps> = ({ 
-  onClose,
-  onMinimize
+  onClose, 
+  onMinimize,
+  onSettings
 }) => {
   return (
-    <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-      <div className="flex items-center space-x-2">
-        <span className="h-8 w-8 rounded-full bg-white flex items-center justify-center text-blue-600 font-bold">
-          L
-        </span>
+    <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-blue-600 to-violet-600 text-white">
+      <div className="flex items-center">
+        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center mr-2">
+          <span className="text-lg font-semibold">L</span>
+        </div>
         <div>
-          <h3 className="font-medium">Lucie</h3>
-          <p className="text-xs text-white/70">Your UberEscorts assistant</p>
+          <h3 className="font-medium text-sm">Lucie AI Assistant</h3>
+          <p className="text-xs text-white/70">Your UberEscorts guide</p>
         </div>
       </div>
       
-      <div className="flex items-center space-x-1">
-        {onMinimize && (
+      <div className="flex items-center gap-1">
+        {onSettings && (
           <Button
-            onClick={onMinimize}
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-white hover:bg-white/10"
+            size="icon"
+            onClick={onSettings}
+            className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
           >
-            <Minimize2 className="h-4 w-4" />
+            <Settings className="h-4 w-4" />
           </Button>
         )}
+        
+        {onMinimize && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onMinimize}
+            className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        )}
+        
         {onClose && (
           <Button
-            onClick={onClose}
             variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-white hover:bg-white/10"
+            size="icon"
+            onClick={onClose}
+            className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
           >
             <X className="h-4 w-4" />
           </Button>
