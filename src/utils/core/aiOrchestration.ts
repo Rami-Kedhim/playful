@@ -10,10 +10,27 @@ import { hermesApiService } from "@/services/hermes/HermesApiService";
 import { hermesOxumEngine } from "@/services/boost/HermesOxumEngine";
 import securityEngine from "@/services/neural/BrainHubSecurityEngine";  // Fixed import: default import
 import aiPersonalityService from "@/services/ai/aiPersonalityService";
+import { uberWallet } from "@/core/UberWallet";
+
+interface RouteContext {
+  userId?: string;
+  walletId?: string;
+  actionType?: string;
+  contentPurpose?: string;
+}
+
+interface AiResponse {
+  responseText: string;
+  tokensUsed: number;
+  moderationPassed: boolean;
+  flaggedContent?: string;
+  logId?: string;
+}
 
 interface SessionState {
   sessionId: string;
   userId?: string;
+  walletId?: string;
   lastActivity: number;
   conversationContext: any;
   emotionalState: Record<string, any>;
@@ -43,15 +60,18 @@ class LucieAIOrchestrator {
   }
 
   // Create or retrieve an existing session
-  public createOrGetSession(sessionId: string, userId?: string): SessionState {
+  public createOrGetSession(sessionId: string, userId?: string, walletId?: string): SessionState {
     if (this.sessions.has(sessionId)) {
       const session = this.sessions.get(sessionId)!;
       session.lastActivity = Date.now();
+      if (userId) session.userId = userId;
+      if (walletId) session.walletId = walletId;
       return session;
     }
     const newSession: SessionState = {
       sessionId,
       userId,
+      walletId,
       lastActivity: Date.now(),
       conversationContext: {},
       emotionalState: {},
@@ -90,16 +110,17 @@ class LucieAIOrchestrator {
     return session.emotionalState;
   }
 
-  // Coordinate AI layers to generate personalized responses
+  // Coordinate AI layers to generate personalized responses with token gating
   public async orchestrateResponse(
     sessionId: string,
     userMessage: string,
-    userContext: any = {},
+    userContext: { userId?: string; walletId?: string; profileId?: string; } = {},
     chatHistory: any[] = []
   ): Promise<{ responseText: string; meta: any }> {
-    const session = this.createOrGetSession(sessionId, userContext.userId);
+    // Retrieve or create session
+    const session = this.createOrGetSession(sessionId, userContext.userId, userContext.walletId);
 
-    // Update last activity
+    // Update last activity timestamp
     session.lastActivity = Date.now();
 
     // Delegate behavior and ranking updates to Hermes & Oxum
@@ -109,13 +130,13 @@ class LucieAIOrchestrator {
       interaction_data: { content: userMessage }
     });
 
-    // Fix here: recordProfileView takes only profileId argument; session time is optional and not used here
+    // Record profile view with Oxum engine if profileId exists
     if (userContext.profileId) {
       hermesOxumEngine.recordProfileView(userContext.profileId);
     }
     hermesOxumEngine.updateSystemLoad(Math.min(1, Math.random() + 0.5)); // Simulate dynamic load
 
-    // Use security checks via Orus (securityEngine)
+    // Security checks via Orus (securityEngine)
     const securityCheck = securityEngine.runSecurityChecks(userMessage, userContext);
     if (!securityCheck.allowed) {
       return {
@@ -133,10 +154,48 @@ class LucieAIOrchestrator {
     // Compose AI prompt incorporating session context, emotional state, and learning state
     const aiPrompt = this.composeAIPrompt(userMessage, session);
 
-    // Here, integration with Lucie AI model service would be called externally
+    // Token gating: estimate tokens and charge UBX if wallet present
+    const estimatedTokens = Math.ceil(userMessage.length / 4); // Rough token estimation
+    const costPerToken = 1; // 1 UBX per token cost for example
+    const totalCost = estimatedTokens * costPerToken;
 
-    // Return the composed prompt and meta info for further processing
-    return { responseText: aiPrompt, meta: { sessionId, userId: session.userId } };
+    if (session.walletId && totalCost > 0) {
+      const debitSuccess = uberWallet.debit(session.walletId, totalCost, `AI prompt token deduction for session ${sessionId}`);
+      if (!debitSuccess) {
+        console.warn(`[Lucie] Insufficient UBX balance in wallet ${session.walletId} for token deduction`);
+        return {
+          responseText: "Insufficient UBX balance to process your request. Please top-up your wallet.",
+          meta: { errorCode: "INSUFFICIENT_BALANCE" }
+        };
+      }
+      console.debug(`[Lucie] Debited ${totalCost} UBX from wallet ${session.walletId} for tokens.`);
+    } else if (!session.walletId && session.userId) {
+      // If walletId is missing but userId present, optionally handle here
+      // For now, log and proceed without charging
+      console.debug(`[Lucie] No walletId provided for user ${session.userId}, skipping token deduction.`);
+    }
+
+    // Simulate AI backend processing - here we just echo the prompt for demo
+    // TODO: Replace with actual AI backend call, e.g. OpenAI, Replicate, etc.
+
+    // Compose final response for this example
+    const aiResponseText = `Lucie says:\n\n${aiPrompt}`;
+
+    // Log this interaction with timestamp, wallet ID and purpose
+    const logId = crypto.randomUUID();
+    const timestamp = new Date().toISOString();
+    console.info(`[Lucie] Logged AI prompt response ${logId} at ${timestamp} for wallet ${session.walletId || 'N/A'}`);
+
+    return {
+      responseText: aiResponseText,
+      meta: {
+        sessionId,
+        userId: session.userId,
+        walletId: session.walletId,
+        logId,
+        tokensUsed: estimatedTokens,
+      }
+    };
   }
 
   // Analyze sentiment of a message (very simple mock)
@@ -205,3 +264,4 @@ export default {
   checkTokenGate: lucieAIOrchestrator.checkTokenGate.bind(lucieAIOrchestrator),
   grantTokenGatedAccess: lucieAIOrchestrator.grantTokenGatedAccess.bind(lucieAIOrchestrator),
 };
+
