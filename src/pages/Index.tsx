@@ -42,6 +42,7 @@ const Index = () => {
       <HeroSection searchLocation={searchLocation} setSearchLocation={setSearchLocation} />
 
       <FeaturesSection />
+
       <HowItWorksSection />
 
       <div className="container mx-auto px-4 py-8 space-y-8">
@@ -59,9 +60,13 @@ const Index = () => {
       </div>
 
       <UBXSection />
+
       <MetaverseSection />
+
       <TrustSection />
+
       <CtaSection />
+
       <LucieAssistant />
     </>
   );
