@@ -1,8 +1,9 @@
 
-// Fix import to unified Escort and VerificationLevel from "@/types/Escort"
+// Fix import to use VerificationLevel from '@/types/verification' for strict enum usage and cast accordingly
 
 import { useState } from "react";
-import { Escort, VerificationLevel } from "@/types/Escort";
+import { Escort } from "@/types/Escort";
+import { VerificationLevel } from "@/types/verification";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import MediaSection from "./MediaSection";
 import ProfileInfo from "./ProfileInfo";
@@ -20,15 +21,15 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [messageOpen, setMessageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Normalize verificationLevel with VerificationLevel type and fallback to 'none'
+  // Normalize verificationLevel with VerificationLevel enum and fallback to 'none'
   const normalizedEscort: Escort = {
     ...escort,
     verificationLevel:
       escort.verificationLevel &&
       typeof escort.verificationLevel === "string" &&
-      ["none", "basic", "enhanced", "premium"].includes(escort.verificationLevel)
+      Object.values(VerificationLevel).includes(escort.verificationLevel as VerificationLevel)
         ? (escort.verificationLevel as VerificationLevel)
-        : "none",
+        : VerificationLevel.NONE,
   };
 
   const handleFavoriteToggle = () => {

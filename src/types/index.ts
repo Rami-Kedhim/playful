@@ -1,11 +1,13 @@
 
-// Fix duplicated export issue for VerificationLevel by explicit export from only one file and removing duplicate
+// Fix duplicated export and remove broken paths for verification as requested
+
+// Removed exports causing errors
+// export * from './verification/statusCheck';
+// export * from './verification/requestSubmission';
+// export * from './verification/documentUpload';
 
 export * from './UberPersona';
 export * from './neural/NeuralSystemMetrics';
-export * from './verification/statusCheck';
-export * from './verification/requestSubmission';
-export * from './verification/documentUpload';
 export * from './Escort';
 export * from './auth';
 
@@ -14,4 +16,3 @@ export interface ContactInfo {
   email?: string;
   website?: string;
 }
-
