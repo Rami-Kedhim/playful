@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export interface AIPreferences {
   anonymized: boolean;
@@ -103,12 +103,6 @@ export const useUserAIContext = () => {
       });
       
       // In a real app, you would update this in your backend/database
-      // For example with Supabase:
-      // await supabase.from('user_preferences').upsert({
-      //   user_id: user.id,
-      //   ai_preferences: updatedPreferences
-      // });
-      
       return true;
     } catch (err) {
       setError('Failed to update AI preferences');
@@ -141,8 +135,6 @@ export const useUserAIContext = () => {
         favoriteTopics: updatedTopics,
         updatedAt: new Date()
       });
-      
-      // In a real app, update this in your backend
     } catch (err) {
       console.error('Failed to track AI interaction:', err);
     }
@@ -158,7 +150,6 @@ export const useUserAIContext = () => {
         updatedAt: new Date()
       });
       
-      // In a real app, update this in your backend
       return true;
     } catch (err) {
       setError('Failed to toggle AI');
@@ -192,7 +183,6 @@ export const useUserAIContext = () => {
       
       setAIContext(freshContext);
       
-      // In a real app, update this in your backend
       return true;
     } catch (err) {
       setError('Failed to reset AI context');

@@ -22,6 +22,11 @@ interface AiResponse {
   logId?: string;
   emotion?: string;
   suggestedActions?: string[];
+  links?: { text: string; url: string }[];
+  visualElements?: {
+    type: 'image' | 'chart' | 'map';
+    data: any;
+  }[];
 }
 
 /**
@@ -191,14 +196,22 @@ export class Lucie {
     // 9. Generate suggested actions based on content
     const suggestedActions = this.generateSuggestedActions(prompt, aiResponseText);
 
-    // 10. Return AI response with tokens used and moderation status
+    // 10. Generate relevant links if applicable
+    const links = this.generateLinks(prompt, aiResponseText);
+    
+    // 11. Generate visual elements if needed
+    const visualElements = this.generateVisualElements(prompt, aiResponseText);
+
+    // 12. Return enhanced AI response
     return {
       responseText: aiResponseText,
       tokensUsed,
       moderationPassed,
       logId,
       emotion,
-      suggestedActions
+      suggestedActions,
+      links,
+      visualElements
     };
   }
 
@@ -222,6 +235,62 @@ export class Lucie {
     }
     
     return defaultSuggestions;
+  }
+  
+  private generateLinks(prompt: string, response: string): { text: string; url: string }[] | undefined {
+    const lowerPrompt = prompt.toLowerCase();
+    
+    // Only generate links for relevant queries
+    if (lowerPrompt.includes('help') || lowerPrompt.includes('support')) {
+      return [
+        { text: "Support Center", url: "/support" },
+        { text: "FAQ", url: "/faq" }
+      ];
+    }
+    
+    if (lowerPrompt.includes('terms') || lowerPrompt.includes('privacy')) {
+      return [
+        { text: "Terms of Service", url: "/terms" },
+        { text: "Privacy Policy", url: "/privacy" }
+      ];
+    }
+    
+    // Don't add links if not relevant
+    return undefined;
+  }
+  
+  private generateVisualElements(prompt: string, response: string): { type: 'image' | 'chart' | 'map'; data: any }[] | undefined {
+    const lowerPrompt = prompt.toLowerCase();
+    
+    // Examples of when to generate visual elements
+    if (lowerPrompt.includes('map') || lowerPrompt.includes('location') || lowerPrompt.includes('near me')) {
+      return [
+        { 
+          type: 'map', 
+          data: { 
+            latitude: 40.7128, 
+            longitude: -74.0060,
+            zoom: 12
+          } 
+        }
+      ];
+    }
+    
+    if (lowerPrompt.includes('statistics') || lowerPrompt.includes('chart') || lowerPrompt.includes('data')) {
+      return [
+        { 
+          type: 'chart', 
+          data: {
+            type: 'bar',
+            labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+            values: [12, 19, 8, 15]
+          } 
+        }
+      ];
+    }
+    
+    // Don't add visual elements if not relevant
+    return undefined;
   }
 }
 
