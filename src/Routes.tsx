@@ -42,20 +42,12 @@ const EscortProfilePage = () => <StubPage title="Escort Profile" />;
 const CreatorPage = () => <StubPage title="Creator" />;
 const CreatorProfilePage = () => <StubPage title="Creator Profile" />;
 
-// Define profile page props explicitly to match component expectations
-interface ProfilePageProps {
-  user?: any; // Make props optional
-  profile?: any;
-}
-
-// Fix props issue by making the component expect the correct props
-const Profile: React.FC<ProfilePageProps> = (props) => <ProfilePage {...props} />;
-
+// Fix the profile page props issue by exposing ProfilePage directly since it already accepts the required props
 const Routes = () => {
   return (
     <RouterRoutes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/login" element={<LoginPage />} />

@@ -8,7 +8,7 @@ import BoostEligibilityCheck from './BoostEligibilityCheck';
 import BoostPackages from './BoostPackages';
 import HermesBoostInfo from './HermesBoostInfo';
 import BoostActivePackage from './BoostActivePackage';
-import { BoostStatus, BoostEligibility } from '@/types/boost';
+import { BoostStatus, BoostEligibility, HermesBoostStatus } from '@/types/boost';
 
 interface BoostDialogTabsProps {
   activeTab: string;
@@ -16,7 +16,7 @@ interface BoostDialogTabsProps {
   isLoading: boolean;
   boostStatus: BoostStatus;
   eligibility: BoostEligibility;
-  hermesBoostStatus?: any;
+  hermesBoostStatus?: HermesBoostStatus;
   boostPackages: any[];
   selectedPackage: string | null;
   onSelectPackage: (packageId: string) => void;
@@ -30,7 +30,7 @@ interface BoostDialogTabsProps {
   loading: boolean;
 }
 
-const BoostDialogTabs = ({
+const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab,
   setActiveTab,
   isLoading,
@@ -48,7 +48,7 @@ const BoostDialogTabs = ({
   dailyBoostUsage,
   dailyBoostLimit,
   loading
-}: BoostDialogTabsProps) => {
+}) => {
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   
@@ -176,7 +176,7 @@ const BoostDialogTabs = ({
           <div className="space-y-6">
             <BoostActivePackage 
               boostStatus={boostStatus}
-              hermesStatus={hermesData}
+              hermesData={hermesData}
             />
             
             <div className="flex justify-end mt-6">

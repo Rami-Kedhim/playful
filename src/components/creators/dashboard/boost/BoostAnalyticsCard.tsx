@@ -1,15 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart, LineChart, TrendingUp, Users, Zap } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-interface AnalyticsData {
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-}
+import { AnalyticsData } from "@/hooks/boost/useBoostAnalytics";
 
 interface BoostAnalyticsCardProps {
   isActive: boolean;
@@ -56,7 +50,7 @@ const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps)
     { name: 'Day 7', views: 55 },
   ];
   
-  if (!isActive) {
+  if (!isActive || !analytics) {
     return (
       <Card className="col-span-2">
         <CardHeader>
@@ -105,6 +99,17 @@ const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps)
     );
   }
   
+  // Mock chart data for visualization
+  const chartData = [
+    { name: 'Day 1', views: 10 },
+    { name: 'Day 2', views: 25 },
+    { name: 'Day 3', views: 40 },
+    { name: 'Day 4', views: 35 },
+    { name: 'Day 5', views: 45 },
+    { name: 'Day 6', views: 60 },
+    { name: 'Day 7', views: 55 },
+  ];
+  
   return (
     <Card className="col-span-2">
       <CardHeader>
@@ -137,25 +142,23 @@ const BoostAnalyticsCard = ({ isActive, getAnalytics }: BoostAnalyticsCardProps)
           </ResponsiveContainer>
         </div>
         
-        {analytics && (
-          <div className="grid grid-cols-3 gap-4 pt-2">
-            <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
-              <Users className="h-5 w-5 mb-1 text-blue-500" />
-              <span className="text-2xl font-bold">{analytics.additionalViews}</span>
-              <span className="text-xs text-muted-foreground">additional views</span>
-            </div>
-            <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
-              <TrendingUp className="h-5 w-5 mb-1 text-green-500" />
-              <span className="text-2xl font-bold">{analytics.engagementIncrease}%</span>
-              <span className="text-xs text-muted-foreground">engagement increase</span>
-            </div>
-            <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
-              <LineChart className="h-5 w-5 mb-1 text-purple-500" />
-              <span className="text-2xl font-bold">#{analytics.rankingPosition}</span>
-              <span className="text-xs text-muted-foreground">ranking position</span>
-            </div>
+        <div className="grid grid-cols-3 gap-4 pt-2">
+          <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
+            <Users className="h-5 w-5 mb-1 text-blue-500" />
+            <span className="text-2xl font-bold">{analytics.additionalViews}</span>
+            <span className="text-xs text-muted-foreground">additional views</span>
           </div>
-        )}
+          <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
+            <TrendingUp className="h-5 w-5 mb-1 text-green-500" />
+            <span className="text-2xl font-bold">{analytics.engagementIncrease}%</span>
+            <span className="text-xs text-muted-foreground">engagement increase</span>
+          </div>
+          <div className="flex flex-col items-center p-3 bg-secondary/20 rounded-md">
+            <LineChart className="h-5 w-5 mb-1 text-purple-500" />
+            <span className="text-2xl font-bold">#{analytics.rankingPosition}</span>
+            <span className="text-xs text-muted-foreground">ranking position</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

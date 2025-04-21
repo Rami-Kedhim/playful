@@ -29,3 +29,29 @@ export interface HermesBoostStatus {
   estimatedVisibility: number;
   lastUpdateTime: string;
 }
+
+// Adding BoostAnalytics interface to fix errors in BoostAnalyticsCard
+export interface BoostAnalytics {
+  impressions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  clicks: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  engagementRate: number;
+  conversionRate: number;
+  boostEfficiency: number;
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
+}

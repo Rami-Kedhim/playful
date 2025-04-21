@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Users, Globe } from "lucide-react";
 import LivecamBoostControls from './LivecamBoostControls';
 import LivecamBoostBadge from './LivecamBoostBadge';
-import { LivecamModel, Livecam } from '@/types/livecams';
+import { LivecamModel, Livecam } from '@/types/livecam';
 
 interface LivecamCardProps {
   model: LivecamModel;
@@ -26,16 +25,12 @@ const LivecamCard = ({
   // Convert to boost interface format for the boost controls
   const livecam: Livecam = {
     id: model.id,
-    username: model.username,
     name: model.displayName,
-    imageUrl: model.imageUrl,
     thumbnailUrl: model.thumbnailUrl,
-    isStreaming: model.isLive,
+    isLive: model.isLive,
     viewerCount: model.viewerCount || 0,
-    region: model.country || 'unknown',
-    language: model.language || 'en',
-    tags: model.categories || [],
-    category: model.categories?.[0] || 'general'
+    username: model.username,
+    tags: model.categories
   };
 
   return (

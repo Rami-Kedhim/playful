@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import BoostManager from "./boost/BoostManager";
 import BoostAnalyticsCard from "./boost/BoostAnalyticsCard";
@@ -24,14 +23,11 @@ const CreatorBoostTab = ({ creatorId, profile }: CreatorBoostTabProps) => {
     getBoostAnalytics
   } = useBoostManager(creatorId);
   
-  // Use the imported interface
   const getAnalyticsWrapper = async (): Promise<AnalyticsData | null> => {
-    const analytics = await getBoostAnalytics();
-    return analytics;
+    return await getBoostAnalytics();
   };
   
   useEffect(() => {
-    // Mock fetch boost history data
     const timer = setTimeout(() => {
       setBoostHistory([
         {

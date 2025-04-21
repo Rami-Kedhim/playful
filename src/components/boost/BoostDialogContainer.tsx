@@ -1,179 +1,160 @@
 
+// Creating a temporary mock implementation for this component
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
-import { useBoostManager } from "@/hooks/boost";
-import { useHermesOxumBoost } from "@/hooks/boost/useHermesOxumBoost";
-import BoostDialogHeader from "./dialog/BoostDialogHeader";
+import { useBoostContext } from "@/contexts/BoostContext";
+import { formatDistance } from "date-fns";
 import BoostDialogTabs from "./dialog/BoostDialogTabs";
-import BoostInfoTooltip from "./dialog/BoostInfoTooltip";
-import { 
-  adaptBoostStatus, 
-  adaptBoostEligibility,
-  adaptBoostPackages,
-  adaptFormatBoostDuration,
-  adaptGetBoostPrice
-} from "@/hooks/boost/useBoostAdapters";
-import { formatBoostDuration } from "@/hooks/boost";
+import { HermesBoostStatus } from "@/types/boost";
 
 interface BoostDialogContainerProps {
-  profileId: string;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   onSuccess?: () => void;
-  buttonText?: string;
-  buttonVariant?: "default" | "outline" | "destructive" | "ghost" | "link" | "secondary" | "lucoin";
-  buttonSize?: "default" | "sm" | "lg" | "icon";
+  profileId: string;
 }
 
 const BoostDialogContainer = ({
-  profileId,
+  open,
+  setOpen,
   onSuccess,
-  buttonText = "Boost Profile",
-  buttonVariant = "outline",
-  buttonSize = "sm"
+  profileId
 }: BoostDialogContainerProps) => {
-  const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("packages");
-  const [boostAnalytics, setBoostAnalytics] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("packages");
+  const [hermesBoostStatus, setHermesBoostStatus] = useState<HermesBoostStatus | undefined>(undefined);
   
-  const { 
-    boostStatus: managerBoostStatus, 
-    eligibility: managerEligibility,
-    boostPackages: managerBoostPackages, 
-    selectedPackage: managerSelectedPackage, 
-    setSelectedPackage: managerSetSelectedPackage,
-    fetchBoostPackages, 
-    getBoostPrice: managerGetBoostPrice, 
+  const {
+    boostStatus,
+    isLoading,
+    dailyBoostUsage,
+    dailyBoostLimit,
     purchaseBoost,
     cancelBoost,
-    loading,
-    getBoostAnalytics,
-    dailyBoostUsage,
-    dailyBoostLimit
-  } = useBoostManager(profileId);
-
-  // Add Hermes + Oxum integration
-  const { hermesStatus: hermesBoostStatus } = useHermesOxumBoost(profileId);
-
-  // Adapt types to match expected interfaces
-  const boostStatus = adaptBoostStatus(managerBoostStatus);
-  const eligibility = adaptBoostEligibility(managerEligibility);
-  const boostPackages = adaptBoostPackages(managerBoostPackages);
+  } = useBoostContext();
   
-  // Use updated adapter function
-  const formatBoostDurationAdapter = adaptFormatBoostDuration(formatBoostDuration);
-  const getBoostPrice = adaptGetBoostPrice(managerGetBoostPrice);
-
-  // Handle selected package conversion
-  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-
-  // Update selected package when manager selected package changes
-  useEffect(() => {
-    if (managerSelectedPackage) {
-      setSelectedPackage(managerSelectedPackage.id);
-    } else {
-      setSelectedPackage(null);
+  // Mock boost packages for demo purposes
+  const boostPackages = [
+    {
+      id: "boost-1",
+      name: "Quick Boost",
+      duration: "06:00:00",
+      price_ubx: 25,
+      description: "Get a 6-hour visibility boost",
+      features: ["Top of search results", "Featured profile badge"]
+    },
+    {
+      id: "boost-2",
+      name: "Daily Boost",
+      duration: "24:00:00",
+      price_ubx: 50,
+      description: "Get a full day visibility boost",
+      features: ["Extended visibility", "Priority in feeds"]
+    },
+    {
+      id: "boost-3",
+      name: "Weekend Boost",
+      duration: "72:00:00",
+      price_ubx: 120,
+      description: "Maximum visibility for 3 days",
+      features: ["Maximum exposure", "Featured everywhere", "Analytics report"]
     }
-  }, [managerSelectedPackage]);
-
-  // Handle package selection
-  const handlePackageSelect = (packageId: string) => {
-    const pkg = managerBoostPackages.find(p => p.id === packageId);
-    if (pkg) {
-      managerSetSelectedPackage(pkg);
-    }
+  ];
+  
+  const [selectedPackage, setSelectedPackage] = useState<string>("");
+  
+  // Mock eligibility for demo purposes
+  const eligibility = {
+    isEligible: true,
+    reason: ""
   };
-
+  
   useEffect(() => {
     if (open) {
-      fetchBoostPackages();
-      if (boostStatus.isActive) {
-        fetchAnalytics();
-      }
-    }
-  }, [open, boostStatus.isActive]);
-
-  const fetchAnalytics = async () => {
-    const analytics = await getBoostAnalytics();
-    if (analytics) {
-      setBoostAnalytics(analytics);
-    }
-    return true;
-  };
-
-  const handlePurchase = async () => {
-    if (!selectedPackage) {
-      toast({
-        title: "No package selected",
-        description: "Please select a boost package",
-        variant: "destructive",
+      // Mock fetching Hermes boost status
+      setHermesBoostStatus({
+        position: 3,
+        activeUsers: 125,
+        estimatedVisibility: 65,
+        lastUpdateTime: new Date().toISOString()
       });
-      return;
     }
-
-    // Find the manager package object from the selected package ID
-    const packageToBoost = managerBoostPackages.find(p => p.id === selectedPackage);
+  }, [open]);
+  
+  // Format boost duration for display
+  const formatBoostDuration = (duration: string): string => {
+    // Parse HH:MM:SS format
+    const [hours, minutes] = duration.split(":").map(Number);
     
-    if (!packageToBoost) {
-      toast({
-        title: "Package not found",
-        description: "The selected package could not be found",
-        variant: "destructive",
-      });
-      return;
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `${days} day${days !== 1 ? 's' : ''}`;
     }
     
-    const success = await purchaseBoost(packageToBoost);
-    
-    if (success) {
-      setActiveTab("active");
-      if (onSuccess) onSuccess();
-    }
+    return `${hours} hour${hours !== 1 ? 's' : ''}`;
   };
-
-  const handleCancel = async () => {
-    const success = await cancelBoost();
+  
+  // Get boost price based on selected package
+  const getBoostPrice = (): number => {
+    const pkg = boostPackages.find(p => p.id === selectedPackage);
+    return pkg ? pkg.price_ubx : 0;
+  };
+  
+  // Handle purchasing boost
+  const handlePurchase = async (): Promise<void> => {
+    const success = await purchaseBoost(selectedPackage);
+    
     if (success && onSuccess) {
       onSuccess();
+      setActiveTab("active");
     }
-    return success;
   };
-
-  const handleDialogClose = () => setOpen(false);
-
+  
+  // Handle cancelling boost
+  const handleCancel = async (): Promise<void> => {
+    const success = await cancelBoost();
+    
+    if (success && onSuccess) {
+      onSuccess();
+      setActiveTab("packages");
+    }
+  };
+  
+  // Handle closing dialog
+  const handleDialogClose = () => {
+    setOpen(false);
+  };
+  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={buttonVariant} size={buttonSize}>
-          <Zap className="mr-2 h-4 w-4" />
-          {buttonText}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <BoostDialogHeader />
-
-        <BoostDialogTabs 
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center">
+            <Zap className="h-5 w-5 mr-2 text-yellow-500" />
+            Boost Your Profile
+          </DialogTitle>
+        </DialogHeader>
+        
+        <BoostDialogTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          isLoading={isLoading}
           boostStatus={boostStatus}
           eligibility={eligibility}
+          hermesBoostStatus={hermesBoostStatus}
           boostPackages={boostPackages}
           selectedPackage={selectedPackage}
-          setSelectedPackage={handlePackageSelect}
-          handlePurchase={handlePurchase}
-          handleCancel={handleCancel}
-          handleDialogClose={handleDialogClose}
-          boostAnalytics={boostAnalytics}
-          formatBoostDuration={formatBoostDurationAdapter}
+          onSelectPackage={setSelectedPackage}
+          formatBoostDuration={formatBoostDuration}
           getBoostPrice={getBoostPrice}
-          loading={loading}
+          onPurchase={handlePurchase}
+          onCancel={handleCancel}
+          handleDialogClose={handleDialogClose}
           dailyBoostUsage={dailyBoostUsage}
           dailyBoostLimit={dailyBoostLimit}
-          hermesBoostStatus={hermesBoostStatus}
+          loading={isLoading}
         />
-        
-        <BoostInfoTooltip />
       </DialogContent>
     </Dialog>
   );

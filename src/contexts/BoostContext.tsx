@@ -45,11 +45,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const fetchData = async () => {
       const data = await getBoostAnalytics();
       if (data) {
-        setAnalyticsData({
-          ...data,
-          conversionRate: data.conversionRate ?? 0,
-          boostEfficiency: data.boostEfficiency ?? 0
-        });
+        setAnalyticsData(data);
       }
     };
     
@@ -61,11 +57,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const data = await getBoostAnalytics();
       if (data) {
-        setAnalyticsData({
-          ...data,
-          conversionRate: data.conversionRate ?? 0,
-          boostEfficiency: data.boostEfficiency ?? 0
-        });
+        setAnalyticsData(data);
       }
       return data;
     } catch (err) {
@@ -78,15 +70,6 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const safeBoostStatus: BoostStatus = {
     ...boostStatus,
     progress: boostStatus.progress ?? 0
-  };
-  
-  // Create safe analytics data
-  const safeAnalyticsData: AnalyticsData = analyticsData || {
-    impressions: 0,
-    clicks: 0,
-    engagementRate: 0,
-    conversionRate: 0,
-    boostEfficiency: 0
   };
   
   // Adapt purchaseBoost to accept packageId string
@@ -110,7 +93,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     dailyBoostLimit,
     purchaseBoost,
     cancelBoost,
-    boostAnalytics: safeAnalyticsData,
+    boostAnalytics: analyticsData,
     fetchAnalytics
   };
   

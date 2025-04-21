@@ -8,9 +8,9 @@ export interface AnalyticsData {
   engagementRate: number;
   conversionRate: number;
   boostEfficiency: number;
-  additionalViews?: number;
-  engagementIncrease?: number;
-  rankingPosition?: number;
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
 }
 
 /**
