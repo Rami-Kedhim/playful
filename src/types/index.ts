@@ -1,14 +1,13 @@
 
-// Cleaned duplicate exports and used export type for types for isolatedModules compliance
+// Fix duplicated export issue for VerificationLevel by explicit export from only one file and removing duplicate
 
 export * from './UberPersona';
-export type * from './neural/NeuralSystemMetrics'; // Export types only to avoid TS error
-export * from './verification';
+export * from './neural/NeuralSystemMetrics';
+export * from './verification/statusCheck';
+export * from './verification/requestSubmission';
+export * from './verification/documentUpload';
 export * from './Escort';
 export * from './auth';
-
-// Removed duplicate NeuralModel export
-//export type * from './UberPersona'; Already export UberPersona types
 
 export interface ContactInfo {
   phone?: string;

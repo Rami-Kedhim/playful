@@ -1,5 +1,8 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Escort } from '@/types/escort';
+
+// Fix import to use unified Escort type and remove incompatible properties (rating not defined in Escort type in context)
+
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { Escort } from '@/types/Escort';
 
 interface EscortContextProps {
   escorts: Escort[];
@@ -33,13 +36,13 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setError(null);
     
     try {
+      // Mock escorts with matching Escort type properties, removed rating that was not defined in Escort type
       const mockEscorts: Escort[] = [
         {
           id: "1",
           name: "Emma",
           age: 28,
           location: "New York",
-          rating: 4.9,
           reviewCount: 120,
           verified: true,
           tags: ["massage", "dinner", "events"],
@@ -62,7 +65,6 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           name: "Sophia",
           age: 26,
           location: "Los Angeles",
-          rating: 4.8,
           reviewCount: 95,
           verified: true,
           tags: ["companionship", "travel", "dinner"],
@@ -107,3 +109,4 @@ export const EscortProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     </EscortContext.Provider>
   );
 };
+

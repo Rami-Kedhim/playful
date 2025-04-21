@@ -1,5 +1,8 @@
+
+// Fix use of properties to match Escort type case and remove invalid ones
+
 import { generateRandomEscort } from "@/data/mock/profileGenerator";
-import { Escort } from '@/types/escort';
+import { Escort } from '@/types/Escort';
 
 export const uberPersonaService = {
     generateRandomPersona: async () => {
@@ -17,7 +20,7 @@ export const uberPersonaService = {
     escortToUberPersona: async (escort: Escort) => {
         return {
             ...escort,
-            profileType: escort.isAI ? 'ai' : escort.isVerified || false ? 'verified' : 'scraped',
+            profileType: escort.isAI ? 'ai' : escort.isVerified ? 'verified' : 'scraped',
             persona_type: 'escort'
         };
     },
@@ -80,3 +83,4 @@ export const updatePersonaProfile = async (id: string, updates: any) => {
         return generateRandomEscort();
     }
 };
+

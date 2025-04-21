@@ -1,5 +1,5 @@
 
-// Fix import and typings for Escort and VerificationLevel to unify usage and fix assignment errors
+// Fix import to unified Escort and VerificationLevel from "@/types/Escort"
 
 import { useState } from "react";
 import { Escort, VerificationLevel } from "@/types/Escort";
@@ -20,11 +20,11 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
   const [messageOpen, setMessageOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Normalize verificationLevel with VerificationLevel type and fallback 'none'
+  // Normalize verificationLevel with VerificationLevel type and fallback to 'none'
   const normalizedEscort: Escort = {
     ...escort,
     verificationLevel:
-      escort.verificationLevel && 
+      escort.verificationLevel &&
       typeof escort.verificationLevel === "string" &&
       ["none", "basic", "enhanced", "premium"].includes(escort.verificationLevel)
         ? (escort.verificationLevel as VerificationLevel)
@@ -78,3 +78,4 @@ const EscortProfile = ({ escort, onBookNow }: EscortProfileProps) => {
 };
 
 export default EscortProfile;
+

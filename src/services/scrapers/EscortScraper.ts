@@ -1,5 +1,7 @@
-// Add Rates interface as it was missing causing TS error
-import { Escort } from '@/types/escort';
+
+// Fix properties to match Escort type and fix array includes call with safeguards
+
+import { Escort } from '@/types/Escort';
 
 interface Rates {
   hourly: number;
@@ -54,8 +56,8 @@ export class EscortScraper {
     const mockEscorts = this.generateMockEscorts(5);
     return mockEscorts.filter(escort =>
       escort.name.toLowerCase().includes(query.toLowerCase()) ||
-      escort.location.toLowerCase().includes(query.toLowerCase()) ||
-      escort.services.some(s => s.toLowerCase().includes(query.toLowerCase()))
+      escort.location?.toLowerCase().includes(query.toLowerCase() ?? "") ||
+      (escort.services?.some(s => s.toLowerCase().includes(query.toLowerCase())) ?? false)
     );
   }
 
@@ -78,7 +80,7 @@ export class EscortScraper {
         id,
         name: `Scraped ${gender === 'male' ? 'John' : 'Jane'} ${id.slice(-3)}`,
         age,
-        gender,
+        gender: gender,
         location: ['New York', 'Los Angeles', 'Miami', 'Chicago', 'Las Vegas'][i % 5],
         bio: `Scraped profile with high-quality service. Available for bookings and special occasions.`,
         services: [
@@ -105,7 +107,6 @@ export class EscortScraper {
           `https://picsum.photos/seed/${id}-1/800/1200`,
           `https://picsum.photos/seed/${id}-2/800/1200`,
         ],
-        // Removed contactInfo as not in Escort type
         boostLevel: Math.floor(Math.random() * 5)
       };
 
@@ -121,3 +122,4 @@ export class EscortScraper {
 }
 
 export default EscortScraper;
+
