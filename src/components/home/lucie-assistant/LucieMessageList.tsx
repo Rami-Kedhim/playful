@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LucieMessage } from '@/hooks/useLucieAssistant';
 import LucieTypingIndicator from './LucieTypingIndicator';
+import LucieConfetti from './LucieConfetti';
 
 interface LucieMessageListProps {
   messages: LucieMessage[];
@@ -16,8 +17,44 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
   messagesEndRef,
   onSuggestedActionClick
 }) => {
+  const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Check if message contains celebratory content
+  const isCelebratoryMessage = (content: string): boolean => {
+    const celebratoryPhrases = [
+      'congratulations', 'well done', 'great job', 'awesome', 'excellent',
+      'perfect', 'amazing', 'fantastic', 'wonderful', 'bravo'
+    ];
+    
+    return celebratoryPhrases.some(phrase => 
+      content.toLowerCase().includes(phrase)
+    );
+  };
+  
+  // Show confetti when a celebratory message appears
+  React.useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (
+        lastMessage.role === 'assistant' && 
+        isCelebratoryMessage(lastMessage.content) &&
+        !isTyping
+      ) {
+        setShowConfetti(true);
+        // Auto-hide confetti after animation completes
+        const timer = setTimeout(() => {
+          setShowConfetti(false);
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [messages, isTyping]);
+
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
+      {/* Confetti animation layer */}
+      <LucieConfetti show={showConfetti} onComplete={() => setShowConfetti(false)} />
+      
       {messages.map((message) => (
         <div
           key={message.id}

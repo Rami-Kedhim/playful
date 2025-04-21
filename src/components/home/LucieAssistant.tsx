@@ -1,5 +1,5 @@
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { X, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { useLucieAssistant } from '@/hooks/useLucieAssistant';
 import LucieHeader from './lucie-assistant/LucieHeader';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
 import LucieInputBox from './lucie-assistant/LucieInputBox';
+import LucieTypingIndicator from './lucie-assistant/LucieTypingIndicator';
 import { useUserAIContext } from '@/hooks/useUserAIContext';
 
 interface LucieAssistantProps {
@@ -31,6 +32,7 @@ const LucieAssistant = ({
 
   const { aiContext, trackInteraction } = useUserAIContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [celebration, setCelebration] = useState(false);
   
   // Set initial open state from props
   useEffect(() => {
@@ -53,6 +55,28 @@ const LucieAssistant = ({
       }
     }
   }, [customInitialMessage, messages, clearMessages]);
+  
+  // Check for celebratory messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant') {
+        // Trigger celebration for positive responses about features
+        const positiveIndicators = [
+          'successfully', 'great news', 'congratulations', 
+          'completed', 'welcome aboard', 'thank you',
+          'well done', 'perfect', 'excellent'
+        ];
+        
+        if (positiveIndicators.some(phrase => 
+          lastMessage.content.toLowerCase().includes(phrase))) {
+          setCelebration(true);
+          // Reset celebration after a delay
+          setTimeout(() => setCelebration(false), 2000);
+        }
+      }
+    }
+  }, [messages]);
 
   // Handle suggested action clicks
   const handleSuggestedActionClick = (action: string) => {
@@ -92,7 +116,9 @@ const LucieAssistant = ({
 
       {/* Chat window */}
       {isOpen && !isDisabled && (
-        <Card className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col animate-fade-in">
+        <Card className={`fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col animate-fade-in ${
+          celebration ? 'animate-pop' : ''
+        }`}>
           <LucieHeader 
             onClose={isOpen ? toggleChat : onClose} 
             onMinimize={toggleChat}
@@ -105,7 +131,6 @@ const LucieAssistant = ({
             onSuggestedActionClick={handleSuggestedActionClick}
           />
           <LucieInputBox onSendMessage={handleSendMessage} />
-          <LucieTypingStyles />
         </Card>
       )}
       
@@ -125,39 +150,5 @@ const LucieAssistant = ({
     </>
   );
 };
-
-const LucieTypingStyles = () => (
-  <style>
-    {`
-    .typing-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: white;
-      margin: 0 2px;
-      animation: typing 1s infinite ease-in-out;
-    }
-    
-    .typing-dot:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    
-    .typing-dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    
-    @keyframes typing {
-      0%, 100% {
-        transform: translateY(0);
-        opacity: 0.5;
-      }
-      50% {
-        transform: translateY(-5px);
-        opacity: 1;
-      }
-    }
-    `}
-  </style>
-);
 
 export default LucieAssistant;
