@@ -3,6 +3,7 @@
 export const GLOBAL_UBX_RATE = 25;
 export const BASE_PRICE_UBX = 50;
 export const PRIME_PRICE_MULTIPLIER = 1.5;
+export const PRICE_TOLERANCE = 0.001; // Tolerance for floating point errors (0.1%)
 
 /**
  * Validates that the price conforms to the global price symmetry rule
@@ -15,6 +16,37 @@ export const validateGlobalPrice = (price: number): boolean => {
   }
   
   return true;
+}
+
+/**
+ * Resilient price validation with automatic retries
+ * For critical payment paths, retry validation to handle transient issues
+ */
+export const validateGlobalPriceWithRetry = async (
+  userPrice: number, 
+  metadata?: Record<string, any>
+): Promise<boolean> => {
+  const MAX_RETRY_ATTEMPTS = 3;
+  let attempts = 0;
+  let lastError: Error | null = null;
+  
+  while (attempts < MAX_RETRY_ATTEMPTS) {
+    try {
+      return validateGlobalPrice(userPrice);
+    } catch (error: any) {
+      lastError = error;
+      attempts++;
+      
+      // Wait before retry with exponential backoff
+      if (attempts < MAX_RETRY_ATTEMPTS) {
+        await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, attempts)));
+      }
+    }
+  }
+  
+  // All attempts failed - throw the last error
+  if (lastError) throw lastError;
+  throw new Error("[Oxum Enforcement] Price validation failed after multiple attempts");
 }
 
 /**
@@ -56,3 +88,9 @@ export const convertUBXToLucoin = (ubx: number): number => {
 export const formatUBXPrice = (amount: number): string => {
   return `${amount} UBX`;
 };
+
+// Export functions used in test harness components
+export { runPricingSystemSelfTest } from './testUtils';
+export { getOxumPriceSystemHealth } from './healthMonitor';
+export { emergencyPriceValidationOverride } from './adminOps';
+

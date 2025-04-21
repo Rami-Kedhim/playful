@@ -1,150 +1,81 @@
+
 /**
- * Analytics service for tracking Oxum price events and violations
+ * Analytics service for Oxum price validation system
  */
+
+interface PriceEvent {
+  eventType: string;
+  timestamp: Date;
+  price: number;
+  targetPrice: number;
+  metadata?: Record<string, any>;
+}
+
 export class OxumPriceAnalytics {
-  private static events: Array<{
-    eventType: string;
-    userPrice: number;
-    targetPrice: number;
-    timestamp: Date;
-    metadata?: Record<string, any>;
-  }> = [];
+  private static events: PriceEvent[] = [];
   
   /**
    * Log a price-related event
-   * @param eventType Type of event (price_check, price_violation, etc.)
-   * @param userPrice The price provided by the user/system
-   * @param metadata Additional contextual data
-   * @param targetPrice The expected price (global rate)
    */
-  public static logPriceEvent(
+  static logPriceEvent(
     eventType: string,
-    userPrice: number,
+    price: number,
     metadata?: Record<string, any>,
     targetPrice?: number
   ): void {
-    // Add event to the log
-    this.events.push({
+    const event: PriceEvent = {
       eventType,
-      userPrice,
-      targetPrice: targetPrice || userPrice, // Default to user price if no target provided
       timestamp: new Date(),
+      price,
+      targetPrice: targetPrice || 0,
       metadata
-    });
-    
-    // In a real app, we would:
-    // 1. Batch events for efficiency
-    // 2. Send to a real analytics platform
-    // 3. Purge old events from memory
-    
-    // For now, just limit the log size in memory
-    if (this.events.length > 1000) {
-      this.events = this.events.slice(-500); // Keep last 500 events
-    }
-  }
-  
-  /**
-   * Get analytics data for a specific period
-   * @param startTime Start timestamp for analytics period
-   * @param endTime End timestamp for analytics period
-   */
-  public static getAnalytics(startTime?: Date, endTime?: Date) {
-    const now = new Date();
-    const filteredEvents = this.events.filter(event => {
-      const eventTime = event.timestamp;
-      if (startTime && eventTime < startTime) return false;
-      if (endTime && eventTime > endTime) return false;
-      return true;
-    });
-    
-    // Calculate success rate
-    const checkEvents = filteredEvents.filter(e => e.eventType === 'price_check');
-    const violationEvents = filteredEvents.filter(e => e.eventType === 'price_violation');
-    
-    const totalChecks = checkEvents.length;
-    const totalViolations = violationEvents.length;
-    const successRate = totalChecks > 0 ? (totalChecks - totalViolations) / totalChecks : 1;
-    
-    return {
-      period: {
-        start: startTime || this.events[0]?.timestamp || now,
-        end: endTime || now,
-      },
-      metrics: {
-        totalChecks,
-        totalViolations,
-        successRate,
-        averagePrice: this.calculateAveragePrice(filteredEvents),
-      },
-      events: filteredEvents
     };
-  }
-  
-  /**
-   * Get filtered events by event type
-   */
-  public static getEvents(filter?: { eventType?: string }): any[] {
-    if (!filter) {
-      return [...this.events];
-    }
     
-    return this.events.filter(event => {
-      if (filter.eventType && event.eventType !== filter.eventType) {
-        return false;
-      }
-      return true;
+    // Add to in-memory log
+    this.events.push(event);
+    
+    // In a real app, this would also send to a logging service
+    console.debug(`[Oxum Analytics] ${eventType}:`, {
+      price,
+      time: event.timestamp.toISOString(),
+      ...(metadata || {})
     });
   }
   
   /**
-   * Get summary statistics for events
+   * Get all logged events
    */
-  public static getStats(): {
-    totalEvents: number;
-    violationCount: number;
-    complianceRate: number;
-    recentViolations: any[];
-  } {
-    const events = this.events;
-    const totalEvents = events.length;
-    const violationEvents = events.filter(e => e.eventType === 'price_violation');
-    const violationCount = violationEvents.length;
-    const complianceRate = totalEvents > 0 ? ((totalEvents - violationCount) / totalEvents) * 100 : 100;
-    
-    // Get recent violations (last 24 hours)
-    const oneDayAgo = new Date();
-    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-    const recentViolations = violationEvents.filter(e => e.timestamp >= oneDayAgo);
-    
-    return {
-      totalEvents,
-      violationCount,
-      complianceRate,
-      recentViolations
-    };
+  static getEvents(): PriceEvent[] {
+    return [...this.events];
   }
   
   /**
-   * Calculate average price from events
+   * Clear all events (mainly for testing)
    */
-  private static calculateAveragePrice(events: typeof this.events) {
-    if (events.length === 0) return 0;
-    
-    const sum = events.reduce((total, event) => total + event.userPrice, 0);
-    return sum / events.length;
-  }
-  
-  /**
-   * Clear analytics data (mainly for testing)
-   */
-  public static clearAnalytics(): void {
+  static clearEvents(): void {
     this.events = [];
   }
   
   /**
-   * Clear all analytics events (alias for clearAnalytics)
+   * Get event statistics
    */
-  public static clearEvents(): void {
-    this.clearAnalytics();
+  static getStats(): {
+    totalEvents: number;
+    eventTypes: Record<string, number>;
+    averagePrice: number;
+  } {
+    const eventTypes: Record<string, number> = {};
+    let priceSum = 0;
+    
+    for (const event of this.events) {
+      eventTypes[event.eventType] = (eventTypes[event.eventType] || 0) + 1;
+      priceSum += event.price;
+    }
+    
+    return {
+      totalEvents: this.events.length,
+      eventTypes,
+      averagePrice: this.events.length ? priceSum / this.events.length : 0
+    };
   }
 }
