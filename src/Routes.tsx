@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -25,6 +24,9 @@ const VerificationPage = lazy(() => import('./pages/VerificationPage'));
 const PersonasPage = lazy(() => import('./pages/Personas'));
 const VerificationDashboard = lazy(() => import('./pages/admin/VerificationDashboard'));
 const RouteSharePage = lazy(() => import('./pages/RouteSharePage'));
+const BookPage = React.lazy(() => import('./pages/BookPage'));
+const LiveCamPage = React.lazy(() => import('./pages/LiveCamPage'));
+const GeneratePage = React.lazy(() => import('./pages/GeneratePage'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -76,6 +78,8 @@ const RoutesComponent: React.FC = () => {
 
         {/* Main App routes */}
         <Route path={AppRoutes.HOME} element={<AppLayout><HomePage /></AppLayout>} />
+        
+        {/* Profile */}
         <Route 
           path={AppRoutes.PROFILE} 
           element={
@@ -90,6 +94,8 @@ const RoutesComponent: React.FC = () => {
             </ProtectedRoute>
           } 
         />
+
+        {/* Existing protected routes */}
         <Route path={AppRoutes.FAVORITES} element={<ProtectedRoute><AppLayout><FavoritesPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.MESSAGES} element={<ProtectedRoute><AppLayout><MessagesPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.METAVERSE} element={<AppLayout><MetaversePage /></AppLayout>} />
@@ -99,7 +105,30 @@ const RoutesComponent: React.FC = () => {
         <Route path={AppRoutes.VERIFICATION} element={<ProtectedRoute><AppLayout><VerificationPage /></AppLayout></ProtectedRoute>} />
         <Route path={AppRoutes.PERSONAS} element={<AppLayout><PersonasPage /></AppLayout>} />
 
-        {/* Admin verification route */}
+        {/* New added pages */}
+        <Route path="/book" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <BookPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/livecam" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <LiveCamPage />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/generate" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <GeneratePage />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* Existing Admin and safety routes */}
         <Route 
           path="/admin/verifications" 
           element={
@@ -111,7 +140,6 @@ const RoutesComponent: React.FC = () => {
           } 
         />
 
-        {/* Safety Route Share */}
         <Route 
           path="/safety/route-share" 
           element={
@@ -131,4 +159,3 @@ const RoutesComponent: React.FC = () => {
 };
 
 export default RoutesComponent;
-

@@ -1,53 +1,49 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { NavLink } from 'react-router-dom';
+import { AppRoutes } from '@/utils/navigation';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/auth/useAuthContext';
 
-interface MainNavProps {
-  className?: string;
-}
-
-export const MainNav: React.FC<MainNavProps> = ({ className }) => {
+const MainNav: React.FC<{ className?: string }> = ({ className }) => {
   const { isAuthenticated } = useAuth();
-  
+
   return (
-    <nav className={cn("flex items-center space-x-4 lg:space-x-6", className)}>
-      <Link
-        to="/"
-        className="text-sm font-medium transition-colors hover:text-primary"
-      >
-        Home
-      </Link>
-      <Link
-        to="/escorts"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Escorts
-      </Link>
-      {isAuthenticated ? (
-        <>
-          <Link
-            to="/bookings"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Bookings
-          </Link>
-          <Link
-            to="/messages"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Messages
-          </Link>
-        </>
-      ) : (
-        <Link
-          to="/about"
-          className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-        >
-          About
-        </Link>
-      )}
+    <nav className={className}>
+      <ul className="flex space-x-4">
+        <li>
+          <NavLink to={AppRoutes.HOME} className={({ isActive }) => isActive ? 'font-bold text-primary' : undefined}>
+            Home
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to={AppRoutes.ESCORTS} className={({ isActive }) => isActive ? 'font-bold text-primary' : undefined}>
+            Escorts
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/book" className={({ isActive }) => isActive ? 'font-bold text-primary' : undefined}>
+            Book
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/livecam" className={({ isActive }) => isActive ? 'font-bold text-primary' : undefined}>
+            LiveCam
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/generate" className={({ isActive }) => isActive ? 'font-bold text-primary' : undefined}>
+            Generate
+          </NavLink>
+        </li>
+        {isAuthenticated && (
+          <li>
+            <NavLink to={AppRoutes.PERSONAS} className={({ isActive }) => isActive ? 'font-bold text-primary' : undefined}>
+              Personas
+            </NavLink>
+          </li>
+        )}
+      </ul>
     </nav>
   );
 };
