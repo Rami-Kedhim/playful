@@ -10,7 +10,7 @@ const UBXSection = () => {
       <div className="bg-gradient-to-r from-primary/10 via-blue-500/5 to-blue-500/10 rounded-xl p-8 border border-white/5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div>
-            <Badge variant="lucoin" className="mb-4">WEB3 PAYMENTS</Badge>
+            <Badge variant="ubx" className="mb-4">WEB3 PAYMENTS</Badge>
             <h2 className="text-3xl font-bold mb-4">
               <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
                 UBX: The Token of Privacy
@@ -45,7 +45,7 @@ const UBXSection = () => {
             </div>
             
             <div className="flex flex-wrap gap-4">
-              <Button className="gap-2" variant="lucoin" asChild>
+              <Button className="gap-2" variant="ubx" asChild>
                 <Link to="/wallet">
                   <Coins className="h-4 w-4" />
                   Get Free Tokens
@@ -83,3 +83,4 @@ const UBXSection = () => {
 };
 
 export default UBXSection;
+
