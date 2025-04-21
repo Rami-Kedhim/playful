@@ -1,47 +1,56 @@
 
-import React, { useState } from 'react';
-import { SendIcon, Image } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useRef, useEffect } from 'react';
+import { SendIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface LucieInputBoxProps {
   onSendMessage: (message: string) => void;
 }
 
-const LucieInputBox = ({ onSendMessage }: LucieInputBoxProps) => {
-  const [inputMessage, setInputMessage] = useState('');
+const LucieInputBox: React.FC<LucieInputBoxProps> = ({ onSendMessage }) => {
+  const [message, setMessage] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when component mounts
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
-    onSendMessage(inputMessage);
-    setInputMessage('');
+    if (message.trim()) {
+      onSendMessage(message);
+      setMessage('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   return (
-    <div className="p-3 border-t border-white/10 bg-background/90 backdrop-blur-sm">
-      <div className="flex gap-2">
-        <Button variant="ghost" size="icon" className="shrink-0">
-          <Image className="h-5 w-5" />
-        </Button>
-        <Input
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="Ask Lucie anything..."
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleSendMessage();
-            }
-          }}
-          className="bg-white/5"
-        />
-        <Button 
-          onClick={handleSendMessage} 
-          className="shrink-0"
-          disabled={!inputMessage.trim()}
-        >
-          <SendIcon className="h-4 w-4" />
-        </Button>
-      </div>
+    <div className="p-4 border-t border-white/10 flex gap-2">
+      <Input
+        ref={inputRef}
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Type a message..."
+        className="flex-1 bg-white/5 border-white/10"
+      />
+      <Button
+        onClick={handleSendMessage}
+        disabled={!message.trim()}
+        className="aspect-square p-2"
+        variant="default"
+      >
+        <SendIcon className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

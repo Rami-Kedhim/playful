@@ -11,6 +11,7 @@ interface RouteContext {
   contentPurpose?: string;
   personalityType?: string;
   characterId?: string;
+  [key: string]: any;
 }
 
 interface AiResponse {
@@ -19,6 +20,8 @@ interface AiResponse {
   moderationPassed: boolean;
   flaggedContent?: string;
   logId?: string;
+  emotion?: string;
+  suggestedActions?: string[];
 }
 
 /**
@@ -26,6 +29,13 @@ interface AiResponse {
  */
 export class Lucie {
   private forbiddenKeywords = ['hack', 'exploit', 'attack', 'malware', 'virus'];
+  private emotionMap = new Map<string, string[]>([
+    ['happy', ['exciting', 'good news', 'congratulations', 'happy', 'excited']],
+    ['concerned', ['sorry', 'unfortunately', 'issue', 'problem', 'worried', 'concern']],
+    ['thinking', ['analyzing', 'considering', 'let me think', 'interesting', 'hmm']],
+    ['confused', ['not sure', 'unclear', 'complex', 'difficult to say']],
+    ['friendly', ['hello', 'hi', 'welcome', 'thank you', 'appreciate']]
+  ]);
 
   private async callOpenRouter(prompt: string): Promise<{ data: string; tokens: number }> {
     console.debug(`[Lucie] Calling OpenRouter with prompt: ${prompt}`);
@@ -67,6 +77,20 @@ export class Lucie {
     return this.applyBoundaryFilters(input) ? 1 : 0;
   }
 
+  private detectEmotion(text: string): string {
+    const lowerText = text.toLowerCase();
+    
+    for (const [emotion, keywords] of this.emotionMap.entries()) {
+      for (const keyword of keywords) {
+        if (lowerText.includes(keyword)) {
+          return emotion;
+        }
+      }
+    }
+    
+    return 'neutral';
+  }
+
   private async composePromptWithEmotionAndPersonality(originalPrompt: string, personalityType?: string, characterId?: string): Promise<string> {
     let prompt = originalPrompt;
 
@@ -98,6 +122,7 @@ export class Lucie {
         tokensUsed: 0,
         moderationPassed: false,
         flaggedContent: "contains forbidden keywords",
+        emotion: "concerned"
       };
     }
 
@@ -110,6 +135,7 @@ export class Lucie {
         responseText: "Your prompt was flagged during moderation and rejected.",
         tokensUsed: 0,
         moderationPassed: false,
+        emotion: "concerned"
       };
     }
 
@@ -134,6 +160,7 @@ export class Lucie {
           responseText: "Insufficient UBX balance to process your request. Please top-up your wallet.",
           tokensUsed: 0,
           moderationPassed: true,
+          emotion: "concerned"
         };
       }
       console.debug(`[Lucie] Debited ${totalCost} UBX from wallet ${walletId} for AI tokens`);
@@ -158,16 +185,43 @@ export class Lucie {
     const timestamp = new Date().toISOString();
     console.info(`[Lucie] Logged AI prompt response ${logId} at ${timestamp} for wallet ${walletId || 'N/A'}, purpose: ${context.contentPurpose || 'general'}`);
 
-    // 8. Optionally create voice/audio output (stub)
-    // const audioBlob = await this.callElevenLabsTTS(aiResponseText);
+    // 8. Detect emotion from response
+    const emotion = this.detectEmotion(aiResponseText);
 
-    // 9. Return AI response with tokens used and moderation status
+    // 9. Generate suggested actions based on content
+    const suggestedActions = this.generateSuggestedActions(prompt, aiResponseText);
+
+    // 10. Return AI response with tokens used and moderation status
     return {
       responseText: aiResponseText,
       tokensUsed,
       moderationPassed,
       logId,
+      emotion,
+      suggestedActions
     };
+  }
+
+  private generateSuggestedActions(prompt: string, response: string): string[] {
+    const lowerPrompt = prompt.toLowerCase();
+    
+    // Default suggestions
+    const defaultSuggestions = ["Find escorts near me", "Browse creators", "Check wallet balance"];
+    
+    // Context-aware suggestions
+    if (lowerPrompt.includes('escort') || lowerPrompt.includes('book')) {
+      return ["View popular escorts", "Filter by service", "Show verified only"];
+    }
+    
+    if (lowerPrompt.includes('creator') || lowerPrompt.includes('content')) {
+      return ["Browse top creators", "See latest posts", "Subscribe"];
+    }
+    
+    if (lowerPrompt.includes('wallet') || lowerPrompt.includes('pay') || lowerPrompt.includes('money')) {
+      return ["Check balance", "Add funds", "View transaction history"];
+    }
+    
+    return defaultSuggestions;
   }
 }
 

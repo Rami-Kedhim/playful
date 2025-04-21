@@ -29,11 +29,16 @@ const LucieMessageList = ({
             message.role === 'user' ? 'justify-end' : 'justify-start'
           }`}
         >
+          {message.role === 'assistant' && (
+            <div className="h-8 w-8 mr-2 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm">
+              L
+            </div>
+          )}
           <div
             className={`max-w-[85%] p-3 rounded-lg ${
               message.role === 'user'
-                ? 'bg-primary/20 text-white'
-                : 'bg-white/5 text-white'
+                ? 'bg-primary/20 text-primary-foreground'
+                : 'bg-secondary/10 text-secondary-foreground'
             }`}
           >
             <p className="whitespace-pre-wrap">{message.content}</p>
@@ -79,6 +84,11 @@ const LucieMessageList = ({
               </div>
             )}
           </div>
+          {message.role === 'user' && (
+            <div className="h-8 w-8 ml-2 rounded-full bg-primary/20 flex items-center justify-center text-primary-foreground text-sm">
+              U
+            </div>
+          )}
         </div>
       ))}
       

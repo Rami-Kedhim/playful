@@ -1,16 +1,12 @@
 
-import { useState, useRef, useEffect } from 'react';
-import { X, MessageCircle, Sparkles, SendIcon, Image, ArrowRight } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRef, useEffect } from 'react';
+import { X, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useLucieAssistant, LucieMessage } from '@/hooks/useLucieAssistant';
+import { useLucieAssistant } from '@/hooks/useLucieAssistant';
 import LucieHeader from './lucie-assistant/LucieHeader';
 import LucieMessageList from './lucie-assistant/LucieMessageList';
 import LucieInputBox from './lucie-assistant/LucieInputBox';
-import LucieTypingIndicator from './lucie-assistant/LucieTypingIndicator';
 
 interface LucieAssistantProps {
   initiallyOpen?: boolean;
@@ -18,7 +14,11 @@ interface LucieAssistantProps {
   onClose?: () => void;
 }
 
-const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }: LucieAssistantProps) => {
+const LucieAssistant = ({ 
+  initiallyOpen = false, 
+  customInitialMessage, 
+  onClose 
+}: LucieAssistantProps) => {
   const {
     messages,
     isTyping,
@@ -28,44 +28,23 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
   } = useLucieAssistant();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // Fix: get both messages and setMessages
-  const [localMessages, setLocalMessages] = useState<LucieMessage[]>([]);
   
   // Set initial open state from props
   useEffect(() => {
-    if (initiallyOpen) {
+    if (initiallyOpen && !isOpen) {
       toggleChat();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Add custom initial message if provided
-  useEffect(() => {
-    if (customInitialMessage && messages.length === 1) {
-      const customMessage: LucieMessage = {
-        id: 'custom-' + Date.now(),
-        role: 'assistant',
-        content: customInitialMessage,
-        timestamp: new Date()
-      };
-      
-      // Replace the default welcome message with the custom one
-      setLocalMessages(prevMessages => {
-        if (prevMessages.length === 1) {
-          return [customMessage];
-        }
-        return prevMessages;
-      });
-    } else {
-      // If no custom message or messages length changed, sync localMessages to messages
-      setLocalMessages(messages);
-    }
-  }, [customInitialMessage, messages]);
+  }, [initiallyOpen, isOpen, toggleChat]);
 
   // Auto-scroll to the bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [localMessages, isTyping]);
+  }, [messages, isTyping]);
+
+  // Handle suggested action clicks
+  const handleSuggestedActionClick = (action: string) => {
+    sendMessage(action);
+  };
 
   return (
     <>
@@ -81,17 +60,17 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
+        <Card className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
           <LucieHeader onClose={isOpen ? toggleChat : onClose} />
           <LucieMessageList 
-            messages={localMessages} 
+            messages={messages} 
             isTyping={isTyping}
             messagesEndRef={messagesEndRef}
-            onSuggestedActionClick={() => {}} // Removed reference to missing function
+            onSuggestedActionClick={handleSuggestedActionClick}
           />
           <LucieInputBox onSendMessage={sendMessage} />
           <LucieTypingStyles />
-        </div>
+        </Card>
       )}
     </>
   );
@@ -132,4 +111,3 @@ const LucieTypingStyles = () => (
 );
 
 export default LucieAssistant;
-
