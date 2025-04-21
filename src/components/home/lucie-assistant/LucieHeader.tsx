@@ -2,24 +2,34 @@
 import React from 'react';
 import { X, Minus, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface LucieHeaderProps {
   onClose?: () => void;
   onMinimize?: () => void;
   onSettings?: () => void;
+  showAnimation?: boolean;
 }
 
 const LucieHeader: React.FC<LucieHeaderProps> = ({ 
   onClose, 
   onMinimize,
-  onSettings
+  onSettings,
+  showAnimation = true
 }) => {
+  const AnimatedDiv = showAnimation ? motion.div : 'div';
+  
   return (
     <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-blue-600 to-violet-600 text-white">
       <div className="flex items-center">
-        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center mr-2">
+        <AnimatedDiv 
+          className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center mr-2"
+          initial={showAnimation ? { scale: 0.8 } : {}}
+          animate={showAnimation ? { scale: 1 } : {}}
+          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        >
           <span className="text-lg font-semibold">L</span>
-        </div>
+        </AnimatedDiv>
         <div>
           <h3 className="font-medium text-sm">Lucie AI Assistant</h3>
           <p className="text-xs text-white/70">Your UberEscorts guide</p>
