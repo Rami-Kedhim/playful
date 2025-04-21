@@ -83,7 +83,7 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
         />
       ))}
       
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes triangleFall {
           0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
           10% { opacity: 1; }
@@ -92,7 +92,7 @@ const LucieConfetti: React.FC<LucieConfettiProps> = ({ show, onComplete }) => {
         .clip-path-triangle {
           clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         }
-      `}</style>
+      `}} />
     </div>
   );
 };
