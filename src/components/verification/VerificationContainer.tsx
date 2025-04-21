@@ -7,6 +7,7 @@ import VerificationForm from './form/VerificationForm';
 import VerificationStatus from './VerificationStatus';
 import VerificationLevelUpgrade from './level/VerificationLevelUpgrade';
 import VerificationLevelType from './level/VerificationLevelType';
+import { VerificationLevel } from '@/types/verification';
 
 const VerificationContainer = () => {
   const { verification, loading, error } = useVerificationStatus();
@@ -17,9 +18,12 @@ const VerificationContainer = () => {
     setSelectedType(type);
   };
 
-  // Extract status and level safely
+  // Extract status and level safely using the enum, fallback to VerificationLevel.NONE enum value
   const status = verification?.status?.toLowerCase() || 'none';
-  const level = verification?.verificationLevel || verification?.requested_level || 'none';
+  const level =
+    (verification?.verificationLevel as VerificationLevel) ||
+    (verification?.requested_level as VerificationLevel) ||
+    VerificationLevel.NONE; // use enum value, not string literal
 
   return (
     <Card className="w-full">
@@ -36,33 +40,31 @@ const VerificationContainer = () => {
             <TabsTrigger value="verify">Verify</TabsTrigger>
             <TabsTrigger value="upgrade">Upgrade</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="status">
             {loading ? (
               <div>Loading...</div>
             ) : error ? (
               <div className="text-destructive">Error: {error}</div>
             ) : (
-              <VerificationStatus 
+              <VerificationStatus
                 status={status as 'none' | 'pending' | 'approved' | 'rejected'}
                 level={level}
               />
             )}
           </TabsContent>
-          
+
           <TabsContent value="verify">
-            <VerificationForm 
-              onSubmissionComplete={() => setActiveTab('status')} 
-            />
+            <VerificationForm onSubmissionComplete={() => setActiveTab('status')} />
           </TabsContent>
-          
+
           <TabsContent value="upgrade">
             <VerificationLevelUpgrade />
           </TabsContent>
         </Tabs>
-        
+
         <div className="mt-8">
-          <VerificationLevelType 
+          <VerificationLevelType
             selectedType={selectedType as 'personal' | 'business' | 'premium' | null}
             onSelectType={handleSelectType as (type: 'personal' | 'business' | 'premium') => void}
           />
