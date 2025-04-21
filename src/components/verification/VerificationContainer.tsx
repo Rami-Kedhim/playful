@@ -18,12 +18,16 @@ const VerificationContainer = () => {
     setSelectedType(type);
   };
 
-  // Extract status and level safely using the enum, fallback to VerificationLevel.NONE enum value
-  const status = verification?.status?.toLowerCase() || 'none';
-  const level =
+  // Define status as one of the allowed literals for VerificationStatus component
+  const rawStatus = verification?.status?.toLowerCase() || 'none';
+  const allowedStatusValues = ['none', 'pending', 'approved', 'rejected'] as const;
+  const status = allowedStatusValues.includes(rawStatus as any) ? (rawStatus as typeof allowedStatusValues[number]) : 'none';
+
+  // Properly type level as a VerificationLevel enum, fallback to enum value VerificationLevel.NONE
+  const level: VerificationLevel =
     (verification?.verificationLevel as VerificationLevel) ||
     (verification?.requested_level as VerificationLevel) ||
-    VerificationLevel.NONE; // use enum value, not string literal
+    VerificationLevel.NONE;
 
   return (
     <Card className="w-full">
@@ -48,7 +52,7 @@ const VerificationContainer = () => {
               <div className="text-destructive">Error: {error}</div>
             ) : (
               <VerificationStatus
-                status={status as 'none' | 'pending' | 'approved' | 'rejected'}
+                status={status}
                 level={level}
               />
             )}
