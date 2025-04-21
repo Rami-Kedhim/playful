@@ -1,6 +1,5 @@
 
 // Change aiPersonalityService to dynamically select backend implementation so redis client is never imported in frontend bundle
-import { useEffect, useState } from 'react';
 import { EmotionalState } from '@/types/ai-personality';
 
 // Safe in-memory implementation for frontend/client usage
@@ -36,6 +35,10 @@ class InMemoryEmotionalMemoryService {
       lastUpdated: new Date().toISOString(),
     };
   }
+
+  async setEmotionalState(characterId: string, state: EmotionalState): Promise<void> {
+    this.memory[characterId] = state;
+  }
 }
 
 // Check environment and conditionally load redis implementation only on server or edge functions
@@ -44,8 +47,8 @@ let redisService: any = null;
 // Only load redisEmotionalMemoryService if running in server environment (Node.js). We check for window being undefined.
 if (typeof window === 'undefined') {
   // Dynamic import to defer redis client import to server-side only
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const RedisEmotionalMemoryService = require('./redisEmotionalMemoryService').default;
     redisService = new RedisEmotionalMemoryService();
   } catch (err) {
@@ -95,7 +98,11 @@ class AIPersonalityService {
       ...updates,
       lastUpdated: new Date().toISOString(),
     };
-    await this.emotionalMemory.setEmotionalState(characterId, newState);
+    if (this.emotionalMemory.updateEmotionalState) {
+      await this.emotionalMemory.updateEmotionalState(characterId, newState);
+    } else if (this.emotionalMemory.setEmotionalState) {
+      await this.emotionalMemory.setEmotionalState(characterId, newState);
+    }
   }
 }
 

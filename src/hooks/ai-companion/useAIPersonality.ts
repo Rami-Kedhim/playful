@@ -1,20 +1,20 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { 
+import type {
   AIPersonalityConfig,
   EmotionalState,
   PersonalityType
 } from '@/types/ai-personality';
-import { AIPersonalityService } from '@/services/ai/aiPersonalityService';
+import AIPersonalityService from '@/services/ai/aiPersonalityService';
 
 export interface UseAIPersonalityProps {
   personalityType: PersonalityType;
   initialEmotionalState?: EmotionalState;
 }
 
-export const useAIPersonality = ({ 
-  personalityType, 
-  initialEmotionalState 
+export const useAIPersonality = ({
+  personalityType,
+  initialEmotionalState
 }: UseAIPersonalityProps) => {
   const [personalityConfig, setPersonalityConfig] = useState<AIPersonalityConfig | null>(null);
   const [emotionalState, setEmotionalState] = useState<EmotionalState | null>(
@@ -36,9 +36,9 @@ export const useAIPersonality = ({
       },
       interactionPatterns: {},
     } as AIPersonalityConfig;
-    
+
     setPersonalityConfig(personality);
-    
+
     if (!initialEmotionalState) {
       const defaultState: EmotionalState = {
         primary: 'neutral',
@@ -72,12 +72,12 @@ export const useAIPersonality = ({
 
   const modifyEmotionalState = useCallback((updates: Partial<EmotionalState>) => {
     if (!emotionalState) return;
-    
+
     const updatedState = {
       ...emotionalState,
       ...updates,
     };
-    
+
     if (!updates.dominantEmotion) {
       const emotions = [
         { name: 'joy', value: updatedState.joy || 0 },
@@ -89,14 +89,14 @@ export const useAIPersonality = ({
         { name: 'anticipation', value: updatedState.anticipation || 0 },
         { name: 'interest', value: updatedState.interest || 0 }
       ];
-      
-      const dominant = emotions.reduce((max, emotion) => 
+
+      const dominant = emotions.reduce((max, emotion) =>
         emotion.value > max.value ? emotion : max
       );
-      
+
       updatedState.dominantEmotion = dominant.name;
     }
-    
+
     setEmotionalState(updatedState);
     return updatedState;
   }, [emotionalState]);
