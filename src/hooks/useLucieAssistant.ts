@@ -168,5 +168,4 @@ export function useLucieAssistant() {
   };
 }
 
-export type { LucieMessage };
 export default useLucieAssistant;
