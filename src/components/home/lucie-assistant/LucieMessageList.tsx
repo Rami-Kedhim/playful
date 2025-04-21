@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LucieMessage } from '@/hooks/useLucieAssistant';
 import LucieTypingIndicator from './LucieTypingIndicator';
 import LucieConfetti from './LucieConfetti';
@@ -18,12 +18,14 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
   onSuggestedActionClick
 }) => {
   const [showConfetti, setShowConfetti] = useState(false);
+  const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
   
   // Check if message contains celebratory content
   const isCelebratoryMessage = (content: string): boolean => {
     const celebratoryPhrases = [
       'congratulations', 'well done', 'great job', 'awesome', 'excellent',
-      'perfect', 'amazing', 'fantastic', 'wonderful', 'bravo'
+      'perfect', 'amazing', 'fantastic', 'wonderful', 'bravo', 'success',
+      'achievement', 'completed', 'accomplished', 'great news'
     ];
     
     return celebratoryPhrases.some(phrase => 
@@ -32,7 +34,7 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
   };
   
   // Show confetti when a celebratory message appears
-  React.useEffect(() => {
+  useEffect(() => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (
@@ -40,11 +42,15 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
         isCelebratoryMessage(lastMessage.content) &&
         !isTyping
       ) {
+        setCelebrationMessage(lastMessage.content);
         setShowConfetti(true);
+        
         // Auto-hide confetti after animation completes
         const timer = setTimeout(() => {
           setShowConfetti(false);
-        }, 2000);
+          setCelebrationMessage(null);
+        }, 3000);
+        
         return () => clearTimeout(timer);
       }
     }
@@ -53,8 +59,12 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
       {/* Confetti animation layer */}
-      <LucieConfetti show={showConfetti} onComplete={() => setShowConfetti(false)} />
+      <LucieConfetti 
+        show={showConfetti} 
+        onComplete={() => setShowConfetti(false)} 
+      />
       
+      {/* Messages */}
       {messages.map((message) => (
         <div
           key={message.id}
@@ -67,7 +77,7 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
               message.role === 'user'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted backdrop-blur-sm'
-            }`}
+            } ${celebrationMessage === message.content ? 'animate-celebration' : ''}`}
           >
             {message.role === 'assistant' && (
               <div className="flex items-center mb-1">

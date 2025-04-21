@@ -65,14 +65,15 @@ const LucieAssistant = ({
         const positiveIndicators = [
           'successfully', 'great news', 'congratulations', 
           'completed', 'welcome aboard', 'thank you',
-          'well done', 'perfect', 'excellent'
+          'well done', 'perfect', 'excellent', 'awesome',
+          'amazing', 'fantastic', 'wonderful', 'bravo'
         ];
         
         if (positiveIndicators.some(phrase => 
           lastMessage.content.toLowerCase().includes(phrase))) {
           setCelebration(true);
           // Reset celebration after a delay
-          setTimeout(() => setCelebration(false), 2000);
+          setTimeout(() => setCelebration(false), 3000);
         }
       }
     }
