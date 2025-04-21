@@ -82,11 +82,11 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
         </div>
       ))}
       
-      {/* Typing indicator with enhanced styling */}
+      {/* Enhanced typing indicator with wave animation */}
       {isTyping && (
         <div className="flex justify-start">
           <div className="rounded-lg px-3 py-2 bg-muted/70 backdrop-blur-sm shadow-sm animate-fade-in">
-            <LucieTypingIndicator size="small" showName={false} />
+            <LucieTypingIndicator size="small" showName={false} animationStyle="wave" />
           </div>
         </div>
       )}

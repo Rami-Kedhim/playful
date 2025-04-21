@@ -79,23 +79,24 @@ const LucieAssistant = ({
 
   return (
     <>
-      {/* Floating button */}
+      {/* Enhanced Floating button with pulse effect */}
       <Button
         onClick={toggleChat}
-        className={`fixed right-6 bottom-6 p-3 w-14 h-14 flex items-center justify-center rounded-full shadow-lg z-50 ${
-          isOpen ? 'bg-gray-700' : 'bg-primary'
+        className={`fixed right-6 bottom-6 p-3 w-14 h-14 flex items-center justify-center rounded-full shadow-lg z-50 transition-transform duration-300 hover:scale-105 ${
+          isOpen ? 'bg-gray-700' : 'bg-primary animate-pulse-glow'
         }`}
         aria-label={isOpen ? "Close chat assistant" : "Open chat assistant"}
       >
-        {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
+        {isOpen ? <X size={24} /> : <MessageCircle size={24} className="animate-float" />}
       </Button>
 
       {/* Chat window */}
       {isOpen && !isDisabled && (
-        <Card className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
+        <Card className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col animate-fade-in">
           <LucieHeader 
             onClose={isOpen ? toggleChat : onClose} 
             onMinimize={toggleChat}
+            showAnimation={true}
           />
           <LucieMessageList 
             messages={messages} 
@@ -110,7 +111,7 @@ const LucieAssistant = ({
       
       {/* Disabled state */}
       {isOpen && isDisabled && (
-        <Card className="fixed bottom-24 right-6 w-80 sm:w-96 bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 p-4">
+        <Card className="fixed bottom-24 right-6 w-80 sm:w-96 bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 p-4 animate-fade-in">
           <h3 className="font-medium mb-2">AI Assistant Disabled</h3>
           <p className="text-sm text-muted-foreground mb-4">
             You have disabled the AI assistant in your settings. 
