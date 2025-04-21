@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/auth/useAuth';
 import { EnhancedButton } from '@/components/ui/enhanced-button';
 import { NotificationsPanel } from './NotificationsPanel';
+import MainNav from './MainNav';
 import { UserNav } from './UserNav';
-import { MainNav } from './MainNav';
 import { MobileMenu } from './MobileMenu';
 
 const Header = () => {
