@@ -1,63 +1,35 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { HermesBoostStatus, HermesBoostInfoProps } from "../types";
-import { Info, Users, TrendingUp } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
-const HermesBoostInfo: React.FC<HermesBoostInfoProps> = ({
-  hermesStatus,
-  status,
-  hermesData
-}) => {
-  // Use whichever prop is provided (for compatibility)
-  const data: HermesBoostStatus = hermesData || hermesStatus || status || {
-    position: 0,
-    activeUsers: 0,
-    estimatedVisibility: 0,
-    lastUpdateTime: new Date().toISOString()
+interface HermesBoostInfoProps {
+  hermesData?: {
+    position: number;
+    activeUsers: number;
+    estimatedVisibility: number;
+    lastUpdateTime: string;
   };
+}
+
+const HermesBoostInfo = ({ hermesData }: HermesBoostInfoProps) => {
+  if (!hermesData) return null;
   
   return (
-    <Card className="mt-4">
-      <CardContent className="pt-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Info className="h-4 w-4 text-blue-500" />
-          <h3 className="text-sm font-medium">Hermes-Oxum Analytics</h3>
-        </div>
-        
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>Queue Position</span>
-              <span className="font-medium">#{data.position}</span>
-            </div>
-            <Progress value={100 - (data.position / Math.max(data.activeUsers, 1)) * 100} className="h-2" />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="p-2 bg-muted/50 rounded flex flex-col">
-              <span className="text-muted-foreground flex items-center mb-1">
-                <Users className="h-3 w-3 mr-1" />
-                Active Users
-              </span>
-              <span className="font-semibold">{data.activeUsers}</span>
-            </div>
-            
-            <div className="p-2 bg-muted/50 rounded flex flex-col">
-              <span className="text-muted-foreground flex items-center mb-1">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                Visibility Score
-              </span>
-              <span className="font-semibold">{data.estimatedVisibility}%</span>
-            </div>
-          </div>
-          
-          <div className="text-xs text-muted-foreground">
-            Last updated: {new Date(data.lastUpdateTime).toLocaleString()}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="rounded-md border p-3 bg-secondary/10">
+      <h4 className="text-sm font-medium flex items-center mb-2">
+        <Sparkles className="h-4 w-4 mr-2 text-amber-500" />
+        Current Boost Metrics
+      </h4>
+      
+      <div className="text-xs text-muted-foreground space-y-1">
+        <p>• Profiles boosting right now: <span className="text-foreground">{hermesData.activeUsers}</span></p>
+        <p>• Average visibility increase: <span className="text-foreground">{hermesData.estimatedVisibility}%</span></p>
+        <p>• Best ranking achieved: <span className="text-foreground">#{hermesData.position}</span></p>
+      </div>
+      
+      <p className="text-xs mt-2 italic text-muted-foreground">
+        Last updated: {new Date(hermesData.lastUpdateTime).toLocaleTimeString()}
+      </p>
+    </div>
   );
 };
 

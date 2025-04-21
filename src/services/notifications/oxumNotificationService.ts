@@ -55,4 +55,15 @@ export class OxumNotificationService {
     recoveryMode = false;
     console.log("[Oxum] Exiting recovery mode");
   }
+  
+  /**
+   * Verify price validation integrity
+   */
+  static verifyPriceIntegrity(validateResult: boolean): boolean {
+    if (!validateResult) {
+      this.notifyViolation();
+      return false;
+    }
+    return true;
+  }
 }

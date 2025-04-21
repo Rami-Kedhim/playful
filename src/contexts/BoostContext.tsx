@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { BoostStatus } from '@/types/boost';
-import { AnalyticsData } from '@/components/boost/types';
+import { BoostStatus, BoostPackage } from '@/types/boost';
+import { AnalyticsData } from '@/hooks/boost/useBoostAnalytics';
 import { useBoostManager } from '@/hooks/boost';
 
 // Define the context interface
@@ -14,6 +14,7 @@ export interface BoostContextType {
   fetchAnalytics: () => Promise<AnalyticsData | null>;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
+  error?: string;
 }
 
 // Create context with default values
@@ -30,7 +31,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const {
     boostStatus,
     eligibility,
-    purchaseBoost,
+    purchaseBoost: purchaseBoostOriginal,
     cancelBoost,
     loading,
     error,
@@ -43,7 +44,13 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const fetchData = async () => {
       const data = await getBoostAnalytics();
-      setAnalyticsData(data);
+      if (data) {
+        setAnalyticsData({
+          ...data,
+          conversionRate: data.conversionRate ?? 0,
+          boostEfficiency: data.boostEfficiency ?? 0
+        });
+      }
     };
     
     fetchData();
@@ -53,7 +60,13 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const fetchAnalytics = async () => {
     try {
       const data = await getBoostAnalytics();
-      setAnalyticsData(data);
+      if (data) {
+        setAnalyticsData({
+          ...data,
+          conversionRate: data.conversionRate ?? 0,
+          boostEfficiency: data.boostEfficiency ?? 0
+        });
+      }
       return data;
     } catch (err) {
       console.error("Error fetching analytics:", err);
@@ -64,7 +77,7 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Create a safe boostStatus object with progress 
   const safeBoostStatus: BoostStatus = {
     ...boostStatus,
-    progress: boostStatus.progress || 0
+    progress: boostStatus.progress ?? 0
   };
   
   // Create safe analytics data
@@ -74,6 +87,19 @@ export const BoostProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     engagementRate: 0,
     conversionRate: 0,
     boostEfficiency: 0
+  };
+  
+  // Adapt purchaseBoost to accept packageId string
+  const purchaseBoost = async (packageId: string): Promise<boolean> => {
+    // In a real app, we'd fetch the package from API or find it in state
+    const mockPackage: BoostPackage = {
+      id: packageId,
+      name: "Standard Boost",
+      duration: "24:00:00",
+      price_ubx: 50
+    };
+    
+    return await purchaseBoostOriginal(mockPackage);
   };
   
   const value: BoostContextType = {

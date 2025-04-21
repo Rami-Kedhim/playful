@@ -1,54 +1,74 @@
 
 /**
- * Hook for handling boost analytics
+ * AnalyticsData interface for boost-related analytics
  */
-
 export interface AnalyticsData {
-  viewsIncrease?: number;
-  engagementRate?: string;
-  impressions?: number;
-  rankingImprovement?: number;
+  impressions: number;
+  clicks: number;
+  engagementRate: number;
+  conversionRate: number;
+  boostEfficiency: number;
   additionalViews?: number;
   engagementIncrease?: number;
   rankingPosition?: number;
-  views?: {
-    withoutBoost: number;
-    withBoost: number;
-    increase: number;
-  };
-  clicks?: {
-    withoutBoost: number;
-    withBoost: number;
-    increase: number;
-  };
 }
 
-export const useBoostAnalytics = (profileId?: string) => {
-  const fetchAnalytics = async (): Promise<AnalyticsData> => {
-    // In a real app, we would fetch from an API
-    // For now, just return mock data
+/**
+ * Interface representing detailed click analytics
+ */
+export interface ClickAnalytics {
+  today: number;
+  yesterday: number;
+  weeklyAverage: number;
+  withBoost: number;
+  withoutBoost?: number;
+  increase?: number;
+}
+
+/**
+ * BoostAnalytics interface for more detailed boost analysis
+ */
+export interface BoostAnalytics {
+  impressions: {
+    today: number;
+    yesterday: number;
+    weeklyAverage: number;
+    withBoost: number;
+    withoutBoost?: number;
+    increase?: number;
+  };
+  clicks: ClickAnalytics;
+  engagementRate: number;
+  conversionRate: number;
+  boostEfficiency: number;
+  additionalViews: number;
+  engagementIncrease: number;
+  rankingPosition: number;
+}
+
+/**
+ * Custom hook for accessing boost analytics
+ */
+export const useBoostAnalytics = (profileId: string) => {
+  /**
+   * Get analytics data for a profile
+   */
+  const getAnalyticsData = async (): Promise<AnalyticsData> => {
+    // This would fetch from an API in a real application
+    // Mock data for now
     return {
-      viewsIncrease: Math.floor(Math.random() * 50) + 10,
-      engagementRate: (Math.random() * 0.3 + 0.1).toFixed(2),
-      impressions: Math.floor(Math.random() * 300) + 50,
-      rankingImprovement: Math.floor(Math.random() * 10) + 1,
-      additionalViews: Math.floor(Math.random() * 100) + 20,
-      engagementIncrease: Math.floor(Math.random() * 30) + 5,
-      rankingPosition: Math.floor(Math.random() * 10) + 1,
-      views: {
-        withoutBoost: Math.floor(Math.random() * 100) + 50,
-        withBoost: Math.floor(Math.random() * 200) + 150,
-        increase: Math.floor(Math.random() * 40) + 10
-      },
-      clicks: {
-        withoutBoost: Math.floor(Math.random() * 20) + 10,
-        withBoost: Math.floor(Math.random() * 50) + 30,
-        increase: Math.floor(Math.random() * 30) + 10
-      }
+      impressions: 234,
+      clicks: 45,
+      engagementRate: 19.2,
+      conversionRate: 5.3,
+      boostEfficiency: 78,
+      additionalViews: 120,
+      engagementIncrease: 25,
+      rankingPosition: 3
     };
   };
 
   return {
-    fetchAnalytics
+    getAnalyticsData
   };
 };

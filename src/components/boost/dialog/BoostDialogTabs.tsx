@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,48 +11,53 @@ import BoostActivePackage from './BoostActivePackage';
 import { BoostStatus, BoostEligibility } from '@/types/boost';
 
 interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
   isLoading: boolean;
   boostStatus: BoostStatus;
   eligibility: BoostEligibility;
-  hermesStatus?: any;
-  packages: any[];
-  selectedPackage: string;
+  hermesBoostStatus?: any;
+  boostPackages: any[];
+  selectedPackage: string | null;
   onSelectPackage: (packageId: string) => void;
   formatBoostDuration: (duration: string) => string;
   getBoostPrice: () => number;
-  onPurchase: () => void;
-  onCancel: () => void;
+  onPurchase: () => Promise<void>;
+  onCancel: () => Promise<void>;
+  handleDialogClose: () => void;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
   loading: boolean;
 }
 
-const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
+const BoostDialogTabs = ({
+  activeTab,
+  setActiveTab,
   isLoading,
   boostStatus,
   eligibility,
-  hermesStatus,
-  packages,
+  hermesBoostStatus,
+  boostPackages,
   selectedPackage,
   onSelectPackage,
   formatBoostDuration,
   getBoostPrice,
   onPurchase,
   onCancel,
+  handleDialogClose,
   dailyBoostUsage,
   dailyBoostLimit,
   loading
-}) => {
-  const [activeTab, setActiveTab] = useState(boostStatus.isActive ? "active" : "packages");
+}: BoostDialogTabsProps) => {
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [cancelLoading, setCancelLoading] = useState(false);
   
   // Create safe HermesBoostStatus object with all required properties
-  const hermesData = hermesStatus ? {
-    position: hermesStatus.position || 0,
-    activeUsers: hermesStatus.activeUsers || 10,
-    estimatedVisibility: hermesStatus.estimatedVisibility || 50,
-    lastUpdateTime: hermesStatus.lastUpdateTime || new Date().toISOString()
+  const hermesData = hermesBoostStatus ? {
+    position: hermesBoostStatus.position || 0,
+    activeUsers: hermesBoostStatus.activeUsers || 10,
+    estimatedVisibility: hermesBoostStatus.estimatedVisibility || 50,
+    lastUpdateTime: hermesBoostStatus.lastUpdateTime || new Date().toISOString()
   } : undefined;
   
   // Handle purchase button click
@@ -61,7 +66,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
     
     setPurchaseLoading(true);
     try {
-      onPurchase();
+      await onPurchase();
     } catch (error) {
       console.error("Purchase error:", error);
     } finally {
@@ -73,7 +78,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   const handleCancel = async () => {
     setCancelLoading(true);
     try {
-      onCancel();
+      await onCancel();
     } catch (error) {
       console.error("Cancel error:", error);
     } finally {
@@ -82,13 +87,13 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   };
   
   // Set active tab when boost status changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (boostStatus.isActive) {
       setActiveTab("active");
     } else {
       setActiveTab("packages");
     }
-  }, [boostStatus.isActive]);
+  }, [boostStatus.isActive, setActiveTab]);
   
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -126,7 +131,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
       
       <TabsContent value="packages" className="mt-6">
         <BoostPackages
-          packages={packages}
+          packages={boostPackages}
           selectedPackage={selectedPackage}
           onSelectPackage={onSelectPackage}
           formatBoostDuration={formatBoostDuration}

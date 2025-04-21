@@ -1,47 +1,44 @@
 
+import { useState, useEffect } from 'react';
+import { HermesBoostStatus } from '@/types/boost';
+
 /**
- * Hook for handling Hermes Oxum boost integration
+ * Hook for using the combined Hermes and Oxum systems for boost functionality
  */
-
-export interface HermesBoostStatus {
-  active: boolean;
-  queuePosition?: number;
-  estimatedTimeMinutes?: number;
-  hermesScore?: number;
-  boostType?: string;
-  isActive?: boolean;
-  position?: number;
-  timeRemaining?: number;
-  boostScore?: number;
-  effectivenessScore?: number;
-}
-
-export const useHermesOxumBoost = (profileId?: string) => {
-  // This would normally interact with the Hermes Oxum system
-  // For now, just return a mock status
+export const useHermesOxumBoost = (profileId: string) => {
+  const [hermesStatus, setHermesStatus] = useState<HermesBoostStatus>({
+    position: 3,
+    activeUsers: 125,
+    estimatedVisibility: 65,
+    lastUpdateTime: new Date().toISOString()
+  });
   
-  const getHermesStatus = async (): Promise<HermesBoostStatus> => {
-    return {
-      active: Math.random() > 0.5,
-      queuePosition: Math.floor(Math.random() * 5) + 1,
-      estimatedTimeMinutes: Math.floor(Math.random() * 30) + 5,
-      hermesScore: Math.floor(Math.random() * 100),
-      boostType: "standard"
-    };
-  };
+  const [oxumPriceValidation, setOxumPriceValidation] = useState({
+    isValid: true,
+    recommendedPrice: 50
+  });
   
-  // Create a hermesStatus object directly in the hook for components that expect it
-  const hermesStatus: HermesBoostStatus = {
-    isActive: Math.random() > 0.5,
-    position: Math.floor(Math.random() * 5) + 1,
-    timeRemaining: Math.floor(Math.random() * 120) + 30,
-    boostScore: Math.floor(Math.random() * 100) + 50,
-    effectivenessScore: Math.floor(Math.random() * 30) + 70,
-    active: Math.random() > 0.5
-  };
+  useEffect(() => {
+    // In a real app, this would call APIs to get status from both systems
+    const timer = setTimeout(() => {
+      setHermesStatus({
+        position: Math.floor(Math.random() * 5) + 1,
+        activeUsers: Math.floor(Math.random() * 200) + 50,
+        estimatedVisibility: Math.floor(Math.random() * 40) + 40,
+        lastUpdateTime: new Date().toISOString()
+      });
+      
+      setOxumPriceValidation({
+        isValid: Math.random() > 0.1,
+        recommendedPrice: Math.floor(Math.random() * 30) + 40
+      });
+    }, 5000);
+    
+    return () => clearTimeout(timer);
+  }, [profileId]);
   
   return {
-    getHermesStatus,
-    hermesStatus
+    hermesStatus,
+    oxumPriceValidation,
   };
 };

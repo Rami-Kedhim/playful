@@ -3,12 +3,19 @@
  * Analytics service for Oxum price validation system
  */
 
-interface PriceEvent {
+export interface PriceEvent {
   eventType: string;
   timestamp: Date;
   price: number;
   targetPrice: number;
   metadata?: Record<string, any>;
+  // Additional properties needed for other components
+  userId?: string;
+  profileId?: string;
+  userPrice?: number;
+  amount?: number;
+  success?: boolean;
+  message?: string;
 }
 
 export class OxumPriceAnalytics {
@@ -63,19 +70,38 @@ export class OxumPriceAnalytics {
     totalEvents: number;
     eventTypes: Record<string, number>;
     averagePrice: number;
+    violationCount?: number;
+    complianceRate?: number;
+    recentViolations?: PriceEvent[];
   } {
     const eventTypes: Record<string, number> = {};
     let priceSum = 0;
+    let violationCount = 0;
+    const recentViolations: PriceEvent[] = [];
     
     for (const event of this.events) {
       eventTypes[event.eventType] = (eventTypes[event.eventType] || 0) + 1;
       priceSum += event.price;
+      
+      // Count violations
+      if (event.eventType === 'violation') {
+        violationCount++;
+        recentViolations.push(event);
+      }
     }
+    
+    // Calculate compliance rate
+    const complianceRate = this.events.length > 0 
+      ? 100 - (violationCount / this.events.length * 100) 
+      : 100;
     
     return {
       totalEvents: this.events.length,
       eventTypes,
-      averagePrice: this.events.length ? priceSum / this.events.length : 0
+      averagePrice: this.events.length ? priceSum / this.events.length : 0,
+      violationCount,
+      complianceRate,
+      recentViolations: recentViolations.slice(-5) // Last 5 violations
     };
   }
 }

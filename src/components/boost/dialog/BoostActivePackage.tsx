@@ -1,65 +1,96 @@
 
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Clock, Zap } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Zap, Clock, Users, BarChart } from "lucide-react";
 import { BoostStatus } from "@/types/boost";
 
 export interface BoostActivePackageProps {
   boostStatus: BoostStatus;
-  hermesData?: any; // Add this prop to fix the error
+  hermesStatus?: {
+    position: number;
+    activeUsers: number;
+    estimatedVisibility: number;
+    lastUpdateTime: string;
+  };
 }
 
-const BoostActivePackage: React.FC<BoostActivePackageProps> = ({ 
-  boostStatus, 
-  hermesData 
-}) => {
-  if (!boostStatus.isActive) {
-    return (
-      <div className="text-center p-6">
-        <p className="text-muted-foreground">No active boost</p>
-      </div>
-    );
-  }
+const BoostActivePackage = ({ boostStatus, hermesStatus }: BoostActivePackageProps) => {
+  // Calculate time remaining in percentage
+  const progress = boostStatus.progress || 0;
   
-  const formatTimeRemaining = (timeRemaining?: string) => {
-    if (!timeRemaining) return "Unknown";
-    return timeRemaining;
+  // Format date and time display
+  const formatTime = (timeString?: string) => {
+    if (!timeString) return "N/A";
+    const date = new Date(timeString);
+    return date.toLocaleString();
   };
-  
+
   return (
-    <Card>
-      <CardContent className="pt-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Zap className="h-5 w-5 text-yellow-500 mr-2" />
-            <span className="font-medium">
-              {boostStatus.boostPackage?.name || "Active Boost"}
-            </span>
-          </div>
-          <div className="text-muted-foreground text-sm flex items-center">
-            <Clock className="h-4 w-4 mr-1" />
-            {formatTimeRemaining(boostStatus.timeRemaining || boostStatus.remainingTime)}
-          </div>
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold flex items-center">
+          <Zap className="h-5 w-5 mr-2 text-primary" />
+          {boostStatus.packageName || "Active Boost"}
+        </h3>
+        <Badge variant="outline" className="px-2 py-1">
+          Active
+        </Badge>
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Progress</span>
+          <span>{Math.round(progress * 100)}%</span>
         </div>
-        
-        <Progress value={boostStatus.progress} className="h-2" />
-        
-        <div className="grid grid-cols-2 gap-4 pt-2">
-          <div className="bg-muted/50 p-3 rounded-md">
-            <div className="text-xs text-muted-foreground mb-1">Boost Progress</div>
-            <div className="text-lg font-semibold">{Math.round(boostStatus.progress)}%</div>
-          </div>
-          
-          {hermesData && (
-            <div className="bg-muted/50 p-3 rounded-md">
-              <div className="text-xs text-muted-foreground mb-1">Visibility Score</div>
-              <div className="text-lg font-semibold">{hermesData.estimatedVisibility || 0}%</div>
+        <Progress value={progress * 100} className="h-2" />
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-muted-foreground">Started</span>
+          <p>{formatTime(boostStatus.startTime)}</p>
+        </div>
+        <div>
+          <span className="text-muted-foreground">Ends</span>
+          <p>{formatTime(boostStatus.endTime)}</p>
+        </div>
+      </div>
+      
+      {hermesStatus && (
+        <Card className="mt-4">
+          <CardContent className="pt-4">
+            <h4 className="text-sm font-medium mb-3">Boost Analytics</h4>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center">
+                <BarChart className="h-4 w-4 mr-2 text-primary" />
+                <div>
+                  <div className="text-sm font-medium">#{hermesStatus.position}</div>
+                  <div className="text-xs text-muted-foreground">Position</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <Users className="h-4 w-4 mr-2 text-primary" />
+                <div>
+                  <div className="text-sm font-medium">{hermesStatus.activeUsers}</div>
+                  <div className="text-xs text-muted-foreground">Active Users</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center col-span-2">
+                <Clock className="h-4 w-4 mr-2 text-primary" />
+                <div>
+                  <div className="text-sm font-medium">{hermesStatus.estimatedVisibility}% higher</div>
+                  <div className="text-xs text-muted-foreground">Visibility</div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 

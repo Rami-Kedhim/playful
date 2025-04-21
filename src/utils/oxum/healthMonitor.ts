@@ -1,77 +1,57 @@
 
-// Health monitoring metrics
-let validationSuccesses = 0;
-let validationFailures = 0;
-let lastValidationTime: Date | null = null;
-let systemStatus: 'healthy' | 'warning' | 'critical' = 'healthy';
+import { OxumNotificationService } from '../../services/notifications/oxumNotificationService';
+import { OxumPriceAnalytics } from '../../services/analytics/oxumPriceAnalytics';
 
-/**
- * Records a successful validation attempt
- */
-export function recordSuccessfulValidation(): void {
-  validationSuccesses++;
-  lastValidationTime = new Date();
-  updateSystemStatus();
+export interface SystemHealthState {
+  isHealthy: boolean;
+  status: 'green' | 'yellow' | 'red';
+  validationRate: number;
+  failureRate: number;
+  lastChecked: Date;
+  message: string;
 }
 
 /**
- * Records a failed validation attempt
+ * Get the current health status of the Oxum price system
  */
-export function recordValidationFailure(): void {
-  validationFailures++;
-  lastValidationTime = new Date();
-  updateSystemStatus();
-}
-
-/**
- * Updates the overall system status based on metrics
- */
-function updateSystemStatus(): void {
-  const failureRate = validationFailures / Math.max(1, validationSuccesses + validationFailures);
+export const getOxumPriceSystemHealth = (): SystemHealthState => {
+  // Get analytics data
+  const stats = OxumPriceAnalytics.getStats();
+  const totalValidations = stats.totalEvents;
+  const failures = stats.eventTypes['validation_failure'] || 0;
   
-  if (failureRate > 0.2) {
-    systemStatus = 'critical';
-  } else if (failureRate > 0.05) {
-    systemStatus = 'warning';
-  } else {
-    systemStatus = 'healthy';
+  // Calculate health metrics
+  const validationRate = totalValidations ? 1 - (failures / totalValidations) : 1;
+  const failureRate = totalValidations ? failures / totalValidations : 0;
+  
+  // Determine system status
+  let status: 'green' | 'yellow' | 'red' = 'green';
+  let message = "System operating normally";
+  let isHealthy = true;
+  
+  if (failureRate > 0.1) {
+    status = 'red';
+    message = "Critical: High failure rate detected";
+    isHealthy = false;
+  } else if (failureRate > 0.01) {
+    status = 'yellow';
+    message = "Warning: Elevated failure rate";
+    isHealthy = true; // Still considered functional
   }
-}
-
-/**
- * Returns the overall health status of the Oxum price system
- */
-export function getOxumPriceSystemHealth(): {
-  status: 'healthy' | 'warning' | 'critical';
-  metrics: {
-    successCount: number;
-    failureCount: number;
-    failureRate: number;
-    lastValidation: Date | null;
+  
+  // Check if system is in recovery mode
+  if (OxumNotificationService.isInRecoveryMode()) {
+    status = 'yellow';
+    message = "System in recovery mode";
+    isHealthy = true; // Still operational but in recovery
   }
-} {
-  const totalValidations = validationSuccesses + validationFailures;
-  const failureRate = totalValidations > 0 
-    ? validationFailures / totalValidations 
-    : 0;
   
   return {
-    status: systemStatus,
-    metrics: {
-      successCount: validationSuccesses,
-      failureCount: validationFailures,
-      failureRate,
-      lastValidation: lastValidationTime
-    }
+    isHealthy,
+    status,
+    validationRate,
+    failureRate,
+    lastChecked: new Date(),
+    message
   };
-}
-
-/**
- * Resets the health metrics (for testing or system recovery)
- */
-export function resetHealthMetrics(): void {
-  validationSuccesses = 0;
-  validationFailures = 0;
-  lastValidationTime = null;
-  systemStatus = 'healthy';
-}
+};

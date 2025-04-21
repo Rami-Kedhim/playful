@@ -6,6 +6,7 @@ export interface TestResult {
   success: boolean;
   message: string;
   details?: any;
+  timestamp?: Date;
 }
 
 /**
@@ -14,6 +15,8 @@ export interface TestResult {
 export function runPricingSystemSelfTest(): {
   success: boolean;
   results: TestResult[];
+  testsPassed?: number;
+  failedTests?: number;
 } {
   const results: TestResult[] = [];
   
@@ -23,13 +26,15 @@ export function runPricingSystemSelfTest(): {
     results.push({
       success: exactMatchResult === true,
       message: 'Exact match validation passed',
-      details: { price: GLOBAL_UBX_RATE }
+      details: { price: GLOBAL_UBX_RATE },
+      timestamp: new Date()
     });
   } catch (error: any) {
     results.push({
       success: false,
       message: 'Exact match validation failed unexpectedly',
-      details: { error: error.message }
+      details: { error: error.message },
+      timestamp: new Date()
     });
   }
   
@@ -43,7 +48,8 @@ export function runPricingSystemSelfTest(): {
     results.push({
       success: toleranceResult === true,
       message: 'Tolerance validation passed',
-      details: { price: toleranceAmount }
+      details: { price: toleranceAmount },
+      timestamp: new Date()
     });
   } catch (error: any) {
     results.push({
@@ -53,7 +59,8 @@ export function runPricingSystemSelfTest(): {
         error: error.message,
         tolerance: PRICE_TOLERANCE,
         testPrice: toleranceAmount
-      }
+      },
+      timestamp: new Date()
     });
   }
   
@@ -64,22 +71,27 @@ export function runPricingSystemSelfTest(): {
     results.push({
       success: false,
       message: 'Out of tolerance validation incorrectly passed',
-      details: { price: outsideToleranceAmount }
+      details: { price: outsideToleranceAmount },
+      timestamp: new Date()
     });
   } catch (error: any) {
     results.push({
       success: true,
       message: 'Out of tolerance validation correctly failed',
-      details: { error: error.message }
+      details: { error: error.message },
+      timestamp: new Date()
     });
   }
   
   // Determine if all tests passed
   const allTestsPassed = results.every(result => result.success);
+  const testsPassed = results.filter(result => result.success).length;
+  const failedTests = results.filter(result => !result.success).length;
   
   return {
     success: allTestsPassed,
-    results: results
+    results: results,
+    testsPassed,
+    failedTests
   };
 }
-

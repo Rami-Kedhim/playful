@@ -1,64 +1,31 @@
 
-export interface BoostStatus {
-  isActive: boolean;
-  activeBoostId?: string;
-  startTime?: Date;
-  endTime?: Date;
-  timeRemaining?: string;
-  progress?: number;  // Making it required to resolve type conflicts
-  profileId?: string;
-  remainingTime?: string;
-  expiresAt?: Date;
-  boostPackage?: BoostPackage;
-  pulseData?: {
-    type?: string;
-    intensity?: number;
-  }
-}
-
 export interface BoostPackage {
   id: string;
   name: string;
-  description: string;
   duration: string;
   price_ubx: number;
-  price?: number;
-  features: string[];
+  description?: string;
+  features?: string[];
+}
+
+export interface BoostStatus {
+  isActive: boolean;
+  startTime?: string;
+  endTime?: string;
+  remainingTime?: string;
+  packageId?: string;
+  packageName?: string;
+  progress?: number;
 }
 
 export interface BoostEligibility {
   isEligible: boolean;
-  eligible?: boolean; // For compatibility with components/boost/types.ts
-  reasons?: string[];
-  minimumProfileCompleteness?: number;
-  missingFields?: string[];
-  minRequiredBalance?: number;
+  reason?: string;
 }
 
-export interface BoostAnalytics {
-  additionalViews: number;
-  engagementIncrease: number;
-  rankingPosition: number;
-  effectiveness?: number;
-  views?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  clicks?: {
-    today: number;
-    yesterday: number;
-    weeklyAverage: number;
-    withBoost: number;
-    withoutBoost?: number;
-    increase?: number;
-  };
-  searchRanking?: {
-    withoutBoost: number;
-    withBoost: number;
-    improvement: number;
-  };
+export interface HermesBoostStatus {
+  position: number;
+  activeUsers: number;
+  estimatedVisibility: number;
+  lastUpdateTime: string;
 }

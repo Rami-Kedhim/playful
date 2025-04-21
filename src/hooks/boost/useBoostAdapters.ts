@@ -1,71 +1,76 @@
 
+import { BoostStatus, BoostEligibility, BoostPackage } from "@/types/boost";
+
 /**
- * Adapter functions to transform between different boost-related data models
+ * Adapts the BoostStatus to ensure all required fields have values
  */
-import { BoostStatus } from "@/types/boost";
-
-// Adapt from internal status to external status
-export function adaptBoostStatus(internalStatus: any): BoostStatus {
+export const adaptBoostStatus = (status: any): BoostStatus => {
   return {
-    isActive: internalStatus.isActive || false,
-    activeBoostId: internalStatus.activeBoostId || undefined,
-    startTime: internalStatus.startTime || undefined,
-    endTime: internalStatus.endTime || undefined,
-    timeRemaining: internalStatus.timeRemaining || undefined,
-    remainingTime: internalStatus.timeRemaining || "0 minutes",
-    expiresAt: internalStatus.endTime,
-    progress: typeof internalStatus.progress === 'number' ? internalStatus.progress : 0,
-    boostPackage: internalStatus.boostPackage || undefined,
-    profileId: internalStatus.profileId || undefined
+    isActive: status?.isActive || false,
+    startTime: status?.startTime || undefined,
+    endTime: status?.endTime || undefined,
+    remainingTime: status?.remainingTime || undefined,
+    packageId: status?.packageId || undefined,
+    packageName: status?.packageName || undefined,
+    progress: status?.progress || 0
   };
-}
+};
 
-// Adapt from internal eligibility to external eligibility
-export function adaptBoostEligibility(internalEligibility: any): any {
+/**
+ * Adapts the BoostEligibility to ensure all required fields have values
+ */
+export const adaptBoostEligibility = (eligibility: any): BoostEligibility => {
   return {
-    eligible: internalEligibility.isEligible || false,
-    reason: internalEligibility.reasons?.[0] || undefined
+    isEligible: eligibility?.isEligible || eligibility?.eligible || false,
+    reason: eligibility?.reason || eligibility?.ineligibilityReason || undefined
   };
-}
+};
 
-// Adapt from internal packages to external packages
-export function adaptBoostPackages(internalPackages: any[]): any[] {
-  return internalPackages.map(pkg => ({
-    id: pkg.id,
-    name: pkg.name,
-    description: pkg.description || "",
-    duration: typeof pkg.duration === 'number' ? `${pkg.duration}:00:00` : pkg.duration,
-    price_ubx: pkg.price,
-    features: pkg.features || []
+/**
+ * Adapts the BoostPackages array to ensure all required fields have values
+ */
+export const adaptBoostPackages = (packages: any[]): BoostPackage[] => {
+  if (!packages || !Array.isArray(packages)) return [];
+  
+  return packages.map(pkg => ({
+    id: pkg.id || `pkg-${Math.random().toString(36).substring(2, 9)}`,
+    name: pkg.name || "Unnamed Package",
+    duration: pkg.duration || "24:00:00",
+    price_ubx: pkg.price_ubx || pkg.price || 50,
+    description: pkg.description,
+    features: pkg.features
   }));
-}
+};
 
-// Fixed adapter for format duration function
-export function adaptFormatBoostDuration(formatFn: (duration: any) => string): (duration: string) => string {
-  // Create a wrapper function that handles string durations by parsing them
-  return (duration: string) => {
-    // Handle format like "HH:MM:SS"
-    if (duration.includes(':')) {
-      const parts = duration.split(':');
-      const hours = parseInt(parts[0], 10);
-      return formatFn(hours);
+/**
+ * Adapts the formatBoostDuration function
+ */
+export const adaptFormatBoostDuration = (formatFn: (duration: string) => string) => {
+  return (duration: string): string => {
+    try {
+      return formatFn(duration);
+    } catch (e) {
+      // Default formatting if the original function fails
+      const [hours, minutes] = duration.split(':');
+      if (hours === "24") return "24 hours";
+      if (hours === "48") return "2 days";
+      if (hours === "72") return "3 days";
+      if (hours === "168") return "1 week";
+      return `${hours} hours`;
     }
-    
-    // Try to parse as a number
-    const durationNum = parseFloat(duration);
-    if (!isNaN(durationNum)) {
-      return formatFn(durationNum);
-    }
-    
-    // Fallback
-    return duration;
   };
-}
+};
 
-// Fixed adapter for price function
-export function adaptGetBoostPrice(getPriceFn: (boostPackage?: any) => number): () => number {
-  // Create a wrapper function that takes no arguments
-  return () => {
-    return getPriceFn();
+/**
+ * Adapts the getBoostPrice function
+ */
+export const adaptGetBoostPrice = (priceFn: () => number) => {
+  return (): number => {
+    try {
+      return priceFn();
+    } catch (e) {
+      // Default price if the original function fails
+      return 50;
+    }
   };
-}
+};

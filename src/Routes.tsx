@@ -48,13 +48,14 @@ interface ProfilePageProps {
   profile?: any;
 }
 
-const ProfileWithStubs = (props: ProfilePageProps) => <ProfilePage {...props} />;
+// Fix props issue by making the component expect the correct props
+const Profile: React.FC<ProfilePageProps> = (props) => <ProfilePage {...props} />;
 
 const Routes = () => {
   return (
     <RouterRoutes>
       <Route path="/" element={<HomePage />} />
-      <Route path="/profile" element={<ProfileWithStubs />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/login" element={<LoginPage />} />
