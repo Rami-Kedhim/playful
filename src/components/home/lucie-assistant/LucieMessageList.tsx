@@ -23,13 +23,13 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
           key={message.id}
           className={`flex ${
             message.role === 'user' ? 'justify-end' : 'justify-start'
-          }`}
+          } animate-fade-in`}
         >
           <div
-            className={`rounded-lg px-4 py-2 max-w-[80%] ${
+            className={`rounded-lg px-4 py-2 max-w-[80%] shadow-sm ${
               message.role === 'user'
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-muted'
+                : 'bg-muted backdrop-blur-sm'
             }`}
           >
             {message.role === 'assistant' && (
@@ -40,7 +40,7 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
                 <span className="text-xs font-medium">Lucie</span>
               </div>
             )}
-            <p className="text-sm">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
             
             {/* Suggested Actions */}
             {message.role === 'assistant' && message.suggestedActions && message.suggestedActions.length > 0 && (
@@ -49,10 +49,32 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
                   <button
                     key={index}
                     onClick={() => onSuggestedActionClick(action)}
-                    className="text-xs bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 rounded-full px-3 py-1 transition-colors"
+                    className="text-xs bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 rounded-full px-3 py-1 transition-colors hover:scale-105 active:scale-95"
                   >
                     {action}
                   </button>
+                ))}
+              </div>
+            )}
+            
+            {/* Visual elements when present */}
+            {message.role === 'assistant' && message.visualElements && message.visualElements.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {message.visualElements.map((element, index) => (
+                  <div key={index} className="rounded-md overflow-hidden bg-black/5 dark:bg-white/5">
+                    {element.type === 'image' && (
+                      <img 
+                        src={element.data.url || element.data} 
+                        alt={element.data.alt || "AI generated image"} 
+                        className="w-full h-auto rounded-md"
+                      />
+                    )}
+                    {element.type === 'chart' && (
+                      <div className="p-2">
+                        <p className="text-xs text-muted-foreground">Chart visualization</p>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
@@ -63,8 +85,8 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
       {/* Typing indicator with enhanced styling */}
       {isTyping && (
         <div className="flex justify-start">
-          <div className="rounded-lg px-3 py-2 bg-muted/70 backdrop-blur-sm">
-            <LucieTypingIndicator size="small" />
+          <div className="rounded-lg px-3 py-2 bg-muted/70 backdrop-blur-sm shadow-sm animate-fade-in">
+            <LucieTypingIndicator size="small" showName={false} />
           </div>
         </div>
       )}

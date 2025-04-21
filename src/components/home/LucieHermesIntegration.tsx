@@ -20,11 +20,16 @@ export const LucieHermesIntegration = ({
   // Use Hermes insights to determine if Lucie should be shown
   const { insights, reportUserAction } = useHermesInsights();
   
+  // Extract relevant insights from the array
+  const boostOfferInsight = insights.find(i => i.type === 'boost');
+  const vrEventInsight = insights.find(i => i.type === 'vr_event');
+  const recommendationInsight = insights.find(i => i.type === 'recommendation');
+  
   // Default values if we can't find proper insights
-  const isLucieEnabled = false;
-  const boostOffer = insights.find(i => i.type === 'boostOffer')?.data?.boostOffer;
-  const vrEvent = insights.find(i => i.type === 'vrEvent')?.description;
-  const recommendedProfileId = insights.find(i => i.type === 'recommendation')?.data?.profileId;
+  const isLucieEnabled = insights.some(i => i.type === 'ai_enabled') || false;
+  const boostOffer = boostOfferInsight?.data?.boostOffer;
+  const vrEvent = vrEventInsight?.description;
+  const recommendedProfileId = recommendationInsight?.data?.profileId;
   
   useEffect(() => {
     // For demo purposes, show Lucie 50% of the time if not forced

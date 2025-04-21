@@ -9,13 +9,17 @@ interface LucieHeaderProps {
   onMinimize?: () => void;
   onSettings?: () => void;
   showAnimation?: boolean;
+  title?: string;
+  subtitle?: string;
 }
 
 const LucieHeader: React.FC<LucieHeaderProps> = ({ 
   onClose, 
   onMinimize,
   onSettings,
-  showAnimation = true
+  showAnimation = true,
+  title = "Lucie AI Assistant",
+  subtitle = "Your UberEscorts guide"
 }) => {
   const AnimatedDiv = showAnimation ? motion.div : 'div';
   
@@ -24,15 +28,21 @@ const LucieHeader: React.FC<LucieHeaderProps> = ({
       <div className="flex items-center">
         <AnimatedDiv 
           className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center mr-2"
-          initial={showAnimation ? { scale: 0.8 } : {}}
-          animate={showAnimation ? { scale: 1 } : {}}
+          initial={showAnimation ? { scale: 0.8, opacity: 0.5 } : {}}
+          animate={showAnimation ? { scale: 1, opacity: 1 } : {}}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
         >
           <span className="text-lg font-semibold">L</span>
         </AnimatedDiv>
         <div>
-          <h3 className="font-medium text-sm">Lucie AI Assistant</h3>
-          <p className="text-xs text-white/70">Your UberEscorts guide</p>
+          <AnimatedDiv
+            initial={showAnimation ? { y: -10, opacity: 0 } : {}}
+            animate={showAnimation ? { y: 0, opacity: 1 } : {}}
+            transition={{ delay: 0.1, duration: 0.3 }}
+          >
+            <h3 className="font-medium text-sm">{title}</h3>
+            <p className="text-xs text-white/70">{subtitle}</p>
+          </AnimatedDiv>
         </div>
       </div>
       

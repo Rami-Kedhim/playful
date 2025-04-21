@@ -1,175 +1,148 @@
+
 /**
  * Hook for accessing HERMES intelligence in React components
  * This manages the state and interaction with the HERMES API
  * Enhanced with AI companion recommendations
  */
 import { useState, useCallback, useEffect } from "react";
-import hermesApiService, { HermesResponse, HermesUserAction } from "@/services/hermes/HermesApiService";
 
 export interface HermesInsight {
-  isLucieEnabled: boolean;
-  recommendedProfileId?: string;
-  recommendedCompanionId?: string;
-  boostOffer?: {
-    value: string;
-    expires: string;
-    category?: string;
+  id: string;
+  type: 'seo' | 'traffic' | 'boost' | 'vr_event' | 'recommendation' | 'ai_enabled';
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  created: string;
+  status: 'new' | 'viewed' | 'actioned';
+  data?: {
+    boostOffer?: {
+      profileId?: string;
+      recommendation?: string;
+      potentialIncrease?: string;
+      cost?: string;
+      duration?: string;
+      value?: string;
+      expires?: string;
+      category?: string;
+    };
+    profileId?: string;
+    affectedPages?: number;
+    potentialImpact?: string;
+    increase?: string;
+    source?: string;
   };
-  vrEvent?: string;
-  isLoading: boolean;
-  error?: string;
-  aiSuggestion?: {
-    message: string;
-    confidence: number;
-  };
+  source: string;
 }
 
-export function useHermesInsights(userId?: string) {
-  const [insights, setInsights] = useState<HermesInsight>({
-    isLucieEnabled: false,
-    isLoading: false
-  });
-  
-  /**
-   * Report a user action to HERMES and get insights
-   * Now includes AI companion recommendations
-   */
-  const reportUserAction = useCallback(async (
-    action: string,
-    category?: string,
-    data?: Record<string, any>
-  ) => {
-    if (!userId) {
-      console.warn('Cannot report to HERMES: missing userId');
-      return;
-    }
-    
-    try {
-      setInsights(prev => ({ ...prev, isLoading: true }));
-      
-      // Prepare action data
-      const actionData: HermesUserAction = {
-        user_id: userId,
-        action,
-        category,
-        interaction_data: data // New field for more context
-      };
-      
-      // Get response from HERMES
-      const response = await hermesApiService.analyzeUserAction(actionData);
-      
-      // Update insights from response
-      setInsights({
-        isLucieEnabled: response.trigger_luxlife,
-        recommendedProfileId: response.recommended_profile,
-        recommendedCompanionId: response.recommended_companion_id, // New AI companion recommendation
-        boostOffer: response.boost_offer,
-        vrEvent: response.vr_event,
-        aiSuggestion: response.ai_suggestion, // New AI suggestion
-        isLoading: false
-      });
-      
-      return response;
-    } catch (error) {
-      console.error('Error getting HERMES insights:', error);
-      setInsights(prev => ({ 
-        ...prev, 
-        isLoading: false,
-        error: 'Failed to get HERMES insights' 
-      }));
-      return null;
-    }
-  }, [userId]);
+interface HermesUserAction {
+  user_id: string;
+  action: string;
+  category?: string;
+  interaction_data?: Record<string, any>;
+}
 
-  /**
-   * Record profile view in HERMES
-   */
-  const recordProfileView = useCallback((profileId: string, sessionTime?: number) => {
-    return reportUserAction('viewed_profile', 'profile', { 
-      sessionTime 
-    });
-  }, [reportUserAction]);
+export function useHermesInsights() {
+  const [insights, setInsights] = useState<HermesInsight[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
   
-  /**
-   * Record favorites action in HERMES
-   */
-  const recordFavorite = useCallback((profileId: string) => {
-    return reportUserAction('selected_favorite', 'profile');
-  }, [reportUserAction]);
-  
-  /**
-   * Record boost request in HERMES
-   */
-  const recordBoostRequest = useCallback(() => {
-    return reportUserAction('requested_boost');
-  }, [reportUserAction]);
-  
-  /**
-   * Record AI companion interaction in HERMES
-   * New method to track AI companion interactions
-   */
-  const recordAICompanionInteraction = useCallback((companionId: string, messageCount: number, interactionData?: Record<string, any>) => {
-    return reportUserAction('ai_companion_interaction', 'ai_companion', {
-      location: companionId,
-      sessionTime: messageCount,
-      ...interactionData
-    });
-  }, [reportUserAction]);
-  
-  /**
-   * Get AI companion recommendations based on user profile
-   */
-  const getAICompanionRecommendations = useCallback(async () => {
-    if (!userId) {
-      console.warn('Cannot get AI recommendations: missing userId');
-      return [];
-    }
+  // Mock data generator for insights
+  const generateMockInsights = useCallback((): HermesInsight[] => {
+    const mockInsights: HermesInsight[] = [];
     
-    try {
-      setInsights(prev => ({ ...prev, isLoading: true }));
-      
-      // Get recommendations from HERMES
-      const response = await hermesApiService.getCompanionRecommendations(userId);
-      
-      setInsights(prev => ({ 
-        ...prev,
-        isLoading: false
-      }));
-      
-      return response.recommendations || [];
-    } catch (error) {
-      console.error('Error getting AI recommendations:', error);
-      setInsights(prev => ({ 
-        ...prev, 
-        isLoading: false,
-        error: 'Failed to get AI companion recommendations' 
-      }));
-      
-      return [];
-    }
-  }, [userId]);
-  
-  /**
-   * Get system health metrics
-   */
-  const getHealthMetrics = useCallback(() => {
-    // Mock implementation for system health metrics
-    return {
-      load: Math.random(),
-      userEngagement: Math.random(),
-      lastUpdated: Date.now()
-    };
+    // SEO insights
+    mockInsights.push({
+      id: 'ins-1',
+      type: 'seo',
+      title: 'Meta descriptions need improvement',
+      description: 'Your escort profiles are missing optimized meta descriptions',
+      priority: 'high',
+      created: new Date().toISOString(),
+      status: 'new',
+      data: {
+        affectedPages: 15,
+        potentialImpact: 'high'
+      },
+      source: 'Hermes SEO Analysis'
+    });
+    
+    // Traffic insights
+    mockInsights.push({
+      id: 'ins-2',
+      type: 'traffic',
+      title: 'Traffic spike detected',
+      description: 'Unusual traffic pattern detected from search engines',
+      priority: 'medium',
+      created: new Date().toISOString(),
+      status: 'new',
+      data: {
+        increase: '45%',
+        source: 'Google'
+      },
+      source: 'Traffic Analysis'
+    });
+    
+    // Boost offer
+    mockInsights.push({
+      id: 'ins-3',
+      type: 'boost',
+      title: 'Boost opportunity identified',
+      description: 'Profile visibility can be improved with strategic boost',
+      priority: 'medium',
+      created: new Date().toISOString(),
+      status: 'new',
+      data: {
+        boostOffer: {
+          profileId: 'prof-123',
+          recommendation: 'weekend-boost',
+          potentialIncrease: '35%',
+          cost: '25 credits',
+          duration: '48 hours'
+        }
+      },
+      source: 'Hermes Analytics'
+    });
+    
+    return mockInsights;
   }, []);
+
+  const refreshInsights = useCallback(async () => {
+    setLoading(true);
+    try {
+      // In a real app, this would be an API call
+      const newInsights = generateMockInsights();
+      setInsights(newInsights);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch Hermes insights');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [generateMockInsights]);
+  
+  // Filter insights by type
+  const getInsightsByType = useCallback((type: string): HermesInsight[] => {
+    return insights.filter(insight => insight.type === type);
+  }, [insights]);
+  
+  // Report user actions on insights
+  const reportUserAction = useCallback((action: string, category?: string) => {
+    console.log(`User performed ${action} in category ${category || 'general'}`);
+    // In a real app, this would send telemetry data
+  }, []);
+  
+  useEffect(() => {
+    refreshInsights();
+  }, [refreshInsights]);
   
   return {
     insights,
-    reportUserAction,
-    recordProfileView,
-    recordFavorite,
-    recordBoostRequest,
-    recordAICompanionInteraction,
-    getAICompanionRecommendations,
-    getHealthMetrics
+    loading,
+    error,
+    refreshInsights,
+    getInsightsByType,
+    reportUserAction
   };
 }
 

@@ -5,12 +5,14 @@ interface LucieTypingIndicatorProps {
   className?: string;
   size?: 'small' | 'medium' | 'large';
   avatarSize?: 'small' | 'medium' | 'large';
+  showName?: boolean;
 }
 
 const LucieTypingIndicator = ({
   className = "",
   size = "medium",
-  avatarSize = "medium"
+  avatarSize = "medium",
+  showName = true
 }: LucieTypingIndicatorProps) => {
   const dotSize = {
     small: "w-1 h-1 mx-[1px]",
@@ -34,7 +36,7 @@ const LucieTypingIndicator = ({
         L
       </div>
       <div className="flex flex-col">
-        <span className="text-xs text-white/70 mb-1 font-medium">Lucie</span>
+        {showName && <span className="text-xs text-white/70 mb-1 font-medium">Lucie</span>}
         <div className="flex items-center space-x-0.5 bg-black/20 px-3 py-1.5 rounded-xl">
           <div className={`rounded-full bg-white/80 ${dotSize} animate-bounce`} style={{ animationDelay: '0ms' }}></div>
           <div className={`rounded-full bg-white/80 ${dotSize} animate-bounce`} style={{ animationDelay: '150ms' }}></div>
