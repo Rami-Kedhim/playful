@@ -5,6 +5,12 @@ import { useToast } from '@/hooks/use-toast';
 import { LucieMessage } from './ai-lucie/types';
 import { useAuth } from '@/hooks/auth/useAuth';
 
+interface RouteContextSafe {
+  userId: string;
+  walletId?: string;
+  [key: string]: any;
+}
+
 export function useLucieAssistant() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<LucieMessage[]>([]);
@@ -43,8 +49,7 @@ export function useLucieAssistant() {
       // Provide userId for context or fallback to 'anonymous'
       const userId = user?.id || 'anonymous';
 
-      const sessionId = 'lucie-' + Date.now().toString();
-      const userContext = { userId };
+      const userContext: RouteContextSafe = { userId };
 
       const response = await lucieOrchestrator.routePrompt(content, userContext);
 

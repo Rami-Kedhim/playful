@@ -68,8 +68,8 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
     try {
       const userContext = {
         userId: user.id,
-        // walletId may not exist as a property on user, so safely get it or undefined
-        walletId: (user as any).walletId || undefined,
+        // walletId is optional, safely read if exists
+        walletId: (user as any)?.walletId || undefined,
         personalityType,
         characterId: companionId,
       };
