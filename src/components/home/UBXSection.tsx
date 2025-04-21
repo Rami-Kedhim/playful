@@ -5,13 +5,13 @@ import { Link } from "react-router-dom";
 
 const UBXCoinIcon = () => {
   return (
-    // Redesign the UBX token icon to match a golden crypto coin style with radial gradients and rich gold tones
+    // Golden cryptocoin style icon with radial gradients and rich gold tones, matching project style
     <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600 shadow-lg flex items-center justify-center select-none">
       {/* Outer golden rim with shine */}
       <div className="absolute inset-0 rounded-full border-4 border-yellow-700 shadow-inner" />
       <div className="absolute inset-0 rounded-full bg-gradient-radial from-yellow-300 via-yellow-400 to-yellow-700 opacity-40" />
 
-      {/* Inner coin design: circular bands and small gem-like shapes */}
+      {/* Inner coin design: circular bands and gems */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 200 200"
@@ -20,9 +20,9 @@ const UBXCoinIcon = () => {
         stroke="currentColor"
         strokeWidth="2"
       >
-        {/* Main coin circle with subtle gradient */}
+        {/* Main coin circle with gradient fill */}
         <circle cx="100" cy="100" r="90" stroke="gold" strokeWidth="4" fill="url(#goldenGradient)" />
-        {/* Inner rings for depth */}
+        {/* Inner rings */}
         <circle cx="100" cy="100" r="70" stroke="goldenrod" strokeWidth="2" />
         <circle cx="100" cy="100" r="50" stroke="goldenrod" strokeWidth="1.5" />
         {/* Corner diamond gems */}
@@ -30,7 +30,7 @@ const UBXCoinIcon = () => {
         <circle cx="150" cy="50" r="5" fill="goldenrod" />
         <circle cx="50" cy="150" r="5" fill="goldenrod" />
         <circle cx="150" cy="150" r="5" fill="goldenrod" />
-        {/* Central UBX letter design */}
+        {/* Central UBX lettering */}
         <text
           x="100"
           y="110"
@@ -161,3 +161,4 @@ const UBXSection = () => {
 };
 
 export default UBXSection;
+
