@@ -45,10 +45,11 @@ export function useLucieAssistant() {
 
       // Use routePrompt from Lucie orchestrator
       // Note: orchestrateResponse returns { responseText, meta }
-      const { responseText } = await lucieAIOrchestrator.orchestrateResponse(sessionId, content, userContext, messages);
+      const response = await lucieAIOrchestrator.orchestrateResponse(sessionId, content, userContext, messages);
 
+      // Fix: properties exist on response.responseText and meta, so use response.responseText here
       // moderation flags are not returned in the current orchestrateResponse interface
-      // So we skip moderation checks here - if needed, adjust LucieAIOrchestrator to provide them
+      // So skip moderation checks here
 
       // Add user message with proper timestamp
       const userMessage: LucieMessage = {
@@ -62,7 +63,7 @@ export function useLucieAssistant() {
       const lucieMessage: LucieMessage = {
         id: 'lucie-' + Date.now().toString(),
         role: 'assistant',
-        content: responseText,
+        content: response.responseText,
         timestamp: new Date(),
         emotion: 'neutral'
       };
@@ -89,9 +90,9 @@ export function useLucieAssistant() {
     error,
     sendMessage,
     toggleChat,
-    // Removed 'handleSuggestedActionClick' as it was not implemented
   };
 }
 
 export type { LucieMessage } from './ai-lucie/types';
 export default useLucieAssistant;
+

@@ -74,17 +74,15 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       };
 
       // Use Lucie AI orchestrator to get response with token gating and wallet deduction
-      const { responseText } = await lucieAIOrchestrator.orchestrateResponse(
+      const response = await lucieAIOrchestrator.orchestrateResponse(
         sessionId,
         userInput,
         userContext,
         messages
       );
 
-      // No moderation flags in current orchestrator, skipping checks
-
-      // Append assistant reply with timestamp
-      const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: responseText, timestamp: new Date() };
+      // Fix to use response.responseText property
+      const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: response.responseText, timestamp: new Date() };
       setMessages((prev) => [...prev, assistantMessage]);
 
     } catch (err: any) {
@@ -127,3 +125,4 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
 };
 
 export default AICompanionChat;
+

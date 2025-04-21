@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { X, MessageCircle, Sparkles, SendIcon, Image, ArrowRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,9 +26,10 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
     sendMessage,
     toggleChat,
   } = useLucieAssistant();
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [setMessages] = useState<LucieMessage[]>([]);
+  // Fix: get both messages and setMessages
+  const [localMessages, setLocalMessages] = useState<LucieMessage[]>([]);
   
   // Set initial open state from props
   useEffect(() => {
@@ -36,7 +38,7 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   // Add custom initial message if provided
   useEffect(() => {
     if (customInitialMessage && messages.length === 1) {
@@ -48,21 +50,22 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
       };
       
       // Replace the default welcome message with the custom one
-      // We must update state to trigger re-render properly
-      // But to keep immutability, use setMessages
-      setMessages(prevMessages => {
+      setLocalMessages(prevMessages => {
         if (prevMessages.length === 1) {
           return [customMessage];
         }
         return prevMessages;
       });
+    } else {
+      // If no custom message or messages length changed, sync localMessages to messages
+      setLocalMessages(messages);
     }
   }, [customInitialMessage, messages]);
-  
+
   // Auto-scroll to the bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [localMessages, isTyping]);
 
   return (
     <>
@@ -81,7 +84,7 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
         <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col">
           <LucieHeader onClose={isOpen ? toggleChat : onClose} />
           <LucieMessageList 
-            messages={messages} 
+            messages={localMessages} 
             isTyping={isTyping}
             messagesEndRef={messagesEndRef}
             onSuggestedActionClick={() => {}} // Removed reference to missing function
@@ -129,3 +132,4 @@ const LucieTypingStyles = () => (
 );
 
 export default LucieAssistant;
+
