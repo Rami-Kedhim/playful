@@ -10,6 +10,10 @@ export interface BoostStatus {
   remainingTime?: string;
   expiresAt?: Date;
   boostPackage?: BoostPackage;
+  pulseData?: {
+    type?: string;
+    intensity?: number;
+  }
 }
 
 export interface BoostPackage {

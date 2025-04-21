@@ -1,17 +1,20 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useParams } from "react-router-dom";
 
-const Profile = () => {
+const EscortProfile = () => {
+  const { id } = useParams();
+
   return (
     <div className="container mx-auto py-10">
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
+          <CardTitle>Escort Profile: {id}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center">
-            <p>Profile placeholder - not implemented yet</p>
+            <p>Escort Profile placeholder - not implemented yet</p>
           </div>
         </CardContent>
       </Card>
@@ -19,4 +22,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default EscortProfile;

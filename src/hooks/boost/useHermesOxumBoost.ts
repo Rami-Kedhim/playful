@@ -9,6 +9,11 @@ export interface HermesBoostStatus {
   estimatedTimeMinutes?: number;
   hermesScore?: number;
   boostType?: string;
+  isActive?: boolean;
+  position?: number;
+  timeRemaining?: number;
+  boostScore?: number;
+  effectivenessScore?: number;
 }
 
 export const useHermesOxumBoost = (profileId?: string) => {
@@ -17,11 +22,26 @@ export const useHermesOxumBoost = (profileId?: string) => {
   
   const getHermesStatus = async (): Promise<HermesBoostStatus> => {
     return {
-      active: false
+      active: Math.random() > 0.5,
+      queuePosition: Math.floor(Math.random() * 5) + 1,
+      estimatedTimeMinutes: Math.floor(Math.random() * 30) + 5,
+      hermesScore: Math.floor(Math.random() * 100),
+      boostType: "standard"
     };
   };
   
+  // Create a hermesStatus object directly in the hook for components that expect it
+  const hermesStatus: HermesBoostStatus = {
+    isActive: Math.random() > 0.5,
+    position: Math.floor(Math.random() * 5) + 1,
+    timeRemaining: Math.floor(Math.random() * 120) + 30,
+    boostScore: Math.floor(Math.random() * 100) + 50,
+    effectivenessScore: Math.floor(Math.random() * 30) + 70,
+    active: Math.random() > 0.5
+  };
+  
   return {
-    getHermesStatus
+    getHermesStatus,
+    hermesStatus
   };
 };

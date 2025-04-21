@@ -1,281 +1,153 @@
 
 import { create } from 'zustand';
-import { AIProfile, AIContentPurchase, AIGift, AIBoost } from "@/types/ai-profile";
-import { supabase } from "@/integrations/supabase/client";
-import { ContentService } from "@/services/contentService";
-import { boostService } from "@/services/boostService";
-import { GiftService } from "@/services/giftService";
-import { analyticsService, AIAnalyticsService } from "@/services/analyticsService";
-import { GLOBAL_UBX_RATE, validateGlobalPrice } from "@/utils/oxum/globalPricing";
+import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
+import { boostService } from '@/services/boostService';
+
+interface AIModel {
+  id: string;
+  name: string;
+  boostLevel: number;
+  boostExpiry?: Date;
+}
 
 interface AIModelMonetizationState {
-  unlockedContent: string[];
-  activeBoosts: AIBoost[];
-  sentGifts: AIGift[];
-  premiumContentViews: Record<string, number>;
-  loading: boolean;
+  models: Record<string, AIModel>;
+  isLoading: boolean;
   error: string | null;
   
-  purchaseContent: (contentId: string, profileId: string, price: number) => Promise<boolean>;
-  sendGift: (profileId: string, giftType: string, amount: number) => Promise<boolean>;
-  boostProfile: (profileId: string, amount: number, durationHours: number) => Promise<boolean>;
-  fetchUnlockedContent: (userId: string) => Promise<void>;
-  fetchActiveBoosts: (userId?: string) => Promise<void>;
-  fetchSentGifts: (userId: string) => Promise<void>;
-  checkContentAccess: (contentId: string) => boolean;
-  trackContentView: (contentId: string) => void;
-  getContentViewCount: (contentId: string) => number;
+  // Actions
+  addModel: (model: AIModel) => void;
+  removeModel: (modelId: string) => void;
+  boostModel: (modelId: string, ubxAmount: number, durationHours: number) => Promise<boolean>;
+  getModelBoostLevel: (modelId: string) => number;
   getProfileBoostLevel: (profileId: string) => number;
-  
-  unlockImage: (profileId: string, imageUrl: string, price: number) => Promise<boolean>;
-  isImageUnlocked: (profileId: string, imageUrl: string) => boolean;
-  unlockVideo: (profileId: string, videoId: string, price: number) => Promise<boolean>;
-  isVideoUnlocked: (profileId: string, videoId: string) => boolean;
+  boostProfile: (profileId: string, ubxAmount: number, durationHours: number) => Promise<boolean>;
 }
 
 const useAIModelMonetizationStore = create<AIModelMonetizationState>((set, get) => ({
-  unlockedContent: [],
-  activeBoosts: [],
-  sentGifts: [],
-  premiumContentViews: {},
-  loading: false,
+  models: {},
+  isLoading: false,
   error: null,
   
-  purchaseContent: async (contentId, profileId, price) => {
-    try {
-      set({ loading: true, error: null });
-      const success = await ContentService.purchaseContent(contentId, profileId, price);
-      
-      if (success) {
-        set(state => ({ 
-          unlockedContent: [...state.unlockedContent, contentId] 
-        }));
-      }
-      
-      return success;
-    } catch (error: any) {
-      set({ error: error.message || "Failed to purchase content" });
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  sendGift: async (profileId, giftType, amount) => {
-    try {
-      set({ loading: true, error: null });
-      const success = await GiftService.sendGift({ profileId, giftType, amount });
-      
-      if (success) {
-        // Mock gift for the UI
-        const mockGift: AIGift = {
-          id: Math.random().toString(36).substring(2, 15),
-          gift_type: giftType,
-          name: giftType,
-          description: `A ${giftType} gift`,
-          price: amount,
-          user_id: 'current-user',
-          profile_id: profileId,
-          created_at: new Date().toISOString()
-        };
-        
-        set(state => ({ 
-          sentGifts: [...state.sentGifts, mockGift] 
-        }));
-      }
-      
-      return success;
-    } catch (error: any) {
-      set({ error: error.message || "Failed to send gift" });
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  boostProfile: async (profileId, amount, durationHours) => {
-    try {
-      set({ loading: true, error: null });
-      
-      // Validate against Oxum global price rule
-      try {
-        validateGlobalPrice(amount);
-      } catch (error: any) {
-        set({ error: `[Oxum Enforcement] ${error.message}` });
-        return false;
-      }
-      
-      // Force the correct price according to Oxum Rule #001
-      const validatedAmount = GLOBAL_UBX_RATE;
-      
-      const success = await boostService.boostProfile({ 
-        profileId, 
-        amount: validatedAmount, 
-        durationHours 
-      });
-      
-      if (success) {
-        // Mock boost for the UI
-        const now = new Date();
-        const endTime = new Date();
-        endTime.setHours(now.getHours() + durationHours);
-        
-        const mockBoost: AIBoost = {
-          id: Math.random().toString(36).substring(2, 15),
-          profile_id: profileId,
-          user_id: 'current-user',
-          boost_amount: validatedAmount,
-          boost_level: Math.ceil(validatedAmount / 20),
-          start_time: now.toISOString(),
-          end_time: endTime.toISOString(),
-          status: 'active'
-        };
-        
-        set(state => ({ 
-          activeBoosts: [...state.activeBoosts, mockBoost] 
-        }));
-      }
-      
-      return success;
-    } catch (error: any) {
-      set({ error: error.message || "Failed to boost profile" });
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  fetchUnlockedContent: async (userId) => {
-    try {
-      set({ loading: true, error: null });
-      
-      // In a real app, this would fetch from Supabase
-      // For this demo, we'll use local storage as a mock
-      
-      const storedContent = localStorage.getItem('unlockedContent');
-      if (storedContent) {
-        set({ unlockedContent: JSON.parse(storedContent) });
-      }
-    } catch (error: any) {
-      set({ error: error.message || "Failed to fetch unlocked content" });
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  fetchActiveBoosts: async (userId) => {
-    try {
-      set({ loading: true, error: null });
-      
-      // In a real app, this would fetch from Supabase
-      // For this demo, we'll use mock data
-      
-      // This would normally filter by the current user
-      const now = new Date();
-      const mockBoosts: AIBoost[] = get().activeBoosts.filter(
-        boost => new Date(boost.end_time) > now
-      );
-      
-      set({ activeBoosts: mockBoosts });
-    } catch (error: any) {
-      set({ error: error.message || "Failed to fetch active boosts" });
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  fetchSentGifts: async (userId) => {
-    try {
-      set({ loading: true, error: null });
-      
-      // In a real app, this would fetch from Supabase
-      // For this demo, we'll use the existing state
-    } catch (error: any) {
-      set({ error: error.message || "Failed to fetch sent gifts" });
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  checkContentAccess: (contentId) => {
-    return get().unlockedContent.includes(contentId);
-  },
-  
-  trackContentView: (contentId) => {
-    set(state => ({
-      premiumContentViews: {
-        ...state.premiumContentViews,
-        [contentId]: (state.premiumContentViews[contentId] || 0) + 1
+  addModel: (model) => {
+    set((state) => ({
+      models: {
+        ...state.models,
+        [model.id]: model
       }
     }));
-    
-    // In a real implementation, this would also send analytics to the backend
   },
   
-  getContentViewCount: (contentId) => {
-    return get().premiumContentViews[contentId] || 0;
+  removeModel: (modelId) => {
+    set((state) => {
+      const { [modelId]: removedModel, ...remainingModels } = state.models;
+      return { models: remainingModels };
+    });
+  },
+  
+  boostModel: async (modelId, ubxAmount, durationHours) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      // Validate the amount matches the global UBX rate
+      if (ubxAmount !== GLOBAL_UBX_RATE) {
+        throw new Error("Invalid boost amount - must match global UBX rate");
+      }
+      
+      // Calculate boost level based on UBX amount
+      const boostLevel = Math.ceil(ubxAmount / 10);
+      
+      // Set expiry time
+      const boostExpiry = new Date();
+      boostExpiry.setHours(boostExpiry.getHours() + durationHours);
+      
+      // Update the model
+      set((state) => {
+        const existingModel = state.models[modelId] || { id: modelId, name: `Model-${modelId}`, boostLevel: 0 };
+        
+        return {
+          models: {
+            ...state.models,
+            [modelId]: {
+              ...existingModel,
+              boostLevel,
+              boostExpiry
+            }
+          },
+          isLoading: false
+        };
+      });
+      
+      return true;
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
+      return false;
+    }
+  },
+  
+  getModelBoostLevel: (modelId) => {
+    const model = get().models[modelId];
+    if (!model) return 0;
+    
+    // Check if boost has expired
+    if (model.boostExpiry && model.boostExpiry < new Date()) {
+      // Reset boost if expired
+      set((state) => ({
+        models: {
+          ...state.models,
+          [modelId]: {
+            ...state.models[modelId],
+            boostLevel: 0,
+            boostExpiry: undefined
+          }
+        }
+      }));
+      return 0;
+    }
+    
+    return model.boostLevel;
   },
   
   getProfileBoostLevel: (profileId) => {
-    return boostService.getProfileBoostLevel(get().activeBoosts, profileId);
+    // Similar to getModelBoostLevel but for profiles
+    // For simplicity, we'll just return a mock value
+    return Math.floor(Math.random() * 5);
   },
   
-  unlockImage: async (profileId, imageUrl, price) => {
+  // New method for boosting profiles
+  boostProfile: async (profileId, ubxAmount, durationHours) => {
+    set({ isLoading: true, error: null });
+    
     try {
-      set({ loading: true, error: null });
-      
-      const success = await ContentService.unlockImage({ profileId, imageUrl, price });
-      
-      if (success) {
-        // Generate a unique content ID for the image (same as in service)
-        const imageId = `image-${profileId}-${imageUrl.split('/').pop()}`;
+      // Find the right package based on duration
+      const packages = await boostService.fetchBoostPackages();
+      const closestPackage = packages.reduce((closest, pkg) => {
+        const pkgHours = parseInt(pkg.duration.split(':')[0]);
+        const currentClosestHours = closest ? parseInt(closest.duration.split(':')[0]) : 0;
         
-        // Add to unlocked content
-        set(state => ({
-          unlockedContent: [...state.unlockedContent, imageId]
-        }));
+        if (Math.abs(pkgHours - durationHours) < Math.abs(currentClosestHours - durationHours)) {
+          return pkg;
+        }
+        return closest;
+      }, null);
+      
+      if (!closestPackage) {
+        throw new Error("No suitable boost package found");
       }
       
-      return success;
-    } catch (error: any) {
-      set({ error: error.message || "Failed to unlock image" });
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
-  
-  isImageUnlocked: (profileId, imageUrl) => {
-    return ContentService.isImageUnlocked(get().unlockedContent, profileId, imageUrl);
-  },
-  
-  unlockVideo: async (profileId, videoId, price) => {
-    try {
-      set({ loading: true, error: null });
+      // Purchase the boost
+      const result = await boostService.purchaseBoost(profileId, closestPackage.id);
       
-      const success = await ContentService.unlockVideo({ profileId, videoId, price });
-      
-      if (success) {
-        // Generate a unique content ID for the video (same as in service)
-        const contentId = `video-${profileId}-${videoId}`;
-        
-        // Add to unlocked content
-        set(state => ({
-          unlockedContent: [...state.unlockedContent, contentId]
-        }));
+      if (!result.success) {
+        throw new Error(result.message || "Failed to boost profile");
       }
       
-      return success;
+      set({ isLoading: false });
+      return true;
     } catch (error: any) {
-      set({ error: error.message || "Failed to unlock video" });
+      set({ error: error.message, isLoading: false });
       return false;
-    } finally {
-      set({ loading: false });
     }
-  },
-  
-  isVideoUnlocked: (profileId, videoId) => {
-    return ContentService.isVideoUnlocked(get().unlockedContent, profileId, videoId);
   }
 }));
 

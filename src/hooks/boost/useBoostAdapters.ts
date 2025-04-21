@@ -1,71 +1,71 @@
 
 /**
- * Adapters to help transition between different boost systems
+ * Adapter functions to transform between different boost-related data models
  */
+import { BoostStatus } from "@/types/boost";
 
-import { formatDurationString } from '@/utils/formatters';
-
-/**
- * Adapter to convert boost status from legacy format to PULSE format
- */
-export const adaptBoostStatus = (status: any) => {
-  if (!status) {
-    return { isActive: false, progress: 0 };
-  }
-
+// Adapt from internal status to external status
+export function adaptBoostStatus(internalStatus: any): BoostStatus {
   return {
-    ...status,
-    progress: status.progress || 0,
+    isActive: internalStatus.isActive || false,
+    activeBoostId: internalStatus.activeBoostId || undefined,
+    startTime: internalStatus.startTime || undefined,
+    endTime: internalStatus.endTime || undefined,
+    timeRemaining: internalStatus.timeRemaining || undefined,
+    remainingTime: internalStatus.timeRemaining || "0 minutes",
+    expiresAt: internalStatus.endTime,
+    progress: typeof internalStatus.progress === 'number' ? internalStatus.progress : 0,
+    boostPackage: internalStatus.boostPackage || undefined,
+    profileId: internalStatus.profileId || undefined
   };
-};
+}
 
-/**
- * Adapter to convert boost eligibility from legacy format to PULSE format
- */
-export const adaptBoostEligibility = (eligibility: any) => {
-  if (!eligibility) {
-    return { eligible: true };
-  }
-
+// Adapt from internal eligibility to external eligibility
+export function adaptBoostEligibility(internalEligibility: any): any {
   return {
-    eligible: eligibility.isEligible || true,
-    reason: eligibility.reasons?.join(', '),
+    eligible: internalEligibility.isEligible || false,
+    reason: internalEligibility.reasons?.[0] || undefined
   };
-};
+}
 
-/**
- * Adapter to convert boost packages from legacy format to PULSE format
- */
-export const adaptBoostPackages = (packages: any[]) => {
-  if (!packages || !packages.length) {
-    return [];
-  }
-
-  return packages.map((pkg) => ({
-    ...pkg,
-    price_ubx: pkg.price || pkg.price_ubx || 0,
+// Adapt from internal packages to external packages
+export function adaptBoostPackages(internalPackages: any[]): any[] {
+  return internalPackages.map(pkg => ({
+    id: pkg.id,
+    name: pkg.name,
+    description: pkg.description || "",
+    duration: typeof pkg.duration === 'number' ? `${pkg.duration}:00:00` : pkg.duration,
+    price_ubx: pkg.price,
+    features: pkg.features || []
   }));
-};
+}
 
-/**
- * Adapter to format boost duration
- */
-export const adaptFormatBoostDuration = (formatter: (durationStr: string) => string) => {
-  return (hours: number) => {
-    // Convert hours to "HH:MM:SS" format
-    const hoursInt = Math.floor(hours);
-    const minutesInt = Math.floor((hours - hoursInt) * 60);
-    const durationStr = `${hoursInt.toString().padStart(2, '0')}:${minutesInt.toString().padStart(2, '0')}:00`;
+// Fixed adapter for format duration function
+export function adaptFormatBoostDuration(formatFn: (duration: any) => string): (duration: string) => string {
+  // Create a wrapper function that handles string durations by parsing them
+  return (duration: string) => {
+    // Handle format like "HH:MM:SS"
+    if (duration.includes(':')) {
+      const parts = duration.split(':');
+      const hours = parseInt(parts[0], 10);
+      return formatFn(hours);
+    }
     
-    return formatter(durationStr);
+    // Try to parse as a number
+    const durationNum = parseFloat(duration);
+    if (!isNaN(durationNum)) {
+      return formatFn(durationNum);
+    }
+    
+    // Fallback
+    return duration;
   };
-};
+}
 
-/**
- * Adapter to get boost price
- */
-export const adaptGetBoostPrice = (getPrice: () => number) => {
-  return (packageId?: string) => {
-    return getPrice();
+// Fixed adapter for price function
+export function adaptGetBoostPrice(getPriceFn: (boostPackage?: any) => number): () => number {
+  // Create a wrapper function that takes no arguments
+  return () => {
+    return getPriceFn();
   };
-};
+}

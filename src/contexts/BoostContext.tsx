@@ -105,8 +105,14 @@ export const BoostProvider = ({ children }: BoostProviderProps) => {
     return analytics;
   };
 
-  const value = {
-    boostStatus,
+  // Create a fixed boostStatus object that includes the required progress property
+  const enhancedBoostStatus: BoostStatus = {
+    ...boostStatus,
+    progress: typeof boostStatus.progress === 'number' ? boostStatus.progress : 0
+  };
+
+  const value: BoostContextType = {
+    boostStatus: enhancedBoostStatus,
     isLoading,
     error,
     dailyBoostUsage,
