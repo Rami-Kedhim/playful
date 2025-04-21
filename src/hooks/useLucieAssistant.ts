@@ -1,26 +1,16 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { useUserContext } from './ai-lucie/useUserContext';
-import { useLucieAPI } from './ai-lucie/useLucieAPI';
-import { useFallbackResponses } from './ai-lucie/useFallbackResponses';
-import { useMessageFormatting } from './ai-lucie/useMessageFormatting';
+import { lucieAIOrchestrator } from '@/utils/core/aiOrchestration';
+import { useToast } from '@/components/ui/use-toast';
 import { LucieMessage } from './ai-lucie/types';
 
 export function useLucieAssistant() {
   const [messages, setMessages] = useState<LucieMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  
-  const userContextUtils = useUserContext();
-  const { 
-    apiAvailable, 
-    shouldRetryApi, 
-    callLucieAPI, 
-    processVisualElements 
-  } = useLucieAPI();
-  const { getFallbackResponse } = useFallbackResponses();
-  const { formatChatHistory } = useMessageFormatting();
-  
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
   // Initialize with welcome message
   useEffect(() => {
     if (messages.length === 0) {
@@ -36,110 +26,69 @@ export function useLucieAssistant() {
         ],
         emotion: "friendly"
       };
-      
       setMessages([welcomeMessage]);
     }
   }, [messages.length]);
-  
-  // Reset API availability after backoff time
-  useEffect(() => {
-    if (!apiAvailable && shouldRetryApi()) {
-      console.log(`Attempting to reset API availability`);
-    }
-  }, [apiAvailable, shouldRetryApi]);
 
-  // Send a message to Lucie
+  // Send a message to Lucie orchestrator
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
-    
-    // Add user message to UI immediately
-    const userMessage: LucieMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      content,
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
+
     setIsTyping(true);
-    
+    setError(null);
+
     try {
-      // Check if we should try the API
-      if (!apiAvailable && !shouldRetryApi()) {
-        console.log('API marked as unavailable, using fallback response');
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Brief delay for typing effect
-        const fallbackMessage = getFallbackResponse(content);
-        setMessages(prev => [...prev, fallbackMessage]);
+      // Compose sessionId with user ID or anon
+      const sessionId = 'lucie-' + Date.now().toString();
+
+      const userContext = {}; // Can be extended
+
+      // Use routePrompt from Lucie orchestrator
+      const { response, tokensUsed, moderationPassed, flaggedContent } = await lucieAIOrchestrator.orchestrateResponse(sessionId, content, userContext, messages);
+
+      if (!moderationPassed) {
+        setError('Your message was flagged by moderation and cannot be processed.');
         setIsTyping(false);
         return;
       }
 
-      // Get user context and chat history
-      const userContext = userContextUtils.getUserContext();
-      const chatHistory = formatChatHistory(messages);
-      
-      // Call the AI service
-      const lucieResponse = await callLucieAPI(content, userContext, chatHistory);
-      
-      if (lucieResponse.error) {
-        // Add the error response to messages
-        const errorResponse: LucieMessage = {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: lucieResponse.text || "Sorry, I'm having trouble connecting at the moment.",
-          timestamp: new Date(),
-          suggestedActions: lucieResponse.suggestedActions || [],
-          links: lucieResponse.links || [],
-          emotion: 'apologetic'
-        };
-        
-        setMessages(prev => [...prev, errorResponse]);
-      } else {
-        // Process any visual elements that might be requested in the response
-        const { visualElements, processedText } = await processVisualElements(lucieResponse.text);
-        
-        // Add Lucie's normal response to the UI
-        const lucieMessage: LucieMessage = {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: processedText,
-          timestamp: new Date(),
-          suggestedActions: lucieResponse.suggestedActions || [],
-          links: lucieResponse.links || [],
-          emotion: lucieResponse.emotion || 'neutral',
-          visualElements
-        };
-        
-        setMessages(prev => [...prev, lucieMessage]);
+      if (flaggedContent) {
+        setError(`Blocked content detected: ${flaggedContent}`);
+        setIsTyping(false);
+        return;
       }
-    } catch (error: any) {
-      console.error('Error sending message to Lucie:', error);
-      
-      // Use fallback response
-      const fallbackMessage = getFallbackResponse(content);
-      setMessages(prev => [...prev, fallbackMessage]);
+
+      // Add Lucie's response message
+      const lucieMessage: LucieMessage = {
+        id: 'lucie-' + Date.now().toString(),
+        role: 'assistant',
+        content: response,
+        timestamp: new Date(),
+        emotion: 'neutral'
+      };
+
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', content }]);
+      setMessages(prev => [...prev, lucieMessage]);
+    } catch (err: any) {
+      setError('Failed to get a response. Please try again.');
+      console.error('Error sending message to Lucie:', err);
     } finally {
       setIsTyping(false);
     }
-  }, [apiAvailable, shouldRetryApi, formatChatHistory, getFallbackResponse, userContextUtils, callLucieAPI, messages, processVisualElements]);
-  
-  // Handle suggested action click
-  const handleSuggestedActionClick = useCallback((action: string) => {
-    sendMessage(action);
-  }, [sendMessage]);
-  
+  }, [messages]);
+
   // Toggle the assistant open/closed
   const toggleChat = useCallback(() => {
     setIsOpen(prev => !prev);
   }, []);
-  
+
   return {
     messages,
     isTyping,
     isOpen,
+    error,
     sendMessage,
     toggleChat,
-    handleSuggestedActionClick
   };
 }
 
