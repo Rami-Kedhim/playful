@@ -1,10 +1,11 @@
 
 import { useEffect, useState } from 'react';
 import { usePulseBoost } from './usePulseBoost';
-import { GLOBAL_UBX_RATE } from '@/utils/oxum/globalPricing';
 import { PULSE_BOOSTS } from '@/constants/pulseBoostConfig';
-import { PulseBoost } from '@/types/pulse-boost';
 import { toast } from '@/hooks/use-toast';
+
+// Default global UBX rate if not imported
+const GLOBAL_UBX_RATE = 15;
 
 export interface UsePulseBoostAdapterReturn {
   boostStatus: any;

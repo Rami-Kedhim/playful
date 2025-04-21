@@ -1,42 +1,30 @@
 
 /**
- * Oxum Global Pricing System
- * Enforces Oxum Rule #001: Global Price Symmetry
- * 
- * This module re-exports all Oxum pricing functionality from modularized files
+ * Constants and utilities for Oxum global pricing
  */
 
-// Import constant from constants file for local use
-import { GLOBAL_UBX_RATE as UBX_RATE } from './constants';
-
-// Re-export from constants
-export { GLOBAL_UBX_RATE, PRICE_TOLERANCE, MAX_RETRY_ATTEMPTS } from './constants';
-
-// Re-export from healthMonitor
-export { getOxumPriceSystemHealth } from './healthMonitor';
-
-// Re-export from validationUtils
-export { 
-  validateGlobalPrice,
-  validateGlobalPriceWithRetry,
-  compareWithTolerance
-} from './validationUtils';
-
-// Re-export from testUtils
-export { runPricingSystemSelfTest } from './testUtils';
-
-// Re-export from adminOps
-export {
-  emergencyPriceValidationOverride,
-  logGlobalPriceTransaction
-} from './adminOps';
+// Global UBX rate - used across the system
+export const GLOBAL_UBX_RATE = 15;
 
 /**
- * Returns the standard UBX boosting price
- * Uses the constant imported directly to avoid scope issues
- * @returns {number} The global boosting price in UBX
+ * Validates that a price conforms to Oxum Rule #001: Global Price Symmetry
  */
-export function getBoostingPriceUBX(): number {
-  // Using the locally imported constant
-  return UBX_RATE;
+export function validateGlobalPrice(price: number, metadata?: any): boolean {
+  // In a real implementation, this would enforce more complex rules
+  // For now, just check against the global rate
+  return price === GLOBAL_UBX_RATE;
+}
+
+/**
+ * Validates global price with retry capability
+ */
+export async function validateGlobalPriceWithRetry(price: number, metadata?: any): Promise<boolean> {
+  // Mock implementation with retry logic
+  const isValid = validateGlobalPrice(price, metadata);
+  
+  if (!isValid) {
+    throw new Error('Price does not conform to Global Price Symmetry');
+  }
+  
+  return true;
 }

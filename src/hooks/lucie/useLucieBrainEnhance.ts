@@ -90,7 +90,7 @@ export const useLucieBrainEnhance = () => {
         activeBoost: isActive ? activeBoostDetails : undefined,
         canRecommendBoost: shouldRecommendBoost && !!recommendedBoost,
         recommendedBoost,
-        userSubscription: profile?.subscription_tier || 'free',
+        userSubscription: (profile as any)?.subscription_tier || 'free',
         boostStatus: isActive ? 'active' : 'inactive',
         ubxBalance: userEconomy?.ubxBalance || profile?.ubx_balance || 0
       });

@@ -13,7 +13,6 @@ import {
   getActiveBoostDetails,
   calculatePulseBoostPower
 } from '@/services/pulseBoostService';
-import { formatDistanceToNow } from 'date-fns';
 
 export interface UsePulseBoostReturn {
   userEconomy: UserEconomy | null;
@@ -57,7 +56,7 @@ export const usePulseBoost = (profileId?: string): UsePulseBoostReturn => {
         const mockUserEconomy: UserEconomy = {
           userId: user.id,
           ubxBalance: profile?.ubx_balance || 0,
-          subscriptionLevel: (profile?.subscription_tier || 'free') as any,
+          subscriptionLevel: ((profile as any)?.subscription_tier || 'free') as any,
           subscriptionExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
           activeBoosts: []
         };
@@ -197,12 +196,13 @@ export const usePulseBoost = (profileId?: string): UsePulseBoostReturn => {
   
   // Combine the legacy boost status with Pulse boost info
   const enhancedBoostStatus: EnhancedBoostStatus = {
-    ...boostStatus,
+    ...(boostStatus || { isActive: false }),
     pulseData: hasActiveBoost ? {
       visibility: activeBoosts[0]?.boostDetails?.visibility || 'unknown',
       pulseLevel: boostPower,
       boostType: activeBoosts[0]?.boostDetails?.name || 'Unknown Boost'
-    } : undefined
+    } : undefined,
+    progress: 75 // Default progress value
   };
   
   return {

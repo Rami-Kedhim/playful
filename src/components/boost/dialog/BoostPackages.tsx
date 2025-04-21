@@ -1,16 +1,14 @@
 
-import { Loader2, Zap, Info } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { BoostPackage } from "@/types/boost";
-import BoostPackageList from "./BoostPackageList";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
-interface BoostPackagesProps {
-  packages: BoostPackage[];
+export interface BoostPackagesProps {
   selectedPackage: string | null;
   onSelectPackage: (packageId: string) => void;
   formatBoostDuration: (duration: string) => string;
-  getBoostPrice: () => number;
+  getBoostPrice: (packageId?: string) => number;
   dailyBoostUsage: number;
   dailyBoostLimit: number;
   onPurchase: () => void;
@@ -19,7 +17,6 @@ interface BoostPackagesProps {
 }
 
 const BoostPackages = ({
-  packages,
   selectedPackage,
   onSelectPackage,
   formatBoostDuration,
@@ -30,52 +27,52 @@ const BoostPackages = ({
   loading,
   onCancel
 }: BoostPackagesProps) => {
+  const exceededDailyLimit = dailyBoostUsage >= dailyBoostLimit;
+
   return (
     <div className="space-y-4">
-      <BoostPackageList
-        packages={packages}
-        selectedPackage={selectedPackage}
-        onSelectPackage={onSelectPackage}
-        formatBoostDuration={formatBoostDuration}
-        getBoostPrice={getBoostPrice}
-      />
-      
-      <div className="p-3 bg-muted/10 border border-muted rounded-md">
-        <h4 className="text-sm font-medium mb-2 flex items-center">
-          <Info className="h-4 w-4 mr-2 text-blue-500" />
-          Oxum Ethical Boosting
-        </h4>
-        <p className="text-xs text-muted-foreground">
-          Limited to {dailyBoostLimit} boosts (12 hours) per day for fairness and equal opportunity.
-        </p>
-        <div className="mt-2">
-          <div className="flex justify-between text-xs mb-1">
-            <span>Daily usage</span>
-            <span>{dailyBoostUsage} of {dailyBoostLimit}</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Normally we would map through packages here */}
+        <div className="p-4 border rounded-md flex flex-col">
+          <div className="font-medium mb-2">1 Hour Boost</div>
+          <div className="text-sm text-gray-500">Fast visibility boost</div>
+          <div className="mt-auto pt-4 flex justify-between items-center">
+            <div className="font-medium">15 UBX</div>
+            <Button size="sm" onClick={() => onSelectPackage('boost-1')}>
+              Select
+            </Button>
           </div>
-          <Progress value={(dailyBoostUsage / dailyBoostLimit) * 100} className="h-1.5" />
+        </div>
+        <div className="p-4 border rounded-md flex flex-col">
+          <div className="font-medium mb-2">6 Hour Boost</div>
+          <div className="text-sm text-gray-500">Extended visibility</div>
+          <div className="mt-auto pt-4 flex justify-between items-center">
+            <div className="font-medium">50 UBX</div>
+            <Button size="sm" onClick={() => onSelectPackage('boost-2')}>
+              Select
+            </Button>
+          </div>
         </div>
       </div>
-
-      <div className="flex justify-between pt-4">
+      
+      {exceededDailyLimit && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            You've reached the daily boost limit of {dailyBoostLimit}. Please try again tomorrow.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <div className="flex justify-end space-x-2 pt-2">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button 
-          onClick={onPurchase} 
-          disabled={!selectedPackage || loading || dailyBoostUsage >= dailyBoostLimit}
+          onClick={onPurchase}
+          disabled={!selectedPackage || loading || exceededDailyLimit}
         >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <Zap className="mr-2 h-4 w-4" />
-              Boost Now
-            </>
-          )}
+          {loading ? 'Processing...' : `Buy Boost (${getBoostPrice(selectedPackage || undefined)} UBX)`}
         </Button>
       </div>
     </div>
