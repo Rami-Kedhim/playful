@@ -24,7 +24,8 @@ const Index = () => {
   useEffect(() => {
     toast({
       title: "Welcome to UberEscorts",
-      description: "Discover verified escorts and creators with UBX tokens for secure transactions.",
+      description:
+        "Discover verified escorts and creators with UBX tokens for secure transactions.",
       variant: "success",
     });
   }, []);
@@ -37,7 +38,10 @@ const Index = () => {
         </div>
       )}
 
-      <HeroSection searchLocation={searchLocation} setSearchLocation={setSearchLocation} />
+      <HeroSection
+        searchLocation={searchLocation}
+        setSearchLocation={setSearchLocation}
+      />
 
       <FeaturesSection />
 
