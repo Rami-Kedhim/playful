@@ -1,20 +1,13 @@
 
-/**
- * Unified HermesOrusOxum Core Module
- * Combines visibility decay, signal transformation, and boost allocation logic
- */
+// Unified and refined HermesOrusOxum core module as per Codex
 
 export class HermesOrusOxum {
-  // Hermes logic related properties
   private baseDecayConstant: number = 0.2;
   private maxBoostEffect: number = 100;
   private aggressionFactor: number = 0.5;
-  private timeOfDayFactor: number = 1.0;
 
-  // Orus related logging and signal tracking
   private signalLog: Array<Record<string, any>> = [];
 
-  // Oxum rotation engine properties
   private recentlyViewedProfiles: string[] = [];
   private activeProfiles: Map<string, any> = new Map();
   private lastRotationTimestamp: number = Date.now();
@@ -25,7 +18,7 @@ export class HermesOrusOxum {
   }
 
   ///////////////////////////////
-  //  Hermes: Visibility & Boost Calculation
+  // Hermes: Visibility & Boost Calculation
   ///////////////////////////////
 
   public calculateVisibilityDecay(initialVisibility: number, decayConstant: number, timeElapsedHours: number): number {
@@ -46,26 +39,42 @@ export class HermesOrusOxum {
 
   public calculateTimeImpact(currentHour: number, optimalWindow: { start: number; peak: number; end: number }): number {
     const { start, peak, end } = optimalWindow;
-    if (currentHour >= start && currentHour <= end) {
-      const distFromPeak = Math.abs(currentHour - peak);
-      const windowSize = (end - start) / 2;
-      return this.maxBoostEffect * Math.pow(1 - (distFromPeak / windowSize), this.aggressionFactor);
+
+    if (start <= end) {
+      if (currentHour >= start && currentHour <= end) {
+        const distFromPeak = Math.abs(currentHour - peak);
+        const windowSize = (end - start) / 2;
+        return this.maxBoostEffect * Math.pow(1 - (distFromPeak / windowSize), this.aggressionFactor);
+      }
+    } else {
+      // Handle window spans midnight (e.g. 20 - 2)
+      if (currentHour >= start || currentHour <= end) {
+        const distFromPeak = Math.min(Math.abs(currentHour - peak), 24 - Math.abs(currentHour - peak));
+        const windowSize = ((24 - start) + end) / 2;
+        return this.maxBoostEffect * Math.pow(1 - (distFromPeak / windowSize), this.aggressionFactor);
+      }
     }
-    const distFromWindow = Math.min(Math.abs(currentHour - start), Math.abs(currentHour - end));
+    const distFromWindow = start <= end ?
+      Math.min(Math.abs(currentHour - start), Math.abs(currentHour - end)) :
+      Math.min(Math.abs(currentHour - start), Math.abs(currentHour - end), 24 - Math.abs(currentHour - start), 24 - Math.abs(currentHour - end));
+
     return Math.max(30, this.maxBoostEffect * Math.exp(-distFromWindow * 0.3));
   }
 
   public getOptimalTimeWindow(): { start: number; peak: number; end: number } {
     const now = new Date();
     const day = now.getDay(); // 0=Sun, 1=Mon, etc.
+
+    // Weekend: Friday 18:00 onwards, Saturday, Sunday
     if ((day === 5 && now.getHours() >= 18) || day === 6 || day === 0) {
-      return { start: 20, peak: 22.5, end: 2 }; // Weekend peak times
+      return { start: 20, peak: 22.5, end: 2 };
     }
-    return { start: 19, peak: 21, end: 23 }; // Weekday peak times
+    // Weekdays
+    return { start: 19, peak: 21, end: 23 };
   }
 
   ///////////////////////////////
-  //  Orus: Signal transformation and logging
+  // Orus: Signal transformation and logging
   ///////////////////////////////
 
   public logSignalTransform(signalName: string, inputSignal: any): void {
@@ -81,7 +90,7 @@ export class HermesOrusOxum {
   }
 
   private transformSignal(input: any): any {
-    if (typeof input === 'number') {
+    if (typeof input === "number") {
       return Math.min(1, Math.max(0, input));
     }
     return input;
@@ -95,9 +104,20 @@ export class HermesOrusOxum {
   // Oxum: Fair rotation and prioritization
   ///////////////////////////////
 
-  public getBoostQueue(): any[] {
+  public getBoostQueue(filters?: { region?: string; language?: string }): any[] {
     const profilesArray = Array.from(this.activeProfiles.values());
-    return profilesArray.sort((a, b) => b.compositeScore - a.compositeScore);
+    // Filter by region and/or language if provided
+    let filtered = profilesArray;
+    if (filters) {
+      if (filters.region) {
+        filtered = filtered.filter((p) => p.region === filters.region);
+      }
+      if (filters.language) {
+        filtered = filtered.filter((p) => p.language === filters.language);
+      }
+    }
+    // Sort by compositeScore descending
+    return filtered.sort((a, b) => b.compositeScore - a.compositeScore);
   }
 
   public recordProfileView(profileId: string): void {
@@ -130,11 +150,10 @@ export class HermesOrusOxum {
   }
 
   private performRotation(): void {
-    // Reset penalties or implement rotation logic as needed
     const currentTime = Date.now();
     const timeElapsedSec = (currentTime - this.lastRotationTimestamp) / 1000;
     this.activeProfiles.forEach((profile) => {
-      profile.timeSinceLastTop += timeElapsedSec / 3600; // convert to hours
+      profile.timeSinceLastTop += timeElapsedSec / 3600;
     });
     this.lastRotationTimestamp = currentTime;
   }
@@ -142,3 +161,4 @@ export class HermesOrusOxum {
 
 export const hermesOrusOxum = new HermesOrusOxum();
 
+export default hermesOrusOxum;
