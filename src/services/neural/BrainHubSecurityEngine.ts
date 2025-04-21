@@ -1,3 +1,4 @@
+
 // Brain Hub Security Engine - Manages security monitoring and threat detection
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,6 +22,11 @@ export interface SecurityMetrics {
   resolvedAlerts: number;
   threatLevel: number; // 0-100
   lastScanCompleted?: Date;
+}
+
+interface RunSecurityCheckResult {
+  allowed: boolean;
+  reason?: string;
 }
 
 class BrainHubSecurityEngine {
@@ -252,7 +258,7 @@ class BrainHubSecurityEngine {
   }
 
   // Add this method for compatibility with aiOrchestration usage
-  public runSecurityChecks(message: string, context: Record<string, any>): { allowed: boolean; reason?: string } {
+  public runSecurityChecks(message: string, context: Record<string, any>): RunSecurityCheckResult {
     // Very basic mock security check: prohibit messages with banned words
     const bannedWords = ['hack', 'exploit', 'malware', 'virus', 'attack'];
     const loweredMessage = message.toLowerCase();
@@ -272,3 +278,4 @@ class BrainHubSecurityEngine {
 const securityEngine = new BrainHubSecurityEngine();
 
 export default securityEngine;
+
