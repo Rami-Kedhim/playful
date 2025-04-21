@@ -33,6 +33,7 @@ const LucieAssistant = ({
   const { aiContext, trackInteraction } = useUserAIContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [celebration, setCelebration] = useState(false);
+  const [celebrationTrigger, setCelebrationTrigger] = useState(0); // Counter to trigger celebrations
   
   // Set initial open state from props
   useEffect(() => {
@@ -56,24 +57,35 @@ const LucieAssistant = ({
     }
   }, [customInitialMessage, messages, clearMessages]);
   
-  // Check for celebratory messages
+  // Check for celebratory messages with more sophisticated detection
   useEffect(() => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage.role === 'assistant') {
-        // Trigger celebration for positive responses about features
+        // List of positive indicators that should trigger celebration
         const positiveIndicators = [
-          'successfully', 'great news', 'congratulations', 
-          'completed', 'welcome aboard', 'thank you',
-          'well done', 'perfect', 'excellent', 'awesome',
-          'amazing', 'fantastic', 'wonderful', 'bravo'
+          'successfully', 'great news', 'congratulations', 'completed', 
+          'welcome aboard', 'thank you', 'well done', 'perfect', 'excellent', 
+          'awesome', 'amazing', 'fantastic', 'wonderful', 'bravo', 'brilliant',
+          'outstanding', 'superb', 'impressive'
         ];
         
-        if (positiveIndicators.some(phrase => 
-          lastMessage.content.toLowerCase().includes(phrase))) {
+        // Check for positive phrases or exclamation marks with positive words
+        const content = lastMessage.content.toLowerCase();
+        const hasPositiveIndicator = positiveIndicators.some(phrase => content.includes(phrase));
+        const hasExcitedTone = content.includes('!') && 
+          (content.includes('great') || content.includes('good') || content.includes('love'));
+        
+        // Check for celebratory emojis
+        const celebrationEmojis = ['🎉', '🎊', '🥳', '👏', '✨', '🙌'];
+        const hasEmoji = celebrationEmojis.some(emoji => lastMessage.content.includes(emoji));
+        
+        if (hasPositiveIndicator || hasExcitedTone || hasEmoji) {
           setCelebration(true);
+          setCelebrationTrigger(prev => prev + 1); // Increment to trigger animation
+          
           // Reset celebration after a delay
-          setTimeout(() => setCelebration(false), 3000);
+          setTimeout(() => setCelebration(false), 4000);
         }
       }
     }
@@ -117,9 +129,12 @@ const LucieAssistant = ({
 
       {/* Chat window */}
       {isOpen && !isDisabled && (
-        <Card className={`fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col animate-fade-in ${
-          celebration ? 'animate-pop' : ''
-        }`}>
+        <Card 
+          className={`fixed bottom-24 right-6 w-80 sm:w-96 h-[500px] bg-background border border-white/10 rounded-xl shadow-xl overflow-hidden z-50 flex flex-col animate-fade-in ${
+            celebration ? 'animate-pop' : ''
+          }`}
+          key={`chat-window-${celebrationTrigger}`} // Re-render on celebration for animations
+        >
           <LucieHeader 
             onClose={isOpen ? toggleChat : onClose} 
             onMinimize={toggleChat}

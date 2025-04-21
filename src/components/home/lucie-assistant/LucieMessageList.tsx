@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { LucieMessage } from '@/hooks/useLucieAssistant';
 import LucieTypingIndicator from './LucieTypingIndicator';
@@ -19,21 +18,40 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
 }) => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
-  
-  // Check if message contains celebratory content
+  const [confettiKey, setConfettiKey] = useState(0);
+
+  const celebratoryPhrases = [
+    'congratulations', 'well done', 'great job', 'awesome', 'excellent',
+    'perfect', 'amazing', 'fantastic', 'wonderful', 'bravo', 'success',
+    'achievement', 'completed', 'accomplished', 'great news', 'thank you',
+    'brilliant', 'splendid', 'outstanding', 'superb', 'terrific',
+    'fabulous', 'impressive', 'magnificent', 'marvelous', 'spectacular',
+    'extraordinary', 'remarkable', 'exceptional', 'stellar', 'great work'
+  ];
+
   const isCelebratoryMessage = (content: string): boolean => {
-    const celebratoryPhrases = [
-      'congratulations', 'well done', 'great job', 'awesome', 'excellent',
-      'perfect', 'amazing', 'fantastic', 'wonderful', 'bravo', 'success',
-      'achievement', 'completed', 'accomplished', 'great news'
-    ];
+    const lowerContent = content.toLowerCase();
     
-    return celebratoryPhrases.some(phrase => 
-      content.toLowerCase().includes(phrase)
-    );
+    if (celebratoryPhrases.some(phrase => lowerContent.includes(phrase))) {
+      return true;
+    }
+    
+    if (lowerContent.includes('!') && 
+        (lowerContent.includes('great') || 
+         lowerContent.includes('good') || 
+         lowerContent.includes('nice') ||
+         lowerContent.includes('love'))) {
+      return true;
+    }
+    
+    const celebrationEmojis = ['🎉', '🎊', '🥳', '👏', '✨', '🙌', '🎯', '🏆', '💯', '⭐'];
+    if (celebrationEmojis.some(emoji => content.includes(emoji))) {
+      return true;
+    }
+    
+    return false;
   };
-  
-  // Show confetti when a celebratory message appears
+
   useEffect(() => {
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
@@ -42,29 +60,32 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
         isCelebratoryMessage(lastMessage.content) &&
         !isTyping
       ) {
-        setCelebrationMessage(lastMessage.content);
-        setShowConfetti(true);
-        
-        // Auto-hide confetti after animation completes
         const timer = setTimeout(() => {
-          setShowConfetti(false);
-          setCelebrationMessage(null);
-        }, 3000);
+          setCelebrationMessage(lastMessage.content);
+          setShowConfetti(true);
+          setConfettiKey(prev => prev + 1);
+        }, 300);
         
         return () => clearTimeout(timer);
       }
     }
   }, [messages, isTyping]);
 
+  const handleConfettiComplete = () => {
+    setShowConfetti(false);
+    setTimeout(() => setCelebrationMessage(null), 2000);
+  };
+
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
-      {/* Confetti animation layer */}
-      <LucieConfetti 
-        show={showConfetti} 
-        onComplete={() => setShowConfetti(false)} 
-      />
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 relative scrollbar-thin">
+      {showConfetti && (
+        <LucieConfetti 
+          key={confettiKey}
+          show={showConfetti} 
+          onComplete={handleConfettiComplete} 
+        />
+      )}
       
-      {/* Messages */}
       {messages.map((message) => (
         <div
           key={message.id}
@@ -77,7 +98,7 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
               message.role === 'user'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted backdrop-blur-sm'
-            } ${celebrationMessage === message.content ? 'animate-celebration' : ''}`}
+            } ${celebrationMessage === message.content ? 'animate-celebration sparkle-element' : ''}`}
           >
             {message.role === 'assistant' && (
               <div className="flex items-center mb-1">
@@ -89,7 +110,6 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
             )}
             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
             
-            {/* Suggested Actions */}
             {message.role === 'assistant' && message.suggestedActions && message.suggestedActions.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {message.suggestedActions.map((action, index) => (
@@ -104,7 +124,6 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
               </div>
             )}
             
-            {/* Visual elements when present */}
             {message.role === 'assistant' && message.visualElements && message.visualElements.length > 0 && (
               <div className="mt-3 space-y-2">
                 {message.visualElements.map((element, index) => (
@@ -129,7 +148,6 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
         </div>
       ))}
       
-      {/* Enhanced typing indicator with wave animation */}
       {isTyping && (
         <div className="flex justify-start">
           <div className="rounded-lg px-3 py-2 bg-muted/70 backdrop-blur-sm shadow-sm animate-fade-in">
@@ -138,7 +156,6 @@ const LucieMessageList: React.FC<LucieMessageListProps> = ({
         </div>
       )}
       
-      {/* Auto-scroll reference */}
       <div ref={messagesEndRef} />
     </div>
   );
