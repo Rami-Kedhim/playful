@@ -45,7 +45,8 @@ const UBXSection = () => {
             </div>
             
             <div className="flex flex-wrap gap-4">
-              <Button className="gap-2" variant="ubx" asChild>
+              {/* Use default variant + custom class for ubx style */}
+              <Button className="gap-2 bg-blue-500 text-white hover:bg-blue-600" asChild>
                 <Link to="/wallet">
                   <Coins className="h-4 w-4" />
                   Get Free Tokens
@@ -83,3 +84,4 @@ const UBXSection = () => {
 };
 
 export default UBXSection;
+

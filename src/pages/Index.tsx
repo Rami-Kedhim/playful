@@ -63,7 +63,8 @@ const Index = () => {
 
       <CtaSection />
 
-      <LucieAssistant />
+      {/* Remove LucieAssistant from homepage since user said shows unrelated branding */}
+      {/* <LucieAssistant /> */}
     </>
   );
 };

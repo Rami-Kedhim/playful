@@ -20,8 +20,10 @@ const Navbar: React.FC = () => {
               src="/lovable-uploads/270a89d4-565b-4654-b8ae-20b959208800.png"
               alt="UberEscorts Logo"
               className="h-6 w-6 mr-2"
+              loading="lazy"
+              decoding="async"
             />
-            <span className="text-xl font-bold">UberEscorts</span>
+            <span className="text-xl font-bold text-primary">UberEscorts</span>
           </Link>
           <div className="hidden md:flex items-center gap-1 md:gap-2">
             <Button variant="ghost" asChild>
@@ -59,3 +61,4 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
