@@ -18,24 +18,27 @@ export const LucieHermesIntegration = ({
   const [customMessage, setCustomMessage] = useState<string | undefined>(undefined);
 
   // Use Hermes insights to determine if Lucie should be shown
-  const { insights, recordAICompanionInteraction } = useHermesInsights(user?.id);
+  const { insights, reportUserAction } = useHermesInsights();
   
-  // Check for insights that would trigger Lucie
-  const isLucieEnabled = insights?.isLucieEnabled || false;
-  const boostOffer = insights?.boostOffer;
-  const vrEvent = insights?.vrEvent;
-  const recommendedProfileId = insights?.recommendedProfileId;
-
+  // Default values if we can't find proper insights
+  const isLucieEnabled = false;
+  const boostOffer = insights.find(i => i.type === 'boostOffer')?.data?.boostOffer;
+  const vrEvent = insights.find(i => i.type === 'vrEvent')?.description;
+  const recommendedProfileId = insights.find(i => i.type === 'recommendation')?.data?.profileId;
+  
   useEffect(() => {
-    if (isLucieEnabled) {
+    // For demo purposes, show Lucie 50% of the time if not forced
+    const shouldShowLucie = Math.random() > 0.5;
+    
+    if (shouldShowLucie || forceVisible) {
       setIsVisible(true);
 
       let personalizedMessage = '';
 
       if (boostOffer) {
         personalizedMessage = `I noticed you might be interested in a boost! I can offer you ${
-          boostOffer.value || ''
-        } off, but it expires in ${boostOffer.expires || ''}.`;
+          boostOffer.recommendation || ''
+        } off, but it expires in ${boostOffer.duration || ''}.`;
       } else if (vrEvent) {
         personalizedMessage = `Have you heard about our ${vrEvent || 'VR'} event? It's happening soon, and I think you'd really enjoy it!`;
       } else if (recommendedProfileId) {
@@ -53,7 +56,7 @@ export const LucieHermesIntegration = ({
       if (onLucieTriggered) {
         let reason = 'HERMES insight';
 
-        if (boostOffer) reason = `Boost offer: ${boostOffer.value || ''}`;
+        if (boostOffer) reason = `Boost offer: ${boostOffer.recommendation || ''}`;
         else if (vrEvent) reason = `VR event: ${vrEvent || ''}`;
 
         onLucieTriggered(reason);
@@ -61,16 +64,16 @@ export const LucieHermesIntegration = ({
       
       // Record this interaction for analytics
       if (user?.id) {
-        recordAICompanionInteraction('lucie', 0, { trigger: 'hermes_insight' });
+        reportUserAction('lucie-shown', 'ai_companion_interaction');
       }
     }
-  }, [isLucieEnabled, boostOffer, vrEvent, recommendedProfileId, user, onLucieTriggered, recordAICompanionInteraction]);
+  }, [user, onLucieTriggered, reportUserAction, boostOffer, vrEvent, recommendedProfileId, forceVisible]);
 
   // Auto-hide Lucie after 2 minutes if not forced visible
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
-    if (isVisible && isLucieEnabled && !forceVisible) {
+    if (isVisible && !forceVisible) {
       timeout = setTimeout(() => {
         setIsVisible(false);
       }, 120000);
@@ -79,7 +82,7 @@ export const LucieHermesIntegration = ({
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [isVisible, isLucieEnabled, forceVisible]);
+  }, [isVisible, forceVisible]);
 
   if (!isVisible && !forceVisible) {
     return null;
@@ -87,7 +90,7 @@ export const LucieHermesIntegration = ({
 
   return (
     <LucieAssistant
-      initiallyOpen={isLucieEnabled || Boolean(forceVisible)}
+      initiallyOpen={Boolean(forceVisible)}
       customInitialMessage={customMessage}
       onClose={() => setIsVisible(false)}
     />
