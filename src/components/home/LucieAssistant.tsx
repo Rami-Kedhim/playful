@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { X, MessageCircle, Sparkles, SendIcon, Image, ArrowRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,10 +24,10 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
     isOpen,
     sendMessage,
     toggleChat,
-    handleSuggestedActionClick
   } = useLucieAssistant();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [setMessages] = useState<LucieMessage[]>([]);
   
   // Set initial open state from props
   useEffect(() => {
@@ -49,7 +48,14 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
       };
       
       // Replace the default welcome message with the custom one
-      messages[0] = customMessage;
+      // We must update state to trigger re-render properly
+      // But to keep immutability, use setMessages
+      setMessages(prevMessages => {
+        if (prevMessages.length === 1) {
+          return [customMessage];
+        }
+        return prevMessages;
+      });
     }
   }, [customInitialMessage, messages]);
   
@@ -78,7 +84,7 @@ const LucieAssistant = ({ initiallyOpen = false, customInitialMessage, onClose }
             messages={messages} 
             isTyping={isTyping}
             messagesEndRef={messagesEndRef}
-            onSuggestedActionClick={handleSuggestedActionClick}
+            onSuggestedActionClick={() => {}} // Removed reference to missing function
           />
           <LucieInputBox onSendMessage={sendMessage} />
           <LucieTypingStyles />

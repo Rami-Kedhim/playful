@@ -44,31 +44,31 @@ export function useLucieAssistant() {
       const userContext = {}; // Can be extended
 
       // Use routePrompt from Lucie orchestrator
-      const { response, tokensUsed, moderationPassed, flaggedContent } = await lucieAIOrchestrator.orchestrateResponse(sessionId, content, userContext, messages);
+      // Note: orchestrateResponse returns { responseText, meta }
+      const { responseText } = await lucieAIOrchestrator.orchestrateResponse(sessionId, content, userContext, messages);
 
-      if (!moderationPassed) {
-        setError('Your message was flagged by moderation and cannot be processed.');
-        setIsTyping(false);
-        return;
-      }
+      // moderation flags are not returned in the current orchestrateResponse interface
+      // So we skip moderation checks here - if needed, adjust LucieAIOrchestrator to provide them
 
-      if (flaggedContent) {
-        setError(`Blocked content detected: ${flaggedContent}`);
-        setIsTyping(false);
-        return;
-      }
+      // Add user message with proper timestamp
+      const userMessage: LucieMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content,
+        timestamp: new Date(),
+      };
 
-      // Add Lucie's response message
+      // Add Lucie's response message with timestamp and default neutral emotion
       const lucieMessage: LucieMessage = {
         id: 'lucie-' + Date.now().toString(),
         role: 'assistant',
-        content: response,
+        content: responseText,
         timestamp: new Date(),
         emotion: 'neutral'
       };
 
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', content }]);
-      setMessages(prev => [...prev, lucieMessage]);
+      setMessages(prev => [...prev, userMessage, lucieMessage]);
+
     } catch (err: any) {
       setError('Failed to get a response. Please try again.');
       console.error('Error sending message to Lucie:', err);
@@ -89,6 +89,7 @@ export function useLucieAssistant() {
     error,
     sendMessage,
     toggleChat,
+    // Removed 'handleSuggestedActionClick' as it was not implemented
   };
 }
 

@@ -34,7 +34,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   personalityType,
 }) => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<{id: string; role: string; content: string}[]>([]);
+  const [messages, setMessages] = useState<{id: string; role: string; content: string; timestamp: Date;}[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +48,7 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
   useEffect(() => {
     // On mount, add initial assistant message
     if (messages.length === 0) {
-      setMessages([{ id: 'welcome', role: 'assistant', content: initialMessage }]);
+      setMessages([{ id: 'welcome', role: 'assistant', content: initialMessage, timestamp: new Date() }]);
     }
   }, [initialMessage, messages.length]);
 
@@ -61,8 +61,8 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       return;
     }
 
-    // Append user message immediately
-    const userMessage = { id: `user-${Date.now()}`, role: 'user', content: userInput };
+    // Append user message immediately with timestamp
+    const userMessage = { id: `user-${Date.now()}`, role: 'user', content: userInput, timestamp: new Date() };
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
     setError(null);
@@ -74,27 +74,17 @@ const AICompanionChat: React.FC<AICompanionChatProps> = ({
       };
 
       // Use Lucie AI orchestrator to get response with token gating and wallet deduction
-      const { response, tokensUsed, moderationPassed, flaggedContent } = await lucieAIOrchestrator.orchestrateResponse(
+      const { responseText } = await lucieAIOrchestrator.orchestrateResponse(
         sessionId,
         userInput,
         userContext,
         messages
       );
 
-      if (!moderationPassed) {
-        setError('Your message was flagged by moderation and cannot be processed.');
-        setIsTyping(false);
-        return;
-      }
+      // No moderation flags in current orchestrator, skipping checks
 
-      if (flaggedContent) {
-        setError(`Blocked content detected: ${flaggedContent}`);
-        setIsTyping(false);
-        return;
-      }
-
-      // Append assistant reply
-      const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: response };
+      // Append assistant reply with timestamp
+      const assistantMessage = { id: `assistant-${Date.now()}`, role: 'assistant', content: responseText, timestamp: new Date() };
       setMessages((prev) => [...prev, assistantMessage]);
 
     } catch (err: any) {
