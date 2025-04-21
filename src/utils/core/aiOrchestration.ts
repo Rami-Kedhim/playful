@@ -8,7 +8,7 @@
 
 import { hermesApiService } from "@/services/hermes/HermesApiService";
 import { hermesOxumEngine } from "@/services/boost/HermesOxumEngine";
-import { securityEngine } from "@/services/neural/BrainHubSecurityEngine";  // Orus
+import securityEngine from "@/services/neural/BrainHubSecurityEngine";  // Fixed import: default import
 import aiPersonalityService from "@/services/ai/aiPersonalityService";
 
 interface SessionState {
@@ -109,7 +109,10 @@ class LucieAIOrchestrator {
       interaction_data: { content: userMessage }
     });
 
-    hermesOxumEngine.recordProfileView(userContext.profileId || "", 0);
+    // Fix here: recordProfileView takes only profileId argument; session time is optional and not used here
+    if (userContext.profileId) {
+      hermesOxumEngine.recordProfileView(userContext.profileId);
+    }
     hermesOxumEngine.updateSystemLoad(Math.min(1, Math.random() + 0.5)); // Simulate dynamic load
 
     // Use security checks via Orus (securityEngine)
