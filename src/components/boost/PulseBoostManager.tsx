@@ -108,4 +108,3 @@ const PulseBoostManager: React.FC<PulseBoostManagerProps> = ({ profileId }) => {
 };
 
 export default PulseBoostManager;
-
