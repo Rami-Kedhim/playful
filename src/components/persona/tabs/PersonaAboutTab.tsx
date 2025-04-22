@@ -1,4 +1,5 @@
-import { UberPersona } from '@/types/UberPersona';
+
+import { UberPersona } from '@/types/uberPersona';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +22,6 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
       : `${Math.floor(responseTime / 60)} hours`
     : 'Unknown';
 
-  // Fix: persona.rating doesn't exist, try persona.stats.rating or fallback 'N/A'
   const rating = persona.stats?.rating ?? 'N/A';
 
   return (
@@ -157,3 +157,4 @@ const PersonaAboutTab = ({ persona }: PersonaAboutTabProps) => {
 };
 
 export default PersonaAboutTab;
+

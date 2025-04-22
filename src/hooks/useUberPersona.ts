@@ -1,7 +1,9 @@
 
+// Fix import casing for UberPersona
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { UberPersona } from '@/types/uberPersona';  // Using the correct case for import
+import { UberPersona } from '@/types/uberPersona';
 
 export const useUberPersona = (userId: string | undefined) => {
   const [persona, setPersona] = useState<UberPersona | null>(null);
