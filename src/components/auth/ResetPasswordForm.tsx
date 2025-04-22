@@ -2,88 +2,83 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/auth/useAuthContext';
+import { useAuth } from '@/hooks/auth';
+import { toast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface ResetPasswordFormProps {
-  token?: string;
+  onSuccess?: () => void;
+  resetToken?: string;
 }
 
-const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ token }) => {
+const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSuccess, resetToken }) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
   const auth = useAuth();
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const handleResetRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
+    if (!email) return;
     
+    setIsLoading(true);
     try {
-      if (token) {
-        // If we have a token, we're resetting the password
-        await auth.resetPassword(token, password);
+      // Call requestPasswordReset from auth context
+      const result = await auth.sendPasswordResetEmail(email);
+      
+      if (result.success) {
+        setSuccess(true);
+        toast({
+          title: "Password reset email sent",
+          description: "Check your inbox for the reset link.",
+        });
+        if (onSuccess) onSuccess();
       } else {
-        // If no token, we're requesting a reset email
-        await auth.requestPasswordReset(email, window.location.origin);
+        toast({
+          title: "Error",
+          description: result.error || "Failed to request password reset",
+          variant: "destructive",
+        });
       }
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
+    } catch (error) {
+      console.error("Password reset error:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-  
+
   if (success) {
     return (
-      <div className="text-center">
-        <h3 className="text-lg font-medium">Request Sent</h3>
-        <p className="mt-2 text-muted-foreground">
-          {token ? 'Your password has been reset successfully.' : 'Check your email for a reset link.'}
-        </p>
-      </div>
+      <Alert className="mb-4">
+        <AlertCircle className="h-4 w-4 mr-2" />
+        <AlertDescription>
+          Password reset link has been sent to your email.
+        </AlertDescription>
+      </Alert>
     );
   }
-  
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <div className="p-3 text-sm border rounded bg-red-50 border-red-200 text-red-600">
-          {error}
-        </div>
-      )}
-      
-      {!token ? (
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-      ) : (
-        <div className="space-y-2">
-          <Label htmlFor="password">New Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-      )}
-      
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Processing...' : token ? 'Reset Password' : 'Send Reset Email'}
+    <form onSubmit={handleResetRequest} className="space-y-4">
+      <div>
+        <Input
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full"
+          disabled={isLoading}
+        />
+      </div>
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Sending..." : "Reset Password"}
       </Button>
     </form>
   );

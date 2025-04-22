@@ -1,34 +1,100 @@
 
-import React, { useContext } from 'react';
-import { Livecam } from '@/types/livecams';
+import { useState, useEffect, useCallback } from 'react';
+import { AIProfile } from '@/types/ai-profile';
 
-// Create the LivecamContextType interface
 export interface LivecamContextType {
-  livecams: Livecam[];
-  loadingLivecams: boolean;
-  error: string | null;
-  fetchLivecams: () => Promise<void>;
-  getLivecamById?: (id: string) => Livecam | undefined;
+  activeStreams: AIProfile[];
+  featuredStream: AIProfile | null;
+  isLoading: boolean;
+  error: Error | null;
+  joinStream: (profileId: string) => Promise<boolean>;
+  leaveStream: (profileId: string) => Promise<boolean>;
 }
 
-// Create a dummy context since we don't know the actual LivecamContext structure
-const LivecamContext = React.createContext<LivecamContextType | undefined>(undefined);
+export const useLivecams = (): LivecamContextType => {
+  const [activeStreams, setActiveStreams] = useState<AIProfile[]>([]);
+  const [featuredStream, setFeaturedStream] = useState<AIProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-export const useLivecams = () => {
-  const context = useContext(LivecamContext);
-  
-  if (!context) {
-    throw new Error('useLivecams must be used within a LivecamProvider');
-  }
-  
-  // Add the missing getLivecamById function
-  const getLivecamById = (id: string): Livecam | undefined => {
-    return context.livecams?.find(livecam => livecam.id === id);
-  };
-  
+  // Mock function to fetch active streams
+  const fetchActiveStreams = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Mock response
+      const mockStreams: AIProfile[] = [
+        {
+          id: '1',
+          name: 'Sophia',
+          livecam_enabled: true,
+          avatarUrl: '/avatars/sophia.jpg',
+          displayName: 'Sophia',
+          thumbnailUrl: '/thumbnails/sophia-stream.jpg',
+          type: 'virtual_companion'
+        },
+        {
+          id: '2',
+          name: 'Emma',
+          livecam_enabled: true,
+          avatarUrl: '/avatars/emma.jpg',
+          displayName: 'Emma',
+          thumbnailUrl: '/thumbnails/emma-stream.jpg',
+          type: 'virtual_companion'
+        }
+      ];
+      
+      setActiveStreams(mockStreams);
+      setFeaturedStream(mockStreams[0]);
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActiveStreams();
+    
+    // Poll for active streams every minute
+    const interval = setInterval(fetchActiveStreams, 60000);
+    
+    return () => {
+      clearInterval(interval);
+    };
+  }, [fetchActiveStreams]);
+
+  const joinStream = useCallback(async (profileId: string): Promise<boolean> => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return true;
+    } catch (err) {
+      console.error('Failed to join stream:', err);
+      return false;
+    }
+  }, []);
+
+  const leaveStream = useCallback(async (profileId: string): Promise<boolean> => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 300));
+      return true;
+    } catch (err) {
+      console.error('Failed to leave stream:', err);
+      return false;
+    }
+  }, []);
+
   return {
-    ...context,
-    getLivecamById
+    activeStreams,
+    featuredStream,
+    isLoading,
+    error,
+    joinStream,
+    leaveStream
   };
 };
 

@@ -22,6 +22,7 @@ export interface User {
   user_metadata?: Record<string, any>;
   ubxBalance?: number;
   created_at?: string;
+  phone?: string; // Add phone property
 }
 
 export interface AuthResult {
@@ -42,8 +43,27 @@ export interface AuthState {
   initialized: boolean;
 }
 
-export type UserRole = string | { name: string };
+export type UserRole = string;
 
 export interface AuthUser extends User {
   // Additional properties needed for auth
+  ubxBalance?: number; // Add UBX balance
+}
+
+export interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  initialized: boolean;
+  login: (email: string, password: string, options?: any) => Promise<AuthResult>;
+  logout: () => Promise<void>;
+  register: (email: string, password: string, username?: string, options?: any) => Promise<AuthResult>;
+  updateUser: (data: Partial<User>) => Promise<boolean>;
+  loadUserProfile: () => Promise<User | null>;
+  refreshProfile: () => Promise<void>;
+  sendPasswordResetEmail: (email: string) => Promise<AuthResult>;
+  resetPassword: (token: string, password: string) => Promise<AuthResult>;
+  requestPasswordReset: (email: string) => Promise<AuthResult>;
+  verifyEmail: (token: string) => Promise<AuthResult>;
 }

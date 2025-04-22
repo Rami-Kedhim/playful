@@ -1,27 +1,18 @@
 
 import { useContext } from 'react';
-import { BoostContext } from '@/contexts/BoostContext';
-import { BoostStatus, BoostPackage } from '@/types/boost';
+import { BoostContext, BoostContextType } from '@/contexts/BoostContext';
 
-export interface BoostContextType {
-  isActive: boolean;
-  packages: BoostPackage[];
-  boostProfile: (profileId: string, packageId: string) => Promise<boolean>;
-  loading: boolean;
-  error: string | null;
-  boostStatus: BoostStatus | null;
-  dailyBoostUsage?: number;
-  dailyBoostLimit?: number;
-  purchaseBoost?: (pkg: BoostPackage) => Promise<boolean>;
-  cancelBoost?: () => Promise<boolean>;
-}
-
-export const useBoostContext = () => {
+/**
+ * Hook to access the boost context
+ */
+export const useBoostContext = (): BoostContextType => {
   const context = useContext(BoostContext);
   
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useBoostContext must be used within a BoostProvider');
   }
   
   return context;
 };
+
+export default useBoostContext;

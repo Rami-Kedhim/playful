@@ -1,94 +1,57 @@
-
-import React from 'react';
-import { useAuth } from '@/hooks/auth/useAuth';
-import { useRole } from '@/hooks/auth/useRole';
+import { ReactNode } from 'react';
+import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
-import { Loader2, ShieldAlert } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { UserRole } from '@/types/auth';
 
 interface RoleGuardProps {
-  children: React.ReactNode;
-  allowedRoles: UserRole[];
-  fallbackPath?: string;
-  requireAllRoles?: boolean;
-  showAccessDenied?: boolean;
+  children: ReactNode;
+  allowedRoles: string[];
+  redirectTo?: string;
+  fallback?: ReactNode;
 }
 
 /**
- * A component that only renders its children if the current user has one or all of the allowed roles
+ * A component that restricts access based on user roles
  */
 const RoleGuard = ({ 
   children, 
   allowedRoles, 
-  fallbackPath = "/", 
-  requireAllRoles = false,
-  showAccessDenied = false
+  redirectTo = '/unauthorized', 
+  fallback 
 }: RoleGuardProps) => {
-  const { user, isLoading } = useAuth();
-  const { hasRole, hasAllRoles, isAdmin } = useRole();
+  const { user, isAuthenticated } = useAuth();
   
-  // Show loading state if auth is still being determined
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[50vh]">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Verifying permissions...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // If no user, redirect to login
-  if (!user) {
-    return <Navigate to="/auth" state={{ from: window.location.pathname }} replace />;
+  // Check if the user is authenticated
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" />;
   }
   
-  // Special handling for admin (admins can access everything)
-  if (isAdmin) {
-    return <>{children}</>;
-  }
-
-  // Check if user has required role(s)
-  const hasAccess = requireAllRoles 
-    ? hasAllRoles(allowedRoles)
-    : allowedRoles.some(role => hasRole(role));
-
-  // If user doesn't have required role(s)
-  if (!hasAccess) {
-    if (showAccessDenied) {
-      return (
-        <div className="flex flex-col items-center justify-center py-10">
-          <Card className="max-w-md mx-auto">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <ShieldAlert className="h-16 w-16 text-destructive" />
-              </div>
-              <CardTitle>Access Denied</CardTitle>
-              <CardDescription>
-                You don't have permission to access this page.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-              <p className="text-sm text-center text-muted-foreground">
-                This page requires one of the following roles: {allowedRoles.join(', ')}
-              </p>
-              <Button onClick={() => window.location.href = fallbackPath}>
-                Return to Home Page
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      );
+  // Extract user roles
+  const userRoles: string[] = user.roles || [];
+  
+  // Check if the user has at least one of the allowed roles
+  const hasRequiredRole = userRoles.some(role => {
+    // If role is a string already, direct comparison
+    if (typeof role === 'string') {
+      return allowedRoles.includes(role);
     }
     
-    return <Navigate to={fallbackPath} replace />;
+    // Otherwise extract the name property
+    return false;
+  });
+  
+  // If user has the required role, render the children
+  if (hasRequiredRole) {
+    return <>{children}</>;
   }
   
-  // If user has required role, render children
-  return <>{children}</>;
+  // If a fallback is provided, render it
+  if (fallback) {
+    return <>{fallback}</>;
+  }
+  
+  // Otherwise redirect to the specified route
+  return <Navigate to={redirectTo} />;
 };
 
 export default RoleGuard;

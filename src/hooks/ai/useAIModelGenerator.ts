@@ -20,6 +20,8 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
   const [currentStage, setCurrentStage] = useState('');
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatusDetails>({
     status: ProcessingStatus.IDLE,
+    progress: 0,
+    message: 'Ready to generate',
     completedCount: 0,
     totalCount: 0,
   });
@@ -34,6 +36,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setCurrentStage('Initializing AI model generation');
     setProcessingStatus({
       status: ProcessingStatus.PENDING,
+      progress: 0,
       message: 'Preparing to generate model',
       completedCount: 0,
       totalCount: 5
@@ -71,6 +74,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
       setGeneratedModel(enhancedProfile);
       setProcessingStatus({
         status: ProcessingStatus.COMPLETED,
+        progress: 100,
         message: 'Model generation completed successfully!',
         completedCount: 5,
         totalCount: 5
@@ -86,6 +90,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
       setError(err.message || 'An error occurred during model generation.');
       setProcessingStatus({
         status: ProcessingStatus.FAILED,
+        progress: 0,
         message: err.message || 'Model generation failed.',
         completedCount: 0,
         totalCount: 5
@@ -100,6 +105,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setIsGenerating(false);
     setProcessingStatus({
       status: ProcessingStatus.FAILED,
+      progress: 0,
       message: 'Model generation was cancelled.',
       completedCount: 0,
       totalCount: 5
@@ -110,6 +116,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setCurrentStage(stage);
     setProcessingStatus({
       status: ProcessingStatus.PROCESSING,
+      progress: Math.floor(((current - 1) / total) * 100),
       message: `Processing: ${stage}`,
       completedCount: current - 1,
       totalCount: total
@@ -122,6 +129,7 @@ export const useAIModelGenerator = (props?: UseAIModelGeneratorProps) => {
     setProgress(newProgress);
     setProcessingStatus({
       status: ProcessingStatus.PROCESSING,
+      progress: newProgress,
       message: `Completed: ${stage}`,
       completedCount: current,
       totalCount: total

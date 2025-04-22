@@ -56,7 +56,7 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
             name: "1 Hour Boost",
             description: "Increase your profile visibility for 1 hour",
             price: 5,
-            price_lucoin: 50,
+            price_ubx: 50,
             duration: "1:00:00",
             features: ["Top of search results", "Featured badge"]
           },
@@ -65,7 +65,7 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
             name: "24 Hour Boost",
             description: "Increase your profile visibility for 24 hours",
             price: 20,
-            price_lucoin: 200,
+            price_ubx: 200,
             duration: "24:00:00",
             features: ["Top of search results", "Featured badge", "Homepage feature"]
           },
@@ -74,7 +74,7 @@ export const BoostProvider: React.FC<BoostProviderProps> = ({ children }) => {
             name: "7 Day Boost",
             description: "Increase your profile visibility for 7 days",
             price: 100,
-            price_lucoin: 1000,
+            price_ubx: 1000,
             duration: "168:00:00",
             features: ["Top of search results", "Featured badge", "Homepage feature", "Priority notifications"]
           }

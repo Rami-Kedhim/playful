@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import {
   Dialog,
@@ -36,7 +35,6 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
   open: externalOpen,
   setOpen: setExternalOpen,
 }) => {
-  // Use buttonProps if provided, otherwise use individual props
   const finalButtonText = buttonProps?.text || buttonText;
   const finalButtonVariant = buttonProps?.variant || buttonVariant;
   const finalButtonSize = buttonProps?.size || buttonSize;
@@ -99,12 +97,11 @@ const BoostDialogContainer: React.FC<BoostDialogContainerProps> = ({
     }
   }, [selectedPackage, boostPackages, boostContext, profileId, onSuccess, handleDialogClose]);
 
-  // Function to get price for selected boost package
   const getBoostPrice = useCallback(() => {
     if (!selectedPackage) return 0;
     
     const pkg = boostPackages.find(p => p.id === selectedPackage);
-    return pkg?.price_ubx || pkg?.price_lucoin || pkg?.price || 0;
+    return pkg?.price_ubx || pkg?.price || 0;
   }, [selectedPackage, boostPackages]);
 
   return (

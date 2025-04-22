@@ -49,10 +49,16 @@ export interface HermesStatus {
   lastUpdateTime: string;
   boostScore?: number;
   effectivenessScore?: number;
+  isActive?: boolean;
+  active?: boolean;
+  timeRemaining?: string;
 }
 
 export interface HermesBoostStatus extends HermesStatus {
   // Additional properties for HermesBoostStatus
+  isActive?: boolean;
+  active?: boolean;
+  timeRemaining?: string;
 }
 
 export interface BoostAnalytics {
@@ -65,6 +71,10 @@ export interface BoostAnalytics {
 export interface PulseBoost extends BoostPackage {
   color: string;
   is_featured?: boolean;
+  durationMinutes?: number;
+  costUBX?: number;
+  visibility?: string;
+  badgeColor?: string;
 }
 
 export interface BoostDialogTabsProps {
@@ -84,10 +94,12 @@ export interface BoostDialogTabsProps {
   getBoostPrice: () => number;
   hermesStatus: HermesStatus;
   formatBoostDuration: (duration: string) => string;
+  onBoostSuccess?: () => void;
 }
 
 export interface HermesData {
   // Add required properties
   position?: number;
   visibilityScore?: number;
+  activeUsers?: number;
 }

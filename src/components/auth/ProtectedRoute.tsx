@@ -1,45 +1,52 @@
 
-import { useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import type { UserRole } from "@/types/auth";
+import { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  allowedRoles?: (UserRole | string)[];
+  children: ReactNode;
+  requiredRole?: string;
+  redirectTo?: string;
 }
 
-const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+/**
+ * A route component that requires authentication
+ * Redirects to login if not authenticated
+ */
+const ProtectedRoute = ({
+  children,
+  requiredRole,
+  redirectTo = '/login'
+}: ProtectedRouteProps) => {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
+  // Show loading state while checking authentication
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // If allowedRoles is specified, check if user has one of the allowed roles
-  if (allowedRoles && allowedRoles.length > 0 && user) {
-    const userRoles = user.roles || [user.role || 'user'];
-    const hasAllowedRole = allowedRoles.some(role => {
-      // Check against string roles or role objects
-      const userRoleStrings = userRoles.map(r => typeof r === 'string' ? r : r.name);
-      return userRoleStrings.includes(role);
+  // If a specific role is required, check for it
+  if (requiredRole && user) {
+    const userRoles = user.roles || [];
+    const hasRole = userRoles.some(role => {
+      if (typeof role === 'string') {
+        return role === requiredRole;
+      }
+      return false;
     });
-    
-    if (!hasAllowedRole) {
-      // User doesn't have required role, redirect to access-denied
-      return <Navigate to="/access-denied" replace />;
+
+    if (!hasRole) {
+      return <Navigate to="/unauthorized" replace />;
     }
   }
 
+  // User is authenticated (and has required role if specified)
   return <>{children}</>;
 };
 

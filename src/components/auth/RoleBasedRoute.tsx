@@ -1,52 +1,50 @@
 
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/hooks/auth/useAuthContext';
-import { UserRole } from '@/types/auth';
+import { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth';
 
 interface RoleBasedRouteProps {
-  allowedRoles?: UserRole[];
-  redirectPath?: string;
-  children?: React.ReactNode;
+  children: ReactNode;
+  allowedRoles: string[];
+  redirectTo?: string;
 }
 
-const RoleBasedRoute: React.FC<RoleBasedRouteProps> = ({
-  allowedRoles = [],
-  redirectPath = '/auth',
-  children
-}) => {
-  const { isAuthenticated, isLoading, checkRole, user } = useAuth();
-  
-  // Show loading state while checking auth
+/**
+ * A route component that restricts access based on user roles
+ */
+const RoleBasedRoute = ({
+  children,
+  allowedRoles,
+  redirectTo = '/unauthorized'
+}: RoleBasedRouteProps) => {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
+  // Show loading state while checking authentication
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Verifying access...</p>
-      </div>
-    );
+    return <div>Loading...</div>;
   }
-  
-  // If no roles specified, just check if authenticated
-  if (allowedRoles.length === 0) {
-    if (!isAuthenticated) {
-      return <Navigate to={redirectPath} replace />;
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Check if the user has at least one of the allowed roles
+  const userRoles = user.roles || [];
+  const hasAllowedRole = userRoles.some(role => {
+    if (typeof role === 'string') {
+      return allowedRoles.includes(role);
     }
-    
-    return children ? <>{children}</> : <Outlet />;
-  }
-  
-  // Check if user has at least one of the allowed roles
-  const hasRequiredRole = allowedRoles.some(role => checkRole(role));
-  
-  if (!isAuthenticated || !hasRequiredRole) {
-    // If authenticated but wrong role, redirect to access denied
-    const redirectTo = isAuthenticated ? '/access-denied' : redirectPath;
+    return false;
+  });
+
+  if (!hasAllowedRole) {
     return <Navigate to={redirectTo} replace />;
   }
-  
-  return children ? <>{children}</> : <Outlet />;
+
+  // User has the required role
+  return <>{children}</>;
 };
 
 export default RoleBasedRoute;

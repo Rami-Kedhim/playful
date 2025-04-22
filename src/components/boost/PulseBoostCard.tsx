@@ -4,7 +4,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Clock, Zap, ChevronRight } from "lucide-react";
-import { formatPulseBoostDuration } from '@/constants/pulseBoostConfig';
 import { PulseBoost } from '@/types/boost';
 
 interface PulseBoostCardProps {
@@ -29,10 +28,12 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   const [loading, setLoading] = useState(false);
   
   // Format duration to readable string
-  const formattedDuration = formatPulseBoostDuration(boost.durationMinutes);
+  const formattedDuration = boost.durationMinutes 
+    ? formatDuration(boost.durationMinutes) 
+    : boost.duration || "Unknown";
   
   // Check if user can afford this boost
-  const canAfford = userBalance >= boost.costUBX;
+  const canAfford = userBalance >= (boost.costUBX || boost.price_ubx || boost.price);
   
   const handleActivate = async () => {
     if (loading || !onActivate) return;
@@ -58,21 +59,29 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   
   // Card background style based on boost type or if active
   const cardStyle = isActive
-    ? { borderColor: boost.badgeColor || '#3b82f6', backgroundColor: (boost.badgeColor || '#3b82f6') + '10' }
+    ? { borderColor: boost.badgeColor || boost.color || '#3b82f6', backgroundColor: (boost.badgeColor || boost.color || '#3b82f6') + '10' }
     : {};
+
+  // Format duration helper
+  function formatDuration(minutes?: number): string {
+    if (!minutes) return "Unknown";
+    if (minutes < 60) return `${minutes} minutes`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
+    return `${Math.floor(minutes / 1440)} days`;
+  }
   
   return (
     <Card className="overflow-hidden" style={cardStyle}>
       <CardContent className="p-5 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="font-medium text-lg">{boost.name}</h3>
-          <Badge style={{ backgroundColor: boost.badgeColor || '#3b82f6' }}>
-            {isActive ? 'Active' : `${boost.costUBX} UBX`}
+          <Badge style={{ backgroundColor: boost.badgeColor || boost.color || '#3b82f6' }}>
+            {isActive ? 'Active' : `${boost.costUBX || boost.price_ubx || boost.price} UBX`}
           </Badge>
         </div>
         
         <p className="text-sm text-muted-foreground">
-          {boost.description || `Increases profile visibility across ${boost.visibility}`}
+          {boost.description || `Increases profile visibility across ${boost.visibility || 'platform'}`}
         </p>
         
         <div className="grid grid-cols-2 gap-3">
@@ -83,7 +92,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
           </div>
           <div className="bg-background/50 p-3 rounded-md flex flex-col items-center">
             <Zap className="h-4 w-4 mb-1 text-muted-foreground" />
-            <span className="text-sm font-semibold">{boost.visibility}</span>
+            <span className="text-sm font-semibold">{boost.visibility || 'Standard'}</span>
             <span className="text-xs text-muted-foreground">Visibility</span>
           </div>
         </div>
@@ -116,9 +125,11 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
             {loading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <ChevronRight className="h-4 w-4 ml-2" />
+              <>
+                Activate
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </>
             )}
-            {canAfford ? 'Activate' : 'Not Enough UBX'}
           </Button>
         )}
       </CardFooter>

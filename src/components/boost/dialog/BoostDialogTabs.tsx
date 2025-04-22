@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,26 @@ import BoostEligibilityCheck from "./BoostEligibilityCheck";
 import BoostActivePackage from "../BoostActivePackage";
 import HermesBoostInfo from './HermesBoostInfo';
 import { BoostStatus, HermesBoostStatus, BoostDialogTabsProps } from '@/types/boost';
+
+export interface BoostDialogTabsProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+  loading: boolean;
+  boostStatus: BoostStatus;
+  eligibility: BoostEligibility;
+  boostPackages: BoostPackage[];
+  selectedPackage: string | null;
+  setSelectedPackage: (id: string) => void;
+  handleBoost: () => Promise<boolean>;
+  handleCancel: () => Promise<boolean>;
+  dailyBoostUsage: number;
+  dailyBoostLimit: number;
+  hermesStatus: HermesStatus;
+  formatBoostDuration?: (duration: string) => string;
+  getBoostPrice?: () => number;
+  handleDialogClose: () => void;
+  onBoostSuccess?: () => void;
+}
 
 const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   activeTab,
@@ -23,7 +42,6 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   dailyBoostUsage,
   dailyBoostLimit,
   hermesStatus,
-  onBoostSuccess,
   formatBoostDuration = (duration) => {
     const [hours] = duration.split(':').map(Number);
     return hours >= 24 ? `${Math.floor(hours / 24)} days` : `${hours} hours`;
