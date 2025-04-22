@@ -60,3 +60,17 @@ export interface RegisterCredentials {
 
 // Add UserRole enum for AuthPage
 export type UserRole = string | { name: string };
+
+// AI Avatar Generator settings
+export interface AIAvatarSettings {
+  gender: "male" | "female" | "non-binary" | string;
+  style: string;
+  ageRange: string;
+  age: number;
+  ethnicity: string;
+  hairColor: string;
+  hairStyle: string;
+  bodyType: string;
+  skinTone: string;
+  background: string;
+}

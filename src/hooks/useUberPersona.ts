@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { UberPersonaData } from '@/types/UberPersona';  // Using the correct case for import
