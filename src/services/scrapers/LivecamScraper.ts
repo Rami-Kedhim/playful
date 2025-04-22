@@ -1,6 +1,4 @@
 
-// Fixed to remove previewVideoUrl and added missing jsdom dependency
-
 import { LivecamModel } from "@/types/livecams";
 import { JSDOM } from "jsdom";
 
@@ -27,13 +25,14 @@ export const LivecamScraper = {
 
         const livecam: LivecamModel = {
           id,
+          displayName: username,
+          thumbnailUrl: imageUrl,
           isStreaming,
           viewerCount,
           username,
           imageUrl,
           tags,
-          category,
-          // Removed previewVideoUrl property
+          category
         };
 
         livecams.push(livecam);
@@ -46,3 +45,4 @@ export const LivecamScraper = {
     }
   }
 };
+

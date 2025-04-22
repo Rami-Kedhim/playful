@@ -1,7 +1,5 @@
 
-// Fix personaHelpers.ts to align with UberPersona props
-
-import { UberPersona } from '@/types/UberPersona';
+import { UberPersona } from '@/types/uberPersona';
 
 function getPersonaType(persona: UberPersona): string {
   return persona?.type ?? '';
@@ -32,7 +30,6 @@ function isPersonaOnline(persona: UberPersona): boolean {
 }
 
 function getPersonaPrice(persona: UberPersona): number {
-  // price is not part of UberPersona in types, fallback to monetization.meetingPrice if available
   if (typeof (persona as any).price === 'number') return (persona as any).price;
   if (persona?.monetization?.meetingPrice) return persona.monetization.meetingPrice;
   return 0;

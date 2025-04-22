@@ -1,6 +1,3 @@
-
-// Fixed imports and method usage
-
 import { visibilitySystem } from "./VisibilitySystem";
 import { Livecam } from "@/types/livecams";
 import { calculateLivecamBoostScore } from "@/utils/boost/livecamBoostScore";
@@ -33,7 +30,6 @@ export class LivecamBoostAdapter {
         id: livecamId,
         isStreaming: item.metadata.isStreaming || false,
         viewerCount: item.metadata.viewerCount || 0,
-        region: item.region || "unknown",
         language: "en",
         username: "unknown",
         imageUrl: "",
@@ -89,7 +85,6 @@ export class LivecamBoostAdapter {
         id: livecamId,
         isStreaming: item.metadata?.isStreaming || false,
         viewerCount: item.metadata?.viewerCount || 0,
-        region: item.region || "unknown",
         language: "en",
         username: "unknown",
         imageUrl: "",
@@ -108,7 +103,6 @@ export class LivecamBoostAdapter {
   }
 
   private calculateBaseLivecamScore(livecam: Livecam): number {
-    // Removed getViewerBasedBoostIntensity usage as it no longer exists
     return calculateLivecamBoostScore(livecam);
   }
 }

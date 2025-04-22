@@ -28,17 +28,16 @@ export const getBoostStatus = async (profileId: string): Promise<BoostStatus | n
       .select('*')
       .eq('profile_id', profileId)
       .single();
-    
+
     if (error) {
-      if (error.code !== 'PGRST116') { // PGRST116 is "no rows returned" error
+      if (error.code !== 'PGRST116') {
         console.error('Error fetching boost status:', error);
       }
       return null;
     }
-    
+
     return {
       isActive: data.is_active,
-      tier: data.tier,
       remainingTime: data.remaining_time,
       expiresAt: data.expires_at,
       boostLevel: data.boost_level
@@ -53,7 +52,7 @@ export const checkBoostEligibility = async (profileId: string): Promise<BoostEli
   try {
     const { data, error } = await supabase
       .rpc('check_boost_eligibility', { profile_id: profileId });
-    
+
     if (error) {
       console.error('Error checking boost eligibility:', error);
       return {
@@ -61,11 +60,10 @@ export const checkBoostEligibility = async (profileId: string): Promise<BoostEli
         reason: 'Error checking eligibility'
       };
     }
-    
+
     return {
       isEligible: data.is_eligible,
-      reason: data.reason || null,
-      restrictions: data.restrictions || []
+      reason: data.reason || null
     };
   } catch (error) {
     console.error('Error in checkBoostEligibility:', error);
@@ -161,28 +159,26 @@ export const getBoostAnalytics = async (
 ): Promise<BoostAnalytics | null> => {
   try {
     const { data, error } = await supabase
-      .rpc('get_boost_analytics', { 
+      .rpc('get_boost_analytics', {
         p_profile_id: profileId
       });
-    
+
     if (error) {
       console.error('Error fetching boost analytics:', error);
       return null;
     }
-    
+
     const analyticsReport: BoostAnalytics = {
       impressions: data.impressions || 0,
       clicks: data.clicks || 0,
-      profileViews: data.profile_views || 0,
       messageRequests: data.message_requests || 0,
       bookingRequests: data.booking_requests || 0,
       clickThroughRate: data.click_through_rate || 0,
       boostROI: data.boost_roi || 0,
-      // conversionRate removed to fix type error
       periodStart: data.period_start,
       periodEnd: data.period_end
     };
-    
+
     return analyticsReport;
   } catch (error) {
     console.error('Error in getBoostAnalytics:', error);
