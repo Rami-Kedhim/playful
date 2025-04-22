@@ -110,6 +110,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),
       features: pkg.features || [],
+      // make sure types are number for visibility_increase
       visibility_increase: visibilityIncreaseNum
     };
   };

@@ -1,5 +1,5 @@
 
-import { UberPersona } from '@/types/uberPersona';
+import { UberPersona } from '@/types/uberPersona'; // ensure casing matches file exactly
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
