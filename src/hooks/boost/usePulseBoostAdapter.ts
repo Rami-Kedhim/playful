@@ -64,7 +64,8 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 
   // Convert a standard boost package to a pulse boost
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
-    const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
+    // Ensure duration is string and parse numbers
+    const durationStr: string = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const durationParts = durationStr.split(':');
     const hours = Number(durationParts[0]) || 0;
     const minutes = Number(durationParts[1]) || 0;
@@ -74,7 +75,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const durationMinutes = (hours * 60) + minutes + Math.floor(seconds / 60);
 
     let visibility: PulseBoost['visibility'] = 'homepage';
-    const boostPowerNum = Number(pkg.boost_power) || 50;
+    const boostPowerNum: number = Number(pkg.boost_power) || 50;
 
     if (pkg.boost_power !== undefined && pkg.boost_power !== null) {
       if (boostPowerNum >= 200) {
@@ -86,16 +87,18 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       }
     }
 
-    const visibilityIncreaseNum = Number(pkg.visibility_increase) || 50;
+    const visibilityIncreaseNum: number = Number(pkg.visibility_increase) || 50;
 
     return {
       id: pkg.id,
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
-      duration: durationStr, // string duration to match type
+      duration: durationStr,
       durationMinutes: durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
-      costUBX: typeof pkg.price_ubx === 'number' ? pkg.price_ubx : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
+      costUBX: typeof pkg.price_ubx === 'number'
+        ? pkg.price_ubx
+        : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),
       visibility,
       color: getColorForBoostPower(boostPowerNum),
       badgeColor: getColorForBoostPower(boostPowerNum),

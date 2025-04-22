@@ -36,7 +36,6 @@ export const useLucoins = (): UseLucoinsReturn => {
     setLoading(true);
     setError(null);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 800));
       const simulatedBalance = 500; // Simulated balance
       setBalance(simulatedBalance);
@@ -44,6 +43,7 @@ export const useLucoins = (): UseLucoinsReturn => {
       setError("Failed to fetch Lucoin balance.");
       console.error("getBalance error:", err);
       toast({
+        title: "Error",
         description: "Failed to fetch Lucoin balance.",
         variant: "destructive",
       });
@@ -55,7 +55,6 @@ export const useLucoins = (): UseLucoinsReturn => {
   const fetchPackages = useCallback(async (): Promise<any[]> => {
     setLoading(true);
     try {
-      // Simulate fetching packages
       await new Promise((resolve) => setTimeout(resolve, 800));
       const packages = [
         {
@@ -78,6 +77,7 @@ export const useLucoins = (): UseLucoinsReturn => {
       return packages;
     } catch (error) {
       toast({
+        title: "Error",
         description: "Failed to load Lucoin packages.",
         variant: "destructive",
       });
@@ -90,16 +90,15 @@ export const useLucoins = (): UseLucoinsReturn => {
   const purchasePackage = useCallback(async (packageId: string): Promise<boolean> => {
     setIsProcessing(true);
     try {
-      // Simulate purchasing package
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast({
         description: "Lucoin package purchased successfully.",
       });
-      // Suppose that purchasing adds the package amount to balance:
       setBalance((prev) => prev + 100);
       return true;
     } catch (error) {
       toast({
+        title: "Error",
         description: "Failed to purchase Lucoin package.",
         variant: "destructive",
       });
@@ -112,7 +111,6 @@ export const useLucoins = (): UseLucoinsReturn => {
   const getTransactionHistory = useCallback(async (): Promise<TransactionHistory[]> => {
     setLoading(true);
     try {
-      // Simulate fetching transaction history
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const mockTransactionHistory: TransactionHistory[] = [
         {
@@ -135,6 +133,7 @@ export const useLucoins = (): UseLucoinsReturn => {
     } catch (error: any) {
       console.error("Error fetching Lucoin transaction history:", error);
       toast({
+        title: "Error",
         description: "Failed to load Lucoin transaction history.",
         variant: "destructive",
       });
@@ -152,7 +151,6 @@ export const useLucoins = (): UseLucoinsReturn => {
     async (params: { amount: number; type: string; description?: string }) => {
       setIsProcessing(true);
       try {
-        // Simulate processing transaction
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setBalance((prev) => prev + params.amount);
         toast({
@@ -162,6 +160,7 @@ export const useLucoins = (): UseLucoinsReturn => {
       } catch (error) {
         console.error("Error processing Lucoin transaction:", error);
         toast({
+          title: "Error",
           description: "Failed to process Lucoin transaction.",
           variant: "destructive",
         });
@@ -172,11 +171,6 @@ export const useLucoins = (): UseLucoinsReturn => {
     },
     [toast]
   );
-
-  useEffect(() => {
-    getBalance();
-    getTransactionHistory();
-  }, [getBalance, getTransactionHistory]);
 
   return {
     balance,
@@ -189,6 +183,10 @@ export const useLucoins = (): UseLucoinsReturn => {
     getTransactionHistory,
     refreshHistory,
     processTransaction,
+    addFunds: async (amount: number) => {
+      // Stub for compatibility if needed
+      return true;
+    }
   };
 };
 
