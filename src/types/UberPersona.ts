@@ -1,4 +1,88 @@
 
+// Merged and updated UberPersona interface to include all required properties used across the codebase
+
+export interface BoostStatus {
+  isActive: boolean;
+  tier?: 'basic' | 'premium' | 'none';
+  remainingTime?: string;
+  expiresAt?: string | Date;
+  boostLevel?: number;
+}
+
+export interface AvailabilityScheduleSlot {
+  start: string;
+  end: string;
+}
+
+export interface AvailabilityScheduleDay {
+  available: boolean;
+  slots?: AvailabilityScheduleSlot[];
+}
+
+export interface AvailabilitySchedule {
+  [day: string]: AvailabilityScheduleDay;
+}
+
+export interface Availability {
+  schedule?: AvailabilitySchedule;
+  nextAvailable?: string;
+}
+
+export interface StatusFlags {
+  needsModeration?: boolean;
+  hasPendingUpdates?: boolean;
+  isPremiumExpiring?: boolean;
+}
+
+export interface SystemMetadata {
+  source: 'ai_generated' | 'scraped' | 'manual';
+  lastSynced?: Date;
+  tagsGeneratedByAI: boolean;
+  hilbertSpaceVector: number[];
+  personalityIndex?: number;
+  statusFlags?: StatusFlags;
+}
+
+export interface RoleFlags {
+  isEscort: boolean;
+  isCreator: boolean;
+  isLivecam: boolean;
+  isAI: boolean;
+  isVerified: boolean;
+  isFeatured: boolean;
+}
+
+export interface Capabilities {
+  hasPhotos: boolean;
+  hasVideos: boolean;
+  hasStories: boolean;
+  hasChat: boolean;
+  hasBooking: boolean;
+  hasLiveStream: boolean;
+  hasExclusiveContent: boolean;
+  hasContent: boolean;
+  hasRealMeets: boolean;
+  hasVirtualMeets: boolean;
+}
+
+export interface Monetization {
+  acceptsLucoin?: boolean;
+  acceptsTips?: boolean;
+  subscriptionPrice?: number;
+  unlockingPrice?: number;
+  boostingActive?: boolean;
+  meetingPrice?: number;
+}
+
+export interface Stats {
+  rating: number;
+  reviewCount: number;
+  responseTime: number;
+  viewCount: number;
+  favoriteCount: number;
+  bookingCount?: number;
+}
+
 export interface UberPersona {
   id: string;
   name: string;
@@ -6,7 +90,7 @@ export interface UberPersona {
   username?: string;
   type: 'escort' | 'creator' | 'livecam' | 'ai';
   personality?: string;
-  traits?: string[]; // added traits as optional
+  traits?: string[];
   interests?: string[];
   mood?: string;
   energyLevel?: number;
@@ -14,12 +98,12 @@ export interface UberPersona {
   avatarUrl?: string;
   imageUrl?: string;
   bio?: string;
-  description?: string; // added description as optional
+  description?: string;
   location?: string;
   age?: number;
   ethnicity?: string;
-  isVerified?: boolean; // add as optional
-  isOnline?: boolean;   // add as optional
+  isVerified?: boolean;
+  isOnline?: boolean;
   verificationLevel?: 'basic' | 'verified' | 'premium';
   isActive?: boolean;
   isAI?: boolean;
@@ -28,66 +112,15 @@ export interface UberPersona {
   tags?: string[];
   featured?: boolean;
   languages?: string[];
-  services?: string[]; // added services as optional
-  availability?: {
-    nextAvailable?: string;
-    schedule?: {
-      [day: string]: {
-        available: boolean;
-        slots?: { start: string; end: string }[];
-      };
-    };
-  };
-  systemMetadata?: {
-    source: 'ai_generated' | 'scraped' | 'manual';
-    lastSynced?: Date;
-    tagsGeneratedByAI: boolean;
-    hilbertSpaceVector: number[];
-  };
-  roleFlags?: {
-    isEscort: boolean;
-    isCreator: boolean;
-    isLivecam: boolean;
-    isAI: boolean;
-    isVerified: boolean;
-    isFeatured: boolean;
-  };
-  capabilities?: {
-    hasPhotos: boolean;
-    hasVideos: boolean;
-    hasStories: boolean;
-    hasChat: boolean;
-    hasBooking: boolean;
-    hasLiveStream: boolean;
-    hasExclusiveContent: boolean;
-    hasContent: boolean;
-    hasRealMeets: boolean;
-    hasVirtualMeets: boolean;
-  };
-  monetization?: {
-    acceptsLucoin?: boolean;
-    acceptsTips?: boolean;
-    subscriptionPrice?: number;
-    unlockingPrice?: number;
-    boostingActive?: boolean;
-    meetingPrice?: number;
-  };
+  services?: string[];
+  availability?: Availability;
+  systemMetadata?: SystemMetadata;
+  roleFlags?: RoleFlags;
+  capabilities?: Capabilities;
+  monetization?: Monetization;
   price?: number;
-  stats?: {
-    rating: number;
-    reviewCount: number;
-    responseTime: number;
-    viewCount: number;
-    favoriteCount: number;
-    bookingCount?: number; // added bookingCount as optional
-  };
-  boostStatus?: {
-    isActive: boolean;
-    tier?: 'basic' | 'premium' | 'none';
-    remainingTime?: string;
-    expiresAt?: string | Date;
-    boostLevel?: number;
-  };
+  stats?: Stats;
+  boostStatus?: BoostStatus;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
@@ -105,3 +138,4 @@ export interface NeuralModel {
     [key: string]: any;
   };
 }
+

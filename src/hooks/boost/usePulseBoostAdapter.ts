@@ -1,4 +1,7 @@
 
+// Fix parseNumberValue to ensure return type is number always.
+// Avoid returning string by parsing strings to numbers properly.
+
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -72,7 +75,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
-    // Ensure parts are parsed as numbers instead of strings
+    // Parse parts to numbers strictly
     const hours = parseNumberValue(parts[0] || '0', 0);
     const minutes = parseNumberValue(parts[1] || '0', 0);
     const seconds = parseNumberValue(parts[2] || '0', 0);
@@ -130,3 +133,4 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 };
 
 export default usePulseBoostAdapter;
+

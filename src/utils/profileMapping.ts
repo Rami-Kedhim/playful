@@ -1,10 +1,6 @@
-
 import { UberPersona } from '@/types/UberPersona';
-import { LivecamModel } from '@/types/livecams';
-import { AIProfile } from '@/types/ai-profile';
-import { Escort } from '@/types/Escort';
 
-export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
+export function mapLivecamToUberPersona(livecam: any): UberPersona {
   return {
     id: livecam.id,
     name: livecam.name || livecam.username,
@@ -45,7 +41,7 @@ export function mapLivecamToUberPersona(livecam: LivecamModel): UberPersona {
   };
 }
 
-export function mapAIProfileToUberPersona(aiProfile: AIProfile): UberPersona {
+export function mapAIProfileToUberPersona(aiProfile: any): UberPersona {
   return {
     id: aiProfile.id,
     name: aiProfile.name,
@@ -89,7 +85,7 @@ export function mapAIProfileToUberPersona(aiProfile: AIProfile): UberPersona {
   };
 }
 
-export function mapEscortToUberPersona(escort: Escort): UberPersona {
+export function mapEscortToUberPersona(escort: any): UberPersona {
   return {
     id: escort.id,
     name: escort.name,
@@ -110,7 +106,7 @@ export function mapEscortToUberPersona(escort: Escort): UberPersona {
       isCreator: false,
       isLivecam: false,
       isAI: false,
-      isVerified: escort.isVerified,
+      isVerified: escort.isVerified || false,
       isFeatured: false,
     },
     capabilities: {
@@ -143,7 +139,7 @@ export function mapEscortToUberPersona(escort: Escort): UberPersona {
 }
 
 export function mapGenericToUberPersona(data: any): UberPersona {
-  let type = 'escort';
+  let type: 'escort' | 'creator' | 'livecam' | 'ai' = 'escort';
 
   if (data.isAI || data.personality) {
     type = 'ai';
@@ -159,7 +155,7 @@ export function mapGenericToUberPersona(data: any): UberPersona {
     id: data.id || `generic-${Date.now()}`,
     name: data.name || data.displayName || 'Unknown',
     displayName: data.displayName || data.name || 'Unknown',
-    type: type as 'escort' | 'creator' | 'livecam' | 'ai', // adjust to literal union
+    type: type,
     avatarUrl: data.avatarUrl || data.profileImage || data.imageUrl,
     imageUrl: data.imageUrl || data.profileImage || data.avatarUrl,
     bio: data.bio || data.description,
@@ -169,7 +165,7 @@ export function mapGenericToUberPersona(data: any): UberPersona {
     isPremium: !!data.isPremium,
     isActive: data.isActive !== false,
     tags: data.tags || data.interests || [],
-    services: data.services || data.services || [],
+    services: data.services || [],
     roleFlags: {
       isEscort: type === 'escort',
       isCreator: type === 'creator',

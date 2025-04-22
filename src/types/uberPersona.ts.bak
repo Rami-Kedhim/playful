@@ -1,6 +1,3 @@
-
-// Adjusted interface to unify property names to camelCase and fix types for UberPersona to match usage in code
-
 export interface BoostStatus {
   isActive: boolean;
   tier?: 'basic' | 'premium' | 'none';
