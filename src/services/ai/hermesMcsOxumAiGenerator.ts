@@ -1,6 +1,4 @@
-
-import { AIProfile } from "@/types/ai-profile";
-import { generateAIProfile } from "@/services/aiProfileGenerator";
+import { AIProfile } from '@/types/ai-profile';
 
 // The Hermes+Oxum system combines cultural context (Hermes) with linguistic diversity (Oxum)
 // to rapidly generate large volumes of specialized AI models
@@ -131,8 +129,8 @@ export async function generateBulkAIProfiles(options: GenerationOptions): Promis
     }
     
     // Add monetization features
-    profile.lucoin_chat_price = Math.floor(Math.random() * 10) + 5;
-    profile.lucoin_image_price = Math.floor(Math.random() * 20) + 10;
+    profile.ubx_chat_price = Math.floor(Math.random() * 10) + 5;
+    profile.ubx_image_price = Math.floor(Math.random() * 20) + 10;
     
     // Add premium content counts
     profile.premium_content_count = {
