@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Zap } from 'lucide-react';
 import BoostProfileDialog from '../BoostProfileDialog';
-import { useBoost } from '@/contexts/BoostContext';
+import { useBoost } from '@/hooks/boost/useBoost';
 
 interface BoostButtonProps {
   profileId?: string;
@@ -29,10 +29,6 @@ const BoostButton: React.FC<BoostButtonProps> = ({
   
   const handleSuccess = () => {
     // Refresh boost status or perform other actions
-  };
-  
-  const handleClose = () => {
-    setOpen(false);
   };
   
   return (

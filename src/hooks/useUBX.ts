@@ -1,110 +1,174 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/auth';
-import { toast } from '@/hooks/use-toast';
 
-interface UBXTransaction {
+export interface UBXTransaction {
   amount: number;
-  transactionType: string;
-  description?: string;
+  type: 'credit' | 'debit';
+  description: string;
   metadata?: Record<string, any>;
 }
 
-interface UBXTransactionResult {
-  success: boolean;
-  newBalance?: number;
-  error?: string;
+export interface UBXPackage {
+  id: string;
+  name: string;
+  amount: number;
+  price: number;
+  bonus_amount?: number;
+  is_featured?: boolean;
+  currency?: string;
 }
 
 export const useUBX = () => {
-  const { user, updateUser } = useAuth();
+  const [balance, setBalance] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [balance, setBalance] = useState<number>(user?.ubxBalance || 0);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const { user, profile } = useAuth();
+  const { toast } = useToast();
   
-  const refreshBalance = async () => {
-    if (!user) return;
-    
+  // Load initial balance from profile if available
+  useEffect(() => {
+    if (profile) {
+      setBalance(profile.ubx_balance || 0);
+    }
+  }, [profile]);
+  
+  // Refresh balance
+  const refreshBalance = async (): Promise<number> => {
     try {
-      // In a real app, this would fetch from an API
-      // For now, just use the user's current balance
-      setBalance(user.ubxBalance || 0);
-      return user.ubxBalance || 0;
+      if (!user) return 0;
+      
+      // In a real implementation, fetch updated balance from API
+      // For now, we'll use the profile's UBX balance
+      const updatedBalance = profile?.ubx_balance || 0;
+      setBalance(updatedBalance);
+      
+      return updatedBalance;
     } catch (error) {
-      console.error('Error refreshing UBX balance:', error);
+      console.error("Error refreshing UBX balance:", error);
       return balance;
     }
   };
   
+  // Process a transaction (credit or debit)
   const processTransaction = async (transaction: UBXTransaction): Promise<boolean> => {
     if (!user) {
       toast({
-        title: 'Error',
-        description: 'You need to be logged in to perform this transaction',
-        variant: 'destructive'
+        title: "Authentication required",
+        description: "You must be logged in to perform this action",
+        variant: "destructive",
       });
       return false;
     }
     
     setIsProcessing(true);
-    
     try {
-      // Check if user has enough balance for a debit transaction
-      if (transaction.amount < 0) {
-        const currentBalance = user.ubxBalance || 0;
-        if (currentBalance < Math.abs(transaction.amount)) {
-          toast({
-            title: 'Insufficient funds',
-            description: `You need ${Math.abs(transaction.amount)} UBX to complete this transaction`,
-            variant: 'destructive'
-          });
-          return false;
-        }
+      // In a real implementation, process transaction via API
+      // For now, just simulate the transaction locally
+      
+      // Check if sufficient funds for debit transactions
+      if (transaction.type === 'debit' && transaction.amount > balance) {
+        toast({
+          title: "Insufficient UBX",
+          description: "You don't have enough UBX to complete this transaction",
+          variant: "destructive",
+        });
+        return false;
       }
       
-      // In a real app, this would call an API
-      // For now, just simulate a transaction
-      const newBalance = (user.ubxBalance || 0) + transaction.amount;
+      // Update balance locally
+      const newBalance = transaction.type === 'credit' 
+        ? balance + transaction.amount 
+        : balance - transaction.amount;
       
-      // Update local state
       setBalance(newBalance);
       
-      // Update user object
-      await updateUser({ ubxBalance: newBalance });
-      
-      // Add to transaction history
+      // Add to transactions history
       setTransactions(prev => [
         {
           id: Date.now().toString(),
-          amount: transaction.amount,
-          type: transaction.transactionType,
-          description: transaction.description,
-          timestamp: new Date().toISOString()
+          ...transaction,
+          timestamp: new Date().toISOString(),
         },
         ...prev
       ]);
       
-      // Show success message for significant transactions
-      if (Math.abs(transaction.amount) > 10) {
-        toast({
-          title: transaction.amount > 0 ? 'Funds received' : 'Payment successful',
-          description: `${Math.abs(transaction.amount)} UBX ${transaction.amount > 0 ? 'added to' : 'deducted from'} your wallet`,
-        });
-      }
+      toast({
+        title: "Transaction complete",
+        description: `${transaction.amount} UBX ${transaction.type === 'credit' ? 'added to' : 'deducted from'} your account`,
+      });
       
       return true;
     } catch (error) {
-      console.error('Error processing UBX transaction:', error);
-      
+      console.error("Error processing UBX transaction:", error);
       toast({
-        title: 'Transaction failed',
-        description: 'There was an error processing your transaction',
-        variant: 'destructive'
+        title: "Transaction failed",
+        description: "There was an error processing your UBX transaction",
+        variant: "destructive",
       });
-      
       return false;
     } finally {
       setIsProcessing(false);
+    }
+  };
+  
+  // Fetch available UBX packages
+  const fetchPackages = async (): Promise<UBXPackage[]> => {
+    try {
+      // In a real implementation, fetch from API
+      // For now, return mock data
+      return [
+        {
+          id: "pkg-basic",
+          name: "Basic",
+          amount: 100,
+          price: 9.99,
+          bonus_amount: 0,
+          is_featured: false
+        },
+        {
+          id: "pkg-standard",
+          name: "Standard",
+          amount: 500,
+          price: 39.99,
+          bonus_amount: 50,
+          is_featured: true
+        },
+        {
+          id: "pkg-premium",
+          name: "Premium",
+          amount: 1200,
+          price: 79.99,
+          bonus_amount: 200,
+          is_featured: false
+        }
+      ];
+    } catch (error) {
+      console.error("Error fetching UBX packages:", error);
+      return [];
+    }
+  };
+  
+  // Purchase a package
+  const purchasePackage = async (packageId: string): Promise<boolean> => {
+    try {
+      const packages = await fetchPackages();
+      const selectedPackage = packages.find(pkg => pkg.id === packageId);
+      
+      if (!selectedPackage) {
+        throw new Error("Package not found");
+      }
+      
+      // Process the transaction
+      return await processTransaction({
+        amount: selectedPackage.amount + (selectedPackage.bonus_amount || 0),
+        type: 'credit',
+        description: `Purchased ${selectedPackage.name} UBX package`
+      });
+    } catch (error) {
+      console.error("Error purchasing UBX package:", error);
+      return false;
     }
   };
   
@@ -113,7 +177,9 @@ export const useUBX = () => {
     transactions,
     processTransaction,
     refreshBalance,
-    isProcessing
+    isProcessing,
+    fetchPackages,
+    purchasePackage
   };
 };
 

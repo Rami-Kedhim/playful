@@ -1,62 +1,102 @@
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Zap } from "lucide-react";
 import { BoostStatus } from "@/types/boost";
-import { formatDistanceToNow } from "date-fns";
+import { Clock, Zap } from "lucide-react";
 
 interface BoostActivePackageProps {
   boostStatus: BoostStatus;
-  hermesData?: {
-    position: number;
-    activeUsers: number;
-    estimatedVisibility: number;
-    lastUpdateTime: string;
-  };
+  formatDuration?: (duration: string) => string;
+  onCancel?: () => Promise<boolean>;
 }
 
-const BoostActivePackage = ({ boostStatus, hermesData }: BoostActivePackageProps) => {
-  if (!boostStatus.isActive) {
-    return null;
-  }
+const BoostActivePackage = ({
+  boostStatus,
+  formatDuration = (d) => d,
+  onCancel
+}: BoostActivePackageProps) => {
+  if (!boostStatus || !boostStatus.isActive) return null;
 
-  // Calculate time remaining
-  const endTime = boostStatus.endTime ? new Date(boostStatus.endTime) : null;
-  const timeRemaining = endTime ? formatDistanceToNow(endTime, { addSuffix: true }) : boostStatus.remainingTime || "Unknown";
+  const pkg = boostStatus.boostPackage || {
+    name: boostStatus.packageName || "Unknown",
+    boost_power: 0,
+    visibility_increase: 0
+  };
+
+  // Calculate progress as a percentage
+  const calculateProgress = (): number => {
+    if (!boostStatus.startTime || !boostStatus.endTime) return 0;
+    
+    const start = new Date(boostStatus.startTime).getTime();
+    const end = new Date(boostStatus.endTime).getTime();
+    const now = Date.now();
+    
+    const total = end - start;
+    const elapsed = now - start;
+    
+    const progress = Math.floor((elapsed / total) * 100);
+    return Math.min(Math.max(progress, 0), 100); // Clamp between 0-100
+  };
+
+  const progress = calculateProgress();
+  const remainingFormatted = boostStatus.remainingTime ? 
+    formatDuration(boostStatus.remainingTime) : 
+    "Unknown";
 
   return (
-    <Card className="bg-primary/5 border-primary/20">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              <span className="font-medium text-lg">{boostStatus.packageName || "Active Boost"}</span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Your profile is currently being boosted
-            </p>
+    <div className="space-y-4">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="text-xl font-semibold">{pkg.name}</div>
+          <div className="text-sm text-muted-foreground">
+            Boosting your profile visibility
           </div>
-          <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>
         </div>
+        <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
+          Active
+        </Badge>
+      </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-6">
+      {/* Progress bar */}
+      <div className="space-y-2">
+        <div className="h-2 w-full bg-secondary relative rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-primary absolute left-0 top-0" 
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>
+            Started: {boostStatus.startTime ? 
+              new Date(boostStatus.startTime).toLocaleString() : 
+              "Unknown"}
+          </span>
+          <span>
+            Expires: {boostStatus.endTime ? 
+              new Date(boostStatus.endTime).toLocaleString() : 
+              "Unknown"}
+          </span>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="bg-secondary/20 p-3 rounded-md flex items-center">
+          <Clock className="h-5 w-5 text-blue-500 mr-3" />
           <div>
-            <div className="text-sm text-muted-foreground mb-1">Time Remaining</div>
-            <div className="flex items-center">
-              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span>{timeRemaining}</span>
-            </div>
-          </div>
-          <div>
-            <div className="text-sm text-muted-foreground mb-1">Visibility Boost</div>
-            <div>
-              {hermesData?.estimatedVisibility ? `+${hermesData.estimatedVisibility}%` : '+75%'}
-            </div>
+            <div className="text-sm font-medium">Time Remaining</div>
+            <div className="font-semibold">{remainingFormatted}</div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="bg-secondary/20 p-3 rounded-md flex items-center">
+          <Zap className="h-5 w-5 text-yellow-500 mr-3" />
+          <div>
+            <div className="text-sm font-medium">Visibility Boost</div>
+            <div className="font-semibold">+{pkg.visibility_increase || 0}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,128 +1,103 @@
 
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useUbx } from "@/hooks/useUbx";
-import { logContentAction, logContentError, logContentFlow } from "@/utils/debugUtils";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/auth';
+import { useUBX } from '@/hooks/useUBX';
 
-export type ContentType = "photo" | "video" | "message";
-
-interface UnlockContentOptions {
-  creatorId: string;
-  contentId: string;
-  contentType: ContentType;
+interface VirtualContent {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  contentUrl: string;
   price: number;
+  creatorId: string;
+  createdAt: string;
+  contentType: string;
+  isOwned?: boolean;
 }
 
-export const useVirtualContent = () => {
-  const [unlockingContentId, setUnlockingContentId] = useState<string | null>(null);
-  const [unlockedContent, setUnlockedContent] = useState<string[]>([]);
+export const useVirtualContent = (contentId?: string) => {
+  const [content, setContent] = useState<VirtualContent | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  const { processUbxTransaction } = useUbx();
+  const { user } = useAuth();
+  const { processTransaction } = useUBX();
   
   useEffect(() => {
-    setError(null);
-    const storedUnlockedContent = localStorage.getItem('unlockedContent');
-    if (storedUnlockedContent) {
+    if (!contentId) {
+      setLoading(false);
+      return;
+    }
+    
+    const fetchContent = async () => {
       try {
-        const parsed = JSON.parse(storedUnlockedContent);
-        setUnlockedContent(parsed);
-        logContentAction('Loaded unlocked content', { count: parsed.length });
-      } catch (error) {
-        console.error("Failed to parse unlocked content from localStorage", error);
-        logContentError('Loading unlocked content', error);
-        setError("Failed to load your unlocked content");
+        setLoading(true);
+        
+        // In a real implementation, this would fetch from Supabase or an API
+        // For now, use mock data
+        setTimeout(() => {
+          const mockContent: VirtualContent = {
+            id: contentId,
+            title: "Virtual Experience Demo",
+            description: "A sample virtual content experience",
+            thumbnailUrl: "https://placehold.co/600x400",
+            contentUrl: "https://example.com/virtual-content",
+            price: 50,
+            creatorId: "creator-123",
+            createdAt: new Date().toISOString(),
+            contentType: "virtual_experience", 
+            isOwned: Math.random() > 0.5
+          };
+          
+          setContent(mockContent);
+          setLoading(false);
+        }, 800);
+        
+      } catch (err: any) {
+        console.error("Error fetching virtual content:", err);
+        setError(err.message || "Failed to load content");
+        setLoading(false);
       }
-    }
-  }, []);
-  
-  const saveUnlockedContent = (contentIds: string[]) => {
-    try {
-      localStorage.setItem('unlockedContent', JSON.stringify(contentIds));
-      setUnlockedContent(contentIds);
-      logContentAction('Saved unlocked content', { count: contentIds.length });
-    } catch (error) {
-      console.error("Failed to save unlocked content to localStorage", error);
-      logContentError('Saving unlocked content', error);
-      setError("Failed to save your unlocked content");
-    }
-  };
-  
-  const isContentUnlocked = (contentId: string): boolean => {
-    return unlockedContent.includes(contentId);
-  };
-  
-  const unlockContent = async (options: UnlockContentOptions) => {
-    const { creatorId, contentId, contentType, price } = options;
+    };
     
-    logContentFlow('Starting unlock process', contentId, { creatorId, contentType, price });
-    
-    if (isContentUnlocked(contentId)) {
-      logContentFlow('Content already unlocked', contentId);
-      toast({
-        title: "Already Unlocked",
-        description: "You already have access to this content",
-      });
-      return true;
-    }
-    
-    setUnlockingContentId(contentId);
-    setError(null);
+    fetchContent();
+  }, [contentId]);
+  
+  const purchaseContent = async (): Promise<boolean> => {
+    if (!content || !user) return false;
     
     try {
-      logContentFlow('Processing payment', contentId, { price });
-      const transactionResult = await processUbxTransaction({
-        amount: price,
-        transactionType: 'purchase',
-        description: `Unlock ${contentType} content`,
-        metadata: {
-          contentId,
-          contentType,
-          creatorId
-        }
+      setLoading(true);
+      
+      // Process UBX transaction
+      const result = await processTransaction({
+        amount: content.price,
+        type: 'debit',
+        description: `Purchased virtual content: ${content.title}`
       });
       
-      if (transactionResult) {
-        logContentFlow('Payment successful', contentId);
-        const updatedUnlockedContent = [...unlockedContent, contentId];
-        saveUnlockedContent(updatedUnlockedContent);
-        
-        toast({
-          title: "Content Unlocked",
-          description: `You now have access to this ${contentType}`,
-        });
+      if (result) {
+        // Update local state to mark content as owned
+        setContent(prev => prev ? {...prev, isOwned: true} : null);
         return true;
-      } else {
-        logContentFlow('Payment failed', contentId);
-        toast({
-          title: "Transaction Failed",
-          description: "Could not complete the transaction",
-          variant: "destructive",
-        });
-        return false;
       }
-    } catch (error: any) {
-      logContentError('Unlocking content', error);
-      console.error("Error unlocking content:", error);
-      setError(error.message || "Failed to unlock content");
-      toast({
-        title: "Error",
-        description: "Failed to unlock content. Please try again later.",
-        variant: "destructive",
-      });
+      
+      return false;
+    } catch (err: any) {
+      console.error("Error purchasing content:", err);
+      setError(err.message || "Failed to purchase content");
       return false;
     } finally {
-      setUnlockingContentId(null);
+      setLoading(false);
     }
   };
   
   return {
-    isUnlocking: !!unlockingContentId,
-    unlockingContentId,
-    isContentUnlocked,
-    unlockContent,
+    content,
+    loading,
     error,
-    unlockedContent
+    isOwned: content?.isOwned || false,
+    purchaseContent
   };
 };
 

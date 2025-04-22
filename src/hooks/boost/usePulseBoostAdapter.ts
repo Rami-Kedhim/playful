@@ -1,63 +1,113 @@
 
-import { BoostPackage } from '@/types/boost';
+import { BoostPackage, PulseBoost } from '@/types/boost';
 
-// Create extended interfaces for the adapter
-interface AdaptedBoostPackage extends BoostPackage {
-  durationMinutes?: number;
-  costUBX?: number;
+interface UsePulseBoostAdapterResult {
+  formatPulseDuration: (duration: string) => string;
+  adaptGetPulseBoostPrice: (fn: (pkg: BoostPackage) => number) => (pkg: BoostPackage) => number;
+  convertToUBX: (value: number) => number;
+  convertToPulseBoost: (pkg: BoostPackage) => PulseBoost;
 }
 
-export const useBoostAdapters = (profileId: string) => {
-  const adaptFormatBoostDuration = (duration: string) => {
-    const [hours, minutes] = duration.split(':').map(Number);
-    return hours >= 24 ? 
-      `${Math.floor(hours / 24)} days` : 
-      `${hours} hours`;
-  };
-
-  const formatBoostDuration = (minutes: number): string => {
-    if (minutes < 60) return `${minutes} minutes`;
-    if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
-    return `${Math.floor(minutes / 1440)} days`;
-  };
-
-  // Fix the formatDuration function to handle standard packages
-  const formatDuration = (pkg: BoostPackage): string => {
-    const adaptedPkg = pkg as AdaptedBoostPackage;
+export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterResult => {
+  // Format the pulse boost duration to readable string
+  const formatPulseDuration = (duration: string): string => {
+    const [hours, minutes, seconds] = duration.split(':').map(Number);
     
-    // Check if we're dealing with the adapted package format
-    if (adaptedPkg.durationMinutes !== undefined) {
-      const minutes = adaptedPkg.durationMinutes;
-      if (minutes < 60) return `${minutes} minutes`;
-      if (minutes < 1440) return `${Math.floor(minutes / 60)} hours`;
-      return `${Math.floor(minutes / 1440)} days`;
-    } else if (pkg.duration) {
-      // Parse the duration string like "24:00:00" into hours
-      const parts = pkg.duration.split(':');
-      const hours = parseInt(parts[0], 10);
-      
-      if (hours < 1) return "Less than an hour";
-      if (hours < 24) return `${hours} hours`;
-      return `${Math.floor(hours / 24)} days`;
+    if (!hours && !minutes && !seconds) return "Unknown duration";
+    
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `${days} ${days === 1 ? 'day' : 'days'}`;
+    }
+    
+    if (hours >= 1) {
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+    }
+    
+    if (minutes >= 1) {
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+    }
+    
+    return "Less than a minute";
+  };
+  
+  // Adapt a price getter function to handle our package formats
+  const adaptGetPulseBoostPrice = (
+    fn: (pkg: BoostPackage) => number
+  ) => (pkg: BoostPackage): number => {
+    // If the package has an explicit UBX price, use that
+    if (pkg.price_ubx) {
+      return pkg.price_ubx;
+    }
+    
+    // If our adapter function is provided, use that
+    if (fn) {
+      return fn(pkg);
+    }
+    
+    // Fall back to regular price or 0
+    return pkg.price || 0;
+  };
+  
+  // Convert USD to UBX at a fixed rate (for example purposes)
+  const convertToUBX = (value: number): number => {
+    const UBX_RATE = 10; // 1 USD = 10 UBX
+    return value * UBX_RATE;
+  };
+  
+  // Convert a standard boost package to a pulse boost
+  const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
+    const durationParts = pkg.duration?.split(':') || ['0', '0', '0'];
+    const hours = parseInt(durationParts[0], 10) || 0;
+    const minutes = parseInt(durationParts[1], 10) || 0;
+    
+    // Calculate the duration in minutes
+    const durationMinutes = hours * 60 + minutes;
+    
+    // Determine the visibility level based on boost level or other properties
+    let visibility = 'standard';
+    if (pkg.boostLevel === 3 || pkg.boost_power >= 200) {
+      visibility = 'global';
+    } else if (pkg.boostLevel === 2 || pkg.boost_power >= 100) {
+      visibility = 'platform';
     } else {
-      return "Unknown duration";
+      visibility = 'homepage';
     }
-  };
-
-  // Fix the getBoostPrice function to handle multiple price formats
-  const getBoostPrice = (pkg: BoostPackage): number => {
-    const adaptedPkg = pkg as AdaptedBoostPackage;
     
-    if (adaptedPkg.costUBX !== undefined) {
-      return adaptedPkg.costUBX;
-    }
-    return pkg.price_ubx || pkg.price_lucoin || pkg.price || 0;
+    return {
+      id: pkg.id,
+      name: pkg.name,
+      description: pkg.description || `${pkg.name} visibility boost for your profile`,
+      duration: pkg.duration,
+      durationMinutes,
+      price: pkg.price,
+      price_ubx: pkg.price_ubx || Math.round(convertToUBX(pkg.price)),
+      costUBX: pkg.price_ubx || Math.round(convertToUBX(pkg.price)),
+      visibility,
+      color: getColorForBoostLevel(pkg.boostLevel || 1),
+      badgeColor: getColorForBoostLevel(pkg.boostLevel || 1),
+      features: pkg.features || [],
+      boost_power: pkg.boost_power || 50,
+      visibility_increase: pkg.visibility_increase || 50,
+      boostLevel: pkg.boostLevel || 1
+    };
   };
-
+  
+  // Get a color for the boost level
+  const getColorForBoostLevel = (level: number): string => {
+    switch (level) {
+      case 3: return '#ec4899'; // Pink for premium
+      case 2: return '#8b5cf6'; // Purple for standard
+      default: return '#60a5fa'; // Blue for basic
+    }
+  };
+  
   return {
-    formatBoostDuration,
-    adaptFormatBoostDuration,
-    formatDuration,
-    getBoostPrice
+    formatPulseDuration,
+    adaptGetPulseBoostPrice,
+    convertToUBX,
+    convertToPulseBoost
   };
 };
+
+export default usePulseBoostAdapter;

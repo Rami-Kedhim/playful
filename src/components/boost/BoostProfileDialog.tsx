@@ -2,9 +2,8 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useBoost } from '@/contexts/BoostContext';
+import { useBoost } from '@/hooks/boost/useBoost';
 import { BoostPackage } from '@/types/boost';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Zap, Check } from 'lucide-react';
 
@@ -25,8 +24,8 @@ const BoostProfileDialog: React.FC<BoostProfileDialogProps> = ({
   const [selectedPackage, setSelectedPackage] = useState<BoostPackage | null>(null);
   const [processing, setProcessing] = useState(false);
 
-  const handleBoostProfile = async (): Promise<boolean> => {
-    if (!selectedPackage || !profileId) return false;
+  const handleBoostProfile = async () => {
+    if (!selectedPackage || !profileId) return;
 
     setProcessing(true);
     try {

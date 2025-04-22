@@ -26,16 +26,31 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
   handleCancel,
   dailyBoostUsage,
   dailyBoostLimit,
-  hermesStatus
+  hermesStatus,
+  formatBoostDuration,
+  getBoostPrice,
+  handleDialogClose
 }) => {
-  // Helper function to format the duration string
+  // Helper function to format the duration string if not provided
   const formatDuration = (duration: string): string => {
+    if (formatBoostDuration) {
+      return formatBoostDuration(duration);
+    }
+    
     const [hours, minutes] = duration.split(':').map(Number);
     if (hours >= 24) {
       const days = Math.floor(hours / 24);
       return `${days} ${days === 1 ? 'day' : 'days'}`;
     }
     return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  };
+
+  // Helper function to get boost price if not provided
+  const getPrice = (pkg?: any): number => {
+    if (getBoostPrice) {
+      return getBoostPrice();
+    }
+    return pkg?.price_ubx || pkg?.price || 0;
   };
 
   return (
@@ -80,12 +95,8 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
               <CardContent>
                 <BoostActivePackage
                   boostStatus={boostStatus}
-                  hermesData={{
-                    position: hermesStatus.position,
-                    activeUsers: hermesStatus.activeUsers,
-                    estimatedVisibility: hermesStatus.estimatedVisibility,
-                    lastUpdateTime: hermesStatus.lastUpdateTime
-                  }}
+                  formatDuration={formatDuration}
+                  onCancel={handleCancel}
                 />
 
                 <div className="mt-6">
@@ -110,6 +121,7 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
               <CardContent>
                 <HermesBoostInfo 
                   hermesStatus={hermesStatus}
+                  isActive={boostStatus.isActive}
                 />
               </CardContent>
             </Card>
@@ -131,40 +143,25 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
                   formatDuration={formatDuration}
                   dailyUsage={dailyBoostUsage}
                   dailyLimit={dailyBoostLimit}
-                  disabled={!eligibility.isEligible || loading}
+                  getBoostPrice={getPrice}
+                  disabled={loading}
                 />
-
-                <div className="mt-6">
-                  <Button
-                    onClick={handleBoost}
-                    variant="default"
-                    disabled={!eligibility.isEligible || loading || !selectedPackage}
-                    className={cx(
-                      "w-full",
-                      boostStatus?.isActive && "bg-red-600 hover:bg-red-700"
-                    )}
+                
+                <div className="mt-6 space-x-3 flex justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleDialogClose}
+                    disabled={loading}
                   >
-                    {loading
-                      ? "Processing..."
-                      : boostStatus?.isActive
-                      ? "Cancel Boost"
-                      : "Activate Boost"}
+                    Cancel
+                  </Button>
+                  <Button
+                    disabled={!selectedPackage || loading}
+                    onClick={handleBoost}
+                  >
+                    {loading ? "Processing..." : "Boost Profile"}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold flex items-center">
-                  <Award className="mr-2 h-5 w-5" />
-                  Visibility Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <HermesBoostInfo 
-                  hermesStatus={hermesStatus}
-                />
               </CardContent>
             </Card>
           </div>
@@ -174,14 +171,30 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
       <TabsContent value="analytics">
         <Card>
           <CardHeader>
-            <CardTitle>Boost Performance</CardTitle>
+            <CardTitle>Boost Analytics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center p-6">
-              <p className="text-muted-foreground">
-                Analytics data is being processed. Check back soon.
-              </p>
-            </div>
+            {boostStatus?.isActive ? (
+              <div className="space-y-4">
+                <div className="grid gap-4">
+                  <div className="bg-secondary/20 p-4 rounded-lg">
+                    <h3 className="font-medium mb-1 flex items-center">
+                      <Award className="h-4 w-4 mr-2 text-amber-500" />
+                      Boost Performance
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Your profile is currently boosted and receiving extra visibility across the platform.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  No active boost to analyze. Start a boost to see performance metrics.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </TabsContent>
@@ -193,25 +206,18 @@ const BoostDialogTabs: React.FC<BoostDialogTabsProps> = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span>Auto-renew boost</span>
-                <div className="flex h-6 w-11 rounded-full bg-gray-200 p-1 transition-all dark:bg-gray-700">
-                  <div className="h-4 w-4 rounded-full bg-white transition-all"></div>
-                </div>
+              <div className="grid gap-2">
+                <h3 className="font-medium">Notifications</h3>
+                <p className="text-sm text-muted-foreground">
+                  Configure how you want to be notified about your boost activities and performance.
+                </p>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span>Receive boost notifications</span>
-                <div className="flex h-6 w-11 rounded-full bg-primary p-1 transition-all">
-                  <div className="h-4 w-4 translate-x-5 rounded-full bg-white transition-all"></div>
-                </div>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span>Show boost badge on profile</span>
-                <div className="flex h-6 w-11 rounded-full bg-primary p-1 transition-all">
-                  <div className="h-4 w-4 translate-x-5 rounded-full bg-white transition-all"></div>
-                </div>
+              <div className="grid gap-2">
+                <h3 className="font-medium">Auto-Renewal</h3>
+                <p className="text-sm text-muted-foreground">
+                  Set up auto-renewal options for your boosts to maintain consistent visibility.
+                </p>
               </div>
             </div>
           </CardContent>

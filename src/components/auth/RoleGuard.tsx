@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/auth';
 import { Navigate } from 'react-router-dom';
-import { UserRole } from '@/types/auth';
+import { UserRole } from '@/types/user';
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -27,17 +27,13 @@ const RoleGuard = ({
   }
   
   // Extract user roles
-  const userRoles: string[] = user.roles || [];
+  const userRoles = user.roles || [];
   
   // Check if the user has at least one of the allowed roles
   const hasRequiredRole = userRoles.some(role => {
-    // If role is a string already, direct comparison
-    if (typeof role === 'string') {
-      return allowedRoles.includes(role);
-    }
-    
-    // Otherwise extract the name property
-    return false;
+    // Convert role to string if it's an object with a name property
+    const roleName = typeof role === 'string' ? role : role.name;
+    return allowedRoles.includes(roleName);
   });
   
   // If user has the required role, render the children

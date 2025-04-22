@@ -10,12 +10,14 @@ interface UBXWalletProps {
   compact?: boolean;
   showRefresh?: boolean;
   showHistory?: boolean;
+  onRecharge?: () => void;
 }
 
 const UBXWallet = ({ 
   compact = true,
   showRefresh = false,
-  showHistory = false 
+  showHistory = false,
+  onRecharge
 }: UBXWalletProps) => {
   const { user } = useAuth();
   const { balance, refreshBalance, isProcessing } = useUBX();
@@ -69,6 +71,17 @@ const UBXWallet = ({
         <p className="text-sm text-muted-foreground">
           Available for boosts, tips, and content purchases
         </p>
+        
+        {onRecharge && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full mt-4"
+            onClick={onRecharge}
+          >
+            Add UBX
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

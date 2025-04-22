@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Coins } from 'lucide-react';
 import { useUBX } from '@/hooks/useUBX';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface UBXPackageDialogProps {

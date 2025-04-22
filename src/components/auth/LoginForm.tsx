@@ -1,77 +1,74 @@
 
-import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
-import FormField from "./FormField";
-import PasswordInput from "./PasswordInput";
+import { useState } from "react";
 
-interface LoginFormProps {
-  email: string;
-  setEmail: (value: string) => void;
-  onLogin: (email: string, password: string) => Promise<void>;
-  onForgotPassword: () => void;
-  isLoading: boolean;
+export interface LoginFormProps {
+  onSubmit: (email: string, password: string) => Promise<any>;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({
-  email,
-  setEmail,
-  onLogin,
-  onForgotPassword,
-  isLoading,
-}) => {
+const LoginForm = ({ onSubmit }: LoginFormProps) => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onLogin(email, password);
+    setError(null);
+    setIsSubmitting(true);
+    
+    try {
+      const result = await onSubmit(email, password);
+      
+      if (!result.success) {
+        setError(result.error || "Login failed");
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <FormField id="login-email" label="Email">
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium mb-1">
+          Email
+        </label>
         <Input
-          id="login-email"
+          id="email"
           type="email"
-          placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          placeholder="name@example.com"
+          autoComplete="email"
         />
-      </FormField>
-
-      <FormField id="login-password" label="Password">
-        <div className="flex justify-between items-center mb-1">
-          <div></div> {/* Empty div to maintain spacing */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs"
-            onClick={onForgotPassword}
-            disabled={isLoading}
-          >
-            Forgot password?
-          </Button>
-        </div>
-        <PasswordInput
-          id="login-password"
+      </div>
+      
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium mb-1">
+          Password
+        </label>
+        <Input
+          id="password"
+          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password"
+          required
+          placeholder="••••••••"
+          autoComplete="current-password"
         />
-      </FormField>
-
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Logging in...
-          </>
-        ) : (
-          "Login"
-        )}
+      </div>
+      
+      {error && (
+        <div className="text-sm text-red-500">{error}</div>
+      )}
+      
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Logging in..." : "Log in"}
       </Button>
     </form>
   );
