@@ -22,13 +22,13 @@ const UBXWallet = ({
   const { user } = useAuth();
   const { balance, refreshBalance, isProcessing } = useUBX();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refreshBalance();
     setIsRefreshing(false);
   };
-  
+
   if (compact) {
     return (
       <div className="flex items-center space-x-2">
@@ -47,7 +47,7 @@ const UBXWallet = ({
       </div>
     );
   }
-  
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -88,3 +88,4 @@ const UBXWallet = ({
 };
 
 export default UBXWallet;
+

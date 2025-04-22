@@ -40,7 +40,6 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
     } catch (error) {
       console.error("Error loading packages:", error);
       toast({
-        title: "Failed to load packages",
         description: "Could not load UBX packages. Please try again.",
         variant: "destructive",
       });
@@ -51,10 +50,10 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
 
   const handleRecharge = async () => {
     if (!selectedPackage) return;
-    
+
     const selectedPkg = packages.find(pkg => pkg.id === selectedPackage);
     if (!selectedPkg) return;
-    
+
     setLoading(true);
     try {
       const result = await processTransaction({
@@ -62,16 +61,14 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
         type: 'credit',
         description: `Recharged ${selectedPkg.amount} UBX`
       });
-      
+
       if (result) {
         toast({
-          title: "Recharge successful",
           description: `Added ${selectedPkg.amount + (selectedPkg.bonus_amount || 0)} UBX to your wallet`,
         });
         onClose();
       } else {
         toast({
-          title: "Recharge failed",
           description: "There was a problem processing your recharge",
           variant: "destructive",
         });
@@ -79,7 +76,6 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
     } catch (error) {
       console.error("Recharge error:", error);
       toast({
-        title: "Recharge failed",
         description: "An unexpected error occurred",
         variant: "destructive",
       });
@@ -100,7 +96,7 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
             Add UBX to your account to use for boosts, tips, and exclusive content
           </DialogDescription>
         </DialogHeader>
-        
+
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -133,7 +129,7 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
             </div>
           </div>
         )}
-        
+
         <div className="bg-secondary/20 rounded-md p-4 flex items-center gap-3">
           <QrCode className="h-5 w-5 text-blue-500" />
           <div className="text-sm">
@@ -141,7 +137,7 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
             <p className="text-muted-foreground">Use mobile payment or crypto options for immediate UBX</p>
           </div>
         </div>
-        
+
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
@@ -166,3 +162,4 @@ const UBXRechargeDialog: React.FC<UBXRechargeDialogProps> = ({ open, onClose }) 
 };
 
 export default UBXRechargeDialog;
+

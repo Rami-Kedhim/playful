@@ -14,11 +14,15 @@ interface UseUBXReturn {
   balance: number;
   loading: boolean;
   error: string | null;
+  isProcessing: boolean;
   getBalance: () => Promise<void>;
   addFunds: (amount: number) => Promise<boolean>;
   getTransactionHistory: () => Promise<TransactionHistory[]>;
   refreshHistory: () => Promise<void>;
   processTransaction: (params: { amount: number; type: string; description?: string }) => Promise<boolean>;
+  fetchPackages: () => Promise<any[]>;
+  purchasePackage: (packageId: string) => Promise<boolean>;
+  refreshBalance: () => Promise<void>;
 }
 
 export const useUBX = (): UseUBXReturn => {
@@ -26,6 +30,7 @@ export const useUBX = (): UseUBXReturn => {
   const [balance, setBalance] = useState<number>(0);
   const [transactionHistory, setTransactionHistory] = useState<TransactionHistory[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const getBalance = useCallback(async () => {
@@ -48,8 +53,12 @@ export const useUBX = (): UseUBXReturn => {
     }
   }, [toast]);
 
+  const refreshBalance = useCallback(async () => {
+    await getBalance();
+  }, [getBalance]);
+
   const addFunds = useCallback(async (amount: number) => {
-    setLoading(true);
+    setIsProcessing(true);
     try {
       // Simulate adding funds API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -66,7 +75,7 @@ export const useUBX = (): UseUBXReturn => {
       });
       return false;
     } finally {
-      setLoading(false);
+      setIsProcessing(false);
     }
   }, [toast]);
 
@@ -111,7 +120,7 @@ export const useUBX = (): UseUBXReturn => {
 
   const processTransaction = useCallback(
     async (params: { amount: number; type: string; description?: string }) => {
-      setLoading(true);
+      setIsProcessing(true);
       try {
         // Simulate processing transaction API call
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -128,11 +137,69 @@ export const useUBX = (): UseUBXReturn => {
         });
         return false;
       } finally {
-        setLoading(false);
+        setIsProcessing(false);
       }
     },
     [toast]
   );
+
+  // Adding fetchPackages and purchasePackage to fix missing references
+  const fetchPackages = useCallback(async (): Promise<any[]> => {
+    setLoading(true);
+    try {
+      // Simulate fetching UBX packages from backend
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const packages = [
+        {
+          id: 'pkg_basic',
+          name: 'Basic UBX Package',
+          amount: 100,
+          bonus_amount: 10,
+          price: 9.99,
+          is_featured: true
+        },
+        {
+          id: 'pkg_premium',
+          name: 'Premium UBX Package',
+          amount: 500,
+          bonus_amount: 75,
+          price: 39.99,
+          is_featured: false
+        }
+      ];
+      return packages;
+    } catch (error) {
+      toast({
+        description: "Failed to load UBX packages.",
+        variant: "destructive"
+      });
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  const purchasePackage = useCallback(async (packageId: string): Promise<boolean> => {
+    setIsProcessing(true);
+    try {
+      // Simulate purchasing package
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast({
+        description: "UBX package purchased successfully.",
+      });
+      // Suppose that purchasing adds the package amount to balance:
+      setBalance((prev) => prev + 100); // Here static for simulation
+      return true;
+    } catch (error) {
+      toast({
+        description: "Failed to purchase UBX package.",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
     getBalance();
@@ -143,13 +210,16 @@ export const useUBX = (): UseUBXReturn => {
     balance,
     loading,
     error,
+    isProcessing,
     getBalance,
+    refreshBalance,
     addFunds,
     getTransactionHistory,
     refreshHistory,
     processTransaction,
+    fetchPackages,
+    purchasePackage,
   };
 };
 
 export default useUBX;
-

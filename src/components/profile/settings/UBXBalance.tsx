@@ -7,31 +7,35 @@ import { Plus, ArrowUpRight } from "lucide-react";
 import { useAuth } from "@/hooks/auth";
 import { useAuthActions } from "@/hooks/auth/useAuthActions";
 
-const UBXBalance: React.FC = () => {
+interface UBXBalanceProps {
+  onRecharge?: () => void;
+}
+
+const UBXBalance: React.FC<UBXBalanceProps> = ({ onRecharge }) => {
   const { user } = useAuth();
   const { refreshProfile } = useAuthActions();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Mock UBX balance - in a real app would come from user profile
   const [balance, setBalance] = useState(user?.ubxBalance || 0);
-  
+
   useEffect(() => {
     // Update balance when user changes
     setBalance(user?.ubxBalance || 0);
   }, [user]);
-  
+
   const handleAddFunds = async () => {
     setIsLoading(true);
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Update local state
       const addedAmount = 100;
       setBalance(prev => prev + addedAmount);
-      
+
       toast({
         title: "Funds Added",
         description: `${addedAmount} UBX has been added to your account.`,
@@ -47,14 +51,14 @@ const UBXBalance: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
+
   const formatBalance = (value: number) => {
     return value.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
   };
-  
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -87,7 +91,7 @@ const UBXBalance: React.FC = () => {
             <ArrowUpRight className="ml-1 h-3 w-3" />
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4 mt-6">
           <Button className="w-full">
             Send UBX
@@ -102,3 +106,4 @@ const UBXBalance: React.FC = () => {
 };
 
 export default UBXBalance;
+

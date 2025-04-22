@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -36,7 +36,6 @@ const UBXPackageDialog: React.FC<UBXPackageDialogProps> = ({ onSuccess }) => {
       } catch (error) {
         console.error("Error fetching packages:", error);
         toast({
-          title: "Failed to load packages",
           description: "Could not load UBX packages. Please try again.",
           variant: "destructive",
         });
@@ -47,7 +46,6 @@ const UBXPackageDialog: React.FC<UBXPackageDialogProps> = ({ onSuccess }) => {
   const handlePurchase = async () => {
     if (!selectedPackage) {
       toast({
-        title: "No package selected",
         description: "Please select a package first",
         variant: "destructive",
       });
@@ -59,14 +57,12 @@ const UBXPackageDialog: React.FC<UBXPackageDialogProps> = ({ onSuccess }) => {
       const result = await purchasePackage(selectedPackage);
       if (result) {
         toast({
-          title: "Purchase successful",
-          description: `You have purchased UBX successfully`,
+          description: `UBX purchased successfully`,
         });
         setOpen(false);
         if (onSuccess) await onSuccess();
       } else {
         toast({
-          title: "Purchase failed",
           description: "An error occurred during purchase",
           variant: "destructive",
         });
@@ -74,7 +70,6 @@ const UBXPackageDialog: React.FC<UBXPackageDialogProps> = ({ onSuccess }) => {
     } catch (error: any) {
       console.error("Error purchasing package:", error);
       toast({
-        title: "Purchase error",
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
