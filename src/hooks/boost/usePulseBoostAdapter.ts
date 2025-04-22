@@ -64,7 +64,6 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
 
   // Convert a standard boost package to a pulse boost
   const convertToPulseBoost = (pkg: BoostPackage): PulseBoost => {
-    // Extract duration as hours, minutes, seconds strings safely
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const durationParts = durationStr.split(':');
     const hours = Number(durationParts[0]) || 0;
@@ -93,7 +92,7 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
       id: pkg.id,
       name: pkg.name,
       description: pkg.description || `${pkg.name} visibility boost for your profile`,
-      duration: durationStr, // keep this as string to match BoostPackage
+      duration: durationStr, // string duration to match type
       durationMinutes: durationMinutes,
       price: typeof pkg.price === 'number' ? pkg.price : 0,
       costUBX: typeof pkg.price_ubx === 'number' ? pkg.price_ubx : Math.round(convertToUBX(typeof pkg.price === 'number' ? pkg.price : 0)),

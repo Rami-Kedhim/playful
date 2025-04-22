@@ -20,7 +20,7 @@ interface UseUBXReturn {
   getTransactionHistory: () => Promise<TransactionHistory[]>;
   refreshHistory: () => Promise<void>;
   processTransaction: (params: { amount: number; type: string; description?: string }) => Promise<boolean>;
-  fetchPackages: () => Promise<any[]>;
+  fetchPackages: () => Promise<any[]>; // add these missing functions with types
   purchasePackage: (packageId: string) => Promise<boolean>;
   refreshBalance: () => Promise<void>;
 }
