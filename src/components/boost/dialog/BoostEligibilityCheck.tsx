@@ -1,33 +1,31 @@
 
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Ban, CheckCircle } from "lucide-react";
-import { BoostEligibility } from '@/types/boost';
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 interface BoostEligibilityCheckProps {
-  eligibility: BoostEligibility;
+  eligibility: {
+    isEligible: boolean;
+    reason?: string;
+  };
 }
 
 const BoostEligibilityCheck: React.FC<BoostEligibilityCheckProps> = ({ eligibility }) => {
   if (eligibility.isEligible) {
     return (
-      <Alert variant="default" className="bg-green-500/10 text-green-500 border-green-500/50">
+      <Alert className="bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-900 dark:text-green-400 mb-4">
         <CheckCircle className="h-4 w-4" />
-        <AlertTitle>Eligible for boost</AlertTitle>
-        <AlertDescription className="text-green-500/90">
-          Your profile meets all requirements to be boosted
-        </AlertDescription>
+        <AlertTitle>Eligible for Boost</AlertTitle>
+        <AlertDescription>Your profile can be boosted.</AlertDescription>
       </Alert>
     );
   }
-  
+
   return (
-    <Alert variant="destructive" className="bg-destructive/10 text-destructive">
-      <Ban className="h-4 w-4" />
-      <AlertTitle>Not eligible for boost</AlertTitle>
-      <AlertDescription className="text-destructive/90">
-        {eligibility.reason || "Your profile does not meet the requirements for boosting"}
-      </AlertDescription>
+    <Alert variant="destructive" className="mb-4">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Not Eligible</AlertTitle>
+      <AlertDescription>{eligibility.reason || "You're not eligible to boost at this time."}</AlertDescription>
     </Alert>
   );
 };

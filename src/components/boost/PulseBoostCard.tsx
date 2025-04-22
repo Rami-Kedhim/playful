@@ -11,9 +11,10 @@ interface PulseBoostCardProps {
   boost: PulseBoost;
   isActive: boolean;
   timeRemaining?: string;
-  onActivate: (boostId: string) => Promise<boolean>;
+  onActivate?: (boostId: string) => Promise<boolean>;
   onCancel: (boostId: string) => Promise<boolean>;
-  userBalance: number;
+  userBalance?: number;
+  disabled?: boolean;
 }
 
 const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
@@ -22,7 +23,8 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   timeRemaining,
   onActivate,
   onCancel,
-  userBalance
+  userBalance = 0,
+  disabled = false
 }) => {
   const [loading, setLoading] = useState(false);
   
@@ -33,7 +35,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
   const canAfford = userBalance >= boost.costUBX;
   
   const handleActivate = async () => {
-    if (loading) return;
+    if (loading || !onActivate) return;
     
     setLoading(true);
     try {
@@ -98,7 +100,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
           <Button 
             variant="outline" 
             onClick={handleCancel} 
-            disabled={loading}
+            disabled={loading || disabled}
             className="w-full"
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -107,7 +109,7 @@ const PulseBoostCard: React.FC<PulseBoostCardProps> = ({
         ) : (
           <Button 
             onClick={handleActivate} 
-            disabled={loading || !canAfford}
+            disabled={loading || !canAfford || disabled || !onActivate}
             className="w-full"
             variant={canAfford ? "default" : "outline"}
           >

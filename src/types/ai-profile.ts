@@ -41,6 +41,17 @@ export interface AIMessage {
   content: string;
   timestamp: string;
   isAI: boolean;
+  attachments?: Array<{
+    type: string;
+    url: string;
+  }>;
+  status?: 'sent' | 'delivered' | 'read';
+  metadata?: {
+    requires_payment?: boolean;
+    payment_status?: 'pending' | 'completed';
+    price?: number;
+    [key: string]: any;
+  };
 }
 
 export interface AIModelGeneratorOptions {
@@ -53,8 +64,10 @@ export interface AIModelGeneratorOptions {
 }
 
 export enum ProcessingStatus {
+  IDLE = 'idle',
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
-  FAILED = 'failed'
+  FAILED = 'failed',
+  CANCELLED = 'cancelled'
 }

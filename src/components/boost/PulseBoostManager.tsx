@@ -1,4 +1,3 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,7 +27,6 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
     pulseBoostPackages
   } = usePulseBoost(profileId);
 
-  // Convert BoostPackage[] to PulseBoost[]
   const convertedBoosts: PulseBoost[] = pulseBoostPackages.map(boost => ({
     id: boost.id,
     name: boost.name,
@@ -158,7 +156,6 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {activeBoosts.map((activeBoost) => {
-                // Convert ActiveBoost to PulseBoost
                 const pulseBoost: PulseBoost = {
                   id: activeBoost.boostId,
                   name: activeBoost.boostDetails?.name || 'Unknown Boost',
@@ -176,7 +173,6 @@ const PulseBoostManager = ({ profileId }: PulseBoostManagerProps) => {
                     isActive={true}
                     timeRemaining={activeBoost.timeRemaining}
                     onCancel={cancelBoost}
-                    disabled={false}
                   />
                 );
               })}
