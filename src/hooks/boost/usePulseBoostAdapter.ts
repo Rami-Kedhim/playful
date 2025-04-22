@@ -1,6 +1,4 @@
 
-// Fix parsing to ensure all duration components are number type to fix TS string-to-number assignment errors
-
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
