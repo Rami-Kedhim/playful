@@ -1,6 +1,4 @@
 
-// Fix type assignment errors by ensuring numeric values are correctly parsed from strings
-
 import { BoostPackage, PulseBoost } from '@/types/boost';
 
 interface UsePulseBoostAdapterResult {
@@ -74,10 +72,15 @@ export const usePulseBoostAdapter = (profileId: string): UsePulseBoostAdapterRes
     const durationStr = typeof pkg.duration === 'string' ? pkg.duration : '00:00:00';
     const parts = durationStr.split(':');
 
-    // Explicitly cast to number for hours, minutes, seconds for duration calculation using parseNumberValue
-    const hours = parseNumberValue(parts[0] || '0', 0);
-    const minutes = parseNumberValue(parts[1] || '0', 0);
-    const seconds = parseNumberValue(parts[2] || '0', 0);
+    // Cast parts explicitly as string to satisfy TypeScript
+    const hoursStr: string = parts[0] || '0';
+    const minutesStr: string = parts[1] || '0';
+    const secondsStr: string = parts[2] || '0';
+
+    // Use parseNumberValue to parse them to numbers
+    const hours: number = parseNumberValue(hoursStr, 0);
+    const minutes: number = parseNumberValue(minutesStr, 0);
+    const seconds: number = parseNumberValue(secondsStr, 0);
 
     const durationMinutes: number = (hours * 60) + minutes + (seconds / 60);
 
